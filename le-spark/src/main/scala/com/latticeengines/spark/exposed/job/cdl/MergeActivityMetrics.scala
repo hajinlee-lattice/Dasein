@@ -47,11 +47,7 @@ class MergeActivityMetrics extends AbstractSparkJob[MergeActivityMetricsJobConfi
     val end = details.getStartIdx + details.getLabels.size
     val groupDFsToMerge: Seq[DataFrame] = input.slice(start, end)
     val joinCol: String = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(entity)
-    val merged: DataFrame = groupDFsToMerge.reduce((df1, df2) => df1.join(df2, Seq(joinCol), "fullouter"))
-    // TODO - deal with null values for other use cases (should not contains null if upstream integrated with batch store)
-    // for web visit use case, null -> no visit records found -> 0
-    // this may not be true for other use cases
-    merged.na.fill(0)
+    groupDFsToMerge.reduce((df1, df2) => df1.join(df2, Seq(joinCol), "fullouter"))
   }
 
   private def parseLabel(mergedTableLabel: String): (BusinessEntity, TableRoleInCollection) = {

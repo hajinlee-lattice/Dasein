@@ -70,7 +70,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
-        setupData();
+        appendInputData();
+        appendAccountBatchStore();
         setupMetricsGroupConfig();
     }
 
@@ -97,10 +98,18 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private ActivityStoreSparkIOMetadata constructInputMetadata() {
         ActivityStoreSparkIOMetadata metadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> detailsMap = new HashMap<>();
+
+        // add period stores details
         Details details = new Details();
         details.setStartIdx(0);
         details.setLabels(new ArrayList<>(TIMEFILTER_PERIODS));
         detailsMap.put(STREAM.getStreamId(), details);
+
+        // add account batch store details
+        Details accountBatchStoreDetails = new Details();
+        accountBatchStoreDetails.setStartIdx(1);
+        detailsMap.put("Account", accountBatchStoreDetails);
+
         metadata.setMetadata(detailsMap);
         return metadata;
     }
@@ -129,7 +138,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         return metadata;
     }
 
-    private void setupData() {
+    private void appendInputData() {
         List<Pair<String, Class<?>>> periodStoreFields = Arrays.asList( //
                 Pair.of(AccountId, String.class), //
                 Pair.of(ContactId, String.class), //
@@ -152,6 +161,17 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
         STREAM = new AtlasStream();
         STREAM.setStreamId(STREAM_ID);
+    }
+
+    private void appendAccountBatchStore() {
+        List<Pair<String, Class<?>>> accountBatchStoreField = Arrays.asList( //
+                Pair.of(AccountId, String.class)
+        );
+
+        Object[][] data = new Object[][]{ //
+                {"missingAccount"} // add one account missing from activity input data
+        };
+        uploadHdfsDataUnit(data, accountBatchStoreField);
     }
 
     private void setupMetricsGroupConfig() {
@@ -193,7 +213,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 // 10 for each time range, + 1 entityId
                 // w_1_w all zeros
                 {"1", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {"2", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0}
+                {"2", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0},
+                {"missingAccount", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
         };
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> arr[0].toString(), Arrays::asList));

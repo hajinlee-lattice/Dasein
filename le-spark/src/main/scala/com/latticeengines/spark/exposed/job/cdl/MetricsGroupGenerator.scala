@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Cal
 import com.latticeengines.domain.exposed.cdl.activity.{ActivityMetricsGroup, ActivityMetricsGroupUtils, ActivityTimeRange, DimensionMetadata}
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO}
-import com.latticeengines.domain.exposed.query.{ComparisonType, TimeFilter}
+import com.latticeengines.domain.exposed.query.{BusinessEntity, ComparisonType, TimeFilter}
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DeriveActivityMetricGroupJobConfig}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
@@ -29,6 +29,13 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   private val TMPLKEY_GROUPID = "GroupId"
   private val TMPLKEY_ROLLUP_DIM_IDs = "RollupDimIds"
   private val TMPLKEY_TIMERANGE = "TimeRange"
+  private val ACCOUNT_BATCH_STORE = "Account" // TODO - put "Account" in one place
+  private val CONTACT_BATCH_STORE = "Contact" // TODO - put "Contact" in one place
+
+  private var hasAccountBatchStore: Boolean = false
+  private var hasContactBatchStore: Boolean = false
+  private var accountBatchStoreTable: DataFrame = _
+  private var contactBatchStoreTable: DataFrame = _
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[DeriveActivityMetricGroupJobConfig]): Unit = {
     val config: DeriveActivityMetricGroupJobConfig = lattice.config
@@ -38,9 +45,24 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groups), evaluationDate)
     val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
     val streamMetadata = config.streamMetadata
+    hasAccountBatchStore = inputMetadata.getMetadata.contains(ACCOUNT_BATCH_STORE)
+    hasContactBatchStore = inputMetadata.getMetadata.contains(CONTACT_BATCH_STORE)
 
     // run defined aggregation on period stores, remove null entries that have no meaning
-    val aggregatedPeriodStores: Seq[DataFrame] = input.map(df => DeriveAttrsUtils.dropPartitionColumns(df.na.drop))
+    var aggregatedPeriodStores: Seq[DataFrame] = input.map(df => DeriveAttrsUtils.dropPartitionColumns(df.na.drop))
+
+    // exclude account and contact batch store
+    if (hasAccountBatchStore && hasContactBatchStore) {
+      aggregatedPeriodStores = aggregatedPeriodStores.dropRight(2)
+    } else if (hasAccountBatchStore || hasContactBatchStore) {
+      aggregatedPeriodStores = aggregatedPeriodStores.dropRight(1)
+    }
+    if (hasAccountBatchStore) {
+      accountBatchStoreTable = input.get(inputMetadata.getMetadata.get(ACCOUNT_BATCH_STORE).getStartIdx)
+    }
+    if (hasContactBatchStore) {
+      contactBatchStoreTable = input.get(inputMetadata.getMetadata.get(CONTACT_BATCH_STORE).getStartIdx)
+    }
 
     val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
     val detailsMap = new util.HashMap[String, Details]() // groupId -> details
@@ -87,10 +109,15 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       df1.join(df2, Seq(entityIdColName), "fullouter")
     })
 
+    val missingEntitiesAppended: DataFrame = group.getEntity match {
+      case BusinessEntity.Account => appendMissingAccount(joined)
+      case _ => throw new UnsupportedOperationException(s"entity ${group.getEntity} is not supported for activity store")
+    }
+
     // replace null values with defined method
     val replaceNull: DataFrame = group.getNullImputation match {
-      case NULL => joined // no operation needed
-      case ZERO => DeriveAttrsUtils.fillZero(joined, group.getJavaClass)
+      case NULL => missingEntitiesAppended // no operation needed
+      case ZERO => DeriveAttrsUtils.fillZero(missingEntitiesAppended, group.getJavaClass)
       case _ => throw new UnsupportedOperationException("Unknown null imputation method")
     }
 
@@ -207,5 +234,14 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val details = new Details()
     details.setStartIdx(index)
     details
+  }
+
+  def appendMissingAccount(df: DataFrame): DataFrame = {
+    if (!hasAccountBatchStore) {
+      df
+    } else {
+      val entityIdCol: String = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(BusinessEntity.Account)
+      df.join(accountBatchStoreTable.select(entityIdCol), Seq(entityIdCol), "fullouter")
+    }
   }
 }
