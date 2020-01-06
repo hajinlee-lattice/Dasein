@@ -22,7 +22,7 @@ public class GlobalAuthTicketDaoImpl extends BaseDaoImpl<GlobalAuthTicket> imple
     }
 
     @Override
-    public List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenantData) {
+    public List<GlobalAuthTicket> findTicketsByUserIdAndLastAccessDateAndTenant(Long userId, GlobalAuthTenant tenantData) {
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTicket> entityClz = getEntityClass();
         Class<GlobalAuthSession> sessionClz = GlobalAuthSession.class;

@@ -10,6 +10,6 @@ public interface GlobalAuthTicketEntityMgr extends BaseEntityMgr<GlobalAuthTicke
 
     GlobalAuthTicket findByTicket(String ticket);
 
-    List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenantData);
+    List<GlobalAuthTicket> findTicketsByUserIdAndLastAccessDateAndTenant(Long userId, GlobalAuthTenant tenantData);
 
 }

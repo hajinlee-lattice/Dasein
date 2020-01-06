@@ -8,6 +8,6 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 
 public interface GlobalAuthTicketDao extends BaseDao<GlobalAuthTicket> {
 
-    List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenantData);
+    List<GlobalAuthTicket> findTicketsByUserIdAndLastAccessDateAndTenant(Long userId, GlobalAuthTenant tenantData);
 
 }

@@ -156,7 +156,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
     @Override
     public List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenant) {
-        return gaTicketEntityMgr.findTicketsByUserIdAndTenant(userId, tenant);
+        return gaTicketEntityMgr.findTicketsByUserIdAndLastAccessDateAndTenant(userId, tenant);
     }
 
     private Session attachSession(Ticket ticket, Tenant tenant) throws Exception {
