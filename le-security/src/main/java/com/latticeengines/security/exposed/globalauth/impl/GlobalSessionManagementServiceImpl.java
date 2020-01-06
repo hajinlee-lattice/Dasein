@@ -12,12 +12,12 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.auth.exposed.dao.GlobalAuthTicketDao;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSessionEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.auth.exposed.util.SessionUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -86,7 +86,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         Date now = new Date(System.currentTimeMillis());
         Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
-        if ((int) (timeElapsed / (1000 * 60)) > GlobalAuthTicketDao.TicketInactivityTimeoutInMinute) {
+        if ((int) (timeElapsed / (1000 * 60)) > SessionUtils.TicketInactivityTimeoutInMinute) {
             throw new Exception("The requested ticket has expired.");
         }
 
@@ -173,7 +173,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         Date now = new Date(System.currentTimeMillis());
         Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
-        if ((int) (timeElapsed / (1000 * 60)) > GlobalAuthTicketDao.TicketInactivityTimeoutInMinute) {
+        if ((int) (timeElapsed / (1000 * 60)) > SessionUtils.TicketInactivityTimeoutInMinute) {
             LOGGER.warn("The requested ticket has expired.");
             return null;
         }

@@ -7,6 +7,7 @@ import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.dao.GlobalAuthTicketDao;
+import com.latticeengines.auth.exposed.util.SessionUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
@@ -25,7 +26,7 @@ public class GlobalAuthTicketDaoImpl extends BaseDaoImpl<GlobalAuthTicket> imple
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTicket> entityClz = getEntityClass();
         Class<GlobalAuthSession> sessionClz = GlobalAuthSession.class;
-        long end = System.currentTimeMillis() - GlobalAuthTicketDao.TicketInactivityTimeoutInMinute;
+        long end = System.currentTimeMillis() - SessionUtils.TicketInactivityTimeoutInMinute;
         String queryStr = String.format("from %s WHERE userId = %d AND UNIX_TIMESTAMP( lastAccessDate ) <= :lastAccessDate and " +
                         "pid in (select ticketId from %s where tenantId=%d and userId=%d)",
                 entityClz.getSimpleName(), userId, sessionClz.getSimpleName(), tenantData.getPid(), userId);

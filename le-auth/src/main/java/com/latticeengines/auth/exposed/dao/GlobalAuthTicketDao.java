@@ -8,8 +8,6 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 
 public interface GlobalAuthTicketDao extends BaseDao<GlobalAuthTicket> {
 
-    int TicketInactivityTimeoutInMinute = 1440;
-
     List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenantData);
 
 }
