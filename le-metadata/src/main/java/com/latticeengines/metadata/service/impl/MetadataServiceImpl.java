@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.metadata.AttributeFixer;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyUpdateDetail;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -257,10 +256,10 @@ public class MetadataServiceImpl implements MetadataService {
     }
 
     @Override
-    public void updateDataFeedTaskImportTemplate(CustomerSpace customerSpace, DataFeedTask dataFeedTask) {
+    public void updateImportTableUpdatedBy(CustomerSpace customerSpace, Table table) {
         tableTypeHolder.setTableType(TableType.IMPORTTABLE);
         try {
-            tableEntityMgr.updateUpdatedBy(dataFeedTask.getImportTemplate());
+            tableEntityMgr.updateUpdatedBy(table);
         } finally {
             tableTypeHolder.setTableType(TableType.DATATABLE);
         }

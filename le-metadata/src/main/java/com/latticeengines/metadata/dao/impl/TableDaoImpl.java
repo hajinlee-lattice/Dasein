@@ -67,4 +67,14 @@ public class TableDaoImpl extends BaseDaoImpl<Table> implements TableDao {
         );
         return result;
     }
+
+    public void updateUpdatedBy(String updatedBy, Long tablePid) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format("update %s set UPDATEDBY = :updatedBy where PID = :tablePid",
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("updatedBy", updatedBy);
+        query.setParameter("tablePid", tablePid);
+        query.executeUpdate();
+    }
 }
