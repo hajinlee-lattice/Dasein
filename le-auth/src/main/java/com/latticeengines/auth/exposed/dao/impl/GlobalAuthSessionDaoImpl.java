@@ -13,5 +13,5 @@ public class GlobalAuthSessionDaoImpl extends BaseDaoImpl<GlobalAuthSession> imp
     protected Class<GlobalAuthSession> getEntityClass() {
         return GlobalAuthSession.class;
     }
-    
+
 }
