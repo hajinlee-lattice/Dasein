@@ -293,7 +293,6 @@ public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
                 "profileProductHierarchy", //
                 "combineStatistics", //
                 "exportToRedshift", //
-                "exportToDynamo", //
                 "generateProcessingReport", // mimic failed in scoring
                 "generateProcessingReport", //
                 "generateProcessingReport", //
