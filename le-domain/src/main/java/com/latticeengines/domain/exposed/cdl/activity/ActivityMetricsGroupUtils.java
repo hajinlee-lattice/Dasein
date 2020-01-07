@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.latticeengines.common.exposed.util.TemplateUtils;
-import com.latticeengines.domain.exposed.StringTemplates;
+import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
@@ -39,9 +39,6 @@ public class ActivityMetricsGroupUtils {
             .put("w", "in last") // within
             .put("b", "between") // between
             .build();
-
-    private static final String SINGLE_VAL_TIME_RANGE_DESC = "${operator} ${params?join(\"_\")} ${period}";
-    private static final String DOUBLE_VAL_TIME_RANGE_DESC = "${operator} ${params?join(\" and \")} ${period}";
 
 
     // generate groupId from groupName
@@ -82,7 +79,7 @@ public class ActivityMetricsGroupUtils {
         map.put("operator", getValueFromBiMap(RELATION_STR, timeFilter.getRelation().toString()));
         map.put("period", getValueFromBiMap(PERIOD_STR, timeFilter.getPeriod()));
         map.put("params", timeFilter.getValues());
-        return TemplateUtils.renderByMap(StringTemplates.ACTIVITY_METRICS_GROUP_TIME_RANGE, map);
+        return TemplateUtils.renderByMap(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE, map);
     }
 
     public static TimeFilter timeRangeTmplToTimeFilter(String timeRange) {
@@ -131,10 +128,10 @@ public class ActivityMetricsGroupUtils {
         String descTemplate;
         switch (op) {
             case "w":
-                descTemplate = SINGLE_VAL_TIME_RANGE_DESC;
+                descTemplate = StringTemplateConstants.SINGLE_VAL_TIME_RANGE_DESC;
                 break;
             case "b":
-                descTemplate = DOUBLE_VAL_TIME_RANGE_DESC;
+                descTemplate = StringTemplateConstants.DOUBLE_VAL_TIME_RANGE_DESC;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown operator " + op);
@@ -147,13 +144,6 @@ public class ActivityMetricsGroupUtils {
         map.put("period", getValueFromBiMap(PERIOD_STR.inverse(), periodLetter).toString().toLowerCase());
         map.put("params", ArrayUtils.subarray(fragments, 1, fragments.length - 1));
         return TemplateUtils.renderByMap(descTemplate, map);
-    }
-
-    public static String generateSourceMediumDisplayName(String timeRange, Map<String, Object> sourceMedium) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("SourceMedium", sourceMedium);
-        map.put("TimeRange", timeRange);
-        return TemplateUtils.renderByMap(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME, map);
     }
 
     private static Object getValueFromBiMap(BiMap<?, ?> map, Object key) {

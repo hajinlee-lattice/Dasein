@@ -72,6 +72,7 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
 
     val aggrProcs = aggregators.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(dailyStore(__Row_Count__.name)).alias(__Row_Count__.name) // Default row count must exist
     val columns: Seq[String] = DeriveAttrsUtils.getGroupByEntityColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
+    // TODO - apply filters while grouping by period Id, preserve column used for dedup condition (e.g. lastUpdated)
     val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*)
       .agg(aggrProcs.head, aggrProcs.tail: _*))
     groupedByPeriodId.map((df: DataFrame) => DeriveAttrsUtils.appendPartitionColumns(df, Seq(PeriodId.name)))

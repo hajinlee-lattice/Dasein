@@ -38,7 +38,7 @@ import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.TemplateUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
-import com.latticeengines.domain.exposed.StringTemplates;
+import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
@@ -242,11 +242,11 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         Map<String, Object> params = createDisplayNameParamMap(rollupDimNames, rollupDimVals, streamDimMetadata, attrName);
         try {
             String timeDesc = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeRange);
-            params.put(StringTemplates.ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN, timeDesc);
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN, timeDesc);
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse time range for attribute " + attrName, e);
         }
-        String displayNameTmpl = group.getDisplayNameTmpl();
+        String displayNameTmpl = group.getDisplayNameTmpl().getTemplate();
         if (StringUtils.isNotBlank(displayNameTmpl)) {
             try {
                 attr.setDisplayName(TemplateUtils.renderByMap(displayNameTmpl, params));
@@ -292,8 +292,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         TimeFilter timeFilter = ActivityMetricsGroupUtils.timeRangeTmplToTimeFilter(timeRange);
         Pair<Integer, Integer> periodIdRange = translator.translateRange(timeFilter);
         Pair<String, String> dateRange = translator.periodIdRangeToDateRange(timeFilter.getPeriod(), periodIdRange);
-        attr.setSecondaryDisplayName(String.format(StringTemplates.ACTIVITY_METRICS_ATTR_SECONDARY_DISPLAYNAME,
-                dateRange.getLeft(), dateRange.getRight()));
+        attr.setSecondaryDisplayName(String.format(StringTemplateConstants.ACTIVITY_METRICS_ATTR_SECONDARY_DISPLAYNAME, dateRange.getLeft(), dateRange.getRight()));
     }
 
     private void appendDummyRecord(Table targetTable) {
