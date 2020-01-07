@@ -530,10 +530,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 continue;
             }
             if (BusinessEntity.Transaction.equals(config.getEntity())) {
+                transactionLegacyDeleteByUploadActions.putIfAbsent(config.getCleanupOperationType(), new HashSet<>());
                 Set<Action> actionSet = transactionLegacyDeleteByUploadActions.get(config.getCleanupOperationType());
-                if (actionSet == null) {
-                    actionSet = new HashSet<>();
-                }
                 actionSet.add(action);
                 transactionLegacyDeleteByUploadActions.put(config.getCleanupOperationType(), actionSet);
             }

@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
@@ -70,8 +70,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
         private ConvertBatchStoreToDataTableWorkflowConfiguration.Builder convertBatchStoreToDataTableWorkflowBuilder =
                 new ConvertBatchStoreToDataTableWorkflowConfiguration.Builder();
-        private LegacyDeleteWorkFlowConfiguration.Builder legacyDeleteWorkFlowBuilder =
-                new LegacyDeleteWorkFlowConfiguration.Builder();
+        private LegacyDeleteWorkflowConfiguration.Builder legacyDeleteWorkFlowBuilder =
+                new LegacyDeleteWorkflowConfiguration.Builder();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);

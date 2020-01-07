@@ -3,10 +3,10 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 
-public class LegacyDeleteWorkFlowConfiguration extends BaseCDLWorkflowConfiguration {
+public class LegacyDeleteWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
-        private LegacyDeleteWorkFlowConfiguration configuration = new LegacyDeleteWorkFlowConfiguration();
+        private LegacyDeleteWorkflowConfiguration configuration = new LegacyDeleteWorkflowConfiguration();
         private LegacyDeleteAccountWorkFlowConfiguration.Builder legacyDeleteAccountWorkFlowBuilder =
                 new LegacyDeleteAccountWorkFlowConfiguration.Builder();
         private LegacyDeleteContactWorkFlowConfiguratiion.Builder legacyDeleteContactWorkFlowBuilder =
@@ -30,7 +30,7 @@ public class LegacyDeleteWorkFlowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
-        public LegacyDeleteWorkFlowConfiguration build() {
+        public LegacyDeleteWorkflowConfiguration build() {
             configuration.setContainerConfiguration("legacyDeleteWorkFlow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(legacyDeleteAccountWorkFlowBuilder.build());

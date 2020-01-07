@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflo
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteAccountWorkFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteContactWorkFlowConfiguratiion;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteTransactionWorkFlowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertAccountWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertContactWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertTransactionWorkflowConfiguration;
@@ -102,7 +102,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = ConvertContactWorkflowConfiguration.class, name = "ConvertContactWorkflowConfiguration"),
         @Type(value = ConvertTransactionWorkflowConfiguration.class, name = "ConvertTransactionWorkflowConfiguration"),
 
-        @Type(value = LegacyDeleteWorkFlowConfiguration.class, name = "LegacyDeleteWorkFlowConfiguration"),
+        @Type(value = LegacyDeleteWorkflowConfiguration.class, name = "LegacyDeleteWorkflowConfiguration"),
         @Type(value = LegacyDeleteAccountWorkFlowConfiguration.class, name = "LegacyDeleteAccountWorkFlowConfiguration"),
         @Type(value = LegacyDeleteContactWorkFlowConfiguratiion.class, name = "LegacyDeleteContactWorkFlowConfiguratiion"),
         @Type(value = LegacyDeleteTransactionWorkFlowConfiguration.class, name = "LegacyDeleteTransactionWorkFlowConfiguration"),

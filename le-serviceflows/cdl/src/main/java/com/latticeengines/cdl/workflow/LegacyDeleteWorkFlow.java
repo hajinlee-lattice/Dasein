@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.legacydelete.LegacyDeleteAccountWorkFlow;
 import com.latticeengines.cdl.workflow.steps.legacydelete.LegacyDeleteContactWorkFlow;
 import com.latticeengines.cdl.workflow.steps.legacydelete.LegacyDeleteTransactionWorkFlow;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -18,7 +18,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("legacyDeleteWorkFlow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class LegacyDeleteWorkFlow extends AbstractWorkflow<LegacyDeleteWorkFlowConfiguration> {
+public class LegacyDeleteWorkFlow extends AbstractWorkflow<LegacyDeleteWorkflowConfiguration> {
 
     @Inject
     private LegacyDeleteAccountWorkFlow legacyDeleteAccountWorkFlow;
@@ -30,7 +30,7 @@ public class LegacyDeleteWorkFlow extends AbstractWorkflow<LegacyDeleteWorkFlowC
     private LegacyDeleteTransactionWorkFlow legacyDeleteTransactionWorkFlow;
 
     @Override
-    public Workflow defineWorkflow(LegacyDeleteWorkFlowConfiguration workflowConfig) {
+    public Workflow defineWorkflow(LegacyDeleteWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(legacyDeleteAccountWorkFlow)
                 .next(legacyDeleteContactWorkFlow)

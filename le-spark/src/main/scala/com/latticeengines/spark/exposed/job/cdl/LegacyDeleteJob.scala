@@ -61,15 +61,13 @@ class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
         MergeUtils.concat2(partA, partB)
       case CleanupOperationType.BYUPLOAD_MINDATE =>
         val fields = original.columns.to
-        val tempDel = delete.where(delete.col(joinColumn.getTransactionTime).isNotNull)
-          .withColumn(dummyColumn, lit("dummyId")).groupBy(col(dummyColumn), col(joinColumn
+        val tempDel = delete.where(delete.col(joinColumn.getTransactionTime).isNotNull).groupBy(col(joinColumn
           .getTransactionTime)).agg(min(joinColumn.getTransactionTime).as(aggregate_prefix.concat(joinColumn.getTransactionTime)))
           .limit(1)
-        val tempOriginal = original.withColumn(dummyColumn, lit("dummyId"))
-        tempOriginal.show()
-        tempOriginal.join(tempDel, Seq(dummyColumn), "left")
-        .where(tempOriginal.col(joinColumn.getTransactionTime) < tempDel.col(aggregate_prefix.concat(joinColumn.getTransactionTime))).select(fields map
-        tempOriginal.col:_*)
+        original.crossJoin(tempDel)
+          .where(original.col(joinColumn.getTransactionTime) < tempDel.col(aggregate_prefix.concat(joinColumn
+            .getTransactionTime))).select(fields map
+          original.col: _*)
       case CleanupOperationType.BYUPLOAD_MINDATEANDACCOUNT =>
         val tempDel = delete.where(col(joinColumn.getTransactionTime) > 0).groupBy(col(joinColumn.getAccountId)).agg(min
         (joinColumn.getTransactionTime).as(aggregate_prefix.concat(joinColumn.getTransactionTime)))

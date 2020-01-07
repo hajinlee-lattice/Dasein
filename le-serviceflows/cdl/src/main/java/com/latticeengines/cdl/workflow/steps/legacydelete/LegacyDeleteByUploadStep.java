@@ -518,8 +518,8 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
                 break;
             case Transaction:
                 Map<CleanupOperationType, Set> actionMap =
-                        getMapObjectFromContext(TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS,
-                                CleanupOperationType.class, Set.class);
+                        new HashMap<>(getMapObjectFromContext(TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS,
+                                CleanupOperationType.class, Set.class));
                 log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
                 otherActions = new ArrayList<>();
                 if (actionMap.containsKey(CleanupOperationType.BYUPLOAD_MINDATE)) {
