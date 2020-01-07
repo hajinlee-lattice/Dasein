@@ -80,6 +80,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
                 dataFeedTask.setImportTemplate(metaData);
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask, false);
+                mdService.updateImportTableUpdatedBy(CustomerSpace.parse(customerSpace), dataFeedTask.getImportTemplate());
             }
         }
     }
