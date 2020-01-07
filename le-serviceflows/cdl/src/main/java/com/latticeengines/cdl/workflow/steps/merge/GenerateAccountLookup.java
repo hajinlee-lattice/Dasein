@@ -45,6 +45,7 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
 
     private String activeBatchStoreName;
     private String inactiveBatchStoreName;
+    private boolean shortCutMode;
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -67,22 +68,31 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
         customerSpace = stepConfiguration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        if (hasNewBatchStore() || missingLookupTable()) {
-            String batchStoreName = hasNewBatchStore() ? inactiveBatchStoreName : activeBatchStoreName;
-            DataCollection.Version version = batchStoreName.equals(activeBatchStoreName) ? active : inactive;
-            Table batchStoreSummary = metadataProxy.getTableSummary(customerSpace.toString(), batchStoreName);
-            GenerateAccountLookupConfig config = new GenerateAccountLookupConfig();
-            config.setInput(Collections.singletonList(batchStoreSummary.toHdfsDataUnit("Account")));
-            List<String> lookupIds = servingStoreProxy
-                    .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account,
-                            Collections.singletonList(ColumnSelection.Predefined.LookupId), version)
-                    .map(ColumnMetadata::getAttrName).collectList().block();
-            log.info("lookupIds=" + lookupIds);
-            config.setLookupIds(lookupIds);
-            return config;
-        } else {
-            log.info("There is no reason to build AccountLookup table.");
+        Table tableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_LOOKUP_TABLE_NAME);
+        shortCutMode = tableInCtx != null;
+        if (shortCutMode) {
+            log.info("Found lookup table in context, using short-cut pipeline");
+            dataCollectionProxy.upsertTable(customerSpace.toString(), tableInCtx.getName(), TABLE_ROLE, inactive);
+            exportToDynamo(tableInCtx.getName());
             return null;
+        } else {
+            if (hasNewBatchStore() || missingLookupTable()) {
+                String batchStoreName = hasNewBatchStore() ? inactiveBatchStoreName : activeBatchStoreName;
+                DataCollection.Version version = batchStoreName.equals(activeBatchStoreName) ? active : inactive;
+                Table batchStoreSummary = metadataProxy.getTableSummary(customerSpace.toString(), batchStoreName);
+                GenerateAccountLookupConfig config = new GenerateAccountLookupConfig();
+                config.setInput(Collections.singletonList(batchStoreSummary.toHdfsDataUnit("Account")));
+                List<String> lookupIds = servingStoreProxy
+                        .getDecoratedMetadata(customerSpace.toString(), BusinessEntity.Account,
+                                Collections.singletonList(ColumnSelection.Predefined.LookupId), version)
+                        .map(ColumnMetadata::getAttrName).collectList().block();
+                log.info("lookupIds=" + lookupIds);
+                config.setLookupIds(lookupIds);
+                return config;
+            } else {
+                log.info("There is no reason to build AccountLookup table.");
+                return null;
+            }
         }
     }
 
@@ -93,6 +103,7 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
         Table resultTable = toTable(resultTableName, InterfaceName.AtlasLookupKey.name(), result.getTargets().get(0));
         metadataProxy.createTable(customerSpace.toString(), resultTableName, resultTable);
         dataCollectionProxy.upsertTable(customerSpace.toString(), resultTableName, TABLE_ROLE, inactive);
+        exportToS3AndAddToContext(resultTable, ACCOUNT_LOOKUP_TABLE_NAME);
         exportToDynamo(resultTableName);
     }
 

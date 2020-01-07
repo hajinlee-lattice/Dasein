@@ -208,6 +208,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_PROFILE_TABLE_NAME = "ACCOUNT_PROFILE_TABLE_NAME";
     protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
+    protected static final String ACCOUNT_LOOKUP_TABLE_NAME = "ACCOUNT_LOOKUP_TABLE_NAME";
     protected static final String CONTACT_SERVING_TABLE_NAME = "CONTACT_SERVING_TABLE_NAME";
     protected static final String CONTACT_PROFILE_TABLE_NAME = "CONTACT_PROFILE_TABLE_NAME";
     protected static final String CONTACT_STATS_TABLE_NAME = "CONTACT_STATS_TABLE_NAME";
@@ -281,6 +282,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACCOUNT_PROFILE_TABLE_NAME, //
             ACCOUNT_SERVING_TABLE_NAME, //
             ACCOUNT_STATS_TABLE_NAME, //
+            ACCOUNT_LOOKUP_TABLE_NAME,
             REMATCHED_ACCOUNT_TABLE_NAME, //
             ENRICHED_ACCOUNT_DIFF_TABLE_NAME, //
             CONTACT_SERVING_TABLE_NAME, //
