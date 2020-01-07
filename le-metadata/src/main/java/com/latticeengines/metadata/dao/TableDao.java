@@ -12,6 +12,4 @@ public interface TableDao extends BaseDao<Table> {
     List<Table> findAllWithExpiredRetentionPolicy(int index, int max);
 
     List<Table> findByNames(List<String> names);
-
-    void updateUpdatedBy(String updatedBy, Long tablePid);
 }
