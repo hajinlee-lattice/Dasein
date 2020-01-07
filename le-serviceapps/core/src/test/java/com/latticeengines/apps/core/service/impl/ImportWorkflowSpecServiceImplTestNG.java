@@ -3,6 +3,8 @@ package com.latticeengines.apps.core.service.impl;
 import java.io.IOException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
@@ -24,6 +27,8 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
     private static String expectedTableFileName =
             "com/latticeengines/apps/core/service/impl/importworkflowspecservice/expected-spec-table.json";
 
+    @Inject
+    private S3Service s3Service;
 
     @Autowired
     private ImportWorkflowSpecService importWorkflowSpecService;
@@ -79,7 +84,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
         String systemType = "specfunctest", systemObject = "contacts";
         List<ImportWorkflowSpec> specList = null;
         try {
-            specList = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(systemType, systemObject);
+            specList = importWorkflowSpecService.loadSpecsByTypeAndObject(null, systemObject, systemType);
 
         } catch (Exception e) {
             log.error("Loading Spec from S3 failed with error:", e);
@@ -97,4 +102,23 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
         Assert.assertNull(spec);
     }
 
+    @Test(groups = "functional")
+    public void uploadSpecToS3() throws Exception {
+        String fakeType = "fakeType", fakeObject = "fakeObject";
+        ImportWorkflowSpec fakeSpec = new ImportWorkflowSpec();
+        fakeSpec.setSystemName("fakeName");
+        fakeSpec.setSystemType(fakeType);
+        fakeSpec.setSystemName(fakeObject);
+        importWorkflowSpecService.addSpecToS3(fakeType, fakeObject, fakeSpec);
+        ImportWorkflowSpec importSpec = importWorkflowSpecService.loadSpecFromS3(fakeType, fakeObject);
+        Assert.assertNotNull(importSpec);
+        importWorkflowSpecService.deleteSpecFromS3(fakeType, fakeObject);
+        try {
+            importSpec = importWorkflowSpecService.loadSpecFromS3(fakeType, fakeObject);
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof IOException);
+            importSpec = null;
+        }
+        Assert.assertNull(importSpec);
+    }
 }

@@ -79,7 +79,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
                 Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace), tableName, true);
                 dataFeedTask.setImportTemplate(metaData);
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
-                dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);
+                dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask, false);
             }
         }
     }
@@ -142,10 +142,10 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
-    public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
+    public void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask, boolean updateTaskOnly) {
         DatabaseUtils.retry("Update DataFeedTask", 10,
                 RollbackException.class, "RollbackException detected when", null,
-                input -> dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask));
+                input -> dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask, updateTaskOnly));
         mdService.updateImportTableUpdatedBy(CustomerSpace.parse(customerSpace), dataFeedTask.getImportTemplate());
     }
 
@@ -165,7 +165,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         }
         if (!status.equals(task.getS3ImportStatus())) {
             task.setS3ImportStatus(status);
-            dataFeedTaskEntityMgr.updateDataFeedTask(task);
+            dataFeedTaskEntityMgr.updateDataFeedTask(task, true);
         }
     }
 
@@ -178,7 +178,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         }
         if (!status.equals(task.getS3ImportStatus())) {
             task.setS3ImportStatus(status);
-            dataFeedTaskEntityMgr.updateDataFeedTask(task);
+            dataFeedTaskEntityMgr.updateDataFeedTask(task, true);
         }
     }
 

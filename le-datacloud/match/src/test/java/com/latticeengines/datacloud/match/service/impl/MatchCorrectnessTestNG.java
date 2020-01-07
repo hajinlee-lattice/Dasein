@@ -78,7 +78,10 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
             { null, "Microsoft Corporation", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { null, "Microsoft Corp.", null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
-            { null, "Google Inc.", null, null, null, null, null, "abc.xyz||google.com",
+            // D&B look up response changed : Google Inc. company name was valid
+            // till 2017, after that its changed to Google/Google LLC. For
+            // Google Inc. lookup, the search is re-directed to Google New York
+            { null, "Google", null, null, null, null, null, "abc.xyz||google.com",
                     "ALPHABET INC.||Google LLC", "California", "USA", ">10,000", ">10B" },
             // { null, "Apple Inc", null, null, null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
             // { null, "Apple", null, "CA", null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },

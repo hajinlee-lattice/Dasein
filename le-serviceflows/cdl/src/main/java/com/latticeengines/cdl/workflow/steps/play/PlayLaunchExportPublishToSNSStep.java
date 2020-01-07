@@ -72,15 +72,10 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
         LookupIdMap lookupIdMap = config.getLookupIdMap();
         sourceFiles = getFiles(PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, s3ExportFilePaths);
 
-        // TODO: Add the same call method to get the deleteFiles
-
         DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(customerSpace);
         ExternalIntegrationMessageBody messageBody = new ExternalIntegrationMessageBody();
         messageBody.setWorkflowRequestId(workflowRequestId);
         messageBody.setSourceFiles(sourceFiles);
-
-        // TODO: Add messageBody.setDeleteFiles(deleteFiles);
-
         messageBody.setTrayTenantId(dropboxSummary.getDropBox());
         if (lookupIdMap != null && lookupIdMap.getExternalAuthentication() != null) {
             messageBody.setSolutionInstanceId(lookupIdMap.getExternalAuthentication().getSolutionInstanceId());

@@ -437,33 +437,6 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
     }
 
     @Override
-    public Timestamp getEarliestTime(String vendor, String status) {
-
-        //check vendor
-        vendor = vendor.toUpperCase();
-        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
-
-            return new Timestamp(System.currentTimeMillis());
-
-        }
-
-        //check status
-        status = status.toUpperCase();
-        if (!status.equals(CollectionRequest.STATUS_READY) &&
-                !status.equals(CollectionRequest.STATUS_COLLECTING) &&
-                !status.equals(CollectionRequest.STATUS_DELIVERED) &&
-                !status.equals(CollectionRequest.STATUS_FAILED) &&
-                !status.equals(CollectionRequest.STATUS_EMPTY_RESULT)) {
-
-            return new Timestamp(System.currentTimeMillis());
-
-        }
-
-        return collectionRequestMgr.getEarliestTime(vendor, status);
-
-    }
-
-    @Override
     public List<CollectionRequest> getReady(String vendor, int upperLimit) {
 
         vendor = vendor.toUpperCase();

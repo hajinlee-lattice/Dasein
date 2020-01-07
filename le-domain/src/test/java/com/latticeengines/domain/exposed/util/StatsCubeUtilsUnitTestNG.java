@@ -17,6 +17,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
@@ -122,6 +123,33 @@ public class StatsCubeUtilsUnitTestNG {
         verifyDateAttrInTopN(topNTree, cmMap);
     }
 
+    @Test(groups = "unit")
+    public void testTopNForIteration() throws IOException {
+
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream metadataStream = classLoader.getResourceAsStream(RESOURCE_ROOT + "metadata.json");
+        List<ColumnMetadata> metadata = JsonUtils.convertList(JsonUtils.deserialize(metadataStream, List.class),
+                ColumnMetadata.class);
+
+        InputStream cubeStream = classLoader.getResourceAsStream(RESOURCE_ROOT + "cube.json");
+        StatsCube cube = new StatsCube();
+        cube.setStatistics(
+                JsonUtils.convertMap(JsonUtils.deserialize(cubeStream, Map.class), String.class, AttributeStats.class));
+
+        TopNTree topN = StatsCubeUtils.constructTopNTreeForIteration(ImmutableMap.of("Account", cube),
+                ImmutableMap.of("Account", metadata));
+
+        Assert.assertNotNull(topN);
+        Assert.assertEquals(topN.getCategory(Category.WEBSITE_KEYWORDS).getSubcategory("Other").size(), 162);
+        Assert.assertEquals(topN.getCategory(Category.ONLINE_PRESENCE).getSubcategory("Other").size(), 39);
+        Assert.assertEquals(topN.getCategory(Category.GROWTH_TRENDS).getSubcategory("Other").size(), 1);
+        Assert.assertEquals(topN.getCategory(Category.WEBSITE_PROFILE).getSubcategory("Other").size(), 81);
+        Assert.assertEquals(topN.getCategory(Category.FIRMOGRAPHICS).getSubcategory("Other").size(), 19);
+        Assert.assertEquals(topN.getCategory(Category.TECHNOLOGY_PROFILE).getSubcategory("Other").size(), 680);
+        Assert.assertEquals(topN.getCategory(Category.PRODUCT_SPEND).getSubcategory("Other").size(), 2650);
+        Assert.assertEquals(topN.getCategory(Category.ACCOUNT_ATTRIBUTES).getSubcategory("Other").size(), 21);
+    }
+
     @Test(groups = "unit", dataProvider = "BktsToChgBkts")
     public void testBktToChgBkt(int id, Object min, Object max, boolean minInclusive, boolean maxInclusive,
             boolean isValBkt, Bucket.Change.Direction direction, Bucket.Change.ComparisonType comparisonType,
@@ -181,7 +209,8 @@ public class StatsCubeUtilsUnitTestNG {
                 AttributeLookup attributeLookup = new AttributeLookup(topAttr.getEntity(), topAttr.getAttribute());
                 ColumnMetadata cm = consolidatedCmMap.get(attributeLookup);
 
-                // Account Attributes (aka "My Attributes") and Contact Attributes that are date attribute types are
+                // Account Attributes (aka "My Attributes") and Contact Attributes that are date
+                // attribute types are
                 // allowed to be in the TopN Tree as long as they are not system attributes.
                 if (!(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
                         || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory()))

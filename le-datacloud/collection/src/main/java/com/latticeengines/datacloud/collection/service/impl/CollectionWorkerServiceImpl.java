@@ -47,20 +47,6 @@ public class CollectionWorkerServiceImpl implements CollectionWorkerService {
     }
 
     @Override
-    public List<CollectionWorker> getWorkerStopped(String vendor, Timestamp after) {
-
-        vendor = vendor.toUpperCase();
-        if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
-
-            return null;
-
-        }
-
-        return collectionWorkerMgr.getWorkerStopped(vendor, after);
-
-    }
-
-    @Override
     public void cleanupWorkerBetween(Timestamp start, Timestamp end) {
         collectionWorkerMgr.cleanupWorkerBetween(start, end);
 

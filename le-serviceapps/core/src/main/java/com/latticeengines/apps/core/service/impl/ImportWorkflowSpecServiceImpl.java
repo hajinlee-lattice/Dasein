@@ -1,5 +1,6 @@
 package com.latticeengines.apps.core.service.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,8 +45,8 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     private S3Service s3Service;
 
     public ImportWorkflowSpec loadSpecFromS3(String systemType, String systemObject) throws IOException {
-        String fileSystemType = systemType.replaceAll("\\s", "").toLowerCase();
-        String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
+        String fileSystemType = ImportWorkflowSpecUtils.sanitizeName(systemType);
+        String fileSystemObject = ImportWorkflowSpecUtils.sanitizeName(systemObject);
         File specFile = null;
         try {
             specFile = File.createTempFile("temp-" + fileSystemType + "-" + fileSystemObject, ".json");
@@ -55,7 +56,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
                     " and SystemObject " + systemObject, e);
         }
 
-        String s3Path = s3Folder + "/" + fileSystemType + "-" + fileSystemObject + "-spec.json";
+        String s3Path = s3Folder + "/" + ImportWorkflowSpecUtils.constructSpecName(fileSystemType, fileSystemObject);
         log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Path);
 
         // Read in S3 file as InputStream.
@@ -75,42 +76,49 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
         return workflowSpec;
     }
 
-    public Table tableFromRecord(String tableName, boolean writeAllDefinitions, FieldDefinitionsRecord record) {
-        log.info(String.format("Generating Table named %s from record of system type %s and object %s",
-                tableName, record.getSystemObject(), record.getSystemType()));
-        return ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(tableName, writeAllDefinitions, record);
-    }
-
+    /**
+     * load spec by system type and system object, if both type and object are blank, all specs return
+     * systemType and excludeSystemType are exclusive parameters
+     * @param systemType
+     * @param systemObject
+     * @param excludeSystemType
+     * @return
+     */
     @Override
-    public List<ImportWorkflowSpec> loadSpecWithSameObjectExcludeTypeFromS3(String excludeSystemType,
-                                                                            String systemObject) throws Exception {
-        String fileSystemType = excludeSystemType.replaceAll("\\s", "").toLowerCase();
-        String fileSystemObject = systemObject.replaceAll("\\s", "").toLowerCase();
-        log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Folder);
-
+    public List<ImportWorkflowSpec> loadSpecsByTypeAndObject(String systemType, String systemObject,
+                                                             String excludeSystemType) {
+        String fileSystemType = ImportWorkflowSpecUtils.sanitizeName(systemType);
+        String fileSystemObject = ImportWorkflowSpecUtils.sanitizeName(systemObject);
+        String fileExcludeSystemType = ImportWorkflowSpecUtils.sanitizeName(excludeSystemType);
+        boolean isBlankType = StringUtils.isBlank(fileSystemType);
+        boolean isBlankExcludeType = StringUtils.isBlank(fileExcludeSystemType);
+        if (!isBlankType && !isBlankExcludeType) {
+            throw new IllegalArgumentException("systemType and excludeType should be exclusive params.");
+        }
+        log.info("Downloading file from S3 location: Bucket: " + s3Bucket + "  Key: " + s3Folder +
+                " System type: " + systemType + " System object: " + systemObject);
         // Read in S3 file as InputStream.
         Iterator<InputStream> specStreamIterator = s3Service.getObjectStreamIterator(s3Bucket, s3Folder,
-                new S3KeyFilter(){
-            @Override
-            public boolean accept(String key) {
-                // key example: /import-sepcs/other-contacts-spec.json
-                if (key.endsWith("/")) {
-                    return false;
-                } else {
-                    String name = key.substring(key.lastIndexOf("/") + 1);
-                    int index = name.indexOf('-');
-                    String type = name.substring(0, index);
-                    String remainingPart = name.substring(index + 1);
-                    boolean result = true;
-                    if (StringUtils.isNotBlank(fileSystemType)) {
-                        result &= !type.equals(fileSystemType);
-                    }
-                    if (StringUtils.isNotBlank(fileSystemObject)) {
-                        result &= remainingPart.startsWith(fileSystemObject);
-                    }
-                    return result;
-                }
-            }});
+                new S3KeyFilter() {
+                    @Override
+                    public boolean accept(String key) {
+                        // key example: /import-sepcs/other-contacts-spec.json
+                        if (key.endsWith("/")) {
+                            return false;
+                        } else {
+                            String name = key.substring(key.lastIndexOf("/") + 1);
+                            int index = name.indexOf('-');
+                            String type = name.substring(0, index);
+                            String remainingPart = name.substring(index + 1);
+                            if (isBlankExcludeType) {
+                                return (StringUtils.isBlank(fileSystemType) || type.equals(fileSystemType))
+                                        && (StringUtils.isBlank(fileSystemObject) || remainingPart.startsWith(fileSystemObject));
+                            } else {
+                                return (!type.equals(fileExcludeSystemType))
+                                        && (StringUtils.isBlank(fileSystemObject) || remainingPart.startsWith(fileSystemObject));
+                            }
+                        }
+                    }});
         List<ImportWorkflowSpec> specList = new ArrayList<>();
         while (specStreamIterator.hasNext()) {
             try {
@@ -124,4 +132,26 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
         }
         return specList;
     }
+
+    public Table tableFromRecord(String tableName, boolean writeAllDefinitions, FieldDefinitionsRecord record) {
+        log.info(String.format("Generating Table named %s from record of system type %s and object %s",
+                tableName, record.getSystemObject(), record.getSystemType()));
+        return ImportWorkflowSpecUtils.getTableFromFieldDefinitionsRecord(tableName, writeAllDefinitions, record);
+    }
+
+    @Override
+    public void addSpecToS3(String systemType, String systemObject, ImportWorkflowSpec importWorkflowSpec) throws Exception {
+        String key = s3Folder + "/" + ImportWorkflowSpecUtils.constructSpecName(systemType, systemObject);
+        ByteArrayInputStream byteArrayInputStream =
+                new ByteArrayInputStream(JsonUtils.pprint(importWorkflowSpec).getBytes());
+
+        s3Service.uploadInputStream(s3Bucket, key, byteArrayInputStream, true);
+    }
+
+    @Override
+    public void deleteSpecFromS3(String systemType, String systemObject) throws Exception {
+        String key = s3Folder + "/" + ImportWorkflowSpecUtils.constructSpecName(systemType, systemObject);
+        s3Service.cleanupPrefix(s3Bucket, key);
+    }
+
 }

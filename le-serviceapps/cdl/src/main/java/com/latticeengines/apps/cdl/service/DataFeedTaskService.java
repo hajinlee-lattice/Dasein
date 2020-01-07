@@ -29,7 +29,7 @@ public interface DataFeedTaskService {
 
     List<DataFeedTask> getDataFeedTaskByUniqueIds(String customerSpace, List<String> uniqueIds);
 
-    void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
+    void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask, boolean updateTaskOnly);
 
     void updateS3ImportStatus(String customerSpace, String source, String dataFeedType, DataFeedTask.S3ImportStatus status);
 

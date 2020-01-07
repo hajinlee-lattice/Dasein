@@ -7,11 +7,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -27,6 +29,9 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     private String customerSpace;
 
@@ -79,8 +84,8 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
                 continue;
             }
             try {
-                // HdfsUtils.rmdir(yarnConfiguration, //
-                // filePath.substring(0, filePath.lastIndexOf("/")));
+                HdfsUtils.rmdir(yarnConfiguration, //
+                        filePath.substring(0, filePath.lastIndexOf("/")));
             } catch (Exception ex) {
                 log.error("Ignoring error while deleting dir: {}" //
                         + filePath.substring(0, filePath.lastIndexOf("/")), //

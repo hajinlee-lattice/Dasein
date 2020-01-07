@@ -18,8 +18,6 @@ public interface CollectionRequestMgr extends BaseEntityMgrRepository<Collection
 
     List<CollectionRequest> getPending(String vendor, List<CollectionWorker> activeWorkers);
 
-    Timestamp getEarliestTime(String vendor, String status);
-
     List<CollectionRequest> getDelivered(String pickupWorker);
 
     void cleanupRequestBetween(Timestamp start, Timestamp end);

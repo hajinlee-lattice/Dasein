@@ -314,7 +314,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                     dataFeedTaskService.createDataFeedTask(customerSpace, backupTask);
                 } else {
                     dataFeedTask.setImportTemplate(backupTask.getImportTemplate());
-                    dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask);
+                    dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, false);
                 }
             }
             return backupTask.getImportTemplate();

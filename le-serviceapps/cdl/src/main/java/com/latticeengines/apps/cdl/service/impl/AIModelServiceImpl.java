@@ -491,16 +491,18 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
 
         return modelingAttributes;
-
     }
 
     @Override
     public Map<String, StatsCube> getIterationMetadataCube(String customerSpace, RatingEngine ratingEngine,
             AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores) {
         List<ColumnMetadata> metadataAttrs = getIterationMetadata(customerSpace, ratingEngine, aiModel, dataStores);
+        return getIterationMetadataCube(customerSpace, aiModel.getModelSummaryId(), metadataAttrs);
+    }
 
-        ModelSummary modelSummary = modelSummaryProxy.findByModelId(customerSpace, aiModel.getModelSummaryId(), true,
-                false, false);
+    public Map<String, StatsCube> getIterationMetadataCube(String customerSpace, String modelSummaryId,
+            List<ColumnMetadata> metadataAttrs) {
+        ModelSummary modelSummary = modelSummaryProxy.findByModelId(customerSpace, modelSummaryId, true, false, false);
         Map<String, Predictor> predictors = extractPredictorsFromSummary(modelSummary);
 
         Map<String, AttributeStats> predictorStats = Flux.fromIterable(metadataAttrs)
@@ -518,13 +520,11 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     public TopNTree getIterationMetadataTopN(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
             List<CustomEventModelingConfig.DataStore> dataStores) {
         List<ColumnMetadata> metadataAttrs = getIterationMetadata(customerSpace, ratingEngine, aiModel, dataStores);
-        Map<String, StatsCube> accountStatsCube = getIterationMetadataCube(customerSpace, ratingEngine, aiModel,
-                dataStores);
-        boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace));
+        Map<String, StatsCube> iterationStatsCube = getIterationMetadataCube(customerSpace, aiModel.getModelSummaryId(),
+                metadataAttrs);
 
-        return StatsCubeUtils.constructTopNTree( //
-                accountStatsCube, ImmutableMap.of(statsCubeKey, metadataAttrs), //
-                false, null, entityMatchEnabled);
+        return StatsCubeUtils.constructTopNTreeForIteration(iterationStatsCube,
+                ImmutableMap.of(statsCubeKey, metadataAttrs));
     }
 
     private String getKey(ColumnMetadata cm) {

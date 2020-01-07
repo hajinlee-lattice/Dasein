@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,8 +40,8 @@ public class ImportWorkflowSpecResource {
     @ApiOperation("get import workflow spec")
     public ImportWorkflowSpec getImportWorkflowSpec(
             @PathVariable String customerSpace, //
-            @RequestParam(value = "systemType", required = true) String systemType, //
-            @RequestParam(value = "systemObject", required = true) String systemObject) {
+            @RequestParam(value = "systemType") String systemType, //
+            @RequestParam(value = "systemObject") String systemObject) {
         ImportWorkflowSpec spec;
         try {
             spec = importWorkflowSpecService.loadSpecFromS3(systemType, systemObject);
@@ -76,23 +77,51 @@ public class ImportWorkflowSpecResource {
         return table;
     }
 
-    @GetMapping(value = "/list/{systemObject}")
+    @GetMapping(value = "/list")
     @ResponseBody
-    @ApiOperation("get workflow spec with same object excluding one type")
-    public List<ImportWorkflowSpec> getImportWorkflowSpecWithSameObjectExcludeType(
+    @ApiOperation("get workflow spec by type/excludeSystemType and object")
+    public List<ImportWorkflowSpec> getImportWorkflowSpecs(
             @PathVariable String customerSpace, //
-            @PathVariable String systemObject, //
+            @RequestParam(value = "systemType", required = false) String systemType, //
+            @RequestParam(value = "systemObject", required = false) String systemObject, //
             @RequestParam(value = "excludeSystemType", required = false) String excludeSystemType) {
-        List<ImportWorkflowSpec> specs;
         try {
-            specs = importWorkflowSpecService.loadSpecWithSameObjectExcludeTypeFromS3(excludeSystemType, systemObject);
+            return importWorkflowSpecService.loadSpecsByTypeAndObject(systemType, systemObject, excludeSystemType);
         } catch (Exception e) {
-            log.error(String.format(
-                    "ImportWorkflowSpecService failed to return Spec for non-system Type %s and system object %s.\n" +
-                            "Error was: %s", excludeSystemType, systemObject, e.toString()));
+            log.error(String.format("ImportWorkflowSpecService failed to return Spec for system type %s, system " +
+                    "object %s and exclude system type %s. Error was: %s", systemType, systemObject,
+                    excludeSystemType, e.toString()));
             return null;
         }
-        return specs;
+    }
+
+    @PostMapping(value = "")
+    @ApiOperation("add the spec to s3")
+    public void putSpecToS3(
+            @PathVariable String customerSpace, //
+            @RequestParam(value = "systemType") String systemType, //
+            @RequestParam(value = "systemObject") String systemObject, //
+            @RequestBody ImportWorkflowSpec importWorkflowSpec) {
+        try {
+            importWorkflowSpecService.addSpecToS3(systemType, systemObject, importWorkflowSpec);
+        } catch (Exception e) {
+            log.error(String.format("ImportWorkflowService failed to upload spec for system type %s and system " +
+                    "object %s.\nError was: %s", systemType, systemObject, e.toString()));
+        }
+    }
+
+    @DeleteMapping(value = "")
+    @ApiOperation("delete spec from s3")
+    public void deleteSpecFromS3(
+        @PathVariable String customerSpace, //
+        @RequestParam(value = "systemType") String systemType, //
+        @RequestParam(value = "systemObject") String systemObject) {
+        try {
+            importWorkflowSpecService.deleteSpecFromS3(systemType, systemObject);
+        } catch (Exception e) {
+            log.error(String.format("failed to delete spec with system type %s and system object %s.\n Error was: %s"
+                    , systemType, systemObject, e.toString()));
+        }
     }
 
 }
