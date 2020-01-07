@@ -1798,7 +1798,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     private ProcessAnalyzeRequest getProcessRequest(Long currentPATimestamp) {
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
-        request.setSkipPublishToS3(true);
+        request.setSkipPublishToS3(isLocalEnvironment());
         request.setSkipDynamoExport(true);
         request.setCurrentPATimestamp(currentPATimestamp);
         return request;

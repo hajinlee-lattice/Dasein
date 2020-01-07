@@ -179,7 +179,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         log.info("Generated {} merged tables", result.getTargets().size());
         Map<String, ActivityStoreSparkIOMetadata.Details> outputMetadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
         Map<TableRoleInCollection, Map<String, String>> signatureTableNames = new HashMap<>();
-        Map<String, String> mergedMetricsGroupTableNames = new HashMap<>();
+        Map<String, Table> mergedMetricsGroupTables = new HashMap<>();
         outputMetadata.forEach((mergedTableLabel, details) -> {
             HdfsDataUnit output = result.getTargets().get(details.getStartIdx());
             String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, mergedTableLabel); // entity_servingEntity (Account_WebVisit)
@@ -196,11 +196,11 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
             signatureTableNames.putIfAbsent(servingEntity, new HashMap<>());
             signatureTableNames.get(servingEntity).put(getEntityInLabel(mergedTableLabel).name(), tableName);
-            mergedMetricsGroupTableNames.put(mergedTableLabel, tableName);
+            mergedMetricsGroupTables.put(mergedTableLabel, mergedTable);
         });
         // signature: entity (Account/Contact)
         // role: WebVisitProfile
-        putObjectInContext(MERGED_METRICS_GROUP_TABLE_NAME, mergedMetricsGroupTableNames);
+        exportToS3AndAddToContext(mergedMetricsGroupTables, MERGED_METRICS_GROUP_TABLE_NAME);
         signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
     }
 

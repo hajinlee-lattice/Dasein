@@ -140,16 +140,16 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         log.info("Generated output metadata: {}", outputMetadataStr);
         log.info("Generated {} output metrics tables", result.getTargets().size());
         Map<String, Details> outputMetadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
-        Map<String, String> signatureTableNames = new HashMap<>();
+        Map<String, Table> signatureTables = new HashMap<>();
         outputMetadata.forEach((groupId, details) -> {
             HdfsDataUnit metricsGroupDU = result.getTargets().get(details.getStartIdx());
             String ctxKey = String.format(METRICS_GROUP_TABLE_FORMAT, groupId);
             String tableName = TableUtils.getFullTableName(ctxKey, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
             Table metricsGroupTable = toTable(tableName, metricsGroupDU);
             metadataProxy.createTable(customerSpace.toString(), tableName, metricsGroupTable);
-            signatureTableNames.put(groupId, tableName); // use groupId as signature
+            signatureTables.put(groupId, metricsGroupTable); // use groupId as signature
         });
-        putObjectInContext(METRICS_GROUP_TABLE_NAME, signatureTableNames);
+        Map<String, String> signatureTableNames = exportToS3AndAddToContext(signatureTables, METRICS_GROUP_TABLE_NAME);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.MetricsGroup, inactive);
     }
 
