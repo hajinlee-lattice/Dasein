@@ -100,7 +100,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
     # ERROR if fieldType of Lattice Field in new template doesn’t match the Spec.
     # WARNING: If user does not map ColumnName that matches a Lattice Field to the corresponding Lattice Field.
     # WARNING if fieldType of Custom Field set by user doesn’t match the autodetected fieldType.
-    # WARNING if the autodetected fieldType based on column data doesn’t match the User defined fieldType of a
+    # Error if the autodetected fieldType based on column data doesn’t match the User defined fieldType of a
      Lattice Field.
     Date Formats (For both Lattice and Custom Fields):
     # WARNING if data format selected by user can’t parse 10% or more of the date column rows and doesn’t match the
@@ -238,14 +238,30 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 FieldValidationMessage.MessageLevel.ERROR, "the current template has fieldType INTEGER while the Spec" +
                         " has fieldType TEXT for field Email");
 
-        // case 7: for the case above, the type for auto-detected should be Text, this case will issue warning
+        // case 7: for the case above, the type for auto-detected should be Text, this case will issue Error
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.Email.name(),
-                FieldValidationMessage.MessageLevel.WARNING, "auto-detected fieldType TEXT based on " +
+                FieldValidationMessage.MessageLevel.ERROR, "auto-detected fieldType TEXT based on " +
                         "column data EmailAddress doesn’t match the fieldType INTEGER of Email in current template " +
                         "in section Contact Fields.");
+        // change FieldType for emailDefinition back to TEXT for case 8
+        emailDefinition.setFieldType(UserDefinedType.TEXT);
 
-        // case 8: WARNING if fieldType of Custom Field set by user doesn’t match the auto-detected fieldType.(current
+        // case 8: change field type of DoNotCall from Boolean to Text in AutoDetection result
+        Map<String, FieldDefinition> autoDetectionResult = validateRequest.getAutodetectionResultsMap();
+        FieldDefinition emailInAutoDetection = autoDetectionResult.get("EmailAddress");
+        Assert.assertNotNull(emailInAutoDetection);
+        emailInAutoDetection.setFieldType(UserDefinedType.INTEGER);
+        validateResponse = modelingFileMetadataService.validateFieldDefinitions(
+                defaultSystemName, systemType, systemObject, fileName, validateRequest);
+        System.out.println("test : " + JsonUtils.pprint(validateResponse));
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.Email.name(),
+                FieldValidationMessage.MessageLevel.WARNING, "auto-detected fieldType INTEGER based on " +
+                        "column data EmailAddress doesn’t match the fieldType TEXT of Email in current template " +
+                        "in section Contact Fields.");
+
+        // case 9: WARNING if fieldType of Custom Field set by user doesn’t match the auto-detected fieldType.(current
         // vs auto-detected in custom fields)
         FieldDefinition earningDefinition = customNameToCustomFieldDefinition.get("Earnings");
         Assert.assertNotNull(earningDefinition);
@@ -258,7 +274,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 FieldValidationMessage.MessageLevel.WARNING,
                 "column Earnings is set as TEXT but appears to only have NUMBER values");
 
-        // case 9: ID fields must have TEXT Field Type
+        // case 10: ID fields must have TEXT Field Type
         FieldDefinition idDefinition = fieldNameToUniqueIDFieldDefinition.get("CustomerContactId");
         Assert.assertNotNull(idDefinition);
         // change type for id to integer
@@ -270,7 +286,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 FieldValidationMessage.MessageLevel.ERROR, "Field mapped to Contact Id in section Unique ID has type " +
                         "NUMBER but is required to have type Text.");
 
-        // case 10: date format is not set when type is Date
+        // case 11: date format is not set when type is Date
         FieldDefinition createdDateDefinition =
                 fieldNameToAnalysisFieldDefinition.get(InterfaceName.CreatedDate.name());
         Assert.assertNotNull(createdDateDefinition);
@@ -282,7 +298,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 FieldValidationMessage.MessageLevel.ERROR,
                 "Date Format shouldn't be empty for column CreatedDate with date type");
 
-        // case 11: Date format selected by user can't parse > 10% of column data.
+        // case 12: Date format selected by user can't parse > 10% of column data.
         createdDateDefinition.setDateFormat("MM-DD-YYYY");
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
                 defaultSystemName, systemType, systemObject, fileName, validateRequest);
@@ -291,7 +307,7 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 FieldValidationMessage.MessageLevel.WARNING,
                 "CreatedDate is set to MM-DD-YYYY which can't parse the 01/01/2008 from uploaded file.");
 
-        // case 12: Date format selected by user doesn't match autodetected date format.
+        // case 13: Date format selected by user doesn't match autodetected date format.
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Analysis_Fields.getName(), InterfaceName.CreatedDate.name(),
                 FieldValidationMessage.MessageLevel.WARNING, "CreatedDate is set to MM-DD-YYYY which is different from " +
