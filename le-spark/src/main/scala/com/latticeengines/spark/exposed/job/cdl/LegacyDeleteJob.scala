@@ -23,7 +23,6 @@ class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
 
     val delete: DataFrame = lattice.input(deleteSrcIdx)
     val original: DataFrame = lattice.input(originalSrcIdx)
-    spark.conf.set("spark.sql.crossJoin.enabled", "true")
 
     // calculation
     val result = entity match {
