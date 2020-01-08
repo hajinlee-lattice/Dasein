@@ -197,7 +197,6 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     public synchronized boolean discard(Ticket ticket) {
         try {
             log.info("Discarding ticket " + ticket + " against Global Auth.");
-
             return globalDiscard(ticket);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18009, e, new String[]{ticket.toString()});

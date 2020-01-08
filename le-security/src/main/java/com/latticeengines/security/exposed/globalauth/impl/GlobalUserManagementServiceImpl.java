@@ -963,4 +963,15 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
         return false;
     }
+
+    @Override
+    public Long getIdByUsername(String username) {
+        try {
+            GlobalAuthUser userData = findGlobalAuthUserByUsername(username, true);
+            return userData.getPid();
+        } catch (Exception e) {
+            log.error(String.format("Failed to get user pid by username %s and  error is %s.", username, e.getMessage()));
+            return null;
+        }
+    }
 }
