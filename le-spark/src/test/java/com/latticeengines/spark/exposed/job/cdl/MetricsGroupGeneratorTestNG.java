@@ -81,8 +81,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.activityMetricsGroups = Collections.singletonList(TEST_METRICS_GROUP_CONFIG);
         config.inputMetadata = constructInputMetadata();
         config.evaluationDate = EVAL_DATE;
-        config.streamMetadata = constructStreamMetadata();
-        ATTRS_COUNT = calculatAttrsCount(config.streamMetadata, TEST_METRICS_GROUP_CONFIG) + 1; // +1 entity Id column
+        config.streamMetadataMap = constructStreamMetadata();
+        ATTRS_COUNT = calculatAttrsCount(config.streamMetadataMap, TEST_METRICS_GROUP_CONFIG) + 1; // +1 entity Id column
         SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config);
         ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
@@ -185,7 +185,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         group.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
                 TIMEFILTER_PERIODS, TIMEFILTER_PARAMS));
         group.setRollupDimensions(String.format("%s,%s", PathPatternId, SomeRollupDim));
-        group.setAggregation(createAttributeDeriver(null, __Row_Count__, StreamAttributeDeriver.Calculation.SUM));
+        group.setAggregation(createAttributeDeriver(Collections.singletonList(__Row_Count__), __Row_Count__, StreamAttributeDeriver.Calculation.SUM));
         group.setNullImputation(NullMetricsImputation.ZERO);
         TEST_METRICS_GROUP_CONFIG = group;
     }

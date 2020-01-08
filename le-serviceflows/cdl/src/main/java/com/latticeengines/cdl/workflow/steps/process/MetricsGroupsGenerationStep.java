@@ -128,7 +128,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
             config.activityMetricsGroups = groups;
             config.evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
-            config.streamMetadata = streamMetadataCache;
+            config.streamMetadataMap = streamMetadataCache;
             appendAccountBatchStore(inputs, inputMetadata);
             // TODO - append contact table if contact-level activity data is required in the future
             config.setInput(inputs);

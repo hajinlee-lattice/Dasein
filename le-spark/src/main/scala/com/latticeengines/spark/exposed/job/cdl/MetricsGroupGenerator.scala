@@ -6,8 +6,7 @@ import com.latticeengines.common.exposed.util.TemplateUtils
 import com.latticeengines.domain.exposed.StringTemplates
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
-import com.latticeengines.domain.exposed.cdl.activity.{ActivityMetricsGroup, ActivityMetricsGroupUtils, ActivityTimeRange, DimensionMetadata}
+import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO}
 import com.latticeengines.domain.exposed.query.{BusinessEntity, ComparisonType, TimeFilter}
@@ -21,7 +20,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters.asScalaIteratorConverter
 
 class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJobConfig] {
   // generate a group of metrics based on ActivityMetricsGroup definition (aggregated to defined business entity)
@@ -41,10 +39,10 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val config: DeriveActivityMetricGroupJobConfig = lattice.config
     val evaluationDate = config.evaluationDate // yyyy-mm-dd
     val input: Seq[DataFrame] = lattice.input
-    val groups: Seq[ActivityMetricsGroup] = asScalaIteratorConverter(config.activityMetricsGroups.iterator).asScala.toSeq
+    val groups: Seq[ActivityMetricsGroup] = config.activityMetricsGroups.toSeq
     val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groups), evaluationDate)
     val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
-    val streamMetadata = config.streamMetadata
+    val streamMetadata = config.streamMetadataMap
     hasAccountBatchStore = inputMetadata.getMetadata.contains(ACCOUNT_BATCH_STORE)
     hasContactBatchStore = inputMetadata.getMetadata.contains(CONTACT_BATCH_STORE)
 
@@ -94,6 +92,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     }
 
     // divide dataframe by time filters defined in TimeRange SQL column
+    // dataframe -> corresponding time range string
     val filteredByTime: Seq[(DataFrame, String)] = createTimeFilters(group.getActivityTimeRange)
       .map(tf => {
         val periodStoreIndex: Int = inputMetadata.getStartIdx + offsetMap(tf.getPeriod)
@@ -135,33 +134,19 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   }
 
   def rollupAndCreateAttr(df: DataFrame, timeRangeName: String, group: ActivityMetricsGroup, streamMetadata: util.Map[String, DimensionMetadata]): DataFrame = {
-    val targetAttr: String = group.getAggregation.getTargetAttribute
+    val deriver: StreamAttributeDeriver = group.getAggregation
     val entityIdColName: String = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(group.getEntity)
     val rollupDimNames: Seq[String] = group.getRollupDimensions.split(",") :+ entityIdColName
     val pivotCols: Seq[String] = group.getRollupDimensions.split(",")
-    val calc = group.getAggregation.getCalculation
 
-    val rollupAggr = (calc match {
-      case Calculation.SUM => sum(df(targetAttr))
-      case Calculation.MAX => max(df(targetAttr))
-      case Calculation.MIN => min(df(targetAttr))
-      case _ => throw new UnsupportedOperationException("Unsupported operation")
-    }).alias(targetAttr)
+    val rolledUp: DataFrame = df.rollup(rollupDimNames.head, rollupDimNames.tail: _*).agg(DeriveAttrsUtils.getAggr(df, deriver))
 
-    val rolledUp: DataFrame = df.rollup(rollupDimNames.head, rollupDimNames.tail: _*).agg(rollupAggr)
-
-    val excludeNull: DataFrame = rolledUp.where(rolledUp(entityIdColName).isNotNull && rolledUp(targetAttr).isNotNull)
+    val excludeNull: DataFrame = rolledUp.where(rolledUp(entityIdColName).isNotNull && rolledUp(deriver.getTargetAttribute).isNotNull)
 
     def concatColumns: UserDefinedFunction = udf((row: Row) => row.mkString(","))
 
-    val pivotAggr = (calc match {
-      case Calculation.SUM => sum(excludeNull(targetAttr))
-      case Calculation.MIN => min(excludeNull(targetAttr))
-      case Calculation.MAX => max(excludeNull(targetAttr))
-      case _ => throw new UnsupportedOperationException("Unsupported operation")
-    }).alias(targetAttr)
     val pivoted: DataFrame = excludeNull.withColumn("combColumn", concatColumns(struct(pivotCols.map(col): _*))).groupBy(entityIdColName)
-      .pivot("combColumn").agg(pivotAggr)
+      .pivot("combColumn").agg(DeriveAttrsUtils.getAggr(excludeNull, deriver))
 
     var attrRenamed: DataFrame = pivoted.columns.foldLeft(pivoted) { (pivotedDF, colName) =>
       if (!colName.equals(entityIdColName)) {
@@ -180,8 +165,8 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
   // create time filters based on timeRange defined
   private def createTimeFilters(timeRange: ActivityTimeRange): Seq[TimeFilter] = {
-    val periods: Seq[String] = asScalaIteratorConverter(timeRange.getPeriods.iterator).asScala.toSeq
-    val paramSet: Seq[util.List[Integer]] = asScalaIteratorConverter(timeRange.getParamSet.iterator).asScala.toSeq
+    val periods: Seq[String] = timeRange.getPeriods.toSeq
+    val paramSet: Seq[util.List[Integer]] = timeRange.getParamSet.iterator.toSeq
     val timeFilters: Seq[TimeFilter] = timeRange.getOperator match {
       case ComparisonType.WITHIN => for (period <- periods; params <- paramSet) yield TimeFilter.within(params.get(0), period)
       case _ => throw new UnsupportedOperationException("Only support time filter WITHIN operation")
@@ -223,7 +208,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   }
 
   private def getPeriodStrategies(groups: Seq[ActivityMetricsGroup]): util.List[PeriodStrategy] = {
-    val periodSets: Seq[Set[String]] = groups.map((group: ActivityMetricsGroup) => asScalaIteratorConverter(group.getActivityTimeRange.getPeriods.iterator).asScala.toSet)
+    val periodSets: Seq[Set[String]] = groups.map((group: ActivityMetricsGroup) => group.getActivityTimeRange.getPeriods.toSet)
     val periodNames: Seq[String] = periodSets.reduce((masterSet, nextSet) => masterSet ++ nextSet).toSeq
     scala.collection.JavaConversions.seqAsJavaList(
       periodNames.map(name => toPeriodStrategy(name))

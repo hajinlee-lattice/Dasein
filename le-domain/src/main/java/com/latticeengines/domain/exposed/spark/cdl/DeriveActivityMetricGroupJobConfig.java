@@ -27,7 +27,7 @@ public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implement
 
     @JsonProperty("streamMetadataMap")
     // streamId -> dimensions
-    public Map<String, Map<String, DimensionMetadata>> streamMetadata;
+    public Map<String, Map<String, DimensionMetadata>> streamMetadataMap;
 
     @Override
     @JsonProperty("Name")

@@ -70,15 +70,7 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
 
     val withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStore, periodName, translator))
 
-    val aggrProcs = aggregators.map(aggr => {
-      val targetAttr = aggr.getTargetAttribute
-      (aggr.getCalculation match {
-        case SUM => sum(dailyStore(targetAttr))
-        case MIN => min(dailyStore(targetAttr))
-        case MAX => max(dailyStore(targetAttr))
-        case _ => throw new UnsupportedOperationException("Unsupported operation")
-      }).alias(targetAttr)
-    }) :+ sum(dailyStore(__Row_Count__.name)).alias(__Row_Count__.name) // Default row count must exist
+    val aggrProcs = aggregators.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(dailyStore(__Row_Count__.name)).alias(__Row_Count__.name) // Default row count must exist
     val columns: Seq[String] = DeriveAttrsUtils.getGroupByEntityColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
     val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*)
       .agg(aggrProcs.head, aggrProcs.tail: _*))
