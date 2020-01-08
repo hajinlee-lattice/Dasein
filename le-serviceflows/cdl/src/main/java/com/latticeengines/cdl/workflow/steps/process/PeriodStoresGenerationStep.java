@@ -113,7 +113,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
     @Override
     protected void postJobExecution(SparkJobResult result) {
         Map<String, Details> metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
-        Map<String, String> signatureTableNames = new HashMap<>();
+        Map<String, Table> signatureTables = new HashMap<>();
         metadata.forEach((streamId, details) -> {
             for (int offset = 0; offset < details.getLabels().size(); offset++) {
                 String period = details.getLabels().get(offset);
@@ -121,10 +121,10 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 String tableName = TableUtils.getFullTableName(ctxKey, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
                 Table periodStoreTable = dirToTable(tableName, result.getTargets().get(details.getStartIdx() + offset));
                 metadataProxy.createTable(customerSpace.toString(), tableName, periodStoreTable);
-                signatureTableNames.put(ctxKey, tableName); // use ctxKey name as signature
+                signatureTables.put(ctxKey, periodStoreTable); // use ctxKey name as signature
             }
         });
-        putObjectInContext(PERIOD_STORE_TABLE_NAME, signatureTableNames);
+        Map<String, String> signatureTableNames = exportToS3AndAddToContext(signatureTables, PERIOD_STORE_TABLE_NAME);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
     }
 }
