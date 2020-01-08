@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -88,15 +89,23 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
         assertTrue(exception);
     }
 
-    @Test(groups = "functional")
-    public void getUserByEmail() {
-        User user = globalUserManagementService.getUserByEmail(testUsername);
+    private void assertUserInfo(User user){
         assertNotNull(user);
 
         assertEquals(user.getEmail(), testUsername);
         assertEquals(user.getUsername(), testUsername);
         assertEquals(user.getFirstName(), "Abc");
         assertEquals(user.getLastName(), "Def");
+    }
+
+    @Test(groups = "functional")
+    public void getUserByEmail() {
+        User user = globalUserManagementService.getUserByEmail(testUsername);
+        assertUserInfo(user);
+        user = globalUserManagementService.getUserByUsername(testUsername);
+        assertUserInfo(user);
+        Long userId = globalUserManagementService.getIdByUsername(testUsername);
+        Assert.assertNotNull(userId);
     }
 
     @Test(groups = "functional")

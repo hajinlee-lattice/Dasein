@@ -11,14 +11,12 @@ public interface SessionService {
     Session attach(Ticket ticket);
 
     void validateSamlLoginResponse(LoginValidationResponse samlLoginResp);
-    
+
     Session attachSamlUserToTenant(String userName, String tenantDeploymentId);
 
     Session retrieve(Ticket ticket);
 
     void logout(Ticket ticket);
 
-    // TODO: really deprecated?
-    @Deprecated
     boolean clearCacheIfNecessary(String tenantId, String token);
 }

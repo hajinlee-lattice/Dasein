@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -30,6 +35,8 @@ import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
+import com.latticeengines.security.exposed.globalauth.GlobalSessionManagementService;
+import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
@@ -46,7 +53,15 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private GlobalAuthenticationService globalAuthenticationService;
 
+    @Autowired
+    private GlobalTenantManagementService globalTenantManagementService;
+
+    @Autowired
+    private GlobalSessionManagementService globalSessionManagementService;
+
     private static EmailValidator emailValidator = EmailValidator.getInstance();
+
+    private ExecutorService clearSessionService = ThreadPoolUtils.getCachedThreadPool("clear-session");
 
     @Override
     public boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant) {
@@ -222,7 +237,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-                                     Long expirationDate, boolean createUser) {
+                                     Long expirationDate, boolean createUser, boolean clearSession) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
@@ -247,10 +262,19 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
-        if (resignAccessLevel(tenantId, username)) {
+        List<String> originalRights = globalUserManagementService.getRights(username, tenantId);
+        if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
-                return globalUserManagementService.grantRight(accessLevel.name(), tenantId, username, createdByUser,
-                        expirationDate);
+                boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
+                        createdByUser, expirationDate);
+                if (result && clearSession) {
+                    AccessLevel originalLevel = AccessLevel.findAccessLevel(originalRights);
+                    if (!isSuperior(accessLevel, originalLevel)) {
+                        Long userId = findIdByUsername(username);
+                        clearSession(tenantId, userId);
+                    }
+                }
+                return result;
             } catch (Exception e) {
                 LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
                 return true;
@@ -260,8 +284,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean resignAccessLevel(String tenantId, String username) {
-        List<String> rights = globalUserManagementService.getRights(username, tenantId);
+    public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
+                                     Long expirationDate, boolean createUser) {
+        return assignAccessLevel( accessLevel,  tenantId,  username,  createdByUser, expirationDate,  createUser, false);
+    }
+
+    private boolean resignAccessLevel(String tenantId, String username, List<String> rights) {
         boolean success = true;
         for (AccessLevel accessLevel : AccessLevel.values()) {
             try {
@@ -275,6 +303,12 @@ public class UserServiceImpl implements UserService {
             }
         }
         return success;
+    }
+
+    @Override
+    public boolean resignAccessLevel(String tenantId, String username) {
+        List<String> rights = globalUserManagementService.getRights(username, tenantId);
+        return resignAccessLevel(tenantId, username, rights);
     }
 
     @Override
@@ -534,6 +568,8 @@ public class UserServiceImpl implements UserService {
                     }
                 }
             }
+            Long userId = findIdByUsername(username);
+            clearSession(tenantId, userId);
             return success;
         } else {
             return false;
@@ -561,4 +597,21 @@ public class UserServiceImpl implements UserService {
         return globalUserManagementService.addUserAccessLevel(userName, emails, level);
     }
 
+    private Long findIdByUsername(String username) {
+        return globalUserManagementService.getIdByUsername(username);
+    }
+
+    private void clearSession(String tenantId, Long userId) {
+        if (userId != null) {
+            clearSessionService.submit(() -> {
+                GlobalAuthTenant tenantData = globalTenantManagementService.findByTenantId(tenantId);
+                List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService.findTicketsByUserIdAndTenant(userId, tenantData);
+                LOGGER.info(String.format("Ticket ids in %s will be deleted.",
+                        globalAuthTickets.stream().map(ticket -> ticket.getPid()).collect(Collectors.toList())));
+                for (GlobalAuthTicket globalAuthTicket : globalAuthTickets) {
+                    globalAuthenticationService.discard(new Ticket(globalAuthTicket.getTicket()));
+                }
+            });
+        }
+    }
 }

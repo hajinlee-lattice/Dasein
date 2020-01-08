@@ -62,4 +62,7 @@ public interface UserService {
 
     RegistrationResult registerUserWithNoTenant(UserRegistration userReg);
 
+    boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
+                              Long expirationDate, boolean createUser, boolean clearSession);
+
 }

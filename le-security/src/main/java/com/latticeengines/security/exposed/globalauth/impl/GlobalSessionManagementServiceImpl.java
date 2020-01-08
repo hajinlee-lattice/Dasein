@@ -17,6 +17,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.auth.exposed.util.SessionUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -38,8 +39,6 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         implements GlobalSessionManagementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionManagementServiceImpl.class);
-
-    public static final int TicketInactivityTimeoutInMinute = 1440;
 
     @Autowired
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
@@ -87,7 +86,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         Date now = new Date(System.currentTimeMillis());
         Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
-        if ((int) (timeElapsed / (1000 * 60)) > TicketInactivityTimeoutInMinute) {
+        if ((int) (timeElapsed / (1000 * 60)) > SessionUtils.TicketInactivityTimeoutInMinute) {
             throw new Exception("The requested ticket has expired.");
         }
 
@@ -155,6 +154,11 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
     }
 
+    @Override
+    public List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenant) {
+        return gaTicketEntityMgr.findTicketsByUserIdAndLastAccessDateAndTenant(userId, tenant);
+    }
+
     private Session attachSession(Ticket ticket, Tenant tenant) throws Exception {
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant.getId());
         if (tenantData == null) {
@@ -169,7 +173,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         Date now = new Date(System.currentTimeMillis());
         Long timeElapsed = now.getTime() - ticketData.getLastAccessDate().getTime();
-        if ((int) (timeElapsed / (1000 * 60)) > TicketInactivityTimeoutInMinute) {
+        if ((int) (timeElapsed / (1000 * 60)) > SessionUtils.TicketInactivityTimeoutInMinute) {
             LOGGER.warn("The requested ticket has expired.");
             return null;
         }

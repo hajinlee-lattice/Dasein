@@ -1,5 +1,6 @@
 package com.latticeengines.security.exposed.globalauth;
 
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public interface GlobalTenantManagementService {
@@ -11,4 +12,6 @@ public interface GlobalTenantManagementService {
     boolean discardTenant(Tenant tenant);
 
     boolean tenantExists(Tenant tenant);
+
+    GlobalAuthTenant findByTenantId(String tenantId);
 }

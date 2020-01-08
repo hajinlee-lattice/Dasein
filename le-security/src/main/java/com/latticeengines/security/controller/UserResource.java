@@ -195,16 +195,13 @@ public class UserResource {
         username = userService.getURLSafeUsername(username).toLowerCase();
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
-
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
-        String loginUsername = loginUser.getUsername();
-        AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
-
-
         // update access level
         if (data.getAccessLevel() != null && !data.getAccessLevel().equals("")) {
             // using access level if it is provided
+            String loginUsername = loginUser.getUsername();
+            AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
             AccessLevel targetLevel = AccessLevel.valueOf(data.getAccessLevel());
             if (!userService.isSuperior(loginLevel, targetLevel)) {
                 response.setStatus(403);
@@ -212,7 +209,8 @@ public class UserResource {
                         Collections.singletonList("Cannot update to a level higher than that of the login user."));
             }
             boolean newUser = !userService.inTenant(tenantId, username);
-            userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(), false);
+            userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
+                    false, !newUser);
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                     targetLevel.name(), username, tenantId));
             User user = userService.findByUsername(username);
@@ -226,13 +224,11 @@ public class UserResource {
                 }
             }
         }
-
         // update other information
         if (!userService.inTenant(tenantId, username)) {
             return SimpleBooleanResponse
                     .failedResponse(Collections.singletonList("Cannot update users in another tenant."));
         }
-
         return SimpleBooleanResponse.successResponse();
     }
 
@@ -244,23 +240,20 @@ public class UserResource {
                                             HttpServletResponse response) {
         Tenant tenant = SecurityUtils.getTenantFromRequest(request, sessionService);
         String tenantId = tenant.getId();
-
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
-        String loginUsername = loginUser.getUsername();
-        AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
-
-        username = userService.getURLSafeUsername(username).toLowerCase();
-
-        if (userService.inTenant(tenantId, username)) {
-            AccessLevel targetLevel = userService.getAccessLevel(tenantId, username);
+        String safeUsername = userService.getURLSafeUsername(username).toLowerCase();
+        if (userService.inTenant(tenantId, safeUsername)) {
+            String loginUsername = loginUser.getUsername();
+            AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
+            AccessLevel targetLevel = userService.getAccessLevel(tenantId, safeUsername);
             if (!userService.isSuperior(loginLevel, targetLevel)) {
                 response.setStatus(403);
                 return SimpleBooleanResponse.failedResponse(Collections.singletonList(String
                         .format("Could not delete a %s user using a %s user.", targetLevel.name(), loginLevel.name())));
             }
-            userService.deleteUser(tenantId, username);
-            LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, username, tenantId));
+            userService.deleteUser(tenantId, safeUsername);
+            LOGGER.info(String.format("%s deleted %s from tenant %s", loginUsername, safeUsername, tenantId));
             return SimpleBooleanResponse.successResponse();
         } else {
             return SimpleBooleanResponse.failedResponse(
