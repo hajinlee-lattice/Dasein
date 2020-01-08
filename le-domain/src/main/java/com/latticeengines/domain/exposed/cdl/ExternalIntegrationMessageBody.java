@@ -24,6 +24,8 @@ public class ExternalIntegrationMessageBody {
 
     private String audienceType;
 
+    private String stackName;
+
     public String getTrayTenantId() {
         return trayTenantId;
     }
@@ -94,5 +96,13 @@ public class ExternalIntegrationMessageBody {
 
     public String getAudienceType() {
         return audienceType;
+    }
+
+    public void setStackName(String stackName) {
+        this.stackName = stackName;
+    }
+
+    public String getStackName() {
+        return stackName;
     }
 }
