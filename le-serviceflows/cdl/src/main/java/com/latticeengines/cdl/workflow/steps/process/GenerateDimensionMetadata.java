@@ -60,7 +60,8 @@ import com.latticeengines.spark.exposed.job.cdl.ProcessDimensionJob;
 public class GenerateDimensionMetadata
         extends RunSparkJob<ActivityStreamSparkStepConfiguration, ProcessDimensionConfig> {
     private static final Logger log = LoggerFactory.getLogger(GenerateDimensionMetadata.class);
-    private static final int DIMENSION_CARDINALITY_LIMIT = 10;
+    // limit of total possible dimension value combination per stream
+    private static final int DIMENSION_CARDINALITY_LIMIT = 2000;
 
     static final String BEAN_NAME = "generateDimensionMetadata";
 
@@ -107,19 +108,21 @@ public class GenerateDimensionMetadata
     protected void postJobExecution(SparkJobResult result) {
         Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap = getDimensionMetadataMap(result);
         dimensionMetadataMap.forEach((streamId, metadataMap) -> {
-            Set<Pair<String, Long>> exceedCardDimensions = metadataMap.entrySet() //
+            // calculate product of all dimension cardinality in stream
+            Long streamCardinality = metadataMap.entrySet() //
                     .stream() //
                     .filter(Objects::nonNull) //
-                    .filter(entry -> entry.getValue() != null) //
-                    .filter(entry -> entry.getValue().getCardinality() > DIMENSION_CARDINALITY_LIMIT) //
-                    .map(entry -> Pair.of(entry.getKey(), entry.getValue().getCardinality())) // dimName, cardinality
-                    .collect(Collectors.toSet());
-            if (CollectionUtils.isNotEmpty(exceedCardDimensions)) {
-                log.warn("Dimensions {} in stream {} exceeds cardinality limit", exceedCardDimensions, streamId);
-                Set<String> dims = exceedCardDimensions.stream().map(Pair::getKey).collect(Collectors.toSet());
-                streamErrorMsgs.put(streamId,
-                        String.format("Dimension %s in stream has too many distinct values, skip processing",
-                                String.join(",", dims)));
+                    .map(Map.Entry::getValue) //
+                    .filter(Objects::nonNull) //
+                    .map(DimensionMetadata::getDimensionValues) //
+                    .map(CollectionUtils::size) //
+                    .map(Integer::longValue) //
+                    .reduce(1L, (v1, v2) -> v1 * v2);
+            if (streamCardinality != null && streamCardinality > DIMENSION_CARDINALITY_LIMIT) {
+                log.warn("Stream {} has total dimension cardinality {}, exceeding limit {}, will not process further",
+                        streamId, streamCardinality, DIMENSION_CARDINALITY_LIMIT);
+                streamErrorMsgs.put(streamId, String.format(
+                        "Stream %s has too many distinct values for its dimensions, skip processing", streamId));
             }
         });
 
