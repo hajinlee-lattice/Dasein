@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.ldap.authentication.ad.ActiveDirectoryLdapAuthenticationProvider;
@@ -60,7 +59,7 @@ public class ActiveDirectoryLoginResource {
             return buildToken(auth);
         } catch (Exception e) {
             log.error("Bad AD Login", e);
-            throw new BadCredentialsException("Unauthorized.");
+            return null;
         }
     }
 
