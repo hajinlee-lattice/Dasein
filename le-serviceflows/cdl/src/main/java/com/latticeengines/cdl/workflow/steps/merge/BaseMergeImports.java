@@ -21,6 +21,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -316,6 +317,19 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         matchInput.setMatchDebugEnabled(false);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         return matchInput;
+    }
+
+    // input: streamId -> tablePrefix
+    // return: streamId -> table name
+    protected Map<String, String> getFullTablenames(Map<String, String> tablePrefixes) {
+        if (MapUtils.isEmpty(tablePrefixes)) {
+            return Collections.emptyMap();
+        }
+
+        return tablePrefixes.entrySet() //
+                .stream() //
+                .map(entry -> Pair.of(entry.getKey(), TableUtils.getFullTableName(entry.getValue(), pipelineVersion))) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
     /**

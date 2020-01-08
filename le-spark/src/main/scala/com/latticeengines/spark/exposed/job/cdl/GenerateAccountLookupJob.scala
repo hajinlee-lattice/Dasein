@@ -17,7 +17,10 @@ class GenerateAccountLookupJob extends AbstractSparkJob[GenerateAccountLookupCon
     override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateAccountLookupConfig]): Unit = {
         val config: GenerateAccountLookupConfig = lattice.config
         val input = lattice.input.head
-        val byAccountId = input.select(accountId).withColumn(lookupKey, getLookupKeyUdf(accountId)(col(accountId)))
+        val byAccountId = input.select(accountId)
+          // FIXME remove this tmp workaround after null accountId issue is fixed
+          .filter(col(accountId).isNotNull)
+          .withColumn(lookupKey, getLookupKeyUdf(accountId)(col(accountId)))
 
         val lookupIds: List[String] = if (config.getLookupIds == null) List() else config.getLookupIds.asScala.toList
         val byLookupIds: List[DataFrame] = lookupIds.map(lookupId => {

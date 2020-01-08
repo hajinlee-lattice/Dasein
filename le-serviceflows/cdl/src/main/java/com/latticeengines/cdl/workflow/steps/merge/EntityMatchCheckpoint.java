@@ -1,10 +1,13 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -60,6 +64,7 @@ public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfigura
         customerSpace = configuration.getCustomerSpace();
         boolean isCompleted = Boolean.TRUE.equals(getObjectFromContext(ENTITY_MATCH_COMPLETED, Boolean.class));
         if (!isCompleted) {
+            // match tables stored as string in ctx
             for (String contextKey : Arrays.asList( //
                     ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
                     ENTITY_MATCH_CONTACT_TARGETTABLE, //
@@ -69,8 +74,24 @@ public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfigura
             )) {
                 exportToS3AndAddToTempList(contextKey);
             }
+
+            // match tables stored as map in ctx (key -> tableName)
+            for (String contextKey : Collections.singletonList(ENTITY_MATCH_STREAM_TARGETTABLE)) {
+                exportMapToS3AndAddToTempList(contextKey);
+            }
+
             putObjectInContext(ENTITY_MATCH_COMPLETED, true);
         }
+    }
+
+    private void exportMapToS3AndAddToTempList(String mapContextKey) {
+        Map<String, String> tables = getMapObjectFromContext(mapContextKey, String.class, String.class);
+        if (MapUtils.isEmpty(tables)) {
+            log.warn("Cannot find map of table in context key {}", mapContextKey);
+            return;
+        }
+
+        tables.values().forEach(tableName -> exportTableToS3AndAddToTempList(mapContextKey, tableName));
     }
 
     private void exportToS3AndAddToTempList(String contextKey) {
@@ -80,6 +101,10 @@ public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfigura
             return;
         }
 
+        exportTableToS3AndAddToTempList(contextKey, tableName);
+    }
+
+    private void exportTableToS3AndAddToTempList(@NotNull String contextKey, @NotNull String tableName) {
         boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
         if (shouldSkip) {
             log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
