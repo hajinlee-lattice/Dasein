@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +49,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityTransactUpdateResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
@@ -123,7 +125,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     null, false);
         }
 
-        return associate(lookupRequestId, associationReq, targetSeed, versionMap);
+        // TODO make it configurable which association implementation to use
+        return transactAssociate(lookupRequestId, associationReq, targetSeed, versionMap);
     }
 
     /*
@@ -297,7 +300,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             @NotNull String requestId, @NotNull EntityAssociationRequest request,
             @NotNull EntityRawSeed targetEntitySeed, Map<EntityMatchEnvironment, Integer> versionMap) {
         try {
-            EntityAssociationResponse response = associate(requestId, request, targetEntitySeed, versionMap);
+            // TODO make it configurable which association implementation to use
+            EntityAssociationResponse response = transactAssociate(requestId, request, targetEntitySeed, versionMap);
             // inject failure only for testing purpose
             injectFailure(getReq(requestId));
             // send successful response
@@ -323,27 +327,11 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             @NotNull EntityRawSeed targetEntitySeed, Map<EntityMatchEnvironment, Integer> versionMap) {
         Tenant tenant = request.getTenant();
         String tenantId = tenant.getId();
-        if (ANONYMOUS_ENTITY_ID.equals(targetEntitySeed.getId())) {
-            // not creating anonymous seed entry
-            return getResponse(request, targetEntitySeed.getId(), targetEntitySeed, targetEntitySeed,
-                    targetEntitySeed.isNewlyAllocated());
+        EntityAssociationResponse response = associateAnonymousOrAttributeOnly(requestId, request, targetEntitySeed,
+                versionMap);
+        if (response != null) {
+            return response;
         }
-        if (CollectionUtils.isEmpty(request.getLookupResults())) {
-            log.debug("No lookup entry for request (ID={}), attributes={}, tenant (ID={})," +
-                    " entity={}, target entity ID={}", requestId, request.getExtraAttributes(),
-                    tenantId, request.getEntity(), targetEntitySeed.getId());
-            EntityRawSeed seedToUpdate = null;
-            if (hasExtraAttributes(targetEntitySeed, request.getExtraAttributes())) {
-                seedToUpdate = new EntityRawSeed(
-                        targetEntitySeed.getId(), targetEntitySeed.getEntity(),
-                        Collections.emptyList(), request.getExtraAttributes());
-                // ignore result as attribute update won't fail
-                entityMatchInternalService.associate(request.getTenant(), seedToUpdate, false, null, versionMap);
-            }
-            return getResponse(request, targetEntitySeed.getId(), targetEntitySeed,
-                    mergeSeed(targetEntitySeed, seedToUpdate, null), targetEntitySeed.isNewlyAllocated());
-        }
-
 
         // handling highest priority lookup entry
         String entity = request.getEntity();
@@ -366,7 +354,6 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     log.debug("Cleanup orphan seed, entity={} entityId={}, tenant (ID={})", tenantId,
                             request.getEntity(), targetEntitySeed.getId());
                     // the target entity is newly allocated, cleanup orphan seed
-                    // support
                     entityMatchInternalService.cleanupOrphanSeed(tenant, entity, targetEntitySeed.getId(), versionMap);
                 }
                 // fail to associate the highest priority entry
@@ -390,20 +377,14 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         Set<EntityLookupEntry> seedConflictEntries = getSeedConflictEntries(
                 request, targetEntitySeed, mappingConflictEntries);
         // handling the remaining lookup entries
-        if (needAdditionalAssociation(request, targetEntitySeed, seedConflictEntries)) {
+        if (needAssociation(request, targetEntitySeed, seedConflictEntries, true, false)) {
             // has more things to associate (excluding max highest priority entry
             // NOTE we update every thing that does NOT already mapped to another seed
             //      and rely on associate method of internal service to handle other conflict for code simplicity.
             //      Even though we can filter out some of them (e.g., one to one lookup entry that is already in target)
             //      , it does not actually save anything (except for a few bytes sent over network).
-            EntityRawSeed seedToUpdate = prepareSeedToAssociate(request, targetEntitySeed, seedConflictEntries);
-            Set<EntityLookupEntry> entriesMapToOtherSeed = request.getLookupResults() //
-                    .stream() //
-                    .filter(pair -> StringUtils.isNoneBlank(pair.getRight())) //
-                    .filter(pair -> !pair.getRight().equals(targetEntitySeed.getId())) // entries map to other seed
-                    .map(Pair::getKey) //
-                    .map(tuple -> getEntry(request.getEntity(), tuple)) //
-                    .collect(Collectors.toSet());
+            EntityRawSeed seedToUpdate = prepareSeedToAssociate(request, targetEntitySeed, seedConflictEntries, false);
+            Set<EntityLookupEntry> entriesMapToOtherSeed = getEntriesMapToOtherSeed(request, targetEntitySeed.getId());
             Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result =
                     entityMatchInternalService.associate(tenant, seedToUpdate, false, entriesMapToOtherSeed,
                             versionMap);
@@ -439,6 +420,157 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 conflictEntries, //
                 getConflictMessages(targetEntitySeed.getId(), request, null, mappingConflictEntries,
                         seedConflictEntries));
+    }
+
+    /*
+     * Associate (using dynamo txn) a single request to a target seed and generate a
+     * non-null response.
+     */
+    @VisibleForTesting
+    protected EntityAssociationResponse transactAssociate(@NotNull String requestId,
+            @NotNull EntityAssociationRequest request, @NotNull EntityRawSeed targetEntitySeed,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
+        Tenant tenant = request.getTenant();
+        String tenantId = tenant.getId();
+        EntityAssociationResponse response = associateAnonymousOrAttributeOnly(requestId, request, targetEntitySeed,
+                versionMap);
+        if (response != null) {
+            return response;
+        }
+
+        Set<EntityLookupEntry> seedConflictEntries = new HashSet<>(getSeedConflictEntries(request, targetEntitySeed,
+                getLookupConflictsWithTarget(request, targetEntitySeed)));
+        Set<EntityLookupEntry> entriesMapToOtherSeed = new HashSet<>(
+                getEntriesMapToOtherSeed(request, targetEntitySeed.getId()));
+        Set<EntityLookupEntry> conflictEntries = getConflictEntries(null, seedConflictEntries, null,
+                entriesMapToOtherSeed);
+        EntityRawSeed seedAfterUpdate = targetEntitySeed;
+        if (needAssociation(request, targetEntitySeed, seedConflictEntries, false, true)) {
+            EntityRawSeed seedToUpdate = prepareSeedToAssociate(request, targetEntitySeed, seedConflictEntries, true);
+            EntityTransactUpdateResult result = entityMatchInternalService.transactAssociate(tenant, seedToUpdate,
+                    entriesMapToOtherSeed, versionMap);
+
+            Preconditions.checkNotNull(result);
+            seedConflictEntries.addAll(getSeedConflictEntries(result, seedToUpdate));
+
+            if (!result.isSucceeded()) {
+                if (targetEntitySeed.isNewlyAllocated()) {
+                    log.debug("Cleanup orphan seed, entity={} entityId={}, tenant (ID={})", tenantId,
+                            request.getEntity(), targetEntitySeed.getId());
+                    // the target entity is newly allocated, cleanup orphan seed
+                    entityMatchInternalService.cleanupOrphanSeed(tenant, request.getEntity(), targetEntitySeed.getId(),
+                            versionMap);
+                }
+
+                // TODO retry if this is not a newly allocated entity
+                // txn update failure (concurrent update), no need to surface conflict to
+                // outside since this is not the final result TODO change to debug level
+                log.info("Conflict detected due to concurrent association, result = {}, update seed = {}", result,
+                        seedToUpdate);
+                return getResponse(request, null, null, null, false, conflictEntries, Collections.emptyList());
+            }
+
+            seedAfterUpdate = mergeSeed(seedAfterUpdate, seedToUpdate, conflictEntries);
+        }
+
+        // associate dummy entries
+        EntityRawSeed dummies = seedWithDummyEntries(request, targetEntitySeed);
+        if (dummies != null) {
+            // conflict for dummy entries doesn't matter
+            Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> result = entityMatchInternalService
+                    .associate(tenant, dummies, false, Collections.emptySet(), versionMap);
+            conflictEntries.addAll(CollectionUtils.emptyIfNull(result.getMiddle()));
+            conflictEntries.addAll(CollectionUtils.emptyIfNull(result.getRight()));
+            // TODO maybe optimize merging better
+            seedAfterUpdate = mergeSeed(seedAfterUpdate, dummies, conflictEntries);
+        }
+
+        // no association is performed, all conflict is found at lookup time
+        log.debug(
+                "Association succeeded. Mapping conflict entries = {}," + " seed conflict entries = {}, requestId = {}",
+                entriesMapToOtherSeed, seedConflictEntries, requestId);
+        // TODO generate better conflict messages
+        return getResponse(request, targetEntitySeed.getId(), //
+                targetEntitySeed, seedAfterUpdate, //
+                targetEntitySeed.isNewlyAllocated(), //
+                conflictEntries, //
+                Collections.emptyList());
+    }
+
+    private Set<EntityLookupEntry> getSeedConflictEntries(@NotNull EntityTransactUpdateResult result,
+            @NotNull EntityRawSeed seedToUpdate) {
+        if (result.getSeed() == null) {
+            return Collections.emptySet();
+        }
+        return seedToUpdate.getLookupEntries() //
+                .stream() //
+                .filter(entry -> EntityMatchUtils.hasConflictInSeed(result.getSeed(), entry)) //
+                .collect(Collectors.toSet());
+    }
+
+    /*
+     * Include all dummy lookup entries in the resulting seed that can be used for
+     * association. return null if no dummy entries.
+     */
+    private EntityRawSeed seedWithDummyEntries(@NotNull EntityAssociationRequest request,
+            @NotNull EntityRawSeed target) {
+        if (CollectionUtils.isEmpty(request.getDummyLookupResultIndices())) {
+            return null;
+        }
+
+        List<EntityLookupEntry> dummyEntries = IntStream.range(0, request.getLookupResults().size()) //
+                .filter(request.getDummyLookupResultIndices()::contains) //
+                .mapToObj(request.getLookupResults()::get) //
+                .map(pair -> {
+                    EntityLookupEntry entry = getEntry(request.getEntity(), pair.getKey());
+                    return Pair.of(entry, pair.getValue());
+                }) //
+                .map(Pair::getLeft) //
+                .collect(toList());
+        return prepareSeedToAssociate(target, dummyEntries, null);
+    }
+
+    /*
+     * get entries that map to other seeds (need to map to something)
+     */
+    private Set<EntityLookupEntry> getEntriesMapToOtherSeed(@NotNull EntityAssociationRequest request,
+            @NotNull String seedId) {
+        return request.getLookupResults() //
+                .stream() //
+                .filter(pair -> StringUtils.isNotBlank(pair.getRight())) //
+                .filter(pair -> !pair.getRight().equals(seedId)) // entries map to other seed
+                .map(Pair::getKey) //
+                .map(tuple -> getEntry(request.getEntity(), tuple)) //
+                .collect(Collectors.toSet());
+    }
+
+    private EntityAssociationResponse associateAnonymousOrAttributeOnly(@NotNull String requestId,
+            @NotNull EntityAssociationRequest request, @NotNull EntityRawSeed targetEntitySeed,
+            Map<EntityMatchEnvironment, Integer> versionMap) {
+        Tenant tenant = request.getTenant();
+        String tenantId = tenant.getId();
+        if (ANONYMOUS_ENTITY_ID.equals(targetEntitySeed.getId())) {
+            // not creating anonymous seed entry
+            return getResponse(request, targetEntitySeed.getId(), targetEntitySeed, targetEntitySeed,
+                    targetEntitySeed.isNewlyAllocated());
+        }
+        if (CollectionUtils.isEmpty(request.getLookupResults())) {
+            log.debug(
+                    "No lookup entry for request (ID={}), attributes={}, tenant (ID={}),"
+                            + " entity={}, target entity ID={}",
+                    requestId, request.getExtraAttributes(), tenantId, request.getEntity(), targetEntitySeed.getId());
+            EntityRawSeed seedToUpdate = null;
+            if (hasExtraAttributes(targetEntitySeed, request.getExtraAttributes())) {
+                seedToUpdate = new EntityRawSeed(targetEntitySeed.getId(), targetEntitySeed.getEntity(),
+                        Collections.emptyList(), request.getExtraAttributes());
+                // ignore result as attribute update won't fail
+                entityMatchInternalService.associate(request.getTenant(), seedToUpdate, false, null, versionMap);
+            }
+            return getResponse(request, targetEntitySeed.getId(), targetEntitySeed,
+                    mergeSeed(targetEntitySeed, seedToUpdate, null), targetEntitySeed.isNewlyAllocated());
+        }
+
+        return null;
     }
 
     /*-
@@ -497,8 +629,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
      * conflicts occurs during update)
      */
     private Set<EntityLookupEntry> getConflictEntries(List<Pair<EntityLookupEntry, String>> mappingConflicts,
-            Set<EntityLookupEntry> seedConflicts, List<EntityLookupEntry> seedUpdateConflicts,
-            List<EntityLookupEntry> mappingUpdateConflicts) {
+            Set<EntityLookupEntry> seedConflicts, Collection<EntityLookupEntry> seedUpdateConflicts,
+            Collection<EntityLookupEntry> mappingUpdateConflicts) {
         Set<EntityLookupEntry> entries = new HashSet<>();
         if (CollectionUtils.isNotEmpty(mappingConflicts)) {
             mappingConflicts.forEach(pair -> entries.add(pair.getLeft()));
@@ -534,22 +666,23 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
      * Check if the input association request contains any lookup entries or extra attributes that requires association
      * to target, need to be in sync with this#prepareSeedToAssociate
      */
-    private boolean needAdditionalAssociation(
+    private boolean needAssociation(
             @NotNull EntityAssociationRequest request, @NotNull EntityRawSeed target,
-            @NotNull Set<EntityLookupEntry> seedConflictEntries) {
-        Optional<Pair<EntityLookupEntry, String>> entryNeedUpdate = request.getLookupResults()
-                .stream()
-                // skip the highest priority one
-                .skip(1L)
-                .map(pair -> {
+            @NotNull Set<EntityLookupEntry> seedConflictEntries, boolean skipFirst, boolean skipDummy) {
+        Optional<Pair<EntityLookupEntry, String>> entryNeedUpdate = IntStream
+                .range(0, request.getLookupResults().size()) //
+                // skip the highest priority one if skipFirst is true
+                .skip(skipFirst ? 1L : 0L).mapToObj(idx -> {
+                    Pair<MatchKeyTuple, String> pair = request.getLookupResults().get(idx);
                     EntityLookupEntry entry = getEntry(request.getEntity(), pair.getKey());
-                    return Pair.of(entry, pair.getValue());
+                    return Triple.of(idx, entry, pair.getValue());
                 })
                 // entries not mapped to target (null or diff ID)
-                .filter(pair -> !target.getId().equals(pair.getValue()))
-                .filter(this::needAssociation)
+                .filter(triple -> !target.getId().equals(triple.getRight())).filter(this::needAssociation) //
                 // entry does not have conflict in seed (e.g., SFDC_ID already have a different value)
-                .filter(pair -> !seedConflictEntries.contains(pair.getKey()))
+                .filter(triple -> !seedConflictEntries.contains(triple.getMiddle())) //
+                .filter(triple -> !skipDummy || !request.getDummyLookupResultIndices().contains(triple.getLeft())) //
+                .map(triple -> Pair.of(triple.getMiddle(), triple.getRight())) //
                 .findFirst();
         return entryNeedUpdate.isPresent() || hasExtraAttributes(target, request.getExtraAttributes());
     }
@@ -561,25 +694,28 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
     }
 
     /*
-     * Create a raw seed that contains all lookup entries that need association, need to be in sync with
-     * this#needAdditionalAssociation
+     * Create a raw seed that contains all lookup entries that need association,
+     * need to be in sync with this#needAssociation
      */
     private EntityRawSeed prepareSeedToAssociate(
             @NotNull EntityAssociationRequest request, @NotNull EntityRawSeed target,
-            @NotNull Set<EntityLookupEntry> seedConflictEntries) {
-        List<EntityLookupEntry> entries = request
-                .getLookupResults()
-                .stream()
-                .map(pair -> {
+            @NotNull Set<EntityLookupEntry> seedConflictEntries, boolean skipDummy) {
+        List<EntityLookupEntry> entries = IntStream.range(0, request.getLookupResults().size()) //
+                .mapToObj(idx -> {
+                    Pair<MatchKeyTuple, String> pair = request.getLookupResults().get(idx);
                     EntityLookupEntry entry = getEntry(request.getEntity(), pair.getKey());
-                    return Pair.of(entry, pair.getValue());
+                    return Triple.of(idx, entry, pair.getValue());
                 })
                 // entries not mapped to target (null or diff ID)
-                .filter(pair -> !target.getId().equals(pair.getValue()))
+                .filter(triple -> !target.getId().equals(triple.getRight()))
                 .filter(this::needAssociation)
                 // entry does not have conflict in seed (e.g., SFDC_ID already have a different value)
-                .filter(pair -> !seedConflictEntries.contains(pair.getKey()))
-                .map(Pair::getLeft)
+                .filter(triple -> !seedConflictEntries.contains(triple.getMiddle())) //
+                /*-
+                 * when skipDummy is true, only use lookup result that's not dummy (idx not in given list)
+                 */
+                .filter(triple -> !skipDummy || !request.getDummyLookupResultIndices().contains(triple.getLeft())) //
+                .map(Triple::getMiddle) //
                 .collect(toList());
         return prepareSeedToAssociate(target, entries, request.getExtraAttributes());
     }
@@ -589,12 +725,12 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
      *      but it is hard to pass in this info to associate method since associate method is fixed.
      * TODO Modify associate interface later if there is performance problem due to this.
      */
-    private boolean needAssociation(@NotNull Pair<EntityLookupEntry, String> pair) {
-        EntityLookupEntry.Mapping mapping = pair.getKey().getType().mapping;
+    private boolean needAssociation(@NotNull Triple<Integer, EntityLookupEntry, String> triple) {
+        EntityLookupEntry.Mapping mapping = triple.getMiddle().getType().mapping;
         // we need to update either
         // (a) this entry is many to x or
         // (b) this entry is one to one but not mapped to any entity at the moment
-        return mapping != ONE_TO_ONE || StringUtils.isBlank(pair.getValue());
+        return mapping != ONE_TO_ONE || StringUtils.isBlank(triple.getRight());
     }
 
     private EntityRawSeed prepareSeedToAssociate(

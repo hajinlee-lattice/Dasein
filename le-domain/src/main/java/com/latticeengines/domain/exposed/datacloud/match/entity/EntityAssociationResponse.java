@@ -77,4 +77,12 @@ public class EntityAssociationResponse {
     public List<String> getAssociationErrors() {
         return associationErrors;
     }
+
+    @Override
+    public String toString() {
+        return "EntityAssociationResponse{" + "tenant=" + tenant + ", entity='" + entity + '\'' + ", isNewlyAllocated="
+                + isNewlyAllocated + ", associatedEntityId='" + associatedEntityId + '\'' + ", seedBeforeAssociation="
+                + seedBeforeAssociation + ", seedAfterAssociation=" + seedAfterAssociation + ", conflictEntries="
+                + conflictEntries + ", associationErrors=" + associationErrors + '}';
+    }
 }

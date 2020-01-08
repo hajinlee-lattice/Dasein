@@ -1035,7 +1035,7 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
         // entries in seed after update, only tested when there is conflict for now
         List<EntityLookupEntry> expectedEntriesInSeed;
 
-        public TxnUpdateTestCase(EntityRawSeed currentState, Map<EntityLookupEntry, String> currentLookupMapping,
+        TxnUpdateTestCase(EntityRawSeed currentState, Map<EntityLookupEntry, String> currentLookupMapping,
                 List<EntityLookupEntry> entriesToSetMapping, EntityRawSeed seedToUpdate, EntityRawSeed finalState,
                 boolean shouldSucceed, List<EntityLookupEntry> expectedEntriesInSeed) {
             this.currentState = currentState;
