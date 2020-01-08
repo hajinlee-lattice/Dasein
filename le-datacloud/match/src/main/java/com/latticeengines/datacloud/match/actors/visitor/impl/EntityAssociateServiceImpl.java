@@ -125,8 +125,11 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     null, false);
         }
 
-        // TODO make it configurable which association implementation to use
-        return transactAssociate(lookupRequestId, associationReq, targetSeed, versionMap);
+        if (associationReq.isUseTransactAssociate()) {
+            return transactAssociate(lookupRequestId, associationReq, targetSeed, versionMap);
+        } else {
+            return associate(lookupRequestId, associationReq, targetSeed, versionMap);
+        }
     }
 
     /*
@@ -301,7 +304,9 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             @NotNull EntityRawSeed targetEntitySeed, Map<EntityMatchEnvironment, Integer> versionMap) {
         try {
             // TODO make it configurable which association implementation to use
-            EntityAssociationResponse response = transactAssociate(requestId, request, targetEntitySeed, versionMap);
+            EntityAssociationResponse response = request.isUseTransactAssociate()
+                    ? transactAssociate(requestId, request, targetEntitySeed, versionMap)
+                    : associate(requestId, request, targetEntitySeed, versionMap);
             // inject failure only for testing purpose
             injectFailure(getReq(requestId));
             // send successful response
@@ -462,10 +467,13 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                             versionMap);
                 }
 
-                // TODO retry if this is not a newly allocated entity
-                // txn update failure (concurrent update), no need to surface conflict to
-                // outside since this is not the final result TODO change to debug level
-                log.info("Conflict detected due to concurrent association, result = {}, update seed = {}", result,
+                /*-
+                 * TODO (a) retry if this is not a newly allocated entity
+                 * TODO (b) generate conflict messages
+                 * txn update failure (concurrent update), no need to surface conflict to
+                 * outside since this is not the final result
+                 */
+                log.debug("Conflict detected due to concurrent association, result = {}, update seed = {}", result,
                         seedToUpdate);
                 return getResponse(request, null, null, null, false, conflictEntries, Collections.emptyList());
             }
@@ -481,7 +489,6 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     .associate(tenant, dummies, false, Collections.emptySet(), versionMap);
             conflictEntries.addAll(CollectionUtils.emptyIfNull(result.getMiddle()));
             conflictEntries.addAll(CollectionUtils.emptyIfNull(result.getRight()));
-            // TODO maybe optimize merging better
             seedAfterUpdate = mergeSeed(seedAfterUpdate, dummies, conflictEntries);
         }
 
@@ -575,10 +582,13 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
 
     /*-
      * redundant read to lower the chance of splitting entity
-     * TODO consider removing extra read if using dynamo txn
      */
     private EntityAssociationRequest lookupNotMappedEntries(@NotNull EntityAssociationRequest request,
             Map<EntityMatchEnvironment, Integer> versionMap) {
+        if (request.isUseTransactAssociate()) {
+            // skip extra read when using dynamo txn
+            return request;
+        }
         int size = request.getLookupResults().size();
         // find all entries not mapped to any entity
         Map<Integer, EntityLookupEntry> notMappedResults = IntStream.range(0, size) //
@@ -608,7 +618,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             }).collect(toList());
             // copy request with new result
             return new EntityAssociationRequest(request.getTenant(), request.getEntity(), request.getVersionMap(),
-                    request.getPreferredEntityId(), newLookupResults, request.getExtraAttributes());
+                    request.getPreferredEntityId(), newLookupResults, request.getExtraAttributes(),
+                    request.getDummyLookupResultIndices(), request.isUseTransactAssociate());
         } else {
             return request;
         }

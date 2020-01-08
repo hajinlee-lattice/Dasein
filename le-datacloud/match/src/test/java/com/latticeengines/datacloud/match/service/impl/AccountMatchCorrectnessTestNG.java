@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -28,7 +31,9 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ConcurrentHashMultiset;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.testframework.EntityMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -131,10 +136,13 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
             MatchKey.Name.name() };
     // Account MatchKey -> Index in FIELDS
     private static final Map<String, Integer> ACCOUNT_KEYIDX_MAP = Stream.of(ACCOUNT_KEYS_PRIORITIZED)
-            .collect(Collectors.toMap(key -> key, key -> FIELDS.indexOf(key)));
+            .collect(Collectors.toMap(key -> key, FIELDS::indexOf));
     // Account MatchKey with many-to-many relationship to Account
     private static final Set<String> ACCOUNT_KEYS_MANY_TO_MANY = new HashSet<>(
             Arrays.asList(MatchKey.Domain.name(), MatchKey.Name.name()));
+
+    private final AtomicInteger concurrentTestNumSplits = new AtomicInteger(0);
+    private final AtomicInteger concurrentTestTotalRuns = new AtomicInteger(0);
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testAllocateAndLookup() {
@@ -912,6 +920,57 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Assert.assertEquals(upperCaseEntityId, expectedEntityId, String.format(
                 "Matching with upper case ID should match to the same account as original one. CustomerAccountId=%s",
                 customerAccountId));
+    }
+
+    @Test(groups = "manual", enabled = false, invocationCount = 20)
+    private void testConcurrentAllocationWithTxn() {
+        Tenant tenant = newTestTenant();
+
+        final int SIZE = 50;
+        ExecutorService service = Executors.newFixedThreadPool(SIZE);
+        List<Runnable> runnables = new ArrayList<>();
+        ConcurrentHashMultiset<String> entityIds = ConcurrentHashMultiset.create();
+        for (int i = 0; i < SIZE; i++) {
+            runnables.add(() -> {
+                List<List<Object>> data = Arrays.stream(concurrentAllocationTxnTestData()).map(Arrays::asList)
+                        .collect(Collectors.toList());
+                Collections.shuffle(data);
+                for (List<Object> row : data) {
+                    MatchOutput output = matchAccount(row, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
+                    String entityId = verifyAndGetEntityId(output);
+                    entityIds.add(entityId, 1);
+                }
+            });
+        }
+        ThreadPoolUtils.runRunnablesInParallel(service, runnables, 10, 2);
+
+        if (entityIds.elementSet().size() > 1) {
+            concurrentTestNumSplits.incrementAndGet();
+        }
+        concurrentTestTotalRuns.incrementAndGet();
+        log.info(
+                "Concurrent test result. entityIds = {}, tenant = {}, concurrentTestNumSplits = {}, concurrentTestTotalRuns = {}, percentSplit = {}",
+                entityIds.entrySet(), tenant.getId(), concurrentTestNumSplits.get(), concurrentTestTotalRuns.get(),
+                (double) concurrentTestNumSplits.get() / concurrentTestTotalRuns.get());
+    }
+
+    /*-
+     * all records have the same company name (but on lower priority), should merge to the same record
+     */
+    private Object[][] concurrentAllocationTxnTestData() {
+        return new Object[][] { //
+                { "a", "m", null, "google", "google.com", "USA", null, null, null }, //
+                { null, "m", null, "google", "google.com", "USA", null, null, null }, //
+                { "a", null, null, "google", "google.com", "USA", null, null, null }, //
+                { null, null, "e", "google", "google.com", "USA", null, null, null }, //
+                { null, "m", "e", "google", null, "USA", null, null, null }, //
+                { "a", null, "e", "google", null, "USA", null, null, null }, //
+                { null, "m", null, "google", null, "USA", null, null, null }, //
+                { null, null, "e", "google", "google.com", "USA", null, null, null }, //
+                { "a", null, "e", "google", null, "USA", null, null, null }, //
+                { null, "m", "e", "google", null, "USA", null, null, null }, //
+                { "a", "m", null, "google", "google.com", "USA", null, null, null }, //
+        }; //
     }
 
     private String matchCustomerAccountId(@NotNull String customerAccountId, @NotNull Tenant tenant) {
