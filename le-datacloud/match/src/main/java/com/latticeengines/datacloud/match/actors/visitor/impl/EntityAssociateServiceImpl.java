@@ -575,6 +575,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
 
     /*-
      * redundant read to lower the chance of splitting entity
+     * TODO consider removing extra read if using dynamo txn
      */
     private EntityAssociationRequest lookupNotMappedEntries(@NotNull EntityAssociationRequest request,
             Map<EntityMatchEnvironment, Integer> versionMap) {
@@ -678,7 +679,12 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     return Triple.of(idx, entry, pair.getValue());
                 })
                 // entries not mapped to target (null or diff ID)
-                .filter(triple -> !target.getId().equals(triple.getRight())).filter(this::needAssociation) //
+                .filter(triple -> !target.getId().equals(triple.getRight())) //
+                /*-
+                 * no need to update seed if target already contains this entry
+                 */
+                .filter(triple -> !target.getLookupEntries().contains(triple.getMiddle())) //
+                .filter(this::needAssociation) //
                 // entry does not have conflict in seed (e.g., SFDC_ID already have a different value)
                 .filter(triple -> !seedConflictEntries.contains(triple.getMiddle())) //
                 .filter(triple -> !skipDummy || !request.getDummyLookupResultIndices().contains(triple.getLeft())) //
@@ -707,7 +713,11 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                     return Triple.of(idx, entry, pair.getValue());
                 })
                 // entries not mapped to target (null or diff ID)
-                .filter(triple -> !target.getId().equals(triple.getRight()))
+                .filter(triple -> !target.getId().equals(triple.getRight())) //
+                /*-
+                 * no need to update seed if target already contains this entry
+                 */
+                .filter(triple -> !target.getLookupEntries().contains(triple.getMiddle())) //
                 .filter(this::needAssociation)
                 // entry does not have conflict in seed (e.g., SFDC_ID already have a different value)
                 .filter(triple -> !seedConflictEntries.contains(triple.getMiddle())) //

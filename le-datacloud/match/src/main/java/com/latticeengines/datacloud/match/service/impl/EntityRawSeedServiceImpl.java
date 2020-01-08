@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -255,8 +256,11 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
     public EntityTransactUpdateResult transactUpdate(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull EntityRawSeed seed, List<EntityLookupEntry> entries, boolean setTTL, int version) {
         checkNotNull(env, tenant, seed);
-        if (entries == null) {
-            entries = Collections.emptyList();
+        if (CollectionUtils.isEmpty(entries)) {
+            EntityRawSeed seedBeforeUpdate = updateIfNotSet(env, tenant, seed, setTTL, version);
+            // TODO maybe just return base
+            return new EntityTransactUpdateResult(true,
+                    EntityMatchUtils.mergeSeed(seedBeforeUpdate, seed, new HashSet<>()), null);
         }
 
         List<TransactWriteItem> items = new ArrayList<>();
