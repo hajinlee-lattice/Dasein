@@ -39,7 +39,8 @@ public class GenerateAccountLookupTestNG extends SparkJobFunctionalTestNGBase {
         Object[][] data = new Object[][] { //
                 { "1", "s1_1", "s2_1" },
                 { "2", "s1_2", null },
-                { "3", null, "s2_3" }
+                { "3", null, "s2_3" }, //
+                { null, null, null }, // FIXME remove this tmp test case after null accountId issue is fixed
         };
         uploadHdfsDataUnit(data, fields);
     }
