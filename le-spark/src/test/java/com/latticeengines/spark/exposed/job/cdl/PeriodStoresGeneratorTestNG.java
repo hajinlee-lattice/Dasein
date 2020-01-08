@@ -107,7 +107,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         stream.setDimensions(prepareDimensions());
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
         stream.setAttributeDerivers(Collections.singletonList(
-                createAttributeDeriver(null, SOME_DIM, StreamAttributeDeriver.Calculation.MIN) //
+                createAttributeDeriver(Collections.singletonList(SOME_DIM), SOME_DIM, StreamAttributeDeriver.Calculation.MIN) //
         ));
 
         STREAM = stream;

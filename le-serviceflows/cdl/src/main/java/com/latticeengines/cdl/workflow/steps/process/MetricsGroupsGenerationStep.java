@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
@@ -63,6 +65,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
 
     private DataCollection.Version inactive;
+    private String signature;
     private boolean shortCutMode = false;
 
     @Override
@@ -85,10 +88,10 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             return null;
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        signature = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class).getDimensionMetadataSignature();
         streamMetadataCache = new ConcurrentHashMap<>();
         streams.forEach(this::updateStreamMetadataCache);
         putStringValueInContext(ACTIVITY_STREAM_METADATA_CACHE, JsonUtils.serialize(streamMetadataCache));
-        // TODO - add stream metadata to spark job
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> detailsMap = new HashMap<>();
         List<String> periodStoreTableCtxNames = new ArrayList<>();
@@ -123,12 +126,38 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         } else {
             validateInputTableCountMatch(groups, inputs, stepConfiguration);
             DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
-            config.inputMetadata = inputMetadata;
             config.activityMetricsGroups = groups;
             config.evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+            config.streamMetadataMap = streamMetadataCache;
+            appendAccountBatchStore(inputs, inputMetadata);
+            // TODO - append contact table if contact-level activity data is required in the future
             config.setInput(inputs);
+            config.inputMetadata = inputMetadata;
             return config;
         }
+    }
+
+    private void appendAccountBatchStore(List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata) {
+        Table batchStoreTable = getAccountBatchStore();
+        if (batchStoreTable != null) {
+            inputs.add(batchStoreTable.toHdfsDataUnit("Account")); // TODO - put "Account" in one place
+            Details accountBatchStoreDetails = new Details();
+            accountBatchStoreDetails.setStartIdx(inputs.size() - 1);
+            inputMetadata.getMetadata().put("Account", accountBatchStoreDetails); // TODO - put "Account" in one place
+        }
+    }
+
+    private Table getAccountBatchStore() {
+        String batchStoreName;
+        TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
+        batchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
+        if (StringUtils.isBlank(batchStoreName)) {
+            batchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive.complement());
+        }
+        if (StringUtils.isBlank(batchStoreName)) {
+            return null;
+        }
+        return metadataProxy.getTableSummary(customerSpace.toString(), batchStoreName);
     }
 
     @Override
@@ -176,7 +205,6 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     }
 
     private void updateStreamMetadataCache(AtlasStream stream) {
-        String signature = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class).getDimensionMetadataSignature();
         if (!streamMetadataCache.containsKey(stream.getStreamId())) {
             streamMetadataCache.put(stream.getStreamId(), activityStoreProxy.getDimensionMetadataInStream(customerSpace.toString(), stream.getName(), signature));
         }
