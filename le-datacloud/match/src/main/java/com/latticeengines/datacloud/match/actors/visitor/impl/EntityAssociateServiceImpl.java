@@ -32,6 +32,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -40,6 +41,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
@@ -72,6 +74,10 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
 
     @Inject
     private EntityMatchInternalService entityMatchInternalService;
+
+    @Inject
+    @Lazy
+    private EntityMatchMetricService entityMatchMetricService;
 
     @Value("${datacloud.match.dynamo.fetchers.num}")
     private Integer nWorkers;
@@ -458,6 +464,8 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
             Preconditions.checkNotNull(result);
             seedConflictEntries.addAll(getSeedConflictEntries(result, seedToUpdate));
 
+            entityMatchMetricService.recordAssociation(tenant, targetEntitySeed.getEntity(), result.isSucceeded(),
+                    targetEntitySeed.isNewlyAllocated());
             if (!result.isSucceeded()) {
                 if (targetEntitySeed.isNewlyAllocated()) {
                     log.debug("Cleanup orphan seed, entity={} entityId={}, tenant (ID={})", tenantId,
