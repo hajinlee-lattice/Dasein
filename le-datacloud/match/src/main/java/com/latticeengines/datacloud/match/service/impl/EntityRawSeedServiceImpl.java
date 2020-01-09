@@ -258,9 +258,11 @@ public class EntityRawSeedServiceImpl implements EntityRawSeedService {
         checkNotNull(env, tenant, seed);
         if (CollectionUtils.isEmpty(entries)) {
             EntityRawSeed seedBeforeUpdate = updateIfNotSet(env, tenant, seed, setTTL, version);
+            EntityRawSeed seedAfterUpdate = seedBeforeUpdate == null ? seed
+                    : EntityMatchUtils.mergeSeed(seedBeforeUpdate, seed, new HashSet<>());
             // TODO maybe just return base
             return new EntityTransactUpdateResult(true,
-                    EntityMatchUtils.mergeSeed(seedBeforeUpdate, seed, new HashSet<>()), null);
+                    seedAfterUpdate, null);
         }
 
         List<TransactWriteItem> items = new ArrayList<>();
