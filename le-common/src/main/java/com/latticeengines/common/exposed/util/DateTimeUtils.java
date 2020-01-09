@@ -51,7 +51,7 @@ public class DateTimeUtils {
                 dateString = dateString.substring(0, dateString.lastIndexOf(space)) + plus
                         + dateString.substring(dateString.lastIndexOf(space) + 1);
                 try {
-                    //log.info("Trying to parse updated string: " + dateString);
+                    // log.info("Trying to parse updated string: " + dateString);
                     return dateFormat.parse(dateString);
                 } catch (ParseException ex) {
                     log.error("Could not parse string even after applying space replacement hack: " + dateString);
@@ -111,13 +111,27 @@ public class DateTimeUtils {
         }
         int year = dayPeriod / (13 * 32);
         int month = (dayPeriod / 32) % 13;
-        if (month == 0) {
-            log.error("Invalid month for period " + dayPeriod);
-        }
         int day = dayPeriod % 32;
+        if (year < 0 || month < 1 || day < 1) {
+            log.error("Invalid dayPeriod " + dayPeriod);
+        }
         String monthStr = (month < 10) ? "0" + month : month + "";
         String dayStr = (day < 10) ? "0" + day : day + "";
         String result = (year + 1900) + "-" + monthStr + "-" + dayStr;
         return result;
+    }
+
+    public static Integer subtractDays(Integer dayPeriod, Integer days){
+        int year = 1900 + dayPeriod / (13 * 32);
+        int month = (dayPeriod / 32) % 13 - 1; // 0 based months in GregorianCalendar
+        int day = dayPeriod % 32;
+        calendar.set(year, month, day);
+        Long delta = days.longValue() * 24 * 60 * 60 * 1000;
+        calendar.setTimeInMillis(calendar.getTimeInMillis() - delta);
+        SimpleDateFormat dateOnlyFormat = new SimpleDateFormat(DATE_ONLY_FORMAT_STRING);
+        dateOnlyFormat.setTimeZone(TimeZone.getTimeZone(UTC));
+        Date newDate = new Date(calendar.getTimeInMillis());
+        String newDayPeriod = dateOnlyFormat.format(newDate);
+        return dateToDayPeriod(newDayPeriod);
     }
 }
