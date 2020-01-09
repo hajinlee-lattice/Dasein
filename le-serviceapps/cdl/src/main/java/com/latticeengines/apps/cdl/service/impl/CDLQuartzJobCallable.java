@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.apps.cdl.service.CDLJobService;
-import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
 import com.latticeengines.apps.cdl.service.DeltaCalculationService;
+import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
@@ -22,7 +22,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
     private DataFeedExecutionCleanupService dataFeedExecutionCleanupService;
     private RedShiftCleanupService redShiftCleanupService;
     private S3ImportService s3ImportService;
-    private CampaignLaunchTriggerService campaignLaunchTriggerService;
+    private EntityStateCorrectionService entityStateCorrectionService;
     private DeltaCalculationService deltaCalculationService;
     private String jobArguments;
 
@@ -32,27 +32,27 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         this.dataFeedExecutionCleanupService = builder.dataFeedExecutionCleanupService;
         this.redShiftCleanupService = builder.redShiftCleanupService;
         this.s3ImportService = builder.s3ImportService;
-        this.campaignLaunchTriggerService = builder.campaignLaunchTriggerService;
+        this.entityStateCorrectionService = builder.entityStateCorrectionService;
         this.deltaCalculationService = builder.deltaCalculationService;
         this.jobArguments = builder.jobArguments;
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Boolean call() {
         log.info(String.format("Calling with job type: %s", cdlJobType.name()));
         switch (cdlJobType) {
-            case DFEXECUTIONCLEANUP:
-                return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
-            case REDSHIFTCLEANUP:
-                return redShiftCleanupService.removeUnusedTables();
-            case IMPORT:
-                return s3ImportService.submitImportJob();
-            case CAMPAIGNlAUNCH:
-                return campaignLaunchTriggerService.triggerQueuedLaunches();
-            case DELTACALCULATION:
-                return deltaCalculationService.triggerScheduledCampaigns();
-            default:
-                return cdlJobService.submitJob(cdlJobType, jobArguments);
+        case DFEXECUTIONCLEANUP:
+            return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
+        case REDSHIFTCLEANUP:
+            return redShiftCleanupService.removeUnusedTables();
+        case IMPORT:
+            return s3ImportService.submitImportJob();
+        case ENTITYSTATECORRECTION:
+            return entityStateCorrectionService.execute();
+        case DELTACALCULATION:
+            return deltaCalculationService.triggerScheduledCampaigns();
+        default:
+            return cdlJobService.submitJob(cdlJobType, jobArguments);
         }
     }
 
@@ -63,7 +63,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         private DataFeedExecutionCleanupService dataFeedExecutionCleanupService;
         private RedShiftCleanupService redShiftCleanupService;
         private S3ImportService s3ImportService;
-        private CampaignLaunchTriggerService campaignLaunchTriggerService;
+        private EntityStateCorrectionService entityStateCorrectionService;
         private DeltaCalculationService deltaCalculationService;
 
         private String jobArguments;
@@ -98,8 +98,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder campaignLaunchTriggerService(CampaignLaunchTriggerService campaignLaunchTriggerService) {
-            this.campaignLaunchTriggerService = campaignLaunchTriggerService;
+        public Builder entityStateCorrectionService(EntityStateCorrectionService entityStateCorrectionService) {
+            this.entityStateCorrectionService = entityStateCorrectionService;
             return this;
         }
 

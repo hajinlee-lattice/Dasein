@@ -215,14 +215,14 @@
         <property name="jobTimeout" value="${quartz.cdl.schedulingPA.job.timeout}"/>
     </bean>
 
-    <bean name="cdlCampaignLaunchJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
-        <property name="jobName" value="cdlCampaignLaunchJob"/>
-        <property name="cronTrigger" value="${quartz.cdl.campaign.launch.job.cron}"/>
+    <bean name="cdlEntityStateCorrectionJob" class="com.latticeengines.domain.exposed.quartz.JobConfig">
+        <property name="jobName" value="cdlEntityStateCorrectionJob"/>
+        <property name="cronTrigger" value="${quartz.cdl.entity.state.correction.job.cron}"/>
         <property name="destUrl" value="${quartz.cdl.predefined.job.primary.url:}"/>
         <property name="secondaryDestUrl" value="${quartz.cdl.predefined.job.secondary.url:}"/>
         <property name="queryApi" value="${quartz.cdl.predefined.job.query.api:}"/>
         <property name="checkJobBeanUrl" value="${quartz.cdl.predefined.job.check.bean.url:}"/>
-        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlCampaignLaunchJob&quot;}"/>
+        <property name="jobArguments" value="{&quot;jobType&quot;:&quot;cdlEntityStateCorrectionJob&quot;}"/>
         <property name="jobTimeout" value="${quartz.cdl.export.job.timeout}"/>
     </bean>
 

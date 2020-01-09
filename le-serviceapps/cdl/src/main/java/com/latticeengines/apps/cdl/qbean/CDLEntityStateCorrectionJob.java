@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
-@Component("cdlCampaignLaunchJob")
-public class CDLCampaignLaunchJob extends CDLAbstractJobBean implements QuartzJobBean {
+@Component("cdlEntityStateCorrectionJob")
+public class CDLEntityStateCorrectionJob extends CDLAbstractJobBean implements QuartzJobBean {
 
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
-        super.setCDLJobType(CDLJobType.CAMPAIGNlAUNCH);
+        super.setCDLJobType(CDLJobType.ENTITYSTATECORRECTION);
         return super.getCallable(jobArguments);
     }
 }
