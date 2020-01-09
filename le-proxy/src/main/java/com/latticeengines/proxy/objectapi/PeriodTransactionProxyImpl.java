@@ -35,7 +35,7 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
 
     @Inject
     public PeriodTransactionProxyImpl(PeriodTransactionProxyImpl periodTransactionProxy) {
-        super("objectapi/customerspaces");
+        super("objectapi");
         this._periodTransactionProxyImpl = periodTransactionProxy;
     }
 
