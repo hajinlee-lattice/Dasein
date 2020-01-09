@@ -50,7 +50,7 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
     @VisibleForTesting
     String constructGetPeriodTransactionByAccountId(String customerSpace, String accountId, String periodName,
             ProductType productType) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/accountid/{accountId}",
+        String url = constructUrl("/{customerSpace}/periodtransactions/accountid/{accountId}",
                 ProxyUtils.shortenCustomerSpace(customerSpace), accountId);
         StringBuilder sb = new StringBuilder();
         if (periodName != null) {
@@ -85,7 +85,7 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
 
     @Override
     public List<String> getFinalAndFirstTransactionDate(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/transaction/maxmindate",
+        String url = constructUrl("/{customerSpace}/periodtransactions/transaction/maxmindate",
                 ProxyUtils.shortenCustomerSpace(customerSpace));
 
         log.info("getFinalAndFirstTransactionDate url " + url);
@@ -95,8 +95,7 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
     @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|%s|%s|SpAnSeg_Txn_Data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #spendAnalyticsSegment, #periodName)")
     public List<PeriodTransaction> getPeriodTransactionsForSegmentAccountsFromCache(String customerSpace,
             String spendAnalyticsSegment, String periodName) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/periodtransactions/spendanalyticssegment/{spendAnalyticsSegment}",
+        String url = constructUrl("/{customerSpace}/periodtransactions/spendanalyticssegment/{spendAnalyticsSegment}",
                 ProxyUtils.shortenCustomerSpace(customerSpace), spendAnalyticsSegment);
         try {
             url = URLDecoder.decode(url, "UTF-8");
@@ -112,7 +111,7 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
 
     @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|Spend_Analytics_Segments\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace))")
     public DataPage getAllSpendAnalyticsSegmentsFromCache(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/spendanalyticssegments",
+        String url = constructUrl("/{customerSpace}/periodtransactions/spendanalyticssegments",
                 ProxyUtils.shortenCustomerSpace(customerSpace));
         log.info("Missed cache for getProductHierarchy url " + url);
         return get("getProductHierarchy", url, DataPage.class);
@@ -120,7 +119,7 @@ public class PeriodTransactionProxyImpl extends MicroserviceRestApiProxy impleme
 
     @Cacheable(cacheNames = CacheName.Constants.ObjectApiCacheName, key = "T(java.lang.String).format(\"%s|%s|Product_Hierarchy\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #version)")
     public List<ProductHierarchy> getProductHierarchyFromCache(String customerSpace, DataCollection.Version version) {
-        String url = constructUrl("/customerspaces/{customerSpace}/periodtransactions/producthierarchy",
+        String url = constructUrl("/{customerSpace}/periodtransactions/producthierarchy",
                 ProxyUtils.shortenCustomerSpace(customerSpace));
         if (version != null) {
             url += ("?version=" + version);
