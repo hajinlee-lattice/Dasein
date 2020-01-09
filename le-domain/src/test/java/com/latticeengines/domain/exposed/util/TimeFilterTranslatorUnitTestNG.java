@@ -17,20 +17,6 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 
 public class TimeFilterTranslatorUnitTestNG {
 
-    @Test(groups = "unit", dataProvider = "timeFilterProvider")
-    public void testTranslateRangeToDate(TimeFilter timeFilter, Pair<String, String> expected) {
-        TimeFilterTranslator translator = getTranslator();
-        Pair<String, String> actual = translator.periodIdRangeToDateRange(timeFilter.getPeriod(), translator.translateRange(timeFilter));
-        System.out.println(actual);
-        if (expected == null) {
-            Assert.assertNull(actual);
-        } else {
-            Assert.assertNotNull(actual);
-            Assert.assertEquals(actual.getLeft(), expected.getLeft());
-            Assert.assertEquals(actual.getRight(), expected.getRight());
-        }
-    }
-
     @Test(groups = "unit")
     public void testTranslate() {
         TimeFilterTranslator translator = getTranslator();
@@ -44,11 +30,19 @@ public class TimeFilterTranslatorUnitTestNG {
         System.out.println(tf.getValues());
     }
 
-    @Test(groups = "unit", dataProvider = "timeRangeAndTimeFilterProvider")
-    public void testTranslateRangeToPeriodId(TimeFilter timeFilter, Pair<Integer, Integer> expected) {
+    @Test(groups = "unit", dataProvider = "timeFilterProvider")
+    public void testTranslateRangeToDate(TimeFilter timeFilter, Pair<String, String> expected) {
         TimeFilterTranslator translator = getTranslator();
-        Pair<Integer, Integer> actual = translator.translateRange(timeFilter);
-        Assert.assertEquals(actual, expected);
+        Pair<String, String> actual = translator.periodIdRangeToDateRange(timeFilter.getPeriod(),
+                translator.translateRange(timeFilter));
+        System.out.println(actual);
+        if (expected == null) {
+            Assert.assertNull(actual);
+        } else {
+            Assert.assertNotNull(actual);
+            Assert.assertEquals(actual.getLeft(), expected.getLeft());
+            Assert.assertEquals(actual.getRight(), expected.getRight());
+        }
     }
 
     @DataProvider(name = "timeFilterProvider")
@@ -82,27 +76,37 @@ public class TimeFilterTranslatorUnitTestNG {
                 ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(7));
         TimeFilter last1DayV2 = TimeFilter.last(1, null);
         TimeFilter last7DaysV2 = TimeFilter.last(7, PeriodStrategy.Template.Day.name());
+        TimeFilter last60Days = new TimeFilter(//
+                ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(60));
 
-        return new Object[][]{ //
-                {TimeFilter.ever(), null}, //
-                {TimeFilter.isEmpty(), null}, //
-                {TimeFilter.latestDay(), null}, //
-                {currentMonth, Pair.of("2018-02-01", "2018-02-28")}, //
-                {within1Month, Pair.of("2018-01-01", "2018-01-31")}, //
-                {within3Month, Pair.of("2017-11-01", "2018-01-31")}, //
-                {within2Quarter, Pair.of("2017-07-01", "2017-12-31")}, //
-                {within2QuarterIncludeCurrent, Pair.of("2017-07-01", "2018-03-31")}, //
-                {prior1Month, Pair.of(null, "2017-12-31")}, //
-                {prior3Month, Pair.of(null, "2017-10-31")}, //
-                {between1And3Month, Pair.of("2017-11-01", "2018-01-31")}, //
-                {betweenDates, Pair.of("2018-02-01", "2019-01-01")}, //
-                {beforeDate, Pair.of(null, "2018-02-01")}, //
-                {afterDate, Pair.of("2018-02-01", null)}, //
-                {last1Day, Pair.of("2018-02-17", "2018-02-17")}, //
-                {last7Days, Pair.of("2018-02-11", "2018-02-17")}, //
-                {last1DayV2, Pair.of("2018-02-17", "2018-02-17")}, //
-                {last7DaysV2, Pair.of("2018-02-11", "2018-02-17")}, //
+        return new Object[][] { //
+                { TimeFilter.ever(), null }, //
+                { TimeFilter.isEmpty(), null }, //
+                { TimeFilter.latestDay(), null }, //
+                { currentMonth, Pair.of("2018-02-01", "2018-02-28") }, //
+                { within1Month, Pair.of("2018-01-01", "2018-01-31") }, //
+                { within3Month, Pair.of("2017-11-01", "2018-01-31") }, //
+                { within2Quarter, Pair.of("2017-07-01", "2017-12-31") }, //
+                { within2QuarterIncludeCurrent, Pair.of("2017-07-01", "2018-03-31") }, //
+                { prior1Month, Pair.of(null, "2017-12-31") }, //
+                { prior3Month, Pair.of(null, "2017-10-31") }, //
+                { between1And3Month, Pair.of("2017-11-01", "2018-01-31") }, //
+                { betweenDates, Pair.of("2018-02-01", "2019-01-01") }, //
+                { beforeDate, Pair.of(null, "2018-02-01") }, //
+                { afterDate, Pair.of("2018-02-01", null) }, //
+                { last1Day, Pair.of("2018-02-17", "2018-02-17") }, //
+                { last7Days, Pair.of("2018-02-11", "2018-02-17") }, //
+                { last1DayV2, Pair.of("2018-02-17", "2018-02-17") }, //
+                { last7DaysV2, Pair.of("2018-02-11", "2018-02-17") }, //
+                { last60Days, Pair.of("2017-12-20", "2018-02-17") }, // PLS-15955
         };
+    }
+
+    @Test(groups = "unit", dataProvider = "timeRangeAndTimeFilterProvider")
+    public void testTranslateRangeToPeriodId(TimeFilter timeFilter, Pair<Integer, Integer> expected) {
+        TimeFilterTranslator translator = getTranslator();
+        Pair<Integer, Integer> actual = translator.translateRange(timeFilter);
+        Assert.assertEquals(actual, expected);
     }
 
     @DataProvider(name = "timeRangeAndTimeFilterProvider")
@@ -114,10 +118,20 @@ public class TimeFilterTranslatorUnitTestNG {
         TimeFilter betweenDates = new TimeFilter(//
                 ComparisonType.BETWEEN_DATE, PeriodStrategy.Template.Date.name(),
                 Arrays.asList("2018-02-01", "2019-01-01"));
-        return new Object[][]{
-                {last7Day, Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-11"), DateTimeUtils.dateToDayPeriod("2018-02-17"))}, //
-                {last1Day, Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-17"), DateTimeUtils.dateToDayPeriod("2018-02-17"))}, //
-                {betweenDates, Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-01"), DateTimeUtils.dateToDayPeriod("2019-01-01"))}
+        TimeFilter last60Day = new TimeFilter(//
+                ComparisonType.LAST, PeriodStrategy.Template.Day.name(), Collections.singletonList(60));
+        return new Object[][] {
+                { last7Day,
+                        Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-11"),
+                                DateTimeUtils.dateToDayPeriod("2018-02-17")) }, //
+                { last1Day,
+                        Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-17"),
+                                DateTimeUtils.dateToDayPeriod("2018-02-17")) }, //
+                { betweenDates,
+                        Pair.of(DateTimeUtils.dateToDayPeriod("2018-02-01"),
+                                DateTimeUtils.dateToDayPeriod("2019-01-01")) }, //
+                { last60Day, Pair.of(DateTimeUtils.dateToDayPeriod("2017-12-20"),
+                        DateTimeUtils.dateToDayPeriod("2018-02-17")) }, // PLS-15955
         };
     }
 
