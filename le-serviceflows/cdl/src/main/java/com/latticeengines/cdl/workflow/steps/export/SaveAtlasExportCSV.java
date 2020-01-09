@@ -167,8 +167,8 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
     }
 
-    private void setDisplayNameMap(ColumnMetadata cm, ExportEntity exportEntity, Map<String, DisplayData> outputCols,
-                                   Map<String, String> displayNameMap, String originalDisplayName, int indexToAppend) {
+    private void insertDataIntoDisplayNameMap(ColumnMetadata cm, ExportEntity exportEntity, Map<String, DisplayData> outputCols,
+                                              Map<String, String> displayNameMap, String originalDisplayName, int indexToAppend) {
         boolean putDisplayName = true;
         String displayName = originalDisplayName;
         DisplayData displayData = outputCols.get(originalDisplayName.toLowerCase());
@@ -218,7 +218,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                 indexMap.put(originalDisplayNameLowerCase, new MutableInt(indexToAppend));
                 displayNameIndexMap.put(cm.getCategory(), indexMap);
             }
-            setDisplayNameMap(cm, exportEntity, outputCols, displayNameMap, originalDisplayName, indexToAppend);
+            insertDataIntoDisplayNameMap(cm, exportEntity, outputCols, displayNameMap, originalDisplayName, indexToAppend);
         });
         return displayNameMap;
     }
