@@ -20,6 +20,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,27 +167,58 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
     }
 
+    private void insertDataIntoDisplayNameMap(ColumnMetadata cm, ExportEntity exportEntity, Map<String, DisplayData> outputCols,
+                                              Map<String, String> displayNameMap, String originalDisplayName, int indexToAppend) {
+        boolean putDisplayName = true;
+        String displayName = originalDisplayName;
+        DisplayData displayData = outputCols.get(originalDisplayName.toLowerCase());
+        if (displayData != null) {
+            putDisplayName = false;
+            if (indexToAppend > 1) {
+                // display name may duplicated in same category, if so append index to display name
+                displayName = cm.getCategory().getName() + "_" + originalDisplayName + "(" + indexToAppend + ")";
+            } else {
+                displayName = cm.getCategory().getName() + "_" + originalDisplayName;
+            }
+            log.warn(String.format("Display name [%s] has already been assigned to another attr, cannot be " +
+                    "assigned to [%s]. Display name changed to [%s].", originalDisplayName, cm.getAttrName(), displayName));
+            if (!displayData.isDisplayNameUpdated()) {
+                displayData.setDisplayNameUpdated(true);
+                ColumnMetadata columnMetadata = displayData.getColumnMetadata();
+                renameDisplayNameMap(exportEntity, columnMetadata,
+                        columnMetadata.getCategory().getName() + "_" + columnMetadata.getDisplayName(), displayNameMap);
+            }
+        }
+        renameDisplayNameMap(exportEntity, cm, displayName, displayNameMap);
+        if (putDisplayName) {
+            outputCols.put(displayName.toLowerCase(), new DisplayData(cm, false));
+        }
+    }
+
     private Map<String, String> getDisplayNameMap(ExportEntity exportEntity) {
         List<ColumnMetadata> schema = getExportSchema(exportEntity);
         Map<String, String> displayNameMap = new HashMap<>();
         Map<String, DisplayData> outputCols = new HashMap<>();
+        Map<Category, Map<String, MutableInt>> displayNameIndexMap = new HashMap<>();
         schema.forEach(cm -> {
             String originalDisplayName = cm.getDisplayName();
-            String displayName = originalDisplayName;
-            DisplayData displayData = outputCols.get(displayName.toLowerCase());
-            if (displayData != null) {
-                displayName = cm.getCategory().getName() + "_" + originalDisplayName;
-                log.warn(String.format("Display name [%s] has already been assigned to another attr, cannot be " +
-                        "assigned to [%s]. Display name changed to [%s].", originalDisplayName, cm.getAttrName(), displayName));
-                if (!displayData.isDisplayNameUpdated()) {
-                    displayData.setDisplayNameUpdated(true);
-                    ColumnMetadata columnMetadata = displayData.getColumnMetadata();
-                    renameDisplayNameMap(exportEntity, columnMetadata,
-                            columnMetadata.getCategory().getName() + "_" + columnMetadata.getDisplayName(), displayNameMap);
+            String originalDisplayNameLowerCase = originalDisplayName.toLowerCase();
+            Map<String, MutableInt> indexMap = displayNameIndexMap.get(cm.getCategory());
+            int indexToAppend = 1;
+            if (MapUtils.isNotEmpty(indexMap)) {
+                MutableInt index = indexMap.get(originalDisplayNameLowerCase);
+                if (index != null) {
+                    index.increment();
+                    indexToAppend = index.getValue();
+                } else {
+                    indexMap.put(originalDisplayNameLowerCase, new MutableInt(indexToAppend));
                 }
+            } else {
+                indexMap = new HashMap<>();
+                indexMap.put(originalDisplayNameLowerCase, new MutableInt(indexToAppend));
+                displayNameIndexMap.put(cm.getCategory(), indexMap);
             }
-            renameDisplayNameMap(exportEntity, cm, displayName, displayNameMap);
-            outputCols.put(displayName.toLowerCase(), new DisplayData(cm, false));
+            insertDataIntoDisplayNameMap(cm, exportEntity, outputCols, displayNameMap, originalDisplayName, indexToAppend);
         });
         return displayNameMap;
     }
