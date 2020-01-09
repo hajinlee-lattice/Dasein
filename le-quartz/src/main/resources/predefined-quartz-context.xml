@@ -313,7 +313,7 @@
         <ref bean="cdlRedShiftCleanupJob"/>
         <ref bean="cdlExportScheduleJob"/>
         <ref bean="cdlSchedulingPAJob"/>
-        <ref bean="cdlCampaignLaunchJob"/>
+        <ref bean="cdlEntityStateCorrectionJob"/>
         <ref bean="cdlDeltaCalculationJob"/>
         <ref bean="adminRecycleTenantJob"/>
         <ref bean="adminCleanupErrorTenantJob"/>
