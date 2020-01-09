@@ -18,6 +18,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.auth.exposed.util.SessionUtils;
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -265,7 +266,9 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         }
 
         private boolean isInternalEmail(String email) {
-            return email.toLowerCase().endsWith("lattice-engines.com");
+            String emailInUpperCase = email.toUpperCase();
+            return emailInUpperCase.endsWith(EmailUtils.LATTICE_ENGINES_COM) ||
+                    emailInUpperCase.endsWith(EmailUtils.DNB_COM);
         }
     }
 
