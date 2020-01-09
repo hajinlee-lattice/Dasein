@@ -43,7 +43,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private String playGroupName2 = "playGroup2";
 
     @Override
-    @BeforeClass(groups = "deployment-app")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         String existingTenant = null;// "LETest1546299140564";
 
@@ -53,7 +53,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         tenant = testPlayCreationHelper.getTenant();
     }
 
-    @Test(groups = "deployment-app")
+    @Test(groups = "deployment")
     public void testCreate() {
         // Test creating a new playGroup
         playGroup1 = new PlayGroup(tenant, playGroupName1, "admin.le.com", "admin.le.com");
@@ -76,7 +76,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(playGroup2.getDisplayName(), playGroupName2);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testCreate")
+    @Test(groups = "deployment", dependsOnMethods = "testCreate")
     public void testGetById() {
         sleepToAllowDbWriterReaderSync();
         // Test getting the newly made playGroup by Id
@@ -86,7 +86,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(getPlayGroup.getDisplayName(), playGroup1.getDisplayName());
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testGetById")
+    @Test(groups = "deployment", dependsOnMethods = "testGetById")
     public void testAttachToPlay() {
         // Test attaching a play to playgroup
         play = testPlayCreationHelper.getPlay();
@@ -121,7 +121,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testAttachToPlay")
+    @Test(groups = "deployment", dependsOnMethods = "testAttachToPlay")
     public void testUpdate() {
         // Test updating the newly made playGroup
         String updatedPlayGroupName = "playGroupTestPostUpdate";
@@ -133,7 +133,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(updatedPlayGroup.getDisplayName(), updatedPlayGroupName);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testUpdate")
+    @Test(groups = "deployment", dependsOnMethods = "testUpdate")
     public void testDelete() {
         // Test deleting playGroup
         playProxy.deletePlayGroupById(tenant.getId(), playGroup1.getId());
@@ -149,7 +149,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(getPlay.getPlayGroups().size(), 1);
     }
 
-    @AfterClass(groups = { "deployment-app" })
+    @AfterClass(groups = { "deployment" })
     public void teardown() {
         testPlayCreationHelper.cleanupArtifacts(true);
         log.info("Cleaned up all artifacts");
