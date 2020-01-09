@@ -150,17 +150,6 @@ public class PlayResource {
         playLaunchChannel.setUpdatedBy(MultiTenantContext.getEmailAddress());
         return playProxy.updatePlayLaunchChannel(tenant.getId(), playName, channelId, playLaunchChannel, launchNow);
     }
-
-    @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Queue a new Play launch for a given play and channel")
-    public PlayLaunch queueNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
-            @PathVariable("playName") String playName, //
-            @PathVariable("channelId") String channelId) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return playProxy.createNewLaunchByPlayChannelAndState(tenant.getId(), playName, channelId, LaunchState.Queued, null,
-                null, null, null, null, false);
-    }
     // --------
     // Channels
     // --------
@@ -229,6 +218,7 @@ public class PlayResource {
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Create play launch for a given play")
+    @Deprecated
     public PlayLaunch createPlayLaunch( //
             @PathVariable("playName") String playName, @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
@@ -246,6 +236,7 @@ public class PlayResource {
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Update play launch for a given play")
+    @Deprecated
     public PlayLaunch updatePlayLaunch( //
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
@@ -265,6 +256,7 @@ public class PlayResource {
     @ResponseBody
     @PreAuthorize("hasRole('Create_PLS_Plays')")
     @ApiOperation(value = "Launch a given play")
+    @Deprecated
     public PlayLaunch launchPlay(@PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();

@@ -43,7 +43,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private String playGroupName2 = "playGroup2";
 
     @Override
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         String existingTenant = null;// "LETest1546299140564";
 
@@ -53,7 +53,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         tenant = testPlayCreationHelper.getTenant();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCreate() {
         // Test creating a new playGroup
         playGroup1 = new PlayGroup(tenant, playGroupName1, "admin.le.com", "admin.le.com");
@@ -76,7 +76,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(playGroup2.getDisplayName(), playGroupName2);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testCreate")
+    @Test(groups = "deployment-app", dependsOnMethods = "testCreate")
     public void testGetById() {
         sleepToAllowDbWriterReaderSync();
         // Test getting the newly made playGroup by Id
@@ -86,11 +86,11 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(getPlayGroup.getDisplayName(), playGroup1.getDisplayName());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testGetById")
+    @Test(groups = "deployment-app", dependsOnMethods = "testGetById")
     public void testAttachToPlay() {
         // Test attaching a play to playgroup
         play = testPlayCreationHelper.getPlay();
-        Set<PlayGroup> set = new HashSet<PlayGroup>();
+        Set<PlayGroup> set = new HashSet<>();
         set.add(playGroup1);
         set.add(playGroup2);
         play.setPlayGroups(set);
@@ -100,7 +100,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         sleepToAllowDbWriterReaderSync();
         Assert.assertNotNull(updatedPlay);
         Assert.assertNotNull(updatedPlay.getPlayGroups());
-        List<PlayGroup> playGroupListFromPlay = new ArrayList<PlayGroup>(updatedPlay.getPlayGroups());
+        List<PlayGroup> playGroupListFromPlay = new ArrayList<>(updatedPlay.getPlayGroups());
 
         List<PlayGroup> playGroup1List = playGroupListFromPlay.stream()
                 .filter(pl -> pl.getDisplayName().equals(playGroupName1)).collect(Collectors.toList());
@@ -121,7 +121,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testAttachToPlay")
+    @Test(groups = "deployment-app", dependsOnMethods = "testAttachToPlay")
     public void testUpdate() {
         // Test updating the newly made playGroup
         String updatedPlayGroupName = "playGroupTestPostUpdate";
@@ -133,7 +133,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(updatedPlayGroup.getDisplayName(), updatedPlayGroupName);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testUpdate")
+    @Test(groups = "deployment-app", dependsOnMethods = "testUpdate")
     public void testDelete() {
         // Test deleting playGroup
         playProxy.deletePlayGroupById(tenant.getId(), playGroup1.getId());
@@ -149,8 +149,8 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(getPlay.getPlayGroups().size(), 1);
     }
 
-    @AfterClass(groups = { "deployment" })
-    public void teardown() throws Exception {
+    @AfterClass(groups = { "deployment-app" })
+    public void teardown() {
         testPlayCreationHelper.cleanupArtifacts(true);
         log.info("Cleaned up all artifacts");
     }

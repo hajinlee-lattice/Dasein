@@ -63,7 +63,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     private String playName;
     private List<PlayType> playTypes;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
         setupTestEnvironment();
 
@@ -93,7 +93,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         play = createDefaultPlay();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment-app")
     public void testCreateAndGet() {
         Play newPlay = playService.createOrUpdate(play, mainTestTenant.getId());
         assertPlay(newPlay);
@@ -113,7 +113,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testCreateAndGet" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testCreateAndGet" })
     public void testFindDependingAttributes() {
         createTalkingPoints();
         List<AttributeLookup> attributes = playService.findDependingAttributes(playService.getAllPlays());
@@ -122,7 +122,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(attributes.size(), 5);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testFindDependingAttributes" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testFindDependingAttributes" })
     public void testFindDependingPlays() {
         List<String> attributes = new ArrayList<>();
         attributes.add("Account.DUNS");
@@ -211,7 +211,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testDelete" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testDelete" })
     public void testDeleteViaRatingEngine() {
         Play newPlay = playService.createOrUpdate(createDefaultPlay(), mainTestTenant.getId());
         assertPlay(newPlay);
@@ -273,7 +273,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testDeleteViaRatingEngine" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testDeleteViaRatingEngine" })
     public void testDeleteViaSegment() {
         Play newPlay = playService.getPlayByName(playName, true);
         assertPlay(newPlay);

@@ -62,6 +62,12 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         if (StringUtils.isNotBlank(playLaunch.getTableName())) {
             existingPlayLaunch.setTableName(playLaunch.getTableName());
         }
+        if (playLaunch.getParentDeltaWorkflowId() != null) {
+            existingPlayLaunch.setParentDeltaWorkflowId(playLaunch.getParentDeltaWorkflowId());
+        }
+        if (playLaunch.getLaunchWorkflowId() != null) {
+            existingPlayLaunch.setLaunchWorkflowId(playLaunch.getLaunchWorkflowId());
+        }
 
         // Account stats
         if (playLaunch.getAccountsSelected() != null) {
@@ -131,7 +137,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             existingPlayLaunch.setRemoveContactsTable(playLaunch.getRemoveContactsTable());
         }
 
-        // TODO: Keeping here for backwards compatibility with UI, should go away after M32
+        // Launch Configuration
         if (CollectionUtils.isNotEmpty(playLaunch.getBucketsToLaunch())) {
             existingPlayLaunch.setBucketsToLaunch(playLaunch.getBucketsToLaunch());
         }
@@ -280,15 +286,16 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         return playLaunchDao.findTotalCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp,
                 orgId, externalSysType);
     }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public PlayLaunch getLaunchFullyLoaded(String playLaunchId){
-        if(playLaunchId != null) {
+    public PlayLaunch getLaunchFullyLoaded(String playLaunchId) {
+        if (playLaunchId != null) {
             PlayLaunch launchRetrieved = this.findByLaunchId(playLaunchId);
             Hibernate.initialize(launchRetrieved.getPlayLaunchChannel());
             Hibernate.initialize(launchRetrieved.getPlay());
             return launchRetrieved;
         }
-        throw new NullPointerException(String.format("Play launch can not be found"));
+        throw new NullPointerException("Play launch can not be found");
     }
 }

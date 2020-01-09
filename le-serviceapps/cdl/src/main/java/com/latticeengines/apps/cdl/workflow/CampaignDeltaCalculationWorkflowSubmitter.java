@@ -71,6 +71,5 @@ public class CampaignDeltaCalculationWorkflowSubmitter extends WorkflowSubmitter
             Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
             return job.getPid();
         }
-
     }
 }

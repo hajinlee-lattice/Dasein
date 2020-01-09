@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayType;
-import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -197,6 +196,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         delete("Delete a play", url);
     }
 
+    @Deprecated
     public PlayLaunch createPlayLaunch(String customerSpace, String playName, PlayLaunch playLaunch) {
         String url = constructUrl(URL_PREFIX + "/{playName}/launches", shortenCustomerSpace(customerSpace), playName);
         log.info("url is " + url);
@@ -407,28 +407,33 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return put("update play launch channel", url, playLaunchChannel, PlayLaunchChannel.class);
     }
 
-    public PlayLaunch createNewLaunchByPlayChannelAndState(String customerSpace, String playName, String channelId,
-            LaunchState state, String addAccountTable, String completeContactsTable, String removeAccountsTable,
-            String addContactsTable, String removeContactsTable, boolean isAutoLaunch) {
+    public Long createLaunchByChannelAndKickoffWorkflow(String customerSpace, String playName, String channelId,
+                                                        boolean isAutoLaunch) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/kickoff-workflow",
+                shortenCustomerSpace(customerSpace), playName, channelId);
+        List<String> params = new ArrayList<>();
+        params.add("is-auto-launch=" + isAutoLaunch);
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
+        log.info("url is " + url);
+        return put("Kickoff Launch Workflow for play launch channel", url, null, Long.class);
+    }
+
+    public Long kickoffWorkflowForLaunch(String customerSpace, String playName, String channelId,
+                                                        String launchId) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}/kickoff-launch",
+                shortenCustomerSpace(customerSpace), playName, channelId);
+        List<String> params = new ArrayList<>();
+        log.info("url is " + url);
+        return put("Kickoff Launch Workflow for play launch", url, null, Long.class);
+    }
+
+    public PlayLaunch createNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId,
+            boolean isAutoLaunch, PlayLaunch launch) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/launch",
                 shortenCustomerSpace(customerSpace), playName, channelId);
         List<String> params = new ArrayList<>();
-        params.add("state=" + state);
-        if (StringUtils.isNotBlank(addAccountTable)) {
-            params.add(PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE + "=" + addAccountTable);
-        }
-        if (StringUtils.isNotBlank(completeContactsTable)) {
-            params.add(PlayUtils.COMPLETE_CONTACTS_TABLE + "=" + completeContactsTable);
-        }
-        if (StringUtils.isNotBlank(removeAccountsTable)) {
-            params.add(PlayUtils.REMOVED_ACCOUNTS_DELTA_TABLE + "=" + removeAccountsTable);
-        }
-        if (StringUtils.isNotBlank(addContactsTable)) {
-            params.add(PlayUtils.ADDED_CONTACTS_DELTA_TABLE + "=" + addContactsTable);
-        }
-        if (StringUtils.isNotBlank(removeContactsTable)) {
-            params.add(PlayUtils.REMOVED_CONTACTS_DELTA_TABLE + "=" + removeContactsTable);
-        }
         if (isAutoLaunch) {
             params.add("is-auto-launch=true");
         }
@@ -436,8 +441,8 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
             url += "?" + StringUtils.join(params, "&");
         }
         log.info("url is " + url);
-        return post("Queuing a new PlayLaunch for a given play and channel with delta tables", url, null,
-                PlayLaunch.class);
+        return post("Creating a new PlayLaunch for a given play and channel with provided launch properties", url,
+                launch, PlayLaunch.class);
     }
 
     public PlayLaunchChannel getChannelById(String customerSpace, String playName, String channelId) {
