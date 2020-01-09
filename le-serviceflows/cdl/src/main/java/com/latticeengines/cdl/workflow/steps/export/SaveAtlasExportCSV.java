@@ -202,19 +202,20 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         Map<Category, Map<String, MutableInt>> displayNameIndexMap = new HashMap<>();
         schema.forEach(cm -> {
             String originalDisplayName = cm.getDisplayName();
+            String originalDisplayNameLowerCase = originalDisplayName.toLowerCase();
             Map<String, MutableInt> indexMap = displayNameIndexMap.get(cm.getCategory());
             int indexToAppend = 1;
             if (MapUtils.isNotEmpty(indexMap)) {
-                MutableInt index = indexMap.get(originalDisplayName.toLowerCase());
+                MutableInt index = indexMap.get(originalDisplayNameLowerCase);
                 if (index != null) {
                     index.increment();
                     indexToAppend = index.getValue();
                 } else {
-                    indexMap.put(originalDisplayName.toLowerCase(), new MutableInt(indexToAppend));
+                    indexMap.put(originalDisplayNameLowerCase, new MutableInt(indexToAppend));
                 }
             } else {
                 indexMap = new HashMap<>();
-                indexMap.put(originalDisplayName.toLowerCase(), new MutableInt(indexToAppend));
+                indexMap.put(originalDisplayNameLowerCase, new MutableInt(indexToAppend));
                 displayNameIndexMap.put(cm.getCategory(), indexMap);
             }
             setDisplayNameMap(cm, exportEntity, outputCols, displayNameMap, originalDisplayName, indexToAppend);
