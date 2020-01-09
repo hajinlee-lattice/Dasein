@@ -254,6 +254,7 @@ public class ProcessAccountWithAdvancedMatchDeploymentTestNG  extends ProcessAcc
                 "matchAccount", //
                 "matchContact", //
                 "entityMatchCheckpoint", //
+                "generateAccountLookup", //
                 "mergeAccount", //
                 "enrichAccount", //
                 "enrichAccount", //
