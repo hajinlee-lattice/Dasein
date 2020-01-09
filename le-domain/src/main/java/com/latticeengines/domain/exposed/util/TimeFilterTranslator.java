@@ -184,8 +184,14 @@ public class TimeFilterTranslator implements Serializable {
                     "Operand has to be larger than or equal to 1, but " + vals + " was provided.");
         }
         int currentPeriodId = PeriodStrategy.Template.Day.name().equals(period) ? DateTimeUtils.dateToDayPeriod(evaluationDate) : currentPeriodIds.get(period);
-        int targetPeriod = currentPeriodId - lastDays + 1;
-        return Pair.of(targetPeriod, currentPeriodId);
+        int targetPeriodId = currentPeriodId;
+        if (PeriodStrategy.Template.Day.name().equals(period)) {
+            targetPeriodId = DateTimeUtils.subtractDays(currentPeriodId, lastDays - 1);
+        }else{
+            targetPeriodId = currentPeriodId - lastDays + 1;
+        }
+
+        return Pair.of(targetPeriodId, currentPeriodId);
     }
 
     private Pair<Integer, Integer> translateWithIn(String period, List<Object> vals) {
