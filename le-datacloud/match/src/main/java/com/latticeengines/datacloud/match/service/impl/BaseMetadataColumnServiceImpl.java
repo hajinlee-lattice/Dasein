@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
@@ -119,7 +120,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
             dataCloudVersion = getLatestVersion();
         }
         if (page == null && size == null) {
-            return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+            return Flux.fromIterable(getMetadataColumns(dataCloudVersion)).parallel();
         } else if (size == null || page == null) {
             throw new IllegalArgumentException("Must specify page and size when asking for a particular page");
         } else {
