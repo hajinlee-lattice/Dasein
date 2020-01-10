@@ -152,9 +152,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     protected GlobalAuthUser createGlobalAuthUser(String userName, User user, boolean externalIntegUser) {
-        String emailInUpperCase = user.getEmail().toUpperCase();
-        if (externalIntegUser && StringUtils.isNotBlank(user.getEmail()) &&
-                (emailInUpperCase.endsWith(EmailUtils.LATTICE_ENGINES_COM) || emailInUpperCase.endsWith(EmailUtils.DNB_COM))) {
+        if (externalIntegUser && EmailUtils.isInternalUser(user.getEmail())) {
             throw new LedpException(LedpCode.LEDP_19004);
         }
         GlobalAuthUser userData;
@@ -905,8 +903,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             return false;
         }
         // disable zendesk feature for Lattice email
-        String emailInUpperCase = email.trim().toUpperCase();
-        return !(emailInUpperCase.endsWith(EmailUtils.LATTICE_ENGINES_COM) || emailInUpperCase.endsWith(EmailUtils.DNB_COM));
+        return !EmailUtils.isInternalUser(email);
     }
 
     /**

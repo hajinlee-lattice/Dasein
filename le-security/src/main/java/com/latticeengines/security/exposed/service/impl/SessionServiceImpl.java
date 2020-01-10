@@ -70,9 +70,7 @@ public class SessionServiceImpl implements SessionService {
             throw new LedpException(LedpCode.LEDP_19005);
         }
         //PLS-6543. Do not allow usernames with lattice-email id.
-        String userIDInUpperCase = samlLoginResp.getUserId().toUpperCase();
-        if(userIDInUpperCase.endsWith(EmailUtils.LATTICE_ENGINES_COM) ||
-                userIDInUpperCase.endsWith(EmailUtils.DNB_COM)) {
+        if(EmailUtils.isInternalUser(samlLoginResp.getUserId())) {
             throw new LedpException(LedpCode.LEDP_19004);
         }
     }

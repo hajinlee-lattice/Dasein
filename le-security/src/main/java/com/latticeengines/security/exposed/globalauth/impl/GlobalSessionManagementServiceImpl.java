@@ -254,7 +254,8 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
                 session.setAccessLevel(level.name());
             } catch (NullPointerException e) {
                 if (!GARights.isEmpty()) {
-                    AccessLevel level = isInternalEmail(session.getEmailAddress()) ? AccessLevel.INTERNAL_USER
+                    AccessLevel level = EmailUtils.isInternalUser(session.getEmailAddress()) ?
+                            AccessLevel.INTERNAL_USER
                             : AccessLevel.EXTERNAL_USER;
                     session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
                     session.setAccessLevel(level.name());
@@ -265,11 +266,6 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             }
         }
 
-        private boolean isInternalEmail(String email) {
-            String emailInUpperCase = email.toUpperCase();
-            return emailInUpperCase.endsWith(EmailUtils.LATTICE_ENGINES_COM) ||
-                    emailInUpperCase.endsWith(EmailUtils.DNB_COM);
-        }
     }
 
     static class TenantBuilder {
