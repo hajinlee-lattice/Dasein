@@ -362,6 +362,11 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
                     if (dataFeedTaskId == null) {
                         continue;
                     }
+                    Long workflowId = importActionConfiguration.getWorkflowId();
+                    // workflow id is null means the workflow is failed
+                    if (workflowId == null) {
+                        continue;
+                    }
                     DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, dataFeedTaskId);
                     if (dataFeedTask == null) {
                         continue;
@@ -404,7 +409,6 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
     private String getBundleFilePath(Action action, String customerSpace) {
         ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
         Long workflowId = importActionConfiguration.getWorkflowId();
-        Preconditions.checkNotNull(workflowId, "configuration is null for bundle");
         Job job = workflowProxy.getJobByWorkflowJobPid(customerSpace, workflowId);
         Map<String, String> inputs = job.getInputs();
         String filePath = inputs.get(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH);
