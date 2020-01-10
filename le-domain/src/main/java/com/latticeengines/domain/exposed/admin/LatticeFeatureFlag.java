@@ -7,6 +7,10 @@ import com.latticeengines.domain.exposed.pls.PlsFeatureFlag;
 
 public enum LatticeFeatureFlag {
 
+    ALPHA_FEATURE("AlphaFeature", "Allows alpha features"), //
+    BETA_FEATURE("BetaFeature", "Allows beta features"), //
+    PROTOTYPE_FEATURE("PrototypeFeature", "Allows prototype features"), //
+
     DANTE("Dante", "Dante"), //
     ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file"), //
     ENABLE_DATA_ENCRYPTION("EnableDataEncryption", "Enable data encryption"), //
@@ -36,9 +40,6 @@ public enum LatticeFeatureFlag {
     IMPORT_WITHOUT_ID("ImportWithoutIds", "Allow import without id columns."), //
     ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"), //
     MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"), //
-    PROTOTYPE_FEATURE("PrototypeFeature", "Allows prototype features"), //
-    ALPHA_FEATURE("AlphaFeature", "Allows alpha features"), //
-    BETA_FEATURE("BetaFeature", "Allows beta features"), //
     ENABLE_MULTI_TEMPLATE_IMPORT("EnableMultiTemplateImport", "Allows multiple templates for import"), //
     ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
     ENABLE_LINKEDIN_INTEGRATION("EnableLinkedInIntegration", "Enable LinkedIn integration"), //
