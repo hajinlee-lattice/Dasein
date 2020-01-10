@@ -11,7 +11,8 @@ public enum LatticeProduct {
     LPA("Lead Prioritization"), //
     LPA3("Lead Prioritization 3.0"), //
     PD("Prospect Discovery"), //
-    CG("Customer Growth");
+    CG("Customer Growth"), //
+    DCP("Data Cloud Portal");
 
     private static Map<String, LatticeProduct> lookup = new HashMap<>();
     private static List<String> names;

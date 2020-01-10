@@ -148,9 +148,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_PRODUCT_HIERARCHY_IMPORT, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.PLAYBOOK_MODULE, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.LAUNCH_PLAY_TO_MAP_SYSTEM, cg);
-        createDefaultFeatureFlag(LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.IMPORT_WITHOUT_ID, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_TARGET_SCORE_DERIVATION, cg).setDefaultValue(true);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_APS_IMPUTATION, cg).setDefaultValue(true);
@@ -163,10 +161,15 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.ADVANCED_MODELING, cg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALWAYS_ON_CAMPAIGNS, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.MIGRATION_TENANT, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.PROTOTYPE_FEATURE, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.BETA_FEATURE, cg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, cg).setDefaultValue(false);
+
+        // DCP & CG
+        Collection<LatticeProduct> dcpCg = Arrays.asList(LatticeProduct.CG, LatticeProduct.DCP);
+        createDefaultFeatureFlag(LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, dcpCg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, dcpCg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, dcpCg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.PROTOTYPE_FEATURE, dcpCg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, dcpCg).setDefaultValue(false);
+        createDefaultFeatureFlag(LatticeFeatureFlag.BETA_FEATURE, dcpCg).setDefaultValue(false);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,

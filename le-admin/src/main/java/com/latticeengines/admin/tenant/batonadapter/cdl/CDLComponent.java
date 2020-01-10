@@ -1,5 +1,6 @@
 package com.latticeengines.admin.tenant.batonadapter.cdl;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class CDLComponent extends LatticeComponent {
 
     @Override
     public Set<LatticeProduct> getAssociatedProducts() {
-        return new HashSet<>(Collections.singletonList(LatticeProduct.CG));
+        return new HashSet<>(Arrays.asList(LatticeProduct.CG, LatticeProduct.DCP));
     }
 
     @Override
