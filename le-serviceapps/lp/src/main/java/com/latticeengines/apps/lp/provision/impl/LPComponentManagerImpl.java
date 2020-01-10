@@ -95,10 +95,20 @@ public class LPComponentManagerImpl implements LPComponentManager {
         List<LatticeProduct> products = productList.stream().map(LatticeProduct::fromName).collect(Collectors.toList());
         if (products.contains(LatticeProduct.LPA3) && products.contains(LatticeProduct.CG)) {
             tenant.setUiVersion("4.0");
+        } else if (products.contains(LatticeProduct.LPA3) && products.contains(LatticeProduct.DCP)) {
+            tenant.setUiVersion("4.0");
         } else if (products.contains(LatticeProduct.LPA3) || products.contains(LatticeProduct.PD)) {
             tenant.setUiVersion("3.0");
         } else if (products.contains(LatticeProduct.LPA)) {
             tenant.setUiVersion("2.0");
+        }
+
+        if (products.contains(LatticeProduct.CG) && products.contains(LatticeProduct.DCP)) {
+            tenant.setEntitledApps("Lattice,DnB");
+        } else if (products.contains(LatticeProduct.DCP)) {
+            tenant.setEntitledApps("DnB");
+        } else {
+            tenant.setEntitledApps("Lattice");
         }
 
         String tenantStatus = installDocument.getProperty(ComponentConstants.Install.TENANT_STATUS);
@@ -111,8 +121,7 @@ public class LPComponentManagerImpl implements LPComponentManager {
             tenant.setTenantType(TenantType.valueOf(tenantType));
         }
         tenant.setContract(contract);
-        log.info("registered tenant's status is " + String.valueOf(tenant.getStatus()) + ", tenant type is "
-                + String.valueOf(tenant.getTenantType()));
+        log.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is " + tenant.getTenantType());
 
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails, userName);
     }

@@ -10,6 +10,8 @@ BEGIN
     UPDATE `PLAY_LAUNCH`
       SET IS_SCHEDULED_LAUNCH = CASE WHEN CREATED_BY = 'build-admin@lattice-engines.com' THEN 1 ELSE 0 END; -- build@lattice-engines.com for QA
 
+    ALTER TABLE `TENANT` ADD COLUMN `ENTITLED_APPS` varchar(255);
+
 END;
 //
 DELIMITER;
