@@ -228,21 +228,7 @@ public class PlayResource {
         }
         playLaunchChannel = playLaunchChannelService.create(playName, playLaunchChannel);
         if (launchNow) {
-            PlayLaunch launch;
-            if (batonService.isEnabled(CustomerSpace.parse(customerSpace),
-                    LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
-                launch = playLaunchChannelService.createNewLaunchForChannelByState(playLaunchChannel.getPlay(),
-                        playLaunchChannel, LaunchState.UnLaunched, false);
-                Long workflowId = schedule(customerSpace, playName, playLaunchChannel.getId(), launch.getLaunchId());
-                log.info(String.format(
-                        "Scheduled Delta Calculation workflow for Play: %s, Channel: %s and Launch: %s with WorkflowPID: %s",
-                        playName, playLaunchChannel.getId(), launch.getLaunchId(), workflowId.toString()));
-            } else {
-                launch = playLaunchChannelService.queueNewLaunchForChannel(playLaunchChannel.getPlay(),
-                        playLaunchChannel);
-            }
-            log.info(String.format("Queued new launch for play:%s and channel: %s : %s", playName, playLaunchChannel,
-                    launch.getLaunchId()));
+            createLaunchByChannelAndKickoffWorkflow(customerSpace, playName, playLaunchChannel.getId(), false);
         }
         return playLaunchChannel;
     }
@@ -267,21 +253,7 @@ public class PlayResource {
         }
         playLaunchChannel = playLaunchChannelService.update(playName, playLaunchChannel);
         if (launchNow) {
-            PlayLaunch launch;
-            if (batonService.isEnabled(CustomerSpace.parse(customerSpace),
-                    LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
-                launch = playLaunchChannelService.createNewLaunchForChannelByState(playLaunchChannel.getPlay(),
-                        playLaunchChannel, LaunchState.UnLaunched, false);
-                Long workflowId = schedule(customerSpace, playName, channelId, launch.getLaunchId());
-                log.info(String.format(
-                        "Scheduled Delta Calculation workflow for Play: %s, Channel: %s and Launch: %s with WorkflowPID: %s",
-                        playName, channelId, launch.getLaunchId(), workflowId.toString()));
-            } else {
-                launch = playLaunchChannelService.queueNewLaunchForChannel(playLaunchChannel.getPlay(),
-                        playLaunchChannel);
-            }
-            log.info(String.format("Queued new launch for play:%s and channel: %s : %s", playName, channelId,
-                    launch.getLaunchId()));
+            createLaunchByChannelAndKickoffWorkflow(customerSpace, playName, channelId, false);
         }
         return playLaunchChannel;
     }
@@ -298,16 +270,11 @@ public class PlayResource {
     @PostMapping(value = "/{playName}/channels/{channelId}/launch", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Queue a new Play launch for a given play, channel with delta tables")
-    public PlayLaunch createLaunchByPlayChannelAndState(@PathVariable String customerSpace, //
+    public PlayLaunch createNewLaunchByPlayAndChannel(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("channelId") String channelId, //
-            @RequestParam(value = "state") LaunchState state, //
-            @RequestParam(value = PlayUtils.ADDED_ACCOUNTS_DELTA_TABLE, required = false) String addAccountsTable, //
-            @RequestParam(value = PlayUtils.COMPLETE_CONTACTS_TABLE, required = false) String completeContactsTable, //
-            @RequestParam(value = PlayUtils.REMOVED_ACCOUNTS_DELTA_TABLE, required = false) String removeAccountsTable, //
-            @RequestParam(value = PlayUtils.ADDED_CONTACTS_DELTA_TABLE, required = false) String addContactsTable, //
-            @RequestParam(value = PlayUtils.REMOVED_CONTACTS_DELTA_TABLE, required = false) String removeContactsTable, //
-            @RequestParam(value = "is-auto-launch", required = false) boolean isAutoLaunch) {
+            @RequestParam(value = "is-auto-launch", required = false) boolean isAutoLaunch, //
+            @RequestBody PlayLaunch launch) {
         if (StringUtils.isEmpty(playName)) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Play Id" });
         }
@@ -325,28 +292,51 @@ public class PlayResource {
         channel.setPlay(play);
         channel.setTenant(MultiTenantContext.getTenant());
         channel.setTenantId(MultiTenantContext.getTenant().getPid());
-
-        if (state == LaunchState.UnLaunched) {
-            return playLaunchChannelService.createNewLaunchForChannelByState(play, channel, state, isAutoLaunch);
-        }
-        if (state == LaunchState.Failed) {
-            return playLaunchChannelService.createNewLaunchForChannelByState(play, channel, state, isAutoLaunch);
-        }
-
-        return playLaunchChannelService.queueNewLaunchForChannel(play, channel, addAccountsTable, completeContactsTable,
-                removeAccountsTable, addContactsTable, removeContactsTable, isAutoLaunch);
+        return playLaunchChannelService.createNewLaunchByPlayAndChannel(play, channel, launch, isAutoLaunch);
     }
 
     @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-workflow", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Internal only use API to kick off campaignLaunch workflow immediately for a channel")
-    @Deprecated
-    public String kickOffWorkflowFromChannel(@PathVariable String customerSpace, //
+    public Long createLaunchByChannelAndKickoffWorkflow(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
-            @PathVariable("channelId") String channelId) {
-        PlayLaunch playLaunch = createLaunchByPlayChannelAndState(customerSpace, playName, channelId,
-                LaunchState.UnLaunched, null, null, null, null, null, false);
-        return kickOffLaunch(customerSpace, playName, playLaunch.getId());
+            @PathVariable("channelId") String channelId, //
+            @RequestParam(value = "is-auto-launch", required = false) boolean isAutoLaunch) {
+        if (StringUtils.isEmpty(playName)) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Play Id" });
+        }
+        if (StringUtils.isEmpty(channelId)) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] { "Empty or blank Channel Id" });
+        }
+        Play play = playService.getPlayByName(playName, false);
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
+        }
+
+        PlayLaunchChannel channel = playLaunchChannelService.findById(channelId);
+        if (channel == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No channel found by channel id: " + channelId });
+        }
+
+        PlayLaunch launch;
+        Long workflowId;
+        if (batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
+            launch = isAutoLaunch ? null
+                    : playLaunchChannelService.createNewLaunchByPlayAndChannel(play, channel, null, false);
+            String launchId = isAutoLaunch ? null : launch.getLaunchId();
+            workflowId = schedule(customerSpace, playName, channelId, launchId);
+            log.info(String.format(
+                    "Scheduled Delta Calculation workflow for Play: %s, Channel: %s and Launch: %s with WorkflowPID: %s",
+                    playName, channelId, launchId, workflowId.toString()));
+        } else {
+            launch = playLaunchChannelService.createNewLaunchByPlayAndChannel(play, channel, null, isAutoLaunch);
+            workflowId = kickoffWorkflowForLaunch(customerSpace, playName, launch.getLaunchId());
+            log.info(String.format("Created new launch for play:%s and channel: %s, LaunchId: %s", playName, channelId,
+                    launch.getLaunchId()));
+        }
+
+        return workflowId;
     }
 
     @PostMapping(value = "/{playName}/channels/{channelId}/kickoff-delta-calculation", headers = "Accept=application/json")
@@ -360,6 +350,13 @@ public class PlayResource {
             Long workflowPid = campaignDeltaCalculationWorkflowSubmitter.submit(customerSpace, playName, channelId,
                     launchId);
             playLaunchChannelService.updateLastDeltaWorkflowId(playName, channelId, workflowPid);
+            if (StringUtils.isNotBlank(launchId)) {
+                PlayLaunch launch = new PlayLaunch();
+                launch.setLaunchId(launchId);
+                launch.setParentDeltaWorkflowId(workflowPid);
+                launch.setLaunchState(LaunchState.PreProcessing);
+                playLaunchService.update(launch);
+            }
             return workflowPid;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18182,
@@ -464,7 +461,7 @@ public class PlayResource {
     @PostMapping(value = "/{playName}/launches/{launchId}/kickoff-launch", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Launch a play launch for a given play")
-    public String kickOffLaunch(@PathVariable String customerSpace, //
+    public Long kickoffWorkflowForLaunch(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId) {
         if (StringUtils.isEmpty(playName)) {
@@ -480,19 +477,38 @@ public class PlayResource {
         if (playLaunch == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
         }
+        PlayLaunchChannel channel = playLaunchService.findPlayLaunchChannelByLaunchId(launchId);
         playLaunch.setPlay(play);
-        PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
-        if (play.getRatingEngine() != null) {
-            validateNonEmptyTargetsForLaunch(customerSpace, play, playLaunch);
+        playLaunch.setPlayLaunchChannel(channel);
+        Long workflowPid;
+        if (batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)) {
+            if (!hasDeltaTables(playLaunch)) {
+                throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                        "Cannot kick off launch workflow since data tables for launch are not populated" });
+            }
+            workflowPid = deltaCampaignLaunchWorkflowSubmitter.submit(playLaunch);
+        } else {
+            PlayUtils.validatePlayLaunchBeforeLaunch(playLaunch, play);
+            if (play.getRatingEngine() != null) {
+                validateNonEmptyTargetsForLaunch(customerSpace, play, playLaunch);
+            }
+            workflowPid = campaignLaunchWorkflowSubmitter.submit(playLaunch);
         }
+        playLaunch.setLaunchWorkflowId(workflowPid);
+        playLaunch.setLaunchState(LaunchState.Launching);
+        Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
+        Long totalAvailableContacts = play.getTargetSegment().getContacts();
 
-        if (batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_DELTA_CALCULATION)
-                && hasDeltaTables(playLaunch)) {
-            return deltaCampaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
-        }
-
-        return campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
-
+        playLaunch.setAccountsSelected(totalAvailableRatedAccounts != null ? totalAvailableRatedAccounts : 0L);
+        playLaunch.setAccountsSuppressed(0L);
+        playLaunch.setAccountsErrored(0L);
+        playLaunch.setAccountsLaunched(0L);
+        playLaunch.setContactsSelected(totalAvailableContacts != null ? totalAvailableContacts : 0L);
+        playLaunch.setContactsLaunched(0L);
+        playLaunch.setContactsSuppressed(0L);
+        playLaunch.setContactsErrored(0L);
+        playLaunchService.update(playLaunch);
+        return workflowPid;
     }
 
     private boolean hasDeltaTables(PlayLaunch playLaunch) {
@@ -505,6 +521,7 @@ public class PlayResource {
     @PostMapping(value = "/{playName}/launches/{launchId}/launch", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Launch a play launch for a given play")
+    @Deprecated
     public PlayLaunch launchPlay(@PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
@@ -533,12 +550,14 @@ public class PlayResource {
         // this dry run flag is useful in writing robust testcases
         if (!isDryRunMode) {
             String appId;
+            Long workflowPid;
             if (useSpark) {
-                appId = campaignLaunchWorkflowSubmitter.submit(playLaunch).toString();
+                workflowPid = campaignLaunchWorkflowSubmitter.submit(playLaunch);
+                playLaunch.setLaunchWorkflowId(workflowPid);
             } else {
                 appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+                playLaunch.setApplicationId(appId);
             }
-            playLaunch.setApplicationId(appId);
         }
 
         playLaunch.setLaunchState(LaunchState.Launching);

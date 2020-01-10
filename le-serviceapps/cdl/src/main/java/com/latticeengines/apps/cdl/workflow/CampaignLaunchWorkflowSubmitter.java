@@ -23,6 +23,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationId;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -30,7 +31,9 @@ import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CampaignLaunchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("campaignLaunchWorkflowSubmitter")
 public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
@@ -45,7 +48,10 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private LookupIdMappingService lookupIdMappingService;
 
-    public ApplicationId submit(PlayLaunch playLaunch) {
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    public Long submit(PlayLaunch playLaunch) {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "campaignLaunchWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_NAME, playLaunch.getPlay().getName());
@@ -67,7 +73,14 @@ public class CampaignLaunchWorkflowSubmitter extends WorkflowSubmitter {
                 .contactAttributeExportDiplayNames(
                         getContactDisplayNameMap(playLaunch.getDestinationSysType(), lookupIdMap)) //
                 .exportPublishPlayLaunch(playLaunch, enableExternalLaunch(playLaunch, lookupIdMap)).build();
-        return workflowJobService.submit(configuration);
+        ApplicationId appId = workflowJobService.submit(configuration);
+
+        if (FakeApplicationId.isFakeApplicationId(appId.toString())) {
+            return FakeApplicationId.toWorkflowJobPid(appId.toString());
+        } else {
+            Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), getCustomerSpace().getTenantId());
+            return job.getPid();
+        }
     }
 
     private Map<String, String> getContactDisplayNameMap(CDLExternalSystemType destinationSysType,

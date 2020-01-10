@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -93,7 +92,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setCreatedBy(CREATED_BY);
         play.setUpdatedBy(CREATED_BY);
         play.setTargetSegment(testSegment);
-        
+
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
 
@@ -167,9 +166,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         List<PlayLaunch> playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 0);
-        playLaunchList.stream().forEach(l -> {
-            Assert.assertEquals(l.getPlay().getPid(), play.getPid());
-        });
+        playLaunchList.forEach(l -> Assert.assertEquals(l.getPlay().getPid(), play.getPid()));
 
         List<LaunchState> states1 = new ArrayList<>();
         states1.add(LaunchState.UnLaunched);
@@ -178,7 +175,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 6);
         Assert.assertEquals(playLaunchList.get(4).getPid(), retreivedPlayLaunch.getPid());
-        playLaunchList.stream().forEach(l -> {
+        playLaunchList.forEach(l -> {
             Assert.assertEquals(l.getPlay().getPid(), play.getPid());
             Assert.assertTrue(states1.contains(l.getLaunchState()));
         });
@@ -189,7 +186,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 6);
         Assert.assertEquals(playLaunchList.get(4).getPid(), retreivedPlayLaunch.getPid());
-        playLaunchList.stream().forEach(l -> {
+        playLaunchList.forEach(l -> {
             Assert.assertEquals(l.getPlay().getPid(), play.getPid());
             Assert.assertTrue(states1.contains(l.getLaunchState()));
         });
@@ -198,9 +195,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 6);
         Assert.assertEquals(playLaunchList.get(4).getPid(), retreivedPlayLaunch.getPid());
-        playLaunchList.stream().forEach(l -> {
-            Assert.assertEquals(l.getLaunchState(), LaunchState.UnLaunched);
-        });
+        playLaunchList.forEach(l -> Assert.assertEquals(l.getLaunchState(), LaunchState.UnLaunched));
 
         retreivedPlayLaunch = playLaunchEntityMgr.findLatestByPlayId(play.getPid(), states);
         Assert.assertNotNull(retreivedPlayLaunch);
@@ -215,7 +210,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
     public void testUpdateLaunch() throws InterruptedException {
-        List<LaunchState> states = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.UnLaunched });
+        List<LaunchState> states = Arrays.asList(LaunchState.Failed, LaunchState.UnLaunched);
 
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 6, null, null);
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org1,
@@ -274,8 +269,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     public void testCountDashboard() {
 
         Long badPlayId = Long.MAX_VALUE;
-        List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
-        List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+        List<LaunchState> goodStates = Arrays.asList(LaunchState.Launched, LaunchState.Launching);
+        List<LaunchState> badStates = Arrays.asList(LaunchState.Failed, LaunchState.Launching);
 
         checkCountForDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, null, null);
         checkCountForDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, org1,
@@ -311,8 +306,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testCountDashboard" })
     public void testEntriesDashboard() {
         Long badPlayId = Long.MAX_VALUE;
-        List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
-        List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+        List<LaunchState> goodStates = Arrays.asList(LaunchState.Launched, LaunchState.Launching);
+        List<LaunchState> badStates = Arrays.asList(LaunchState.Failed, LaunchState.Launching);
 
         checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L,
                 null, null);
@@ -397,11 +392,11 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testEntriesDashboard" })
-    public void testCumulativeStatsDashboard() throws Exception {
+    public void testCumulativeStatsDashboard() {
 
         Long badPlayId = Long.MAX_VALUE;
-        List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
-        List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
+        List<LaunchState> goodStates = Arrays.asList(LaunchState.Launched, LaunchState.Launching);
+        List<LaunchState> badStates = Arrays.asList(LaunchState.Failed, LaunchState.Launching);
 
         checkForCumulativeStatsDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, 0L,
                 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, null, null);
@@ -434,8 +429,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 externalSystemType.name());
 
         checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, 1L, 0L, 0L, 0L, 0L, 9L, 3L, 20L, 10L, 0L, 0L,
-                2L, 2L,
-                org1, externalSystemType.name());
+                2L, 2L, org1, externalSystemType.name());
 
         //
 
@@ -453,8 +447,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 externalSystemType.name());
 
         checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, 1L, 0L, 0L, 0L, 0L, 2L, 7L, 21L, 22L, 0L, 0L,
-                3L, 3L,
-                org2, externalSystemType.name());
+                3L, 3L, org2, externalSystemType.name());
 
     }
 
@@ -479,7 +472,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
+    public void teardown() {
         if (playLaunch1 != null && playLaunch1.getLaunchId() != null) {
             playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         }
@@ -493,7 +486,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private PlayLaunch createPlayLaunch(String org, CDLExternalSystemType externalSystemType,
-                                        String destinationAccountIdColumn) {
+            String destinationAccountIdColumn) {
         PlayLaunch launch = new PlayLaunch();
         launch.setTenant(mainTestTenant);
         launch.setLaunchState(LaunchState.UnLaunched);
@@ -558,22 +551,19 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             Long contactsSuppressed, Long contactErrors, Long contactsSuppressedWithNullEndTimestamp,
             Long contactErrorsWithNullEndTimestamp, String orgId, String destinationSystemType) {
         checkForCumulativeStatsDashboard(playId, goodStates, startTimestamp, endTimestamp, accountsSuppressed,
-                accountsErrors,
-                recommendationsLaunched, contactsWithinRecommendations, contactsSuppressed, contactErrors, orgId,
-                destinationSystemType);
+                accountsErrors, recommendationsLaunched, contactsWithinRecommendations, contactsSuppressed,
+                contactErrors, orgId, destinationSystemType);
         checkForCumulativeStatsDashboard(playId, null, startTimestamp, endTimestamp, accountsSuppressed, accountsErrors,
                 recommendationsLaunched, contactsWithinRecommendations, contactsSuppressed, contactErrors, orgId,
                 destinationSystemType);
         checkForCumulativeStatsDashboard(playId, goodStates, startTimestamp, null, suppressedWithNullEndTimestamp,
                 errorsWithNullEndTimestamp, recommendationsLaunchedWithNullEndTimestamp,
                 contactsWithinRecommendationsWithNullEndTimestamp, contactsSuppressedWithNullEndTimestamp,
-                contactErrorsWithNullEndTimestamp, orgId,
-                destinationSystemType);
+                contactErrorsWithNullEndTimestamp, orgId, destinationSystemType);
         checkForCumulativeStatsDashboard(playId, null, startTimestamp, null, suppressedWithNullEndTimestamp,
                 errorsWithNullEndTimestamp, recommendationsLaunchedWithNullEndTimestamp,
                 contactsWithinRecommendationsWithNullEndTimestamp, contactsSuppressedWithNullEndTimestamp,
-                contactErrorsWithNullEndTimestamp, orgId,
-                destinationSystemType);
+                contactErrorsWithNullEndTimestamp, orgId, destinationSystemType);
         checkForCumulativeStatsDashboard(playId, badStates, startTimestamp, endTimestamp, 0L, 0L, 0L, 0L, 0L, 0L, orgId,
                 destinationSystemType);
     }
@@ -601,7 +591,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             Set<String> playIdSet = ConcurrentHashMap.newKeySet();
 
             Assert.assertTrue(uniquePlays.size() > 0);
-            uniquePlays.stream().forEach(pl -> {
+            uniquePlays.forEach(pl -> {
                 Assert.assertNotNull(pl.getPid());
                 Assert.assertNotNull(pl.getName());
                 Assert.assertNotNull(pl.getDisplayName());
@@ -616,13 +606,12 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         if (recommendationsLaunched > 0) {
             Assert.assertTrue(dashboardEntries.size() > 0);
             Set<String> orgSet = new HashSet<>(Arrays.asList(org1, org2));
-            dashboardEntries.stream() //
-                    .forEach(pair -> {
-                        Assert.assertNotNull(pair.getLeft());
-                        Assert.assertNotNull(pair.getRight());
-                        Assert.assertTrue(orgSet.contains(pair.getLeft()));
-                        Assert.assertEquals(CDLExternalSystemType.valueOf(pair.getRight()), CDLExternalSystemType.CRM);
-                    });
+            dashboardEntries.forEach(pair -> {
+                Assert.assertNotNull(pair.getLeft());
+                Assert.assertNotNull(pair.getRight());
+                Assert.assertTrue(orgSet.contains(pair.getLeft()));
+                Assert.assertEquals(CDLExternalSystemType.valueOf(pair.getRight()), CDLExternalSystemType.CRM);
+            });
         }
     }
 
@@ -674,16 +663,15 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         launchIds.add(playLaunch_org2_2.getId());
 
         if (dashboardEntries.size() > 0) {
-            dashboardEntries.stream() //
-                    .forEach(entry -> {
-                        Assert.assertNotNull(entry.getLaunchId());
-                        Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
-                        Assert.assertNotNull(entry.getLaunchState());
-                        Assert.assertNotNull(entry.getLaunchTime());
-                        Assert.assertNotNull(entry.getPlayDisplayName());
-                        Assert.assertNotNull(entry.getPlayName());
-                        Assert.assertNotNull(entry.getSelectedBuckets());
-                    });
+            dashboardEntries.forEach(entry -> {
+                Assert.assertNotNull(entry.getLaunchId());
+                Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
+                Assert.assertNotNull(entry.getLaunchState());
+                Assert.assertNotNull(entry.getLaunchTime());
+                Assert.assertNotNull(entry.getPlayDisplayName());
+                Assert.assertNotNull(entry.getPlayName());
+                Assert.assertNotNull(entry.getSelectedBuckets());
+            });
 
             if (descending) {
                 if (dashboardEntries.size() > 0) {

@@ -2,40 +2,27 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.service.CampaignLaunchTriggerService;
+import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
-import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-@Component("campaignLaunchTriggerService")
-public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implements CampaignLaunchTriggerService {
-    private static final Logger log = LoggerFactory.getLogger(CampaignLaunchTriggerServiceImpl.class);
-
-    @Value("${cdl.campaignLaunch.maximum.job.count}")
-    private Long maxToLaunch;
-
-    @Value("common.internal.app.url")
-    private String internalAppUrl;
+@Component("entityStateCorrectionService")
+public class EntityStateCorrectionServiceImpl implements EntityStateCorrectionService {
+    private static final Logger log = LoggerFactory.getLogger(EntityStateCorrectionServiceImpl.class);
 
     @Inject
     private PlayLaunchService playLaunchService;
@@ -43,32 +30,27 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
     @Inject
     private WorkflowProxy workflowProxy;
 
-    private final String baseLaunchUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/launches/{launchId}";
-    private final String kickoffLaunchPrefix = baseLaunchUrlPrefix + "/kickoff-launch";
+    public EntityStateCorrectionServiceImpl() {
 
-    public CampaignLaunchTriggerServiceImpl() {
-        super(PropertyUtils.getProperty("common.internal.app.url"), "cdl");
-        String env = PropertyUtils.getProperty("common.le.environment");
-        if ("dev".equals(env) || "devcluster".equals(env)) {
-            setHostport(PropertyUtils.getProperty("common.microservice.url"));
-        }
     }
 
     @Override
-    public Boolean triggerQueuedLaunches() {
-        if (StringUtils.isBlank(internalAppUrl)) {
-            log.warn("Common internal app url not found, ignoring cdlCampaignLaunchJob job");
-            return false;
-        }
+    public Boolean execute() {
+        attemptPlayLaunchStateCorrection();
+        attemptPlayLaunchChannelStateCorrection();
+        attemptModelIterationStateCorrection();
+        return true;
+    }
 
-        List<PlayLaunch> queuedPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Queued,
-                maxToLaunch);
-        if (CollectionUtils.isEmpty(queuedPlayLaunches)) {
-            log.info("No Queued Launches found");
-            return true;
-        }
-        log.info("Found " + queuedPlayLaunches.size() + " queued launches");
+    private void attemptPlayLaunchChannelStateCorrection() {
+        // TODO: PLS-14138
+    }
 
+    private void attemptModelIterationStateCorrection() {
+        // TODO: PLS-14138
+    }
+
+    private void attemptPlayLaunchStateCorrection() {
         List<PlayLaunch> launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
 
         log.info("Found " + launchingPlayLaunches.size() + " launches currently launching");
@@ -82,56 +64,8 @@ public class CampaignLaunchTriggerServiceImpl extends BaseRestApiProxy implement
                                     .isBefore(Instant.now().atOffset(ZoneOffset.UTC).minusHours(24)))
                             .count()
                     + " launches running for more than 24 hours. Attempting Launch status cleanup");
-            if (clearStuckOrFailedLaunches(launchingPlayLaunches)) {
-                launchingPlayLaunches = playLaunchService.getByStateAcrossTenants(LaunchState.Launching, null);
-            }
+            clearStuckOrFailedLaunches(launchingPlayLaunches);
         }
-
-        if (launchingPlayLaunches.size() >= maxToLaunch) {
-            log.info(String.format("%s Launch jobs are currently running, no new jobs can be kicked off ",
-                    launchingPlayLaunches.size()));
-            return true;
-        }
-        Set<String> currentlyLaunchingChannels = launchingPlayLaunches.stream()
-                .filter(launch -> launch.getPlayLaunchChannel() != null)
-                .map(launch -> launch.getPlayLaunchChannel().getId()).collect(Collectors.toSet());
-
-        Iterator<PlayLaunch> iterator = queuedPlayLaunches.iterator();
-        int i = launchingPlayLaunches.size();
-
-        while (i < maxToLaunch && iterator.hasNext()) {
-            PlayLaunch launch = iterator.next();
-
-            if (launch.getPlayLaunchChannel() == null) {
-                log.info(String.format("No play channel for this play launch %s", launch.getId()));
-                continue;
-            }
-            if (currentlyLaunchingChannels.contains(launch.getPlayLaunchChannel().getId())) {
-                log.info(String.format(
-                        "Launch: %s skipped since a play launch is already being launched to this channel",
-                        launch.getId()));
-                continue;
-            }
-
-            String url = constructUrl(kickoffLaunchPrefix,
-                    CustomerSpace.parse(launch.getTenant().getId()).getTenantId(), launch.getPlay().getName(),
-                    launch.getId());
-            try {
-                String appId = post("Kicking off Play Launch Workflow for Play: " + launch.getPlay().getName(), url,
-                        null, String.class);
-                launch.setApplicationId(appId);
-                launch.setLaunchState(LaunchState.Launching);
-            } catch (Exception e) {
-                launch.setLaunchState(LaunchState.Canceled);
-                log.error(String.format("Failed to kick off Campaign launch workflow for launchId: %s due to ",
-                        launch.getLaunchId()), e);
-            }
-            MultiTenantContext.setTenant(launch.getTenant());
-            playLaunchService.update(launch);
-            MultiTenantContext.clearTenant();
-            i++;
-        }
-        return true;
     }
 
     private boolean clearStuckOrFailedLaunches(List<PlayLaunch> launchingPlayLaunches) {

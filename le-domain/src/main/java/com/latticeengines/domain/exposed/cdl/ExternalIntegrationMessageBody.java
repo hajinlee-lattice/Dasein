@@ -26,6 +26,8 @@ public class ExternalIntegrationMessageBody {
 
     private String stackName;
 
+    private String stack;
+
     public String getTrayTenantId() {
         return trayTenantId;
     }
@@ -105,4 +107,8 @@ public class ExternalIntegrationMessageBody {
     public String getStackName() {
         return stackName;
     }
+
+    public String getStack() { return stack; }
+
+    public void setStack(String stack) { this.stack = stack; }
 }

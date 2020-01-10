@@ -66,7 +66,7 @@ public class PlayUtils {
         if (playLaunch.getLaunchState() != LaunchState.Queued
                 && playLaunch.getLaunchState() != LaunchState.UnLaunched) {
             throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { String.format("Launch %s is in a State %s and hence cannot be kicked off",
+                    new String[] { String.format("Launch %s is in %s State and hence cannot be kicked off",
                             playLaunch.getLaunchId(), playLaunch.getLaunchState().name()) });
         }
     }

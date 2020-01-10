@@ -9,40 +9,35 @@ import java.util.Set;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public enum LaunchState {
-    UnLaunched, //
-    Queued, //
-    Launching, //
-    Launched, //
-    Failed, //
-    Canceled, //
-    Deleted, //
+    UnLaunched(true, false), //
+    Queued(true, false), //
+    PreProcessing(false, false), //
+    Skipped(false, true), //
+    Launching(false, false), //
+    Launched(false, true), //
+    Failed(true, true), //
+    Canceled(true, true), //
 
-    Syncing, //
-    Synced, //
-    PartialSync, //
-    SyncFailed;
+    Syncing(false, false), //
+    Synced(false, true), //
+    PartialSync(false, true), //
+    SyncFailed(false, true);
 
     private static Map<LaunchState, Collection<LaunchState>> transitionMap = new HashMap<>();
 
     static {
-        Set<LaunchState> statesAfterUnLaunched = new HashSet<>();
-        statesAfterUnLaunched.add(Launching);
-        statesAfterUnLaunched.add(Queued);
-        statesAfterUnLaunched.add(Canceled);
-        statesAfterUnLaunched.add(Failed);
-        transitionMap.put(UnLaunched, statesAfterUnLaunched);
 
-        Set<LaunchState> statesAfterQueued = new HashSet<>();
-        statesAfterUnLaunched.add(Launching);
-        statesAfterUnLaunched.add(Canceled);
-        statesAfterUnLaunched.add(Failed);
-        transitionMap.put(Queued, statesAfterQueued);
+        Set<LaunchState> statesAfterPreProcessing = new HashSet<>();
+        statesAfterPreProcessing.add(Skipped);
+        statesAfterPreProcessing.add(Canceled);
+        statesAfterPreProcessing.add(Failed);
+        statesAfterPreProcessing.add(Queued);
+        transitionMap.put(Launching, statesAfterPreProcessing);
 
         Set<LaunchState> statesAfterLaunching = new HashSet<>();
         statesAfterLaunching.add(Launched);
         statesAfterLaunching.add(Canceled);
         statesAfterLaunching.add(Failed);
-        statesAfterLaunching.add(Deleted);
         transitionMap.put(Launching, statesAfterLaunching);
 
         Set<LaunchState> statesAfterLaunched = new HashSet<>();
@@ -63,6 +58,14 @@ public enum LaunchState {
         return transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState);
     }
 
+    private boolean initial;
+    private boolean terminal;
+
+    LaunchState(boolean initial, boolean terminal) {
+        this.initial = initial;
+        this.terminal = terminal;
+    }
+
     public static LaunchState translateFromJobStatus(JobStatus jobStatus) {
         switch (jobStatus) {
         case FAILED:
@@ -80,11 +83,15 @@ public enum LaunchState {
         case COMPLETED:
             return Launched;
         default:
-            return UnLaunched;
+            return Canceled;
         }
     }
 
+    public Boolean isInitial() {
+        return this.initial;
+    }
+
     public Boolean isTerminal() {
-        return this != Queued && this != UnLaunched && this != Launching;
+        return this.terminal;
     }
 }
