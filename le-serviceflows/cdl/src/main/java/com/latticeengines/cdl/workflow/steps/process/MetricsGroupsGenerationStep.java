@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -94,7 +93,6 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         putStringValueInContext(ACTIVITY_STREAM_METADATA_CACHE, JsonUtils.serialize(streamMetadataCache));
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> detailsMap = new HashMap<>();
-        List<String> periodStoreTableCtxNames = new ArrayList<>();
         int idx = 0;
         for (AtlasStream stream : streams) {
             String streamId = stream.getStreamId();
@@ -105,12 +103,10 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             details.setLabels(periods);
             detailsMap.put(streamId, details);
 
-            periodStoreTableCtxNames.addAll(periods.stream().map(periodName -> String.format(PERIOD_STORE_TABLE_FORMAT, streamId, periodName)).collect(Collectors.toList()));
             idx += periods.size();
         }
         inputMetadata.setMetadata(detailsMap);
-        log.info("Fetching periodStore tables with names {}", periodStoreTableCtxNames);
-        List<DataUnit> inputs = getTableSummariesFromCtxKeys(customerSpace.toString(), periodStoreTableCtxNames).stream().filter(Objects::nonNull)
+        List<DataUnit> inputs = getTablesFromMapCtxKey(customerSpace.toString(), PERIOD_STORE_TABLE_NAME).values().stream().filter(Objects::nonNull)
                 .map(table -> table.partitionedToHdfsDataUnit(table.getName(), Collections.singletonList(InterfaceName.PeriodId.name()))
                 ).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(inputs)) {
