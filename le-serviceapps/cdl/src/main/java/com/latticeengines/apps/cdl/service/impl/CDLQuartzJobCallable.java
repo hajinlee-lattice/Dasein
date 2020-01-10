@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.CampaignLaunchSchedulingService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
-import com.latticeengines.apps.cdl.service.DeltaCalculationService;
 import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
@@ -23,7 +23,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
     private RedShiftCleanupService redShiftCleanupService;
     private S3ImportService s3ImportService;
     private EntityStateCorrectionService entityStateCorrectionService;
-    private DeltaCalculationService deltaCalculationService;
+    private CampaignLaunchSchedulingService campaignLaunchSchedulingService;
     private String jobArguments;
 
     public CDLQuartzJobCallable(Builder builder) {
@@ -33,7 +33,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         this.redShiftCleanupService = builder.redShiftCleanupService;
         this.s3ImportService = builder.s3ImportService;
         this.entityStateCorrectionService = builder.entityStateCorrectionService;
-        this.deltaCalculationService = builder.deltaCalculationService;
+        this.campaignLaunchSchedulingService = builder.campaignLaunchSchedulingService;
         this.jobArguments = builder.jobArguments;
     }
 
@@ -49,8 +49,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
             return s3ImportService.submitImportJob();
         case ENTITYSTATECORRECTION:
             return entityStateCorrectionService.execute();
-        case DELTACALCULATION:
-            return deltaCalculationService.triggerScheduledCampaigns();
+        case CAMPAIGNLAUNCHSCHEDULER:
+            return campaignLaunchSchedulingService.kickoffScheduledCampaigns();
         default:
             return cdlJobService.submitJob(cdlJobType, jobArguments);
         }
@@ -64,7 +64,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         private RedShiftCleanupService redShiftCleanupService;
         private S3ImportService s3ImportService;
         private EntityStateCorrectionService entityStateCorrectionService;
-        private DeltaCalculationService deltaCalculationService;
+        private CampaignLaunchSchedulingService campaignLaunchSchedulingService;
 
         private String jobArguments;
 
@@ -103,8 +103,8 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
             return this;
         }
 
-        public Builder deltaCalculationService(DeltaCalculationService deltaCalculationService) {
-            this.deltaCalculationService = deltaCalculationService;
+        public Builder campaignLaunchSchedulingService(CampaignLaunchSchedulingService campaignLaunchSchedulingService) {
+            this.campaignLaunchSchedulingService = campaignLaunchSchedulingService;
             return this;
         }
 

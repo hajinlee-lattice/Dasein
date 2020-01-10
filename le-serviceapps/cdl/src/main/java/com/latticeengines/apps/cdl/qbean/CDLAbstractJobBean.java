@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.CampaignLaunchSchedulingService;
 import com.latticeengines.apps.cdl.service.DataFeedExecutionCleanupService;
-import com.latticeengines.apps.cdl.service.DeltaCalculationService;
 import com.latticeengines.apps.cdl.service.EntityStateCorrectionService;
 import com.latticeengines.apps.cdl.service.RedShiftCleanupService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
@@ -36,7 +36,7 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
     private EntityStateCorrectionService entityStateCorrectionService;
 
     @Inject
-    private DeltaCalculationService deltaCalculationService;
+    private CampaignLaunchSchedulingService campaignLaunchSchedulingService;
 
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
@@ -45,7 +45,7 @@ public abstract class CDLAbstractJobBean implements QuartzJobBean {
                 .dataFeedExecutionCleanupService(dataFeedExecutionCleanupService)
                 .redshiftCleanupService(redShiftCleanupService).s3ImportService(s3ImportService)
                 .entityStateCorrectionService(entityStateCorrectionService)
-                .deltaCalculationService(deltaCalculationService).jobArguments(jobArguments);
+                .campaignLaunchSchedulingService(campaignLaunchSchedulingService).jobArguments(jobArguments);
         return new CDLQuartzJobCallable(builder);
     }
 

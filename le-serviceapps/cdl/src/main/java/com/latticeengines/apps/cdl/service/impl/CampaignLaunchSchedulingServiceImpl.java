@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
-import com.latticeengines.apps.cdl.service.DeltaCalculationService;
+import com.latticeengines.apps.cdl.service.CampaignLaunchSchedulingService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -24,9 +24,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
-@Component("deltaCalculationService")
-public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements DeltaCalculationService {
-    private static final Logger log = LoggerFactory.getLogger(DeltaCalculationServiceImpl.class);
+@Component("campaignLaunchSchedulingService")
+public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implements CampaignLaunchSchedulingService {
+    private static final Logger log = LoggerFactory.getLogger(CampaignLaunchSchedulingServiceImpl.class);
 
     @Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
@@ -43,12 +43,12 @@ public class DeltaCalculationServiceImpl extends BaseRestApiProxy implements Del
     private final String campaignLaunchUrlPrefix = "/customerspaces/{customerSpace}/plays/{playId}/channels/{channelId}/kickoff-workflow?is-auto-launch=true";
     private final String setChannelScheduleUrlPrefix = "/customerspaces/{customerSpace}/plays//{playName}/channels/{channelId}/next-scheduled-date";
 
-    public DeltaCalculationServiceImpl() {
+    public CampaignLaunchSchedulingServiceImpl() {
         super(PropertyUtils.getProperty("common.internal.app.url"), "cdl");
     }
 
     @Override
-    public Boolean triggerScheduledCampaigns() {
+    public Boolean kickoffScheduledCampaigns() {
         if (StringUtils.isBlank(internalAppUrl)) {
             log.warn("Common internal app url not found, ignoring this job");
             return false;

@@ -9,12 +9,12 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 
 @DisallowConcurrentExecution
-@Component("cdlDeltaCalculationJob")
-public class CDLDeltaCalculationJob extends CDLAbstractJobBean implements QuartzJobBean {
+@Component("cdlCampaignLaunchSchedulerJob")
+public class CDLCampaignLaunchSchedulerJob extends CDLAbstractJobBean implements QuartzJobBean {
 
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
-        super.setCDLJobType(CDLJobType.DELTACALCULATION);
+        super.setCDLJobType(CDLJobType.CAMPAIGNLAUNCHSCHEDULER);
         return super.getCallable(jobArguments);
     }
 }
