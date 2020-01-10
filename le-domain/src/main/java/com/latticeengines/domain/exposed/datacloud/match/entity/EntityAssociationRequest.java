@@ -36,7 +36,7 @@ public class EntityAssociationRequest {
             @NotNull Tenant tenant, @NotNull String entity, Map<EntityMatchEnvironment, Integer> versionMap,
             String preferredEntityId,
             @NotNull List<Pair<MatchKeyTuple, String>> lookupResults, Map<String, String> extraAttributes) {
-        this(tenant, entity, servingVersion, preferredEntityId, lookupResults, extraAttributes, null, false);
+        this(tenant, entity, versionMap, preferredEntityId, lookupResults, extraAttributes, null, false);
     }
 
     public EntityAssociationRequest(@NotNull Tenant tenant, @NotNull String entity,

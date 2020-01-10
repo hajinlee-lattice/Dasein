@@ -940,7 +940,24 @@ public class EntityRawSeedServiceImplTestNG extends DataCloudMatchFunctionalTest
                         asList(SFDC_2, DUNS_5, NC_FACEBOOK_1), newSeed(TEST_SEED_ID, SFDC_2, DUNS_5, NC_FACEBOOK_1), //
                         newSeed(TEST_SEED_ID, SFDC_1, DUNS_1, DC_GOOGLE_2, NC_GOOGLE_2), false,
                         asList(SFDC_1, DUNS_1)) }, //
-                // TODO add test cases only conflict on lookup mapping
+                /*-
+                 * conflict in lookup mapping only (entry mapped to another seed)
+                 */
+                { new TxnUpdateTestCase( // update name/country
+                        newSeed(TEST_SEED_ID, SFDC_1, DUNS_1), //
+                        mapping("slkdjfklsd", NC_GOOGLE_2), // map to another seed
+                        singletonList(NC_GOOGLE_2), newSeed(TEST_SEED_ID, NC_GOOGLE_2), //
+                        newSeed(TEST_SEED_ID, SFDC_1, DUNS_1), false, emptyList()) }, //
+                { new TxnUpdateTestCase( // update ID
+                        newSeed(TEST_SEED_ID, SFDC_1, DUNS_1), //
+                        mapping("slkdjfklsd", SFDC_2), //
+                        singletonList(SFDC_2), newSeed(TEST_SEED_ID, SFDC_2), //
+                        newSeed(TEST_SEED_ID, SFDC_1, DUNS_1), false, emptyList()) }, //
+                { new TxnUpdateTestCase( // update DUNS
+                        newSeed(TEST_SEED_ID, SFDC_1), //
+                        mapping("slkdjfklsd", DUNS_1), //
+                        singletonList(DUNS_1), newSeed(TEST_SEED_ID, DUNS_1), //
+                        newSeed(TEST_SEED_ID, SFDC_1), false, emptyList()) }, //
         };
     }
 
