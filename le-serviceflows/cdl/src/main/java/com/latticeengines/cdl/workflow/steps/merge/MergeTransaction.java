@@ -156,13 +156,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
         mergedImportTable = getStringValueFromContext(ENTITY_MATCH_TXN_TARGETTABLE);
         if (StringUtils.isBlank(mergedImportTable)) {// && skipSoftDelete) {
-            throw new RuntimeException("There's no matched table found! And there's no soft delete action!");
-        }
-        if (StringUtils.isBlank(mergedImportTable)) {
-            double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
-            scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize);
-            log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
-                    scalingMultiplier, oldTableSize));
+            throw new RuntimeException("There's no matched table found!");
         } else {
             double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, rawTable);
             Table tableSummary = metadataProxy.getTableSummary(customerSpace.toString(), mergedImportTable);

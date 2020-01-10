@@ -346,7 +346,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return hasImports || checkHasEntityMatchRematch(step);
+        return hasImports || (checkHasEntityMatchRematch(step) && hasBatchStore);
     }
 
     protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {

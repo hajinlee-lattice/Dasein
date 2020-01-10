@@ -79,6 +79,15 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
             log.info("No daily stores found for tenant {}. Skip generating period stores", customerSpace);
             return null;
         }
+        Map<String, String> periodStoreTableNames = getMapObjectFromContext(PERIOD_STORE_TABLE_NAME, String.class, String.class);
+        if(periodStoreTableNames != null){
+            if (isShortCutMode(periodStoreTableNames)) {
+                log.info("Period stores have been created before retry. Skip generating period stores", customerSpace);
+                dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), periodStoreTableNames, TableRoleInCollection.PeriodStores, inactive);
+                return null;
+            }
+        }
+
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
         Map<String, Details> metadata = new HashMap<>();
         for (Map.Entry<String, Table> entry : dailyStoreTables.entrySet()) {
@@ -104,7 +113,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
     @Override
     protected void postJobExecution(SparkJobResult result) {
         Map<String, Details> metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
-        Map<String, String> signatureTableNames = new HashMap<>();
+        Map<String, Table> signatureTables = new HashMap<>();
         metadata.forEach((streamId, details) -> {
             for (int offset = 0; offset < details.getLabels().size(); offset++) {
                 String period = details.getLabels().get(offset);
@@ -112,10 +121,10 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
                 String tableName = TableUtils.getFullTableName(ctxKey, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
                 Table periodStoreTable = dirToTable(tableName, result.getTargets().get(details.getStartIdx() + offset));
                 metadataProxy.createTable(customerSpace.toString(), tableName, periodStoreTable);
-                signatureTableNames.put(details.getLabels().get(offset), tableName); // use period name as signature
-                putStringValueInContext(ctxKey, periodStoreTable.getName());
+                signatureTables.put(ctxKey, periodStoreTable); // use ctxKey name as signature
             }
         });
+        Map<String, String> signatureTableNames = exportToS3AndAddToContext(signatureTables, PERIOD_STORE_TABLE_NAME);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
     }
 }
