@@ -127,50 +127,39 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "TENANT_ID", nullable = false)
     private Long tenantId;
 
-    @JsonProperty("launchCompletionPercent")
-    @Column(name = "LAUNCH_COMPLETION_PERCENT")
-    private double launchCompletionPercent;
+    @JsonProperty("parentDeltaCalculationWorkflowId")
+    @Column(name = "FK_DELTA_CALC_WORKFLOW_ID")
+    private Long parentDeltaWorkflowId;
 
-    @JsonProperty("accountsSelected")
-    @Column(name = "ACCOUNTS_SELECTED")
-    private Long accountsSelected;
+    @JsonProperty("launchWorkflowId")
+    @Column(name = "FK_WORKFLOW_ID")
+    private Long launchWorkflowId;
 
-    @JsonProperty("contactsSelected")
-    @Column(name = "CONTACTS_SELECTED")
-    private Long contactsSelected;
+    @JsonProperty("isScheduledLaunch")
+    @Column(name = "IS_SCHEDULED_LAUNCH", nullable = false, columnDefinition = "'BIT DEFAULT 0'")
+    private boolean isScheduledLaunch = false;
 
-    @JsonProperty("contactsLaunched")
-    @Column(name = "CONTACTS_LAUNCHED")
-    private Long contactsLaunched;
+    @JsonProperty("addAccountsTable")
+    @Column(name = "ADD_ACCOUNTS_TABLE_NAME")
+    private String addAccountsTable;
 
-    @JsonProperty("accountsLaunched")
-    @Column(name = "ACCOUNTS_LAUNCHED")
-    private Long accountsLaunched;
+    @JsonProperty("addContactsTable")
+    @Column(name = "ADD_CONTACTS_TABLE_NAME")
+    private String addContactsTable;
 
-    @JsonProperty("accountsSuppressed")
-    @Column(name = "ACCOUNTS_SUPPRESSED")
-    private Long accountsSuppressed;
+    @JsonProperty("removeAccountsTable")
+    @Column(name = "REMOVE_ACCOUNTS_TABLE_NAME")
+    private String removeAccountsTable;
 
-    @JsonProperty("contactsSuppressed")
-    @Column(name = "CONTACTS_SUPPRESSED")
-    private Long contactsSuppressed;
+    @JsonProperty("removeContactsTable")
+    @Column(name = "REMOVE_CONTACTS_TABLE_NAME")
+    private String removeContactsTable;
 
-    @JsonProperty("accountsErrored")
-    @Column(name = "ACCOUNTS_ERRORED")
-    private Long accountsErrored;
+    @JsonProperty("completeContactsTable")
+    @Column(name = "COMPLETE_CONTACTS_TABLE_NAME")
+    private String completeContactsTable;
 
-    @JsonProperty("contactsErrored")
-    @Column(name = "CONTACTS_ERRORED")
-    private Long contactsErrored;
-
-    @JsonProperty("accountsDuplicated")
-    @Column(name = "ACCOUNTS_DUPLICATED")
-    private Long accountsDuplicated;
-
-    @JsonProperty("contactsDuplicated")
-    @Column(name = "CONTACTS_DUPLICATED")
-    private Long contactsDuplicated;
-
+    // # Launch Config
     @JsonProperty("excludeItemsWithoutSalesforceId")
     @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = false)
     private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
@@ -242,33 +231,60 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Lob
     private String channelConfig;
 
-    @JsonProperty("addAccountsTable")
-    @Column(name = "ADD_ACCOUNTS_TABLE_NAME")
-    private String addAccountsTable;
-
-    @JsonProperty("addContactsTable")
-    @Column(name = "ADD_CONTACTS_TABLE_NAME")
-    private String addContactsTable;
-
-    @JsonProperty("removeAccountsTable")
-    @Column(name = "REMOVE_ACCOUNTS_TABLE_NAME")
-    private String removeAccountsTable;
-
-    @JsonProperty("removeContactsTable")
-    @Column(name = "REMOVE_CONTACTS_TABLE_NAME")
-    private String removeContactsTable;
-
-    @JsonProperty("completeContactsTable")
-    @Column(name = "COMPLETE_CONTACTS_TABLE_NAME")
-    private String completeContactsTable;
-
     @JsonProperty("audienceState")
     @Transient
     private String audienceState;
+    // # Launch Config
+
+    // # LaunchStats
+    @JsonProperty("launchCompletionPercent")
+    @Column(name = "LAUNCH_COMPLETION_PERCENT")
+    private double launchCompletionPercent;
+
+    @JsonProperty("accountsSelected")
+    @Column(name = "ACCOUNTS_SELECTED")
+    private Long accountsSelected;
+
+    @JsonProperty("contactsSelected")
+    @Column(name = "CONTACTS_SELECTED")
+    private Long contactsSelected;
+
+    @JsonProperty("contactsLaunched")
+    @Column(name = "CONTACTS_LAUNCHED")
+    private Long contactsLaunched;
+
+    @JsonProperty("accountsLaunched")
+    @Column(name = "ACCOUNTS_LAUNCHED")
+    private Long accountsLaunched;
+
+    @JsonProperty("accountsSuppressed")
+    @Column(name = "ACCOUNTS_SUPPRESSED")
+    private Long accountsSuppressed;
+
+    @JsonProperty("contactsSuppressed")
+    @Column(name = "CONTACTS_SUPPRESSED")
+    private Long contactsSuppressed;
+
+    @JsonProperty("accountsErrored")
+    @Column(name = "ACCOUNTS_ERRORED")
+    private Long accountsErrored;
+
+    @JsonProperty("contactsErrored")
+    @Column(name = "CONTACTS_ERRORED")
+    private Long contactsErrored;
+
+    @JsonProperty("accountsDuplicated")
+    @Column(name = "ACCOUNTS_DUPLICATED")
+    private Long accountsDuplicated;
+
+    @JsonProperty("contactsDuplicated")
+    @Column(name = "CONTACTS_DUPLICATED")
+    private Long contactsDuplicated;
 
     @JsonProperty("matchedRate")
     @Transient
     private Long matchedRate;
+    // # LaunchStats
 
     public PlayLaunch() {
     }
@@ -301,69 +317,51 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     }
 
     @Override
-    public void setId(String launchId) {
-        this.launchId = launchId;
-    }
+    public void setId(String launchId) { this.launchId = launchId; }
 
     @Override
-    public Date getCreated() {
-        return created;
-    }
+    public Date getCreated() { return created; }
 
     @Override
-    public void setCreated(Date created) {
-        this.created = created;
-    }
+    public void setCreated(Date created) { this.created = created; }
 
     @Override
-    public Date getUpdated() {
-        return updated;
-    }
+    public Date getUpdated() { return updated; }
 
     @Override
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
+    public void setUpdated(Date updated) { this.updated = updated; }
 
-    public String getCreatedBy() {
-        return createdBy;
-    }
+    public String getCreatedBy() { return createdBy; }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
+    public String getUpdatedBy() { return updatedBy; }
 
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
+    public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
 
-    public LaunchState getLaunchState() {
-        return launchState;
-    }
+    public LaunchState getLaunchState() { return launchState; }
 
-    public void setLaunchState(LaunchState launchState) {
-        this.launchState = launchState;
-    }
+    public void setLaunchState(LaunchState launchState) { this.launchState = launchState; }
 
-    public Play getPlay() {
-        return play;
-    }
+    public Play getPlay() { return play; }
 
-    public void setPlay(Play play) {
-        this.play = play;
-    }
+    public void setPlay(Play play) { this.play = play; }
 
-    public PlayLaunchChannel getPlayLaunchChannel() {
-        return playLaunchChannel;
-    }
+    public PlayLaunchChannel getPlayLaunchChannel() { return playLaunchChannel; }
 
     public void setPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
         this.playLaunchChannel = playLaunchChannel;
     }
+
+    public Long getParentDeltaWorkflowId() { return parentDeltaWorkflowId; }
+
+    public void setParentDeltaWorkflowId(Long parentDeltaWorkflowId) {
+        this.parentDeltaWorkflowId = parentDeltaWorkflowId;
+    }
+
+    public Long getLaunchWorkflowId() { return launchWorkflowId; }
+
+    public void setLaunchWorkflowId(Long launchWorkflowId) { this.launchWorkflowId = launchWorkflowId; }
 
     public String getApplicationId() {
         return applicationId;
@@ -372,6 +370,10 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
+
+    public boolean isScheduledLaunch() { return isScheduledLaunch; }
+
+    public void setScheduledLaunch(boolean scheduledLaunch) { isScheduledLaunch = scheduledLaunch; }
 
     @JsonIgnore
     public Tenant getTenant() {

@@ -226,44 +226,34 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
-    public PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel, String addAccountTable,
-            String completeContactsTable, String removeAccountsTable, String addContactsTable,
-            String removeContactsTable, boolean autoLaunch) {
-        runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
-        PlayLaunch playLaunch = createLaunchFromPlayAndChannel(play, playLaunchChannel, LaunchState.Queued, autoLaunch);
-
-        playLaunch.setLaunchState(LaunchState.Queued);
-        playLaunch.setAddAccountsTable(addAccountTable);
-        playLaunch.setCompleteContactsTable(completeContactsTable);
-        playLaunch.setRemoveAccountsTable(removeAccountsTable);
-        playLaunch.setAddContactsTable(addContactsTable);
-        playLaunch.setRemoveContactsTable(removeContactsTable);
-
-        playLaunchEntityMgr.create(playLaunch);
-        playLaunchChannel.setLastLaunch(playLaunch);
-        return playLaunch;
-    }
-
-    @Override
-    public PlayLaunch createNewLaunchForChannelByState(Play play, PlayLaunchChannel playLaunchChannel,
-            LaunchState state, boolean isAutoLaunch) {
-        runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
-        PlayLaunch playLaunch = createLaunchFromPlayAndChannel(play, playLaunchChannel, state, isAutoLaunch);
-        playLaunchEntityMgr.create(playLaunch);
-        playLaunchChannel.setLastLaunch(playLaunch);
-        return playLaunch;
-    }
-
-    private PlayLaunch createLaunchFromPlayAndChannel(Play play, PlayLaunchChannel playLaunchChannel, LaunchState state,
+    public PlayLaunch createNewLaunchByPlayAndChannel(Play play, PlayLaunchChannel playLaunchChannel, PlayLaunch launch,
             boolean autoLaunch) {
+        if (launch != null && !launch.getLaunchState().isInitial()) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Cannot create a new launch with state: " + launch.getLaunchState().name() });
+        }
+        runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
+        PlayLaunch newLaunch = createDefaultLaunchFromPlayAndChannel(play, playLaunchChannel, LaunchState.Queued,
+                autoLaunch);
+        playLaunchEntityMgr.create(newLaunch);
+
+        if (launch != null) {
+            playLaunchEntityMgr.update(launch);
+        }
+        playLaunchChannel.setLastLaunch(newLaunch);
+        return newLaunch;
+    }
+
+    private PlayLaunch createDefaultLaunchFromPlayAndChannel(Play play, PlayLaunchChannel playLaunchChannel,
+            LaunchState state, boolean isAutoLaunch) {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setTenant(MultiTenantContext.getTenant());
         playLaunch.setLaunchId(PlayLaunch.generateLaunchId());
-        playLaunch.setUpdatedBy(autoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
-        playLaunch.setCreatedBy(autoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
+        playLaunch.setUpdatedBy(isAutoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
+        playLaunch.setCreatedBy(isAutoLaunch ? serviceUser : playLaunchChannel.getUpdatedBy());
         playLaunch.setPlay(play);
         playLaunch.setPlayLaunchChannel(playLaunchChannel);
-        playLaunch.setLaunchState(state != null ? state : LaunchState.UnLaunched);
+        playLaunch.setLaunchState(state != null ? state : LaunchState.Canceled);
         playLaunch.setTopNCount(playLaunchChannel.getMaxAccountsToLaunch());
         playLaunch.setBucketsToLaunch(playLaunchChannel.getBucketsToLaunch());
         playLaunch.setLaunchUnscored(playLaunchChannel.getLaunchUnscored());
@@ -273,6 +263,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setTableName(createTable());
         playLaunchChannel.getChannelConfig().populateLaunchFromChannelConfig(playLaunch);
         playLaunch.setChannelConfig(playLaunchChannel.getChannelConfig());
+        playLaunch.setScheduledLaunch(isAutoLaunch);
 
         Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
         Long totalAvailableContacts = play.getTargetSegment().getContacts();
@@ -285,11 +276,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setContactsSuppressed(0L);
         playLaunch.setContactsErrored(0L);
         return playLaunch;
-    }
-
-    @Override
-    public PlayLaunch queueNewLaunchForChannel(Play play, PlayLaunchChannel playLaunchChannel) {
-        return queueNewLaunchForChannel(play, playLaunchChannel, null, null, null, null, null, false);
     }
 
     @Override

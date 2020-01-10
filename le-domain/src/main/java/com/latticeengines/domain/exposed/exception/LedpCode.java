@@ -277,7 +277,7 @@ public enum LedpCode {
     LEDP_18152("Failed to submit a customer report on matching issue."), //
     LEDP_18153("Segment not defined for Model {0}."), //
     LEDP_18154("Type not defined for Model {0}."), //
-    LEDP_18155("Play {0} cannot be launched since corresponding ratings engine is not active."), //
+    LEDP_18155("Campaign {0} cannot be launched since corresponding Model is not active."), //
     LEDP_18156("PlayLaunch for Play {0} cannot be started since it does not have buckets specified."), //
     LEDP_18157("PlayLaunch workflow failed."), //
     LEDP_18158("Error in evaluating restriction."), //

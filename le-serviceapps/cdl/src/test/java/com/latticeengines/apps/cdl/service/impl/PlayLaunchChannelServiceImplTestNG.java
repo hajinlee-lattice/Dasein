@@ -145,7 +145,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         playLaunchChannelService.create(play.getName(), playLaunchChannel1);
         Thread.sleep(1000);
         playLaunchChannelService.create(play.getName(), playLaunchChannel2);
-        playLaunchChannelService.queueNewLaunchForChannel(play, playLaunchChannel2);
+        playLaunchChannelService.createNewLaunchByPlayAndChannel(play, playLaunchChannel2, null, false);
         Thread.sleep(1000);
         long playLaunchChannel1Pid = playLaunchChannel1.getPid();
         long playLaunchChannel2Pid = playLaunchChannel2.getPid();

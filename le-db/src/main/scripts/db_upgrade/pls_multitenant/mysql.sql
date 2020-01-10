@@ -2,6 +2,13 @@ USE `PLS_MultiTenant`;
 
 CREATE PROCEDURE `UpdatePLSTables`()
 BEGIN
+    ALTER TABLE `PLAY_LAUNCH`
+      ADD COLUMN `FK_WORKFLOW_ID` bigint,
+      ADD COLUMN `FK_DELTA_CALC_WORKFLOW_ID` bigint,
+      ADD COLUMN `IS_SCHEDULED_LAUNCH` BIT DEFAULT 0 NOT NULL;
+
+    UPDATE `PLAY_LAUNCH`
+      SET IS_SCHEDULED_LAUNCH = CASE WHEN CREATED_BY = 'build-admin@lattice-engines.com' THEN 1 ELSE 0 END; -- build@lattice-engines.com for QA
 
     ALTER TABLE `TENANT` ADD COLUMN `ENTITLED_APPS` varchar(255);
 

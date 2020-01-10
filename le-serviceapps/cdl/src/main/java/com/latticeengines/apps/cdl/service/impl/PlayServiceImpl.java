@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -357,13 +356,10 @@ public class PlayServiceImpl implements PlayService {
     }
 
     private LaunchHistory getLaunchHistoryForPlay(Play play) {
-        PlayLaunch lastIncompleteLaunch = playLaunchService.findLatestByPlayId(play.getPid(),
-                Collections.singletonList(LaunchState.UnLaunched));
         PlayLaunch lastCompletedLaunch = playLaunchService.findLatestByPlayId(play.getPid(),
                 Arrays.asList(LaunchState.Launched, LaunchState.PartialSync, LaunchState.Synced));
         PlayLaunch mostRecentLaunch = playLaunchService.findLatestByPlayId(play.getPid(), null);
         LaunchHistory launchHistory = new LaunchHistory();
-        launchHistory.setLastIncompleteLaunch(lastIncompleteLaunch);
         launchHistory.setLastCompletedLaunch(lastCompletedLaunch);
         launchHistory.setMostRecentLaunch(mostRecentLaunch);
         return launchHistory;

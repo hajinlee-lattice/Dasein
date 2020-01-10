@@ -41,7 +41,6 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
             launch = playProxy.getPlayLaunch(customerSpace, configuration.getPlayId(), configuration.getLaunchId());
             channel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace, configuration.getPlayId(),
                     configuration.getLaunchId());
-
         }
 
         channel.setCurrentLaunchedAccountUniverseTable(getObjectFromContext(FULL_ACCOUNTS_UNIVERSE, String.class));
@@ -57,32 +56,37 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 channel.getLookupIdMap().getExternalSystemName());
 
         if (deltaFound) {
-            if (launch != null && launch.getLaunchState() == LaunchState.UnLaunched) {
+            if (launch != null && launch.getLaunchState() == LaunchState.PreProcessing) {
                 launch.setAddAccountsTable(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class));
                 launch.setCompleteContactsTable(getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class));
                 launch.setAddContactsTable(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class));
                 launch.setRemoveAccountsTable(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class));
                 launch.setRemoveContactsTable(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class));
-                launch.setLaunchState(LaunchState.Queued);
                 playProxy.updatePlayLaunch(customerSpace, configuration.getPlayId(), configuration.getLaunchId(),
                         launch);
                 log.info("Updated the scheduled Launch: " + configuration.getLaunchId() + " with delta tables ("
                         + getDeltaTables() + ")");
-            } else if (launch != null && launch.getLaunchState() != LaunchState.UnLaunched) {
+            } else if (launch != null && launch.getLaunchState() != LaunchState.PreProcessing) {
                 log.warn("Launch found by LaunchId: " + configuration.getLaunchId() + " but in State: "
                         + launch.getLaunchState().name() + ". Hence queuing a new launch");
-                queueNewLaunch();
+                launch = queueNewLaunch(jobId);
             } else {
                 log.warn("No Launch found by LaunchId: " + configuration.getLaunchId() + ". Queuing a new launch");
-                queueNewLaunch();
+                launch = queueNewLaunch(jobId);
             }
+
+            // TODO: Remove when delta & delta launch workflows are unified
+            Long launchWorkflowPid = playProxy.kickoffWorkflowForLaunch(configuration.getCustomerSpace().toString(),
+                    configuration.getPlayId(), configuration.getChannelId(), launch.getLaunchId());
+            log.info("Kicked off delta launch workflow for the new Launch: " + launch.getId() + " with workflow PID ="
+                    + launchWorkflowPid);
         } else {
             if (launch != null) {
                 log.info(String.format(
-                        "No Delta Found: Marking existing launch (%s) as cancelled since no delta found for launch",
+                        "No Delta Found: Marking existing launch (%s) as skipped since no delta found for launch",
                         configuration.getLaunchId()));
                 playProxy.updatePlayLaunch(customerSpace, configuration.getPlayId(), configuration.getLaunchId(),
-                        LaunchState.Canceled);
+                        LaunchState.Skipped);
             } else {
                 log.info(String.format("No Delta Found: No launch queued for play %s, channel %s ",
                         configuration.getPlayId(), configuration.getChannelId()));
@@ -95,15 +99,20 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
         }
     }
 
-    private void queueNewLaunch() {
-        PlayLaunch launch = playProxy.createNewLaunchByPlayChannelAndState(configuration.getCustomerSpace().toString(),
-                configuration.getPlayId(), configuration.getChannelId(), LaunchState.Queued,
-                getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class),
-                getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class),
-                getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class),
-                getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class),
-                getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class), true);
+    private PlayLaunch queueNewLaunch(Long deltaWorkflowPid) {
+        PlayLaunch launch = new PlayLaunch();
+        launch.setLaunchState(LaunchState.Queued);
+        launch.setAddAccountsTable(getObjectFromContext(ADDED_ACCOUNTS_DELTA_TABLE, String.class));
+        launch.setCompleteContactsTable(getObjectFromContext(ADDED_ACCOUNTS_FULL_CONTACTS_TABLE, String.class));
+        launch.setRemoveAccountsTable(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class));
+        launch.setAddContactsTable(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class));
+        launch.setRemoveContactsTable(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class));
+        launch.setParentDeltaWorkflowId(deltaWorkflowPid);
+        launch = playProxy.createNewLaunchByPlayAndChannel(configuration.getCustomerSpace().toString(),
+                configuration.getPlayId(), configuration.getChannelId(), true, launch);
         log.info("Queued New Launch: " + launch.getId() + " with delta tables (" + getDeltaTables() + ")");
+
+        return launch;
     }
 
     private String getDeltaTables() {

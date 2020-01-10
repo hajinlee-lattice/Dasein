@@ -90,7 +90,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void testAttachToPlay() {
         // Test attaching a play to playgroup
         play = testPlayCreationHelper.getPlay();
-        Set<PlayGroup> set = new HashSet<PlayGroup>();
+        Set<PlayGroup> set = new HashSet<>();
         set.add(playGroup1);
         set.add(playGroup2);
         play.setPlayGroups(set);
@@ -100,7 +100,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         sleepToAllowDbWriterReaderSync();
         Assert.assertNotNull(updatedPlay);
         Assert.assertNotNull(updatedPlay.getPlayGroups());
-        List<PlayGroup> playGroupListFromPlay = new ArrayList<PlayGroup>(updatedPlay.getPlayGroups());
+        List<PlayGroup> playGroupListFromPlay = new ArrayList<>(updatedPlay.getPlayGroups());
 
         List<PlayGroup> playGroup1List = playGroupListFromPlay.stream()
                 .filter(pl -> pl.getDisplayName().equals(playGroupName1)).collect(Collectors.toList());
@@ -150,7 +150,7 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     @AfterClass(groups = { "deployment" })
-    public void teardown() throws Exception {
+    public void teardown() {
         testPlayCreationHelper.cleanupArtifacts(true);
         log.info("Cleaned up all artifacts");
     }
