@@ -191,17 +191,6 @@ public class TenantServiceImpl implements TenantService {
         serviceConfigService.verifyInvokeTime(allowAutoSchedule, props);
         preinstall(spaceConfig, configSDirs);
 
-        // make sure no match entries leftover
-        if (batonService.isEntityMatchEnabled(customerSpace)) {
-            BumpVersionRequest request = new BumpVersionRequest();
-            request.setTenant(new Tenant(tenantId));
-            request.setEnvironments(Arrays.asList(EntityMatchEnvironment.SERVING, EntityMatchEnvironment.STAGING));
-            BumpVersionResponse response = matchProxy.bumpVersion(request);
-            log.info(
-                    "Entity match is enabled for tenant {}, bumping up version to have a clean state. Current version = {}",
-                    tenantId, response.getVersions());
-        }
-
         // change components in orchestrator based on selected product
         // retrieve mappings from Camille
         final Map<String, Map<String, String>> orchestratorProps = props;
@@ -217,6 +206,18 @@ public class TenantServiceImpl implements TenantService {
                 updateTenantInfo(contractId, tenantId, tenantInfo);
             }
         });
+
+        // make sure no match entries leftover
+        if (batonService.isEntityMatchEnabled(customerSpace)) {
+            BumpVersionRequest request = new BumpVersionRequest();
+            request.setTenant(new Tenant(tenantId));
+            request.setEnvironments(Arrays.asList(EntityMatchEnvironment.SERVING, EntityMatchEnvironment.STAGING));
+            BumpVersionResponse response = matchProxy.bumpVersion(request);
+            log.info(
+                    "Entity match is enabled for tenant {}, bumping up version to have a clean state. Current version = {}",
+                    tenantId, response.getVersions());
+        }
+
         return true;
     }
 
