@@ -99,9 +99,10 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         // Mimicking a manual Launch creation
         PlayLaunch testPlayLaunch = playProxy
-                .getPlay(playCreationHelper.getCustomerSpace(), play.getName(), false, false).getLaunchHistory()
+                .getPlay(playCreationHelper.getCustomerSpace(), play.getName(), false, true).getLaunchHistory()
                 .getMostRecentLaunch();
         Assert.assertNotNull(testPlayLaunch);
+        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
         Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
         Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
@@ -125,8 +126,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         PlayLaunch launch = new PlayLaunch();
         launch.setAddContactsTable("SomeTable");
 
-        Long workflowPid = playProxy.createLaunchByChannelAndKickoffWorkflow(playCreationHelper.getCustomerSpace(), play.getName(),
-                channel.getId(), true);
+        Long workflowPid = playProxy.createLaunchByChannelAndKickoffWorkflow(playCreationHelper.getCustomerSpace(),
+                play.getName(), channel.getId(), true);
 
         Thread.sleep(15000); // Making sure update passes thru to the read cluster
 

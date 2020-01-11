@@ -133,7 +133,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         assertPlay(plays.get(0));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testFindDependingPlays" })
+    @Test(groups = "deployment-app", dependsOnMethods = { "testFindDependingPlays" })
     public void testDelete() {
         Play retrievedPlay = playService.getPlayByName(playName, false);
         Assert.assertNotNull(retrievedPlay);
