@@ -129,10 +129,20 @@ public class PLSComponentManager {
         List<LatticeProduct> products = tenantConfigService.getProducts(PLSTenantId);
         if (products.contains(LatticeProduct.LPA3) && products.contains(LatticeProduct.CG)) {
             tenant.setUiVersion("4.0");
+        } else if (products.contains(LatticeProduct.LPA3) && products.contains(LatticeProduct.DCP)) {
+            tenant.setUiVersion("4.0");
         } else if (products.contains(LatticeProduct.LPA3) || products.contains(LatticeProduct.PD)) {
             tenant.setUiVersion("3.0");
         } else if (products.contains(LatticeProduct.LPA)) {
             tenant.setUiVersion("2.0");
+        }
+
+        if (products.contains(LatticeProduct.CG) && products.contains(LatticeProduct.DCP)) {
+            tenant.setEntitledApps("Lattice,DnB");
+        } else if (products.contains(LatticeProduct.DCP)) {
+            tenant.setEntitledApps("DnB");
+        } else {
+            tenant.setEntitledApps("Lattice");
         }
 
         try {
@@ -145,8 +155,8 @@ public class PLSComponentManager {
                 tenant.setTenantType(TenantType.valueOf(info.properties.tenantType));
             }
             tenant.setContract(info.properties.contract);
-            LOGGER.info("registered tenant's status is " + String.valueOf(tenant.getStatus()) + ", tenant type is "
-                    + String.valueOf(tenant.getTenantType()));
+            LOGGER.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is "
+                    + tenant.getTenantType());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18028, "Failed to retrieve tenants properties", e);
         }
