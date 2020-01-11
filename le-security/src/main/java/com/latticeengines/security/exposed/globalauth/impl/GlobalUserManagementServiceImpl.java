@@ -25,6 +25,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
@@ -49,8 +50,6 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         GlobalUserManagementService {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalUserManagementServiceImpl.class);
-
-    private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
 
     @Value("${monitor.emailsettings.from}")
     private String EMAIL_FROM;
@@ -153,7 +152,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     protected GlobalAuthUser createGlobalAuthUser(String userName, User user, boolean externalIntegUser) {
-        if (externalIntegUser && StringUtils.isNotBlank(user.getEmail()) && user.getEmail().toUpperCase().endsWith(LATTICE_ENGINES_COM)) {
+        if (externalIntegUser && EmailUtils.isInternalUser(user.getEmail())) {
             throw new LedpException(LedpCode.LEDP_19004);
         }
         GlobalAuthUser userData;
@@ -904,7 +903,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             return false;
         }
         // disable zendesk feature for Lattice email
-        return !email.trim().toUpperCase().endsWith(LATTICE_ENGINES_COM);
+        return !EmailUtils.isInternalUser(email);
     }
 
     /**

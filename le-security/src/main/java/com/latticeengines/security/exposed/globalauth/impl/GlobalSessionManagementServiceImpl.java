@@ -18,6 +18,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.auth.exposed.util.SessionUtils;
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -253,7 +254,8 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
                 session.setAccessLevel(level.name());
             } catch (NullPointerException e) {
                 if (!GARights.isEmpty()) {
-                    AccessLevel level = isInternalEmail(session.getEmailAddress()) ? AccessLevel.INTERNAL_USER
+                    AccessLevel level = EmailUtils.isInternalUser(session.getEmailAddress()) ?
+                            AccessLevel.INTERNAL_USER
                             : AccessLevel.EXTERNAL_USER;
                     session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
                     session.setAccessLevel(level.name());
@@ -264,9 +266,6 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             }
         }
 
-        private boolean isInternalEmail(String email) {
-            return email.toLowerCase().endsWith("lattice-engines.com");
-        }
     }
 
     static class TenantBuilder {

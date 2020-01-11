@@ -12,7 +12,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class EmailUtils {
 
-    private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
+    public static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
+
+    public static final String DNB_COM = "DNB.COM";
 
     public static List<String> parseEmails(String emailsInJson) {
         List<String> adminEmails = new ArrayList<>();
@@ -39,7 +41,8 @@ public class EmailUtils {
         if (StringUtils.isBlank(email)) {
             return false;
         }
-        return email.trim().toUpperCase().endsWith(LATTICE_ENGINES_COM);
+        String emailInUpperCase = email.trim().toUpperCase();
+        return emailInUpperCase.endsWith(LATTICE_ENGINES_COM) || emailInUpperCase.endsWith(DNB_COM);
     }
 
 }
