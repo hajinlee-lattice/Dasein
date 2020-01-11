@@ -122,8 +122,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         PlayLaunchChannel channel = playProxy
                 .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
         // Mimicking an automatic Launch creation
-        PlayLaunch launch = new PlayLaunch();
-        launch.setAddContactsTable("SomeTable");
 
         Long workflowPid = playProxy.createLaunchByChannelAndKickoffWorkflow(playCreationHelper.getCustomerSpace(),
                 play.getName(), channel.getId(), true);
