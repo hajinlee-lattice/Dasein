@@ -61,7 +61,8 @@ public class ErrorUtils {
         } else if (e instanceof RemoteLedpException) {
             RemoteLedpException remoteLedpException = (RemoteLedpException) e;
             HttpStatus httpStatus = remoteLedpException.getHttpStatus();
-            if (HttpStatus.BAD_GATEWAY.equals(httpStatus) || HttpStatus.SERVICE_UNAVAILABLE.equals(httpStatus)) {
+            if (HttpStatus.BAD_GATEWAY.equals(httpStatus) || HttpStatus.GATEWAY_TIMEOUT.equals(httpStatus)
+                    || HttpStatus.SERVICE_UNAVAILABLE.equals(httpStatus)) {
                 reason = "HttpStatus=" + httpStatus;
             } else {
                 String stackTrace = remoteLedpException.getRemoteStackTrace();

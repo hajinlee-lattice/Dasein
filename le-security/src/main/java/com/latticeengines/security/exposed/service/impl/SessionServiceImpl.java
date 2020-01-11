@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -39,7 +40,6 @@ public class SessionServiceImpl implements SessionService {
     private static Long retryIntervalMsec = 200L;
     private static final String AUTH_ROUTE_SSO = "SSO";
     private static final String AUTH_ROUTE_GA = "GA";
-    private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
 
     @Inject
     private GlobalSessionManagementService globalSessionManagementService;
@@ -70,7 +70,7 @@ public class SessionServiceImpl implements SessionService {
             throw new LedpException(LedpCode.LEDP_19005);
         }
         //PLS-6543. Do not allow usernames with lattice-email id.
-        if(samlLoginResp.getUserId().toUpperCase().endsWith(LATTICE_ENGINES_COM)) {
+        if(EmailUtils.isInternalUser(samlLoginResp.getUserId())) {
             throw new LedpException(LedpCode.LEDP_19004);
         }
     }
