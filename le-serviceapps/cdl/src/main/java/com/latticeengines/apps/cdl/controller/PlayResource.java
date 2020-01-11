@@ -674,6 +674,9 @@ public class PlayResource {
             if (LaunchState.canTransit(existingPlayLaunch.getLaunchState(), action)) {
                 existingPlayLaunch.setLaunchState(action);
                 return playLaunchService.update(existingPlayLaunch);
+            } else {
+                log.error(String.format("Cannot change state for Launch:%s from %s to %s", launchId,
+                        existingPlayLaunch.getLaunchState().name(), action.name()));
             }
         }
         return existingPlayLaunch;

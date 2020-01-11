@@ -281,22 +281,6 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private DataCollection createDataCollection() {
         return dataCollectionService.createDefaultCollection();
-        // DataCollection dc = new DataCollection();
-        // dc.setName(NamingUtils.timestamp("DC"));
-        // dc.setVersion(Blue);
-        //
-        // dc.setTenant(MultiTenantContext.getTenant());
-        // PlatformTransactionManager ptm =
-        // applicationContext.getBean("transactionManager",
-        // PlatformTransactionManager.class);
-        // TransactionTemplate tx = new TransactionTemplate(ptm);
-        // tx.execute(new TransactionCallbackWithoutResult() {
-        // public void doInTransactionWithoutResult(TransactionStatus status) {
-        // dataCollectionDao.create(dc);
-        // }
-        // });
-
-        // return dc;
     }
 
     private PlayType createTestPlayType() {

@@ -408,7 +408,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public Long createLaunchByChannelAndKickoffWorkflow(String customerSpace, String playName, String channelId,
-                                                        boolean isAutoLaunch) {
+            boolean isAutoLaunch) {
         String url = constructUrl(URL_PREFIX + "/{playName}/channels/{channelId}/kickoff-workflow",
                 shortenCustomerSpace(customerSpace), playName, channelId);
         List<String> params = new ArrayList<>();
@@ -417,11 +417,10 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
             url += "?" + StringUtils.join(params, "&");
         }
         log.info("url is " + url);
-        return put("Kickoff Launch Workflow for play launch channel", url, null, Long.class);
+        return post("Kickoff Launch Workflow for play launch channel", url, null, Long.class);
     }
 
-    public Long kickoffWorkflowForLaunch(String customerSpace, String playName, String channelId,
-                                                        String launchId) {
+    public Long kickoffWorkflowForLaunch(String customerSpace, String playName, String channelId, String launchId) {
         String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}/kickoff-launch",
                 shortenCustomerSpace(customerSpace), playName, channelId);
         List<String> params = new ArrayList<>();

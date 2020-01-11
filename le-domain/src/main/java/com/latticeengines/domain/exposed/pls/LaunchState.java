@@ -27,12 +27,25 @@ public enum LaunchState {
 
     static {
 
+        Set<LaunchState> statesAfterUnLaunched = new HashSet<>();
+        statesAfterUnLaunched.add(Launching);
+        statesAfterUnLaunched.add(Canceled);
+        statesAfterUnLaunched.add(Failed);
+        transitionMap.put(UnLaunched, statesAfterUnLaunched);
+
+        Set<LaunchState> statesAfterQueued = new HashSet<>();
+        statesAfterQueued.add(PreProcessing);
+        statesAfterQueued.add(Launching);
+        statesAfterQueued.add(Canceled);
+        statesAfterQueued.add(Failed);
+        transitionMap.put(Queued, statesAfterQueued);
+
         Set<LaunchState> statesAfterPreProcessing = new HashSet<>();
+        statesAfterPreProcessing.add(Launching);
         statesAfterPreProcessing.add(Skipped);
         statesAfterPreProcessing.add(Canceled);
         statesAfterPreProcessing.add(Failed);
-        statesAfterPreProcessing.add(Queued);
-        transitionMap.put(Launching, statesAfterPreProcessing);
+        transitionMap.put(PreProcessing, statesAfterPreProcessing);
 
         Set<LaunchState> statesAfterLaunching = new HashSet<>();
         statesAfterLaunching.add(Launched);

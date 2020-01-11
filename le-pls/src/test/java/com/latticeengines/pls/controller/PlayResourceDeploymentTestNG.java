@@ -243,16 +243,15 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(dataPage);
         Assert.assertNotNull(dataPage.getData());
         Assert.assertFalse(dataPage.getData().isEmpty());
-        dataPage.getData().stream() //
-                .forEach(d -> {
-                    String row = JsonUtils.serialize(d);
-                    Assert.assertTrue(d.containsKey(bucketFieldName), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.CompanyName.name()), row);
-                    Assert.assertFalse(d.containsKey(InterfaceName.SalesforceAccountID.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.Website.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.AccountId.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.LDC_Name.name()), row);
-                });
+        dataPage.getData().forEach(d -> {
+            String row = JsonUtils.serialize(d);
+            Assert.assertTrue(d.containsKey(bucketFieldName), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.CompanyName.name()), row);
+            Assert.assertFalse(d.containsKey(InterfaceName.SalesforceAccountID.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.Website.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.AccountId.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.LDC_Name.name()), row);
+        });
     }
 
     private void checkContactPreviewForRating(RatingEngine re) {
@@ -266,22 +265,21 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(dataPage);
         Assert.assertNotNull(dataPage.getData());
         Assert.assertFalse(dataPage.getData().isEmpty());
-        dataPage.getData().stream() //
-                .forEach(d -> {
-                    String row = JsonUtils.serialize(d);
-                    Assert.assertTrue(d.containsKey(InterfaceName.AccountId.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.ContactId.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.CompanyName.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.Email.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.ContactName.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.City.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.State.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.Country.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.PostalCode.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.PhoneNumber.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.Title.name()), row);
-                    Assert.assertTrue(d.containsKey(InterfaceName.Address_Street_1.name()), row);
-                });
+        dataPage.getData().forEach(d -> {
+            String row = JsonUtils.serialize(d);
+            Assert.assertTrue(d.containsKey(InterfaceName.AccountId.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.ContactId.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.CompanyName.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.Email.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.ContactName.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.City.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.State.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.Country.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.PostalCode.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.PhoneNumber.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.Title.name()), row);
+            Assert.assertTrue(d.containsKey(InterfaceName.Address_Street_1.name()), row);
+        });
     }
 
     MetadataSegment createSegment() {
@@ -375,9 +373,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
                 "/pls/play/" + name + "/launches", createDefaultPlayLaunch(), PlayLaunch.class);
 
-        playLaunch = restTemplate.postForObject(
-                getRestAPIHostPort() + //
-                        "/pls/play/" + name + "/launches/" + playLaunch.getId() + "/launch?dry-run=" + isDryRunMode,
+        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
+                "/pls/play/" + name + "/launches/" + playLaunch.getId() + "/launch?dry-run=" + isDryRunMode,
                 new Object(), PlayLaunch.class);
 
         assertPlayLaunch(playLaunch, isDryRunMode);
@@ -389,9 +386,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         logInterceptor();
 
         LookupIdMap lookupIdMap = createDefaultLookupIdMap();
-        playLaunch = restTemplate.postForObject(
-                getRestAPIHostPort() + //
-                        "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
+        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
+                "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
                 createDefaultPlayLaunch(bucketsToLaunch, excludeItemsWithoutSalesforceId, topNCount, lookupIdMap),
                 PlayLaunch.class);
 
@@ -420,10 +416,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         try {
             launch = restTemplate.postForObject(getRestAPIHostPort() + //
                     "/pls/play/" + name + "/launches", launch, PlayLaunch.class);
-            restTemplate.postForObject(
-                    getRestAPIHostPort() + //
-                            "/pls/play/" + name + "/launches/" + launch.getId() + "/launch",
-                    new Object(), PlayLaunch.class);
+            restTemplate.postForObject(getRestAPIHostPort() + //
+                    "/pls/play/" + name + "/launches/" + launch.getId() + "/launch", new Object(), PlayLaunch.class);
             Assert.fail("Play launch submission should fail");
         } catch (Exception ex) {
             Assert.assertTrue(ex.getMessage().contains(LedpCode.LEDP_18176.name()));
@@ -490,7 +484,6 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Play retrievedFullPlay = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/" + name, Play.class);
         Assert.assertNotNull(retrievedFullPlay);
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory());
-        Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getLastIncompleteLaunch());
         Assert.assertNotNull(retrievedFullPlay.getLaunchHistory().getLastCompletedLaunch());
         // TODO will change to NotNull after integration with RatingEngine is
         // fully done
@@ -680,8 +673,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private void logInterceptor() {
         log.info("Tenant = " + tenant.getId());
         log.info("restTemplate = " + restTemplate);
-        restTemplate.getInterceptors().stream() //
-                .forEach(
-                        in -> log.info(String.format("interceptor Obj = %s, class = %s", in, in.getClass().getName())));
+        restTemplate.getInterceptors().forEach(
+                in -> log.info(String.format("interceptor Obj = %s, class = %s", in, in.getClass().getName())));
     }
 }
