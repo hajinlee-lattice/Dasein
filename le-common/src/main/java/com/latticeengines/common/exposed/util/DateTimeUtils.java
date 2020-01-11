@@ -121,10 +121,13 @@ public class DateTimeUtils {
         return result;
     }
 
-    public static Integer subtractDays(Integer dayPeriod, Integer days){
+    public static Integer subtractDays(Integer dayPeriod, Integer days) {
         int year = 1900 + dayPeriod / (13 * 32);
         int month = (dayPeriod / 32) % 13 - 1; // 0 based months in GregorianCalendar
         int day = dayPeriod % 32;
+        if (year < 0 || month < 0 || day < 1) {
+            log.error("Invalid dayPeriod " + dayPeriod);
+        }
         calendar.set(year, month, day);
         Long delta = days.longValue() * 24 * 60 * 60 * 1000;
         calendar.setTimeInMillis(calendar.getTimeInMillis() - delta);
