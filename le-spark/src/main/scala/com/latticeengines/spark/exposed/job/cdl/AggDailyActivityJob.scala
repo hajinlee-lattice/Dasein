@@ -63,6 +63,9 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
           }
           col.as(deriver.getTargetAttribute)
         }
+
+        // TODO - apply dedup filter before generating row count, preserve column used for dedup condition (e.g. lastUpdated)
+
         // always generate row count agg
         val aggDf = df.groupBy(dimAttrs.head, dimAttrs.tail: _*)
           .agg(count("*").as(__Row_Count__.name), aggFns: _*)

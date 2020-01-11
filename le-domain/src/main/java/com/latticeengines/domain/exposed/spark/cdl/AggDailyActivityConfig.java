@@ -21,6 +21,8 @@ public class AggDailyActivityConfig extends SparkJobConfig {
     @JsonProperty
     public Map<String, Integer> rawStreamInputIdx = new HashMap<>();
 
+    // TODO - add stream filters (streamId -> List[Filter])
+
     // streamId -> dimensionName -> metadata
     @JsonProperty
     public Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap = new HashMap<>();

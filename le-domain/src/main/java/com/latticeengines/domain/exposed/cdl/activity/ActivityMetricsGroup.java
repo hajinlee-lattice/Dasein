@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -32,7 +33,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
 @Table(name = "ACTIVITY_METRIC_GROUP", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "GROUP_ID", "FK_TENANT_ID" }) })
+        @UniqueConstraint(columnNames = {"GROUP_ID", "FK_TENANT_ID"})})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
@@ -84,12 +85,16 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     private ActivityTimeRange activityTimeRange;
 
     @JsonProperty("displayNameTmpl")
-    @Column(name = "DISPLAY_NAME_TMPL", nullable = false)
-    private String displayNameTmpl;
+    @ManyToOne
+    @JoinColumn(name = "DISPLAY_NAME_TMPL", nullable = false)
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    private StringTemplate displayNameTmpl;
 
     @JsonProperty("descriptionTmpl")
-    @Column(name = "DESCRIPTION_TMPL")
-    private String descriptionTmpl;
+    @ManyToOne
+    @JoinColumn(name = "DESCRIPTION_TMPL")
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    private StringTemplate descriptionTmpl;
 
     @JsonProperty("category")
     @Column(name = "CATEGORY", nullable = false)
@@ -97,8 +102,10 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     private Category category;
 
     @JsonProperty("subCategoryTmpl")
-    @Column(name = "SUBCATEGORY_TMPL", nullable = false)
-    private String subCategoryTmpl;
+    @ManyToOne
+    @JoinColumn(name = "SUBCATEGORY_TMPL", nullable = false)
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    private StringTemplate subCategoryTmpl;
 
     @JsonProperty("javaClass")
     @Column(name = "JAVA_CLASS", nullable = false)
@@ -188,19 +195,19 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
         this.activityTimeRange = activityTimeRange;
     }
 
-    public String getDisplayNameTmpl() {
+    public StringTemplate getDisplayNameTmpl() {
         return displayNameTmpl;
     }
 
-    public void setDisplayNameTmpl(String displayNameTmpl) {
+    public void setDisplayNameTmpl(StringTemplate displayNameTmpl) {
         this.displayNameTmpl = displayNameTmpl;
     }
 
-    public String getDescriptionTmpl() {
+    public StringTemplate getDescriptionTmpl() {
         return descriptionTmpl;
     }
 
-    public void setDescriptionTmpl(String descriptionTmpl) {
+    public void setDescriptionTmpl(StringTemplate descriptionTmpl) {
         this.descriptionTmpl = descriptionTmpl;
     }
 
@@ -212,11 +219,11 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
         this.category = category;
     }
 
-    public String getSubCategoryTmpl() {
+    public StringTemplate getSubCategoryTmpl() {
         return subCategoryTmpl;
     }
 
-    public void setSubCategoryTmpl(String subCategoryTmpl) {
+    public void setSubCategoryTmpl(StringTemplate subCategoryTmpl) {
         this.subCategoryTmpl = subCategoryTmpl;
     }
 

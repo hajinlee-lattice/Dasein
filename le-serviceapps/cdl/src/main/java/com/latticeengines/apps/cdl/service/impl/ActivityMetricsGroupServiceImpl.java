@@ -2,8 +2,10 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,10 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.AtlasStreamEntityMgr;
+import com.latticeengines.apps.cdl.repository.reader.StringTemplateReaderRepository;
 import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.StringTemplates;
+import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
@@ -24,6 +27,7 @@ import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
@@ -37,11 +41,16 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     private static final String DIM_NAME_PATH_PATTERN = InterfaceName.PathPatternId.name();
     private static final String DIM_NAME_SOURCEMEDIUM = InterfaceName.SourceMediumId.name();
 
+    private static Map<String, StringTemplate> templateCache = new HashMap<>();
+
     @Inject
     private ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr;
 
     @Inject
     private AtlasStreamEntityMgr atlasStreamEntityMgr;
+
+    @Inject
+    private StringTemplateReaderRepository stringTemplateReaderRepository;
 
     @Override
     @WithCustomerSpace
@@ -86,9 +95,9 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         totalVisit.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
         totalVisit.setCategory(Category.WEB_VISIT_PROFILE);
-        totalVisit.setSubCategoryTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY);
-        totalVisit.setDisplayNameTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME);
-        totalVisit.setDescriptionTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION);
+        totalVisit.setSubCategoryTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SUBCATEGORY));
+        totalVisit.setDisplayNameTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME));
+        totalVisit.setDescriptionTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION));
         totalVisit.setNullImputation(NullMetricsImputation.ZERO);
         return totalVisit;
     }
@@ -112,9 +121,9 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         sourceMedium.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
         sourceMedium.setCategory(Category.WEB_VISIT_PROFILE);
-        sourceMedium.setSubCategoryTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY);
-        sourceMedium.setDisplayNameTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME);
-        sourceMedium.setDescriptionTmpl(StringTemplates.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION);
+        sourceMedium.setSubCategoryTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SUBCATEGORY));
+        sourceMedium.setDisplayNameTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME));
+        sourceMedium.setDescriptionTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION));
         sourceMedium.setNullImputation(NullMetricsImputation.ZERO);
         return sourceMedium;
     }
@@ -140,5 +149,16 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         timeRange.setPeriods(periods);
         timeRange.setParamSet(paramSet);
         return timeRange;
+    }
+
+    private StringTemplate getTemplate(String name) {
+        if (!templateCache.containsKey(name)) {
+            templateCache.put(name, stringTemplateReaderRepository.findByName(name));
+        }
+        StringTemplate tmpl = templateCache.get(name);
+        if (tmpl == null) {
+            throw new IllegalStateException(String.format("Default template %s is not added to database", name));
+        }
+        return tmpl;
     }
 }

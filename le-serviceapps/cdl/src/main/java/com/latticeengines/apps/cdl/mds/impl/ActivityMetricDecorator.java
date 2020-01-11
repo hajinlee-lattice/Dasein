@@ -22,7 +22,7 @@ import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.common.exposed.util.TemplateUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.StringTemplates;
+import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
@@ -57,7 +57,7 @@ public class ActivityMetricDecorator implements Decorator {
     private ConcurrentMap<String, ActivityMetricsGroup> groupCache = new ConcurrentHashMap<>();
 
     ActivityMetricDecorator(String signature, Tenant tenant, //
-            DimensionMetadataService dimensionMetadataService, //
+                            DimensionMetadataService dimensionMetadataService, //
                             ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr) {
         this.signature = signature;
         this.tenant = tenant;
@@ -82,10 +82,10 @@ public class ActivityMetricDecorator implements Decorator {
 
     private ColumnMetadata filter(ColumnMetadata cm) {
         switch (cm.getEntity()) {
-        case WebVisitProfile:
-            cm.setCategory(Category.WEB_VISIT_PROFILE);
-            break;
-        default:
+            case WebVisitProfile:
+                cm.setCategory(Category.WEB_VISIT_PROFILE);
+                break;
+            default:
         }
         if (systemAttrs.contains(cm.getAttrName())) {
             return cm;
@@ -134,7 +134,7 @@ public class ActivityMetricDecorator implements Decorator {
     }
 
     private Map<String, Object> getRenderParams(String attrName, ActivityMetricsGroup group, //
-            String[] rollupDimVals, String timeRange) {
+                                                String[] rollupDimVals, String timeRange) {
         String groupId = group.getGroupId();
         String streamId = group.getStream().getStreamId();
 
@@ -177,7 +177,7 @@ public class ActivityMetricDecorator implements Decorator {
 
         try {
             String timeDesc = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeRange);
-            params.put(StringTemplates.ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN, timeDesc);
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN, timeDesc);
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to parse time range for attribute " + attrName, e);
         }
@@ -188,7 +188,7 @@ public class ActivityMetricDecorator implements Decorator {
     private void renderTemplates(ColumnMetadata cm, ActivityMetricsGroup group, Map<String, Object> params) {
         String attrName = cm.getAttrName();
 
-        String dispNameTmpl = group.getDisplayNameTmpl();
+        String dispNameTmpl = group.getDisplayNameTmpl().getTemplate();
         if (StringUtils.isNotBlank(dispNameTmpl)) {
             try {
                 cm.setDisplayName(TemplateUtils.renderByMap(dispNameTmpl, params));
@@ -197,7 +197,7 @@ public class ActivityMetricDecorator implements Decorator {
             }
         }
 
-        String descTmpl = group.getDescriptionTmpl();
+        String descTmpl = group.getDescriptionTmpl().getTemplate();
         if (StringUtils.isNotBlank(descTmpl)) {
             try {
                 cm.setDescription(TemplateUtils.renderByMap(descTmpl, params));
@@ -206,7 +206,7 @@ public class ActivityMetricDecorator implements Decorator {
             }
         }
 
-        String subCatTmpl = group.getSubCategoryTmpl();
+        String subCatTmpl = group.getSubCategoryTmpl().getTemplate();
         if (StringUtils.isNotBlank(subCatTmpl)) {
             try {
                 cm.setSubcategory(TemplateUtils.renderByMap(subCatTmpl, params));

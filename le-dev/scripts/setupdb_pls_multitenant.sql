@@ -167,4 +167,9 @@ INSERT INTO WORKFLOW_JOB_SEQ (ID, UNIQUE_KEY) SELECT *
                                               WHERE NOT exists(SELECT *
                                                                FROM WORKFLOW_JOB_SEQ);
 
+LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/PLSMultiTenant_ManageDB/StringTemplate.csv' INTO TABLE `STRING_TEMPLATE`
+FIELDS TERMINATED BY ','
+Lines TERMINATED BY '\r\n'
+IGNORE 1 LINES;
+
 COMMIT;
