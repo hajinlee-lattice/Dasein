@@ -110,7 +110,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(testPlayLaunch.getAccountsSuppressed());
         Assert.assertEquals(testPlayLaunch.getCreatedBy(), testuser);
         Assert.assertEquals(testPlayLaunch.getUpdatedBy(), testuser);
-        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.Launching);
         totalRatedAccounts = testPlayLaunch.getAccountsSelected();
 
         playProxy.deletePlayLaunch(playCreationHelper.getCustomerSpace(), playCreationHelper.getPlayName(),
@@ -132,8 +131,10 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Thread.sleep(15000); // Making sure update passes thru to the read cluster
 
         PlayLaunch testPlayLaunch = playProxy
-                .getPlay(playCreationHelper.getCustomerSpace(), play.getName(), false, false).getLaunchHistory()
+                .getPlay(playCreationHelper.getCustomerSpace(), play.getName(), false, true).getLaunchHistory()
                 .getMostRecentLaunch();
+        Assert.assertNotNull(testPlayLaunch);
+        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNotNull(testPlayLaunch.getAccountsSelected());
         Assert.assertNotNull(testPlayLaunch.getAccountsLaunched());
         Assert.assertNotNull(testPlayLaunch.getContactsLaunched());
@@ -141,7 +142,6 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(testPlayLaunch.getAccountsSuppressed());
         Assert.assertEquals(testPlayLaunch.getCreatedBy(), serviceUser);
         Assert.assertEquals(testPlayLaunch.getUpdatedBy(), serviceUser);
-        Assert.assertEquals(testPlayLaunch.getLaunchState(), LaunchState.Queued);
         totalRatedAccounts = testPlayLaunch.getAccountsSelected();
 
         playProxy.deletePlayLaunch(playCreationHelper.getCustomerSpace(), playCreationHelper.getPlayName(),
