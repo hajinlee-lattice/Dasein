@@ -1,8 +1,10 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -13,21 +15,23 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
+import com.latticeengines.apps.cdl.repository.reader.StringTemplateReaderRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.StringTemplates;
+import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
-@Listeners({ SimpleRetryListener.class })
+@Listeners({SimpleRetryListener.class})
 public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEntityMgrImplTestNGBase {
 
     private static ActivityMetricsGroup TEST_GROUP_TOTAL_VISIT;
@@ -38,13 +42,18 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
     private static final String GROUPNAME_TOTAL_VISIT = "Total Web Visits";
     private static final String STREAM_NAME_WEBVISIT = "WebVisit";
     private static final String ROLLUP_DIM = "rollupDim";
-    private static final String DISPLAY_NAME_TMPL = StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME;
-    private static final String SUBCATEGORY_TMPL = StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY;
+    private static final String DISPLAY_NAME_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME;
+    private static final String SUBCATEGORY_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_SUBCATEGORY;
     private static final String JAVA_CLASS_LONG = Long.class.getSimpleName();
     private static final NullMetricsImputation NULL_IMPUTATION = NullMetricsImputation.ZERO;
 
+    private static Map<String, StringTemplate> templateCache = new HashMap<>();
+
     @Inject
     private ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr;
+
+    @Inject
+    private StringTemplateReaderRepository stringTemplateReaderRepository;
 
     @BeforeClass(groups = "functional")
     public void setupData() {
@@ -105,14 +114,14 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
 
     @DataProvider(name = "testGroupsDataProvider")
     public Object[][] testGroupsDataProvider() {
-        return new Object[][] {
-                { TEST_GROUP_TOTAL_VISIT, prepareMetricsGroup(GROUPNAME_TOTAL_VISIT, STREAM_WEBVISIT) } };
+        return new Object[][]{
+                {TEST_GROUP_TOTAL_VISIT, prepareMetricsGroup(GROUPNAME_TOTAL_VISIT, STREAM_WEBVISIT)}};
     }
 
     @DataProvider(name = "groupNamesDataProvider")
     public Object[][] groupNameDataProvider() {
-        return new Object[][] { { GROUPNAME_TOTAL_VISIT,
-                ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(GROUPNAME_TOTAL_VISIT) + "1" } };
+        return new Object[][]{{GROUPNAME_TOTAL_VISIT,
+                ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(GROUPNAME_TOTAL_VISIT) + "1"}};
     }
 
     private ActivityTimeRange createTimeRollup() {
@@ -134,9 +143,9 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
         group.setRollupDimensions(ROLLUP_DIM);
         group.setAggregation(stream.getAttributeDerivers().get(0));
         group.setActivityTimeRange(activityTimeRange);
-        group.setDisplayNameTmpl(DISPLAY_NAME_TMPL);
+        group.setDisplayNameTmpl(getTemplate(DISPLAY_NAME_TMPL));
         group.setCategory(Category.WEBSITE_PROFILE);
-        group.setSubCategoryTmpl(SUBCATEGORY_TMPL);
+        group.setSubCategoryTmpl(getTemplate(SUBCATEGORY_TMPL));
         group.setJavaClass(JAVA_CLASS_LONG);
         group.setNullImputation(NULL_IMPUTATION);
 
@@ -155,10 +164,21 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
         Assert.assertEquals(group.getEntity(), retrieved.getEntity());
         Assert.assertEquals(group.getRollupDimensions(), retrieved.getRollupDimensions());
         Assert.assertEquals(group.getAggregation().getCalculation(), retrieved.getAggregation().getCalculation());
-        Assert.assertEquals(group.getDisplayNameTmpl(), retrieved.getDisplayNameTmpl());
+        Assert.assertEquals(group.getDisplayNameTmpl().getTemplate(), retrieved.getDisplayNameTmpl().getTemplate());
         Assert.assertEquals(group.getCategory(), retrieved.getCategory());
-        Assert.assertEquals(group.getSubCategoryTmpl(), retrieved.getSubCategoryTmpl());
+        Assert.assertEquals(group.getSubCategoryTmpl().getTemplate(), retrieved.getSubCategoryTmpl().getTemplate());
         Assert.assertEquals(group.getJavaClass(), retrieved.getJavaClass());
         Assert.assertEquals(group.getNullImputation(), retrieved.getNullImputation());
+    }
+
+    private StringTemplate getTemplate(String name) {
+        if (!templateCache.containsKey(name)) {
+            templateCache.put(name, stringTemplateReaderRepository.findByName(name));
+        }
+        StringTemplate tmpl = templateCache.get(name);
+        if (tmpl == null) {
+            throw new IllegalStateException(String.format("Default template %s is not added to database", name));
+        }
+        return tmpl;
     }
 }

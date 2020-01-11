@@ -3,7 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl
 import java.util
 
 import com.latticeengines.common.exposed.util.TemplateUtils
-import com.latticeengines.domain.exposed.StringTemplates
+import com.latticeengines.domain.exposed.StringTemplateConstants
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity._
@@ -130,6 +130,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
     val timeRangeStr: String = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter)
 
+    // TODO - apply dedup filter before return, remove column used for dedup condition (e.g. lastUpdated)
     (df.filter(df(periodIdColumnName).between(bounds.getLeft, bounds.getRight)), timeRangeStr)
   }
 
@@ -200,7 +201,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     map.put(TMPLKEY_GROUPID, groupId)
     map.put(TMPLKEY_ROLLUP_DIM_IDs, seqAsJavaList(rollupDimIds))
     map.put(TMPLKEY_TIMERANGE, timeRangeStr)
-    TemplateUtils.renderByMap(StringTemplates.ACTIVITY_METRICS_GROUP_ATTRNAME, map).toLowerCase()
+    TemplateUtils.renderByMap(StringTemplateConstants.ACTIVITY_METRICS_GROUP_ATTRNAME, map).toLowerCase()
   }
 
   private def toPeriodStrategy(name: String): PeriodStrategy = {

@@ -21,6 +21,9 @@ else
     sed -i 's/alter table .* drop foreign key .*;//g' $DDL
 fi
 
+rm -rf $WSHOME/le-dev/testartifacts/PLSMultiTenant_ManageDB/StringTemplate.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/PLSMultiTenant_ManageDB/StringTemplate.csv.gz > $WSHOME/le-dev/testartifacts/PLSMultiTenant_ManageDB/StringTemplate.csv
+
 source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 
 mysql_version=$(mysql --version | sed 's/.*Distrib //' | cut -d , -f 1) || true

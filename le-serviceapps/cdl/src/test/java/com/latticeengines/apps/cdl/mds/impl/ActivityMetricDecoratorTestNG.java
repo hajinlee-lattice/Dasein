@@ -1,6 +1,6 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-import static com.latticeengines.domain.exposed.StringTemplates.ACTIVITY_METRICS_GROUP_ATTRNAME;
+import static com.latticeengines.domain.exposed.StringTemplateConstants.ACTIVITY_METRICS_GROUP_ATTRNAME;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
@@ -27,11 +27,12 @@ import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.impl.ActivityRelatedEntityMgrImplTestNGBase;
 import com.latticeengines.apps.cdl.mds.ActivityMetricDecoratorFac;
+import com.latticeengines.apps.cdl.repository.reader.StringTemplateReaderRepository;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.TemplateUtils;
-import com.latticeengines.domain.exposed.StringTemplates;
+import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -63,11 +65,13 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
     private static final String PATTERN_NAME = "Page 123";
     private static final String PERIOD = PeriodStrategy.Template.Week.name();
     private static final String GROUPNAME_TOTAL_VISIT = "Total Web Visits";
-    private static final String DISPLAY_NAME_TMPL = StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME;
-    private static final String DESCRIPTION_TMPL = StringTemplates.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION;
-    private static final String SUBCATEGORY_TMPL = StringTemplates.ACTIVITY_METRICS_GROUP_SUBCATEGORY;
+    private static final String DISPLAY_NAME_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME;
+    private static final String DESCRIPTION_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION;
+    private static final String SUBCATEGORY_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_SUBCATEGORY;
     private static final String JAVA_CLASS_LONG = Long.class.getSimpleName();
     private static final NullMetricsImputation NULL_IMPUTATION = NullMetricsImputation.ZERO;
+
+    private static Map<String, StringTemplate> templateCache = new HashMap<>();
 
     @Inject
     private DataCollectionStatusEntityMgr dataCollectionStatusEntityMgr;
@@ -77,6 +81,9 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
 
     @Inject
     private ActivityMetricDecoratorFac decoratorFac;
+
+    @Inject
+    private StringTemplateReaderRepository stringTemplateReaderRepository;
 
     private String groupId;
 
@@ -236,10 +243,10 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         group.setRollupDimensions(DIM_PATH_PATTERN_ID);
         group.setAggregation(stream.getAttributeDerivers().get(0));
         group.setActivityTimeRange(activityTimeRange);
-        group.setDisplayNameTmpl(DISPLAY_NAME_TMPL);
-        group.setDescriptionTmpl(DESCRIPTION_TMPL);
+        group.setDisplayNameTmpl(getTemplate(DISPLAY_NAME_TMPL));
+        group.setDescriptionTmpl(getTemplate(DESCRIPTION_TMPL));
         group.setCategory(Category.WEBSITE_PROFILE);
-        group.setSubCategoryTmpl(SUBCATEGORY_TMPL);
+        group.setSubCategoryTmpl(getTemplate(SUBCATEGORY_TMPL));
         group.setJavaClass(JAVA_CLASS_LONG);
         group.setNullImputation(NULL_IMPUTATION);
 
@@ -254,4 +261,14 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         return activityTimeRange;
     }
 
+    private StringTemplate getTemplate(String name) {
+        if (!templateCache.containsKey(name)) {
+            templateCache.put(name, stringTemplateReaderRepository.findByName(name));
+        }
+        StringTemplate tmpl = templateCache.get(name);
+        if (tmpl == null) {
+            throw new IllegalStateException(String.format("Default template %s is not added to database", name));
+        }
+        return tmpl;
+    }
 }
