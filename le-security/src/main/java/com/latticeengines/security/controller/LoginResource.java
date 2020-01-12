@@ -1,26 +1,30 @@
 package com.latticeengines.security.controller;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -44,7 +48,9 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
+import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.LogoutService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
@@ -61,28 +67,34 @@ public class LoginResource {
     @Value("${security.app.public.url}")
     private String APP_BASE_URL;
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
-    @Autowired
+    @Inject
     private EmailService emailService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthUserEntityMgr gaUserEntityMgr;
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
+    @Inject
+    private GlobalAuthenticationService globalAuthenticationService;
+
+    @Inject
+    private LogoutService logoutService;
+
+    @PostMapping("/login")
     @ResponseBody
     @ApiOperation(value = "Login to Lattice external application")
     public LoginDocument login(@RequestBody Credentials creds) {
@@ -98,7 +110,6 @@ public class LoginResource {
 
             doc.setRandomness(ticket.getRandomness());
             doc.setUniqueness(ticket.getUniqueness());
-            doc.setSuccess(true);
 
             GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
             GlobalAuthUser userData = gaUserEntityMgr.findByUserId(ticketData.getUserId());
@@ -106,24 +117,72 @@ public class LoginResource {
                 doc.setErrors(Collections.singletonList("The email address or password is not valid. Please re-enter your credentials."));
                 return doc;
             }
+            doc.setUserName(creds.getUsername());
             doc.setFirstName(userData.getFirstName());
             doc.setLastName(userData.getLastName());
+            doc.setSuccess(true);
 
             LoginResult result = doc.new LoginResult();
             result.setMustChangePassword(ticket.isMustChangePassword());
             result.setPasswordLastModified(ticket.getPasswordLastModified());
             List<Tenant> tenants = tenantService.getTenantsByStatus(TenantStatus.ACTIVE);
-            List<Tenant> gaTenants = null;
-            if (ticket.getTenants()!= null) {
-                gaTenants = new ArrayList<>(ticket.getTenants());
+            List<Tenant> gaTenants = ticket.getTenants();
+            if (CollectionUtils.isNotEmpty(gaTenants)) {
+                tenants.retainAll(gaTenants);
+                tenants.sort(new TenantNameSorter());
+                result.setTenants(tenants);
             }
-            if (gaTenants != null) {
-                if (!gaTenants.isEmpty()) {
-                    tenants.retainAll(gaTenants);
-                    tenants.sort(new TenantNameSorter());
-                    result.setTenants(tenants);
-                }
+            doc.setResult(result);
+        } catch (LedpException e) {
+            doc.setErrors(Collections.singletonList(e.getCode().getMessage()));
+        }
+        return doc;
+    }
+
+    @GetMapping("/login-doc")
+    @ResponseBody
+    @ApiOperation(value = "Login externally and get tenant list")
+    public LoginDocument getLoginDocument(HttpServletRequest request) {
+        LoginDocument doc = new LoginDocument();
+
+        try {
+            String token = request.getHeader(Constants.AUTHORIZATION);
+            if (!StringUtils.isNotEmpty(token)) {
+                throw new LedpException(LedpCode.LEDP_18123);
             }
+
+            Ticket ticket = new Ticket(token);
+            GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
+            if (ticketData == null) {
+                doc.setErrors(Collections.singletonList("The provided token " + token + " is not valid."));
+                return doc;
+            }
+            doc.setRandomness(ticket.getRandomness());
+            doc.setUniqueness(ticket.getUniqueness());
+
+            GlobalAuthUser userData = gaUserEntityMgr.findByUserId(ticketData.getUserId());
+            if (userData == null) {
+                doc.setErrors(Collections.singletonList("The provided token " + token + " is not valid."));
+                return doc;
+            }
+            doc.setUserName(userData.getEmail());
+            doc.setFirstName(userData.getFirstName());
+            doc.setLastName(userData.getLastName());
+
+            LoginResult result = doc.new LoginResult();
+
+            // these are managed by iDaaS now
+            // result.setMustChangePassword(ticket.isMustChangePassword());
+            // result.setPasswordLastModified(ticket.getPasswordLastModified());
+
+            List<Tenant> tenants = tenantService.getTenantsByStatus(TenantStatus.ACTIVE);
+            List<Tenant> gaTenants = globalAuthenticationService.getValidTenants(userData);
+            if (CollectionUtils.isNotEmpty(gaTenants)) {
+                tenants.retainAll(gaTenants);
+                tenants.sort(new TenantNameSorter());
+                result.setTenants(tenants);
+            }
+            doc.setSuccess(true);
             doc.setResult(result);
         } catch (LedpException e) {
             doc.setErrors(Collections.singletonList(e.getCode().getMessage()));
@@ -211,17 +270,22 @@ public class LoginResource {
         return true;
     }
 
-    @RequestMapping(value = "/logout", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/logout")
     @ResponseBody
     @ApiOperation(value = "Logout the user")
-    public SimpleBooleanResponse logout(HttpServletRequest request) {
+    public ResponseDocument<String> logout(@RequestParam(name = "redirectTo", required = false) String redirectTo, //
+                                           HttpServletRequest request) {
         String token = request.getHeader(Constants.AUTHORIZATION);
         if (StringUtils.isNotEmpty(token)) {
             // Make sure the token has at least two parts separated by a period
             // in order to generate a valid ticket.
             if (token.split("\\.").length > 1) {
-                sessionService.logout(new Ticket(token));
-                return SimpleBooleanResponse.successResponse();
+                String sloUrl = logoutService.logout(token, redirectTo);
+                if (StringUtils.isNotBlank(sloUrl)) {
+                    return ResponseDocument.successResponse(sloUrl);
+                } else {
+                    return ResponseDocument.successResponse("");
+                }
             } else {
                 log.warn("Invalid token (missing period) passed by HttpServletRequest to Logout.");
                 // For now, return a successful response even though the token
@@ -243,13 +307,13 @@ public class LoginResource {
                 // TODO: Reevaluate the proper response for this error condition
                 // (return success, return failures, or
                 // throw exception).
-                return SimpleBooleanResponse.successResponse();
+                return ResponseDocument.successResponse("");
             }
         } else {
             log.warn("Logout request made with empty token.");
             // See above invalid token case as to why we return a successful
             // response here despite the empty token.
-            return SimpleBooleanResponse.successResponse();
+            return ResponseDocument.successResponse("");
         }
     }
 

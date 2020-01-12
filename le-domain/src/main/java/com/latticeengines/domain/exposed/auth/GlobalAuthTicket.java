@@ -13,13 +13,23 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.TypeDefs;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "GlobalTicket", indexes = { @Index(name = "IX_Ticket", columnList = "Ticket") })
+@Table(name = "GlobalTicket", indexes = {
+        @Index(name = "IX_Ticket", columnList = "Ticket"),
+        @Index(name = "IX_User_Issuer", columnList = "User_ID,Issuer") })
+@TypeDefs({ @TypeDef(name = "json", typeClass = JsonStringType.class),
+        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)})
 public class GlobalAuthTicket extends BaseGlobalAuthObject implements HasPid {
 
     @Id
@@ -40,6 +50,17 @@ public class GlobalAuthTicket extends BaseGlobalAuthObject implements HasPid {
     @JsonProperty("last_access_date")
     @Column(name = "Last_Access_Date", nullable = false)
     private Date lastAccessDate;
+
+    @JsonProperty("external_session")
+    @Type(type = "json")
+    @Column(name = "External_Session", columnDefinition = "'JSON'")
+    private GlobalAuthExternalSession externalSession;
+
+    @JsonIgnore
+    @Column(name = "Issuer", //
+            columnDefinition = "'VARCHAR(255) GENERATED ALWAYS AS (`External_Session` ->> '$.Issuer')'", //
+            insertable = false, updatable = false)
+    private String issuer;
 
     @Override
     public Long getPid() {
@@ -75,4 +96,11 @@ public class GlobalAuthTicket extends BaseGlobalAuthObject implements HasPid {
         this.lastAccessDate = lastAccessDate;
     }
 
+    public GlobalAuthExternalSession getExternalSession() {
+        return externalSession;
+    }
+
+    public void setExternalSession(GlobalAuthExternalSession externalSession) {
+        this.externalSession = externalSession;
+    }
 }

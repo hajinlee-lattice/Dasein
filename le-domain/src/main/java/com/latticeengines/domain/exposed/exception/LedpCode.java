@@ -385,6 +385,7 @@ public enum LedpCode {
     LEDP_19014("Unsupport error."), //
     LEDP_19015("Your account has been locked, please reset password."), //
     LEDP_19016("Your login session has expired, please log in again."), //
+    LEDP_19017("Failed to find external session from token: {0}"), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //

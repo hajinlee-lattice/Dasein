@@ -19,6 +19,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEnt
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
+import com.latticeengines.domain.exposed.auth.GlobalAuthExternalSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
@@ -113,6 +114,10 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     }
 
     protected Ticket constructTicket(GlobalAuthUser user) {
+        return constructTicket(user, null);
+    }
+
+    protected Ticket constructTicket(GlobalAuthUser user, GlobalAuthExternalSession externalSession) {
         Ticket ticket = new Ticket();
         ticket.setUniqueness(UUID.randomUUID().toString());
         ticket.setRandomness(GlobalAuthPasswordUtils.getSecureRandomString(16));
@@ -120,7 +125,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
         ticketData.setUserId(user.getPid());
         ticketData.setTicket(ticket.getData());
         ticketData.setLastAccessDate(new Date(System.currentTimeMillis()));
-
+        ticketData.setExternalSession(externalSession);
         attachValidTenantsToTicket(user, ticket);
 
         gaTicketEntityMgr.create(ticketData);
@@ -129,7 +134,14 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     }
 
     protected void attachValidTenantsToTicket(GlobalAuthUser user, Ticket ticket) {
+        List<Tenant> tenants = getValidTenants(user);
+        ticket.setTenants(tenants);
+    }
+
+    @Override
+    public List<Tenant> getValidTenants(GlobalAuthUser user) {
         GlobalAuthUser userData = gaUserEntityMgr.findByUserIdWithTenantRightsAndAuthentications(user.getPid());
+        List<Tenant> tenants = new ArrayList<Tenant>();
         if (userData.getUserTenantRights() != null && userData.getUserTenantRights().size() > 0) {
             Map<String, GlobalAuthTenant> distinctTenants = new HashMap<String, GlobalAuthTenant>();
             for (GlobalAuthUserTenantRight rightData : userData.getUserTenantRights()) {
@@ -146,39 +158,36 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
                 }
             }
 
-            List<Tenant> tenants = new ArrayList<Tenant>();
             for (Entry<String, GlobalAuthTenant> tenantData : distinctTenants.entrySet()) {
                 Tenant tenant = new Tenant();
                 tenant.setId(tenantData.getKey());
                 tenant.setName(tenantData.getValue().getName());
                 tenants.add(tenant);
             }
-            ticket.setTenants(tenants);
         }
+        return tenants;
     }
 
 
     @Override
-    public synchronized Ticket externallyAuthenticated(String emailAddress) {
+    public synchronized Ticket externallyAuthenticated(String emailAddress, GlobalAuthExternalSession externalSession) {
         try {
             log.info(String.format("Retrieving ticket for already authenticated user %s", emailAddress));
-            return globalAuthExternallyAuthenticated(emailAddress);
+
+            // GlobalAuthUser user = gaUserEntityMgr.findByEmailJoinAuthentication(emailAddress);
+            GlobalAuthUser user = gaUserEntityMgr.findByEmail(emailAddress);
+
+            validateUserForTicketCreation(user);
+
+            Ticket ticket = constructTicket(user, externalSession);
+            if (ticket != null) {
+                return ticket;
+            } else {
+                throw new Exception("The credentials provided for login are incorrect.");
+            }
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18001, new String[]{emailAddress});
+            throw new LedpException(LedpCode.LEDP_18001, e, new String[]{emailAddress});
         }
-    }
-
-    private Ticket globalAuthExternallyAuthenticated(String emailAddress) throws Exception {
-        GlobalAuthUser user = gaUserEntityMgr.findByEmailJoinAuthentication(emailAddress);
-
-        validateUserForTicketCreation(user);
-
-        Ticket ticket = constructTicket(user);
-        if (ticket != null) {
-            return ticket;
-        }
-
-        throw new Exception("The credentials provided for login are incorrect.");
     }
 
     protected void validateUserForTicketCreation(GlobalAuthUser user) throws Exception {
