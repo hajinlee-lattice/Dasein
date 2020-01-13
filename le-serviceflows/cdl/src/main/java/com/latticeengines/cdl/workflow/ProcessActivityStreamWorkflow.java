@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteActivityStreamWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.BuildRawActivityStreamWrapper;
 import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
 import com.latticeengines.cdl.workflow.steps.process.AggActivityStreamToDaily;
@@ -30,6 +31,9 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
 
     @Inject
     private PrepareForActivityStream prepareForActivityStream;
+
+    @Inject
+    private SoftDeleteActivityStreamWrapper softDeleteActivityStreamWrapper;
 
     @Inject
     private BuildRawActivityStreamWrapper buildRawActivityStreamWrapper;
@@ -59,6 +63,7 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     public Workflow defineWorkflow(ProcessActivityStreamWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(prepareForActivityStream) //
+                .next(softDeleteActivityStreamWrapper) //
                 .next(buildRawActivityStreamWrapper) //
                 .next(generateDimensionMetadata) //
                 .next(aggActivityStreamToDaily) //
