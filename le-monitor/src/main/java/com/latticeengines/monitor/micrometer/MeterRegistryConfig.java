@@ -1,5 +1,10 @@
 package com.latticeengines.monitor.micrometer;
 
+import static com.latticeengines.common.exposed.util.MetricUtils.TAG_ENVIRONMENT;
+import static com.latticeengines.common.exposed.util.MetricUtils.TAG_SERVICE;
+import static com.latticeengines.common.exposed.util.MetricUtils.TAG_STACK;
+import static com.latticeengines.monitor.util.MonitoringUtils.getService;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -99,7 +104,7 @@ public class MeterRegistryConfig {
         }
 
         // service level tags
-        config.commonTags(MetricUtils.TAG_ENVIRONMENT, environment, MetricUtils.TAG_STACK, stack);
+        config.commonTags(TAG_ENVIRONMENT, environment, TAG_STACK, stack, TAG_SERVICE, getService());
 
         // host level tags
         if (addHostLevelTags) {

@@ -14,7 +14,8 @@ import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 public class MonitoringUtils {
     private static final Logger log = LoggerFactory.getLogger(MonitoringUtils.class);
 
-    private static final String UNKNOWN_HOSTNAME = "unknown";
+    private static final String APP_MASTER = "appmaster";
+    private static final String UNKNOWN = "unknown";
     private static final String METRIC_ADVERTISE_NAME = "METRIC_ADVERTISE_NAME";
     private static final String STACK_ENV_KEY = "LE_STACK";
 
@@ -32,10 +33,10 @@ public class MonitoringUtils {
             if (StringUtils.isBlank(advertiseName)) {
                 advertiseName = InetAddress.getLocalHost().getHostName();
             }
-            return StringUtils.isBlank(advertiseName) ? UNKNOWN_HOSTNAME : advertiseName;
+            return StringUtils.isBlank(advertiseName) ? UNKNOWN : advertiseName;
         } catch (Exception e) {
             log.error("Hostname can not be resolved", e);
-            return UNKNOWN_HOSTNAME;
+            return UNKNOWN;
         }
     }
 
@@ -68,5 +69,20 @@ public class MonitoringUtils {
     public static String getStack() {
         String stack = System.getenv(STACK_ENV_KEY);
         return StringUtils.isBlank(stack) ? "" : stack;
+    }
+
+    /**
+     * Retrieve current service name
+     *
+     * @return service name, will not be {@code null}
+     */
+    public static String getService() {
+        BeanFactoryEnvironment.Environment env = BeanFactoryEnvironment.getEnvironment();
+        if (BeanFactoryEnvironment.Environment.AppMaster.equals(env)) {
+            return APP_MASTER;
+        } else {
+            String svc = BeanFactoryEnvironment.getService();
+            return StringUtils.isNotBlank(svc) ? svc : UNKNOWN;
+        }
     }
 }
