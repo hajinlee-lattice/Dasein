@@ -34,4 +34,16 @@ public class GlobalAuthTicketDaoImpl extends BaseDaoImpl<GlobalAuthTicket> imple
         query.setParameter("lastAccessDate", end);
         return query.list();
     }
+
+    @Override
+    public List<GlobalAuthTicket> findTicketsByUserIdAndExternalIssuer(Long userId, String issuer) {
+        Session session = sessionFactory.getCurrentSession();
+        String queryStr = String.format("FROM %s WHERE userId = :userId AND issuer = :issuer",
+                getEntityClass().getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("userId", userId);
+        query.setParameter("issuer", issuer);
+        return query.list();
+    }
+
 }

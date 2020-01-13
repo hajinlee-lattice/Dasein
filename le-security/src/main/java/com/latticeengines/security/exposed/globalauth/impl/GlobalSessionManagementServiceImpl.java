@@ -19,6 +19,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.auth.exposed.util.SessionUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
+import com.latticeengines.domain.exposed.auth.GlobalAuthExternalSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -123,7 +124,24 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         ticketData.setLastAccessDate(now);
         gaTicketEntityMgr.update(ticketData);
 
-        return new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
+        Session session = new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
+        session.setExternalSession(ticketData.getExternalSession());
+        return session;
+    }
+
+    @Override
+    public GlobalAuthExternalSession retrieveExternalSession(Ticket ticket) {
+        try {
+            GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
+
+            if (ticketData == null) {
+                return null;
+            }
+
+            return ticketData.getExternalSession();
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_19017, e, new String[] { ticket.getData() });
+        }
     }
 
     @Override
@@ -158,6 +176,16 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
     @Override
     public List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenant) {
         return gaTicketEntityMgr.findTicketsByUserIdAndLastAccessDateAndTenant(userId, tenant);
+    }
+
+    @Override
+    public List<GlobalAuthTicket> findTicketsByEmailAndExternalIssuer(String email, String issuer) {
+        List<GlobalAuthTicket> tickets = new ArrayList<>();
+        GlobalAuthUser user = gaUserEntityMgr.findByEmail(email);
+        if (user != null) {
+            tickets = gaTicketEntityMgr.findTicketsByUserIdAndExternalIssuer(user.getPid(), issuer);
+        }
+        return tickets;
     }
 
     private Session attachSession(Ticket ticket, Tenant tenant) throws Exception {

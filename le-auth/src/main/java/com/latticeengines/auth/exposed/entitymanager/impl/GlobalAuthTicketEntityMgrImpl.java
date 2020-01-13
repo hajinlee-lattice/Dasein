@@ -58,4 +58,11 @@ public class GlobalAuthTicketEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthT
     public List<GlobalAuthTicket> findTicketsByUserIdAndLastAccessDateAndTenant(Long userId, GlobalAuthTenant tenantData) {
         return gaTicketDao.findTicketsByUserIdAndLastAccessDateAndTenant(userId, tenantData);
     }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthTicket> findTicketsByUserIdAndExternalIssuer(Long userId, String issuer) {
+        return gaTicketDao.findTicketsByUserIdAndExternalIssuer(userId, issuer);
+    }
+
 }

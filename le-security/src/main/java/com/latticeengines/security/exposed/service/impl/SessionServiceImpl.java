@@ -1,10 +1,12 @@
 package com.latticeengines.security.exposed.service.impl;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.domain.exposed.auth.GlobalAuthExternalSession;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -32,7 +36,7 @@ import com.latticeengines.security.exposed.service.SessionService;
 @CacheConfig(cacheNames = CacheName.Constants.SessionCacheName)
 public class SessionServiceImpl implements SessionService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SessionServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SessionServiceImpl.class);
 
     private static final Integer MAX_RETRY = 3;
     private static final Long RETRY_INTERVAL_MSEC = 200L;
@@ -64,9 +68,22 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public Ticket authenticateSamlUser(String username, GlobalAuthExternalSession externalSession) {
+        if (username == null || StringUtils.isBlank(username)) {
+            log.info("Saml Login response is missing required information. " + username);
+            throw new LedpException(LedpCode.LEDP_19005);
+        }
+        Ticket ticket = globalAuthenticationService.externallyAuthenticated(username, externalSession);
+        if (ticket != null) {
+            ticket.setAuthenticationRoute(AUTH_ROUTE_GA);
+        }
+        return ticket;
+    }
+
+    @Override
     public void validateSamlLoginResponse(LoginValidationResponse samlLoginResp) {
         if (samlLoginResp == null || StringUtils.isBlank(samlLoginResp.getUserId())) {
-            LOGGER.info("Saml Login response is missing required information. " + samlLoginResp);
+            log.info("Saml Login response is missing required information. " + samlLoginResp);
             throw new LedpException(LedpCode.LEDP_19005);
         }
         //PLS-6543. Do not allow usernames with lattice-email id.
@@ -98,7 +115,7 @@ public class SessionServiceImpl implements SessionService {
         Integer retries = 0;
         Session session = null;
         if (ticket.getTenants() == null || ticket.getTenants().size() == 0) {
-            LOGGER.error("The ticket" + ticket.getData() + "'s tenant is null");
+            log.error("The ticket" + ticket.getData() + "'s tenant is null");
             throw new RuntimeException("The ticket" + ticket.getData() + "'s tenant is null");
         }
         while (++retries <= MAX_RETRY) {
@@ -108,7 +125,7 @@ public class SessionServiceImpl implements SessionService {
                     break;
                 }
             } catch (Exception e) {
-                LOGGER.error("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
+                log.error("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
                         + " from GA - retried " + retries + " out of " + MAX_RETRY + " times", e);
             }
             try {
@@ -130,8 +147,23 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
+    public GlobalAuthExternalSession retrieveExternalSession(Ticket ticket) {
+        return globalSessionManagementService.retrieveExternalSession(ticket);
+    }
+
+    @Override
     public void logout(Ticket ticket) {
         globalAuthenticationService.discard(ticket);
+    }
+
+    @Override
+    public void logoutByIdp(String userName, String issuer) {
+        List<GlobalAuthTicket> gaTickets = //
+                globalSessionManagementService.findTicketsByEmailAndExternalIssuer(userName, issuer);
+        log.info("Found {} tickets for {} issued by {}", CollectionUtils.size(gaTickets), userName, issuer);
+        for (GlobalAuthTicket gaTicket: gaTickets) {
+            logout(new Ticket(gaTicket.getTicket()));
+        }
     }
 
     @Override
@@ -143,7 +175,7 @@ public class SessionServiceImpl implements SessionService {
             tenant = session.getTenant();
         }
         if (tenant == null || !tenant.getId().equals(tenantId)) {
-            LOGGER.info(String.format(
+            log.info(String.format(
                     "Clearing cache for ticket %s because client thinks that tenant is %s and our cache has %s", token,
                     tenantId, tenant != null ? tenant.getId() : ""));
             return true;
@@ -163,7 +195,7 @@ public class SessionServiceImpl implements SessionService {
                     break;
                 }
             } catch (Exception e) {
-                LOGGER.warn("Failed to retrieve session {} from GA - retried {} out of {} times. Cause: {}", token, retries, MAX_RETRY, e.getMessage());
+                log.warn("Failed to retrieve session {} from GA - retried {} out of {} times. Cause: {}", token, retries, MAX_RETRY, e.getMessage());
             }
             try {
                 retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();

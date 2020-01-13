@@ -24,8 +24,6 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -325,14 +323,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         if (StringUtils.isNotBlank(inputTable)) {
             log.info("Add inputTable=" + inputTable);
             addBaseTables(step, inputTable);
-        }
-    }
-
-    void setServingVersionForEntityMatchTenant(MatchInput matchInput) {
-        if (Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
-            EntityMatchVersion entityMatchVersion = getObjectFromContext(ENTITY_MATCH_SERVING_VERSION,
-                    EntityMatchVersion.class);
-            matchInput.setServingVersion(entityMatchVersion.getNextVersion());
         }
     }
 

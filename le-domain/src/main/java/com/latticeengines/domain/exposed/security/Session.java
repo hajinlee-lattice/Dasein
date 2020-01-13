@@ -4,118 +4,129 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.auth.GlobalAuthExternalSession;
 
 public class Session {
 
+    @JsonProperty("Tenant")
     private Tenant tenant;
+
+    @JsonProperty("Rights")
     private List<String> rights;
+
+    @JsonProperty("Ticket")
     private Ticket ticket;
+
+    @JsonProperty("DisplayName")
     private String displayName;
+
+    @JsonProperty("Identifier")
     private String identifier;
+
+    @JsonProperty("EmailAddress")
     private String emailAddress;
+
+    @JsonProperty("Locale")
     private String locale;
+
+    @JsonProperty("Title")
     private String title;
+
+    @JsonProperty("AccessLevel")
     private String accessLevel;
+
+    @JsonProperty("AuthenticationRoute")
     private String authenticationRoute;
 
-    @JsonProperty("Tenant")
+    @JsonProperty("ExternalSession")
+    private GlobalAuthExternalSession externalSession;
+
     public Tenant getTenant() {
         return tenant;
     }
 
-    @JsonProperty("Tenant")
     public void setTenant(Tenant tenant) {
         this.tenant = tenant;
     }
 
-    @JsonProperty("Rights")
     public List<String> getRights() {
         return rights;
     }
 
-    @JsonProperty("Rights")
     public void setRights(List<String> rights) {
         this.rights = rights;
     }
 
-    @JsonProperty("Ticket")
     public Ticket getTicket() {
         return ticket;
     }
 
-    @JsonProperty("Ticket")
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
     }
 
-    @JsonProperty("DisplayName")
     public String getDisplayName() {
         return displayName;
     }
 
-    @JsonProperty("DisplayName")
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    @JsonProperty("Identifier")
     public String getIdentifier() {
         return identifier;
     }
 
-    @JsonProperty("Identifier")
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
     }
 
-    @JsonProperty("EmailAddress")
     public String getEmailAddress() {
         return emailAddress;
     }
 
-    @JsonProperty("EmailAddress")
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
     }
 
-    @JsonProperty("Locale")
     public String getLocale() {
         return locale;
     }
 
-    @JsonProperty("Locale")
     public void setLocale(String locale) {
         this.locale = locale;
     }
 
-    @JsonProperty("Title")
     public String getTitle() {
         return title;
     }
 
-    @JsonProperty("Title")
     public void setTitle(String title) {
         this.title = title;
     }
 
-    @JsonProperty("AccessLevel")
     public String getAccessLevel() {
         return accessLevel;
     }
 
-    @JsonProperty("AccessLevel")
     public void setAccessLevel(String accessLevel) {
         this.accessLevel = accessLevel;
     }
 
-    @JsonProperty("AuthenticationRoute")
     public String getAuthenticationRoute() {
         return authenticationRoute;
     }
 
-    @JsonProperty("AuthenticationRoute")
     public void setAuthenticationRoute(String authenticationRoute) {
         this.authenticationRoute = authenticationRoute;
+    }
+
+    public GlobalAuthExternalSession getExternalSession() {
+        return externalSession;
+    }
+
+    public void setExternalSession(GlobalAuthExternalSession externalSession) {
+        this.externalSession = externalSession;
     }
 
     @Override

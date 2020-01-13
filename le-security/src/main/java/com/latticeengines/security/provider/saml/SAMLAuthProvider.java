@@ -37,7 +37,7 @@ public class SAMLAuthProvider implements AuthenticationProvider {
                     break;
                 }
             }
-            globalAuthenticationService.externallyAuthenticated(userId);
+            globalAuthenticationService.externallyAuthenticated(userId, null);
 
             TicketAuthenticationToken token = new TicketAuthenticationToken( //
                     userId);

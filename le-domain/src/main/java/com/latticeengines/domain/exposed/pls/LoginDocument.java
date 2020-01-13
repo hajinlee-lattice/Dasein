@@ -9,14 +9,32 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public class LoginDocument {
 
-    private List<String> errors;
-    private LoginResult result;
-    private String uniqueness;
-    private String randomness;
-    private boolean success;
-    private String authenticationRoute;
+    @JsonProperty("UserName")
+    private String userName;
+
+    @JsonProperty("FirstName")
     private String firstName;
+
+    @JsonProperty("LastName")
     private String lastName;
+
+    @JsonProperty("Uniqueness")
+    private String uniqueness;
+
+    @JsonProperty("Randomness")
+    private String randomness;
+
+    @JsonProperty("Errors")
+    private List<String> errors;
+
+    @JsonProperty("Success")
+    private boolean success;
+
+    @JsonProperty("AuthenticationRoute")
+    private String authenticationRoute;
+
+    @JsonProperty("Result")
+    private LoginResult result;
 
     public LoginDocument() {
 
@@ -28,82 +46,74 @@ public class LoginDocument {
         setRandomness(tokens[1]);
     }
 
-    @JsonProperty("FirstName")
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public String getFirstName() {
         return firstName;
     }
 
-    @JsonProperty("FirstName")
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
-    @JsonProperty("LastName")
     public String getLastName() {
         return lastName;
     }
 
-    @JsonProperty("LastName")
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
 
-    @JsonProperty("Errors")
     public List<String> getErrors() {
         return errors;
     }
 
-    @JsonProperty("Errors")
     public void setErrors(List<String> errors) {
         this.errors = errors;
     }
 
-    @JsonProperty("Uniqueness")
     public String getUniqueness() {
         return uniqueness;
     }
 
-    @JsonProperty("Uniqueness")
     public void setUniqueness(String uniqueness) {
         this.uniqueness = uniqueness;
     }
 
-    @JsonProperty("Randomness")
     public String getRandomness() {
         return randomness;
     }
 
-    @JsonProperty("Randomness")
     public void setRandomness(String randomness) {
         this.randomness = randomness;
     }
 
-    @JsonProperty("Result")
     public LoginResult getResult() {
         return result;
     }
 
-    @JsonProperty("Result")
     public void setResult(LoginResult result) {
         this.result = result;
     }
 
-    @JsonProperty("Success")
     public boolean isSuccess() {
         return success;
     }
 
-    @JsonProperty("Success")
     public void setSuccess(boolean success) {
         this.success = success;
     }
 
-    @JsonProperty("AuthenticationRoute")
     public String getAuthenticationRoute() {
         return authenticationRoute;
     }
 
-    @JsonProperty("AuthenticationRoute")
     public void setAuthenticationRoute(String authenticationRoute) {
         this.authenticationRoute = authenticationRoute;
     }
@@ -119,40 +129,40 @@ public class LoginDocument {
     }
 
     public class LoginResult {
+
+        @JsonProperty("Tenants")
         private List<Tenant> tenants;
+
+        @JsonProperty("MustChangePassword")
         private boolean mustChangePassword;
+
+        @JsonProperty("PasswordLastModified")
         private long passwordLastModified;
 
         public LoginResult() {
 
         }
 
-        @JsonProperty("Tenants")
         public List<Tenant> getTenants() {
             return tenants;
         }
 
-        @JsonProperty("Tenants")
         public void setTenants(List<Tenant> tenants) {
             this.tenants = tenants;
         }
 
-        @JsonProperty("MustChangePassword")
         public boolean isMustChangePassword() {
             return mustChangePassword;
         }
 
-        @JsonProperty("MustChangePassword")
         public void setMustChangePassword(boolean mustChangePassword) {
             this.mustChangePassword = mustChangePassword;
         }
 
-        @JsonProperty("PasswordLastModified")
         public long getPasswordLastModified() {
             return passwordLastModified;
         }
 
-        @JsonProperty("PasswordLastModified")
         public void setPasswordLastModified(long passwordLastModified) {
             this.passwordLastModified = passwordLastModified;
         }

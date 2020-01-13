@@ -23,7 +23,7 @@ export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS:-} -XX:+UseNUMA"
 if [[ -n $(java -version 2>&1 |  grep "11.0") ]]; then
     echo "Java version: $(java -version 2>&1)"
     if [[ -n "${JPDA_PORT}" ]]; then
-        export CATALINA_OPTS="${CATALINA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:4001"
+        export CATALINA_OPTS="${CATALINA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${JPDA_PORT}"
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseParallelGC"
     else
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UnlockExperimentalVMOptions"
@@ -31,7 +31,7 @@ if [[ -n $(java -version 2>&1 |  grep "11.0") ]]; then
     fi
 else
     if [[ -n "${JPDA_PORT}" ]]; then
-        export CATALINA_OPTS="${CATALINA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=4001"
+        export CATALINA_OPTS="${CATALINA_OPTS} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${JPDA_PORT}"
     else
         export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -XX:+UseG1GC"
     fi
