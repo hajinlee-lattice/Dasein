@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig.ConsolidateDataTxmfrConfigBuilder;
@@ -317,6 +318,14 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         matchInput.setMatchDebugEnabled(false);
         matchInput.setSplitsPerBlock(cascadingPartitions * 10);
         return matchInput;
+    }
+
+    void setServingVersionForEntityMatchTenant(MatchInput matchInput) {
+        if (Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
+            EntityMatchVersion entityMatchVersion = getObjectFromContext(ENTITY_MATCH_SERVING_VERSION,
+                    EntityMatchVersion.class);
+            matchInput.setServingVersion(entityMatchVersion.getNextVersion());
+        }
     }
 
     // input: streamId -> tablePrefix
