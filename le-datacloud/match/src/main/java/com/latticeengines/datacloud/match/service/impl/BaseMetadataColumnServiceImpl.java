@@ -44,6 +44,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
+import io.micrometer.core.annotation.Timed;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
@@ -98,6 +100,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
+    @Timed
     public List<E> findByColumnSelection(Predefined selectName, String dataCloudVersion) {
         List<E> columns = getMetadataColumns(dataCloudVersion);
         return columns.stream() //
@@ -105,6 +108,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
                 .collect(Collectors.toList());
     }
 
+    @Timed
     @Override
     public Long count(String dataCloudVersion) {
         if (StringUtils.isBlank(dataCloudVersion)) {
@@ -114,12 +118,13 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
+    @Timed
     public ParallelFlux<E> scan(String dataCloudVersion, Integer page, Integer size) {
         if (StringUtils.isBlank(dataCloudVersion)) {
             dataCloudVersion = getLatestVersion();
         }
         if (page == null && size == null) {
-            return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+            return Flux.fromIterable(getMetadataColumns(dataCloudVersion)).parallel();
         } else if (size == null || page == null) {
             throw new IllegalArgumentException("Must specify page and size when asking for a particular page");
         } else {
@@ -128,6 +133,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
+    @Timed
     @MatchStep
     public List<E> getMetadataColumns(List<String> columnIds, String dataCloudVersion) {
         List<E> toReturn = new ArrayList<>();
@@ -160,6 +166,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
+    @Timed
     @MatchStep(threshold = 100L)
     public E getMetadataColumn(String columnId, String dataCloudVersion) {
         ConcurrentMap<String, ConcurrentMap<String, E>> whiteColumnCaches = getWhiteColumnCache();
@@ -221,6 +228,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         }
     }
 
+    @Timed
     private void refreshCacheForVersion(String dataCloudVersion) {
         new Thread(() -> {
             log.info("Start loading white column caches for version " + dataCloudVersion);
@@ -268,6 +276,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
+    @Timed
     public synchronized long s3Publish(@NotNull String dataCloudVersion) {
         Preconditions.checkNotNull(dataCloudVersion);
         long total = getMetadataColumnEntityMgr().count(dataCloudVersion);
@@ -322,6 +331,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         return total;
     }
 
+    @Timed
     private List<E> loadFromS3(String dataCloudVersion) {
         String s3Prefix = getMDSS3Prefix(dataCloudVersion);
         List<E> list = new ArrayList<>();
@@ -361,6 +371,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
+    @Timed
     public List<E> getMetadataColumns(String dataCloudVersion) {
         List<E> toReturn = new ArrayList<>();
         ConcurrentMap<String, ConcurrentMap<String, E>> whiteColumnCaches = getWhiteColumnCache();

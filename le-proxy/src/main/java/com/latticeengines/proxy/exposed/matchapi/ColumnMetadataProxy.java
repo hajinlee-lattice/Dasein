@@ -2,12 +2,9 @@ package com.latticeengines.proxy.exposed.matchapi;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -34,6 +31,7 @@ import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 
+import io.micrometer.core.annotation.Timed;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -121,6 +119,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return getAllColumns("");
     }
 
+    @Timed
     public List<ColumnMetadata> getAllColumns(String dataCloudVersion) {
         if (StringUtils.isEmpty(dataCloudVersion)) {
             dataCloudVersion = "";
@@ -145,42 +144,11 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     private List<ColumnMetadata> requestAllColumns(String dataCloudVersion, String logMsg) {
         try (PerformanceTimer timer = new PerformanceTimer(logMsg)) {
-            long count = getColumnCount(dataCloudVersion);
-            int pageSize = 5000;
-            int numPages = (int) Math.ceil(1.0 * count / pageSize);
-            List<Callable<List<ColumnMetadata>>> callables = new ArrayList<>();
-            for (int i = 0; i< numPages; i++) {
-                final int page = i;
-                Callable<List<ColumnMetadata>> callable = () -> requestMetadataPage(dataCloudVersion, page, pageSize);
-                callables.add(callable);
+            if (StringUtils.isBlank(dataCloudVersion)) {
+                dataCloudVersion = latestVersion("").getVersion();
             }
-            List<List<ColumnMetadata>> cmLists = ThreadPoolUtils.runCallablesInParallel(parallelFetchers(), //
-                    callables, 10, 1);
-            List<ColumnMetadata> cms = cmLists.stream().flatMap(Collection::stream).collect(Collectors.toList());
-            log.info("Loaded in total " + CollectionUtils.size(cms) + " columns from matchapi");
-            return cms;
-        }
-    }
-
-    private List<ColumnMetadata> requestMetadataPage(String dataCloudVersion, int page, int size) {
-        if (StringUtils.isBlank(dataCloudVersion)) {
-            dataCloudVersion = latestVersion("").getVersion();
-        }
-        String url = constructUrl("/?page={page}&size={size}&datacloudversion={dataCloudVersion}", page, size,
-                dataCloudVersion);
-        return getList("get metadata page", url, ColumnMetadata.class);
-    }
-
-    private Long getColumnCount(String dataCloudVersion) {
-        if (StringUtils.isBlank(dataCloudVersion)) {
-            dataCloudVersion = latestVersion("").getVersion();
-        }
-        String url = constructUrl("/count?datacloudversion={dataCloudVersion}", dataCloudVersion);
-        Long count = get("get count", url, Long.class);
-        if (count == null || count == 0) {
-            throw new IllegalStateException("There is no metadata in data cloud version " + dataCloudVersion);
-        } else {
-            return count;
+            String url = constructUrl("/?datacloudversion={dataCloudVersion}", dataCloudVersion);
+            return getList("get metadata page", url, ColumnMetadata.class);
         }
     }
 

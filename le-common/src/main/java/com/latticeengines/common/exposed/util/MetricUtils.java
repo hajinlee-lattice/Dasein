@@ -32,6 +32,7 @@ public class MetricUtils {
     public static final String TAG_ENVIRONMENT = "Environment";
     public static final String TAG_HOST = "Host";
     public static final String TAG_STACK = "Stack";
+    public static final String TAG_SERVICE = "Service";
     public static final String NULL = "null";
     public static Collection<String> frameworkTags = Arrays.asList(TAG_ENVIRONMENT, TAG_HOST, TAG_STACK);
 
