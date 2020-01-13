@@ -12,6 +12,7 @@ import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
 import com.latticeengines.apps.cdl.workflow.CDLOperationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RegisterDeleteDataWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -46,6 +47,9 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     @Inject
     private RegisterDeleteDataWorkflowSubmitter registerDeleteDataWorkflowSubmitter;
+
+    @Inject
+    private BatonService batonService;
 
     private final CDLOperationWorkflowSubmitter cdlOperationWorkflowSubmitter;
 
@@ -88,6 +92,9 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     @Override
     public ApplicationId createLegacyDeleteUploadAction(String customerSpace, CleanupOperationConfiguration configuration) {
+        if (isEntityMatchEnabled(customerSpace)) {
+            throw new IllegalStateException("entityMatch tenant cannot create legacyDelete Action.");
+        }
         String sourceFileName = ((CleanupByUploadConfiguration) configuration).getFileName();
         SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileName);
         if (sourceFile == null) {
@@ -104,6 +111,9 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     @Override
     public void createLegacyDeleteDateRangeAction(String customerSpace, CleanupOperationConfiguration configuration) {
+        if (isEntityMatchEnabled(customerSpace)) {
+            throw new IllegalStateException("entityMatch tenant cannot create legacyDelete Action.");
+        }
         log.info("customerSpace: {}, CleanupOperationConfiguration: {}", customerSpace, configuration);
         log.info("Registering an operation action for tenant={}", customerSpace);
         Tenant tenant = tenantService.findByTenantId(customerSpace);
@@ -196,6 +206,10 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
             log.warn("The tenant in action does not have a pid:{}. ", tenant);
         }
         actionService.create(action);
+    }
+
+    private boolean isEntityMatchEnabled(String customerSpace) {
+        return batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace));
     }
 
 }
