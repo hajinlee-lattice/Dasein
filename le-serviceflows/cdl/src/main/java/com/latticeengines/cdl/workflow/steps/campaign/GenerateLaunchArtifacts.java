@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -159,8 +158,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 getRemoveDeltaTableContextKeyByAudienceType(channelConfig.getAudienceType()) + ATLAS_EXPORT_DATA_UNIT,
                 HdfsDataUnit.class);
 
-        SparkJobResult sparkJobResult = executeSparkJob(play.getTargetSegment(), accountLookups, contactLookups,
-                positiveDeltaDataUnit, negativeDeltaDataUnit,
+        SparkJobResult sparkJobResult = executeSparkJob(accountLookups, contactLookups, positiveDeltaDataUnit,
+                negativeDeltaDataUnit,
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
                 contactsDataExists);
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
@@ -176,19 +175,21 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
     }
 
-    private SparkJobResult executeSparkJob(MetadataSegment targetSegment, Set<Lookup> accountLookups,
-            Set<Lookup> contactLookups, HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit,
-            BusinessEntity mainEntity, boolean contactsDataExists) {
+    private SparkJobResult executeSparkJob(Set<Lookup> accountLookups, Set<Lookup> contactLookups,
+            HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit, BusinessEntity mainEntity,
+            boolean contactsDataExists) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
-            if (ctx.getRetryCount() > 0)
+            if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") extract entities via Spark SQL.");
-            log.warn("Previous failure:", ctx.getLastThrowable());
+                log.warn("Previous failure:", ctx.getLastThrowable());
+            }
+
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
 
-                FrontEndQuery query = FrontEndQuery.fromSegment(targetSegment);
+                FrontEndQuery query = new FrontEndQuery();
                 query.setLookups(new ArrayList<>(accountLookups));
                 query.setMainEntity(BusinessEntity.Account);
                 HdfsDataUnit accountDataUnit = getEntityQueryData(query);
