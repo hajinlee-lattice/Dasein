@@ -31,7 +31,7 @@ public class OrphanRecordsResource {
         return orphanRecordsService.submitOrphanRecordsWorkflow(orphanType, response);
     }
 
-    @GetMapping(value = "/orphanexport/{exportId}", headers = "Accept=application/json")
+    @GetMapping(value = "/orphanexport/{exportId}")
     public void downloadOrphanArtifact(@PathVariable String exportId, HttpServletRequest request, HttpServletResponse response) {
         orphanRecordsService.downloadOrphanArtifact(exportId, request, response);
     }
