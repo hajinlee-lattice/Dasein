@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -191,15 +192,21 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
         String newAccTableName = NamingUtils
                 .timestamp(String.format(RAWSTREAM_NEW_ACC_TABLE_PERFIX_FORMAT, stream.getStreamId()));
         String matchConfig;
+        MatchInput baseMatchInput = getBaseMatchInput();
+        if (isRematchMode) {
+            setServingVersionForEntityMatchTenant(baseMatchInput);
+            log.info("Specifying serving version for rematch mode, servingVersion = {}",
+                    baseMatchInput.getServingVersion());
+        }
         // match entity TODO maybe support entity match GA?
         if (stream.getMatchEntities().contains(Contact.name())) {
             // contact match
-            matchConfig = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), getBaseMatchInput(),
+            matchConfig = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), baseMatchInput,
                     importTableColumns, getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact),
                     newAccTableName, isRematchMode, false);
         } else if (stream.getMatchEntities().contains(Account.name())) {
             // account match
-            matchConfig = MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), getBaseMatchInput(),
+            matchConfig = MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), baseMatchInput,
                     importTableColumns, getSystemIds(BusinessEntity.Account), newAccTableName, isRematchMode);
         } else {
             log.error("Match entities {} in stream {} is not supported", stream.getMatchEntities(),
