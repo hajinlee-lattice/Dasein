@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.LEGACY_DELTE_BYDATERANGE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONTACT_LEGACY_DELTE_BYUOLOAD_ACTIONS;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.legacydelete.LegacyDeleteByDateRangeStep;
 import com.latticeengines.cdl.workflow.steps.legacydelete.LegacyDeleteByUploadStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -40,6 +42,9 @@ public class LegacyDeleteChoreographer extends BaseChoreographer {
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+        if (isCommonSkip(step)) {
+            return true;
+        }
         if (isLegacyDeleteByDateRangeStep(step)) {
             return skipLegacyDeleteByDateRange(step);
         } else if (isLegacyDeleteByUploadStep(step)) {
@@ -47,6 +52,12 @@ public class LegacyDeleteChoreographer extends BaseChoreographer {
         } else {
             return false;
         }
+    }
+
+    private boolean isCommonSkip(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        return grapherContext.isEntityMatchEnabled();
     }
 
     private boolean isLegacyDeleteByUploadStep(AbstractStep<? extends BaseStepConfiguration> step) {

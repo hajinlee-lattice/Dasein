@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +21,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -29,7 +34,10 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteByDateRangeStepConfiguration;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
+import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component(LegacyDeleteByDateRangeStep.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -42,15 +50,25 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
+    @Inject
+    private EMREnvService emrEnvService;
+
+    private DataCollection.Version inactive;
+    private DataCollection.Version active;
+
     @Override
     public void execute() {
         log.info("Start cleanup by date range operation!");
-        if(configuration.getCustomerSpace() == null) {
+        if (configuration.getCustomerSpace() == null) {
             throw new LedpException(LedpCode.LEDP_40000);
         }
-        if(configuration.getEntity() == null || configuration.getEntity() != BusinessEntity.Transaction) {
+        if (configuration.getEntity() == null || configuration.getEntity() != BusinessEntity.Transaction) {
             throw new LedpException(LedpCode.LEDP_40001);
         }
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION,
+                DataCollection.Version.class);
+        active = getObjectFromContext(CDL_ACTIVE_VERSION,
+                DataCollection.Version.class);
         if (getAvroDir() == null) {
             log.info("transaction table is empty.");
             if (noImport()) {
@@ -68,11 +86,11 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
                 LegacyDeleteByDateRangeActionConfiguration actionConfiguration = (LegacyDeleteByDateRangeActionConfiguration) action.getActionConfiguration();
                 Date startTime = actionConfiguration.getStartTime();
                 Date endTime = actionConfiguration.getEndTime();
-                if(startTime == null || endTime == null) {
+                if (startTime == null || endTime == null) {
                     throw new LedpException(LedpCode.LEDP_40002);
                 }
 
-                if(startTime.getTime() > endTime.getTime()) {
+                if (startTime.getTime() > endTime.getTime()) {
                     throw new LedpException(LedpCode.LEDP_40003);
                 }
 
@@ -92,7 +110,7 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
                         calendar.add(Calendar.DAY_OF_YEAR, 1);
                     }
                 } catch (ParseException pe) {
-                    throw new LedpException(LedpCode.LEDP_40004, new String[] { pe.getMessage() });
+                    throw new LedpException(LedpCode.LEDP_40004, new String[]{pe.getMessage()});
                 }
                 String avroDir = getAvroDir();
                 Long deletedRows = TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, avroDir, periods, true);
@@ -104,9 +122,14 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
 
     private String getAvroDir() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection
-                .ConsolidatedRawTransaction);
-        if(table == null) {
+        Table table = dataCollectionProxy.getTable(customerSpace, //
+                TableRoleInCollection.ConsolidatedRawTransaction, inactive);
+        if (table == null) {
+            clonePeriodStore(TableRoleInCollection.ConsolidatedRawTransaction, customerSpace);
+            table = dataCollectionProxy.getTable(customerSpace, //
+                    TableRoleInCollection.ConsolidatedRawTransaction, inactive);
+        }
+        if (table == null) {
             return null;
         }
         if (table.getExtracts() == null || table.getExtracts().size() != 1) {
@@ -121,5 +144,16 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
         return MapUtils.isEmpty(entityImportsMap) || !entityImportsMap.containsKey(configuration.getEntity());
+    }
+
+    private void clonePeriodStore(TableRoleInCollection role, String customerSpace) {
+        Table activeTable = dataCollectionProxy.getTable(customerSpace, role, active);
+        String cloneName = NamingUtils.timestamp(role.name());
+        String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+        queue = LedpQueueAssigner.overwriteQueueAssignment(queue, emrEnvService.getYarnQueueScheme());
+        Table inactiveTable = TableCloneUtils //
+                .cloneDataTable(yarnConfiguration, CustomerSpace.parse(customerSpace), cloneName, activeTable, queue);
+        metadataProxy.createTable(customerSpace, cloneName, inactiveTable);
+        dataCollectionProxy.upsertTable(customerSpace, cloneName, role, inactive);
     }
 }
