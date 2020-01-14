@@ -112,11 +112,6 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         put("updateTable", url, table);
     }
 
-    public void createTempTable(String customerSpace, String tableName, Table table, RetentionPolicy policy) {
-        table.setRetentionPolicy(RetentionPolicyUtil.retentionPolicyToStr(policy));
-        createTable(customerSpace, tableName, table);
-    }
-
     public void createTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         List<Attribute> attributes = null;

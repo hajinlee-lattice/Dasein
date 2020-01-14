@@ -38,7 +38,6 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
     private static final Logger log = LoggerFactory.getLogger(TableResourceDeploymentTestNG.class);
 
     private static final String TABLE_NAME = "TestAccountTable";
-    private static final String TABLE_NAME1 = "TestAccountTable1";
     private static final String S3_DIR = "le-dev/LocalTest";
     private static final String S3_VERSION = "4";
     private static String renamedTableName = TABLE_NAME;
@@ -80,7 +79,7 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         logTableSummary("Table skeleton from S3", table);
 
         assertTrue(table.getAttributes().size() >= 10100, "Doesn't have minimum attributes 10100 for this test");
-        List<Attribute> minAttributes = table.getAttributes().subList(0, 10100);
+        List<Attribute> minAttributes = table.getAttributes().subList(0,  10100);
 
         table.setAttributes(minAttributes);
         table.setName(TABLE_NAME);
@@ -93,13 +92,6 @@ public class TableResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
         assertNotNull(tableFromDB, "Retrieved Table from DB is empty");
         logTableSummary("Account Table Summary from DB", tableFromDB);
         assertEquals(minAttributes.size(), tableFromDB.getAttributes().size());
-        assertNull(tableFromDB.getRetentionPolicy());
-
-        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(3, RetentionPolicyTimeUnit.DAY);
-        table.setName(TABLE_NAME1);
-        metadataProxy.createTempTable(customerSpace1, TABLE_NAME1, table, retentionPolicy);
-        tableFromDB = metadataProxy.getTable(customerSpace1, TABLE_NAME1);
-        assertEquals(tableFromDB.getRetentionPolicy(), RetentionPolicyUtil.toRetentionPolicyStr(3, RetentionPolicyTimeUnit.DAY));
     }
 
     private void logTableSummary(String context, Table table) {
