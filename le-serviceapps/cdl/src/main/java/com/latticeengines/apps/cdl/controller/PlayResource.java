@@ -351,8 +351,7 @@ public class PlayResource {
                     launchId);
             playLaunchChannelService.updateLastDeltaWorkflowId(playName, channelId, workflowPid);
             if (StringUtils.isNotBlank(launchId)) {
-                PlayLaunch launch = new PlayLaunch();
-                launch.setLaunchId(launchId);
+                PlayLaunch launch = playLaunchService.findByLaunchId(launchId);
                 launch.setParentDeltaWorkflowId(workflowPid);
                 launch.setLaunchState(LaunchState.PreProcessing);
                 playLaunchService.update(launch);
