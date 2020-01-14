@@ -65,7 +65,9 @@ public class StreamAttributeDeriver implements Serializable {
         // max value of input attribute (only accept single input attribute)
         MAX("Max"), //
         // min value of input attribute (only accept single input attribute)
-        MIN("Min");
+        MIN("Min"),
+        // count only last row within period
+        LAST("Last");
 
         private static Map<String, Calculation> nameMap;
         private static Set<String> values;
@@ -104,7 +106,7 @@ public class StreamAttributeDeriver implements Serializable {
 
         public String getName() {
             return this.name;
-        }    
+        }
     }
 
     @Override

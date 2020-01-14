@@ -131,6 +131,11 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
     @JsonProperty("updated")
     private Date updated;
 
+    @JsonProperty("reducer")
+    @Type(type = "json")
+    @Column(name = "REDUCER", columnDefinition = "'JSON'")
+    private ActivityRowReducer reducer;
+
     @Override
     public Long getPid() {
         return pid;
@@ -252,6 +257,14 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
 
     public void setAttributeDerivers(List<StreamAttributeDeriver> attributeDerivers) {
         this.attributeDerivers = attributeDerivers;
+    }
+
+    public ActivityRowReducer getReducer() {
+        return reducer;
+    }
+
+    public void setReducer(ActivityRowReducer reducer) {
+        this.reducer = reducer;
     }
 
     private void instantiateTaskIfNull() {

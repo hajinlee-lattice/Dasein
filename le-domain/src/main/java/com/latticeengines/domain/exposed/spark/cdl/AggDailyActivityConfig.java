@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.commons.collections4.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
@@ -21,7 +22,8 @@ public class AggDailyActivityConfig extends SparkJobConfig {
     @JsonProperty
     public Map<String, Integer> rawStreamInputIdx = new HashMap<>();
 
-    // TODO - add stream filters (streamId -> List[Filter])
+    @JsonProperty
+    public Map<String, ActivityRowReducer> streamReducerMap = new HashMap<>();
 
     // streamId -> dimensionName -> metadata
     @JsonProperty

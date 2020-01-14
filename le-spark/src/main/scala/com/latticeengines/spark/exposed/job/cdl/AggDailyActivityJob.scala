@@ -8,7 +8,7 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{StringType, StructField}
+import org.apache.spark.sql.types.{LongType, StringType, StructField}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.json4s.jackson.Serialization
 
@@ -25,6 +25,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     val entityIdColMap = lattice.config.additionalDimAttrMap.asScala.mapValues(_.asScala.toList)
     val hashDimensionMap = lattice.config.hashDimensionMap.asScala.mapValues(_.asScala.toSet)
     val dimValueIdMap = lattice.config.dimensionValueIdMap.asScala
+    val streamReducerMap = lattice.config.streamReducerMap.asScala
 
     // calculation
     val streamDfs = inputIdx
@@ -64,11 +65,16 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
           col.as(deriver.getTargetAttribute)
         }
 
-        // TODO - apply dedup filter before generating row count, preserve column used for dedup condition (e.g. lastUpdated)
-
         // always generate row count agg
-        val aggDf = df.groupBy(dimAttrs.head, dimAttrs.tail: _*)
-          .agg(count("*").as(__Row_Count__.name), aggFns: _*)
+        val aggDf: DataFrame = {
+          if (streamReducerMap.get(streamId).isDefined) {
+            // if stream has reducer, just append 1 as dedup already done for daily level
+            df.withColumn(__Row_Count__.name, lit(1).cast(LongType))
+          } else {
+            df.groupBy(dimAttrs.head, dimAttrs.tail: _*)
+              .agg(count("*").as(__Row_Count__.name), aggFns: _*)
+          }
+        }
 
         (streamId, aggDf, idx)
       }

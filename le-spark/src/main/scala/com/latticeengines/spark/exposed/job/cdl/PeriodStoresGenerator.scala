@@ -5,8 +5,7 @@ import java.util
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
-import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver, StreamDimension}
+import com.latticeengines.domain.exposed.cdl.activity.{ActivityRowReducer, AtlasStream, StreamAttributeDeriver, StreamDimension}
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{PeriodId, __Row_Count__, __StreamDate}
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
@@ -19,13 +18,13 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, StringType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-import scala.collection.JavaConverters.asScalaIteratorConverter
+import scala.collection.JavaConversions._
 
 class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJobConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[DailyStoreToPeriodStoresJobConfig]): Unit = {
     val config: DailyStoreToPeriodStoresJobConfig = lattice.config
-    val streams: Seq[AtlasStream] = asScalaIteratorConverter(config.streams.iterator).asScala.toSeq
+    val streams: Seq[AtlasStream] = config.streams.toSeq
     val input = lattice.input
     val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
     val calendar: BusinessCalendar = config.businessCalendar
@@ -56,35 +55,43 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
   }
 
   private def processStream(dailyStore: DataFrame, stream: AtlasStream, evaluationDate: String, calendar: BusinessCalendar): Seq[DataFrame] = {
-    val periods: Seq[String] = asScalaIteratorConverter(stream.getPeriods.iterator).asScala.toSeq
-    val dimensions: Seq[StreamDimension] = asScalaIteratorConverter(stream.getDimensions.iterator).asScala.toSeq
+    val periods: Seq[String] = stream.getPeriods.toSeq
+    val dimensions: Seq[StreamDimension] = stream.getDimensions.toSeq
     val aggregators: Seq[StreamAttributeDeriver] =
-      if (stream.getAttributeDerivers == null) Seq()
-      else asScalaIteratorConverter(stream.getAttributeDerivers.iterator).asScala.toSeq
+      if (Option(stream.getAttributeDerivers).isEmpty) Seq()
+      else stream.getAttributeDerivers.toSeq
     val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(periods, calendar), evaluationDate)
 
-    // 1: for each requested period (week, month, etc.):
-    //  a: make a copy of daily store dataframe, add periodId column based on date and period
-    //  b: group by (entityId + all dimensions from stream + periodId), apply aggregations on target attributes as marked by attribute derivers
-    // 2: return all dataframes
+    // for each requested period name (week, month, etc.):
+    //  a: append periodId column based on date and period name
+    //  b: apply filters
+    //  c: group to period: group by (entityId + all dimensions from stream + periodId)
 
-    val withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStore, periodName, translator))
+    val withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStore, periodName, translator, stream))
 
-    val aggrProcs = aggregators.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(dailyStore(__Row_Count__.name)).alias(__Row_Count__.name) // Default row count must exist
-    val columns: Seq[String] = DeriveAttrsUtils.getGroupByEntityColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
-    // TODO - apply filters while grouping by period Id, preserve column used for dedup condition (e.g. lastUpdated)
-    val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*)
-      .agg(aggrProcs.head, aggrProcs.tail: _*))
+    val aggrProcs = aggregators.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(__Row_Count__.name).as(__Row_Count__.name) // Default row count must exist
+    val columns: Seq[String] = DeriveAttrsUtils.getEntityIdColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
+    val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*).agg(aggrProcs.head, aggrProcs.tail: _*))
     groupedByPeriodId.map((df: DataFrame) => DeriveAttrsUtils.appendPartitionColumns(df, Seq(PeriodId.name)))
   }
 
-  private def generatePeriodId(dailyStore: DataFrame, periodName: String, translator: TimeFilterTranslator): DataFrame = {
+  private def generatePeriodId(dailyStore: DataFrame, periodName: String, translator: TimeFilterTranslator, stream: AtlasStream): DataFrame = {
 
     def getPeriodIdFunc: String => Int = (dateStr: String) => translator.dateToPeriod(periodName, dateStr)
 
     def getPeriodIdUdf = UserDefinedFunction(getPeriodIdFunc, IntegerType, Some(Seq(StringType)))
 
-    dailyStore.withColumn(PeriodId.name, getPeriodIdUdf(dailyStore(__StreamDate.name)))
+    var df = dailyStore.withColumn(PeriodId.name, getPeriodIdUdf(dailyStore(__StreamDate.name)))
+
+    if (Option(stream.getReducer).isDefined) {
+      val reducer = Option(stream.getReducer).get
+
+      if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator)) {
+        reducer.getGroupByFields.append(PeriodId.name) // separate by each period if filter is applied for time
+      }
+      df = DeriveAttrsUtils.applyReducer(df, reducer)
+    }
+    df
   }
 
   private def toPeriodStrategy(name: String, calendar: BusinessCalendar): PeriodStrategy = {

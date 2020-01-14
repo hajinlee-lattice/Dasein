@@ -4,16 +4,19 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
+import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{__StreamDate, __StreamDateId}
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.MergeUtils
+import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
+import scala.collection.JavaConversions._
+
 /**
-  * Process activity stream imports and merge with current batch store if any
-  */
+ * Process activity stream imports and merge with current batch store if any
+ */
 class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[AppendRawStreamConfig]): Unit = {
@@ -34,7 +37,7 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
       }
 
       // add date & dateId
-      var mdf = lattice.input(config.matchedRawStreamInputIdx)
+      var mdf: DataFrame = lattice.input(config.matchedRawStreamInputIdx)
       mdf = mdf.withColumn(__StreamDate.name, getDate(mdf.col(config.dateAttr)))
         .withColumn(__StreamDateId.name, getDateId(mdf.col(config.dateAttr)))
       if (hasMaster) {
@@ -49,6 +52,13 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
       df = df.filter(df.col(__StreamDateId.name).geq(getStartDateId(config.retentionDays, config.currentEpochMilli)))
     }
 
+    if (Option(config.reducer).isDefined) {
+      val reducer = Option(config.reducer).get
+      if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator)) {
+        reducer.getGroupByFields.append(__StreamDate.name) // separate by each day if filter is applied for time
+      }
+      df = DeriveAttrsUtils.applyReducer(df, reducer)
+    }
     lattice.output = df :: Nil
   }
 

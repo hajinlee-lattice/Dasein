@@ -46,7 +46,7 @@ class MergeActivityMetrics extends AbstractSparkJob[MergeActivityMetricsJobConfi
     val start = details.getStartIdx
     val end = details.getStartIdx + details.getLabels.size
     val groupDFsToMerge: Seq[DataFrame] = input.slice(start, end)
-    val joinCol: String = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(entity)
+    val joinCol: String = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(entity)
     groupDFsToMerge.reduce((df1, df2) => df1.join(df2, Seq(joinCol), "fullouter"))
   }
 

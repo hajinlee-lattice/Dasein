@@ -6,6 +6,8 @@ import com.latticeengines.common.exposed.util.TemplateUtils
 import com.latticeengines.domain.exposed.StringTemplateConstants
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
+import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer.Operator
+import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
 import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO}
@@ -96,14 +98,14 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val filteredByTime: Seq[(DataFrame, String)] = createTimeFilters(group.getActivityTimeRange)
       .map(tf => {
         val periodStoreIndex: Int = inputMetadata.getStartIdx + offsetMap(tf.getPeriod)
-        separateByTimeFilter(aggregatedPeriodStores.get(periodStoreIndex), tf, translator)
+        separateByTimeFilter(aggregatedPeriodStores.get(periodStoreIndex), tf, translator, group)
       })
 
     // rollup by (entityId, rollupDimensions), pivot and rename pivoted attribute following attrName template
     val attrRolledUp: Seq[DataFrame] = filteredByTime.map(item => rollupAndCreateAttr(item._1, item._2, group, streamMetadata))
 
     // join dataframes from all time filters
-    val entityIdColName = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(group.getEntity)
+    val entityIdColName = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(group.getEntity)
     val joined: DataFrame = attrRolledUp.reduce((df1, df2) => {
       df1.join(df2, Seq(entityIdColName), "fullouter")
     })
@@ -124,19 +126,26 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   }
 
   // return: (dataframe, TimeRange string used for attribute name template)
-  def separateByTimeFilter(df: DataFrame, timeFilter: TimeFilter, translator: TimeFilterTranslator): (DataFrame, String) = {
+  def separateByTimeFilter(df: DataFrame, timeFilter: TimeFilter, translator: TimeFilterTranslator, group: ActivityMetricsGroup): (DataFrame, String) = {
     val periodIdColumnName: String = InterfaceName.PeriodId.name
     val bounds = translator.translateRange(timeFilter)
+    val aggregation = group.getAggregation
 
     val timeRangeStr: String = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter)
-
-    // TODO - apply dedup filter before return, remove column used for dedup condition (e.g. lastUpdated)
-    (df.filter(df(periodIdColumnName).between(bounds.getLeft, bounds.getRight)), timeRangeStr)
+    var inRange: DataFrame = df.filter(df(periodIdColumnName).between(bounds.getLeft, bounds.getRight))
+    if (Calculation.LAST.equals(aggregation.getCalculation)) {
+      val reducer: ActivityRowReducer = new ActivityRowReducer
+      reducer.setGroupByFields(Seq(aggregation.getSourceAttributes.get(0), DeriveAttrsUtils.getEntityIdColumnNameFromEntity(group.getEntity)))
+      reducer.setArguments(Seq(InterfaceName.PeriodId.name)) // default periodId for metrics
+      reducer.setOperator(Operator.Latest)
+      inRange = DeriveAttrsUtils.applyReducer(inRange, reducer)
+    }
+    (inRange, timeRangeStr)
   }
 
   def rollupAndCreateAttr(df: DataFrame, timeRangeName: String, group: ActivityMetricsGroup, streamMetadata: util.Map[String, DimensionMetadata]): DataFrame = {
     val deriver: StreamAttributeDeriver = group.getAggregation
-    val entityIdColName: String = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(group.getEntity)
+    val entityIdColName: String = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(group.getEntity)
     val rollupDimNames: Seq[String] = group.getRollupDimensions.split(",") :+ entityIdColName
     val pivotCols: Seq[String] = group.getRollupDimensions.split(",")
 
@@ -144,15 +153,14 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
     val excludeNull: DataFrame = rolledUp.where(rolledUp(entityIdColName).isNotNull && rolledUp(deriver.getTargetAttribute).isNotNull)
 
-    def concatColumns: UserDefinedFunction = udf((row: Row) => row.mkString(","))
+    def concatColumns: UserDefinedFunction = udf((row: Row) => row.mkString("_"))
 
     val pivoted: DataFrame = excludeNull.withColumn("combColumn", concatColumns(struct(pivotCols.map(col): _*))).groupBy(entityIdColName)
       .pivot("combColumn").agg(DeriveAttrsUtils.getAggr(excludeNull, deriver))
 
     var attrRenamed: DataFrame = pivoted.columns.foldLeft(pivoted) { (pivotedDF, colName) =>
       if (!colName.equals(entityIdColName)) {
-        val rollupDimVals: Seq[String] = colName.split(",")
-        val attrName: String = constructAttrName(group.getGroupId, rollupDimVals, timeRangeName)
+        val attrName: String = constructAttrName(group.getGroupId, Seq(colName), timeRangeName)
         pivotedDF.withColumnRenamed(colName, attrName)
       } else {
         pivotedDF
@@ -185,7 +193,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       rollupDimIds = for (rollupDimIds <- rollupDimIds; newDimId <- extractDimIds(streamMetadata.get(dimName), dimName))
         yield rollupDimIds + "_" + newDimId
     }
-    rollupDimIds.map(rollupDimIdTmpl => constructAttrName(group.getGroupId, rollupDimIdTmpl.split("_"), timeRange))
+    rollupDimIds.map(rollupDimIdTmpl => constructAttrName(group.getGroupId, Seq(rollupDimIdTmpl), timeRange))
   }
 
   def extractDimIds(metadata: DimensionMetadata, dimName: String): Seq[String] = {
@@ -226,7 +234,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     if (!hasAccountBatchStore) {
       df
     } else {
-      val entityIdCol: String = DeriveAttrsUtils.getMetricsGroupEntityIdColumnName(BusinessEntity.Account)
+      val entityIdCol: String = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(BusinessEntity.Account)
       df.join(accountBatchStoreTable.select(entityIdCol), Seq(entityIdCol), "fullouter")
     }
   }

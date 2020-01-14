@@ -125,6 +125,7 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
         config.dateAttr = stream.getDateAttribute();
         config.retentionDays = stream.getRetentionDays();
         config.currentEpochMilli = paTimestamp;
+        config.reducer = stream.getReducer();
 
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_APPEND_RAWSTREAM);
