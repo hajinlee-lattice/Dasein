@@ -21,8 +21,9 @@
 
     <modules>
         <module>core</module>
-        <module>cdl</module>
         <module>lp</module>
+        <module>cdl</module>
+        <module>dcp</module>
     </modules>
 
     <dependencies>

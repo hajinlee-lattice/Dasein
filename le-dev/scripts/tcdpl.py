@@ -47,7 +47,7 @@ else:
 
 LE_APPS = ['api', 'admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
 MS_MODULES = ['ms-core', 'dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
-              'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'cdl', 'lp']
+              'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'cdl', 'lp', 'dcp']
 
 LE_APPS = [ app for app in LE_APPS + MS_MODULES if app != 'microservice' ]
 
@@ -77,6 +77,10 @@ PRESETS = {
                  'playmaker', 'dataflowapi', 'eai', 'modeling', 'scoring', 'workflowapi',
                  'quartz', 'sqoop']
     },
+    'dcp': {
+        'apps': ['admin', 'pls', 'lp', 'cdl', 'dcp', 'matchapi', 'metadata',
+                 'dataflowapi', 'workflowapi', 'eai', 'datacloudapi']
+    },
     'benchmark': {
         'apps': ['pls', 'lp', 'cdl', 'matchapi', 'metadata', 'dataflowapi', 'eai', 'modeling',
                  'scoring', 'workflowapi', 'quartz', 'sqoop']
@@ -92,7 +96,7 @@ PRESETS = {
     'all': {
         'apps': ['admin', 'pls', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'ulysses', 'saml',
                  'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz',
-                 'sqoop', 'datacloudapi', 'cdl', 'objectapi']
+                 'sqoop', 'datacloudapi', 'cdl', 'objectapi', 'dcp']
     }
 }
 

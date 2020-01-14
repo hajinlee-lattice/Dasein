@@ -1,5 +1,6 @@
 /ddl_*.sql
 /metadata.json
+/replace_token.py
 
 /dataplatform
 /datascience

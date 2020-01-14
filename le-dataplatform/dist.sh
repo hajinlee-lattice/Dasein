@@ -6,7 +6,7 @@ rm -rf ${dist} || true
 mkdir ${dist}
 
 cp -r ../le-swlib/target/swlib ${dist}
-for lib in 'leadprioritization' 'cdl' 'datacloud' 'modeling' 'scoring'; do
+for lib in 'leadprioritization' 'cdl' 'dcp' 'datacloud' 'modeling' 'scoring'; do
     if [[ -d "${dist}/swlib/dataflowapi/le-serviceflows-${lib}" ]]; then
         cp ../le-serviceflows/${lib}/target/le-*-shaded.jar ${dist}/swlib/dataflowapi/le-serviceflows-${lib}/le-serviceflows-${lib}.jar
     fi
