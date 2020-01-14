@@ -86,7 +86,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-jsonSchema</artifactId>
-            <version>${jackson.module.version}</version>
+            <version>${jackson.fasterxml.version}</version>
             <scope>test</scope>
         </dependency>
 
