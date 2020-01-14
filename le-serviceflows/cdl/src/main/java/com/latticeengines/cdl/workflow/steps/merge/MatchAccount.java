@@ -139,7 +139,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             boolean hasConvertBatchStoreTableName = StringUtils.isNotEmpty(convertBatchStoreTableName);
             if (hasConvertBatchStoreTableName) {
                 columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
-                setServingVersionForEntityMatchTenant(matchInput);
+                setRematchVersions(matchInput);
             }
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
                     getSystemIds(BusinessEntity.Account), null, hasConvertBatchStoreTableName);
