@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Preconditions;
 import com.latticeengines.datacloud.match.actors.visitor.DataSourceLookupRequest;
 import com.latticeengines.datacloud.match.service.EntityMatchInternalService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupRequest;
@@ -61,8 +61,7 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
         EntityLookupRequest lookupRequest = (EntityLookupRequest) request.getInputData();
         List<EntityLookupEntry> entries = EntityLookupEntryConverter.fromMatchKeyTuple(
                 lookupRequest.getEntity(), lookupRequest.getTuple());
-        Map<EntityMatchEnvironment, Integer> versionMap = lookupRequest.getServingVersion() == null ? null
-                : Collections.singletonMap(EntityMatchEnvironment.SERVING, lookupRequest.getServingVersion());
+        Map<EntityMatchEnvironment, Integer> versionMap = lookupRequest.getVersionMap();
         List<String> entityIds = entityMatchInternalService.getIds(lookupRequest.getTenant(), entries, versionMap);
         return new EntityLookupResponse(
                 lookupRequest.getTenant(), lookupRequest.getEntity(), lookupRequest.getTuple(), entityIds);
@@ -94,8 +93,9 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
                 // group by tenant ID, put all lookupRequests in this tenant into a list
                 .collect(groupingBy(pair -> {
                     String tenantId = pair.getValue().getTenant().getId();
-                    Integer servingVersion = pair.getValue().getServingVersion();
-                    return String.format("%s_%d", tenantId, servingVersion); // use both tenant & version as key
+                    // use both tenant & version info as key
+                    return String.format("%s_%s", tenantId,
+                            EntityMatchUtils.serialize(pair.getValue().getVersionMap()));
                 }, mapping(pair -> pair, toList())));
         params.values().forEach(this::handleRequestForTenant);
     }
@@ -110,9 +110,7 @@ public class EntityLookupServiceImpl extends DataSourceMicroBatchLookupServiceBa
 
         // should all have the same tenant and version
         Tenant tenant = pairs.get(0).getRight().getTenant();
-        Integer servingVersion = pairs.get(0).getRight().getServingVersion();
-        Map<EntityMatchEnvironment, Integer> versionMap = servingVersion == null ? null
-                : Collections.singletonMap(EntityMatchEnvironment.SERVING, servingVersion);
+        Map<EntityMatchEnvironment, Integer> versionMap = pairs.get(0).getRight().getVersionMap();
         String tenantId = tenant.getId();
         try {
             List<List<EntityLookupEntry>> entryLists = pairs

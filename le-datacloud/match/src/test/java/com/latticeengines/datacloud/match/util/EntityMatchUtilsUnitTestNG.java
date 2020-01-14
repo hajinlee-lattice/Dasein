@@ -18,6 +18,8 @@ import static com.latticeengines.datacloud.match.testframework.TestEntityMatchUt
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.CDL_LOOKUP;
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.ENTITY_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.match.OperationalMode.LDC_MATCH;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Country;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Domain;
@@ -40,12 +42,14 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.testframework.TestEntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 
 public class EntityMatchUtilsUnitTestNG {
@@ -78,6 +82,24 @@ public class EntityMatchUtilsUnitTestNG {
         Assert.assertNotNull(result, "Merged seed should not be null");
         Assert.assertTrue(TestEntityMatchUtils.equalsDisregardPriority(result, expectedResult), String.format(
                 "Merged seed (%s) should be the same as the expected merged seed (%s)", result, expectedResult));
+    }
+
+    @Test(groups = "unit", dataProvider = "versionMap")
+    private void testSerializeVersionMap(Map<EntityMatchEnvironment, Integer> versionMap,
+            String expectedSerializedStr) {
+        Assert.assertEquals(EntityMatchUtils.serialize(versionMap), expectedSerializedStr);
+    }
+
+    @DataProvider(name = "versionMap")
+    private Object[][] versionMapTestData() {
+        return new Object[][] { //
+                { null, "null_null" }, //
+                { ImmutableMap.of(STAGING, 1), "1_null" }, //
+                { ImmutableMap.of(STAGING, 2), "2_null" }, //
+                { ImmutableMap.of(SERVING, 2), "null_2" }, //
+                { ImmutableMap.of(STAGING, 1, SERVING, 2), "1_2" }, //
+                { ImmutableMap.of(STAGING, 3, SERVING, 2), "3_2" }, //
+        }; //
     }
 
     @DataProvider(name = "mergeSeed")

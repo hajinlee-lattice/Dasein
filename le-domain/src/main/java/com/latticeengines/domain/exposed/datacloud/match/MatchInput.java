@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -201,10 +202,11 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("AllocateId")
     private boolean allocateId;
 
-    // Version of entity match serving store that will be used in matching. Specify
-    // null to use current version.
-    @JsonProperty("ServingVersion")
-    private Integer servingVersion;
+    /*-
+     * versions used for entity match, set to null to use current version
+     */
+    @JsonProperty("EntityMatchVersionMap")
+    private Map<EntityMatchEnvironment, Integer> entityMatchVersionMap;
 
     // Target entity represents the ultimate Business Entity that this match request is trying to find an ID for.
     // Since some entity matches will require matching other entities, eg. Contact might require Account, and
@@ -604,12 +606,12 @@ public class MatchInput implements Fact, Dimension {
         this.allocateId = allocateId;
     }
 
-    public Integer getServingVersion() {
-        return servingVersion;
+    public Map<EntityMatchEnvironment, Integer> getEntityMatchVersionMap() {
+        return entityMatchVersionMap;
     }
 
-    public void setServingVersion(Integer servingVersion) {
-        this.servingVersion = servingVersion;
+    public void setEntityMatchVersionMap(Map<EntityMatchEnvironment, Integer> entityMatchVersionMap) {
+        this.entityMatchVersionMap = entityMatchVersionMap;
     }
 
     public String getTargetEntity() {

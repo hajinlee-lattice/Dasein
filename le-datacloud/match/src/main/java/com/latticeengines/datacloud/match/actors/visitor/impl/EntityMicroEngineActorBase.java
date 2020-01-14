@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntryConverter;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupResponse;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -159,8 +160,9 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         List<Integer> dummyResultIndices = IntStream.range(lookupSizeBefore, postProcessedResults.size()).boxed()
                 .collect(Collectors.toList());
 
-        Integer servingVersion = traveler.getMatchInput() == null ? null : traveler.getMatchInput().getServingVersion();
-        return new EntityAssociationRequest(standardizedTenant, entity, servingVersion,
+        Map<EntityMatchEnvironment, Integer> versionMap = traveler.getMatchInput() == null ? null
+                : traveler.getMatchInput().getEntityMatchVersionMap();
+        return new EntityAssociationRequest(standardizedTenant, entity, versionMap,
                 getPreferredEntityId(traveler.getEntity(), traveler.getEntityMatchKeyRecord()),
                 postProcessedResults, extraAttributes, dummyResultIndices);
     }
@@ -240,8 +242,9 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
             @NotNull MatchTraveler traveler, @NotNull MatchKeyTuple tuple) {
         Tenant standardizedTenant = traveler.getEntityMatchKeyRecord().getParsedTenant();
         String entity = traveler.getEntity();
-        Integer servingVersion = traveler.getMatchInput() == null ? null : traveler.getMatchInput().getServingVersion();
-        return new EntityLookupRequest(standardizedTenant, entity, servingVersion, tuple);
+        Map<EntityMatchEnvironment, Integer> versionMap = traveler.getMatchInput() == null ? null
+                : traveler.getMatchInput().getEntityMatchVersionMap();
+        return new EntityLookupRequest(standardizedTenant, entity, versionMap, tuple);
     }
 
     @Override
