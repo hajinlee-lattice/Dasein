@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
+import io.micrometer.core.annotation.Timed;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import reactor.core.publisher.ParallelFlux;
@@ -91,6 +92,7 @@ public class ColumnMetadataResource {
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Get all columns belong to a data cloud version")
+    @Timed
     public ParallelFlux<ColumnMetadata> getAllColumns(
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion,
             @RequestParam(value = "page", required = false) Integer page,
