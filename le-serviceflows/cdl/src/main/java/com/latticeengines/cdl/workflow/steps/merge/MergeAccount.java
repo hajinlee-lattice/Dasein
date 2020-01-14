@@ -56,9 +56,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        List<String> tables = !hasSystemBatch ? Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME)
+        List<String> accountTables = !hasSystemBatch ? Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME)
                 : Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, SYSTEM_ACCOUNT_MASTER_TABLE_NAME);
-        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), tables);
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), accountTables);
         shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
         if (shortCutMode) {
             log.info("Found diff table and batch store in context, using short-cut pipeline");
