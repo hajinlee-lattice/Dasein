@@ -31,7 +31,6 @@ import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 
-import io.micrometer.core.annotation.Timed;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -119,7 +118,6 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return getAllColumns("");
     }
 
-    @Timed
     public List<ColumnMetadata> getAllColumns(String dataCloudVersion) {
         if (StringUtils.isEmpty(dataCloudVersion)) {
             dataCloudVersion = "";
