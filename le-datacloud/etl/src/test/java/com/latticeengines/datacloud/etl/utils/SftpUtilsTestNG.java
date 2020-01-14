@@ -17,6 +17,16 @@ import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTest
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 import com.latticeengines.domain.exposed.datacloud.ingestion.VersionCheckStrategy;
 
+/**
+ * This test requires setup some files on the sftp server:
+ *
+ * 1. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190714/AllDomainsAllTopicsZips_20190714_1.csv.gz
+ * 2. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_1.csv.gz
+ * 3. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_2.csv.gz
+ * 4. ingest_test/SftpUtilsTestNG/DnB/gets/LE_SEED_OUTPUT_2016_09_001.OUT.gz
+ *
+ * The files can be found in s3://latticeengines-test-artifacts/le-datacloud/etl-ingestion/1/
+ */
 public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(SftpUtilsTestNG.class);
