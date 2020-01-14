@@ -8,13 +8,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -22,6 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.cdl.workflow.steps.merge.BaseActivityStreamStep;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -34,13 +33,11 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component(SoftDeleteActivityStream.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class SoftDeleteActivityStream extends BaseTransformWrapperStep<ProcessActivityStreamStepConfiguration> {
+public class SoftDeleteActivityStream extends BaseActivityStreamStep<ProcessActivityStreamStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SoftDeleteActivityStream.class);
 
@@ -48,8 +45,6 @@ public class SoftDeleteActivityStream extends BaseTransformWrapperStep<ProcessAc
 
     private static final String RAWSTREAM_TABLE_PREFIX_FORMAT = "SD_RawStream_%s";
     private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
-
-    private final Map<String, String> rawStreamTablePrefixes = new HashMap<>();
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -81,7 +76,8 @@ public class SoftDeleteActivityStream extends BaseTransformWrapperStep<ProcessAc
         }
     }
 
-    private void initializeConfiguration() {
+    @Override
+    protected void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         entity = configuration.getMainEntity();
         batchStore = entity.getBatchStore();
@@ -99,7 +95,8 @@ public class SoftDeleteActivityStream extends BaseTransformWrapperStep<ProcessAc
         }
     }
 
-    private PipelineTransformationRequest getConsolidateRequest() {
+    @Override
+    protected PipelineTransformationRequest getConsolidateRequest() {
         if (configuration.isRematchMode()) {
             log.info("Activity Stream use replace mode. Skip soft delete!");
             return null;
@@ -158,23 +155,6 @@ public class SoftDeleteActivityStream extends BaseTransformWrapperStep<ProcessAc
         step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);
         step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
         return step;
-    }
-
-    // copy from com.latticeengines.cdl.workflow.steps.merge.BuildRawActivityStream.buildRawStreamBatchStore
-    private Map<String, String> buildRawStreamBatchStore() {
-        if (MapUtils.isEmpty(rawStreamTablePrefixes)) {
-            return Collections.emptyMap();
-        }
-        Map<String, String> rawStreamTableNames = rawStreamTablePrefixes.entrySet() //
-                .stream() //
-                .map(entry -> Pair.of(entry.getKey(), TableUtils.getFullTableName(entry.getValue(), pipelineVersion))) //
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
-
-        log.info("Building raw stream tables, tables={}, pipelineVersion={}", rawStreamTableNames, pipelineVersion);
-
-        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), rawStreamTableNames, batchStore,
-                inactive);
-        return rawStreamTableNames;
     }
 
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
