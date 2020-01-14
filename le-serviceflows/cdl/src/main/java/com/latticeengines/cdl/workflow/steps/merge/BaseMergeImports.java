@@ -88,9 +88,11 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected DataCollection.Version inactive;
 
     protected BusinessEntity entity;
+    protected TableRoleInCollection systemBatchStore;
     protected TableRoleInCollection batchStore;
     protected String batchStoreTablePrefix;
     protected String mergedBatchStoreName;
+    protected String systemBatchStoreTablePrefix;
     protected String diffTablePrefix;
     protected String diffReportTablePrefix;
     protected String batchStorePrimaryKey;
@@ -100,6 +102,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
     Map<BusinessEntity, Boolean> softDeleteEntities;
+    protected Map<String, String> tableSystemMap;
+
+    protected boolean hasSystemBatch;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -125,6 +130,10 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             batchStoreSortKeys = batchStore.getForeignKeysAsStringList();
             mergedBatchStoreName = batchStore.name() + "_Merged";
         }
+        systemBatchStore = entity.getSystemBatchStore();
+        if (systemBatchStore != null) {
+            systemBatchStoreTablePrefix = systemBatchStore.name();
+        }
         diffTablePrefix = entity.name() + "_Diff";
         diffReportTablePrefix = entity.name() + "_DiffReport";
 
@@ -141,7 +150,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         if (entityImportsMap == null) {
             return;
         }
-
+        tableSystemMap = getMapObjectFromContext(CONSOLIDATE_INPUT_SYSTEMS, String.class, String.class);
+        hasSystemBatch = MapUtils.isNotEmpty(tableSystemMap) && systemBatchStore != null;
+        log.info("Has Batch System=" + hasSystemBatch);
         List<DataFeedImport> imports = JsonUtils.convertList(entityImportsMap.get(entity), DataFeedImport.class);
         if (CollectionUtils.isNotEmpty(imports)) {
             List<Table> tables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
@@ -224,6 +235,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setAddTimestamps(false);
         config.setCloneSrcFields(cloneSrcFlds);
         config.setRenameSrcFields(renameSrcFlds);
+        setupSystems(config);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         if (StringUtils.isNotBlank(targetTablePrefix)) {
@@ -231,6 +243,18 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
 
         return step;
+    }
+
+    private void setupSystems(MergeImportsConfig config) {
+        if (!hasSystemBatch) {
+            return;
+        }
+        List<String> systems = new ArrayList<>();
+        inputTableNames.forEach(t -> {
+            log.info("inputTable=" + t + ", systemName=" + tableSystemMap.get(t));
+            systems.add(tableSystemMap.get(t));
+        });
+        config.setSystems(systems);
     }
 
     TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions) {
@@ -265,7 +289,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setDedupSrc(true);
         config.setJoinKey(joinKey);
         config.setAddTimestamps(true);
-
+        if (hasSystemBatch) {
+            config.setHasSystem(true);
+        }
         // those Id columns must exist in the output
         if (CollectionUtils.isNotEmpty(requiredIdCols)) {
             Map<String, String> requiredCols = new HashMap<>();

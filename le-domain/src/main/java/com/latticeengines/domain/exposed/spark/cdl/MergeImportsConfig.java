@@ -22,6 +22,9 @@ public class MergeImportsConfig extends SparkJobConfig {
     @JsonProperty("DedupSrc")
     private boolean dedupSrc; // dedupe each input by srcId
 
+    @JsonProperty("hasSystem")
+    private boolean hasSystem;
+
     @JsonProperty("Systems")
     private List<String> systems;
 
@@ -87,6 +90,14 @@ public class MergeImportsConfig extends SparkJobConfig {
 
     public void setDedupSrc(boolean dedupSrc) {
         this.dedupSrc = dedupSrc;
+    }
+
+    public boolean isHasSystem() {
+        return hasSystem;
+    }
+
+    public void setHasSystem(boolean hasSystem) {
+        this.hasSystem = hasSystem;
     }
 
     public boolean isAddTimestamps() {

@@ -13,6 +13,7 @@ import scala.collection.JavaConverters._
 class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
   private val systemColumn = "__system__"
+  private var hasSystem = false
   
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeImportsConfig]): Unit = {
     val config: MergeImportsConfig = lattice.config
@@ -20,6 +21,7 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     val joinKey = config.getJoinKey
     val srcId = config.getSrcId
     val systems = config.getSystems
+    hasSystem = config.isHasSystem
     var processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
         config.getRenameSrcFields, config.getCloneSrcFields) }
     println("----- BEGIN SCRIPT OUTPUT -----")
@@ -40,7 +42,10 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
       val rhsIdx = r._2
       val merge2 =
         if (joinKey != null && lhsDf.columns.contains(joinKey) && rhsDf.columns.contains(joinKey)) {
-          val joinKeysForThisJoin = Seq(joinKey)
+          var joinKeysForThisJoin = Seq(joinKey)
+          if (hasSystem) {
+              joinKeysForThisJoin = joinKeysForThisJoin :+ systemColumn
+          }
           MergeUtils.merge2(lhsDf, rhsDf, joinKeysForThisJoin, Set(), overwriteByNull = false)
         } else {
           MergeUtils.concat2(lhsDf, rhsDf)

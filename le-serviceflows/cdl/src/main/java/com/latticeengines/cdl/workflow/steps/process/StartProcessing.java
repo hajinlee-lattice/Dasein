@@ -564,6 +564,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private void addActionAssociateTables() {
         List<Action> actionList = getImportActions();
         if (CollectionUtils.isNotEmpty(actionList)) {
+            Map<String, String> tableSystemMap = new HashMap<>();
             for (Action action : actionList) {
                 if (action.getActionConfiguration() == null) {
                     log.warn(String.format("Action %d does not have a import configuration, may need re-import.",
@@ -592,7 +593,20 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     continue;
                 }
                 dataFeedProxy.addTablesToQueue(customerSpace.toString(), taskId, tables);
+
+                if (configuration.isEntityMatchEnabled()) {
+                    List<String> systems = importActionConfiguration.getTableSystems();
+                    // associateSystems(tables, systems, tableSystemMap);
+                }
             }
+            putObjectInContext(CONSOLIDATE_INPUT_SYSTEMS, tableSystemMap);
+        }
+    }
+
+    private void associateSystems(List<String> tables, List<String> systems, Map<String, String> tableSystemMap) {
+        for (int i = 0; i < tables.size(); i++) {
+            tableSystemMap.put(tables.get(i), "testsystem"); // TODO:
+                                                             // systems.get(i));
         }
     }
 

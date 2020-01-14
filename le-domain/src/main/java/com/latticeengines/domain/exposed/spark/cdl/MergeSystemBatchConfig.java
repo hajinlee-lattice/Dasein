@@ -20,7 +20,7 @@ public class MergeSystemBatchConfig extends SparkJobConfig {
     private boolean keepPrefix; // if keep system as the prefix in the column name
 
     @JsonProperty("Systems")
-    private List<String> systems;
+    private List<String> systems; // increasing priority
 
     @Override
     @JsonProperty("Name")

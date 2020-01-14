@@ -56,8 +56,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), //
-                Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME));
+        List<String> tables = !hasSystemBatch ? Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME)
+                : Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, SYSTEM_ACCOUNT_MASTER_TABLE_NAME);
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), tables);
         shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
         if (shortCutMode) {
             log.info("Found diff table and batch store in context, using short-cut pipeline");
@@ -147,12 +148,24 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             throw new IllegalArgumentException("No input to be merged, and no soft delete needed!");
         }
 
-        upsertStep = mergeStep + 1;
-        diffStep = mergeStep + 2;
+        TransformationStepConfig upsertSystem = null;
+        TransformationStepConfig upsert;
+        if (hasSystemBatch) {
+            upsertSystem = upsertSystemBatch(mergeStep, true);
+            upsert = mergeSystemBatch(mergeStep + 1, true);
+            upsertStep = mergeStep + 2;
+            diffStep = mergeStep + 3;
+        } else {
+            upsert = upsertMaster(true, mergeStep, true);
+            upsertStep = mergeStep + 1;
+            diffStep = mergeStep + 2;
+        }
 
-        TransformationStepConfig upsert = upsertMaster(true, mergeStep, true);
         TransformationStepConfig diff = diff(mergeStep, upsertStep);
         TransformationStepConfig report = reportDiff(diffStep);
+        if (upsertSystem != null) {
+            steps.add(upsertSystem);
+        }
         steps.add(upsert);
         steps.add(diff);
         steps.add(report);
@@ -228,6 +241,11 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
+        if (hasSystemBatch) {
+            String systemBatchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
+                    systemBatchStore, inactive);
+            exportToS3AndAddToContext(systemBatchStoreTableName, SYSTEM_ACCOUNT_MASTER_TABLE_NAME);
+        }
         String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
@@ -267,6 +285,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         // SystemIds which don't exist in match target table are ignored in
         // dataflow
         config.setSystemIdFlds(systemIds);
+        if (hasSystemBatch) {
+            config.setSystem(SystemBatchStoreName.Embded.name());
+        }
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }

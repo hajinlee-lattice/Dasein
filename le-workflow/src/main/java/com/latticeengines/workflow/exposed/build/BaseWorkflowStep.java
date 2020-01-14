@@ -117,6 +117,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVENT_COUNTER_MAP = "EVENT_COUNTER_MAP";
 
     // CDL
+    public static final String CONSOLIDATE_INPUT_SYSTEMS = "CONSOLIDATE_INPUT_SYSTEMS";
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
     public static final String SOFT_DEELETE_ACTIONS = "SOFT_DEELETE_ACTIONS";
     public static final String HARD_DEELETE_ACTIONS = "HARD_DEELETE_ACTIONS";
@@ -202,6 +203,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE";
     public static final String ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE";
     protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
+    protected static final String SYSTEM_ACCOUNT_MASTER_TABLE_NAME = "SYSTEM_ACCOUNT_MASTER_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
     protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
     protected static final String ACCOUNT_FEATURE_TABLE_NAME = "ACCOUNT_FEATURE_TABLE_NAME";
@@ -282,6 +284,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_TXN_TARGETTABLE, //
             ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE, //
             ACCOUNT_DIFF_TABLE_NAME, //
+            SYSTEM_ACCOUNT_MASTER_TABLE_NAME, //
             ACCOUNT_MASTER_TABLE_NAME, //
             FULL_ACCOUNT_TABLE_NAME, //
             ACCOUNT_EXPORT_TABLE_NAME, //

@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
@@ -9,15 +10,15 @@ import org.apache.spark.sql.functions.{col}
 import scala.collection.JavaConverters._
 
 class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
+  private val customerAccountIdField = InterfaceName.CustomerAccountId.name
+  private val customerContactIdField = InterfaceName.CustomerContactId.name
   
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeSystemBatchConfig]): Unit = {
     val config: MergeSystemBatchConfig = lattice.config
-    if (config.getSystems == null) {
-      lattice.output = lattice.input
+    val joinKey = config.getJoinKey
+    val systems = 
+      if (config.getSystems == null) getSystems(lattice.input.head.columns, joinKey) else config.getSystems.asScala.toList 
       
-    } else {
-      val systems = config.getSystems.asScala.toList 
-      val joinKey = config.getJoinKey
       val overwriteByNull: Boolean =
         if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
       var lhsDf = selectSystemBatch(lattice.input.head, systems(0), joinKey, config.isKeepPrefix)
@@ -31,13 +32,12 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
         }
         lattice.output = lhsDf :: Nil
       }
-    }
   }
 
   private def selectSystemBatch(df: DataFrame, system: String, joinKey: String, keepPrefix: Boolean): DataFrame = {
       var fields = scala.collection.mutable.ListBuffer[String]()
       fields += joinKey
-      df.columns.foreach{ c =>
+      df.columns.foreach { c =>
         if (c.startsWith(system + "__")) {
           fields += c
         }
@@ -55,5 +55,26 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
         df.columns map (c => if (c == joinKey) c else c.stripPrefix(system + "__"))
       return df.toDF(newColumns:_*)
     }
+  }
+  
+  private def getSystems(columns: Array[String], joinKey: String): List[String] = {
+    var result = scala.collection.mutable.ListBuffer[String]()
+    var primarySystems = scala.collection.mutable.Set[String]()
+    var secondarySystems = scala.collection.mutable.Set[String]()
+    columns.foreach { c =>
+      if (c != joinKey) { 
+        val i = c.indexOf("__")
+        val system = c.substring(0, i)
+        val field = c.substring(i+2)
+        if (field == customerAccountIdField || field == customerContactIdField) {
+          primarySystems += system
+        } else {
+          secondarySystems += system
+        }
+      }
+    }
+    result ++= (secondarySystems diff primarySystems)
+    result ++= primarySystems
+    result.toList
   }
 }

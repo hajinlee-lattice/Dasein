@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_SYSTEM_BATCH_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
 
@@ -40,6 +41,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
+import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -53,6 +55,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     protected String inputMasterTableName;
     protected String diffTableName;
     protected Table masterTable;
+    protected Table systemBatchTable;
+    protected String systemBatchTableName;
 
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
@@ -62,6 +66,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     @Override
     protected void onPostTransformationCompleted() {
+        registerSystemBatchStore();
         registerBatchStore();
         generateDiffReport();
 
@@ -80,15 +85,29 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         }
     }
 
+    protected void registerSystemBatchStore() {
+        if (hasSystemBatch) {
+            Table table = metadataProxy.getTable(customerSpace.toString(), getSystemBatchStoreName());
+            if (table == null) {
+                throw new IllegalStateException("Did not generate new table for " + systemBatchStore);
+            }
+            enrichSystemBatchTableSchema(table);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), systemBatchStore, inactive);
+        }
+    }
+
     protected void registerBatchStore() {
-        Table table = metadataProxy.getTable(customerSpace.toString(), getBatchStoreName());
         if (entity.getBatchStore() != null) {
+            Table table = metadataProxy.getTable(customerSpace.toString(), getBatchStoreName());
             if (table == null) {
                 throw new IllegalStateException("Did not generate new table for " + batchStore);
             }
             isDataQuotaLimit(table);
             enrichTableSchema(table);
             dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
+            if (hasSystemBatch) {
+                writeSchema(table);
+            }
         }
     }
 
@@ -98,8 +117,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             AttributeLimit limit = getObjectFromContext(ATTRIBUTE_QUOTA_LIMIT, AttributeLimit.class);
             Integer attrQuota = 0;
             Set<String> names = table.getAttributes().stream().map(Attribute::getName).collect(Collectors.toSet());
-            Set<String> internalNames = SchemaRepository.getSystemAttributes(configuration.getMainEntity(),
-                    entityMatch).stream().map(InterfaceName::name).collect(Collectors.toSet());
+            Set<String> internalNames = SchemaRepository.getSystemAttributes(configuration.getMainEntity(), entityMatch)
+                    .stream().map(InterfaceName::name).collect(Collectors.toSet());
             log.info(String.format("internal attributes %s.", internalNames));
             Set<String> namesExcludeInternal = names.stream().filter(name -> {
                 if (internalNames.contains(name)) {
@@ -117,28 +136,29 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                     configuration.getMainEntity(), true);
             Set<String> nameExcludeInternalAndInactive = namesExcludeInternal;
             if (CollectionUtils.isNotEmpty(configRequest.getAttrConfigs())) {
-                Set<String> inactiveNames =
-                        configRequest.getAttrConfigs().stream().filter(config -> !AttrState.Active.equals(config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class)))
-                                .map(AttrConfig::getAttrName).collect(Collectors.toSet());
+                Set<String> inactiveNames = configRequest.getAttrConfigs().stream()
+                        .filter(config -> !AttrState.Active
+                                .equals(config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class)))
+                        .map(AttrConfig::getAttrName).collect(Collectors.toSet());
                 log.info(String.format("inactive attribute %s.", inactiveNames));
-                nameExcludeInternalAndInactive =
-                        namesExcludeInternal.stream().filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
+                nameExcludeInternalAndInactive = namesExcludeInternal.stream()
+                        .filter(name -> !inactiveNames.contains(name)).collect(Collectors.toSet());
             }
             int attrCount = nameExcludeInternalAndInactive.size();
-            log.info(String.format( "the size of remaining attributes is %s.", attrCount));
-            switch(configuration.getMainEntity()) {
-                case Account:
-                    attrQuota = limit.getAccountAttributeQuotaLimit();
-                    break;
-                case Contact:
-                    attrQuota = limit.getContactAttributeQuotaLimit();
-                    break;
-                    default:
-                        break;
+            log.info(String.format("the size of remaining attributes is %s.", attrCount));
+            switch (configuration.getMainEntity()) {
+            case Account:
+                attrQuota = limit.getAccountAttributeQuotaLimit();
+                break;
+            case Contact:
+                attrQuota = limit.getContactAttributeQuotaLimit();
+                break;
+            default:
+                break;
             }
             if (attrCount > attrQuota) {
-                throw new LedpException(LedpCode.LEDP_18226, new String[]{attrQuota.toString(),
-                        String.valueOf(configuration.getMainEntity())});
+                throw new LedpException(LedpCode.LEDP_18226,
+                        new String[] { attrQuota.toString(), String.valueOf(configuration.getMainEntity()) });
             }
         }
     }
@@ -151,18 +171,24 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 Long dataQuota = 0L;
                 DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
                 switch (configuration.getMainEntity()) {
-                    case Account: dataQuota = dataLimit.getAccountDataQuotaLimit();break;
-                    case Contact: dataQuota = dataLimit.getContactDataQuotaLimit();break;
-                    case Transaction: dataQuota = dataLimit.getTransactionDataQuotaLimit();break;
-                    default:break;
+                case Account:
+                    dataQuota = dataLimit.getAccountDataQuotaLimit();
+                    break;
+                case Contact:
+                    dataQuota = dataLimit.getContactDataQuotaLimit();
+                    break;
+                case Transaction:
+                    dataQuota = dataLimit.getTransactionDataQuotaLimit();
+                    break;
+                default:
+                    break;
                 }
                 for (Extract extract : extracts) {
                     dataCount = dataCount + extract.getProcessedRecords();
                     log.info("stored " + configuration.getMainEntity() + " data is " + dataCount);
                     if (dataQuota < dataCount)
                         throw new IllegalStateException("the " + configuration.getMainEntity() + " data quota limit is "
-                                + dataQuota
-                                + ", The data you uploaded has exceeded the limit.");
+                                + dataQuota + ", The data you uploaded has exceeded the limit.");
                 }
                 log.info("stored data is " + dataCount + ", the " + configuration.getMainEntity() + "data limit is "
                         + dataQuota);
@@ -199,8 +225,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        boolean isEntityMatchRematch =
-                configuration.isEntityMatchEnabled() && Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
+        boolean isEntityMatchRematch = configuration.isEntityMatchEnabled()
+                && Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
         if (softDeleteEntities.containsKey(entity) && Boolean.TRUE.equals(softDeleteEntities.get(entity))) {
             masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, inactive);
         } else {
@@ -215,6 +241,12 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             inputMasterTableName = masterTable.getName();
         }
         log.info("Set inputMasterTableName=" + inputMasterTableName);
+
+        systemBatchTable = dataCollectionProxy.getTable(customerSpace.toString(), systemBatchStore, inactive);
+        if (systemBatchTable != null) {
+            systemBatchTableName = systemBatchTable.getName();
+        }
+        log.info("Set system batch name=" + systemBatchTableName);
     }
 
     TransformationStepConfig softDelete(int mergeSoftDeleteStep, int mergeStep) {
@@ -261,6 +293,58 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         UpsertConfig config = getUpsertConfig(entityMatch, true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
+    }
+
+    TransformationStepConfig upsertSystemBatch(int mergeStep, boolean setTarget) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        String batchSystemName = setupSystemBatchTable(step);
+        step.setInputSteps(Collections.singletonList(mergeStep));
+        step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
+        if (setTarget) {
+            setTargetTable(step, systemBatchStoreTablePrefix);
+        }
+        UpsertConfig config = getUpsertConfig(true, true);
+        config.setInputSystemBatch(true);
+        config.setBatchSystemName(batchSystemName);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    private String setupSystemBatchTable(TransformationStepConfig step) {
+        if (StringUtils.isNotBlank(systemBatchTableName)) {
+            Table systemBatchTable = metadataProxy.getTable(customerSpace.toString(), systemBatchTableName);
+            if (systemBatchTable != null && !systemBatchTable.getExtracts().isEmpty()) {
+                log.info("Add systemBatchTable=" + systemBatchTableName);
+                addBaseTables(step, systemBatchTableName);
+            }
+        } else if (StringUtils.isNotBlank(inputMasterTableName)) {
+            Table masterTable = metadataProxy.getTable(customerSpace.toString(), inputMasterTableName);
+            if (masterTable != null && !masterTable.getExtracts().isEmpty()) {
+                log.info("Add masterTable=" + inputMasterTableName);
+                addBaseTables(step, inputMasterTableName);
+            }
+            return SystemBatchStoreName.Other.name();
+        }
+        return null;
+    }
+
+    TransformationStepConfig mergeSystemBatch(int mergeStep, boolean setTarget) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(mergeStep));
+        step.setTransformer(TRANSFORMER_MERGE_SYSTEM_BATCH_TXMFR);
+        if (setTarget) {
+            setTargetTable(step, batchStoreTablePrefix);
+        }
+        MergeSystemBatchConfig config = getMergeSystemBatchConfig();
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    private MergeSystemBatchConfig getMergeSystemBatchConfig() {
+        MergeSystemBatchConfig config = new MergeSystemBatchConfig();
+        config.setNotOverwriteByNull(true);
+        config.setJoinKey(InterfaceName.EntityId.name());
+        return config;
     }
 
     TransformationStepConfig upsertMaster(boolean entityMatch, String matchedTable) {
@@ -339,8 +423,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     }
 
     /**
-     * Retrieve all system IDs for target entity of current tenant (sorted by system
-     * priority from high to low)
+     * Retrieve all system IDs for target entity of current tenant (sorted by
+     * system priority from high to low)
      *
      * @param entity
      *            target entity
@@ -383,7 +467,14 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
+    protected void enrichSystemBatchTableSchema(Table table) {
+    }
+
     protected void enrichTableSchema(Table table) {
+    }
+
+    protected String getSystemBatchStoreName() {
+        return TableUtils.getFullTableName(systemBatchStoreTablePrefix, pipelineVersion);
     }
 
     protected String getBatchStoreName() {

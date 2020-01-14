@@ -76,14 +76,23 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             } else {
                 int dedupStep = 0;
                 upsertMasterStep = 1;
-
+                TransformationStepConfig upsertSystem = null;
                 TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
                         Collections.singletonList(matchedTable), //
                         Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
-                upsert = upsertMaster(true, dedupStep, true);
+                if (hasSystemBatch) {
+                    upsertSystem = upsertSystemBatch(dedupStep, true);
+                    upsert = mergeSystemBatch(upsertMasterStep, true);
+                    upsertMasterStep++;
+                } else {
+                    upsert = upsertMaster(true, dedupStep, true);
+                }
                 diffStep = upsertMasterStep + 1;
                 diff = diff(matchedTable, upsertMasterStep);
                 steps.add(dedup);
+                if (upsertSystem != null) {
+                    steps.add(upsertSystem);
+                }
                 steps.add(upsert);
             }
         } else {

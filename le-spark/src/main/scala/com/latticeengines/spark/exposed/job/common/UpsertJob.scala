@@ -13,41 +13,44 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
   private val systemColumn = "__system__"
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[UpsertConfig]): Unit = {
+    val spark = SparkSession.builder.getOrCreate    
+    import spark.implicits._
+    
     val config: UpsertConfig = lattice.config
-
+    
     if (lattice.input.length == 1) {
       lattice.output = 
-        if (config.getSystems == null || config.isSystemBatch) {
+        if (!config.isInputSystemBatch) {
             lattice.input
           } else {
-            addSystemPrefix(lattice.input.head, config.getSystems().get(0), Seq(config.getJoinKey)) :: Nil
+            addSystemPrefixForInput(lattice.input.head, Seq(config.getJoinKey)) :: Nil
           }
     } else {
       val switchSide = config.getSwitchSides != null && config.getSwitchSides
       val lhsDf = if (switchSide) lattice.input(1) else lattice.input.head
       val rhsDf = if (switchSide) lattice.input.head else lattice.input(1)
-      val systems = if (config.getSystems == null) List() else config.getSystems.asScala.toList 
       
       val joinKey = config.getJoinKey
       val colsFromLhs: Set[String] = if (config.getColsFromLhs == null) Set() else config.getColsFromLhs.asScala.toSet
       val overwriteByNull: Boolean =
         if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
         
-      if (systems.size == 0) {
+      if (!config.isInputSystemBatch) {
         val merged = MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull = overwriteByNull)
         lattice.output = merged :: Nil
       } else {
-         val merged = upsertSystemBatch(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull, config.isSystemBatch, systems) 
+         var systems = rhsDf.select(systemColumn).as[String].collect.toSet.toList
+         val merged = upsertSystemBatch(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull, config.getBatchSystemName, systems) 
         lattice.output = merged :: Nil
       }
     }
   }
   
   private def upsertSystemBatch(lhsDf: DataFrame, rhsDf: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
-             overwriteByNull: Boolean, systemBatch: Boolean, systems: List[String]): DataFrame = {
+             overwriteByNull: Boolean, systemName: String, systems: List[String]): DataFrame = {
     var merged = 
-      if (!systemBatch) addSystemPrefix(lhsDf, systems(0), joinKeys) else lhsDf
-    for (i <- 1 to systems.length-1) {
+      if (systemName != null) addSystemPrefix(lhsDf, systemName, joinKeys) else lhsDf
+    for (i <- 0 to systems.length-1) {
       var system = systems(i)           
       var newRhsDf = filterBySystem(rhsDf, system)
       newRhsDf = addSystemPrefix(newRhsDf, system, joinKeys)
@@ -59,6 +62,21 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
   
   private def filterBySystem(df: DataFrame, system: String): DataFrame = {
       df.filter(col(systemColumn) === lit(system)).drop(systemColumn) 
+  }
+  
+  private def addSystemPrefixForInput(df: DataFrame, joinKeys: Seq[String]): DataFrame = {
+    val spark = SparkSession.builder.getOrCreate    
+    import spark.implicits._
+    var systems = df.select(systemColumn).as[String].collect.toSet.toList
+    var merged = filterBySystem(df, systems(0))
+    merged = addSystemPrefix(merged, systems(0), joinKeys)
+    for (i <- 1 to systems.length-1) {
+      var system = systems(i)           
+      var newDf = filterBySystem(df, system)
+      newDf = addSystemPrefix(newDf, system, joinKeys)
+      merged = MergeUtils.merge2(merged, newDf, joinKeys, Set(), false)
+    }
+    merged
   }
   
   private def addSystemPrefix(df: DataFrame, system: String, joinKeys: Seq[String]): DataFrame = {

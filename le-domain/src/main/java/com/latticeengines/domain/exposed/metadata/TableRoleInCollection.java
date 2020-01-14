@@ -16,6 +16,9 @@ public enum TableRoleInCollection {
     ConsolidatedCatalog, //
     ConsolidatedActivityStream, //
 
+    SystemAccount, //
+    SystemContact, //
+
     PivotedRating, //
 
     Profile, //

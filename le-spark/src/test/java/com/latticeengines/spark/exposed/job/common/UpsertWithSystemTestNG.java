@@ -28,6 +28,9 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
         runnables.add(runnable1);
         Runnable runnable2 = () -> testHasSystemBatch();
         runnables.add(runnable2);
+        Runnable runnable3 = () -> testHasInputOnly();
+        runnables.add(runnable3);
+
         ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
         workers.shutdownNow();
     }
@@ -47,6 +50,30 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
         SparkJobResult result = runSparkJob(UpsertJob.class, config, input,
                 String.format("/tmp/%s/%s/HasSystemBatch", leStack, this.getClass().getSimpleName()));
         verify(result, Collections.singletonList(this::verifyHasSystemBatch));
+    }
+
+    private void testHasInputOnly() {
+        List<String> input = uploadHasInputOnly();
+        UpsertConfig config = getHasInputOnlyConfig();
+
+        SparkJobResult result = runSparkJob(UpsertJob.class, config, input,
+                String.format("/tmp/%s/%s/HasInputOnly", leStack, this.getClass().getSimpleName()));
+        verify(result, Collections.singletonList(this::verifyHasInputOnly));
+    }
+
+    private UpsertConfig getHasInputOnlyConfig() {
+        UpsertConfig config = UpsertConfig.joinBy("Id");
+        config.setInputSystemBatch(true);
+        config.setBatchSystemName(null);
+        return config;
+    }
+
+    private List<String> uploadHasInputOnly() {
+        List<String> input = new ArrayList<>();
+        List<Pair<String, Class<?>>> fields = getInput2Fields();
+        Object[][] data = getInput2Data();
+        input.add(uploadHdfsDataUnit(data, fields));
+        return input;
     }
 
     private List<String> uploadDataHasNoSystemBatch() {
@@ -100,8 +127,8 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
 
     private UpsertConfig getHasNoSystemBatchConfig() {
         UpsertConfig config = UpsertConfig.joinBy("Id");
-        config.setSystemBatch(false);
-        config.setSystems(Arrays.asList("default", "system1", "system2"));
+        config.setInputSystemBatch(true);
+        config.setBatchSystemName("default");
         return config;
     }
 
@@ -191,8 +218,8 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
 
     private UpsertConfig getHasSystemBatchConfig() {
         UpsertConfig config = UpsertConfig.joinBy("Id");
-        config.setSystemBatch(true);
-        config.setSystems(Arrays.asList("system1", "system1", "system2"));
+        config.setInputSystemBatch(true);
+        config.setBatchSystemName(null);
         return config;
     }
 
@@ -278,6 +305,54 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
                 break;
             case 5:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
+                assertNulls(record, system1Attr1, system1Attr2, system1Attr3);
+
+                Assert.assertEquals(system2Attr1, "25", record.toString());
+                Assert.assertEquals(system2Attr2, Long.valueOf(-5), record.toString());
+                Assert.assertEquals(system2Attr3, Boolean.FALSE, record.toString());
+
+                break;
+            default:
+                Assert.fail("Should not see a record with id " + id + ": " + record.toString());
+            }
+        });
+
+        return true;
+    }
+
+    private Boolean verifyHasInputOnly(HdfsDataUnit tgt) {
+        verifyAndReadTarget(tgt).forEachRemaining(record -> {
+            int id = (int) record.get("Id");
+            String prefix = "system1__";
+            String system1Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
+            Long system1Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
+            Boolean system1Attr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
+            prefix = "system2__";
+            String system2Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
+            Long system2Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
+            Boolean system2Attr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
+            switch (id) {
+            case 2:
+                Assert.assertEquals(system1Attr1, "22", record.toString());
+                Assert.assertNull(system1Attr2, record.toString());
+                Assert.assertEquals(system1Attr3, Boolean.TRUE, record.toString());
+
+                Assert.assertEquals(system2Attr1, "24", record.toString());
+                Assert.assertNull(system2Attr2, record.toString());
+                Assert.assertNull(system2Attr3, record.toString());
+
+                break;
+            case 3:
+                Assert.assertEquals(system1Attr1, "23", record.toString());
+                Assert.assertEquals(system1Attr2, Long.valueOf(-3), record.toString());
+                Assert.assertEquals(system1Attr3, Boolean.FALSE, record.toString());
+
+                Assert.assertNull(system2Attr1, record.toString());
+                Assert.assertNull(system2Attr2, record.toString());
+                Assert.assertNull(system2Attr3, record.toString());
+
+                break;
+            case 5:
                 assertNulls(record, system1Attr1, system1Attr2, system1Attr3);
 
                 Assert.assertEquals(system2Attr1, "25", record.toString());

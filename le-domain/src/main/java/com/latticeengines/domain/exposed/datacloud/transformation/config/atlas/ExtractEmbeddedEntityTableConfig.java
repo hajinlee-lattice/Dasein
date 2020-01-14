@@ -18,8 +18,11 @@ public class ExtractEmbeddedEntityTableConfig extends TransformerConfig {
     @JsonProperty("FilterByEntity")
     private boolean filterByEntity;
 
-    @JsonProperty("SysmteIdFields")
+    @JsonProperty("SystemIdFields")
     private List<String> systemIdFlds;
+
+    @JsonProperty("System")
+    private String system;
 
     // EntityId field name in embedded entity table (EntityId field name in
     // EntityIds table is fixed as "EntityId")
@@ -48,6 +51,14 @@ public class ExtractEmbeddedEntityTableConfig extends TransformerConfig {
 
     public void setSystemIdFlds(List<String> systemIdFlds) {
         this.systemIdFlds = systemIdFlds;
+    }
+
+    public String getSystem() {
+        return system;
+    }
+
+    public void setSystem(String system) {
+        this.system = system;
     }
 
     public String getEntityIdFld() {

@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
@@ -33,6 +34,9 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
 
         Runnable runnable3 = () -> testHasSystemBatchWithoutPrefix();
         runnables.add(runnable3);
+
+        Runnable runnable4 = () -> testHasSystemBatchPrimarySecondary();
+        runnables.add(runnable4);
 
         ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
         workers.shutdownNow();
@@ -62,6 +66,14 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         verify(result, Collections.singletonList(this::verifySystemBatchWithoutPrefix));
     }
 
+    private void testHasSystemBatchPrimarySecondary() {
+        List<String> input = uploadData();
+        MergeSystemBatchConfig config = getConfigPrimarySecondary();
+        SparkJobResult result = runSparkJob(MergeSystemBatchJob.class, config, input,
+                String.format("/tmp/%s/%s/systemBatchPrimarySecondary", leStack, this.getClass().getSimpleName()));
+        verify(result, Collections.singletonList(this::verifySystemBatchPrimarySecondary));
+    }
+
     private List<String> uploadData() {
         List<String> input = new ArrayList<>();
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
@@ -69,9 +81,9 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of("system1__Attr1", String.class), //
                 Pair.of("system2__Attr1", String.class), //
                 Pair.of("system2__Attr2", String.class), //
+                Pair.of("system2__" + InterfaceName.CustomerAccountId.name(), String.class), //
                 Pair.of("system3__Attr1", String.class), //
-                Pair.of("system3__Attr2", String.class), //
-                Pair.of("system3__Attr3", String.class) //
+                Pair.of("system3__Attr2", String.class) //
         );
         Object[][] data = getInput1Data();
         input.add(uploadHdfsDataUnit(data, fields));
@@ -81,8 +93,8 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
 
     private Object[][] getInput1Data() {
         Object[][] data = new Object[][] { //
-                { 1, "1_1", "2_1", "2_2", "3_1", "3_2", "3_3" }, //
-                { 2, "1_1b", "2_1b", "2_2b", "3_1b", null, "3_3b" } //
+                { 1, "1_1", "2_1", "2_2", "2_3", "3_1", "3_2" }, //
+                { 2, "1_1b", "2_1b", "2_2b", "2_3b", "3_1b", null } //
         };
         return data;
     }
@@ -105,18 +117,22 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
     private Boolean verifySingleSystemBatch(HdfsDataUnit tgt) {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            Assert.assertEquals(record.getSchema().getFields().size(), 3, record.toString());
+            Assert.assertEquals(record.getSchema().getFields().size(), 4, record.toString());
             int id = (int) record.get("Id");
             String attr1 = record.get("Attr1") == null ? null : record.get("Attr1").toString();
             String attr2 = record.get("Attr2") == null ? null : record.get("Attr2").toString();
+            String attr3 = record.get(InterfaceName.CustomerAccountId.name()) == null ? null
+                    : record.get(InterfaceName.CustomerAccountId.name()).toString();
             switch (id) {
             case 1:
                 Assert.assertEquals(attr1, "2_1", record.toString());
                 Assert.assertEquals(attr2, "2_2", record.toString());
+                Assert.assertEquals(attr3, "2_3", record.toString());
                 break;
             case 2:
                 Assert.assertEquals(attr1, "2_1b", record.toString());
                 Assert.assertEquals(attr2, "2_2b", record.toString());
+                Assert.assertEquals(attr3, "2_3b", record.toString());
                 break;
             default:
                 Assert.fail("Should not see a record with id " + id + ": " + record.toString());
@@ -130,24 +146,28 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
     private Boolean verifySystemBatchForKeepPrefix(HdfsDataUnit tgt) {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            Assert.assertEquals(record.getSchema().getFields().size(), 4, record.toString());
+            Assert.assertEquals(record.getSchema().getFields().size(), 5, record.toString());
             int id = (int) record.get("Id");
             String prefix = "system1__";
             String system1Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
             prefix = "system2__";
             String system2Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
             String system2Attr2 = record.get(prefix + "Attr2") == null ? null : record.get(prefix + "Attr2").toString();
+            String system2attr3 = record.get(prefix + InterfaceName.CustomerAccountId.name()) == null ? null
+                    : record.get(prefix + InterfaceName.CustomerAccountId.name()).toString();
             switch (id) {
             case 1:
                 Assert.assertEquals(system1Attr1, "1_1", record.toString());
                 Assert.assertEquals(system2Attr1, "2_1", record.toString());
                 Assert.assertEquals(system2Attr2, "2_2", record.toString());
+                Assert.assertEquals(system2attr3, "2_3", record.toString());
 
                 break;
             case 2:
                 Assert.assertEquals(system1Attr1, "1_1b", record.toString());
                 Assert.assertEquals(system2Attr1, "2_1b", record.toString());
                 Assert.assertEquals(system2Attr2, "2_2b", record.toString());
+                Assert.assertEquals(system2attr3, "2_3b", record.toString());
 
                 break;
             default:
@@ -168,6 +188,14 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         return config;
     }
 
+    private MergeSystemBatchConfig getConfigPrimarySecondary() {
+        MergeSystemBatchConfig config = new MergeSystemBatchConfig();
+        config.setJoinKey("Id");
+        config.setKeepPrefix(false);
+        config.setNotOverwriteByNull(true);
+        return config;
+    }
+
     private Boolean verifySystemBatchWithoutPrefix(HdfsDataUnit tgt) {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
@@ -175,17 +203,47 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
             int id = (int) record.get("Id");
             String attr1 = record.get("Attr1") == null ? null : record.get("Attr1").toString();
             String attr2 = record.get("Attr2") == null ? null : record.get("Attr2").toString();
-            String attr3 = record.get("Attr3") == null ? null : record.get("Attr3").toString();
+            String attr3 = record.get(InterfaceName.CustomerAccountId.name()) == null ? null
+                    : record.get(InterfaceName.CustomerAccountId.name()).toString();
             switch (id) {
             case 1:
                 Assert.assertEquals(attr1, "3_1", record.toString());
                 Assert.assertEquals(attr2, "3_2", record.toString());
-                Assert.assertEquals(attr3, "3_3", record.toString());
+                Assert.assertEquals(attr3, "2_3", record.toString());
                 break;
             case 2:
                 Assert.assertEquals(attr1, "3_1b", record.toString());
                 Assert.assertEquals(attr2, "2_2b", record.toString());
-                Assert.assertEquals(attr3, "3_3b", record.toString());
+                Assert.assertEquals(attr3, "2_3b", record.toString());
+                break;
+            default:
+                Assert.fail("Should not see a record with id " + id + ": " + record.toString());
+            }
+            count.addAndGet(1);
+        });
+        Assert.assertEquals(count.get(), 2L);
+        return true;
+    }
+
+    private Boolean verifySystemBatchPrimarySecondary(HdfsDataUnit tgt) {
+        final AtomicLong count = new AtomicLong();
+        verifyAndReadTarget(tgt).forEachRemaining(record -> {
+            Assert.assertEquals(record.getSchema().getFields().size(), 4, record.toString());
+            int id = (int) record.get("Id");
+            String attr1 = record.get("Attr1") == null ? null : record.get("Attr1").toString();
+            String attr2 = record.get("Attr2") == null ? null : record.get("Attr2").toString();
+            String attr3 = record.get(InterfaceName.CustomerAccountId.name()) == null ? null
+                    : record.get(InterfaceName.CustomerAccountId.name()).toString();
+            switch (id) {
+            case 1:
+                Assert.assertEquals(attr1, "2_1", record.toString());
+                Assert.assertEquals(attr2, "2_2", record.toString());
+                Assert.assertEquals(attr3, "2_3", record.toString());
+                break;
+            case 2:
+                Assert.assertEquals(attr1, "2_1b", record.toString());
+                Assert.assertEquals(attr2, "2_2b", record.toString());
+                Assert.assertEquals(attr3, "2_3b", record.toString());
                 break;
             default:
                 Assert.fail("Should not see a record with id " + id + ": " + record.toString());

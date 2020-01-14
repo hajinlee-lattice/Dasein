@@ -21,6 +21,8 @@ public class ImportActionConfiguration extends ActionConfiguration {
     private Long importCount;
     @JsonProperty("registered_tables")
     private List<String> registeredTables;
+    @JsonProperty("table_systems")
+    private List<String> tableSystems;
     @JsonProperty("mock_completed")
     private Boolean mockCompleted;
 
@@ -70,6 +72,14 @@ public class ImportActionConfiguration extends ActionConfiguration {
 
     public void setRegisteredTables(List<String> registeredTables) {
         this.registeredTables = registeredTables;
+    }
+
+    public List<String> getTableSystems() {
+        return tableSystems;
+    }
+
+    public void setTableSystems(List<String> tableSystems) {
+        this.tableSystems = tableSystems;
     }
 
     public Boolean getMockCompleted() {
