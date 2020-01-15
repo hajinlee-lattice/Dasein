@@ -60,8 +60,8 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
 
     private static final String POD_ID = IngestionResourceDeploymentTestNG.class.getSimpleName();
     private static final String DNB_INGESTION = "DnBCacheSeedTest";
-    private static final String DNB_VERSION = "2016-08-01_00-00-00_UTC";
-    private static final String DNB_FILE = "LE_SEED_OUTPUT_2016_08_003.OUT.gz";
+    private static final String DNB_VERSION = "2019-05-01_00-00-00_UTC";
+    private static final String DNB_FILE = "LE_SEED_OUTPUT_2019_05_001.OUT.gz";
     private static final String ORB_INGESTION = "OrbTest";
     private static final String BOMBORA_INGESTION = "BomboraTest";
     private static final String BOMBORA_FILE_VERSION1 = "20190714";

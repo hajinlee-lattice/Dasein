@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-cbor</artifactId>
-            <version>${jackson.dataformat.version}</version>
+            <version>${jackson.fasterxml.version}</version>
         </dependency>
 
         <!-- LE dependencies -->
