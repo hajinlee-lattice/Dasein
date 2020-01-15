@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -289,77 +288,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         createOrUpdate(aiModel, ratingEngineId);
         log.info(String.format("Modeling Job status updated for AIModel:%s, RatingEngine:%s to %s", aiModelId,
                 ratingEngineId, newStatus.name()));
-    }
-
-    @Override
-    public Map<String, List<ColumnMetadata>> getIterationAttributes(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores) {
-        if (!aiModel.getModelingJobStatus().isTerminated()) {
-            throw new LedpException(LedpCode.LEDP_40034,
-                    new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
-        }
-        if (aiModel.getModelingJobStatus() != JobStatus.COMPLETED || StringUtils.isEmpty(aiModel.getModelSummaryId())) {
-            throw new LedpException(LedpCode.LEDP_40035,
-                    new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
-        }
-        ModelSummary modelSummary = modelSummaryProxy.getByModelId(aiModel.getModelSummaryId());
-        if (modelSummary == null) {
-            throw new LedpException(LedpCode.LEDP_40036,
-                    new String[] { "ModelSummary", aiModel.getId(), ratingEngine.getId(), customerSpace });
-        }
-        String tableName = modelSummary.getEventTableName();
-        if (tableName == null) {
-            throw new LedpException(LedpCode.LEDP_40036,
-                    new String[] { "Event table name", aiModel.getId(), ratingEngine.getId(), customerSpace });
-        }
-
-        Table table = metadataProxy.getTable(customerSpace, tableName);
-        if (table == null) {
-            throw new LedpException(LedpCode.LEDP_40036,
-                    new String[] { "Event table metadata", aiModel.getId(), ratingEngine.getId(), customerSpace });
-        }
-
-        Set<Category> selectedCategories = CollectionUtils.isEmpty(dataStores)
-                || ratingEngine.getType() != RatingEngineType.CUSTOM_EVENT
-                        ? new HashSet<>(Arrays.asList(Category.values()))
-                        : CustomEventModelingDataStoreUtil.getCategoriesByDataStores(dataStores);
-
-        Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
-                modelSummary);
-
-        Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy.getMetadata(MetadataStoreName.Table,
-                CustomerSpace.shortenCustomerSpace(customerSpace), table.getName()).collectMap(this::getKey).block();
-
-        Map<String, ColumnMetadata> modelingAttributes = servingStoreService
-                .getAllowedModelingAttrs(customerSpace, null, dataCollectionService.getActiveVersion(customerSpace),
-                        false)
-                .collectMap(this::getKey, cm -> iterationAttributes.getOrDefault(getKey(cm), cm),
-                        () -> iterationAttributes)
-                .block();
-
-        Map<String, List<ColumnMetadata>> toReturn = Flux.fromIterable(modelingAttributes.values())
-                .filter(cm -> selectedCategories.contains(cm.getCategory()))
-                .collect(HashMap<String, List<ColumnMetadata>>::new, (returnMap, cm) -> {
-                    if (importanceOrdering.containsKey(cm.getAttrName())) {
-                        // could move this into le-metadata as a decorator
-                        cm.setImportanceOrdering(importanceOrdering.get(cm.getAttrName()));
-                        importanceOrdering.remove(cm.getAttrName());
-                    }
-                    if (!returnMap.containsKey(cm.getCategory().getName())) {
-                        returnMap.put(cm.getCategory().getName(), new ArrayList<>());
-                    }
-                    returnMap.get(cm.getCategory().getName()).add(cm);
-                }).block();
-
-        if (MapUtils.isNotEmpty(importanceOrdering)) {
-            log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
-        }
-
-        if (MapUtils.isNotEmpty(toReturn)) {
-            checkAndRemoveHiddenAttributes(toReturn);
-        }
-
-        return toReturn;
     }
 
     @Override

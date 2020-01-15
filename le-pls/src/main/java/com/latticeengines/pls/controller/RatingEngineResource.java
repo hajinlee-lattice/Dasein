@@ -209,8 +209,7 @@ public class RatingEngineResource {
                 LedpCode code = ((LedpException) ex).getCode();
                 throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, code);
             }
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex,
-                    LedpCode.LEDP_40041);
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
         }
         return res;
     }
@@ -327,17 +326,6 @@ public class RatingEngineResource {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
         }
         return res;
-    }
-
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/attributes", headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
-    @Deprecated
-    public Map<String, List<ColumnMetadata>> getIterationAttributes(@PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId, //
-            @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getIterationAttributes(tenant.getId(), ratingEngineId, ratingModelId, dataStores);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
