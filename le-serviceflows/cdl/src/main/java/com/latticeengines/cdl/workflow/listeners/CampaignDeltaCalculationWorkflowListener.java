@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -58,10 +57,6 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                     launchId = launch.getId();
                     log.warn(String.format("Created a new launch (%s) with failed state to log the failure event",
                             launchId));
-                }
-                PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, playId, channelId);
-                if (channel.getIsAlwaysOn()) {
-                    playProxy.setNextScheduledTimeForChannel(customerSpace, playId, channelId);
                 }
             }
         } catch (Exception e) {
