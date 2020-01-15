@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -99,6 +100,10 @@ public class SoftDeleteActivityStream extends BaseActivityStreamStep<ProcessActi
     protected PipelineTransformationRequest getConsolidateRequest() {
         if (configuration.isRematchMode()) {
             log.info("Activity Stream use replace mode. Skip soft delete!");
+            return null;
+        }
+        if (CollectionUtils.isEmpty(softDeleteActions)) {
+            log.info("No soft delete action detected, Skip soft delete!");
             return null;
         }
 
