@@ -534,7 +534,8 @@ public class RatingEngineResource {
             @PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId, //
             @RequestBody(required = false) List<ColumnMetadata> attributes, //
-            @RequestParam(value = "useremail", required = true) String userEmail) {
+            @RequestParam(value = "useremail") String userEmail,
+            @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
         RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
 

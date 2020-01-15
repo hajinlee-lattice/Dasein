@@ -700,8 +700,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
-            List<ColumnMetadata> userRefinedColumnMetadata, String userEmail) {
-        validateForModeling(customerSpace, ratingEngine, aiModel);
+            List<ColumnMetadata> userRefinedColumnMetadata, String userEmail, boolean skipValidation) {
+        if (skipValidation) {
+            validateForModeling(customerSpace, ratingEngine, aiModel);
+        }
         ApplicationId jobId = aiModel.getModelingYarnJobId();
         if (jobId != null) {
             return jobId.toString();
