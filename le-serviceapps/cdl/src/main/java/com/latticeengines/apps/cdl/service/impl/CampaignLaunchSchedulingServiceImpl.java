@@ -136,7 +136,7 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
                 context.setAttribute(FAILURE_DESCRIPTION_KEY, failureDescription);
                 context.setAttribute(FAILURE_MESSAGE_KEY, e.getMessage());
                 context.setAttribute(FAILURE_STACKTRACE_KEY, e.getStackTrace());
-                return false;
+                throw e;
             } finally {
                 String channelScheduleUrl = constructUrl(setChannelScheduleUrlPrefix,
                         CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
@@ -145,7 +145,7 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
                         + channel.getId());
                 patch("Setting Next Scheduled Date", channelScheduleUrl, null, PlayLaunchChannel.class);
             }
-        });
+        }, context -> false);
     }
 
     private boolean queueNewFullCampaignLaunch(PlayLaunchChannel channel) {
@@ -175,7 +175,7 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
                 context.setAttribute(FAILURE_DESCRIPTION_KEY, failureDescription);
                 context.setAttribute(FAILURE_MESSAGE_KEY, e.getMessage());
                 context.setAttribute(FAILURE_STACKTRACE_KEY, e.getStackTrace());
-                return false;
+                throw e;
             } finally {
                 String channelScheduleUrl = constructUrl(setChannelScheduleUrlPrefix,
                         CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
@@ -184,12 +184,13 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
                         + channel.getId());
                 patch("Setting Next Scheduled Date", channelScheduleUrl, null, PlayLaunchChannel.class);
             }
-        });
+        }, context -> false);
     }
 
     private RetryTemplate getRetryTemplate() {
         RetryTemplate template = RetryUtils.getExponentialBackoffRetryTemplate(3, 2000L, 2.0D, null);
         template.registerListener(getLaunchSchedulingFailureListener());
+        template.setThrowLastExceptionOnExhausted(false);
         return template;
     }
 
