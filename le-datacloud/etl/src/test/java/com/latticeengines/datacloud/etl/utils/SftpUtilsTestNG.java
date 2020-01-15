@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.ingestion.VersionCheckStrateg
  * 1. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190714/AllDomainsAllTopicsZips_20190714_1.csv.gz
  * 2. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_1.csv.gz
  * 3. ingest_test/SftpUtilsTestNG/Bombora/bombora-clientfiles-adat_zip/20190721/AllDomainsAllTopicsZips_20190721_2.csv.gz
- * 4. ingest_test/SftpUtilsTestNG/DnB/gets/LE_SEED_OUTPUT_2016_09_001.OUT.gz
+ * 4. ingest_test/SftpUtilsTestNG/DnB/gets/LE_SEED_OUTPUT_2019_05_001.OUT.gz
  *
  * The files can be found in s3://latticeengines-test-artifacts/le-datacloud/etl-ingestion/1/
  */
@@ -49,7 +49,7 @@ public class SftpUtilsTestNG extends DataCloudEtlFunctionalTestNGBase {
     // Expected returned DnB files based on files on SFTP and prepared SFTP
     // config and calendar
     private static final List<String> DNB_FILES = Arrays.asList( //
-            "LE_SEED_OUTPUT_2016_09_001.OUT.gz" //
+            "LE_SEED_OUTPUT_2019_05_001.OUT.gz" //
     );
 
     @Test(groups = "functional")
