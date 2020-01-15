@@ -21,10 +21,6 @@ public interface AIModelService extends RatingModelService<AIModel> {
 
     void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
 
-    Map<String, List<ColumnMetadata>> getIterationAttributes(String customerSpace,
-            RatingEngine ratingEngine, AIModel aiModel,
-            List<CustomEventModelingConfig.DataStore> dataStores);
-
     AIModel createNewIteration(AIModel aiModel, RatingEngine ratingEngine);
 
     List<ColumnMetadata> getIterationMetadata(String customerSpace, RatingEngine ratingEngine,
