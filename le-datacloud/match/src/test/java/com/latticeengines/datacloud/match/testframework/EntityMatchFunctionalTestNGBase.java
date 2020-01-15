@@ -15,6 +15,7 @@ import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.testng.Assert;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
@@ -187,7 +188,9 @@ public abstract class EntityMatchFunctionalTestNGBase extends DataCloudMatchFunc
         input.setSkipKeyResolution(true);
         input.setUseRemoteDnB(true);
         input.setUseDnBCache(true);
-        input.setServingVersion(servingVersion);
+        if (servingVersion != null) {
+            input.setEntityMatchVersionMap(ImmutableMap.of(EntityMatchEnvironment.SERVING, servingVersion));
+        }
         input.setRootOperationUid(UUID.randomUUID().toString());
         // Enable debug logs for Match Traveler.
         input.setLogLevelEnum(Level.DEBUG);

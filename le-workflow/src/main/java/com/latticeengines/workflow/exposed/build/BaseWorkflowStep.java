@@ -264,9 +264,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     public static final String REMATCH_TABLE_NAME = "REMATCH_TABLE_NAME";
     public static final String DELETED_TABLE_NAME = "DELETED_TABLE_NAME";
-    public static final String ENTITY_MATCH_SERVING_VERSION = "ENTITY_MATCH_SERVING_VERSION";
     public static final String ENTITY_MATCH_ENABLED = "ENTITY_MATCH_ENABLED";
     public static final String FULL_REMATCH_PA = "FULL_REMATCH_PA";
+    /*-
+     * in rematch, staging version should persist across PAs, serving should not
+     */
+    public static final String ENTITY_MATCH_REMATCH_STAGING_VERSION = "ENTITY_MATCH_REMATCH_STAGING_VERSION";
+    public static final String ENTITY_MATCH_REMATCH_SERVING_VERSION = "ENTITY_MATCH_REMATCH_SERVING_VERSION";
 
     public static final String TRACING_CONTEXT = "TRACING_CONTEXT";
 
@@ -315,6 +319,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_COMPLETED, //
             NEW_ENTITY_MATCH_ENVS, //
             FULL_REMATCH_PA, //
+            ENTITY_MATCH_REMATCH_STAGING_VERSION, //
             NEW_RECORD_CUT_OFF_TIME, //
             PROCESS_ACCOUNT_STATS_MERGE);
 

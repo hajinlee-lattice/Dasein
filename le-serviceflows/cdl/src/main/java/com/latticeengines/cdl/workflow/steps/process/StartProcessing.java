@@ -155,7 +155,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace.toString(),
                 EntityMatchEnvironment.SERVING, false);
         log.info("entityMatchVersion is {}.", entityMatchVersion);
-        putObjectInContext(ENTITY_MATCH_SERVING_VERSION, entityMatchVersion);
+        putObjectInContext(ENTITY_MATCH_REMATCH_SERVING_VERSION, entityMatchVersion.getNextVersion());
 
         putObjectInContext(SKIP_PUBLISH_PA_TO_S3, configuration.isSkipPublishToS3());
 

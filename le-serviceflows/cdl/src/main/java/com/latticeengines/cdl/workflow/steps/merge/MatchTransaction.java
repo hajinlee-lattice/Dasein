@@ -115,7 +115,7 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         boolean hasConvertBatchStoreTableName = StringUtils.isNotEmpty(convertBatchStoreTableName);
         if (hasConvertBatchStoreTableName) {
             columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
-            setServingVersionForEntityMatchTenant(matchInput);
+            setRematchVersions(matchInput);
         }
         log.info("matchInput is {}.", matchInput);
         if (configuration.isEntityMatchGAOnly()) {
