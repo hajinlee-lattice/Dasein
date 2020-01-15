@@ -39,7 +39,7 @@ import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 public class ScoringApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringApiExceptionHandler.class);
-    private static final String SPLUNK_URL = "http://splunk.lattice.local:8000/en-US/app/search/search?q=search%20index%3Dscoringapi%20%22";
+    private static final String SPLUNK_URL = "http://splunksearch.lattice.local:8000/en-US/app/search/search?q=search%20index%3Dscoringapi%20%22";
 
     @Autowired
     private AlertService alertService;
@@ -75,8 +75,8 @@ public class ScoringApiExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionHandlerErrors handleException(HttpMessageNotReadableException ex) {
-        ScoringApiException exception = new ScoringApiException(
-                LedpCode.LEDP_31111,  new String[] { "message_not_readable" }, ex.getMessage());
+        ScoringApiException exception = new ScoringApiException(LedpCode.LEDP_31111,
+                new String[] { "message_not_readable" }, ex.getMessage());
         exception.setStackTrace(ex.getStackTrace());
         return handleScoringApiException(exception);
     }
@@ -85,8 +85,8 @@ public class ScoringApiExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
     public ExceptionHandlerErrors handleException(RateLimitException ex) {
-        ScoringApiException exception = new ScoringApiException(
-                LedpCode.LEDP_31111, new String[] { "too_many_requests" }, ex.getMessage());
+        ScoringApiException exception = new ScoringApiException(LedpCode.LEDP_31111,
+                new String[] { "too_many_requests" }, ex.getMessage());
         exception.setStackTrace(ex.getStackTrace());
         return handleScoringApiException(exception);
     }
@@ -102,8 +102,8 @@ public class ScoringApiExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionHandlerErrors handleException(Exception ex) {
-        ScoringApiException exception = new ScoringApiException(
-                LedpCode.LEDP_31111, new String[] { "general_error" }, ex.getMessage());
+        ScoringApiException exception = new ScoringApiException(LedpCode.LEDP_31111, new String[] { "general_error" },
+                ex.getMessage());
         exception.setStackTrace(ex.getStackTrace());
         return handleScoringApiException(exception);
     }
@@ -112,8 +112,8 @@ public class ScoringApiExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionHandlerErrors handleException(HttpMessageNotWritableException ex) {
-        ScoringApiException exception = new ScoringApiException(
-                LedpCode.LEDP_31111, new String[] { "message_not_writable" }, ex.getMessage());
+        ScoringApiException exception = new ScoringApiException(LedpCode.LEDP_31111,
+                new String[] { "message_not_writable" }, ex.getMessage());
         exception.setStackTrace(ex.getStackTrace());
         return handleScoringApiException(exception);
     }
@@ -181,8 +181,7 @@ public class ScoringApiExceptionHandler {
         if (fireAlert) {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
                     .getRequestAttributes();
-            String identifier = String
-                    .valueOf(attributes.getRequest().getAttribute(RequestIdUtils.IDENTIFIER_KEY));
+            String identifier = String.valueOf(attributes.getRequest().getAttribute(RequestIdUtils.IDENTIFIER_KEY));
 
             List<BasicNameValuePair> alertDetails = new ArrayList<>();
             alertDetails.add(new BasicNameValuePair(RequestIdUtils.REQUEST_ID, identifier));
