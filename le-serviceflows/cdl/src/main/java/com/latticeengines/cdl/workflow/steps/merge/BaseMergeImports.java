@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow.steps.merge;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,14 +30,16 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
-import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig.ConsolidateDataTxmfrConfigBuilder;
@@ -320,11 +324,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return matchInput;
     }
 
-    void setServingVersionForEntityMatchTenant(MatchInput matchInput) {
+    void setRematchVersions(MatchInput matchInput) {
         if (Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
-            EntityMatchVersion entityMatchVersion = getObjectFromContext(ENTITY_MATCH_SERVING_VERSION,
-                    EntityMatchVersion.class);
-            matchInput.setServingVersion(entityMatchVersion.getNextVersion());
+            Integer servingVersion = getObjectFromContext(ENTITY_MATCH_REMATCH_SERVING_VERSION, Integer.class);
+            Integer stagingVersion = getObjectFromContext(ENTITY_MATCH_REMATCH_STAGING_VERSION, Integer.class);
+            matchInput.setEntityMatchVersionMap(ImmutableMap.of(STAGING, stagingVersion, SERVING, servingVersion));
+            log.info("Setting entity match versions for rematch. versions = {}", matchInput.getEntityMatchVersionMap());
         }
     }
 
@@ -467,11 +472,15 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     void bumpEntityMatchStagingVersion() {
         List<EntityMatchEnvironment> updatedEnvs = //
                 getListObjectFromContext(NEW_ENTITY_MATCH_ENVS, EntityMatchEnvironment.class);
-        if (CollectionUtils.isEmpty(updatedEnvs) || !updatedEnvs.contains(EntityMatchEnvironment.STAGING)) {
+        if (CollectionUtils.isEmpty(updatedEnvs) || !updatedEnvs.contains(STAGING)) {
             BumpVersionRequest request = new BumpVersionRequest();
             request.setTenant(new Tenant(customerSpace.toString()));
-            List<EntityMatchEnvironment> environments = Collections.singletonList(EntityMatchEnvironment.STAGING);
+            List<EntityMatchEnvironment> environments = Collections.singletonList(STAGING);
             request.setEnvironments(environments);
+
+            // bump up and reserve version for rematch
+            reserveStagingVersionForRematch(request);
+
             log.info("Bump up entity match version for environments = {}", environments);
             BumpVersionResponse response = matchProxy.bumpVersion(request);
             log.info("Current entity match versions = {}", response.getVersions());
@@ -480,6 +489,23 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             }
             updatedEnvs.addAll(environments);
             putObjectInContext(NEW_ENTITY_MATCH_ENVS, updatedEnvs);
+        }
+    }
+
+    void reserveStagingVersionForRematch(@NotNull BumpVersionRequest request) {
+        if (Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
+            Preconditions.checkArgument( //
+                    Collections.singletonList(STAGING).equals(request.getEnvironments()), //
+                    String.format(
+                            "Entity match environment list in bump version request should only contains staging. Envs = %s",
+                            request.getEnvironments()));
+            log.info("Bump up staging version and reserve for Rematch mode");
+            BumpVersionResponse response = matchProxy.bumpVersion(request);
+            Preconditions.checkNotNull(response);
+            Preconditions.checkNotNull(response.getVersions());
+            Preconditions.checkNotNull(response.getVersions().get(STAGING));
+            log.info("Reserved staging version for Rematch mode = {}", response.getVersions().get(STAGING));
+            putObjectInContext(ENTITY_MATCH_REMATCH_STAGING_VERSION, response.getVersions().get(STAGING));
         }
     }
 

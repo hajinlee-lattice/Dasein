@@ -12,11 +12,13 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -104,7 +106,9 @@ public class SpecificVersionMatchDeploymentTestNG extends AdvancedMatchDeploymen
         input.setAllocateId(allocateId);
         input.setOutputNewEntities(true);
         input.setEntityKeyMaps(getKeyMap());
-        input.setServingVersion(servingVersion);
+        if (servingVersion != null) {
+            input.setEntityMatchVersionMap(ImmutableMap.of(EntityMatchEnvironment.SERVING, servingVersion));
+        }
         input.setInputBuffer(testDataBuffer);
         input.setUseDnBCache(true);
         input.setUseRemoteDnB(true);

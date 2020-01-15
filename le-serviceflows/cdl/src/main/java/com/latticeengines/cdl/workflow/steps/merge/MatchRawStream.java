@@ -194,9 +194,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
         String matchConfig;
         MatchInput baseMatchInput = getBaseMatchInput();
         if (isRematchMode) {
-            setServingVersionForEntityMatchTenant(baseMatchInput);
-            log.info("Specifying serving version for rematch mode, servingVersion = {}",
-                    baseMatchInput.getServingVersion());
+            setRematchVersions(baseMatchInput);
         }
         // match entity TODO maybe support entity match GA?
         if (stream.getMatchEntities().contains(Contact.name())) {

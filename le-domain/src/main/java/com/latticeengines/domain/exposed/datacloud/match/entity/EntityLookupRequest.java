@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.datacloud.match.entity;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -12,13 +14,14 @@ public class EntityLookupRequest {
      */
     private final Tenant tenant;
     private final String entity;
-    private final Integer servingVersion;
+    private final Map<EntityMatchEnvironment, Integer> versionMap;
     private final MatchKeyTuple tuple;
 
-    public EntityLookupRequest(Tenant tenant, String entity, Integer servingVersion, MatchKeyTuple tuple) {
+    public EntityLookupRequest(Tenant tenant, String entity, Map<EntityMatchEnvironment, Integer> versionMap,
+            MatchKeyTuple tuple) {
         this.tenant = tenant;
         this.entity = entity;
-        this.servingVersion = servingVersion;
+        this.versionMap = versionMap;
         this.tuple = tuple;
     }
 
@@ -30,8 +33,8 @@ public class EntityLookupRequest {
         return entity;
     }
 
-    public Integer getServingVersion() {
-        return servingVersion;
+    public Map<EntityMatchEnvironment, Integer> getVersionMap() {
+        return versionMap;
     }
 
     public MatchKeyTuple getTuple() {

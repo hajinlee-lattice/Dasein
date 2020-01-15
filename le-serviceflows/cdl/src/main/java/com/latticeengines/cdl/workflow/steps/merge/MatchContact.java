@@ -152,7 +152,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         MatchInput matchInput = getBaseMatchInput();
         if (hasConvertBatchStoreTableName) {
             columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
-            setServingVersionForEntityMatchTenant(matchInput);
+            setRematchVersions(matchInput);
         }
         log.info("Ignore domain match keys for account in contact = {}", ignoreDomainMatchKeyInContact);
         if (configuration.isEntityMatchGAOnly()) {

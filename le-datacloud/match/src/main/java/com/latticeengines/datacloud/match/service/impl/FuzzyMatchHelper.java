@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -246,8 +244,7 @@ public class FuzzyMatchHelper implements DbHelper {
                 .collect(Collectors.toList());
         long startTime = System.currentTimeMillis();
         Tenant tenant = new Tenant(CustomerSpace.parse(context.getInput().getTenant().getId()).getTenantId());
-        Map<EntityMatchEnvironment, Integer> versionMap = context.getInput().getServingVersion() == null ? null
-                : Collections.singletonMap(SERVING, context.getInput().getServingVersion());
+        Map<EntityMatchEnvironment, Integer> versionMap = context.getInput().getEntityMatchVersionMap();
         List<EntityRawSeed> seeds = entityMatchInternalService.get(tenant, context.getInput().getTargetEntity(),
                 seedIds, versionMap);
         int unmatch = 0;

@@ -104,8 +104,9 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 // group by tenant ID, put all lookupRequests in this tenant into a list
                 .collect(groupingBy(pair -> {
                     String tenantId = pair.getValue().getTenant().getId();
-                    Integer servingVersion = pair.getValue().getServingVersion();
-                    return String.format("%s_%d", tenantId, servingVersion); // use both tenant & version as key
+                    // use both tenant & version info as key
+                    return String.format("%s_%s", tenantId,
+                            EntityMatchUtils.serialize(pair.getValue().getVersionMap()));
                 }, mapping(pair -> pair, toList())));
         params.values().forEach(this::handleRequestsForTenant);
     }
@@ -113,8 +114,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
     @Override
     protected EntityAssociationResponse lookupFromService(String lookupRequestId, DataSourceLookupRequest request) {
         EntityAssociationRequest associationReq = (EntityAssociationRequest) request.getInputData();
-        Map<EntityMatchEnvironment, Integer> versionMap = associationReq.getServingVersion() == null ? null
-                : Collections.singletonMap(EntityMatchEnvironment.SERVING, associationReq.getServingVersion());
+        Map<EntityMatchEnvironment, Integer> versionMap = associationReq.getVersionMap();
         associationReq = lookupNotMappedEntries(associationReq, versionMap);
         EntityRawSeed targetSeed = getOrAllocate(associationReq, pickTargetEntity(associationReq), versionMap);
         if (targetSeed == null) {
@@ -474,7 +474,7 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
                 }
             }).collect(toList());
             // copy request with new result
-            return new EntityAssociationRequest(request.getTenant(), request.getEntity(), request.getServingVersion(),
+            return new EntityAssociationRequest(request.getTenant(), request.getEntity(), request.getVersionMap(),
                     request.getPreferredEntityId(), newLookupResults, request.getExtraAttributes());
         } else {
             return request;
@@ -723,7 +723,6 @@ public class EntityAssociateServiceImpl extends DataSourceMicroBatchLookupServic
         }
 
         // TODO cache map reference for reuse
-        Integer servingVersion = pairs.get(0).getRight().getServingVersion();
-        return servingVersion == null ? null : Collections.singletonMap(EntityMatchEnvironment.SERVING, servingVersion);
+        return pairs.get(0).getRight().getVersionMap();
     }
 }

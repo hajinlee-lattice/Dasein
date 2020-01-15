@@ -2,6 +2,8 @@ package com.latticeengines.datacloud.match.util;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_PREFIX_SEED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
+import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
@@ -84,6 +86,17 @@ public class EntityMatchUtils {
             return String.format("{System=%s,ID=%s}", entry.getSerializedKeys(), entry.getSerializedValues());
         }
         return StringUtils.EMPTY;
+    }
+
+    /**
+     * Serialize version map, only consider supported environments
+     *
+     * @param versionMap
+     *            target version map, nullable
+     * @return serialized representation of given map
+     */
+    public static String serialize(Map<EntityMatchEnvironment, Integer> versionMap) {
+        return String.format("%d_%d", MapUtils.getObject(versionMap, STAGING), MapUtils.getObject(versionMap, SERVING));
     }
 
     /**
@@ -180,7 +193,7 @@ public class EntityMatchUtils {
      */
     public static boolean shouldSetTTL(EntityMatchEnvironment env) {
         // at the moment, only set TTL for staging environment
-        return env == EntityMatchEnvironment.STAGING;
+        return env == STAGING;
     }
 
     /**

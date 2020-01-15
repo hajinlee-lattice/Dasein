@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class EntityAssociationRequest {
     private final Tenant tenant;
     private final String entity;
-    private final Integer servingVersion;
+    private final Map<EntityMatchEnvironment, Integer> versionMap;
     private final String preferredEntityId; // preferred allocate ID for this request
     // user need to sort the lookup results based on the priority (DESC)
     // The following preconditions must be met, this makes implementation of association simpler
@@ -29,12 +29,14 @@ public class EntityAssociationRequest {
     private final List<Integer> dummyLookupResultIndices; // idx of artificially created lookup results
 
     public EntityAssociationRequest(
-            @NotNull Tenant tenant, @NotNull String entity, Integer servingVersion, String preferredEntityId,
+            @NotNull Tenant tenant, @NotNull String entity, Map<EntityMatchEnvironment, Integer> versionMap,
+            String preferredEntityId,
             @NotNull List<Pair<MatchKeyTuple, String>> lookupResults, Map<String, String> extraAttributes) {
-        this(tenant, entity, servingVersion, preferredEntityId, lookupResults, extraAttributes, null);
+        this(tenant, entity, versionMap, preferredEntityId, lookupResults, extraAttributes, null);
     }
 
-    public EntityAssociationRequest(@NotNull Tenant tenant, @NotNull String entity, Integer servingVersion,
+    public EntityAssociationRequest(@NotNull Tenant tenant, @NotNull String entity,
+            Map<EntityMatchEnvironment, Integer> versionMap,
             String preferredEntityId, @NotNull List<Pair<MatchKeyTuple, String>> lookupResults,
             Map<String, String> extraAttributes, List<Integer> dummyLookupResultIndices) {
         Preconditions.checkNotNull(tenant);
@@ -42,7 +44,7 @@ public class EntityAssociationRequest {
         Preconditions.checkNotNull(lookupResults);
         this.tenant = tenant;
         this.entity = entity;
-        this.servingVersion = servingVersion;
+        this.versionMap = versionMap;
         this.preferredEntityId = preferredEntityId;
         this.lookupResults = lookupResults;
         this.extraAttributes = extraAttributes == null ? Collections.emptyMap() : extraAttributes;
@@ -58,8 +60,8 @@ public class EntityAssociationRequest {
         return entity;
     }
 
-    public Integer getServingVersion() {
-        return servingVersion;
+    public Map<EntityMatchEnvironment, Integer> getVersionMap() {
+        return versionMap;
     }
 
     public String getPreferredEntityId() {
