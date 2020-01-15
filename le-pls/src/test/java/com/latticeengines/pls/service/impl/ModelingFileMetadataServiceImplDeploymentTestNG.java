@@ -254,7 +254,6 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         emailInAutoDetection.setFieldType(UserDefinedType.INTEGER);
         validateResponse = modelingFileMetadataService.validateFieldDefinitions(
                 defaultSystemName, systemType, systemObject, fileName, validateRequest);
-        System.out.println("test : " + JsonUtils.pprint(validateResponse));
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
                 FieldDefinitionSectionName.Contact_Fields.getName(), InterfaceName.Email.name(),
                 FieldValidationMessage.MessageLevel.WARNING, "auto-detected fieldType INTEGER based on " +
