@@ -27,7 +27,6 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
-import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
@@ -160,10 +159,9 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
                             context.getRetryCount() + 1));
                     log.warn("Previous failure:", context.getLastThrowable());
                 }
-                PlayLaunch launch = post("Kicking off Campaign Launch", url, null, PlayLaunch.class);
+                Long workflowPid = post("Kicking off Campaign Launch", url, null, Long.class);
                 log.info("Kicked off a Campaign Launch for campaignId " + channel.getPlay().getName() + ", Channel ID: "
-                        + channel.getId() + " Launch Id: " + launch.getLaunchId() + "  WorflowPid: "
-                        + launch.getLaunchWorkflowId());
+                        + channel.getId() + "  WorflowPid: " + workflowPid);
                 return true;
             } catch (Exception e) {
                 log.error("Failed to Kick off Campaign Launch for channel: " + channel.getId() + " \n", e);

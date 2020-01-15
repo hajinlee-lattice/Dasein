@@ -209,8 +209,7 @@ public class RatingEngineResource {
                 LedpCode code = ((LedpException) ex).getCode();
                 throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, code);
             }
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex,
-                    LedpCode.LEDP_40041);
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
         }
         return res;
     }
@@ -327,17 +326,6 @@ public class RatingEngineResource {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
         }
         return res;
-    }
-
-    @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/attributes", headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get Metadata for a given AIModel's iteration")
-    @Deprecated
-    public Map<String, List<ColumnMetadata>> getIterationAttributes(@PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId, //
-            @RequestParam(value = "data_stores", defaultValue = "", required = false) String dataStores) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getIterationAttributes(tenant.getId(), ratingEngineId, ratingModelId, dataStores);
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
@@ -495,12 +483,14 @@ public class RatingEngineResource {
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model")
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
-    public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestBody(required = false) List<ColumnMetadata> attributes) {
+    public String ratingEngineModel(@PathVariable String ratingEngineId, //
+            @PathVariable String ratingModelId, //
+            @RequestBody(required = false) List<ColumnMetadata> attributes, //
+            @RequestParam(value = "skip-validation", required = false, defaultValue = "false") boolean skipValidation) {
         try {
             Tenant tenant = MultiTenantContext.getTenant();
             return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId, attributes,
-                    MultiTenantContext.getEmailAddress());
+                    MultiTenantContext.getEmailAddress(), skipValidation);
         } catch (LedpException e) {
             throw e;
         } catch (Exception ex) {

@@ -496,19 +496,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public Map<String, List<ColumnMetadata>> getIterationAttributes(String customerSpace, String ratingEngineId,
-            String ratingModelId, List<CustomEventModelingConfig.DataStore> dataStores) {
-        log.info(String.format("Attempting to collate Metadata for Iteration %s of Model %s", ratingModelId,
-                ratingEngineId));
-        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
-        validateAIRatingEngine(ratingEngine);
-        AIModel aiModel = (AIModel) getRatingModel(ratingEngineId, ratingModelId);
-        AIModelService aiModelService = (AIModelService) getRatingModelService(ratingEngine.getType());
-
-        return aiModelService.getIterationAttributes(customerSpace, ratingEngine, aiModel, dataStores);
-    }
-
-    @Override
     public Map<String, StatsCube> getIterationMetadataCube(String customerSpace, String ratingEngineId,
             String ratingModelId, List<CustomEventModelingConfig.DataStore> dataStores) {
         log.info(String.format("Attempting to generate StasCube for Iteration %s of Model %s", ratingModelId,
@@ -700,8 +687,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
-            List<ColumnMetadata> userRefinedColumnMetadata, String userEmail) {
-        validateForModeling(customerSpace, ratingEngine, aiModel);
+            List<ColumnMetadata> userRefinedColumnMetadata, String userEmail, boolean skipValidation) {
+        if (skipValidation) {
+            validateForModeling(customerSpace, ratingEngine, aiModel);
+        }
         ApplicationId jobId = aiModel.getModelingYarnJobId();
         if (jobId != null) {
             return jobId.toString();

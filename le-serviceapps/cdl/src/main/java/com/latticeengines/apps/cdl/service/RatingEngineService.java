@@ -33,16 +33,14 @@ public interface RatingEngineService {
 
     List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status);
 
-    List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status,
-            boolean publishedRatingsOnly);
+    List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status, boolean publishedRatingsOnly);
 
     List<String> getAllRatingEngineIdsInSegment(String segmentName);
 
     List<String> getAllRatingEngineIdsInSegment(String segmentName, //
             boolean considerPublishedOnly);
 
-    RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate,
-            boolean populateActiveModel);
+    RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate, boolean populateActiveModel);
 
     RatingEngine getRatingEngineById(String id, boolean populateRefreshedDate);
 
@@ -66,35 +64,27 @@ public interface RatingEngineService {
 
     RatingModel getRatingModel(String ratingEngineId, String ratingModelId);
 
-    RatingModel updateRatingModel(String ratingEngineId, String ratingModelId,
-            RatingModel ratingModel);
+    RatingModel updateRatingModel(String ratingEngineId, String ratingModelId, RatingModel ratingModel);
 
-    Map<String, List<ColumnMetadata>> getIterationAttributes(String customerSpace,
-            String ratingEngineId, String ratingModelId,
+    List<ColumnMetadata> getIterationMetadata(String customerSpace, String ratingEngineId, String ratingModelId,
             List<CustomEventModelingConfig.DataStore> dataStores);
 
-    List<ColumnMetadata> getIterationMetadata(String customerSpace, String ratingEngineId,
-            String ratingModelId, List<CustomEventModelingConfig.DataStore> dataStores);
+    Map<String, StatsCube> getIterationMetadataCube(String customerSpace, String ratingEngineId, String ratingModelId,
+            List<CustomEventModelingConfig.DataStore> dataStores);
 
-    Map<String, StatsCube> getIterationMetadataCube(String customerSpace, String ratingEngineId,
-            String ratingModelId, List<CustomEventModelingConfig.DataStore> dataStores);
+    TopNTree getIterationMetadataTopN(String customerSpace, String ratingEngineId, String ratingModelId,
+            List<CustomEventModelingConfig.DataStore> dataStores);
 
-    TopNTree getIterationMetadataTopN(String customerSpace, String ratingEngineId,
-            String ratingModelId, List<CustomEventModelingConfig.DataStore> dataStores);
+    Map<String, List<String>> getRatingEngineDependencies(String customerSpace, String ratingEngineId);
 
-    Map<String, List<String>> getRatingEngineDependencies(String customerSpace,
-            String ratingEngineId);
+    EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
+            ModelingQueryType modelingQueryType, DataCollection.Version version);
 
-    EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine,
-            RatingModel ratingModel, ModelingQueryType modelingQueryType,
-            DataCollection.Version version);
-
-    Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine,
-            RatingModel ratingModel, ModelingQueryType modelingQueryType,
-            DataCollection.Version version);
+    Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
+            ModelingQueryType modelingQueryType, DataCollection.Version version);
 
     String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel,
-            List<ColumnMetadata> userEditedAttributes, String userEmail);
+            List<ColumnMetadata> userEditedAttributes, String userEmail, boolean skipValidation);
 
     List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId);
 
@@ -111,11 +101,9 @@ public interface RatingEngineService {
     void setScoringIteration(String customerSpace, String ratingEngineId, String ratingModelId,
             List<BucketMetadata> bucketMetadatas, String userEmail);
 
-    boolean validateForModeling(String customerSpace, RatingEngine ratingEngine,
-            AIModel ratingModel);
+    boolean validateForModeling(String customerSpace, RatingEngine ratingEngine, AIModel ratingModel);
 
-    List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(String customerSpace,
-            String ratingEngineId);
+    List<RatingModelWithPublishedHistoryDTO> getPublishedHistory(String customerSpace, String ratingEngineId);
 
     List<RatingModel> getAllRatingModels();
 
