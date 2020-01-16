@@ -1,6 +1,10 @@
 package com.latticeengines.spark.testframework;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,9 +23,12 @@ import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +41,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ParquetUtils;
@@ -316,11 +324,46 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         } catch (Exception e) {
             throw new RuntimeException("Failed to upload avro to hdfs.", e);
         }
+        putHdfsDataUnit(recordName, dirPath, DataUnit.DataFormat.AVRO);
+        return recordName;
+    }
+
+    private void copyCSVDataToHdfs(String dirPath, String fileName, String[] headers, Object[] values) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
+            try (OutputStream outputStream = fs.create(new Path(dirPath + File.separator + fileName))) {
+                try (CSVPrinter csvPrinter = new CSVPrinter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
+                        LECSVFormat.format.withHeader(headers))) {
+                    csvPrinter.printRecord(values);
+                }
+            }
+        }
+    }
+
+    private void putHdfsDataUnit(String recordName, String dirPath, DataUnit.DataFormat dataFormat) {
         HdfsDataUnit dataUnit = new HdfsDataUnit();
         dataUnit.setName(recordName);
         dataUnit.setPath(dirPath);
+        dataUnit.setDataFormat(dataFormat);
         inputUnits.put(recordName, dataUnit);
-        return recordName;
+    }
+
+    protected void uploadHdfsDataUnitWithCSVFmt(String[] headers, Object[][] values) {
+        try {
+            int seq = inputSeq.getAndIncrement();
+            String recordName = "Input" + seq;
+            String dirPath = getWorkspace() + "/" + recordName;
+            if (HdfsUtils.fileExists(yarnConfiguration, dirPath)) {
+                HdfsUtils.rmdir(yarnConfiguration, dirPath);
+            }
+            int index = 0;
+            for (Object[] value : values) {
+                String fileName = recordName + "-" + (index++) + ".csv";
+                copyCSVDataToHdfs(dirPath, fileName, headers, value);
+            }
+            putHdfsDataUnit(recordName, dirPath, DataUnit.DataFormat.CSV);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload csv to hdfs.", e);
+        }
     }
 
     protected Iterator<GenericRecord> verifyAndReadTarget(HdfsDataUnit target) {

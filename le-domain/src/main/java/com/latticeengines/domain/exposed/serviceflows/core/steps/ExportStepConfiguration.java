@@ -6,7 +6,6 @@ import java.util.Map;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 
 public class ExportStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
@@ -27,7 +26,9 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
 
     private String mergedFileName;
 
-    private Map<String, Attribute> nameToAttributeMap;
+    private boolean compressResult;
+
+    private boolean remapField;
 
     private Map<String, String> properties = new HashMap<>();
 
@@ -111,11 +112,19 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
         this.mergedFileName = mergedFileName;
     }
 
-    public Map<String, Attribute> getNameToAttributeMap() {
-        return nameToAttributeMap;
+    public boolean isCompressResult() {
+        return compressResult;
     }
 
-    public void setAttributes(Map<String, Attribute> nameToAttributeMap) {
-        this.nameToAttributeMap = nameToAttributeMap;
+    public void setCompressResult(boolean compressResult) {
+        this.compressResult = compressResult;
+    }
+
+    public boolean isRemapField() {
+        return remapField;
+    }
+
+    public void setRemapField(boolean remapField) {
+        this.remapField = remapField;
     }
 }

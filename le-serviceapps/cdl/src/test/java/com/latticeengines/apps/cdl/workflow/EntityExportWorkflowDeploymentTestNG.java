@@ -61,7 +61,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.domain.exposed.serviceflows.cdl.EntityExportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExportStepConfiguration;
-import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
+import com.latticeengines.domain.exposed.spark.common.CSVJobConfigBase;
 
 /**
  * dpltc deploy -a admin,pls,lp,cdl,metadata,matchapi,workflowapi
@@ -246,7 +246,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
             for (CSVRecord record : records) {
                 String dateStr = record.get("Test Date");
                 if (StringUtils.isNotEmpty(dateStr)) {
-                    SimpleDateFormat dateFmt = new SimpleDateFormat(ConvertToCSVConfig.ISO_8601);
+                    SimpleDateFormat dateFmt = new SimpleDateFormat(CSVJobConfigBase.ISO_8601);
                     try {
                         Date date = dateFmt.parse(dateStr);
                         Assert.assertNotNull(date);

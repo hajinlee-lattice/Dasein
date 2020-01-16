@@ -779,4 +779,14 @@ public class HdfsUtils {
         return rows;
     }
 
+    public static String getCsvGzPath(Configuration configuration, String outputDir) {
+        try {
+            List<String> files = getFilesForDir(configuration, outputDir, (HdfsFilenameFilter) filename ->
+                    filename.endsWith(".csv.gz") || filename.endsWith(".csv"));
+            return files.get(0);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read " + outputDir);
+        }
+    }
+
 }

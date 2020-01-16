@@ -94,7 +94,7 @@ public abstract class DataUnit {
     }
 
     public enum DataFormat {
-        AVRO, PARQUET
+        AVRO, PARQUET, CSV
     }
 
 }

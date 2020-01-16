@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
-import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -30,12 +29,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionArtifact;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
@@ -51,9 +48,6 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Value("${common.microservice.url}")
     private String microServiceHostPort;
-
-    @Inject
-    private DataFeedTaskService dataFeedTaskService;
 
     @Inject
     private AttrConfigService attrConfigService;
@@ -95,9 +89,6 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 artifact.getStatus(), request.getArtifactVersion());
         log.info("Created dataCollectionArtifact=" + JsonUtils.serialize(artifact));
 
-        List<Attribute> importedAttributes = getImportAttributes(orphanRecordsType.getDataSource(),
-                orphanRecordsType.getDataFeedType(), orphanRecordsType.getEntity().name());
-
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE,
                 OrphanRecordsExportWorkflowConfiguration.WORKFLOW_NAME);
@@ -128,17 +119,17 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 .collect(Collectors.toList());
 
         if (orphanRecordsType == OrphanRecordsType.TRANSACTION &&
-                !validateTableNames(new String[] { transactionTableName, accountTableName, productTableName })) {
+                !validateTableNames(new String[]{transactionTableName, accountTableName, productTableName})) {
             return null;
         }
 
         if (orphanRecordsType == OrphanRecordsType.CONTACT &&
-                !validateTableNames(new String[] { contactTableName, accountTableName })) {
+                !validateTableNames(new String[]{contactTableName, accountTableName})) {
             return null;
         }
 
         if (orphanRecordsType == OrphanRecordsType.UNMATCHED_ACCOUNT &&
-                !validateTableNames(new String[] { accountTableName })) {
+                !validateTableNames(new String[]{accountTableName})) {
             return null;
         }
 
@@ -147,7 +138,6 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 .workflow(OrphanRecordsExportWorkflowConfiguration.WORKFLOW_NAME) //
                 .orphanRecordExportId(request.getExportId()) //
                 .orphanRecordsType(orphanRecordsType) //
-                .originalAttributeNames(importedAttributes) //
                 .inputProperties(inputProperties) //
                 .targetPath(targetPath) //
                 .exportInputPath(targetPath) //
@@ -162,6 +152,7 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 .productTableName(productTableName) //
                 .transactionTableName(transactionTableName) //
                 .exportMergeFile(Boolean.TRUE) //
+                .remapField(true)
                 .validatedColumns(validatedColumns) //
                 .mergedFileName(orphanRecordsType.getOrphanType() + ".csv") //
                 .build();
@@ -178,17 +169,6 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
             return null;
         }
         return table.getName();
-    }
-
-    private List<Attribute> getImportAttributes(String source, String dataFeedType, String entity) {
-        String tenant = getCustomerSpace().toString();
-        DataFeedTask task = dataFeedTaskService.getDataFeedTask(tenant, source, dataFeedType, entity);
-
-        if (task == null) {
-            return null;
-        }
-
-        return task.getImportTemplate().getAttributes();
     }
 
     private boolean validateTableNames(String[] tableNames) {
