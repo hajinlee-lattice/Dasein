@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
 
-    <display-name>lp</display-name>
-    <description>Lattice Engines LP Service REST API</description>
+    <display-name>dcp</display-name>
+    <description>Dun and Bradstreet DCP Service REST API</description>
 
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
@@ -21,7 +21,7 @@
 
     <filter-mapping>
         <filter-name>tracingFilter</filter-name>
-        <servlet-name>lp</servlet-name>
+        <servlet-name>dcp</servlet-name>
     </filter-mapping>
 
     <filter-mapping>
@@ -30,14 +30,14 @@
     </filter-mapping>
 
     <servlet>
-        <servlet-name>lp</servlet-name>
+        <servlet-name>dcp</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
         <async-supported>true</async-supported>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>lp</servlet-name>
+        <servlet-name>dcp</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 

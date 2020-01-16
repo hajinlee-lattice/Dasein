@@ -15,7 +15,6 @@ import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
-import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.aws.s3.S3Service;
@@ -63,9 +62,6 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
     @Inject
     private RedshiftService redshiftService;
-
-    @Inject
-    private SegmentService segmentService;
 
     @Inject
     private ActionService actionService;
