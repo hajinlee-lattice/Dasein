@@ -50,6 +50,10 @@
       "Children": [
         {"Node": "QueryLogging", "Data": false}
       ]
+    },
+    {
+      "Node": "CampaignLaunchEndPointUrl",
+      "Data": ""
     }
   ]
 }
