@@ -85,6 +85,7 @@
         <module>objectapi</module>
         <module>cdl</module>
         <module>lp</module>
+        <module>dcp</module>
     </modules>
 
 </project>

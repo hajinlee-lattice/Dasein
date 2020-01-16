@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+
+    <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment" />
+        <property name="targetMethod" value="setService" />
+        <property name="arguments">
+            <list>
+                <value>lp</value>
+            </list>
+        </property>
+    </bean>
+
+    <import resource="classpath:microservice-context.xml"/>
+
+    <security:http auto-config="false"
+                   use-expressions="true"
+                   pattern="/**"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="true"/>
+        <security:intercept-url pattern="/health" access="permitAll" />
+        <security:intercept-url pattern="/redirect/**" access="permitAll" />
+        <security:intercept-url pattern="/v2/api-docs" access="permitAll" />
+        <security:intercept-url pattern="/**" access="hasRole('INTERNAL_USER')" />
+        <security:custom-filter ref="internalRestServicesFilter" before="PRE_AUTH_FILTER" />
+    </security:http>
+
+    <import resource="classpath:serviceapps-dcp-context.xml"/>
+    <import resource="classpath:component-context.xml" />
+
+    <context:component-scan base-package="
+        com.latticeengines.apps.core.controller,
+        com.latticeengines.apps.dcp.controller,
+        com.latticeengines.microservice.dcp" />
+
+    <bean id="lpHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">
+        <property name="componentName" value="dcp" />
+    </bean>
+
+</beans>
