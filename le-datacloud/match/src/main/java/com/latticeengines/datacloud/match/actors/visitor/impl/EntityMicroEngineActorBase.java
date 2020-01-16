@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 
 import com.latticeengines.actors.exposed.traveler.Response;
@@ -59,6 +60,9 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
     @Lazy
     @Inject
     private EntityMatchMetricService entityMatchMetricService;
+
+    @Value("${datacloud.match.entity.txn.associate.enabled}")
+    private boolean useTransactAssociateByDefault;
 
     /**
      * Hook to decide whether this actor should process current request. If this method is invoked, all
@@ -164,7 +168,7 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
                 : traveler.getMatchInput().getEntityMatchVersionMap();
         return new EntityAssociationRequest(standardizedTenant, entity, versionMap,
                 getPreferredEntityId(traveler.getEntity(), traveler.getEntityMatchKeyRecord()),
-                postProcessedResults, extraAttributes, dummyResultIndices);
+                postProcessedResults, extraAttributes, dummyResultIndices, useTransactAssociate(traveler));
     }
 
     /*
@@ -281,6 +285,14 @@ public abstract class EntityMicroEngineActorBase<T extends DataSourceWrapperActo
         } else {
             log.error("Got invalid entity lookup response in actor {}, should not have happened", self());
         }
+    }
+
+    private boolean useTransactAssociate(@NotNull MatchTraveler traveler) {
+        if (traveler.getMatchInput() == null || traveler.getMatchInput().isUseTransactAssociate() == null) {
+            return useTransactAssociateByDefault;
+        }
+
+        return traveler.getMatchInput().isUseTransactAssociate();
     }
 
     private String getPreferredEntityId(String entity, EntityMatchKeyRecord record) {

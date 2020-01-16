@@ -11,11 +11,27 @@ import com.latticeengines.domain.exposed.actors.VisitingHistory;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
  * Service for recording entity match related metrics
  */
 public interface EntityMatchMetricService {
+
+    /**
+     * Record association result
+     *
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            target entity
+     * @param hasConcurrentConflict
+     *            whether there is conflict due to concurrent association by
+     *            multiple processes
+     * @param isNewlyAllocated
+     *            whether entity is a new one
+     */
+    void recordAssociation(Tenant tenant, String entity, boolean hasConcurrentConflict, boolean isNewlyAllocated);
 
     /**
      * Record metrics for dynamo throttling event (read/write capacity exceeded)

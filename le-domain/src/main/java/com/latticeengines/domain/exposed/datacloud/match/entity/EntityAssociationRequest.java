@@ -27,18 +27,22 @@ public class EntityAssociationRequest {
     private final List<Pair<MatchKeyTuple, String>> lookupResults;
     private final Map<String, String> extraAttributes;
     private final List<Integer> dummyLookupResultIndices; // idx of artificially created lookup results
+    // whether to use txn implementation (less chance of splitting records,
+    // trade-off
+    // on performance)
+    private final boolean useTransactAssociate;
 
     public EntityAssociationRequest(
             @NotNull Tenant tenant, @NotNull String entity, Map<EntityMatchEnvironment, Integer> versionMap,
             String preferredEntityId,
             @NotNull List<Pair<MatchKeyTuple, String>> lookupResults, Map<String, String> extraAttributes) {
-        this(tenant, entity, versionMap, preferredEntityId, lookupResults, extraAttributes, null);
+        this(tenant, entity, versionMap, preferredEntityId, lookupResults, extraAttributes, null, false);
     }
 
     public EntityAssociationRequest(@NotNull Tenant tenant, @NotNull String entity,
             Map<EntityMatchEnvironment, Integer> versionMap,
             String preferredEntityId, @NotNull List<Pair<MatchKeyTuple, String>> lookupResults,
-            Map<String, String> extraAttributes, List<Integer> dummyLookupResultIndices) {
+            Map<String, String> extraAttributes, List<Integer> dummyLookupResultIndices, boolean useTransactAssociate) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(entity);
         Preconditions.checkNotNull(lookupResults);
@@ -50,6 +54,7 @@ public class EntityAssociationRequest {
         this.extraAttributes = extraAttributes == null ? Collections.emptyMap() : extraAttributes;
         this.dummyLookupResultIndices = dummyLookupResultIndices == null ? Collections.emptyList()
                 : dummyLookupResultIndices;
+        this.useTransactAssociate = useTransactAssociate;
     }
 
     public Tenant getTenant() {
@@ -78,5 +83,9 @@ public class EntityAssociationRequest {
 
     public List<Integer> getDummyLookupResultIndices() {
         return dummyLookupResultIndices;
+    }
+
+    public boolean isUseTransactAssociate() {
+        return useTransactAssociate;
     }
 }

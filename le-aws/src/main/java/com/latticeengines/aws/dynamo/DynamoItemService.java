@@ -12,6 +12,10 @@ import com.amazonaws.services.dynamodbv2.document.spec.PutItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.ScanSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
+import com.amazonaws.services.dynamodbv2.model.TransactGetItemsRequest;
+import com.amazonaws.services.dynamodbv2.model.TransactGetItemsResult;
+import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsRequest;
+import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public interface DynamoItemService {
@@ -34,7 +38,7 @@ public interface DynamoItemService {
     List<Item> scan(@NotNull String tableName, @NotNull ScanSpec scanSpec);
 
     /*
-     * Thin wrapper to expose full put/update/delete functionality
+     * Thin wrapper to expose full put/update/delete & txn functionality
      */
 
     PutItemOutcome put(@NotNull String tableName, @NotNull PutItemSpec putItemSpec);
@@ -42,4 +46,8 @@ public interface DynamoItemService {
     UpdateItemOutcome update(@NotNull String tableName, @NotNull UpdateItemSpec updateItemSpec);
 
     DeleteItemOutcome delete(@NotNull String tableName, @NotNull DeleteItemSpec deleteItemSpec);
+
+    TransactWriteItemsResult transactWriteItems(@NotNull TransactWriteItemsRequest request);
+
+    TransactGetItemsResult transactGetItems(@NotNull TransactGetItemsRequest request);
 }

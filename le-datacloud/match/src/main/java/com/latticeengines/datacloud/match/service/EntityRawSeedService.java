@@ -7,6 +7,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityTransactUpdateResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
@@ -131,7 +132,7 @@ public interface EntityRawSeedService {
      * @param tenant
      *            target tenant
      * @param rawSeed
-     *            seed object used to udpate
+     *            seed object used to update
      * @param setTTL
      *            whether we should set TTL
      * @param version
@@ -142,6 +143,28 @@ public interface EntityRawSeedService {
     EntityRawSeed updateIfNotSet(
             @NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
             @NotNull EntityRawSeed rawSeed, boolean setTTL, int version);
+
+    /**
+     * Merge given {@link EntityRawSeed} to existing seed and setup lookup mapping
+     * for all given {@link EntityLookupEntry}s
+     *
+     * @param env
+     *            environment to perform operation in
+     * @param tenant
+     *            target tenant
+     * @param seed
+     *            seed object used to update
+     * @param entries
+     *            lookup entries to setup mapping to given seed
+     * @param setTTL
+     *            whether we should set TTL
+     * @param version
+     *            specific version used for this operation
+     * @return update result, including seed before update & lookup entries that map
+     *         to another seed
+     */
+    EntityTransactUpdateResult transactUpdate(@NotNull EntityMatchEnvironment env, @NotNull Tenant tenant,
+            @NotNull EntityRawSeed seed, List<EntityLookupEntry> entries, boolean setTTL, int version);
 
     /**
      * Clear all {@link EntityLookupEntry} and attributes if the seed has the same

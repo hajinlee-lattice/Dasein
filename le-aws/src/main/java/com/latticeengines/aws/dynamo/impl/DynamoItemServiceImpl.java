@@ -40,6 +40,10 @@ import com.amazonaws.services.dynamodbv2.model.KeysAndAttributes;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
+import com.amazonaws.services.dynamodbv2.model.TransactGetItemsRequest;
+import com.amazonaws.services.dynamodbv2.model.TransactGetItemsResult;
+import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsRequest;
+import com.amazonaws.services.dynamodbv2.model.TransactWriteItemsResult;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.dynamo.DynamoItemService;
@@ -140,6 +144,18 @@ public class DynamoItemServiceImpl implements DynamoItemService {
         Preconditions.checkNotNull(tableName);
         Preconditions.checkNotNull(deleteItemSpec);
         return dynamoDB.getTable(tableName).deleteItem(deleteItemSpec);
+    }
+
+    @Override
+    public TransactWriteItemsResult transactWriteItems(@NotNull TransactWriteItemsRequest request) {
+        Preconditions.checkNotNull(request);
+        return dynamoService.getClient().transactWriteItems(request);
+    }
+
+    @Override
+    public TransactGetItemsResult transactGetItems(@NotNull TransactGetItemsRequest request) {
+        Preconditions.checkNotNull(request);
+        return dynamoService.getClient().transactGetItems(request);
     }
 
     @Override

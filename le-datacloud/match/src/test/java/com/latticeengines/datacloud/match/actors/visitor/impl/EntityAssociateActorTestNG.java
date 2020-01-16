@@ -60,6 +60,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociatio
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityAssociationResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
@@ -76,8 +77,7 @@ import scala.concurrent.duration.FiniteDuration;
 public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final String TEST_ENTITY = BusinessEntity.Contact.name();
-    // TODO change to InterfaceName
-    private static final String CUSTOMER_CONTACT_ID = "CustomerContactId";
+    private static final String CUSTOMER_CONTACT_ID = InterfaceName.CustomerContactId.name();
     private static final EntityRawSeed SEED_1 = getSeed1();
     private static final EntityRawSeed SEED_2 = getSeed2();
     private static final Map<EntityLookupEntry, String> LOOKUP_MAP = getLookupMapping(SEED_1, SEED_2);
@@ -111,11 +111,11 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
      * @param expectedEntityId
      *            expected contact entity ID, use {@literal null} to represent new
      *            contact
-     * @param hasAssociationError
+     * @param hasConflictEntries
      *            whether there are conflict during association
      */
     @Test(groups = "functional", dataProvider = "contactMatch", retryAnalyzer = SimpleRetryAnalyzer.class)
-    private void testContactAssociation(MatchKeyTuple[] tuples, String expectedEntityId, boolean hasAssociationError)
+    private void testContactAssociation(MatchKeyTuple[] tuples, String expectedEntityId, boolean hasConflictEntries)
             throws Exception {
         Tenant tenant = newTestTenant();
         String entity = TEST_ENTITY;
@@ -147,12 +147,12 @@ public class EntityAssociateActorTestNG extends DataCloudMatchFunctionalTestNGBa
             Assert.assertEquals(associationResponse.getAssociatedEntityId(), expectedEntityId);
         }
 
-        if (hasAssociationError) {
-            Assert.assertTrue(CollectionUtils.isNotEmpty(associationResponse.getAssociationErrors()),
-                    "Should have association error");
+        if (hasConflictEntries) {
+            Assert.assertTrue(CollectionUtils.isNotEmpty(associationResponse.getConflictEntries()),
+                    "Should have conflict entries");
         } else {
-            Assert.assertFalse(CollectionUtils.isNotEmpty(associationResponse.getAssociationErrors()), String
-                    .format("Should not have association error, got=%s", associationResponse.getAssociationErrors()));
+            Assert.assertFalse(CollectionUtils.isNotEmpty(associationResponse.getConflictEntries()), String
+                    .format("Should not have conflict entries, got=%s", associationResponse.getConflictEntries()));
         }
     }
 

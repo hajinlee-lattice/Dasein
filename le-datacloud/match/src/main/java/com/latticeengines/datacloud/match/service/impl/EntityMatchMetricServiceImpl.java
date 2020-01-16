@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ACTOR_VISIT;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_CONFLICT_COUNT;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_CONFLICT_DISTRIBUTION;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DISTRIBUTION_RETRY;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_ERROR_DIST;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_RETRY_DIST;
@@ -16,6 +18,7 @@ import static com.latticeengines.common.exposed.metric.MetricTags.TAG_DYNAMO_TAB
 import static com.latticeengines.common.exposed.metric.MetricTags.TAG_TENANT;
 import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_ALLOCATE_ID_MODE;
 import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_ENTITY;
+import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_IS_NEWLY_ALLOCATED;
 import static com.latticeengines.common.exposed.metric.MetricTags.EntityMatch.TAG_MATCH_ENV;
 import static com.latticeengines.common.exposed.metric.MetricTags.Match.TAG_ACTOR;
 import static com.latticeengines.common.exposed.metric.MetricTags.Match.TAG_HAS_ERROR;
@@ -66,6 +69,30 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
     @Inject
     private MatchActorSystem matchActorSystem;
+
+    @Override
+    public void recordAssociation(Tenant tenant, String entity, boolean hasConcurrentConflict,
+            boolean isNewlyAllocated) {
+        if (tenant == null || StringUtils.isBlank(tenant.getId()) || StringUtils.isBlank(entity)) {
+            return;
+        }
+
+        String tenantId = EntityMatchUtils.newStandardizedTenant(tenant).getId();
+        if (hasConcurrentConflict) {
+            Counter.builder(METRIC_ASSOCIATION_CONFLICT_COUNT) //
+                    .tag(TAG_TENANT, tenantId) //
+                    .tag(TAG_ENTITY, entity) //
+                    .tag(TAG_IS_NEWLY_ALLOCATED, String.valueOf(isNewlyAllocated)) //
+                    .register(registryFactory.getServiceLevelRegistry()) //
+                    .increment();
+        }
+        DistributionSummary.builder(METRIC_ASSOCIATION_CONFLICT_DISTRIBUTION) //
+                .tag(TAG_TENANT, tenantId) //
+                .tag(TAG_ENTITY, entity) //
+                .tag(TAG_IS_NEWLY_ALLOCATED, String.valueOf(isNewlyAllocated)) //
+                .register(registryFactory.getServiceLevelRegistry()) //
+                .record(hasConcurrentConflict ? 1 : 0);
+    }
 
     @Override
     public void recordDynamoThrottling(EntityMatchEnvironment env, String tableName) {
