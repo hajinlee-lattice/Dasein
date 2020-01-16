@@ -107,7 +107,7 @@ public class ZKConfigServiceImpl implements ZKConfigService {
                     componentName);
             Path CampaignLaunchEndPointUrlPath = path.append(CAMPAIGN_LAUNCH_END_POINT_URL);
             Camille camille = CamilleEnvironment.getCamille();
-            if (CampaignLaunchEndPointUrlPath != null && camille.exists(CampaignLaunchEndPointUrlPath)) {
+            if (camille.exists(CampaignLaunchEndPointUrlPath)) {
                 return camille.get(CampaignLaunchEndPointUrlPath).getData();
             }
         } catch (Exception e) {

@@ -117,16 +117,7 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
 
     private boolean queueNewDeltaCalculationJob(PlayLaunchChannel channel) {
         return getRetryTemplate().execute(context -> {
-            String tenantSpecificUrl = zkConfigService.getCampaignLaunchEndPointUrl(
-                    CustomerSpace.parse(channel.getTenant().getId()), CDLComponent.componentName);
-
-            String url = StringUtils.isNotBlank(tenantSpecificUrl)
-                    ? constructUrl(tenantSpecificUrl, campaignLaunchUrlPrefix,
-                            CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
-                            channel.getId())
-                    : constructUrl(campaignLaunchUrlPrefix,
-                            CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
-                            channel.getId());
+            String url = getUrl(channel, context.getRetryCount());
             try {
                 if (context.getRetryCount() > 0) {
                     log.info(String.format("(attempt=%d) to kick off delta calculation", context.getRetryCount() + 1));
@@ -149,7 +140,7 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
                 throw e;
             } finally {
                 String channelScheduleUrl = constructUrl(setChannelScheduleUrlPrefix,
-                        CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                        CustomerSpace.shortenCustomerSpace(channel.getTenant().getId()), channel.getPlay().getName(),
                         channel.getId());
                 log.info("Setting Next Scheduled Date for campaignId " + channel.getPlay().getName() + ", Channel ID: "
                         + channel.getId());
@@ -160,16 +151,7 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
 
     private boolean queueNewFullCampaignLaunch(PlayLaunchChannel channel) {
         return getRetryTemplate().execute(context -> {
-            String tenantSpecificUrl = zkConfigService.getCampaignLaunchEndPointUrl(
-                    CustomerSpace.parse(channel.getTenant().getId()), CDLComponent.componentName);
-
-            String url = StringUtils.isNotBlank(tenantSpecificUrl)
-                    ? constructUrl(tenantSpecificUrl, campaignLaunchUrlPrefix,
-                            CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
-                            channel.getId())
-                    : constructUrl(campaignLaunchUrlPrefix,
-                            CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
-                            channel.getId());
+            String url = getUrl(channel, context.getRetryCount());
             context.setAttribute("url", url);
             try {
                 if (context.getRetryCount() > 0) {
@@ -194,13 +176,32 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
                 throw e;
             } finally {
                 String channelScheduleUrl = constructUrl(setChannelScheduleUrlPrefix,
-                        CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                        CustomerSpace.shortenCustomerSpace(channel.getTenant().getId()), channel.getPlay().getName(),
                         channel.getId());
                 log.info("Setting Next Scheduled Date for campaignId " + channel.getPlay().getName() + ", Channel ID: "
                         + channel.getId());
                 patch("Setting Next Scheduled Date", channelScheduleUrl, null, PlayLaunchChannel.class);
             }
         }, context -> false);
+    }
+
+    private String getUrl(PlayLaunchChannel channel, int retryCount) {
+        CustomerSpace customerSpace = CustomerSpace.parse(channel.getTenant().getId());
+        String tenantSpecificEndpoint = zkConfigService.getCampaignLaunchEndPointUrl(customerSpace,
+                CDLComponent.componentName);
+
+        if (StringUtils.isNotBlank(tenantSpecificEndpoint) && retryCount > 0) {
+            log.warn(String.format(
+                    "Failed to kick off scheduled campaign launch on tenant %s, Channel %s. Falling back to Active stack url",
+                    customerSpace.getTenantId(), channel.getId()));
+            tenantSpecificEndpoint = null;
+        }
+
+        return StringUtils.isNotBlank(tenantSpecificEndpoint)
+                ? constructUrl(tenantSpecificEndpoint, campaignLaunchUrlPrefix, customerSpace.getTenantId(),
+                        channel.getPlay().getName(), channel.getId())
+                : constructUrl(campaignLaunchUrlPrefix, customerSpace.getTenantId(), channel.getPlay().getName(),
+                        channel.getId());
     }
 
     private RetryTemplate getRetryTemplate() {
