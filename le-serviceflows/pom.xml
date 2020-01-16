@@ -26,6 +26,7 @@
         <module>scoring</module>
         <module>leadprioritization</module>
         <module>cdl</module>
+        <module>dcp</module>
     </modules>
 
     <dependencies>
