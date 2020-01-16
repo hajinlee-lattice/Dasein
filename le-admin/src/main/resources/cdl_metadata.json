@@ -30,6 +30,7 @@
       "Children": [
           { "Node": "QueryLogging", "Data": {"Type": "boolean", "Required": false}}
       ]
-    }
+    },
+    {"Node": "CampaignLaunchEndPointUrl", "Data": {"Type": "string", "Required": false}}
   ]
 }
