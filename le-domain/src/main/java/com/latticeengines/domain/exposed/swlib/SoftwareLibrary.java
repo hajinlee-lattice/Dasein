@@ -46,7 +46,7 @@ public enum SoftwareLibrary {
         LeadPrioritization.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
 
         CDL.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
-        DCP.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
+        DCP.modules = ImmutableSet.of(Module.workflowapi);
     }
 
     private final String name;
