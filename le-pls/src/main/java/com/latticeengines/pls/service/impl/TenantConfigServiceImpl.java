@@ -46,7 +46,6 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     public static final String SERVICES_ZNODE = "/Services";
     public static final String PLS_ZNODE = "/PLS";
     public static final String ENRICHMENT_ATTRIBUTES_MAX_NUMBER_ZNODE = "/EnrichAttributesMaxNumber";
-    public static final String INVOKE_TIME = "/InvokeTime";
 
     @Value("${pls.dataloader.rest.api}")
     private String defaultDataLoaderUrl;
@@ -68,7 +67,7 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     private ModelSummaryProxy modelSummaryProxy;
 
     @PostConstruct
-    private void definePlsFeatureFlags() {
+    private void postConstruct() {
         for (PlsFeatureFlag flag : PlsFeatureFlag.values()) {
             if (FeatureFlagClient.getDefinition(flag.getName()) == null) {
                 FeatureFlagClient.setDefinition(flag.getName(), flag.getDefinition());

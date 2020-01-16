@@ -162,11 +162,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-liaison</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-camille</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>

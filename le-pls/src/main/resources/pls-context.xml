@@ -20,7 +20,6 @@
     <import resource="classpath:monitor-metric-context.xml"/>
     <import resource="classpath:monitor-alerts-context.xml"/>
     <import resource="classpath:monitor-email-settings-context.xml"/>
-    <import resource="classpath:liaison-context.xml"/>
     <import resource="classpath:remote-context.xml"/>
     <import resource="classpath:app-context.xml"/>
     <import resource="classpath:cache-context.xml" />
@@ -30,5 +29,5 @@
              since the servlet container instances are not available when running tests. -->
         <context:exclude-filter type="assignable" expression="com.latticeengines.pls.swagger.SwaggerConfig"/>
     </context:component-scan>
-	
+
 </beans>
