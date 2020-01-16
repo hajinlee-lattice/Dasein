@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
+import com.latticeengines.spark.service.impl.LivyServerManager;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
@@ -46,6 +47,9 @@ public class SparkSQLQueryTester {
 
     @Inject
     protected QueryEvaluatorService queryEvaluatorService;
+
+    @Inject
+    private LivyServerManager livyServerManager;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -101,7 +105,7 @@ public class SparkSQLQueryTester {
     private void reuseLivyEnvironment(int sessionId) {
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
+            livyHost = livyServerManager.getLivyHost();
         } else {
             livyHost = "http://localhost:8998";
         }

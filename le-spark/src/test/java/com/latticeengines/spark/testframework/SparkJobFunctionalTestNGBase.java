@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.spark.service.impl.LivyServerManager;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -68,6 +69,9 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
 
     @Inject
     private SparkJobService sparkJobService;
+
+    @Inject
+    private LivyServerManager livyServerManager;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -127,7 +131,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     protected void reuseLivyEnvironment(int sessionId) {
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
+            livyHost = livyServerManager.getLivyHost();
         } else {
             livyHost = "http://localhost:8998";
         }
