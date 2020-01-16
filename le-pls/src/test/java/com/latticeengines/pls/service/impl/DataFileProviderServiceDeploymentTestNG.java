@@ -14,6 +14,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,9 +25,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -50,35 +48,32 @@ import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(DataFileProviderServiceDeploymentTestNG.class);
-
     @Mock
     private SourceFileProxy sourceFileProxy;
 
     @Mock
     private SourceFile sourceFile;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Value("${pls.modelingservice.basedir}")
-    private String modelingServiceHdfsBaseDir;
-
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
+
+    @Inject
+    private ImportFromS3Service importFromS3Service;
+
+    @Inject
+    private BatonService batonService;
+
+    @Inject
+    private ModelSummaryProxy modelSummaryProxy;
 
     @Spy
     private DataFileProviderServiceImpl dataFileProviderService = new DataFileProviderServiceImpl();
 
-    @Autowired
-    private ImportFromS3Service importFromS3Service;
-
-    @Autowired
-    private BatonService batonService;
-
-    @Autowired
-    private ModelSummaryProxy modelSummaryProxy;
+    @Value("${pls.modelingservice.basedir}")
+    private String modelingServiceHdfsBaseDir;
 
     private String modelId;
 
@@ -101,7 +96,7 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
 
         testBed.bootstrap(1);
         Tenant tenant1 = testBed.getMainTestTenant();
-        setupDbWithEloquaSMB(tenant1, true, true);
+        setupDbWithEloquaSMB(tenant1, true);
 
         TENANT_ID = tenant1.getId();
         Tenant tenant = tenantEntityMgr.findByTenantId(TENANT_ID);

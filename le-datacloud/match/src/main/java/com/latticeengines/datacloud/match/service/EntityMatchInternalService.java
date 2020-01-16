@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityTransactUpdateResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 /**
@@ -145,20 +146,46 @@ public interface EntityMatchInternalService {
      *            mapping, false if we only clear one to one entries that failed
      * @param entriesMapToOtherSeed
      *            set of entries that are already map to other seeds, can be
-     *            {@literal null}
-     * @return a triple where the left object is the state before association the
-     *         middle list contains all lookup entries that cannot be associated to
-     *         the current seed. the right list contains all lookup entries that
-     *         already mapped to another seed
+     *            {@code null}
      * @param versionMap
      *            user specified match version for each
      *            {@link EntityMatchEnvironment}, current version will be used if no
      *            version is specified for certain environment
+     * @return a triple where the left object is the state before association the
+     *         middle list contains all lookup entries that cannot be associated to
+     *         the current seed. the right list contains all lookup entries that
+     *         already mapped to another seed
      * @throws UnsupportedOperationException
      *             if allocating new accounts are not supported
      */
     Triple<EntityRawSeed, List<EntityLookupEntry>, List<EntityLookupEntry>> associate(
             @NotNull Tenant tenant, @NotNull EntityRawSeed seed, boolean clearAllFailedLookupEntries,
+            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap);
+
+    /**
+     * Associate all lookup entries and attributes in the input
+     * {@link EntityRawSeed} to the current ones transactionally. no side effect if
+     * there are any conflict. Note that lookup entries might be break into multiple
+     * txn if there are too many, so only the first batch of entries has the
+     * atomicity guarantee. conflict in later txns will be added to the result.
+     *
+     * @param tenant
+     *            target tenant
+     * @param seed
+     *            seed object containing lookup entries and attributes that we want
+     *            to associate
+     * @param entriesMapToOtherSeed
+     *            set of entries that are already map to other seeds, can be
+     *            {@code null}
+     * @param versionMap
+     *            user specified match version for each
+     *            {@link EntityMatchEnvironment}, current version will be used if no
+     *            version is specified for certain environment
+     * @return result of association (operation succeeded, seed after update, lookup
+     *         entries having conflict during association), seed should only be used
+     *         to find conflict entries if operation failed
+     */
+    EntityTransactUpdateResult transactAssociate(@NotNull Tenant tenant, @NotNull EntityRawSeed seed,
             Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap);
 
     /**

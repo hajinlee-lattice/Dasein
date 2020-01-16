@@ -222,7 +222,6 @@ public class MatchInput implements Fact, Dimension {
 
     // Temporary flag to output all newly allocated entities to avro files. Only
     // applies to bulk match with allocateId mode.
-    // TODO: change this after solution is finalized
     @JsonProperty("OutputNewEntities")
     private boolean outputNewEntities;
 
@@ -230,6 +229,13 @@ public class MatchInput implements Fact, Dimension {
     // workflow for testing
     @JsonProperty("BumpupEntitySeedVersion")
     private boolean bumpupEntitySeedVersion;
+
+    /*-
+     * whether to use transaction implementation on associate operation. will have less chance of splitting records
+     * but more expensive and less performance
+     */
+    @JsonProperty("UseTransactAssociate")
+    private Boolean useTransactAssociate;
 
     // ====================
     // END ENTITY MATCH PROPERTIES
@@ -644,6 +650,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setBumpupEntitySeedVersion(boolean bumpupEntitySeedVersion) {
         this.bumpupEntitySeedVersion = bumpupEntitySeedVersion;
+    }
+
+    public Boolean isUseTransactAssociate() {
+        return useTransactAssociate;
+    }
+
+    public void setUseTransactAssociate(Boolean useTransactAssociate) {
+        this.useTransactAssociate = useTransactAssociate;
     }
 
     @Override

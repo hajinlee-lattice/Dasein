@@ -5,9 +5,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +21,6 @@ import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.pls.entitymanager.PdSegmentEntityMgr;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -31,8 +29,6 @@ import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed
 
 public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(PlsDeploymentTestNGBase.class);
-
     @Autowired
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
@@ -40,10 +36,7 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
     @Value("${common.test.pls.url}")
     private String deployedHostPort;
 
-    @Autowired
-    private PdSegmentEntityMgr segmentEntityMgr;
-
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     protected Tenant marketoTenant;
@@ -69,12 +62,13 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
                 : deployedHostPort;
     }
 
-    protected void setupTestEnvironmentWithGATenants(int numTenants) throws Exception {
+    private void setupTestEnvironmentWithGATenants(int numTenants) {
         testBed.bootstrap(numTenants);
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
     }
 
+    @SuppressWarnings("unused")
     protected void setupTestEnvironmentWithExistingTenant(String tenantId)
             throws NoSuchAlgorithmException, KeyManagementException {
         turnOffSslChecking();
@@ -159,25 +153,24 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
         switchToSuperAdmin();
     }
 
-    protected void setupDbUsingDefaultTenantIds() throws Exception {
+    private void setupDbUsingDefaultTenantIds() throws Exception {
         setupDbUsingDefaultTenantIds(true, true);
     }
 
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
-        setupDbUsingDefaultTenantIds(useTenant1, useTenant2, true, true);
+    private void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2) throws Exception {
+        setupDbUsingDefaultTenantIds(useTenant1, useTenant2, true);
     }
 
-    protected void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries,
-                                                boolean createSegments) throws Exception {
+    private void setupDbUsingDefaultTenantIds(boolean useTenant1, boolean useTenant2, boolean createSummaries) throws Exception {
         marketoTenant = testTenants().get(0);
         eloquaTenant = testTenants().get(1);
         testBed.setMainTestTenant(eloquaTenant);
         mainTestTenant = testBed.getMainTestTenant();
-        setupDbWithMarketoSMB(marketoTenant, createSummaries, createSegments);
-        setupDbWithEloquaSMB(eloquaTenant, createSummaries, createSegments);
+        setupDbWithMarketoSMB(marketoTenant, createSummaries);
+        setupDbWithEloquaSMB(eloquaTenant, createSummaries);
     }
 
-    protected void setupDbWithMarketoSMB(Tenant tenant, boolean createSummaries, boolean createSegments)
+    private void setupDbWithMarketoSMB(Tenant tenant, boolean createSummaries)
             throws Exception {
 
         ModelSummary summary1 = null;
@@ -196,26 +189,9 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
             setupSecurityContext(tenant);
             modelSummaryProxy.create(tenant.getId(), summary1);
         }
-
-        if (createSummaries && createSegments) {
-            Segment segment1 = new Segment();
-            segment1.setModelId(summary1.getId());
-            segment1.setName("SMB");
-            segment1.setPriority(1);
-            segment1.setTenant(tenant);
-
-            String modelId = segment1.getModelId();
-            Segment segment = segmentEntityMgr.retrieveByModelIdForInternalOperations(modelId);
-            if (segment != null) {
-                setupSecurityContext(segment);
-                segmentEntityMgr.deleteByModelId(segment.getModelId());
-            }
-            setupSecurityContext(tenant);
-            segmentEntityMgr.create(segment1);
-        }
     }
 
-    protected void setupDbWithEloquaSMB(Tenant tenant, boolean createSummaries, boolean createSegments)
+    protected void setupDbWithEloquaSMB(Tenant tenant, boolean createSummaries)
             throws Exception {
         ModelSummary summary2 = null;
         if (createSummaries) {
@@ -259,23 +235,6 @@ public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
             }
             setupSecurityContext(tenant);
             modelSummaryProxy.create(tenant.getId(), summary2);
-        }
-
-        if (createSummaries && createSegments) {
-            Segment segment2 = new Segment();
-            segment2.setModelId(summary2.getId());
-            segment2.setName("SMB");
-            segment2.setPriority(1);
-            segment2.setTenant(tenant);
-
-            String modelId = segment2.getModelId();
-            Segment segment = segmentEntityMgr.retrieveByModelIdForInternalOperations(modelId);
-            if (segment != null) {
-                setupSecurityContext(segment);
-                segmentEntityMgr.deleteByModelId(segment.getModelId());
-            }
-            setupSecurityContext(tenant);
-            segmentEntityMgr.create(segment2);
         }
     }
 

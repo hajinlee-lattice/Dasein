@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.RetryCallback;
@@ -14,9 +13,9 @@ import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughputExceededException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.latticeengines.aws.dynamo.DynamoRetryPolicy;
 import com.latticeengines.aws.dynamo.DynamoRetryUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityMatchConfigurationService;
@@ -180,7 +179,7 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
             @Override
             public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback,
                     Throwable throwable) {
-                if (isThrottleError(throwable)) {
+                if (DynamoRetryPolicy.isThrottlingError(throwable)) {
                     entityMatchMetricService.recordDynamoThrottling(env, getTableName(env));
                 }
                 super.onError(context, callback, throwable);
@@ -190,12 +189,9 @@ public class EntityMatchConfigurationServiceImpl implements EntityMatchConfigura
             public <T, E extends Throwable> void close(RetryContext context, RetryCallback<T, E> callback,
                     Throwable throwable) {
                 // NOTE retry template should only be used for dynamo call
-                entityMatchMetricService.recordDynamoCall(env, getTableName(env), context, isThrottleError(throwable));
+                entityMatchMetricService.recordDynamoCall(env, getTableName(env), context,
+                        DynamoRetryPolicy.isThrottlingError(throwable));
                 super.close(context, callback, throwable);
-            }
-
-            private boolean isThrottleError(Throwable throwable) {
-                return ExceptionUtils.indexOfType(throwable, ProvisionedThroughputExceededException.class) != -1;
             }
         };
     }

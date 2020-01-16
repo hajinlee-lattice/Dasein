@@ -59,6 +59,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityTransactUpdateResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("entityMatchInternalService")
@@ -68,6 +69,7 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     private static final String LOOKUP_BACKGROUND_THREAD_NAME = "entity-match-internal";
     private static final int ENTITY_ID_LENGTH = 16;
     private static final int MAX_ID_ALLOCATION_ATTEMPTS = 50;
+    private static final int DYNAMO_TXN_LIMIT = 25; // max number of records involved in one dynamo txn
     // make the probability even for all characters since we want to have case insensitive ID
     private static final char[] ENTITY_ID_CHARS = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
@@ -288,6 +290,54 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
     }
 
     @Override
+    public EntityTransactUpdateResult transactAssociate(@NotNull Tenant tenant, @NotNull EntityRawSeed seed,
+            Set<EntityLookupEntry> entriesMapToOtherSeed, Map<EntityMatchEnvironment, Integer> versionMap) {
+        EntityMatchEnvironment env = EntityMatchEnvironment.STAGING; // only change staging seed
+        checkNotNull(tenant, seed);
+        if (!isAllocateMode()) {
+            throw new UnsupportedOperationException("Not allowed to associate entity in lookup mode");
+        }
+        int version = getMatchVersion(env, tenant, versionMap);
+
+        // first txn, if this fail then consider association failure
+        int startIdx = 0;
+        EntityRawSeed seedToUpdate = seedForUpdate(seed, startIdx, true);
+        Preconditions.checkNotNull(seedToUpdate,
+                String.format("Should have either lookup entries or attributes for association. seed = %s", seed));
+        EntityTransactUpdateResult result = entityRawSeedService.transactUpdate(env, tenant, seedToUpdate,
+                seedToUpdate.getLookupEntries().stream() //
+                        .filter(entry -> !CollectionUtils.emptyIfNull(entriesMapToOtherSeed).contains(entry)) //
+                        .collect(Collectors.toList()),
+                shouldSetTTL(env), version);
+        if (!result.isSucceeded()) {
+            // just return when first txn failed, not handling un-processed batch for now,
+            // can optimize later if needed
+            return result;
+        }
+        startIdx += seedToUpdate.getLookupEntries().size();
+
+        // since first txn succeeded, shouldn't have conflict
+        Map<EntityLookupEntry, String> entriesConflictInLookup = new HashMap<>();
+        // handle following batches, ignore any conflict and accept that entries will
+        // not be updated for now (since we are far from reaching 25 items, this part
+        // shouldn't be executed at all)
+        for (; (seedToUpdate = seedForUpdate(seed, startIdx, false)) != null; startIdx += seedToUpdate
+                .getLookupEntries().size()) {
+            result = entityRawSeedService.transactUpdate(env, tenant, seedToUpdate,
+                    seedToUpdate.getLookupEntries().stream() //
+                            .filter(entry -> !CollectionUtils.emptyIfNull(entriesMapToOtherSeed).contains(entry)) //
+                            .collect(Collectors.toList()),
+                    shouldSetTTL(env), version);
+            if (!result.isSucceeded()) {
+                // TODO handle non-first txn conflicts and merge seed into the final result
+                entriesConflictInLookup.putAll(result.getEntriesMapToOtherSeeds());
+            }
+        }
+
+        return new EntityTransactUpdateResult(true, result.getSeed(), entriesConflictInLookup);
+    }
+
+    @Override
     public void cleanupOrphanSeed(@NotNull Tenant tenant, @NotNull String entity, @NotNull String seedId,
             Map<EntityMatchEnvironment, Integer> versionMap) {
         checkNotNull(tenant, entity, seedId);
@@ -358,6 +408,38 @@ public class EntityMatchInternalServiceImpl implements EntityMatchInternalServic
             scanSeeds.clear();
         } while (CollectionUtils.isNotEmpty(getSeedIds));
         return new EntityPublishStatistics(seedCount, lookupCount, nNotInStaging);
+    }
+
+    /**
+     * Create a new seed contains specified part of lookup entries from original
+     * seed & attributes for update
+     *
+     * @param seed
+     *            original seed for update
+     * @param startIdx
+     *            start index to retrieve lookup entries from original seed
+     * @param includeAttributes
+     *            whether to include attributes from original seed
+     * @return partial seed for update, {@code null} if nothing left
+     */
+    private EntityRawSeed seedForUpdate(@NotNull EntityRawSeed seed, int startIdx, boolean includeAttributes) {
+        int maxNumLookupEntries = DYNAMO_TXN_LIMIT - 1; // reserve one for seed update
+        if (startIdx == 0 && maxNumLookupEntries >= CollectionUtils.size(seed.getLookupEntries())
+                && (includeAttributes || MapUtils.isEmpty(seed.getAttributes()))) {
+            // range includes entire seed
+            return seed;
+        }
+        if (startIdx >= CollectionUtils.size(seed.getLookupEntries())
+                && (!includeAttributes || MapUtils.isEmpty(seed.getAttributes()))) {
+            // no lookup entries and no need to update attributes
+            return null;
+        }
+
+        List<EntityLookupEntry> lookupEntries = seed.getLookupEntries();
+        List<EntityLookupEntry> entries = lookupEntries.subList(startIdx,
+                Math.min(lookupEntries.size(), startIdx + maxNumLookupEntries));
+        return new EntityRawSeed(seed.getId(), seed.getEntity(), entries,
+                includeAttributes ? seed.getAttributes() : null);
     }
 
     @VisibleForTesting

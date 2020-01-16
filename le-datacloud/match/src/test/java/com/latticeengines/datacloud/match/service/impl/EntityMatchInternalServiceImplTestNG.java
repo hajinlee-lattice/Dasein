@@ -45,6 +45,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.mockito.InjectMocks;
@@ -72,6 +73,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityPublishStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.datacloud.match.entity.EntityTransactUpdateResult;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
@@ -683,6 +685,37 @@ public class EntityMatchInternalServiceImplTestNG extends DataCloudMatchFunction
         String randomId = entityMatchInternalService.allocateId(tenant, BusinessEntity.Account.name(), null, null);
         Assert.assertNotEquals(randomId, id);
         Assert.assertNotEquals(randomId, preferredId);
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class, priority = 14)
+    private void testTxnAssociation() throws Exception {
+        Tenant tenant = newTestTenant();
+        entityMatchConfigurationService.setIsAllocateMode(true);
+
+        String[] domains = IntStream.range(0, 113) //
+                .mapToObj(idx -> String.format("google%d.com", idx)) //
+                .toArray(String[]::new);
+        String seedId = UUID.randomUUID().toString();
+        EntityRawSeed seed = newSeed(seedId, "sfdc_acc_1", domains);
+
+        EntityTransactUpdateResult result = entityMatchInternalService.transactAssociate(tenant, seed, null, null);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.isSucceeded());
+        Assert.assertTrue(MapUtils.isEmpty(result.getEntriesMapToOtherSeeds()));
+
+        Thread.sleep(1000L);
+
+        // verify lookup mapping
+        List<String> ids = entityMatchInternalService.getIds(tenant, seed.getLookupEntries(), null);
+        boolean hasUnmappedEntry = ids.stream().anyMatch(id -> !seedId.equals(id));
+        Assert.assertFalse(hasUnmappedEntry,
+                String.format("All entries should mapped to seedId %s, got %s", seedId, ids));
+
+        EntityRawSeed seedAfterUpdate = entityMatchInternalService.get(tenant, TEST_ENTITY, seedId, null);
+        Assert.assertTrue(equalsDisregardPriority(seed, seedAfterUpdate),
+                String.format("Seed after association %s should equals seedForUpdate %s", seedAfterUpdate, seed));
+
+        // TODO add other test cases with conflict in first & later batches
     }
 
     // [ nAllocations, nThreads ]
