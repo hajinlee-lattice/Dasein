@@ -17,11 +17,11 @@ public interface ZKConfigService {
 
     int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, String dataLicense);
 
-    Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName,
-            BusinessEntity businessEntity);
+    Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, BusinessEntity businessEntity);
 
-    Long getActiveRatingEngingQuota(CustomerSpace customerSpace, String componentName);
+    Long getActiveRatingEngineQuota(CustomerSpace customerSpace, String componentName);
 
     Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, ProductType type);
 
+    String getCampaignLaunchEndPointUrl(CustomerSpace customerSpace, String componentName);
 }
