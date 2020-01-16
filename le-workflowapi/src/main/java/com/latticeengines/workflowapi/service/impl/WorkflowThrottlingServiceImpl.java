@@ -48,7 +48,7 @@ import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflowapi.service.WorkflowThrottlingService;
 import com.latticeengines.yarn.exposed.service.JobService;
 
-@Component("workflowThrottlerService")
+@Component("workflowThrottlingService")
 public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService {
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowThrottlingServiceImpl.class);
