@@ -46,6 +46,9 @@ public enum LatticeFeatureFlag {
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
     ENABLE_GOOGLE_INTEGRATION("EnableGoogleIntegration", "Enable Google integration"), //
     ENABLE_DELTA_CALCULATION("EnableDeltaCalculation", "Enable Delta Calculation"), //
+    ADVANCED_FILTERING("AdvancedFiltering",
+            "Enable Advanced filtering functionality for Segments, Models and Campaigns"), //
+    ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multiclick behavior for Attributes during query building"), //
 
     @Deprecated
     QUOTA(true, "Quota", "Quota"), //
