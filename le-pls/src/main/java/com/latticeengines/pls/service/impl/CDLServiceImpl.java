@@ -887,11 +887,24 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public Map<String, String> getDecoratedDisplayNameMapping(String customerSpace, BusinessEntity entity) {
-        return servingStoreProxy.getDecoratedMetadata(customerSpace, entity, null,
-                null, StoreFilter.NON_LDC)
-                .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
-                .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
-                .block();
+    public Map<String, String> getDecoratedDisplayNameMapping(String customerSpace, EntityType entityType) {
+        if (entityType == null) {
+            return Collections.emptyMap();
+        }
+        if (EntityType.isStandardEntityType(entityType)) {
+            return servingStoreProxy.getDecoratedMetadata(customerSpace, entityType.getEntity(), null,
+                    null, StoreFilter.NON_LDC)
+                    .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
+                    .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
+                    .block();
+        } else if (EntityType.isStreamEntityType(entityType)) {
+            return servingStoreProxy.getDecoratedMetadata(customerSpace, BusinessEntity.Account, null,
+                    null, StoreFilter.NON_LDC)
+                    .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
+                    .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
+                    .block();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 }

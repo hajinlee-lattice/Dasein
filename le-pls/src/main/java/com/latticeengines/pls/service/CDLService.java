@@ -78,8 +78,8 @@ public interface CDLService {
     /**
      *
      * @param customerSpace Identify current tenant
-     * @param entity BusinessEntity for current attributes group.
+     * @param entityType EntityType for current template.
      * @return Attribute name as map key and Attribute display name as map value.
      */
-    Map<String, String> getDecoratedDisplayNameMapping(String customerSpace, BusinessEntity entity);
+    Map<String, String> getDecoratedDisplayNameMapping(String customerSpace, EntityType entityType);
 }

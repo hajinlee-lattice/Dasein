@@ -451,7 +451,7 @@ public class CDLResource {
                             .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
             BusinessEntity entity = entityType == null ?
                     BusinessEntity.getByName(dataFeedTask.getEntity()) : entityType.getEntity();
-            Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entity);
+            Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entityType);
             fieldPreviews.forEach(preview -> {
                 if (nameMapping.containsKey(preview.getNameInTemplate())) {
                     preview.setDisplayName(nameMapping.get(preview.getNameInTemplate()));
