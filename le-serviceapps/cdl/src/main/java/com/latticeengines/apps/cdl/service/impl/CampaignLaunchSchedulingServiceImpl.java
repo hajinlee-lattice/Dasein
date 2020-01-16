@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
@@ -20,7 +19,9 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
+import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.CampaignLaunchSchedulingService;
+import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -45,8 +46,11 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
     @Inject
     private BatonService batonService;
 
-    @Autowired
+    @Inject
     private AlertService alertService;
+
+    @Inject
+    private ZKConfigService zkConfigService;
 
     @Value("common.internal.app.url")
     private String internalAppUrl;
@@ -113,9 +117,16 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
 
     private boolean queueNewDeltaCalculationJob(PlayLaunchChannel channel) {
         return getRetryTemplate().execute(context -> {
-            String url = constructUrl(campaignLaunchUrlPrefix,
-                    CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
-                    channel.getId());
+            String tenantSpecificUrl = zkConfigService.getCampaignLaunchEndPointUrl(
+                    CustomerSpace.parse(channel.getTenant().getId()), CDLComponent.componentName);
+
+            String url = StringUtils.isNotBlank(tenantSpecificUrl)
+                    ? constructUrl(tenantSpecificUrl, campaignLaunchUrlPrefix,
+                            CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                            channel.getId())
+                    : constructUrl(campaignLaunchUrlPrefix,
+                            CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                            channel.getId());
             try {
                 if (context.getRetryCount() > 0) {
                     log.info(String.format("(attempt=%d) to kick off delta calculation", context.getRetryCount() + 1));
@@ -149,9 +160,16 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
 
     private boolean queueNewFullCampaignLaunch(PlayLaunchChannel channel) {
         return getRetryTemplate().execute(context -> {
-            String url = constructUrl(campaignLaunchUrlPrefix,
-                    CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
-                    channel.getId());
+            String tenantSpecificUrl = zkConfigService.getCampaignLaunchEndPointUrl(
+                    CustomerSpace.parse(channel.getTenant().getId()), CDLComponent.componentName);
+
+            String url = StringUtils.isNotBlank(tenantSpecificUrl)
+                    ? constructUrl(tenantSpecificUrl, campaignLaunchUrlPrefix,
+                            CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                            channel.getId())
+                    : constructUrl(campaignLaunchUrlPrefix,
+                            CustomerSpace.parse(channel.getTenant().getId()).getTenantId(), channel.getPlay().getName(),
+                            channel.getId());
             context.setAttribute("url", url);
             try {
                 if (context.getRetryCount() > 0) {

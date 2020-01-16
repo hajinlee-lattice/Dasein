@@ -181,7 +181,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public Long getActiveRatingEngineQuotaLimit(CustomerSpace customerSpace) {
         String componentName = CDLComponent.componentName;
-        Long activeModelDataLimit = zkConfigService.getActiveRatingEngingQuota(customerSpace, componentName);
+        Long activeModelDataLimit = zkConfigService.getActiveRatingEngineQuota(customerSpace, componentName);
         defaultActiveModelQuotaLimit = (activeModelDataLimit != null && activeModelDataLimit > 0) ? activeModelDataLimit
                 : defaultActiveModelQuotaLimit;
         return defaultActiveModelQuotaLimit;

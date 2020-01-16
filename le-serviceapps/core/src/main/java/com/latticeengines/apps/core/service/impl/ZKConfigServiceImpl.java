@@ -30,6 +30,7 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
     private static final String ACTIVE_MODEL_QUOTA = "ActiveModelQuotaLimit";
+    private static final String CAMPAIGN_LAUNCH_END_POINT_URL = "CampaignLaunchEndPointUrl";
     private static final String PLS = "PLS";
 
     @Inject
@@ -74,7 +75,8 @@ public class ZKConfigServiceImpl implements ZKConfigService {
         try {
             return batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
         } catch (Exception e) {
-            log.warn("Failed to tell if InternalEnrichment is enabled in ZK for " + customerSpace.getTenantId() + ": " + e.getMessage());
+            log.warn("Failed to tell if InternalEnrichment is enabled in ZK for " + customerSpace.getTenantId() + ": "
+                    + e.getMessage());
             return false;
         }
     }
@@ -98,14 +100,32 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     }
 
     @Override
-    public Long getActiveRatingEngingQuota(CustomerSpace customerSpace, String componentName) {
+    public String getCampaignLaunchEndPointUrl(CustomerSpace customerSpace, String componentName) {
+
+        try {
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
+                    componentName);
+            Path CampaignLaunchEndPointUrlPath = path.append(CAMPAIGN_LAUNCH_END_POINT_URL);
+            Camille camille = CamilleEnvironment.getCamille();
+            if (CampaignLaunchEndPointUrlPath != null && camille.exists(CampaignLaunchEndPointUrlPath)) {
+                return camille.get(CampaignLaunchEndPointUrlPath).getData();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get count of CampaignLaunchEndPointUrl from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return null;
+    }
+
+    @Override
+    public Long getActiveRatingEngineQuota(CustomerSpace customerSpace, String componentName) {
         Long dataQuotaLimit = null;
         try {
             Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
                     componentName);
             Path activeModelCntPath = path.append(ACTIVE_MODEL_QUOTA);
             Camille camille = CamilleEnvironment.getCamille();
-            // if zookeeper node value <= 0 or empty then we take the default quota limit value = 50
+            // if zookeeper node value <= 0 or empty then we take the default quota limit
+            // value = 50
             if (activeModelCntPath != null && camille.exists(activeModelCntPath)) {
                 String activeModelsQuota = camille.get(activeModelCntPath).getData();
                 if (!StringUtils.isEmpty(activeModelsQuota)) {
@@ -113,8 +133,7 @@ public class ZKConfigServiceImpl implements ZKConfigService {
                 }
             }
         } catch (Exception e) {
-            log.warn("Failed to get count of ActiveModels from ZK for "
-                    + customerSpace.getTenantId(), e);
+            log.warn("Failed to get count of ActiveModels from ZK for " + customerSpace.getTenantId(), e);
         }
         return dataQuotaLimit;
     }
@@ -162,28 +181,27 @@ public class ZKConfigServiceImpl implements ZKConfigService {
     }
 
     @Override
-    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName,
-            BusinessEntity businessEntity) {
+    public Long getDataQuotaLimit(CustomerSpace customerSpace, String componentName, BusinessEntity businessEntity) {
         try {
             Long dataQuotaLimit = null;
             Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
                     componentName);
             Path entityDataQuotaPath = null;
             switch (businessEntity) {
-                case Account:
-                    entityDataQuotaPath = path.append("AccountQuotaLimit");
-                    break;
-                case Contact:
-                    entityDataQuotaPath = path.append("ContactQuotaLimit");
-                    break;
-                case Product:
-                    entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
-                    break;
-                case Transaction:
-                    entityDataQuotaPath = path.append("TransactionQuotaLimit");
-                    break;
-                default:
-                    break;
+            case Account:
+                entityDataQuotaPath = path.append("AccountQuotaLimit");
+                break;
+            case Contact:
+                entityDataQuotaPath = path.append("ContactQuotaLimit");
+                break;
+            case Product:
+                entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
+                break;
+            case Transaction:
+                entityDataQuotaPath = path.append("TransactionQuotaLimit");
+                break;
+            default:
+                break;
             }
             Camille camille = CamilleEnvironment.getCamille();
             if (entityDataQuotaPath != null && camille.exists(entityDataQuotaPath)) {
@@ -203,14 +221,14 @@ public class ZKConfigServiceImpl implements ZKConfigService {
                     componentName);
             Path entityDataQuotaPath = null;
             switch (type) {
-                case Analytic:
-                    entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
-                    break;
-                case Spending:
-                    entityDataQuotaPath = path.append("ProductSKUsQuotaLimit");
-                    break;
-                default:
-                    break;
+            case Analytic:
+                entityDataQuotaPath = path.append("ProductBundlesQuotaLimit");
+                break;
+            case Spending:
+                entityDataQuotaPath = path.append("ProductSKUsQuotaLimit");
+                break;
+            default:
+                break;
             }
             Camille camille = CamilleEnvironment.getCamille();
             if (entityDataQuotaPath != null && camille.exists(entityDataQuotaPath)) {

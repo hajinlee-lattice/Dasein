@@ -65,8 +65,7 @@ public abstract class BaseRestApiProxy {
             org.apache.commons.httpclient.util.TimeoutController.TimeoutException.class, //
             org.springframework.web.context.request.async.AsyncRequestTimeoutException.class, //
             io.netty.handler.timeout.TimeoutException.class, //
-            org.apache.http.NoHttpResponseException.class,
-            org.springframework.web.client.ResourceAccessException.class,
+            org.apache.http.NoHttpResponseException.class, org.springframework.web.client.ResourceAccessException.class,
             java.io.IOException.class);
 
     private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset");
@@ -104,8 +103,7 @@ public abstract class BaseRestApiProxy {
 
     protected BaseRestApiProxy(String hostport, String rootpath, Object... urlVariables) {
         this.hostport = hostport;
-        this.rootpath = StringUtils.isEmpty(rootpath) ? ""
-                : new UriTemplate(rootpath).expand(urlVariables).toString();
+        this.rootpath = StringUtils.isEmpty(rootpath) ? "" : new UriTemplate(rootpath).expand(urlVariables).toString();
         this.restTemplate = HttpClientUtils.newRestTemplate();
         this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
         this.noTracingTemplate = HttpClientUtils.newRestTemplate();
@@ -121,22 +119,19 @@ public abstract class BaseRestApiProxy {
 
     private void initialConfig() {
         if (StringUtils.isNotBlank(PropertyUtils.getProperty("proxy.retry.maxAttempts"))) {
-            this.maxAttempts = Integer
-                    .valueOf(PropertyUtils.getProperty("proxy.retry.maxAttempts"));
+            this.maxAttempts = Integer.valueOf(PropertyUtils.getProperty("proxy.retry.maxAttempts"));
         }
         if (StringUtils.isNotBlank(PropertyUtils.getProperty("proxy.retry.multiplier"))) {
             this.multiplier = Double.valueOf(PropertyUtils.getProperty("proxy.retry.multiplier"));
         }
         if (StringUtils.isNotBlank(PropertyUtils.getProperty("proxy.retry.initialwaitmsec"))) {
-            this.initialWaitMsec = Long
-                    .valueOf(PropertyUtils.getProperty("proxy.retry.initialwaitmsec"));
+            this.initialWaitMsec = Long.valueOf(PropertyUtils.getProperty("proxy.retry.initialwaitmsec"));
         }
     }
 
-    protected <B> ProxyRetryTemplate getRetryTemplate(final String method, HttpMethod verb,
-            final String url, final boolean logBody, final B body) {
-        ProxyRetryTemplate retryTemplate = new ProxyRetryTemplate(maxAttempts, initialWaitMsec,
-                multiplier);
+    protected <B> ProxyRetryTemplate getRetryTemplate(final String method, HttpMethod verb, final String url,
+            final boolean logBody, final B body) {
+        ProxyRetryTemplate retryTemplate = new ProxyRetryTemplate(maxAttempts, initialWaitMsec, multiplier);
         retryTemplate.setRetryExceptions(retryExceptions);
         retryTemplate.setRetryMessages(retryMessages);
         retryTemplate.setMethod(method);
@@ -154,6 +149,19 @@ public abstract class BaseRestApiProxy {
 
     protected String constructUrl(Object path, Object... variables) {
         if (hostport == null || hostport.equals("")) {
+            throw new NullPointerException("hostport must be set");
+        }
+
+        String end = rootpath;
+        if (path != null) {
+            String expandedPath = new UriTemplate(path.toString()).expand(variables).toString();
+            end = combine(rootpath, expandedPath);
+        }
+        return combine(hostport, end);
+    }
+
+    protected String constructUrl(String hostport, Object path, Object... variables) {
+        if (StringUtils.isBlank(hostport)) {
             throw new NullPointerException("hostport must be set");
         }
 
@@ -224,8 +232,7 @@ public abstract class BaseRestApiProxy {
 
     void setMagicAuthHeader(RestTemplate template) {
         MagicAuthenticationHeaderHttpRequestInterceptor authHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(
-                template.getInterceptors());
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(template.getInterceptors());
         interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
         headers.put(Constants.INTERNAL_SERVICE_HEADERNAME, Constants.INTERNAL_SERVICE_HEADERVALUE);
@@ -233,10 +240,8 @@ public abstract class BaseRestApiProxy {
     }
 
     void setAuthHeader(String authToken) {
-        AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(
-                authToken);
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(
-                restTemplate.getInterceptors());
+        AuthorizationHeaderHttpRequestInterceptor authHeader = new AuthorizationHeaderHttpRequestInterceptor(authToken);
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         interceptors.add(authHeader);
         restTemplate.setInterceptors(interceptors);
@@ -275,8 +280,7 @@ public abstract class BaseRestApiProxy {
         return postKryo(method, url, body, null);
     }
 
-    protected <T, B> T postKryo(final String method, final String url, final B body,
-            final Class<T> returnValueClazz) {
+    protected <T, B> T postKryo(final String method, final String url, final B body, final Class<T> returnValueClazz) {
         return post(method, url, body, returnValueClazz, true, true);
     }
 
@@ -284,13 +288,12 @@ public abstract class BaseRestApiProxy {
         post(method, url, body, Object.class, true, false);
     }
 
-    protected <T, B> T post(final String method, final String url, final B body,
-            final Class<T> returnValueClazz) {
+    protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {
         return post(method, url, body, returnValueClazz, true, false);
     }
 
-    protected <T, B> T post(final String method, final String url, final B body,
-            final Class<T> returnValueClazz, final boolean logBody, final boolean useKryo) {
+    protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz,
+            final boolean logBody, final boolean useKryo) {
         HttpMethod verb = HttpMethod.POST;
         RetryTemplate retry = getRetryTemplate(method, verb, url, logBody, body);
         return retry.execute(context -> {
@@ -299,15 +302,14 @@ public abstract class BaseRestApiProxy {
         });
     }
 
-    protected <T> T postMultiPart(final String method, final String url,
-            final MultiValueMap<String, Object> parts, final Class<T> returnValueClazz) {
+    protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts,
+            final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate(method, HttpMethod.POST, url, false, null);
         return retry.execute(context -> {
             logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts,
-                    headers);
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
             RestTemplate newRestTemplate = HttpClientUtils.newRestTemplate();
             List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
             for (ClientHttpRequestInterceptor interceptor : restTemplate.getInterceptors()) {
@@ -317,14 +319,13 @@ public abstract class BaseRestApiProxy {
                 }
             }
             newRestTemplate.setInterceptors(interceptors);
-            ResponseEntity<T> response = newRestTemplate.exchange(url, HttpMethod.POST,
-                    requestEntity, returnValueClazz);
+            ResponseEntity<T> response = newRestTemplate.exchange(url, HttpMethod.POST, requestEntity,
+                    returnValueClazz);
             return response.getBody();
         });
     }
 
-    protected <T> T postForUrlEncoded(final String method, final String url,
-            final Class<T> returnValueClazz) {
+    protected <T> T postForUrlEncoded(final String method, final String url, final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate(method, HttpMethod.POST, url, false, null);
         return retry.execute(context -> {
             logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
@@ -356,13 +357,12 @@ public abstract class BaseRestApiProxy {
         put(method, url, body, null, logBody, false);
     }
 
-    protected <B, T> T put(final String method, final String url, final B body,
-            Class<T> returnClz) {
+    protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz) {
         return put(method, url, body, returnClz, false, false);
     }
 
-    protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz,
-            boolean logBody, boolean kryo) {
+    protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz, boolean logBody,
+            boolean kryo) {
         HttpMethod verb = HttpMethod.PUT;
         RetryTemplate retry = getRetryTemplate(method, verb, url, logBody, body);
         return retry.execute(context -> {
@@ -395,8 +395,7 @@ public abstract class BaseRestApiProxy {
         });
     }
 
-    protected <T> List<T> getList(final String method, final String url,
-            final Class<T> returnValueClazz) {
+    protected <T> List<T> getList(final String method, final String url, final Class<T> returnValueClazz) {
         List<?> list = get(method, url, List.class, false);
         return JsonUtils.convertList(list, returnValueClazz);
     }
@@ -409,8 +408,7 @@ public abstract class BaseRestApiProxy {
         return get(method, url, returnValueClazz, false);
     }
 
-    protected <T> T getKryo(final String method, final String url,
-            final Class<T> returnValueClazz) {
+    protected <T> T getKryo(final String method, final String url, final Class<T> returnValueClazz) {
         return get(method, url, returnValueClazz, true);
     }
 
@@ -419,8 +417,8 @@ public abstract class BaseRestApiProxy {
         return get(method, url, returnValueClazz, useKryo, true);
     }
 
-    private <T> T get(final String method, final String url, final Class<T> returnValueClazz,
-            boolean useKryo, boolean instrumentTracing) {
+    private <T> T get(final String method, final String url, final Class<T> returnValueClazz, boolean useKryo,
+            boolean instrumentTracing) {
         final HttpMethod verb = HttpMethod.GET;
         RetryTemplate retry = getRetryTemplate(method, verb, url, false, null);
         return retry.execute(context -> {
@@ -433,10 +431,8 @@ public abstract class BaseRestApiProxy {
         RetryTemplate retry = getRetryTemplate(method, HttpMethod.GET, url, false, null);
         return retry.execute(retryContext -> {
             logInvocation(method, url, HttpMethod.GET, retryContext.getRetryCount() + 1);
-            ContentDisposition contentDisposition = ContentDisposition
-                    .builder("attachment")
-                    .filename("downloaded_file.csv")
-                    .build();
+            ContentDisposition contentDisposition = ContentDisposition.builder("attachment")
+                    .filename("downloaded_file.csv").build();
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Collections.singletonList(MediaType.APPLICATION_OCTET_STREAM));
             headers.setContentDisposition(contentDisposition);
@@ -497,9 +493,9 @@ public abstract class BaseRestApiProxy {
     }
 
     /**
-     * Reactive api won't start fetching right away. Data transmission starts
-     * when the flux is first time subscribed. Retry should handle retry in
-     * callers, because it may be an infinite stream
+     * Reactive api won't start fetching right away. Data transmission starts when
+     * the flux is first time subscribed. Retry should handle retry in callers,
+     * because it may be an infinite stream
      */
     protected <T> Mono<T> getMono(String channel, String url, Class<T> clz) {
         RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.GET, null, false);
@@ -509,8 +505,7 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T> Mono<T> getMonoKryo(String channel, String url, Class<T> clz) {
-        WebClient.RequestHeadersSpec<?> request = prepareKryoReactiveRequest(url, HttpMethod.GET,
-                null);
+        WebClient.RequestHeadersSpec<?> request = prepareKryoReactiveRequest(url, HttpMethod.GET, null);
         Mono<T> mono = extractKryoMono(request, clz);
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
@@ -529,8 +524,7 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T, P> Mono<T> postMono(String channel, String url, P payload, Class<T> clz) {
-        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.POST, payload,
-                false);
+        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
         Mono<T> mono = request.retrieve().bodyToMono(clz);
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
@@ -544,19 +538,16 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <K, V, P> Mono<Map<K, V>> postMapMono(String channel, String url, P payload) {
-        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.POST, payload,
-                false);
-        Mono<Map<K, V>> mono = request.retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<K, V>>() {
-                });
+        RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
+        Mono<Map<K, V>> mono = request.retrieve().bodyToMono(new ParameterizedTypeReference<Map<K, V>>() {
+        });
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
     }
 
     private <T> Mono<T> extractKryoMono(WebClient.RequestHeadersSpec<?> request, Class<T> clz) {
         return request.retrieve().bodyToMono(ByteBuffer.class) //
-                .map(byteBuffer -> KryoUtils.read(new ByteArrayInputStream(byteBuffer.array()),
-                        clz));
+                .map(byteBuffer -> KryoUtils.read(new ByteArrayInputStream(byteBuffer.array()), clz));
     }
 
     private <T> Mono<T> appendMonoHandler(Mono<T> mono, String channel) {
@@ -568,34 +559,30 @@ public abstract class BaseRestApiProxy {
             } else {
                 return Mono.error(throwable);
             }
-        }).retryWhen(
-                companion -> companion.zipWith(Flux.range(1, maxAttempts), (error, attempt) -> {
-                    if (attempt < maxAttempts) {
-                        String reason = ErrorUtils.shouldRetryFor(error, retryExceptions,
-                                retryMessages);
-                        if (StringUtils.isNotBlank(reason)) {
-                            log.warn(String.format(
-                                    "%s (Attempt=%d): Remote call failure, will retry: %s", channel, //
-                                    attempt, reason));
-                        } else {
-                            attempt = maxAttempts;
-                        }
-                    }
-                    if (attempt >= maxAttempts) {
-                        throw Exceptions.propagate(error);
-                    }
-                    return attempt;
-                }).flatMap(attempt -> {
-                    Mono<Long> delay = Mono.delay(Duration.ofMillis(backoff.get()));
-                    backoff.set((long) (backoff.get() * multiplier));
-                    return delay;
-                }));
+        }).retryWhen(companion -> companion.zipWith(Flux.range(1, maxAttempts), (error, attempt) -> {
+            if (attempt < maxAttempts) {
+                String reason = ErrorUtils.shouldRetryFor(error, retryExceptions, retryMessages);
+                if (StringUtils.isNotBlank(reason)) {
+                    log.warn(String.format("%s (Attempt=%d): Remote call failure, will retry: %s", channel, //
+                            attempt, reason));
+                } else {
+                    attempt = maxAttempts;
+                }
+            }
+            if (attempt >= maxAttempts) {
+                throw Exceptions.propagate(error);
+            }
+            return attempt;
+        }).flatMap(attempt -> {
+            Mono<Long> delay = Mono.delay(Duration.ofMillis(backoff.get()));
+            backoff.set((long) (backoff.get() * multiplier));
+            return delay;
+        }));
     }
 
     private <T> Flux<T> appendLogInterceptors(Flux<T> flux, String channel, String url) {
         return flux //
-                .doOnCancel(() -> log
-                        .info(String.format("Cancel reading %s flux from %s", channel, url)))
+                .doOnCancel(() -> log.info(String.format("Cancel reading %s flux from %s", channel, url)))
                 .onErrorResume(throwable -> {
                     log.warn(String.format("Failed to read %s flux from %s", channel, url));
                     return Flux.error(throwable);
@@ -604,8 +591,7 @@ public abstract class BaseRestApiProxy {
 
     private <T> Mono<T> appendLogInterceptors(Mono<T> mono, String channel, String url) {
         return mono //
-                .doOnCancel(() -> log
-                        .info(String.format("Cancel reading %s mono from %s", channel, url)))
+                .doOnCancel(() -> log.info(String.format("Cancel reading %s mono from %s", channel, url)))
                 .onErrorResume(throwable -> {
                     log.warn(String.format("Failed to read %s mono from %s", channel, url));
                     return Mono.error(throwable);
@@ -613,8 +599,7 @@ public abstract class BaseRestApiProxy {
     }
 
     @SuppressWarnings("rawtypes")
-    private <P> WebClient.RequestHeadersSpec prepareKryoReactiveRequest(String url,
-            HttpMethod method, P payload) {
+    private <P> WebClient.RequestHeadersSpec prepareKryoReactiveRequest(String url, HttpMethod method, P payload) {
         WebClient.RequestHeadersSpec request;
 
         if (payload != null) {
@@ -630,8 +615,8 @@ public abstract class BaseRestApiProxy {
     }
 
     @SuppressWarnings("rawtypes")
-    private <P> WebClient.RequestHeadersSpec<?> prepareReactiveRequest(String url,
-            HttpMethod method, P payload, boolean streaming) {
+    private <P> WebClient.RequestHeadersSpec<?> prepareReactiveRequest(String url, HttpMethod method, P payload,
+            boolean streaming) {
         WebClient.RequestHeadersSpec request;
 
         if (payload != null) {
@@ -655,13 +640,12 @@ public abstract class BaseRestApiProxy {
         logInvocation(method, url, verb, attempt, null, false);
     }
 
-    private <P> void logInvocation(String method, String url, HttpMethod verb, Integer attempt,
-            P payload, boolean logPlayload) {
+    private <P> void logInvocation(String method, String url, HttpMethod verb, Integer attempt, P payload,
+            boolean logPlayload) {
         if (log.isDebugEnabled()) {
             String msg = String.format("Invoking %s by %s url %s", method, verb, url);
             if (logPlayload) {
-                msg += String.format(" with body %s",
-                        payload == null ? "null" : payload.toString());
+                msg += String.format(" with body %s", payload == null ? "null" : payload.toString());
             }
             if (attempt != null) {
                 msg += String.format(".  (Attempt=%d)", attempt);
