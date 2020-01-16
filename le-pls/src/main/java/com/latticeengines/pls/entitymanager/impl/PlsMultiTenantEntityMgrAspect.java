@@ -32,21 +32,6 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.find*(..))")
-    public void findPdSegment(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.update*(..))")
-    public void updatePdSegment(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.pls.entitymanager.impl.PdSegmentEntityMgrImpl.delete*(..))")
-    public void deletePdSegment(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
     @Before("execution(* com.latticeengines.db.entitymgr.impl.ReportEntityMgrImpl.find*(..))")
     public void findReport(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);

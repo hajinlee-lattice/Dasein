@@ -82,7 +82,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
         batonService.createTenant(contractId, tenantId, spaceId, spaceInfo);
 
         SpaceConfiguration spaceConfiguration = new SpaceConfiguration();
-        spaceConfiguration.setProducts(Collections.singletonList(LatticeProduct.LPA));
+        spaceConfiguration.setProducts(Collections.singletonList(LatticeProduct.LPA3));
         batonService.setupSpaceConfiguration(contractId, tenantId, spaceId, spaceConfiguration);
 
         customerSpace = CustomerSpace.parse(tenantId);
