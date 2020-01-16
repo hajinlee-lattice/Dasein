@@ -1,7 +1,7 @@
 //import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
 //import com.fasterxml.jackson.databind.node.{ObjectNode,ArrayNode,BooleanNode}
 //import com.fasterxml.jackson.module.scala.DefaultScalaModule
-//import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+//import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
 //import org.apache.spark.sql.DataFrame
 //import org.apache.spark.sql.functions._
 //val mapper = new ObjectMapper() with ScalaObjectMapper

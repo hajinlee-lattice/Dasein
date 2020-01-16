@@ -4,8 +4,7 @@ import java.io.StringWriter
 
 import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit.StorageType
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit

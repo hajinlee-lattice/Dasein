@@ -1,18 +1,16 @@
 package com.latticeengines.spark.exposed.job.cdl
 
-import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants
-import com.latticeengines.domain.exposed.metadata.InterfaceName
+import java.io.StringWriter
 
-import org.apache.spark.sql.expressions.MutableAggregationBuffer
-import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
+import com.latticeengines.domain.exposed.metadata.InterfaceName
+import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants
 import org.apache.spark.sql._
+import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
 import org.apache.spark.sql.types._
 
-import scala.collection.mutable.Map
-import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
-import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
-import java.io.StringWriter;
+import scala.collection.mutable.Map;
 
 class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDefinedAggregateFunction {
 
