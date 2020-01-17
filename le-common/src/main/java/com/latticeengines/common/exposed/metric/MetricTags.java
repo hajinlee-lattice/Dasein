@@ -37,4 +37,13 @@ public class MetricTags {
         public static final String TAG_ENTITY = "Entity";
         public static final String TAG_IS_NEWLY_ALLOCATED = "NewlyAllocated";
     }
+
+    /*-
+     * tags for tests
+     */
+    public static class Test {
+        public static final String TAG_TEST_GROUP = "TestGroup";
+        public static final String TAG_TEST_CLASS = "TestClass";
+        public static final String TAG_TEST_METHOD = "TestMethod";
+    }
 }
