@@ -78,12 +78,12 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         List<String> input = new ArrayList<>();
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("Id", Integer.class), //
-                Pair.of("system1__Attr1", String.class), //
-                Pair.of("system2__Attr1", String.class), //
-                Pair.of("system2__Attr2", String.class), //
-                Pair.of("system2__" + InterfaceName.CustomerAccountId.name(), String.class), //
-                Pair.of("system3__Attr1", String.class), //
-                Pair.of("system3__Attr2", String.class) //
+                Pair.of("template1__Attr1", String.class), //
+                Pair.of("template2__Attr1", String.class), //
+                Pair.of("template2__Attr2", String.class), //
+                Pair.of("template2__" + InterfaceName.CustomerAccountId.name(), String.class), //
+                Pair.of("template3__Attr1", String.class), //
+                Pair.of("template3__Attr2", String.class) //
         );
         Object[][] data = getInput1Data();
         input.add(uploadHdfsDataUnit(data, fields));
@@ -102,7 +102,7 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
     private MergeSystemBatchConfig getConfigForSingleSystem() {
         MergeSystemBatchConfig config = new MergeSystemBatchConfig();
         config.setJoinKey("Id");
-        config.setSystems(Arrays.asList("system2"));
+        config.setTemplates(Arrays.asList("template2"));
         return config;
     }
 
@@ -110,7 +110,7 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         MergeSystemBatchConfig config = new MergeSystemBatchConfig();
         config.setJoinKey("Id");
         config.setKeepPrefix(true);
-        config.setSystems(Arrays.asList("system1", "system2"));
+        config.setTemplates(Arrays.asList("template1", "template2"));
         return config;
     }
 
@@ -148,26 +148,29 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
             Assert.assertEquals(record.getSchema().getFields().size(), 5, record.toString());
             int id = (int) record.get("Id");
-            String prefix = "system1__";
-            String system1Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
-            prefix = "system2__";
-            String system2Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
-            String system2Attr2 = record.get(prefix + "Attr2") == null ? null : record.get(prefix + "Attr2").toString();
-            String system2attr3 = record.get(prefix + InterfaceName.CustomerAccountId.name()) == null ? null
+            String prefix = "template1__";
+            String template1Attr1 = record.get(prefix + "Attr1") == null ? null
+                    : record.get(prefix + "Attr1").toString();
+            prefix = "template2__";
+            String template2Attr1 = record.get(prefix + "Attr1") == null ? null
+                    : record.get(prefix + "Attr1").toString();
+            String template2Attr2 = record.get(prefix + "Attr2") == null ? null
+                    : record.get(prefix + "Attr2").toString();
+            String template2attr3 = record.get(prefix + InterfaceName.CustomerAccountId.name()) == null ? null
                     : record.get(prefix + InterfaceName.CustomerAccountId.name()).toString();
             switch (id) {
             case 1:
-                Assert.assertEquals(system1Attr1, "1_1", record.toString());
-                Assert.assertEquals(system2Attr1, "2_1", record.toString());
-                Assert.assertEquals(system2Attr2, "2_2", record.toString());
-                Assert.assertEquals(system2attr3, "2_3", record.toString());
+                Assert.assertEquals(template1Attr1, "1_1", record.toString());
+                Assert.assertEquals(template2Attr1, "2_1", record.toString());
+                Assert.assertEquals(template2Attr2, "2_2", record.toString());
+                Assert.assertEquals(template2attr3, "2_3", record.toString());
 
                 break;
             case 2:
-                Assert.assertEquals(system1Attr1, "1_1b", record.toString());
-                Assert.assertEquals(system2Attr1, "2_1b", record.toString());
-                Assert.assertEquals(system2Attr2, "2_2b", record.toString());
-                Assert.assertEquals(system2attr3, "2_3b", record.toString());
+                Assert.assertEquals(template1Attr1, "1_1b", record.toString());
+                Assert.assertEquals(template2Attr1, "2_1b", record.toString());
+                Assert.assertEquals(template2Attr2, "2_2b", record.toString());
+                Assert.assertEquals(template2attr3, "2_3b", record.toString());
 
                 break;
             default:
@@ -184,7 +187,7 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         config.setJoinKey("Id");
         config.setKeepPrefix(false);
         config.setNotOverwriteByNull(true);
-        config.setSystems(Arrays.asList("system2", "system3"));
+        config.setTemplates(Arrays.asList("template2", "template3"));
         return config;
     }
 

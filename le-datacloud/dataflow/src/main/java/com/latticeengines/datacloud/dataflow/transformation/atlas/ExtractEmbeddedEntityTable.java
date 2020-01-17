@@ -52,7 +52,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @Component(ExtractEmbeddedEntityTable.DATAFLOW_BEAN_NAME)
 public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbeddedEntityTableConfig> {
     private static final Logger log = LoggerFactory.getLogger(ExtractEmbeddedEntityTable.class);
-    private static final String SYSTEM_COLUMN = "__system__";
+    private static final String TEMPLATE_COLUMN = "__template__";
     public static final String DATAFLOW_BEAN_NAME = "ExtractEmbeddedEntityTableFlow";
     public static final String TRANSFORMER_NAME = TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 
@@ -88,7 +88,7 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
                 .join(new FieldList(ENTITY_ID_FIELD), embeddedEntities, new FieldList(ENTITYID_JOIN), JoinType.INNER)
                 .discard(ENTITYID_JOIN);
         if (StringUtils.isNotBlank(config.getSystem())) {
-            result = result.addColumnWithFixedValue(SYSTEM_COLUMN, config.getSystem(), String.class);
+            result = result.addColumnWithFixedValue(TEMPLATE_COLUMN, config.getSystem(), String.class);
         }
         log.info("fields=" + String.join(",", result.getFieldNames()));
         return result;

@@ -297,7 +297,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     TransformationStepConfig upsertSystemBatch(int mergeStep, boolean setTarget) {
         TransformationStepConfig step = new TransformationStepConfig();
-        String batchSystemName = setupSystemBatchTable(step);
+        String batchTemplateName = setupSystemBatchTable(step);
         step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
         if (setTarget) {
@@ -305,7 +305,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         }
         UpsertConfig config = getUpsertConfig(true, true);
         config.setInputSystemBatch(true);
-        config.setBatchSystemName(batchSystemName);
+        config.setBatchTemplateName(batchTemplateName);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }

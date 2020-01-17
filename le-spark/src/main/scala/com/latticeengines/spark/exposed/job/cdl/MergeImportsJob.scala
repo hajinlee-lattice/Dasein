@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 
 class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
-  private val systemColumn = "__system__"
+  private val templateColumn = "__template__"
   private var hasSystem = false
   
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeImportsConfig]): Unit = {
@@ -20,19 +20,19 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     val inputDfs = lattice.input
     val joinKey = config.getJoinKey
     val srcId = config.getSrcId
-    val systems = config.getSystems
+    val templates = config.getTemplates
     hasSystem = config.isHasSystem
     var processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
         config.getRenameSrcFields, config.getCloneSrcFields) }
     println("----- BEGIN SCRIPT OUTPUT -----")
-    println(s"systems is: $systems")
+    println(s"templates is: $templates")
     println("----- END SCRIPT OUTPUT -----")
 
-    if (systems != null) {
-        processedInputs = processedInputs.zip(systems.asScala.toList) map { e =>
+    if (templates != null) {
+        processedInputs = processedInputs.zip(templates.asScala.toList) map { e =>
           val df = e._1
-          val system = e._2
-          addSystemColumn(df, system) 
+          val template = e._2
+          addTemplateColumn(df, template) 
         }
     }
     val merged = processedInputs.zipWithIndex.reduce((l, r) => {
@@ -44,7 +44,7 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
         if (joinKey != null && lhsDf.columns.contains(joinKey) && rhsDf.columns.contains(joinKey)) {
           var joinKeysForThisJoin = Seq(joinKey)
           if (hasSystem) {
-              joinKeysForThisJoin = joinKeysForThisJoin :+ systemColumn
+              joinKeysForThisJoin = joinKeysForThisJoin :+ templateColumn
           }
           MergeUtils.merge2(lhsDf, rhsDf, joinKeysForThisJoin, Set(), overwriteByNull = false)
         } else {
@@ -164,11 +164,11 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     }
   }
 
-   private def addSystemColumn(df: DataFrame, system: String): DataFrame = {
-    if (df.columns.contains(systemColumn)) {
+   private def addTemplateColumn(df: DataFrame, template: String): DataFrame = {
+    if (df.columns.contains(templateColumn)) {
       df
     } else {
-      df.withColumn(systemColumn, lit(system))
+      df.withColumn(templateColumn, lit(template))
     }
   }
    

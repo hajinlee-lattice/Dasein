@@ -36,7 +36,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
     // All the schema should have AccountId field as row identifier for result
     // verification
     private static final String[] FIELDS1 = { InterfaceName.Id.name(), "AID1" };
-    private static final String[] FIELDS1_EXPECTED = { InterfaceName.Id.name(), "AID1", "__system__" };
+    private static final String[] FIELDS1_EXPECTED = { InterfaceName.Id.name(), "AID1", "__template__" };
     private static final String[] FIELDS3 = { InterfaceName.Id.name(), "AID1", "AID2" };
     private static final String[] FIELDS4 = { InterfaceName.Id.name(), InterfaceName.AccountId.name(), "AID1", "AID2" };
     @Test(groups = "functional")
@@ -63,7 +63,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setDedupSrc(false);
         config.setJoinKey(null);
         config.setAddTimestamps(false);
-        config.setSystems(Arrays.asList("system1", "system2"));
+        config.setTemplates(Arrays.asList("template1", "template2"));
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace1());
         verify(result, Collections.singletonList(this::verifyTarget1));
     }
@@ -94,10 +94,10 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyTarget1(HdfsDataUnit tgt) {
         Object[][] expectedResult = new String[][] { //
-                { "1", "A1", "system1" }, //
-                { "2", "A2", "system1" }, //
-                { "3", "A1", "system2" }, //
-                { "4", "A3", "system2" }, //
+                { "1", "A1", "template1" }, //
+                { "2", "A2", "template1" }, //
+                { "3", "A1", "template2" }, //
+                { "4", "A3", "template2" }, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> (String) arr[0], Arrays::asList));
@@ -121,7 +121,7 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
         config.setAddTimestamps(true);
         config.setHasSystem(true);
         config.setRequiredColumns(ImmutableMap.of("Id1", "string", "Id2", "long"));
-        config.setSystems(Arrays.asList("system1", "system2"));
+        config.setTemplates(Arrays.asList("template1", "template2"));
         SparkJobResult result = runSparkJob(MergeImportsJob.class, config, orderedInput, getWorkspace2());
         verify(result, Collections.singletonList(this::verifyTarget2));
     }
@@ -152,17 +152,17 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyTarget2(HdfsDataUnit tgt) {
         Object[][] expectedResult = new String[][] { //
-                { "1", "A1", "system1" }, //
-                { "1", "A1", "system2" }, //
-                { "2", "A2", "system1"}, //
-                { "3", "A3", "system2"}, //
+                { "1", "A1", "template1" }, //
+                { "1", "A1", "template2" }, //
+                { "2", "A2", "template1" }, //
+                { "3", "A3", "template2" }, //
         };
         Map<String, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> (String) arr[0] + "-" + (String) arr[2], Arrays::asList));
         Iterator<GenericRecord> iter = verifyAndReadTarget(tgt);
         int rows = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iter) {
-            verifyTargetData(FIELDS1_EXPECTED, expectedMap, record, "__system__");
+            verifyTargetData(FIELDS1_EXPECTED, expectedMap, record, "__template__");
             Schema schema = record.getSchema();
             verifyFieldOfType(schema, "Id1", String.class);
             verifyFieldOfType(schema, "Id2", Long.class);
@@ -349,14 +349,14 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
      ******************/
 
     private void verifyTargetData(String[] fields, Map<String, List<Object>> expectedMap, GenericRecord record,
-            String system) {
+            String template) {
         log.info(record.toString());
         Assert.assertNotNull(record);
         Assert.assertNotNull(record.get(InterfaceName.Id.name()));
         String id = record.get(InterfaceName.Id.name()).toString();
-        if (StringUtils.isNotBlank(system)) {
-            String systemName = record.get(system).toString();
-            id = id + "-" + systemName;
+        if (StringUtils.isNotBlank(template)) {
+            String templateName = record.get(template).toString();
+            id = id + "-" + templateName;
         }
         List<Object> expected = expectedMap.get(id);
         Assert.assertNotNull(expected);

@@ -17,10 +17,11 @@ public class MergeSystemBatchConfig extends SparkJobConfig {
     private Boolean notOverwriteByNull; // if new data is null, it won't overwrite old data
 
     @JsonProperty("KeepPrefix")
-    private boolean keepPrefix; // if keep system as the prefix in the column name
+    private boolean keepPrefix; // if keep template as the prefix in the column
+                                // name
 
-    @JsonProperty("Systems")
-    private List<String> systems; // increasing priority
+    @JsonProperty("Templates")
+    private List<String> templates; // increasing priority
 
     @Override
     @JsonProperty("Name")
@@ -50,12 +51,12 @@ public class MergeSystemBatchConfig extends SparkJobConfig {
         this.notOverwriteByNull = notOverwriteByNull;
     }
 
-    public List<String> getSystems() {
-        return systems;
+    public List<String> getTemplates() {
+        return templates;
     }
 
-    public void setSystems(List<String> systems) {
-        this.systems = systems;
+    public void setTemplates(List<String> templates) {
+        this.templates = templates;
     }
 
     public boolean isKeepPrefix() {

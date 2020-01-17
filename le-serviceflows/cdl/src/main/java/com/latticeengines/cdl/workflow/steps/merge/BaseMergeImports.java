@@ -102,7 +102,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
     Map<BusinessEntity, Boolean> softDeleteEntities;
-    protected Map<String, String> tableSystemMap;
+    protected Map<String, String> tableTemplateMap;
 
     protected boolean hasSystemBatch;
 
@@ -150,9 +150,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         if (entityImportsMap == null) {
             return;
         }
-        tableSystemMap = getMapObjectFromContext(CONSOLIDATE_INPUT_SYSTEMS, String.class, String.class);
-        hasSystemBatch = MapUtils.isNotEmpty(tableSystemMap) && systemBatchStore != null;
-        log.info("Has Batch System=" + hasSystemBatch);
+        tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class, String.class);
+        hasSystemBatch = MapUtils.isNotEmpty(tableTemplateMap) && systemBatchStore != null;
+        log.info("Has System Batch=" + hasSystemBatch);
         List<DataFeedImport> imports = JsonUtils.convertList(entityImportsMap.get(entity), DataFeedImport.class);
         if (CollectionUtils.isNotEmpty(imports)) {
             List<Table> tables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
@@ -249,12 +249,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         if (!hasSystemBatch) {
             return;
         }
-        List<String> systems = new ArrayList<>();
+        List<String> templates = new ArrayList<>();
         inputTableNames.forEach(t -> {
-            log.info("inputTable=" + t + ", systemName=" + tableSystemMap.get(t));
-            systems.add(tableSystemMap.get(t));
+            log.info("inputTable=" + t + ", templateName=" + tableTemplateMap.get(t));
+            templates.add(tableTemplateMap.get(t));
         });
-        config.setSystems(systems);
+        config.setTemplates(templates);
     }
 
     TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions) {

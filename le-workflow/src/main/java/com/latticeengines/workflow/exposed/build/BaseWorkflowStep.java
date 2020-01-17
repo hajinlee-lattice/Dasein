@@ -117,7 +117,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVENT_COUNTER_MAP = "EVENT_COUNTER_MAP";
 
     // CDL
-    public static final String CONSOLIDATE_INPUT_SYSTEMS = "CONSOLIDATE_INPUT_SYSTEMS";
+    public static final String CONSOLIDATE_INPUT_TEMPLATES = "CONSOLIDATE_INPUT_TEMPLATES";
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
     public static final String SOFT_DEELETE_ACTIONS = "SOFT_DEELETE_ACTIONS";
     public static final String HARD_DEELETE_ACTIONS = "HARD_DEELETE_ACTIONS";

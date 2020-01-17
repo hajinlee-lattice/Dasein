@@ -25,8 +25,8 @@ public class MergeImportsConfig extends SparkJobConfig {
     @JsonProperty("hasSystem")
     private boolean hasSystem;
 
-    @JsonProperty("Systems")
-    private List<String> systems;
+    @JsonProperty("Templates")
+    private List<String> templates;
 
     @JsonProperty("AddTimestamps")
     private boolean addTimestamps; // add cdl timestamp cols
@@ -132,12 +132,12 @@ public class MergeImportsConfig extends SparkJobConfig {
         this.cloneSrcFields = cloneSrcFields;
     }
 
-    public List<String> getSystems() {
-        return systems;
+    public List<String> getTemplates() {
+        return templates;
     }
 
-    public void setSystems(List<String> systems) {
-        this.systems = systems;
+    public void setTemplates(List<String> templates) {
+        this.templates = templates;
     }
 
 }

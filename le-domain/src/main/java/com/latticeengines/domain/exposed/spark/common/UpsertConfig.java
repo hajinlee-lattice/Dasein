@@ -26,8 +26,8 @@ public class UpsertConfig extends SparkJobConfig {
     @JsonProperty("InputSystemBatch")
     private boolean inputSystemBatch;
 
-    @JsonProperty("BatchSystemName")
-    private String batchSystemName;
+    @JsonProperty("BatchTemplateName")
+    private String batchTemplateName;
 
     @Override
     @JsonProperty("Name")
@@ -81,12 +81,12 @@ public class UpsertConfig extends SparkJobConfig {
         this.inputSystemBatch = inputSystemBatch;
     }
 
-    public String getBatchSystemName() {
-        return batchSystemName;
+    public String getBatchTemplateName() {
+        return batchTemplateName;
     }
 
-    public void setBatchSystemName(String batchSystemName) {
-        this.batchSystemName = batchSystemName;
+    public void setBatchTemplateName(String batchTemplateName) {
+        this.batchTemplateName = batchTemplateName;
     }
 
 }
