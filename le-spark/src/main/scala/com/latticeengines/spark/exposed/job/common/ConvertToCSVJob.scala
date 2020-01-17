@@ -6,6 +6,7 @@ import java.util.TimeZone
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import com.latticeengines.spark.util.CSVUtils
 import org.apache.commons.collections4.MapUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.functions.{col, lit, udf, when}
@@ -43,19 +44,16 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     } else {
       val attrsToFmt: Map[String, String] = config.getDateAttrsFmt.asScala.toMap
         .filterKeys(input.columns.contains(_))
-      val suffix = scala.util.Random.nextString(6)
       val tz =
         if (config.getTimeZone == null)
-        TimeZone.getTimeZone("UTC")
-      else
-        TimeZone.getTimeZone(config.getTimeZone)
-      val originalCols = input.columns.clone
+          TimeZone.getTimeZone("UTC")
+        else
+          TimeZone.getTimeZone(config.getTimeZone)
       input.columns.foldLeft(input)((df, c) => {
         if (attrsToFmt.contains(c)) {
           val fmtr = new SimpleDateFormat(attrsToFmt(c))
           fmtr.setTimeZone(tz)
           val fmtrUdf = udf((ts: Long) => fmtr.format(ts))
-          val tempCol = c + "_str_" + suffix
           df.withColumn(c, when(col(c).isNotNull, fmtrUdf(col(c))))
         } else {
           df
@@ -75,40 +73,10 @@ class ConvertToCSVJob extends AbstractSparkJob[ConvertToCSVConfig] {
     }
   }
 
-  private def saveToCsv(df: DataFrame, path: String, compress: Boolean): Unit = {
-    var writer = df.coalesce(1).write
-      .option("header", value = true)
-      .option("quote", "\"")
-      .option("escape", "\"")
-    if (compress) {
-      writer = writer.option("compression", "gzip")
-    }
-    writer.csv(path)
-  }
-
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[ConvertToCSVConfig]): List[HdfsDataUnit] = {
     val config: ConvertToCSVConfig = latticeCtx.config
     val compress: Boolean = if (config.getCompress == null) false else config.getCompress
-
-    val targets: List[HdfsDataUnit] = latticeCtx.targets
-    val output: List[DataFrame] = latticeCtx.output
-    if (targets.length != output.length) {
-      throw new IllegalArgumentException(s"${targets.length} targets are declared " //
-        + s"but ${output.length} outputs are generated!")
-    }
-    targets.zip(output).map { t =>
-      val tgt = t._1
-      val df = t._2
-      saveToCsv(df, tgt.getPath, compress=compress)
-      val suffix = if (compress) ".csv.gz" else ".csv"
-      val df2 = spark.read.format("csv")
-        .option("maxColumns", 40000)
-        .option("header", "true")
-        .option("compression", "gzip")
-        .load(tgt.getPath + "/*" + suffix)
-      tgt.setCount(df2.count())
-      tgt
-    }
+    CSVUtils.dfToCSV(spark, compress, latticeCtx.targets, latticeCtx.output)
   }
 
 }
