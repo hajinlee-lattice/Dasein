@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.EntityExp
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
-import com.latticeengines.domain.exposed.spark.common.CSVJobConfigBase;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -61,7 +60,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguration, ConvertToCSVConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(SaveAtlasExportCSV.class);
-    private static final String ISO_8601 = CSVJobConfigBase.ISO_8601; // default date format
+    private static final String ISO_8601 = ConvertToCSVConfig.ISO_8601; // default date format
 
     private Map<ExportEntity, HdfsDataUnit> inputUnits;
     private Map<ExportEntity, HdfsDataUnit> outputUnits = new HashMap<>();
@@ -122,7 +121,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             config.setInput(Collections.singletonList(hdfsDataUnit));
             config.setDateAttrsFmt(getDateAttrFmtMap(exportEntity));
             config.setDisplayNames(getDisplayNameMap(exportEntity));
-            config.setTimeZone(CSVJobConfigBase.TIME_ZONE);
+            config.setTimeZone("UTC");
             config.setWorkspace(getRandomWorkspace());
             config.setCompress(configuration.isCompressResult());
             if (configuration.isAddExportTimestamp()) {
@@ -239,10 +238,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         return dateFmtMap;
     }
 
-    /**
-     * @param schemaMap
-     * @param schema
-     */
     @SuppressWarnings("unchecked")
     private void setAccountSchema(Map<BusinessEntity, List> schemaMap, List<ColumnMetadata> schema) {
         for (BusinessEntity entity : BusinessEntity.EXPORT_ACCOUNT_ENTITIES) {
@@ -317,7 +312,15 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
         outputUnits.forEach(((exportEntity, hdfsDataUnit) -> {
             String outputDir = hdfsDataUnit.getPath();
-            String csvGzPath = HdfsUtils.getCsvGzPath(yarnConfiguration, outputDir);
+            String csvGzPath;
+            try {
+                List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, //
+                        (HdfsUtils.HdfsFilenameFilter) filename -> //
+                                filename.endsWith(".csv.gz") || filename.endsWith(".csv"));
+                csvGzPath = files.get(0);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read " + outputDir);
+            }
             processResultCSV(exportEntity, csvGzPath, exportRecord);
         }));
     }
@@ -365,7 +368,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
     }
 
-   private String getExportName(AtlasExport atlasExport) {
+    private String getExportName(AtlasExport atlasExport) {
         if (StringUtils.isEmpty(atlasExport.getSegmentName())) {
             return atlasExport.getUuid();
         }

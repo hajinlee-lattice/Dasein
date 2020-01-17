@@ -2,39 +2,41 @@ package com.latticeengines.serviceflows.workflow.export;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
-import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig;
-import com.latticeengines.domain.exposed.spark.common.CSVJobConfigBase;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
+import com.latticeengines.serviceflows.workflow.dataflow.LivySessionManager;
+import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.spark.exposed.job.cdl.MergeCSVJob;
+import com.latticeengines.spark.exposed.service.SparkJobService;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-public abstract class BaseExportData<T extends ExportStepConfiguration> extends BaseSparkStep<T> {
+public abstract class BaseExportData<T extends ExportStepConfiguration> extends BaseWorkflowStep<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseExportData.class);
 
@@ -44,7 +46,16 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
     @Autowired
     private EaiProxy eaiProxy;
 
-    private Table exportTable;
+    @Inject
+    private SparkJobService sparkJobService;
+
+    @Inject
+    private LivySessionManager livySessionManager;
+
+    private CustomerSpace customerSpace;
+
+    @Value("${camille.zk.pod.id}")
+    protected String podId;
 
     protected String exportData() {
         ExportConfiguration exportConfig = setupExportConfig();
@@ -63,9 +74,6 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
         exportConfig.setExclusionColumns(getExclusionColumns());
         exportConfig.setInclusionColumns(getInclusionColumns());
         exportConfig.setTable(retrieveTable());
-        if (configuration.isRemapField()) {
-            exportTable = exportConfig.getTable();
-        }
         exportConfig.setExportInputPath(getExportInputPath());
         Map<String, String> properties = configuration.getProperties();
         if (StringUtils.isNotBlank(getExportOutputPath())) {
@@ -141,7 +149,8 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
                 }
             }
             MergeCSVConfig mergeCSVConfig = getMergeCSVConfig(dstPath);
-            SparkJobResult result = runSparkJob(MergeCSVJob.class, mergeCSVConfig);
+            SparkJobResult result = SparkUtils.runJob(customerSpace, yarnConfiguration, sparkJobService,
+                    livySessionManager, MergeCSVJob.class, mergeCSVConfig);
             // mv generated csv file to dest path
             HdfsDataUnit hdfsDataUnit = result.getTargets().get(0);
             String outputDir = hdfsDataUnit.getPath();
@@ -172,33 +181,8 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
         HdfsDataUnit hdfsDataUnit = HdfsDataUnit.fromPath(path);
         hdfsDataUnit.setDataFormat(DataUnit.DataFormat.CSV);
         mergeCSVConfig.setInput(Collections.singletonList(hdfsDataUnit));
-        mergeCSVConfig.setWorkspace(getRandomWorkspace());
-        mergeCSVConfig.setCompress(configuration.isCompressResult());
-        if (configuration.isRemapField()) {
-            Map<String, String> dateFmtMap = new HashMap<>();
-            Map<String, String> displayNames = new HashMap<>();
-            setDataMaps(dateFmtMap, displayNames);
-            mergeCSVConfig.setDateAttrsFmt(dateFmtMap);
-            mergeCSVConfig.setDisplayNames(displayNames);
-        }
-        mergeCSVConfig.setTimeZone(CSVJobConfigBase.TIME_ZONE);
+        mergeCSVConfig.setWorkspace(PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString());
         return mergeCSVConfig;
     }
 
-    private Map<String, String> setDataMaps(Map<String, String> dateFmtMap, Map<String, String> displayNames) {
-        // TODO: the way set display name map and date format here should be consistent with the way in SaveAtlasExportCSV
-        List<Attribute> attributes = exportTable.getAttributes();
-        if (CollectionUtils.isEmpty(attributes)) {
-            return Collections.emptyMap();
-        }
-        attributes.forEach(attribute -> {
-            displayNames.put(attribute.getName(), attribute.getDisplayName());
-            if (LogicalDataType.Date.equals(attribute.getLogicalDataType()) ||
-                    LogicalDataType.Timestamp.equals(attribute.getLogicalDataType())) {
-                // for now, use default format for all date attrs
-                dateFmtMap.put(attribute.getName(), CSVJobConfigBase.ISO_8601);
-            }
-        });
-        return dateFmtMap;
-    }
 }

@@ -12,10 +12,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -82,13 +80,6 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     }
 
     protected void computeScalingMultiplier(List<DataUnit> inputs, int numberOfTargets) {
-        double totalSizeInGb = getTotalSize(inputs);
-        scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb * Math.max(1, numberOfTargets));
-        log.info("Set scalingMultiplier=" + scalingMultiplier + " based on totalSize=" + totalSizeInGb //
-                + " gb and numberOfTargets=" + numberOfTargets);
-    }
-
-    private double getTotalSize(List<DataUnit> inputs) {
         double totalSizeInGb = inputs.stream().mapToDouble(du -> {
             if (du instanceof HdfsDataUnit) {
                 String path = ((HdfsDataUnit) du).getPath();
@@ -97,35 +88,14 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
                 return 0.0;
             }
         }).sum();
-        return totalSizeInGb;
+        scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb * Math.max(1, numberOfTargets));
+        log.info("Set scalingMultiplier=" + scalingMultiplier + " based on totalSize=" + totalSizeInGb //
+                + " gb and numberOfTargets=" + numberOfTargets);
     }
 
     protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //
     SparkJobResult runSparkJob(LivySession session, Class<J> jobClz, C jobConfig) {
         return sparkJobService.runJob(session, jobClz, jobConfig);
-    }
-
-    protected <C extends SparkJobConfig, J extends AbstractSparkJob<C>> //
-    SparkJobResult runSparkJob(Class<J> jobClz, C jobConfig) {
-        double totalSizeInGb = getTotalSize(jobConfig.getInput());
-        int scalingMultiplier = ScalingUtils.getMultiplier(totalSizeInGb);
-        try {
-            RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-            SparkJobResult sparkJobResult = retry.execute(context -> {
-                if (context.getRetryCount() > 0) {
-                    log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
-                            + jobClz.getSimpleName());
-                    log.warn("Previous failure:", context.getLastThrowable());
-                    livySessionManager.killSession();
-                }
-                String jobName = customerSpace.getTenantId() + "~" + jobClz.getSimpleName();
-                LivySession session = livySessionManager.createLivySession(jobName, new LivyScalingConfig(scalingMultiplier, 1));
-                return sparkJobService.runJob(session, jobClz, jobConfig);
-            });
-            return sparkJobResult;
-        } finally {
-            livySessionManager.killSession();
-        }
     }
 
     protected String getRandomWorkspace() {

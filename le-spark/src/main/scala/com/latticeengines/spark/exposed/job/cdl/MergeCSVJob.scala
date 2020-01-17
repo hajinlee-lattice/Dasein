@@ -2,20 +2,18 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig
-import com.latticeengines.spark.exposed.job.LatticeContext
-import com.latticeengines.spark.exposed.job.common.CSVJobBase
+import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import com.latticeengines.spark.util.CSVUtils
 import org.apache.spark.sql.SparkSession
 
-class MergeCSVJob extends CSVJobBase[MergeCSVConfig] {
+class MergeCSVJob extends AbstractSparkJob[MergeCSVConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeCSVConfig]): Unit = {
     val input = lattice.input.head
-    val config: MergeCSVConfig = lattice.config
-    val result = customizeField(input, config)
-    lattice.output = result :: Nil
+    lattice.output = input :: Nil
   }
 
   override def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[MergeCSVConfig]): List[HdfsDataUnit] = {
-    dfToCSV(spark, latticeCtx.config, latticeCtx.targets, latticeCtx.output)
+    CSVUtils.dfToCSV(spark, false, latticeCtx.targets, latticeCtx.output)
   }
 }

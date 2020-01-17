@@ -28,8 +28,6 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean compressResult;
 
-    private boolean remapField;
-
     private Map<String, String> properties = new HashMap<>();
 
     public ExportFormat getExportFormat() {
@@ -120,11 +118,4 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
         this.compressResult = compressResult;
     }
 
-    public boolean isRemapField() {
-        return remapField;
-    }
-
-    public void setRemapField(boolean remapField) {
-        this.remapField = remapField;
-    }
 }

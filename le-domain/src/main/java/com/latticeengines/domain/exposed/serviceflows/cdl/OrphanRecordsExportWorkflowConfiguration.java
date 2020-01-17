@@ -128,11 +128,6 @@ public class OrphanRecordsExportWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
-        public Builder remapField(boolean remapField) {
-            avroToCsvExport.setRemapField(remapField);
-            return this;
-        }
-
         public Builder dataCollectionName(String dataCollectionName) {
             computeOrphans.setDataCollectionName(dataCollectionName);
             exportToS3.setDataCollectionName(dataCollectionName);

@@ -152,7 +152,6 @@ public class OrphanRecordsExportWorkflowSubmitter extends WorkflowSubmitter {
                 .productTableName(productTableName) //
                 .transactionTableName(transactionTableName) //
                 .exportMergeFile(Boolean.TRUE) //
-                .remapField(true)
                 .validatedColumns(validatedColumns) //
                 .mergedFileName(orphanRecordsType.getOrphanType() + ".csv") //
                 .build();
