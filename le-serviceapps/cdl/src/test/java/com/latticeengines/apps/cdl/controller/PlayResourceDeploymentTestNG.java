@@ -87,7 +87,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testCrud" })
     public void testManualLaunchByChannel() throws InterruptedException {
-        String testuser = "testuser@lattice-engines.com";
+        String testuser = "ga_dev@lattice-engines.com";
         play = playCreationHelper.getPlay();
         PlayLaunchChannel channel = playProxy
                 .getPlayLaunchChannels(playCreationHelper.getCustomerSpace(), play.getName(), false).get(0);
