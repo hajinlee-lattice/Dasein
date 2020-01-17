@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobC
 import com.latticeengines.domain.exposed.spark.cdl.GenerateAccountLookupConfig;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
@@ -91,7 +92,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = AggDailyActivityConfig.class, name = AggDailyActivityConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateAccountLookupConfig.class, name = GenerateAccountLookupConfig.NAME), //
         @JsonSubTypes.Type(value = MergeActivityMetricsJobConfig.class, name = MergeActivityMetricsJobConfig.NAME),
-        @JsonSubTypes.Type(value = CountOrphanTransactionsConfig.class, name = CountOrphanTransactionsConfig.NAME)
+        @JsonSubTypes.Type(value = CountOrphanTransactionsConfig.class, name = CountOrphanTransactionsConfig.NAME),
+        @JsonSubTypes.Type(value = MergeCSVConfig.class, name = MergeCSVConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
 
