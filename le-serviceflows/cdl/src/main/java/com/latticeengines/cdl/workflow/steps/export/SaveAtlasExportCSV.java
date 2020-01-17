@@ -375,7 +375,7 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         }
     }
 
-    private String getExportName(AtlasExport atlasExport) {
+   private String getExportName(AtlasExport atlasExport) {
         if (StringUtils.isEmpty(atlasExport.getSegmentName())) {
             return atlasExport.getUuid();
         }
