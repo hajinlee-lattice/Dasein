@@ -493,18 +493,12 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     private Runnable createScoringLoadLimitRunnable(final String url,
             final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList,
             final boolean isInternalScoring, boolean b) {
-        Runnable runnable = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    testScore(url, 1, 500000, modelList, isInternalScoring, false, customerSpace, true);
-                } catch (IOException e) {
-                    // ignore
-                }
+        return () -> {
+            try {
+                testScore(url, 1, 500000, modelList, isInternalScoring, false, customerSpace, true);
+            } catch (IOException ignore) {
             }
         };
-        return runnable;
     }
 
     protected void runScoringTest(final String url, final boolean isInternalScoring, boolean isPmmlModel)

@@ -89,7 +89,7 @@ public class AvroUtils {
     private static final String SQLSERVER_TYPE_LONG = "long";
     private static Schema NULL_SCHEMA = Schema.create(Schema.Type.NULL);
     private static Logger log = LoggerFactory.getLogger(AvroUtils.class);
-    
+
     // java type -> (avro schema type, whether java type is primitive)
     // TODO: Java type as Date/Timestamp, List and Map are to be added
     private static final Map<Class<?>, Pair<Type, Boolean>> TYPE_MAP = ImmutableMap
@@ -312,8 +312,7 @@ public class AvroUtils {
     }
 
     private static Long countOneFile(Configuration configuration, String path) {
-        // log.info("Counting number of records in " + path);
-        Long count = 0L;
+        long count = 0L;
 
         try (DataFileStream<GenericRecord> stream = getAvroFileStream(configuration, new Path(path))) {
             try {
@@ -321,7 +320,7 @@ public class AvroUtils {
                     count += stream.getBlockCount();
                 }
             } catch (NoSuchElementException e) {
-                // log.info("Seems no next block in current stream.");
+                log.debug("Seems no next block in current stream.");
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to count avro at " + path, e);

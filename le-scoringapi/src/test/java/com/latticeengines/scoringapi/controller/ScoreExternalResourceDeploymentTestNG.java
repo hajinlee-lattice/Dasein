@@ -22,6 +22,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -245,10 +246,6 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
      * In real world scenario, this is consumed at UI layer, we can are fine with few milli-seconds of delay
      */
     private void addDelay() {
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            //Ignore
-        }
+        SleepUtils.sleep(2000L);
     }
 }

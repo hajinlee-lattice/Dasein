@@ -6,6 +6,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +32,8 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component
 public abstract class WorkflowSubmitter {
+
+    private static final Logger log = LoggerFactory.getLogger(WorkflowSubmitter.class);
 
     @Inject
     protected WorkflowJobService workflowJobService;
@@ -63,8 +67,8 @@ public abstract class WorkflowSubmitter {
         try {
             status = workflowJobService.getJobStatusFromApplicationId(appId);
         } catch (Exception e) {
-            // Ignore any errors since this means that any associated workflow
-            // must be problematic so let it continue
+            log.warn("Failed to get job status from app id. But it is ignored, " +
+                    "since this means that any associated workflow must be problematic so let it continue", e);
         }
         return status != null && !Job.TERMINAL_JOB_STATUS.contains(status);
     }

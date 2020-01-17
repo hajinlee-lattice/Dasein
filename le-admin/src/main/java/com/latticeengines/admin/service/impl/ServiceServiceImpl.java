@@ -115,9 +115,11 @@ public class ServiceServiceImpl implements ServiceService {
 
             String metaStr = null;
             try {
-                metaStr = camille.get(schemaPath).getData();
+                if (camille.exists(schemaPath)) {
+                    metaStr = camille.get(schemaPath).getData();
+                }
             } catch (Exception e) {
-                // ignore
+                throw new RuntimeException("Failed to read schema from " + schemaPath, e);
             }
 
             ObjectMapper mapper = new ObjectMapper();

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -76,14 +77,10 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
 
     /**
      * As most of the find operations performed on reader connection, we need to add some delay before making find call.
-     * In real world scenario, this is consumed at UI layer, we can are fine with few milli-seconds of delay
+     * In real world scenario, this is consumed at UI layer, we can are fine with a few seconds of delay
      */
     private void addDelay() {
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            //Ignore
-        }
+        SleepUtils.sleep(2000L);
     }
 
     @Test(groups = { "deployment" })

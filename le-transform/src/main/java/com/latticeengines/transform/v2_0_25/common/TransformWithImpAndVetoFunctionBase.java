@@ -2,7 +2,12 @@ package com.latticeengines.transform.v2_0_25.common;
 
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class TransformWithImpAndVetoFunctionBase extends TransformWithImputationFunctionBase {
+
+    private static final Logger log = LoggerFactory.getLogger(TransformWithImpAndVetoFunctionBase.class);
 
     private Pattern pattern_unusualCharSet;
     private Pattern pattern_vetoStringSet;
@@ -19,7 +24,8 @@ public abstract class TransformWithImpAndVetoFunctionBase extends TransformWithI
         try {
             Double.valueOf(s);
             return false;
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException ignore) {
+            // Ignoring number format exception, treat it as invalid
         }
         if (pattern_unusualCharSet.matcher(s).matches()) {
             return false;

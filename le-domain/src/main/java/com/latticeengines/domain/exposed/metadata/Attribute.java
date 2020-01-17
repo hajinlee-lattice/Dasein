@@ -29,6 +29,8 @@ import javax.persistence.Transient;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -60,6 +62,8 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 )
 public class Attribute
         implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
+
+    private static final Logger log = LoggerFactory.getLogger(Attribute.class);
 
     private static final long serialVersionUID = -4779448415471374224L;
 
@@ -249,7 +253,7 @@ public class Attribute
         try {
             logicalDataType = LogicalDataType.valueOf(logicalDataTypeString);
         } catch (Exception e) {
-            // pass
+            log.warn("Cannot parse {} to a LogicalDataType", logicalDataTypeString);
         }
         if (logicalDataType != null) {
             setLogicalDataType(logicalDataType);
@@ -290,8 +294,8 @@ public class Attribute
         InterfaceName interfaceName = null;
         try {
             interfaceName = InterfaceName.valueOf(interfaceNameString);
-        } catch (Exception e) {
-            // pass
+        }  catch (Exception e) {
+            log.warn("Cannot parse {} to a InterfaceName", interfaceNameString);
         }
         if (interfaceName != null) {
             setInterfaceName(interfaceName);

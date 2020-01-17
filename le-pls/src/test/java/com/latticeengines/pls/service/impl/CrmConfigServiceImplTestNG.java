@@ -49,8 +49,8 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecate
     public void setup() throws Exception {
         try {
             afterClass();
-        } catch (Exception ex) {
-            // ignore
+        } catch (Exception ignore) {
+            // ignoring any error from test env cleanup
         }
 
         CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, tenant, tenant);

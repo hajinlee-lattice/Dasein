@@ -1,7 +1,9 @@
 package com.latticeengines.common.exposed.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -27,6 +29,9 @@ public class ThreadPoolUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ThreadPoolUtils.class);
     private static final String DEBUG_GATEWAY = "DebugGateway";
+    private static final int NUM_CORES = Runtime.getRuntime().availableProcessors();
+
+    private static ExecutorService sharedPool;
 
     public static ExecutorService getFixedSizeThreadPool(String name, int size) {
         ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
@@ -49,12 +54,6 @@ public class ThreadPoolUtils {
         return executorService;
     }
 
-    public static ForkJoinPool getForkJoinThreadPool(String name) {
-        ForkJoinPool pool = getForkJoinThreadPool(name, null);
-        Runtime.getRuntime().addShutdownHook(new Thread(pool::shutdownNow));
-        return pool;
-    }
-
     public static ForkJoinPool getForkJoinThreadPool(String name, Integer size) {
         // custom workerThreadFactory for ensuring specified thread name prefix
         ForkJoinWorkerThreadFactory workerThreadFactory = //
@@ -68,7 +67,11 @@ public class ThreadPoolUtils {
         return new ForkJoinPool(size, workerThreadFactory, null, false);
     }
 
-    public static <T> List<T> runCallablesInParallel(ExecutorService executorService, List<Callable<T>> callables,
+    public static <T> List<T> runCallablesInParallel(Collection<Callable<T>> callables) {
+        return runCallablesInParallel(getSharedPool(), callables, 60, 1);
+    }
+
+    public static <T> List<T> runCallablesInParallel(ExecutorService executorService, Collection<Callable<T>> callables,
             int timeoutInMinutes, int intervalInSeconds) {
         if (CollectionUtils.isNotEmpty(callables)) {
             int numTasks = CollectionUtils.size(callables);
@@ -89,8 +92,8 @@ public class ThreadPoolUtils {
                         T result = future.get(intervalInSeconds, TimeUnit.SECONDS);
                         results.add(result);
                         toBeRemoved.add(future);
-                    } catch (TimeoutException e) {
-                        // ignore
+                    } catch (TimeoutException ignore) {
+                        // just retry next time
                     } catch (InterruptedException | ExecutionException e) {
                         toBeRemoved.add(future);
                         throw new RuntimeException(e);
@@ -107,8 +110,12 @@ public class ThreadPoolUtils {
         }
     }
 
-    public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService, List<T> runnables,
-            int timeoutInMinutes, int intervalInSeconds) {
+    public static <T extends Runnable> void runRunnablesInParallel(Collection<T> runnables) {
+        runRunnablesInParallel(getSharedPool(), runnables, 60, 1);
+    }
+
+    public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService,
+            Collection<T> runnables, int timeoutInMinutes, int intervalInSeconds) {
         if (CollectionUtils.isNotEmpty(runnables)) {
             int numTasks = CollectionUtils.size(runnables);
             List<Runnable> wrappedRunnables = runnables.stream() //
@@ -126,8 +133,8 @@ public class ThreadPoolUtils {
                     try {
                         future.get(intervalInSeconds, TimeUnit.SECONDS);
                         toBeRemoved.add(future);
-                    } catch (TimeoutException e) {
-                        // ignore
+                    } catch (TimeoutException ignore) {
+                        // just retry next time
                     } catch (InterruptedException | ExecutionException e) {
                         toBeRemoved.add(future);
                         throw new RuntimeException(e);
@@ -140,6 +147,26 @@ public class ThreadPoolUtils {
         } else {
             log.warn("Empty runnables are submitted, skip execution.");
         }
+    }
+
+    public static <T> void doInParallel(final Iterable<T> elements, final Operation<T> operation) {
+        doInParallel(getSharedPool(), elements, operation);
+    }
+
+    private static <T> void doInParallel(final ExecutorService executorService, final Iterable<T> elements,
+                                         final Operation<T> operation) {
+        runRunnablesInParallel(executorService, createRunnables(elements, operation), 10, 1);
+    }
+
+    private static <T> Collection<Runnable> createRunnables(final Iterable<T> elements,
+            final Operation<T> operation) {
+        List<Runnable> runnables = new LinkedList<>();
+        for (final T elem : elements) {
+            runnables.add(() -> {
+                operation.perform(elem);
+            });
+        }
+        return runnables;
     }
 
     public static void shutdownAndAwaitTermination(ExecutorService pool, long threadPoolTimeoutMin) {
@@ -160,11 +187,7 @@ public class ThreadPoolUtils {
         }
     }
 
-    public static void shutdownAndAwaitTermination(ExecutorService pool) {
-        shutdownAndAwaitTermination(pool, 1);
-    }
-
-    public static Runnable wrapForDebugGateway(Runnable runnable) {
+    private static Runnable wrapForDebugGateway(Runnable runnable) {
         if (ThreadContext.containsKey(DEBUG_GATEWAY)) {
             return () -> {
                 ThreadContext.put(DEBUG_GATEWAY, "ON");
@@ -179,7 +202,7 @@ public class ThreadPoolUtils {
         }
     }
 
-    public static <T> Callable<T> wrapForDebugGateway(Callable<T> callable) {
+    private static <T> Callable<T> wrapForDebugGateway(Callable<T> callable) {
         if (ThreadContext.containsKey(DEBUG_GATEWAY)) {
             return () -> {
                 ThreadContext.put(DEBUG_GATEWAY, "ON");
@@ -192,6 +215,21 @@ public class ThreadPoolUtils {
         } else {
             return callable;
         }
+    }
+
+    public interface Operation<T> {
+        void perform(T parameter);
+    }
+
+    private static ExecutorService getSharedPool() {
+        if (sharedPool == null) {
+            synchronized (ThreadPoolUtils.class) {
+                if (sharedPool == null) {
+                    sharedPool = Executors.newFixedThreadPool(NUM_CORES * 2);
+                }
+            }
+        }
+        return sharedPool;
     }
 
 }

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.entitymgr.DnbMatchCommandEntityMgr;
@@ -216,12 +217,8 @@ public class MatchCommandServiceImpl implements MatchCommandService {
                 return report.getFinalApplicationStatus();
             } catch (IOException e) {
                 log.error("Failed to get application status for " + appIdStr + " retries=" + retries, e);
-                try {
-                    Thread.sleep(sleepTime);
-                    sleepTime += sleepTime;
-                } catch (InterruptedException e2) {
-                    // ignore;
-                }
+                SleepUtils.sleep(sleepTime);
+                sleepTime += sleepTime;
             }
         }
         throw new RuntimeException("Failed to get final application status for " + appIdStr + " within 5 retries.");

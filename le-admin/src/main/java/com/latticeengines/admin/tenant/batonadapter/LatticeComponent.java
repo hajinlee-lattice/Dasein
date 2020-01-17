@@ -100,8 +100,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
         DocumentDirectory dir = LatticeComponent.constructConfigDirectory(defaultJson, metadataJson);
         try {
             camille.delete(defaultRootPath);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // defaultRootPath already removed
         }
         batonService.loadDirectory(dir, defaultRootPath);
 
@@ -110,8 +110,8 @@ public abstract class LatticeComponent implements HasName, GraphNode {
         dir = LatticeComponent.constructMetadataDirectory(defaultJson, metadataJson);
         try {
             camille.delete(metadataRootPath);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // metadataRootPath already removed
         }
         batonService.loadDirectory(dir, metadataRootPath);
 

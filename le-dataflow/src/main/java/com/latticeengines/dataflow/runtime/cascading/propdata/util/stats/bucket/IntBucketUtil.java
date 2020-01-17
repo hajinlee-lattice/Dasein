@@ -16,20 +16,20 @@ public class IntBucketUtil extends BucketUtil {
         for (int i = 0; i < buckets.size(); i++) {
             Integer bucketA = (Integer) buckets.get(i);
 
-            if (val.intValue() < bucketA.intValue()) {
-
-            } else if (val.equals(bucketA)) {
-                lbl = bucketLbls.get(i);
-                break;
-            } else if (val.intValue() > bucketA.intValue()) {
-                if (i + 1 >= buckets.size()) {
+            if (val >= bucketA) {
+                if (val.equals(bucketA)) {
                     lbl = bucketLbls.get(i);
                     break;
                 } else {
-                    Integer bucketB = (Integer) buckets.get(i + 1);
-                    if (val.intValue() < bucketB.intValue()) {
+                    if (i + 1 >= buckets.size()) {
                         lbl = bucketLbls.get(i);
                         break;
+                    } else {
+                        Integer bucketB = (Integer) buckets.get(i + 1);
+                        if (val < bucketB) {
+                            lbl = bucketLbls.get(i);
+                            break;
+                        }
                     }
                 }
             }
@@ -40,8 +40,8 @@ public class IntBucketUtil extends BucketUtil {
     public List<Object> calculateBuckets(List<Object> minMaxList, //
             int maxBucketCount) {
         List<Object> buckets = new ArrayList<>();
-        Integer min = (Integer) minMaxList.get(0);
-        Integer max = (Integer) minMaxList.get(1);
+        Integer min;
+        Integer max;
 
         if (minMaxList.get(0) instanceof Integer) {
             min = (Integer) minMaxList.get(0);

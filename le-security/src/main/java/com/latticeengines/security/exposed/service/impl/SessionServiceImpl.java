@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthExternalSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -128,12 +129,8 @@ public class SessionServiceImpl implements SessionService {
                 log.error("Failed to attach tenent " + ticket.getTenants().get(0) + " session " + ticket.getData()
                         + " from GA - retried " + retries + " out of " + MAX_RETRY + " times", e);
             }
-            try {
-                retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
-                Thread.sleep(retryInterval);
-            } catch (Exception e) {
-                // ignore
-            }
+            retryInterval = Double.valueOf(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
+            SleepUtils.sleep(retryInterval);
         }
         if (session != null) {
             session.setAuthenticationRoute(AUTH_ROUTE_GA);
@@ -197,12 +194,8 @@ public class SessionServiceImpl implements SessionService {
             } catch (Exception e) {
                 log.warn("Failed to retrieve session {} from GA - retried {} out of {} times. Cause: {}", token, retries, MAX_RETRY, e.getMessage());
             }
-            try {
-                retryInterval = new Double(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
-                Thread.sleep(retryInterval);
-            } catch (Exception e) {
-                // ignore
-            }
+            retryInterval = Double.valueOf(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
+            SleepUtils.sleep(retryInterval);
         }
 
         return setTenantPid(session);

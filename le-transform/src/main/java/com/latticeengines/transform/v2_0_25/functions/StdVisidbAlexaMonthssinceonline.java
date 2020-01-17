@@ -56,14 +56,16 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
                 try {
                     dt = new Date(Long.valueOf(dateStr));
                     parsed = true;
-                } catch (Exception e) {
+                } catch (Exception ignore) {
+                    // it is not a Date as Long
                 }
                 if (!parsed) {
                     try {
                         SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy HH:mm:ss a");
                         dt = format.parse(dateStr);
                         parsed = true;
-                    } catch (ParseException e) {
+                    } catch (ParseException ignore) {
+                        // it is not a SimpleDateFormat
                     }
                 }
                 if (!parsed) {

@@ -29,6 +29,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
@@ -351,11 +352,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
                 && System.currentTimeMillis() - startTime <= timeout) {
             ingestionProxy.scan(POD_ID);
             status = ingestionVersionService.findProgressAtVersion(name, version);
-            try {
-                Thread.sleep(60000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
+            SleepUtils.sleep(60000L);
         }
         Assert.assertEquals(status, ProgressStatus.FINISHED);
         progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);

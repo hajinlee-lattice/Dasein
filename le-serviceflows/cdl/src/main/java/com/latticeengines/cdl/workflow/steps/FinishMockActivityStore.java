@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -27,12 +28,8 @@ public class FinishMockActivityStore extends BaseWorkflowStep<MockActivityStoreC
     public void execute() {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         clearCache(customerSpace.toString());
-        try {
-            // wait for local cache clean up
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        // wait for local cache clean up
+        SleepUtils.sleep(10000L);
         servingStoreProxy.getDecoratedMetadataFromCache(customerSpace.toString(), BusinessEntity.Account);
     }
 

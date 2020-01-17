@@ -60,7 +60,7 @@ public abstract class WorkflowSubmitter {
         JobStatus status = null;
         try {
             status = workflowJobService.getJobStatusFromApplicationId(appId);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             // Ignore any errors since this means that any associated workflow
             // must be problematic so let it continue
         }

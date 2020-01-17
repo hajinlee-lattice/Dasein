@@ -241,7 +241,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                             cleanupTenantInDL(contractId);
                             cleanupTenantInZK(contractId);
                         } catch (Exception e) {
-                            // ignore
+                            log.warn("Ignoring ZK errors.", e);
                         }
                     }
                 }

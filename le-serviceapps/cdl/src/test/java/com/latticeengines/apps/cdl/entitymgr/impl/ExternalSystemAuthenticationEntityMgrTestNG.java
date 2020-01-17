@@ -19,6 +19,7 @@ import com.latticeengines.apps.cdl.entitymgr.ExternalSystemAuthenticationEntityM
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
@@ -95,11 +96,7 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
         updatedSysAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
         updatedSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
         extSysAuthenticationEntityMgr.updateAuthentication(extSysAuth.getId(), updatedSysAuth);
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        SleepUtils.sleep(2000L);
         updatedSysAuth = extSysAuthenticationEntityMgr.findAuthenticationByAuthId(extSysAuthRef.getId());
         verifyCurrentObject(updatedSysAuth);
         log.info(JsonUtils.serialize(updatedSysAuth));

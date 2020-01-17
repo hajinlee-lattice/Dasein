@@ -35,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.dataflow.transformation.atlas.Sort;
@@ -199,11 +200,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             Set<String> toDelete = consumeFutures(futures);
             toDelete.forEach(futures::remove);
             if (!futures.isEmpty()) {
-                try {
-                    Thread.sleep(5000L);
-                } catch (Exception e) {
-                    // do nothing
-                }
+                SleepUtils.sleep(5000L);
             }
         }
     }
@@ -215,9 +212,9 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
             boolean success = false;
             try {
                 success = entry.getValue().get(1, TimeUnit.SECONDS);
-            } catch (InterruptedException | TimeoutException e) {
-                // ignore
-            } catch (ExecutionException e) {
+            } catch (TimeoutException ignore) {
+                // just retry next time
+            } catch (InterruptedException|ExecutionException e) {
                 throw new RuntimeException("The thread processing " + entry.getKey() + " throws an exception.", e);
             }
             if (success) {

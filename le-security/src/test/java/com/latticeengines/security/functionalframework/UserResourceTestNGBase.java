@@ -42,8 +42,8 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
         destroyTestTenant();
         try {
             tenantService.registerTenant(testTenant);
-        } catch (ConstraintViolationException e) {
-            //ignore
+        } catch (ConstraintViolationException ignore) {
+            // tenant already exist
         }
     }
 
@@ -52,13 +52,13 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
             for (User user: userService.getUsers(testTenant.getId())) {
                 makeSureUserDoesNotExist(user.getUsername());
             }
-        } catch (LedpException e ) {
-            // ignore
+        } catch (LedpException ignore) {
+            // user is already deleted
         }
         try {
             tenantService.discardTenant(testTenant);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // tenant is already deleted
         }
     }
 

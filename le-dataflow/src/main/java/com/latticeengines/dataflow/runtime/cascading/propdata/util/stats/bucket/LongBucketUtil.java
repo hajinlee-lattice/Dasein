@@ -16,20 +16,20 @@ public class LongBucketUtil extends BucketUtil {
         for (int i = 0; i < buckets.size(); i++) {
             Long bucketA = (Long) buckets.get(i);
 
-            if (val.longValue() < bucketA.longValue()) {
-
-            } else if (val.equals(bucketA)) {
-                lbl = bucketLbls.get(i);
-                break;
-            } else if (val.longValue() > bucketA.longValue()) {
-                if (i + 1 >= buckets.size()) {
+            if (val >= bucketA) {
+                if (val.equals(bucketA)) {
                     lbl = bucketLbls.get(i);
                     break;
                 } else {
-                    Long bucketB = (Long) buckets.get(i + 1);
-                    if (val.longValue() < bucketB.longValue()) {
+                    if (i + 1 >= buckets.size()) {
                         lbl = bucketLbls.get(i);
                         break;
+                    } else {
+                        Long bucketB = (Long) buckets.get(i + 1);
+                        if (val < bucketB) {
+                            lbl = bucketLbls.get(i);
+                            break;
+                        }
                     }
                 }
             }
@@ -41,8 +41,8 @@ public class LongBucketUtil extends BucketUtil {
     public List<Object> calculateBuckets(List<Object> minMaxList, //
             int maxBucketCount) {
         List<Object> buckets = new ArrayList<>();
-        Long min = 0L;
-        Long max = 0L;
+        Long min;
+        Long max;
 
         if (minMaxList.get(0) instanceof Integer) {
             min = ((Integer) minMaxList.get(0)).longValue();

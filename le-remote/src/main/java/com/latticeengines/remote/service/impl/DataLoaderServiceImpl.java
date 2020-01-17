@@ -28,6 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.vdb.SpecParser;
 import com.latticeengines.domain.exposed.admin.CreateVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
@@ -612,15 +613,11 @@ public class DataLoaderServiceImpl implements DataLoaderService {
     private <T> String callDLRestServiceWithRetry(String dlUrl, String endpoint, T payload) throws IOException {
         String response = null;
         int retries = 0;
-        IOException exception = null;
+        IOException exception;
         do {
             if (retries > 0) {
-                try {
-                    Thread.sleep(RETRY_WAIT_TIME);
-                } catch (InterruptedException e) {
-                    // Do nothing if sleep interrupted
-                }
-                log.info("Retry #" + String.valueOf(retries) + ": Send POST to " + dlUrl + endpoint);
+                SleepUtils.sleep(RETRY_WAIT_TIME);
+                log.info("Retry #" + retries + ": Send POST to " + dlUrl + endpoint);
             }
 
             try {
@@ -878,12 +875,8 @@ public class DataLoaderServiceImpl implements DataLoaderService {
         T response = null;
         do {
             if (retries > 0) {
-                try {
-                    Thread.sleep(RETRY_WAIT_TIME);
-                } catch (InterruptedException e) {
-                    // Do nothing if sleep interrupted
-                }
-                log.info("Retry #" + String.valueOf(retries) + ": Send POST to " + url);
+                SleepUtils.sleep(RETRY_WAIT_TIME);
+                log.info("Retry #" + retries + ": Send POST to " + url);
             }
 
             try {

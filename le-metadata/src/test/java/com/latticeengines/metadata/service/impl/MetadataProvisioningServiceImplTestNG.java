@@ -5,8 +5,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,6 +19,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
+import com.latticeengines.metadata.provisioning.MetadataComponentTestNG;
 import com.latticeengines.metadata.service.MetadataProvisioningService;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -23,17 +27,19 @@ import com.latticeengines.security.exposed.service.TenantService;
 @Component
 public class MetadataProvisioningServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(MetadataComponentTestNG.class);
+
+    @Inject
     private MetadataProvisioningService metadataProvisioningService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private Tenant tenant;
 
     private CustomerSpace space;
 
-    @Autowired
+    @Inject
     private MetadataService mdService;
 
     @BeforeClass(groups = "functional")
@@ -44,12 +50,13 @@ public class MetadataProvisioningServiceImplTestNG extends MetadataFunctionalTes
         tenant.setName("Metadata provisioning service test tenant");
         try {
             tenantService.discardTenant(tenant);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
+            // tenant not exist
         }
     }
 
     @Test(groups = { "functional" })
-    public void provisionImportTables() throws Exception {
+    public void provisionImportTables() {
         tenantService.registerTenant(tenant);
         metadataProvisioningService.provisionImportTables(space);
         List<Table> tables = mdService.getImportTables(space);

@@ -17,6 +17,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +37,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataloader.DataReadyResult;
 import com.latticeengines.domain.exposed.dataloader.GetDataTablesResult;
@@ -78,19 +81,19 @@ public class VdbTableImportServiceImpl extends ImportService {
         super(SourceType.VISIDB);
     }
 
-    public static final String EXTRACT_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
+    private static final String EXTRACT_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final int RECORDS_PER_EXTRACT_MIN = 1000000;
 
-    @Autowired
+    @Inject
     private VdbTableToAvroTypeConverter vdbTableToAvroTypeConverter;
 
-    @Autowired
+    @Inject
     private DataLoaderService dataLoaderService;
 
-    @Autowired
+    @Inject
     private EaiMetadataService eaiMetadataService;
 
-    @Autowired
+    @Inject
     private EaiImportJobDetailService eaiImportJobDetailService;
 
     @Value("${eai.vdb.extract.size}")
@@ -140,16 +143,9 @@ public class VdbTableImportServiceImpl extends ImportService {
                     readyResult = dataLoaderService.readyToExportData(vdbConnectorConfiguration.getDlEndpoint(), query);
                 } catch (Exception e) {
                     exceptionCount++;
-                    try {
-                        Thread.sleep(30000L);
-                    } catch (InterruptedException e1) {
-                        // do nothing.
-                    }
-                }
-                try {
-                    Thread.sleep(10000L);
-                } catch (InterruptedException e) {
-                    // do nothing.
+                    SleepUtils.sleep(30000L);
+                } finally {
+                    SleepUtils.sleep(10000L);
                 }
             } while (exceptionCount < MAX_RETRIES && (readyResult == null || !readyResult.isDataReady()));
             if (!readyResult.isDataReady()) {
@@ -259,7 +255,7 @@ public class VdbTableImportServiceImpl extends ImportService {
         try {
             dataLoaderService.editLaunchStatus(dlEndpoint, launchId, "Failed", message);
         } catch (Exception e) {
-            // do noting.
+            log.warn("Ignoring dataloader error", e);
         }
     }
 

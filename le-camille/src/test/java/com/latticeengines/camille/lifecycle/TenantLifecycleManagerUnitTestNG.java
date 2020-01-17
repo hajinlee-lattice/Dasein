@@ -52,12 +52,8 @@ public class TenantLifecycleManagerUnitTestNG {
 
         Assert.assertEquals(defaultSpaceId1, TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId));
         String defaultSpaceId2 = "testDefaultSpaceId2";
-        try {
-            TenantLifecycleManager.setDefaultSpaceId(contractId, tenantId, defaultSpaceId2);
-            Assert.fail(String.format("Space with spaceId=%s does not exist.  setDefaultSpaceId should have failed.",
-                    defaultSpaceId2));
-        } catch (RuntimeException e) {
-        }
+        Assert.assertThrows(RuntimeException.class, //
+                () -> TenantLifecycleManager.setDefaultSpaceId(contractId, tenantId, defaultSpaceId2));
         SpaceLifecycleManager.create(contractId, tenantId, defaultSpaceId2, customerSpaceInfo);
         TenantLifecycleManager.setDefaultSpaceId(contractId, tenantId, defaultSpaceId2);
         Assert.assertEquals(TenantLifecycleManager.getDefaultSpaceId(contractId, tenantId), defaultSpaceId2);

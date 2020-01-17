@@ -617,11 +617,9 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
             for (InputStream stream : tmpStreams) {
 
                 try {
-
                     stream.close();
-
                 } catch (IOException e) {
-
+                    log.warn("Failed to close stream", e);
                 }
 
             }

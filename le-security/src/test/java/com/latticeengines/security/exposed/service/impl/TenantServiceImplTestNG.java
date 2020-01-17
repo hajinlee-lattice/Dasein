@@ -27,8 +27,8 @@ public class TenantServiceImplTestNG extends SecurityFunctionalTestNGBase {
         try {
             tenantService.discardTenant(tenant);
             globalTenantManagementService.discardTenant(tenant);
-        } catch(LedpException e) {
-            //ignore
+        } catch(LedpException ignore) {
+            // tenant not exist
         }
     }
 
@@ -38,8 +38,8 @@ public class TenantServiceImplTestNG extends SecurityFunctionalTestNGBase {
         try {
             tenantService.discardTenant(tenant);
             globalTenantManagementService.discardTenant(tenant);
-        } catch(LedpException e) {
-            //ignore
+        } catch(LedpException ignore) {
+            // tenant not exist
         }
     }
 

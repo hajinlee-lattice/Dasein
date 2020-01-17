@@ -162,9 +162,8 @@ public class JobPublisher {
             try {
                 if(camille.exists(executorDataPath))
                     camille.delete(executorDataPath);
-            }
-            catch (Exception exc) {
-
+            } catch (Exception e) {
+                log.debug("Executor data path {} already removed, ignore delete", executor);
             }
         }
 
@@ -178,26 +177,27 @@ public class JobPublisher {
             return;
         }
 
+        Path requestsPath = rootPath.append(requestsFolder);
+        Camille camille = CamilleEnvironment.getCamille();
         try {
-            Path requestsPath = rootPath.append(requestsFolder);
-            Camille camille = CamilleEnvironment.getCamille();
             if(!camille.exists(requestsPath))
             {
                 camille.create(requestsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
             }
-
-            Path failuresPath = rootPath.append(failedJobsFolder);
+        } catch (Exception e) {
+            log.debug("Requests path {} already exist, ignore create", requestsPath);
+        }
+        Path failuresPath = rootPath.append(failedJobsFolder);
+        try {
             if(!camille.exists(failuresPath))
             {
                 camille.create(failuresPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
             }
+        } catch (Exception e) {
+            log.debug("Failures path {} already exist, ignore create", requestsPath);
+        }
+        isInitialized = true;
 
-            isInitialized = true;
-        }
-        catch (Exception exc)
-        {
-            // Ignore
-        }
     }
 
     public static final String dataAttribute = "Data";

@@ -34,6 +34,7 @@ public class PodLifecycleManager {
             camille.create(podsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Pods path @ {}", podsPath);
         } catch (KeeperException.NodeExistsException e) {
+            log.debug("Pods already existed, ignoring create");
         }
 
         Path podPath = PathBuilder.buildPodPath(podId);

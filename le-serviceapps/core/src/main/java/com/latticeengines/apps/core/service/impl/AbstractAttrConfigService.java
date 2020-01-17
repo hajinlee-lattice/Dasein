@@ -70,7 +70,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractAttrConfigService.class);
 
-    static final long DEFAULT_LIMIT = 500L;
+    private static final long DEFAULT_LIMIT = 500L;
 
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
@@ -198,6 +198,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     accounts =
                             zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
                 } catch (Exception e) {
+                    log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
                 }
                 overview.setLimit(accounts);
                 break;
@@ -207,6 +208,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     contacts =
                             zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
                 } catch (Exception e) {
+                    log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
                 }
                 overview.setLimit(contacts);
                 break;

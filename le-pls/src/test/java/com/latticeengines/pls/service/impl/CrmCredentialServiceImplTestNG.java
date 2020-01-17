@@ -29,7 +29,6 @@ import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
 import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
-@SuppressWarnings("unused")
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @Autowired
@@ -72,11 +71,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
-        try {
-            camille.delete(path);
-        } catch (Exception ex) {
-            // ignore
-        }
+        camille.delete(path);
         CustomerSpaceProperties properties = new CustomerSpaceProperties();
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
         batonService.createTenant(contractId, tenantId, spaceId, spaceInfo);

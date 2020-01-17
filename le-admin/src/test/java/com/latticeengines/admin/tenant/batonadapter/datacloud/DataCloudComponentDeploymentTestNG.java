@@ -39,8 +39,8 @@ public class DataCloudComponentDeploymentTestNG extends BatonAdapterDeploymentTe
                 tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, getServiceName());
         try {
             CamilleEnvironment.getCamille().delete(servicePath);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // servicePath already removed
         }
 
         bootstrap(getDataCloudDocumentDirectory());

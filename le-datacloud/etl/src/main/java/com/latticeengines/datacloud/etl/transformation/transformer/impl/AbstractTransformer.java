@@ -130,14 +130,14 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
                 try {
                     configuration = (T) configClass.newInstance();
                 } catch (Exception e) {
-                    // ignored
+                    log.warn("Failed to instantiate the configuration", e);
                 }
             }
         } else {
             try {
                 configuration = (T) JsonUtils.deserialize(confStr, configClass);
             } catch (Exception e) {
-                log.error("Failed to convert tranformer config.", e);
+                log.warn("Failed to convert tranformer config.", e);
             }
         }
         return configuration;
