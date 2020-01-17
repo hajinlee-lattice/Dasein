@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
+
 public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
 
     private static final String EXPORT_TIME = "ExportTime";
@@ -42,7 +43,6 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
     private static final SimpleDateFormat fmtr1 = new SimpleDateFormat(FMT_1);
     private static final SimpleDateFormat fmtr2 = new SimpleDateFormat(FMT_2);
     private static final SimpleDateFormat fmtr3 = new SimpleDateFormat(ConvertToCSVConfig.ISO_8601);
-
     static {
         fmtr1.setTimeZone(TimeZone.getTimeZone("UTC"));
         fmtr2.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -75,7 +75,7 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of("Attr2", Long.class), //
                 Pair.of("Attr3", Long.class) //
         );
-        Object[][] data = new Object[][]{ //
+        Object[][] data = new Object[][] { //
                 {1, "1", now, now}, //
                 {2, "2", null, now}, //
                 {3, null, now, now}, //
@@ -104,9 +104,12 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
         } catch (IOException e) {
             throw new RuntimeException("Failed to parse csv input stream", e);
         }
+
         verifyHeaders(records.getHeaderMap());
+
         int count = 0;
         for (CSVRecord record : records) {
+            System.out.println(record);
             verifyRecord(record);
             count++;
         }
