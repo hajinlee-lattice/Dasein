@@ -9,9 +9,6 @@ public class MergeCSVConfig extends SparkJobConfig {
 
     public static final String NAME = "mergeCSV";
 
-    @JsonProperty("Compress")
-    private Boolean compress;
-
     @Override
     @JsonProperty("Name")
     public String getName() {

@@ -145,7 +145,7 @@ public class HdfsUtils {
     }
 
     public static void copyInputStreamToHdfsWithoutBom(Configuration configuration, InputStream inputStream,
-            String hdfsPath) throws IOException {
+                                                       String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
@@ -205,7 +205,7 @@ public class HdfsUtils {
     }
 
     public static void uncompressGZFileWithinHDFS(Configuration configuration, String gzHdfsPath,
-            String uncompressedFilePath) throws IOException {
+                                                  String uncompressedFilePath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path inputFilePath = new Path(gzHdfsPath);
             Path outputFilePath = new Path(uncompressedFilePath);
@@ -217,7 +217,7 @@ public class HdfsUtils {
     }
 
     public static void uncompressZipFileWithinHDFS(Configuration configuration, String compressedFile,
-            String uncompressedDir) throws IOException {
+                                                   String uncompressedDir) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path inputFile = new Path(compressedFile);
             Path outputFolder = new Path(uncompressedDir);
@@ -239,7 +239,7 @@ public class HdfsUtils {
     }
 
     public static void compressGZFileWithinHDFS(Configuration configuration, String gzHdfsPath,
-            String uncompressedFilePath) throws IOException {
+                                                String uncompressedFilePath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path inputFilePath = new Path(uncompressedFilePath);
             Path outputFilePath = new Path(gzHdfsPath);
@@ -347,7 +347,7 @@ public class HdfsUtils {
     }
 
     public static List<FileStatus> getFileStatusesForDir(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter) throws IOException {
+                                                         HdfsFileFilter filter) throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsDir)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<FileStatus> filePaths = new ArrayList<>();
@@ -367,12 +367,12 @@ public class HdfsUtils {
     }
 
     public static List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter) throws IOException {
+                                                       HdfsFileFilter filter) throws IOException {
         return getFilesForDirRecursive(configuration, hdfsDir, filter, false);
     }
 
     public static List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir, String regex,
-            boolean returnFirstMatch) throws IOException {
+                                                       boolean returnFirstMatch) throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsDir)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<String> filePaths = new HashSet<String>();
@@ -391,7 +391,7 @@ public class HdfsUtils {
     }
 
     public static List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
+                                                       HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsDir)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<String> filePaths = new HashSet<String>();
@@ -409,7 +409,7 @@ public class HdfsUtils {
     }
 
     public static List<String> getFilesForDirRecursiveWithFilterOnDir(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, HdfsFileFilter folderFilter) throws IOException {
+                                                                      HdfsFileFilter filter, HdfsFileFilter folderFilter) throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsDir)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<String> filePaths = new HashSet<String>();
@@ -428,14 +428,14 @@ public class HdfsUtils {
 
     // Only return files. Exclude all the sub directory paths
     public static List<String> onlyGetFilesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
+                                                           HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
         Set<String> filePaths = new HashSet<String>();
         onlyGetFilesForDirRecursiveHelper(configuration, hdfsDir, filter, returnFirstMatch, filePaths);
         return new ArrayList<>(filePaths);
     }
 
     public static void onlyGetFilesForDirRecursiveHelper(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, boolean returnFirstMatch, Set<String> filePaths) throws IOException {
+                                                         HdfsFileFilter filter, boolean returnFirstMatch, Set<String> filePaths) throws IOException {
         if (returnFirstMatch && filePaths.size() > 0) {
             return;
         }
@@ -462,12 +462,12 @@ public class HdfsUtils {
     }
 
     public static List<FileStatus> getFileStatusesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter) throws IOException {
+                                                                  HdfsFileFilter filter) throws IOException {
         return getFileStatusesForDirRecursive(configuration, hdfsDir, filter, false);
     }
 
     public static List<FileStatus> getFileStatusesForDirRecursive(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
+                                                                  HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
         try (FileSystem fs = getFileSystem(configuration, hdfsDir)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             Set<FileStatus> filePaths = new HashSet<>();
@@ -543,7 +543,7 @@ public class HdfsUtils {
     }
 
     public static List<String> getFilesByGlobWithScheme(Configuration configuration, String globPath,
-            boolean withScheme) throws IOException {
+                                                        boolean withScheme) throws IOException {
         try (FileSystem fs = getFileSystem(configuration, globPath)) {
             FileStatus[] statuses = fs.globStatus(new Path(globPath));
             List<String> filePaths = new ArrayList<>();
@@ -621,13 +621,13 @@ public class HdfsUtils {
     public static boolean copyFiles(Configuration configuration, String src, String dst)
             throws IllegalArgumentException, IOException {
         try (FileSystem srcFS = getFileSystem(configuration, src);
-                FileSystem dstFS = getFileSystem(configuration, dst)) {
+             FileSystem dstFS = getFileSystem(configuration, dst)) {
             return FileUtil.copy(srcFS, new Path(src), dstFS, new Path(dst), false, false, configuration);
         }
     }
 
     public static void copyGlobToDirWithScheme(Configuration configuration, String sourceGlob, String targetDir,
-            String tgtNameSuffix) throws IOException {
+                                               String tgtNameSuffix) throws IOException {
         if (!isDirectory(configuration, targetDir)) {
             mkdir(configuration, targetDir);
         }
@@ -639,7 +639,7 @@ public class HdfsUtils {
     }
 
     public static void copyGlobToDir(Configuration configuration, String sourceGlob, String targetDir,
-            String tgtNameSuffix) throws IOException {
+                                     String tgtNameSuffix) throws IOException {
         if (!isDirectory(configuration, targetDir)) {
             mkdir(configuration, targetDir);
         }
@@ -693,7 +693,7 @@ public class HdfsUtils {
     }
 
     public static long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration,
-            InputStream inputStream, String hdfsPath, long totalRows) throws IOException {
+                                                                    InputStream inputStream, String hdfsPath, long totalRows) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 return copyLarge(
@@ -705,7 +705,7 @@ public class HdfsUtils {
     }
 
     public static long copyCSVStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath,
-            long totalRows) throws IOException {
+                                           long totalRows) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 CSVFormat format = LECSVFormat.format.withFirstRecordAsHeader();
@@ -755,7 +755,7 @@ public class HdfsUtils {
     }
 
     public static long copyInputStreamToHdfsWithoutBomAndReturnRows(Configuration configuration,
-            InputStream inputStream, String hdfsPath) throws IOException {
+                                                                    InputStream inputStream, String hdfsPath) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 return copyLarge(new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
@@ -777,16 +777,6 @@ public class HdfsUtils {
             }
         }
         return rows;
-    }
-
-    public static String getCsvGzPath(Configuration configuration, String outputDir) {
-        try {
-            List<String> files = getFilesForDir(configuration, outputDir, (HdfsFilenameFilter) filename ->
-                    filename.endsWith(".csv.gz") || filename.endsWith(".csv"));
-            return files.get(0);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read " + outputDir);
-        }
     }
 
 }

@@ -302,6 +302,13 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         return schema;
     }
 
+    private String getProductNameFromRedshift(String tableName, String productId) {
+        String sql = String.format("SELECT %s FROM %s WHERE %s = '%s' LIMIT 1", InterfaceName.ProductName.name(), tableName, //
+                InterfaceName.ProductId.name(), productId);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> redshiftJdbcTemplate.queryForObject(sql, String.class));
+    }
+
     @Override
     protected void postJobExecution(SparkJobResult result) {
         AtlasExport exportRecord = WorkflowStaticContext.getObject(ATLAS_EXPORT, AtlasExport.class);

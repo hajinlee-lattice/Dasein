@@ -26,8 +26,6 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
 
     private String mergedFileName;
 
-    private boolean compressResult;
-
     private Map<String, String> properties = new HashMap<>();
 
     public ExportFormat getExportFormat() {
@@ -108,14 +106,6 @@ public class ExportStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setMergedFileName(String mergedFileName) {
         this.mergedFileName = mergedFileName;
-    }
-
-    public boolean isCompressResult() {
-        return compressResult;
-    }
-
-    public void setCompressResult(boolean compressResult) {
-        this.compressResult = compressResult;
     }
 
 }

@@ -151,12 +151,13 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
             MergeCSVConfig mergeCSVConfig = getMergeCSVConfig(dstPath);
             SparkJobResult result = SparkUtils.runJob(customerSpace, yarnConfiguration, sparkJobService,
                     livySessionManager, MergeCSVJob.class, mergeCSVConfig);
-            // mv generated csv file to dest path
             HdfsDataUnit hdfsDataUnit = result.getTargets().get(0);
             String outputDir = hdfsDataUnit.getPath();
-            String csvGzPath = HdfsUtils.getCsvGzPath(yarnConfiguration, outputDir);
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, (HdfsUtils.HdfsFilenameFilter) filename -> filename.endsWith(".csv"));
+            String csvPath = files.get(0);
             String renamePath = outputDir + "/" + mergedFileName;
-            HdfsUtils.rename(yarnConfiguration, csvGzPath, renamePath);
+            HdfsUtils.rename(yarnConfiguration, csvPath, renamePath);
+            // mv generated csv file to dest path
             HdfsUtils.moveFile(yarnConfiguration, renamePath, dstPath);
             HdfsUtils.rmdir(yarnConfiguration, mergeCSVConfig.getWorkspace());
             if (keepMergedFileName) {

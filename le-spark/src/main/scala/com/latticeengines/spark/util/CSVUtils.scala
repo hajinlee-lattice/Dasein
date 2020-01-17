@@ -27,7 +27,7 @@ private[spark] object CSVUtils {
     }
   }
 
-  def saveToCsv(df: DataFrame, path: String, compress: Boolean): Unit = {
+  private def saveToCsv(df: DataFrame, path: String, compress: Boolean): Unit = {
     var writer = df.coalesce(1).write
       .option("header", value = true)
       .option("quote", "\"")
