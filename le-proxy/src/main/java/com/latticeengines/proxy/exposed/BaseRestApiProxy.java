@@ -160,7 +160,7 @@ public abstract class BaseRestApiProxy {
         return combine(hostport, end);
     }
 
-    protected String constructUrl(String hostport, Object path, Object... variables) {
+    protected String constructUrlWithHostPort(String hostport, Object path, Object... variables) {
         if (StringUtils.isBlank(hostport)) {
             throw new NullPointerException("hostport must be set");
         }

@@ -198,7 +198,7 @@ public class CampaignLaunchSchedulingServiceImpl extends BaseRestApiProxy implem
         }
 
         return StringUtils.isNotBlank(tenantSpecificEndpoint)
-                ? constructUrl(tenantSpecificEndpoint, campaignLaunchUrlPrefix, customerSpace.getTenantId(),
+                ? constructUrlWithHostPort(tenantSpecificEndpoint, campaignLaunchUrlPrefix, customerSpace.getTenantId(),
                         channel.getPlay().getName(), channel.getId())
                 : constructUrl(campaignLaunchUrlPrefix, customerSpace.getTenantId(), channel.getPlay().getName(),
                         channel.getId());
