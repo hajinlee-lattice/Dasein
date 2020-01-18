@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -20,6 +21,9 @@ import org.springframework.beans.factory.annotation.Value;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -35,6 +39,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -357,4 +362,22 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
             log.info("Skip publish " + contextKey + " (" + tableName + ") to S3.");
         }
     }
+
+    protected void writeSchema(Table table) {
+        try {
+            Schema schema = TableUtils.createSchema(AvroUtils.getAvroFriendlyString(table.getName()), table);
+            String avscPath = getAvscPath(table);
+            log.info("Write schema for table={}, avscPath={}", table.getName(), avscPath);
+            HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
+        } catch (Exception ex) {
+            log.warn("Could not write schema, error=" + ex.getMessage(), ex);
+        }
+    }
+
+    private String getAvscPath(Table table) {
+        String avscFile = table.getName() + ".avsc";
+        return PathBuilder.buildDataTableSchemaPath(podId, customerSpace).append(table.getName()).append(avscFile)
+                .toString();
+    }
+
 }

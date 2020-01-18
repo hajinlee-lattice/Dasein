@@ -28,6 +28,9 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
         runnables.add(runnable1);
         Runnable runnable2 = () -> testHasSystemBatch();
         runnables.add(runnable2);
+        Runnable runnable3 = () -> testHasInputOnly();
+        runnables.add(runnable3);
+
         ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
         workers.shutdownNow();
     }
@@ -47,6 +50,30 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
         SparkJobResult result = runSparkJob(UpsertJob.class, config, input,
                 String.format("/tmp/%s/%s/HasSystemBatch", leStack, this.getClass().getSimpleName()));
         verify(result, Collections.singletonList(this::verifyHasSystemBatch));
+    }
+
+    private void testHasInputOnly() {
+        List<String> input = uploadHasInputOnly();
+        UpsertConfig config = getHasInputOnlyConfig();
+
+        SparkJobResult result = runSparkJob(UpsertJob.class, config, input,
+                String.format("/tmp/%s/%s/HasInputOnly", leStack, this.getClass().getSimpleName()));
+        verify(result, Collections.singletonList(this::verifyHasInputOnly));
+    }
+
+    private UpsertConfig getHasInputOnlyConfig() {
+        UpsertConfig config = UpsertConfig.joinBy("Id");
+        config.setInputSystemBatch(true);
+        config.setBatchTemplateName(null);
+        return config;
+    }
+
+    private List<String> uploadHasInputOnly() {
+        List<String> input = new ArrayList<>();
+        List<Pair<String, Class<?>>> fields = getInput2Fields();
+        Object[][] data = getInput2Data();
+        input.add(uploadHdfsDataUnit(data, fields));
+        return input;
     }
 
     private List<String> uploadDataHasNoSystemBatch() {
@@ -78,10 +105,10 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
     private Object[][] getInput2Data() {
         Object[][] data;
         data = new Object[][] { //
-                { 2, "22", null, true, "system1" }, //
-                { 3, "23", -3L, false, "system1" }, //
-                { 2, "24", null, null, "system2" }, //
-                { 5, "25", -5L, false, "system2" } //
+                { 2, "22", null, true, "template1" }, //
+                { 3, "23", -3L, false, "template1" }, //
+                { 2, "24", null, null, "template2" }, //
+                { 5, "25", -5L, false, "template2" } //
         };
         return data;
     }
@@ -93,15 +120,15 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of("Attr1", String.class), //
                 Pair.of("Attr2", Long.class), //
                 Pair.of("Attr3", Boolean.class), //
-                Pair.of("__system__", String.class) //
+                Pair.of("__template__", String.class) //
         );
         return fields;
     }
 
     private UpsertConfig getHasNoSystemBatchConfig() {
         UpsertConfig config = UpsertConfig.joinBy("Id");
-        config.setSystemBatch(false);
-        config.setSystems(Arrays.asList("default", "system1", "system2"));
+        config.setInputSystemBatch(true);
+        config.setBatchTemplateName("default");
         return config;
     }
 
@@ -112,23 +139,27 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
             String defaultAttr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
             Long defaultAttr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
             Boolean defaultAttr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
-            prefix = "system1__";
-            String system1Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
-            Long system1Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
-            Boolean system1Attr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
-            prefix = "system2__";
-            String system2Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
-            Long system2Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
-            Boolean system2Attr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
+            prefix = "template1__";
+            String template1Attr1 = record.get(prefix + "Attr1") == null ? null
+                    : record.get(prefix + "Attr1").toString();
+            Long template1Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
+            Boolean template1Attr3 = record.get(prefix + "Attr3") == null ? null
+                    : (boolean) record.get(prefix + "Attr3");
+            prefix = "template2__";
+            String template2Attr1 = record.get(prefix + "Attr1") == null ? null
+                    : record.get(prefix + "Attr1").toString();
+            Long template2Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
+            Boolean template2Attr3 = record.get(prefix + "Attr3") == null ? null
+                    : (boolean) record.get(prefix + "Attr3");
             switch (id) {
             case 1:
                 Assert.assertEquals(defaultAttr1, "1", record.toString());
                 Assert.assertEquals(defaultAttr2, Long.valueOf(1), record.toString());
                 Assert.assertNull(defaultAttr3, record.toString());
 
-                assertNulls(record, system1Attr1, system1Attr2, system1Attr3);
+                assertNulls(record, template1Attr1, template1Attr2, template1Attr3);
 
-                assertNulls(record, system2Attr1, system2Attr2, system2Attr3);
+                assertNulls(record, template2Attr1, template2Attr2, template2Attr3);
 
                 break;
             case 2:
@@ -136,13 +167,13 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertEquals(defaultAttr2, Long.valueOf(2), record.toString());
                 Assert.assertNull(defaultAttr3, record.toString());
 
-                Assert.assertEquals(system1Attr1, "22", record.toString());
-                Assert.assertNull(system1Attr2, record.toString());
-                Assert.assertEquals(system1Attr3, Boolean.TRUE, record.toString());
+                Assert.assertEquals(template1Attr1, "22", record.toString());
+                Assert.assertNull(template1Attr2, record.toString());
+                Assert.assertEquals(template1Attr3, Boolean.TRUE, record.toString());
 
-                Assert.assertEquals(system2Attr1, "24", record.toString());
-                Assert.assertNull(system2Attr2, record.toString());
-                Assert.assertNull(system2Attr3, record.toString());
+                Assert.assertEquals(template2Attr1, "24", record.toString());
+                Assert.assertNull(template2Attr2, record.toString());
+                Assert.assertNull(template2Attr3, record.toString());
 
                 break;
             case 3:
@@ -150,11 +181,11 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertEquals(defaultAttr2, Long.valueOf(3), record.toString());
                 Assert.assertNull(defaultAttr3, record.toString());
 
-                Assert.assertEquals(system1Attr1, "23", record.toString());
-                Assert.assertEquals(system1Attr2, Long.valueOf(-3), record.toString());
-                Assert.assertEquals(system1Attr3, Boolean.FALSE, record.toString());
+                Assert.assertEquals(template1Attr1, "23", record.toString());
+                Assert.assertEquals(template1Attr2, Long.valueOf(-3), record.toString());
+                Assert.assertEquals(template1Attr3, Boolean.FALSE, record.toString());
 
-                assertNulls(record, system2Attr1, system2Attr2, system2Attr3);
+                assertNulls(record, template2Attr1, template2Attr2, template2Attr3);
 
                 break;
             case 4:
@@ -162,17 +193,17 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertEquals(defaultAttr2, Long.valueOf(4), record.toString());
                 Assert.assertNull(defaultAttr3, record.toString());
 
-                assertNulls(record, system1Attr1, system1Attr2, system1Attr3);
-                assertNulls(record, system2Attr1, system2Attr2, system2Attr3);
+                assertNulls(record, template1Attr1, template1Attr2, template1Attr3);
+                assertNulls(record, template2Attr1, template2Attr2, template2Attr3);
 
                 break;
             case 5:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
-                assertNulls(record, system1Attr1, system1Attr2, system1Attr3);
+                assertNulls(record, template1Attr1, template1Attr2, template1Attr3);
 
-                Assert.assertEquals(system2Attr1, "25", record.toString());
-                Assert.assertEquals(system2Attr2, Long.valueOf(-5), record.toString());
-                Assert.assertEquals(system2Attr3, Boolean.FALSE, record.toString());
+                Assert.assertEquals(template2Attr1, "25", record.toString());
+                Assert.assertEquals(template2Attr2, Long.valueOf(-5), record.toString());
+                Assert.assertEquals(template2Attr3, Boolean.FALSE, record.toString());
 
                 break;
             default:
@@ -191,8 +222,8 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
 
     private UpsertConfig getHasSystemBatchConfig() {
         UpsertConfig config = UpsertConfig.joinBy("Id");
-        config.setSystemBatch(true);
-        config.setSystems(Arrays.asList("system1", "system1", "system2"));
+        config.setInputSystemBatch(true);
+        config.setBatchTemplateName(null);
         return config;
     }
 
@@ -200,8 +231,8 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
         List<String> input = new ArrayList<>();
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("Id", Integer.class), //
-                Pair.of("system1__Attr1", String.class), //
-                Pair.of("system2__Attr2", Long.class) //
+                Pair.of("template1__Attr1", String.class), //
+                Pair.of("template2__Attr2", Long.class) //
         );
         Object[][] data = getInput1Data();
         input.add(uploadHdfsDataUnit(data, fields));
@@ -219,70 +250,125 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
             String defaultAttr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
             Long defaultAttr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
             Boolean defaultAttr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
-            prefix = "system1__";
-            String system1Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
-            Long system1Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
-            Boolean system1Attr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
-            prefix = "system2__";
-            String system2Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
-            Long system2Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
-            Boolean system2Attr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
+            prefix = "template1__";
+            String template1Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
+            Long template1Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
+            Boolean template1Attr3 = record.get(prefix + "Attr3") == null ? null
+                    : (boolean) record.get(prefix + "Attr3");
+            prefix = "template2__";
+            String template2Attr1 = record.get(prefix + "Attr1") == null ? null
+                    : record.get(prefix + "Attr1").toString();
+            Long template2Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
+            Boolean template2Attr3 = record.get(prefix + "Attr3") == null ? null
+                    : (boolean) record.get(prefix + "Attr3");
             switch (id) {
             case 1:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
 
-                Assert.assertEquals(system1Attr1, "1", record.toString());
-                Assert.assertNull(system1Attr2, record.toString());
-                Assert.assertNull(system1Attr3, record.toString());
+                Assert.assertEquals(template1Attr1, "1", record.toString());
+                Assert.assertNull(template1Attr2, record.toString());
+                Assert.assertNull(template1Attr3, record.toString());
 
-                Assert.assertNull(system2Attr1, record.toString());
-                Assert.assertEquals(system2Attr2, Long.valueOf(1), record.toString());
-                Assert.assertNull(system2Attr3, record.toString());
+                Assert.assertNull(template2Attr1, record.toString());
+                Assert.assertEquals(template2Attr2, Long.valueOf(1), record.toString());
+                Assert.assertNull(template2Attr3, record.toString());
 
                 break;
             case 2:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
 
-                Assert.assertEquals(system1Attr1, "22", record.toString());
-                Assert.assertNull(system1Attr2, record.toString());
-                Assert.assertEquals(system1Attr3, Boolean.TRUE, record.toString());
+                Assert.assertEquals(template1Attr1, "22", record.toString());
+                Assert.assertNull(template1Attr2, record.toString());
+                Assert.assertEquals(template1Attr3, Boolean.TRUE, record.toString());
 
-                Assert.assertEquals(system2Attr1, "24", record.toString());
-                Assert.assertNull(system2Attr2, record.toString());
-                Assert.assertNull(system2Attr3, record.toString());
+                Assert.assertEquals(template2Attr1, "24", record.toString());
+                Assert.assertNull(template2Attr2, record.toString());
+                Assert.assertNull(template2Attr3, record.toString());
 
                 break;
             case 3:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
 
-                Assert.assertEquals(system1Attr1, "23", record.toString());
-                Assert.assertEquals(system1Attr2, Long.valueOf(-3), record.toString());
-                Assert.assertEquals(system1Attr3, Boolean.FALSE, record.toString());
+                Assert.assertEquals(template1Attr1, "23", record.toString());
+                Assert.assertEquals(template1Attr2, Long.valueOf(-3), record.toString());
+                Assert.assertEquals(template1Attr3, Boolean.FALSE, record.toString());
 
-                Assert.assertNull(system2Attr1, record.toString());
-                Assert.assertEquals(system2Attr2, Long.valueOf(3), record.toString());
-                Assert.assertNull(system2Attr3, record.toString());
+                Assert.assertNull(template2Attr1, record.toString());
+                Assert.assertEquals(template2Attr2, Long.valueOf(3), record.toString());
+                Assert.assertNull(template2Attr3, record.toString());
 
                 break;
             case 4:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
 
-                Assert.assertEquals(system1Attr1, "4", record.toString());
-                Assert.assertNull(system1Attr2, record.toString());
-                Assert.assertNull(system1Attr3, record.toString());
+                Assert.assertEquals(template1Attr1, "4", record.toString());
+                Assert.assertNull(template1Attr2, record.toString());
+                Assert.assertNull(template1Attr3, record.toString());
 
-                Assert.assertNull(system2Attr1, record.toString());
-                Assert.assertEquals(system2Attr2, Long.valueOf(4), record.toString());
-                Assert.assertNull(system2Attr3, record.toString());
+                Assert.assertNull(template2Attr1, record.toString());
+                Assert.assertEquals(template2Attr2, Long.valueOf(4), record.toString());
+                Assert.assertNull(template2Attr3, record.toString());
 
                 break;
             case 5:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
-                assertNulls(record, system1Attr1, system1Attr2, system1Attr3);
+                assertNulls(record, template1Attr1, template1Attr2, template1Attr3);
 
-                Assert.assertEquals(system2Attr1, "25", record.toString());
-                Assert.assertEquals(system2Attr2, Long.valueOf(-5), record.toString());
-                Assert.assertEquals(system2Attr3, Boolean.FALSE, record.toString());
+                Assert.assertEquals(template2Attr1, "25", record.toString());
+                Assert.assertEquals(template2Attr2, Long.valueOf(-5), record.toString());
+                Assert.assertEquals(template2Attr3, Boolean.FALSE, record.toString());
+
+                break;
+            default:
+                Assert.fail("Should not see a record with id " + id + ": " + record.toString());
+            }
+        });
+
+        return true;
+    }
+
+    private Boolean verifyHasInputOnly(HdfsDataUnit tgt) {
+        verifyAndReadTarget(tgt).forEachRemaining(record -> {
+            int id = (int) record.get("Id");
+            String prefix = "template1__";
+            String template1Attr1 = record.get(prefix + "Attr1") == null ? null
+                    : record.get(prefix + "Attr1").toString();
+            Long template1Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
+            Boolean template1Attr3 = record.get(prefix + "Attr3") == null ? null
+                    : (boolean) record.get(prefix + "Attr3");
+            prefix = "template2__";
+            String template2Attr1 = record.get(prefix + "Attr1") == null ? null
+                    : record.get(prefix + "Attr1").toString();
+            Long template2Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
+            Boolean template2Attr3 = record.get(prefix + "Attr3") == null ? null
+                    : (boolean) record.get(prefix + "Attr3");
+            switch (id) {
+            case 2:
+                Assert.assertEquals(template1Attr1, "22", record.toString());
+                Assert.assertNull(template1Attr2, record.toString());
+                Assert.assertEquals(template1Attr3, Boolean.TRUE, record.toString());
+
+                Assert.assertEquals(template2Attr1, "24", record.toString());
+                Assert.assertNull(template2Attr2, record.toString());
+                Assert.assertNull(template2Attr3, record.toString());
+
+                break;
+            case 3:
+                Assert.assertEquals(template1Attr1, "23", record.toString());
+                Assert.assertEquals(template1Attr2, Long.valueOf(-3), record.toString());
+                Assert.assertEquals(template1Attr3, Boolean.FALSE, record.toString());
+
+                Assert.assertNull(template2Attr1, record.toString());
+                Assert.assertNull(template2Attr2, record.toString());
+                Assert.assertNull(template2Attr3, record.toString());
+
+                break;
+            case 5:
+                assertNulls(record, template1Attr1, template1Attr2, template1Attr3);
+
+                Assert.assertEquals(template2Attr1, "25", record.toString());
+                Assert.assertEquals(template2Attr2, Long.valueOf(-5), record.toString());
+                Assert.assertEquals(template2Attr3, Boolean.FALSE, record.toString());
 
                 break;
             default:

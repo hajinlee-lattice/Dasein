@@ -14,6 +14,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.shaded.com.google.common.collect.ImmutableMap;
 import org.apache.flink.util.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
@@ -49,6 +51,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
  */
 @Component(ExtractEmbeddedEntityTable.DATAFLOW_BEAN_NAME)
 public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbeddedEntityTableConfig> {
+    private static final Logger log = LoggerFactory.getLogger(ExtractEmbeddedEntityTable.class);
+    private static final String TEMPLATE_COLUMN = "__template__";
     public static final String DATAFLOW_BEAN_NAME = "ExtractEmbeddedEntityTableFlow";
     public static final String TRANSFORMER_NAME = TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 
@@ -80,9 +84,14 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
         entityIds = validatePrepareEntityIdsNode(entityIds);
         embeddedEntities = validatePrepareEmbeddedEntitiesNode(embeddedEntities);
 
-        return entityIds
+        Node result = entityIds
                 .join(new FieldList(ENTITY_ID_FIELD), embeddedEntities, new FieldList(ENTITYID_JOIN), JoinType.INNER)
                 .discard(ENTITYID_JOIN);
+        if (StringUtils.isNotBlank(config.getSystem())) {
+            result = result.addColumnWithFixedValue(TEMPLATE_COLUMN, config.getSystem(), String.class);
+        }
+        log.info("fields=" + String.join(",", result.getFieldNames()));
+        return result;
     }
 
     private void validateConfig() {
