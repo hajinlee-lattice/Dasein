@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.service;
 
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.query.EntityType;
 
 public interface DataFeedTaskTemplateService {
 
@@ -38,4 +40,32 @@ public interface DataFeedTaskTemplateService {
      * @return A table object from the backup file. / Null if file not exists.
      */
     Table restoreTemplate(String customerSpace, String uniqueTaskId, String backupName, boolean onlyGetTable);
+
+    /**
+     *
+     * @param customerSpace target tenant.
+     * @param systemName The user defined name for the system for which a template is being created
+     * @param entityType using to judge if this is Opportunity entityType
+     * @return true if validate pass.
+     */
+    boolean validationOpportunity(String customerSpace, String systemName, EntityType entityType);
+
+    /**
+     *
+     * @param customerSpace target tenant
+     * @param systemName The user defined name for the system for which a template is being created
+     * @return true if success
+     */
+    boolean createDefaultOpportunityTemplate(String customerSpace, String systemName);
+
+    /**
+     *
+     * @param customerSpace target tenant
+     * @param systemName The user defined name for the system for which a template is being created
+     * @param entityType using to create Template
+     * @param simpleTemplateMetadata Template description.
+     * @return datafeedTask object if success
+     */
+    DataFeedTask createOpportunityTemplate(String customerSpace, String systemName, EntityType entityType,
+                                           SimpleTemplateMetadata simpleTemplateMetadata);
 }

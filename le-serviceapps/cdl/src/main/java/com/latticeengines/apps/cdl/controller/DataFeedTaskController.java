@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
@@ -29,8 +31,10 @@ import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -238,5 +242,57 @@ public class DataFeedTaskController {
     public ResponseDocument<ImportTemplateDiagnostic> templateDiagnostic(@PathVariable String customerSpace,
                                                                          @PathVariable String taskIdentifier) {
         return ResponseDocument.successResponse(dataFeedTaskManagerService.diagnostic(customerSpace, taskIdentifier));
+    }
+
+    @PostMapping(value = "/setup/defaultOpportunity")
+    @ResponseBody
+    @ApiOperation(value = "Create a default opportunity template")
+    public ResponseDocument<Boolean> createDefaultOpportunityTemplate(@PathVariable String customerSpace,
+                                                                      @RequestParam(value = "systemName") String systemName) {
+        log.info("systemName = {}.", systemName);
+        if (StringUtils.isEmpty(systemName)) {
+            return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
+        }
+        if (!dataFeedTaskTemplateService.validationOpportunity(customerSpace, systemName, EntityType.Opportunity)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("Opportunities by stage cannot be " +
+                    "created as the corresponding Salesforce Account object does not have a Unique ID"));
+        }
+        try {
+            Boolean result = dataFeedTaskTemplateService.createDefaultOpportunityTemplate(customerSpace, systemName);
+            return ResponseDocument.successResponse(result);
+        } catch (Exception e) {
+            log.error("Create Default Opportunity template failed with error: {}", e.toString());
+            String stacktrace = ExceptionUtils.getStackTrace(e);
+            log.error("Stack trace is: {}", stacktrace);
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+
+    @PostMapping(value = "/setup/opportunity")
+    @ResponseBody
+    @ApiOperation(value = "Create a opportunity template")
+    public ResponseDocument<Boolean> createOpportunityTemplate(@PathVariable String customerSpace,
+                                                                      @RequestParam(value = "systemName") String systemName,
+                                                                      @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata) {
+        log.info("systemName = {}.", systemName);
+        if (StringUtils.isEmpty(systemName)) {
+            return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
+        }
+        Preconditions.checkNotNull(simpleTemplateMetadata);
+        if (!dataFeedTaskTemplateService.validationOpportunity(customerSpace, systemName, simpleTemplateMetadata.getEntityType())) {
+            return ResponseDocument.failedResponse(new IllegalStateException("Opportunities by stage cannot be " +
+                    "created as the corresponding Salesforce Account object does not have a Unique ID"));
+        }
+        try {
+            DataFeedTask dataFeedTask = dataFeedTaskTemplateService.createOpportunityTemplate(customerSpace, systemName,
+                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata);
+            return ResponseDocument.successResponse(true);
+        } catch (Exception e) {
+            log.error("Create Default Opportunity template failed with error: {}", e.toString());
+            String stacktrace = ExceptionUtils.getStackTrace(e);
+            log.error("Stack trace is: {}", stacktrace);
+            return ResponseDocument.failedResponse(e);
+        }
     }
 }

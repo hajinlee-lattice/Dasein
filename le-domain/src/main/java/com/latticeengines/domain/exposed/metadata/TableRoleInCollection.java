@@ -15,6 +15,7 @@ public enum TableRoleInCollection {
     ConsolidatedPeriodTransaction, //
     ConsolidatedCatalog, //
     ConsolidatedActivityStream, //
+    ConsolidatedOpportunity, //
 
     SystemAccount, //
     SystemContact, //
