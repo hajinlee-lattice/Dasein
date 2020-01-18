@@ -18,6 +18,8 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.P
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedProduct;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedProductHierarchy;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SystemAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SystemContact;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,9 +89,11 @@ public enum BusinessEntity implements GraphNode {
 
     static {
         // Storage
+        Account.setSystemBatchStore(SystemAccount);
         Account.setBatchStore(ConsolidatedAccount);
         Account.setServingStore(BucketedAccount);
 
+        Contact.setSystemBatchStore(SystemContact);
         Contact.setBatchStore(ConsolidatedContact);
         Contact.setServingStore(SortedContact);
 
@@ -148,6 +152,7 @@ public enum BusinessEntity implements GraphNode {
     }
 
     // Entity Definitions
+    private TableRoleInCollection systemBatchStore;
     private TableRoleInCollection batchStore;
     private TableRoleInCollection servingStore;
     private List<Relationship> relationships = new ArrayList<>();
@@ -159,6 +164,14 @@ public enum BusinessEntity implements GraphNode {
             }
         }
         throw new IllegalArgumentException(String.format("There is no entity name %s in BusinessEntity", entity));
+    }
+
+    public TableRoleInCollection getSystemBatchStore() {
+        return systemBatchStore;
+    }
+
+    public void setSystemBatchStore(TableRoleInCollection systemBatchStore) {
+        this.systemBatchStore = systemBatchStore;
     }
 
     public TableRoleInCollection getBatchStore() {
