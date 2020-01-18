@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,8 +40,9 @@ public class ServingStoreResource {
     public Flux<ColumnMetadata> getDecoratedMetadata( //
             @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
             @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
-            @RequestParam(name = "version", required = false) DataCollection.Version version) {
-        return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups);
+            @RequestParam(name = "version", required = false) DataCollection.Version version, //) {
+            @RequestParam(name = "filter", required = false) StoreFilter filter) {
+        return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups, filter);
     }
 
     @GetMapping(value = "/systemmetadata")

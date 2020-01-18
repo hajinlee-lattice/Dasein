@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -55,6 +56,12 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
+            public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity,
+                    DataCollection.Version version, StoreFilter filter) {
+                return null;
+            }
+
+            @Override
             public List<ColumnMetadata> getDecoratedMetadataFromCache(String tenantId, BusinessEntity entity) {
                 return null;
             }
@@ -62,6 +69,12 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             @Override
             public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
                     DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+                    DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, StoreFilter filter) {
                 return null;
             }
 

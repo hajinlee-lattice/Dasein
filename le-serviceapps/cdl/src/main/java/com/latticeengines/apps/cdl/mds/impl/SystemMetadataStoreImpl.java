@@ -28,13 +28,15 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace0;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace3;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 
 @Component("systemMetadataStore")
 public class SystemMetadataStoreImpl extends
         DecoratedMetadataStore<//
-                Namespace2<BusinessEntity, DataCollection.Version>, //
-                Namespace2<BusinessEntity, DataCollection.Version>, //
+                Namespace3<BusinessEntity, DataCollection.Version, StoreFilter>, //
+                Namespace3<BusinessEntity, DataCollection.Version, StoreFilter>, //
                 Namespace2<BusinessEntity, DataCollection.Version>>
         implements SystemMetadataStore {
 
@@ -131,14 +133,14 @@ public class SystemMetadataStoreImpl extends
     }
 
     @Override
-    protected Namespace2<BusinessEntity, DataCollection.Version> projectBaseNamespace(
-            Namespace2<BusinessEntity, DataCollection.Version> namespace) {
+    protected Namespace2<BusinessEntity, DataCollection.Version> projectDecoratorNamespace(
+            Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> namespace) {
         return namespace;
     }
 
     @Override
-    protected Namespace2<BusinessEntity, DataCollection.Version> projectDecoratorNamespace(
-            Namespace2<BusinessEntity, DataCollection.Version> namespace) {
+    protected Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> projectBaseNamespace(
+            Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> namespace) {
         return namespace;
     }
 

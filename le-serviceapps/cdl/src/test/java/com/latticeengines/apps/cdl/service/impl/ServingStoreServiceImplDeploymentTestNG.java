@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,6 +15,8 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
@@ -42,6 +45,29 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
         Flux<ColumnMetadata> allModelingAttrs = servingStoreProxy.getAllowedModelingAttrs(mainTestTenant.getId());
         p = ColumnMetadata::getCanModel;
         Assert.assertTrue(allModelingAttrs.all(p).block());
+    }
+
+    @Test(groups = "deployment-app")
+    public void testCustomerAttrs() {
+        Flux<ColumnMetadata> customerAccountAttrs = servingStoreProxy.getDecoratedMetadata(mainTestTenant.getId(),
+                BusinessEntity.Account, null, null, StoreFilter.NON_LDC);
+        Map<String, String> nameMap = customerAccountAttrs
+                .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
+                .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
+                .block();
+        Assert.assertNotNull(nameMap);
+        Assert.assertTrue(nameMap.containsKey(ACCOUNT_SYSTEM_ID));
+        Assert.assertEquals(nameMap.get(ACCOUNT_SYSTEM_ID), "DefaultSystem Account ID");
+        Flux<ColumnMetadata> customerContactAttrs = servingStoreProxy.getDecoratedMetadata(mainTestTenant.getId(),
+                BusinessEntity.Contact, null, null, StoreFilter.NON_LDC);
+        nameMap = customerContactAttrs
+                .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
+                .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
+                .block();
+        Assert.assertNotNull(nameMap);
+        Assert.assertTrue(nameMap.containsKey(OTHERSYSTEM_ACCOUNT_SYSTEM_ID));
+        Assert.assertEquals(nameMap.get(OTHERSYSTEM_ACCOUNT_SYSTEM_ID), "DefaultSystem_2 Account ID");
+
     }
 
 

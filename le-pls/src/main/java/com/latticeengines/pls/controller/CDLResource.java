@@ -6,11 +6,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -39,6 +41,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -437,8 +440,28 @@ public class CDLResource {
                 standardTable = SchemaRepository.instance().getSchema(
                         BusinessEntity.getByName(dataFeedTask.getEntity()), true, false, enableEntityMatch);
             }
-            return cdlService.getTemplatePreview(customerSpace.toString(),
+            List<TemplateFieldPreview> fieldPreviews = cdlService.getTemplatePreview(customerSpace.toString(),
                     dataFeedTask.getImportTemplate(), standardTable);
+            if (CollectionUtils.isEmpty(fieldPreviews)) {
+                return fieldPreviews;
+            }
+            Map<String, String> standardNameMapping =
+                    standardTable.getAttributes()
+                            .stream()
+                            .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
+            BusinessEntity entity = entityType == null ?
+                    BusinessEntity.getByName(dataFeedTask.getEntity()) : entityType.getEntity();
+            Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entityType);
+            fieldPreviews.forEach(preview -> {
+                if (nameMapping.containsKey(preview.getNameInTemplate())) {
+                    preview.setDisplayName(nameMapping.get(preview.getNameInTemplate()));
+                } else if (standardNameMapping.containsKey(preview.getNameInTemplate())) {
+                    preview.setDisplayName(standardNameMapping.get(preview.getNameInTemplate()));
+                } else {
+                    preview.setDisplayName(preview.getNameFromFile());
+                }
+            });
+            return fieldPreviews;
         } catch (RuntimeException e) {
             log.error("Get template preview Failed: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
