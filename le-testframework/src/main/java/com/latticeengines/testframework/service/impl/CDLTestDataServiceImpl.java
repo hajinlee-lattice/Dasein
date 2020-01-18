@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.zip.GZIPInputStream;
 
 import javax.annotation.Resource;
@@ -133,7 +132,6 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             log.info("DataCollection version " + active + " is already populated, switch to " + active.complement());
             dataCollectionProxy.switchVersion(shortTenantId, active.complement());
         }
-        ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("cdl-test-data", 4);
         List<Runnable> tasks = new ArrayList<>();
         ConcurrentMap<String, Long> entityCounts = new ConcurrentHashMap<>();
         tasks.add(() -> populateStats(shortTenantId, String.valueOf(version)));
@@ -144,7 +142,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         // Product data is needed for activity metrics metadata decorator
         tasks.add(() -> populateBatchStore(shortTenantId, BusinessEntity.Product, String.valueOf(version)));
         tasks.add(() -> populateTableRole(shortTenantId, ConsolidatedAccount, String.valueOf(version)));
-        ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
+        ThreadPoolUtils.runInParallel(tasks);
         updateDataCollectionStatus(shortTenantId, entityCounts);
     }
 
@@ -157,7 +155,6 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             log.info("DataCollection version " + active + " is already populated, switch to " + active.complement());
             dataCollectionProxy.switchVersion(shortTenantId, active.complement());
         }
-        ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("cdl-test-data", 4);
         List<Runnable> tasks = new ArrayList<>();
         ConcurrentMap<String, Long> entityCounts = new ConcurrentHashMap<>();
         tasks.add(() -> populateStats(shortTenantId, String.valueOf(version)));
@@ -170,7 +167,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             tasks.add(() -> populateServingStore(shortTenantId, entity, String.valueOf(version), entityCounts));
             tasks.add(() -> populateBatchStore(shortTenantId, entity, String.valueOf(version)));
         }
-        ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
+        ThreadPoolUtils.runInParallel(tasks);
         updateDataCollectionStatus(shortTenantId, entityCounts);
     }
 

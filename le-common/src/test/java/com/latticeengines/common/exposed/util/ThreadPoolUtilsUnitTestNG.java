@@ -30,7 +30,7 @@ public class ThreadPoolUtilsUnitTestNG {
         AtomicLong counter = new AtomicLong(0L);
         ForkJoinPool pool = ThreadPoolUtils.getForkJoinThreadPool("test", 4);
         List<Runnable> runnables = getRunnables(counter);
-        ThreadPoolUtils.runRunnablesInParallel(pool, runnables, 1, 1);
+        ThreadPoolUtils.runInParallel(pool, runnables, 1, 1);
         Assert.assertEquals(counter.get(), 100L);
     }
 

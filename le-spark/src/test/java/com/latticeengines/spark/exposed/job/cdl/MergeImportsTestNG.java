@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
@@ -41,17 +40,12 @@ public class MergeImportsTestNG extends SparkJobFunctionalTestNGBase {
     private static final String[] FIELDS4 = { InterfaceName.Id.name(), InterfaceName.AccountId.name(), "AID1", "AID2" };
     @Test(groups = "functional")
     public void test() {
-        ExecutorService workers = ThreadPoolUtils.getFixedSizeThreadPool("merge-imports-test", 2);
-
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(this::test1);
         runnables.add(this::test2);
         runnables.add(this::test3);
         runnables.add(this::test4);
-
-        ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
-
-        workers.shutdownNow();
+        ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
     // Test concat imports -- very basic test case

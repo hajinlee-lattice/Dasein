@@ -125,7 +125,7 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
             runnables.add(new RunnableTest(this, MultiTenantContext.getTenant(), jobIndex + 1));
         }
         log.info("Going to submited {} threads: {} ", TEST_THREADS);
-        ThreadPoolUtils.runRunnablesInParallel(executor, runnables, 10, 1);
+        ThreadPoolUtils.runInParallel(executor, runnables, 10, 1);
     }
 
     public class RunnableTest implements Runnable {

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -835,12 +834,10 @@ public class CheckpointService {
         if (!isEntityMatchEnabled()) {
             return;
         }
-
-        ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("entity-match-copy", 2);
-        ThreadPoolUtils.runRunnablesInParallel(tp, Arrays.asList( //
-                copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Account.name()),
-                copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Contact.name())), 10, 1);
-        tp.shutdown();
+        ThreadPoolUtils.doInParallel(Arrays.asList( //
+                BusinessEntity.Account.name(), //
+                BusinessEntity.Contact.name() //
+        ), entity -> copyEntitySeedTable(checkpoint, checkpointVersion, entity));
     }
 
     private Runnable copyEntitySeedTable(String checkpoint, String checkpointVersion, String entity) {

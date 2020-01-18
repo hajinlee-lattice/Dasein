@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -91,7 +90,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     @Inject
     private TestSftpProvider sftpProvider;
 
-    private ExecutorService verificationWorkers;
     private Map<String, Ingestion> ingestions = new HashMap<>();
     private String orbVersion;
     private int timeout = 2700000;
@@ -162,7 +160,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     public void setup() {
         prepareCleanPod(POD_ID);
         prepareIngestions();
-        verificationWorkers = ThreadPoolUtils.getFixedSizeThreadPool("ingestion-test", 2);
         prepareBomboraFiles();
     }
 
@@ -171,7 +168,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         for (Ingestion ingestion : ingestions.values()) {
             ingestionEntityMgr.delete(ingestion);
         }
-        verificationWorkers.shutdownNow();
         recoverBomboraFiles();
     }
 
@@ -331,7 +327,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
             }
         }
         if (CollectionUtils.isNotEmpty(verifiers)) {
-            ThreadPoolUtils.runRunnablesInParallel(verificationWorkers, verifiers, 60, 1);
+            ThreadPoolUtils.runInParallel(verifiers);
         }
     }
 

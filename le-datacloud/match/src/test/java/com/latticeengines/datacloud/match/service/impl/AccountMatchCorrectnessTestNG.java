@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -927,7 +925,6 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = newTestTenant();
 
         final int SIZE = 50;
-        ExecutorService service = Executors.newFixedThreadPool(SIZE);
         List<Runnable> runnables = new ArrayList<>();
         ConcurrentHashMultiset<String> entityIds = ConcurrentHashMultiset.create();
         for (int i = 0; i < SIZE; i++) {
@@ -942,7 +939,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                 }
             });
         }
-        ThreadPoolUtils.runRunnablesInParallel(service, runnables, 10, 2);
+        ThreadPoolUtils.runInParallel(runnables);
 
         if (entityIds.elementSet().size() > 1) {
             concurrentTestNumSplits.incrementAndGet();

@@ -45,7 +45,7 @@ public class DecoratorChain implements Decorator, NeedsLoad {
             }
         }
         if (CollectionUtils.isNotEmpty(runnables)) {
-            ThreadPoolUtils.runRunnablesInParallel(getDcLoaders(), runnables, 60, 1);
+            ThreadPoolUtils.runInParallel(getDcLoaders(), runnables, 60, 1);
         }
     }
 

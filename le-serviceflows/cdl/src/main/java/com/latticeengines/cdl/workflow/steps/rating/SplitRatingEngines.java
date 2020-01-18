@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -165,9 +164,7 @@ public class SplitRatingEngines extends BaseWorkflowStep<ProcessRatingStepConfig
             };
             runnables.add(runnable);
         });
-        ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("dep-attrs", Math.min(8, engineIds.size()));
-        ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 1);
-        threadPool.shutdown();
+        ThreadPoolUtils.runInParallel(runnables);
         return nodes;
     }
 

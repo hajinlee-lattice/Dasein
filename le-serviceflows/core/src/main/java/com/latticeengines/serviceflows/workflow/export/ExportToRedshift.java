@@ -69,7 +69,7 @@ public class ExportToRedshift extends BaseWorkflowStep<ExportToRedshiftStepConfi
 
         int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("redshift-export", threadPoolSize);
-        ThreadPoolUtils.runRunnablesInParallel(executors, exporters, (int) TimeUnit.DAYS.toMinutes(1), 10);
+        ThreadPoolUtils.runInParallel(executors, exporters, (int) TimeUnit.DAYS.toMinutes(1), 10);
     }
 
     private List<RedshiftExportConfig> getExportConfigs() {

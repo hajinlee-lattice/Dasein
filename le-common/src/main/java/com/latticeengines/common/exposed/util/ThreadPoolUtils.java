@@ -67,12 +67,27 @@ public class ThreadPoolUtils {
         return new ForkJoinPool(size, workerThreadFactory, null, false);
     }
 
-    public static <T> List<T> runCallablesInParallel(Collection<Callable<T>> callables) {
-        return runCallablesInParallel(getSharedPool(), callables, 60, 1);
+    /**
+     * run callables in an ephemeral thread pool with given name
+     */
+    public static <T> List<T> callInParallel(Collection<Callable<T>> callables) {
+        return callInParallel(getSharedPool(), callables, 60, 1);
     }
 
-    public static <T> List<T> runCallablesInParallel(ExecutorService executorService, Collection<Callable<T>> callables,
-            int timeoutInMinutes, int intervalInSeconds) {
+    /**
+     * run callables in shared thread pool. be careful not to block the shared threads for too long
+     */
+    public static <T> List<T> callInParallel(String threadPoolName, Collection<Callable<T>> callables) {
+        ExecutorService tp = getFixedSizeThreadPool(threadPoolName, NUM_CORES * 2);
+        try {
+            return callInParallel(getSharedPool(), callables, 60, 1);
+        } finally {
+            tp.shutdown();
+        }
+    }
+
+    public static <T> List<T> callInParallel(ExecutorService executorService, Collection<Callable<T>> callables,
+                                             int timeoutInMinutes, int intervalInSeconds) {
         if (CollectionUtils.isNotEmpty(callables)) {
             int numTasks = CollectionUtils.size(callables);
             List<Callable<T>> wrappedCallables = callables.stream() //
@@ -110,12 +125,34 @@ public class ThreadPoolUtils {
         }
     }
 
-    public static <T extends Runnable> void runRunnablesInParallel(Collection<T> runnables) {
-        runRunnablesInParallel(getSharedPool(), runnables, 60, 1);
+    /**
+     * run runnables in shared thread pool. be careful not to block the shared threads for too long
+     */
+    public static <T extends Runnable> void runInParallel(Collection<T> runnables) {
+        runInParallel(runnables, 60, 1);
     }
 
-    public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService,
-            Collection<T> runnables, int timeoutInMinutes, int intervalInSeconds) {
+    /**
+     * run runnables in shared thread pool. be careful not to block the shared threads for too long
+     */
+    public static <T extends Runnable> void runInParallel(Collection<T> runnables, int timeoutInMinutes, int intervalInSeconds) {
+        runInParallel(getSharedPool(), runnables, timeoutInMinutes, intervalInSeconds);
+    }
+
+    /**
+     * run runnables in an ephemeral thread pool with given name
+     */
+    public static <T extends Runnable> void runInParallel(String threadPoolName, Collection<T> runnables) {
+        ExecutorService tp = getFixedSizeThreadPool(threadPoolName, NUM_CORES * 2);
+        try {
+            runInParallel(tp, runnables, 60, 1);
+        } finally {
+            tp.shutdown();
+        }
+    }
+
+    public static <T extends Runnable> void runInParallel(ExecutorService executorService,
+                                                          Collection<T> runnables, int timeoutInMinutes, int intervalInSeconds) {
         if (CollectionUtils.isNotEmpty(runnables)) {
             int numTasks = CollectionUtils.size(runnables);
             List<Runnable> wrappedRunnables = runnables.stream() //
@@ -149,22 +186,23 @@ public class ThreadPoolUtils {
         }
     }
 
+    /**
+     * run runnables in shared thread pool. be careful not to block the shared threads for too long
+     */
     public static <T> void doInParallel(final Iterable<T> elements, final Operation<T> operation) {
         doInParallel(getSharedPool(), elements, operation);
     }
 
     private static <T> void doInParallel(final ExecutorService executorService, final Iterable<T> elements,
                                          final Operation<T> operation) {
-        runRunnablesInParallel(executorService, createRunnables(elements, operation), 10, 1);
+        runInParallel(executorService, createRunnables(elements, operation), 10, 1);
     }
 
     private static <T> Collection<Runnable> createRunnables(final Iterable<T> elements,
             final Operation<T> operation) {
         List<Runnable> runnables = new LinkedList<>();
         for (final T elem : elements) {
-            runnables.add(() -> {
-                operation.perform(elem);
-            });
+            runnables.add(() -> operation.perform(elem));
         }
         return runnables;
     }
@@ -225,7 +263,7 @@ public class ThreadPoolUtils {
         if (sharedPool == null) {
             synchronized (ThreadPoolUtils.class) {
                 if (sharedPool == null) {
-                    sharedPool = Executors.newFixedThreadPool(NUM_CORES * 2);
+                    sharedPool = getFixedSizeThreadPool("parallel-util", NUM_CORES * 2);
                 }
             }
         }
