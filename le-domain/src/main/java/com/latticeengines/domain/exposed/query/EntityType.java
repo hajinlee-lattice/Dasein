@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.SubType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -21,6 +22,12 @@ public enum EntityType {
             SchemaInterpretation.WebVisitPathPattern), //
     WebVisitSourceMedium(BusinessEntity.Catalog, SubType.SourceMedium, "Visit Source", "WebVisitSourceMedium",
             SchemaInterpretation.WebVisitSourceMedium);
+
+    private static final Set<EntityType> STANDARD_ENTITY_TYPES =
+            ImmutableSet.of(Accounts, Contacts, Leads, ProductPurchases, ProductBundles, ProductHierarchy);
+    private static final Set<EntityType> STREAM_ENTITY_TYPES =
+            ImmutableSet.of(WebVisit, WebVisitPathPattern, WebVisitSourceMedium);
+
 
     private BusinessEntity entity;
     private SubType subType;
@@ -118,6 +125,14 @@ public enum EntityType {
             defaultFolders.add(entry.getDefaultFeedTypeName());
         }
         return new ArrayList<>(defaultFolders);
+    }
+
+    public static boolean isStandardEntityType(EntityType entityType) {
+        return STANDARD_ENTITY_TYPES.contains(entityType);
+    }
+
+    public static boolean isStreamEntityType(EntityType entityType) {
+        return STREAM_ENTITY_TYPES.contains(entityType);
     }
 
 }

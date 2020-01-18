@@ -856,7 +856,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             if (JobStatus.ENQUEUED.name().equals(workflowJob.getStatus())) {
                 continue;
             }
-
+            if (workflowJob.getStartTimeInMillis() == null) {
+                continue;
+            }
             long currentTimeMillis = System.currentTimeMillis();
             if ((currentTimeMillis - workflowJob.getStartTimeInMillis()) > SPRING_BATCH_FAILURE_THRESHOLD
                     && workflowJob.getWorkflowId() == null) {

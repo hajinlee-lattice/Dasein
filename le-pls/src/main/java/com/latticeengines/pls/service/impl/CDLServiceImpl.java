@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
@@ -68,6 +69,7 @@ import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -82,6 +84,7 @@ import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -103,6 +106,9 @@ public class CDLServiceImpl implements CDLService {
 
     @Inject
     private ActivityStoreProxy activityStoreProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     @Inject
     private CDLProxy cdlProxy;
@@ -878,5 +884,27 @@ public class CDLServiceImpl implements CDLService {
             }
         }
         return true;
+    }
+
+    @Override
+    public Map<String, String> getDecoratedDisplayNameMapping(String customerSpace, EntityType entityType) {
+        if (entityType == null) {
+            return Collections.emptyMap();
+        }
+        if (EntityType.isStandardEntityType(entityType)) {
+            return servingStoreProxy.getDecoratedMetadata(customerSpace, entityType.getEntity(), null,
+                    null, StoreFilter.NON_LDC)
+                    .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
+                    .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
+                    .block();
+        } else if (EntityType.isStreamEntityType(entityType)) {
+            return servingStoreProxy.getDecoratedMetadata(customerSpace, BusinessEntity.Account, null,
+                    null, StoreFilter.NON_LDC)
+                    .filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
+                    .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName)
+                    .block();
+        } else {
+            return Collections.emptyMap();
+        }
     }
 }
