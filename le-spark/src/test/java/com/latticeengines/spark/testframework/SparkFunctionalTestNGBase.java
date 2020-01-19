@@ -2,6 +2,7 @@ package com.latticeengines.spark.testframework;
 
 import javax.inject.Inject;
 
+import com.latticeengines.spark.service.impl.LivyServerManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -16,6 +17,9 @@ public abstract class SparkFunctionalTestNGBase extends AbstractTestNGSpringCont
     @Inject
     private EMRCacheService emrCacheService;
 
+    @Inject
+    private LivyServerManager livyServerManager;
+
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
@@ -23,7 +27,7 @@ public abstract class SparkFunctionalTestNGBase extends AbstractTestNGSpringCont
 
     protected void setupLivyHost() {
         if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
+            livyHost = livyServerManager.getLivyHost();
         } else {
             livyHost = "http://localhost:8998";
         }
