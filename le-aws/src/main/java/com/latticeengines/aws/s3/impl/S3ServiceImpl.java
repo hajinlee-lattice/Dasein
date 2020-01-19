@@ -293,12 +293,12 @@ public class S3ServiceImpl implements S3Service {
                     Upload upload = tm.upload(bucket, filePrefix, file);
                     uploads.add(upload);
                 }
-                log.info("Submitted an upload job for " + numFiles + " files.");
+                log.info("Submitted upload jobs for " + numFiles + " files.");
                 for (Upload upload : uploads) {
                     waitForUploadResult(upload, uploadedObjects, numFiles, failedUploadFiles);
                 }
                 if (CollectionUtils.isNotEmpty(failedUploadFiles)) {
-                    log.info("Still {} files uploaded to {}/{}.", files.size(), bucket, finalPrefix);
+                    log.info("{} files failed to upload to {}/{}, need to retry upload.", files.size(), bucket, finalPrefix);
                     files.clear();
                     files.addAll(failedUploadFiles);
                     // retry the failed list
@@ -307,7 +307,7 @@ public class S3ServiceImpl implements S3Service {
                 return true;
             });
         } catch (Exception e) {
-            log.info("There are still {} files failed to upload to {}/{}.", files.size(), bucket, finalPrefix);
+            log.info("There are still {} files failed to upload to {}/{} after retry upload 3 times.", files.size(), bucket, finalPrefix);
         }
     }
 
