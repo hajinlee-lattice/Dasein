@@ -24,9 +24,9 @@ public class AttrDimension implements GraphNode, Serializable {
         return name;
     }
 
-    public AttrDimension clone() {
+    public AttrDimension cloneDimension() {
         AttrDimension dim = new AttrDimension(name);
-        List<AttrDimension> children = this.children.stream().map(AttrDimension::clone)
+        List<AttrDimension> children = this.children.stream().map(AttrDimension::cloneDimension)
                 .collect(Collectors.toList());
         dim.setChildren(children);
         return dim;

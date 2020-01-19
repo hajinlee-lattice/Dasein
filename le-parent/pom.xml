@@ -33,7 +33,7 @@
         <maven.compiler.version>3.8.0</maven.compiler.version>
         <maven.assembly.version>3.1.0</maven.assembly.version>
         <maven.exec.version>1.6.0</maven.exec.version>
-        <maven.checkstyle.version>3.0.0</maven.checkstyle.version>
+        <maven.checkstyle.version>3.1.0</maven.checkstyle.version>
         <maven.spotbugs.version>3.1.9</maven.spotbugs.version>
         <maven.scala.version>4.0.1</maven.scala.version>
         <maven.dependency.version>3.1.1</maven.dependency.version>
@@ -90,7 +90,7 @@
         <akka.version>2.4.20</akka.version> <!-- match flink version -->
 
         <!-- versions should be easy to upgrade: keep them updated! -->
-        <checkstyle.version>8.15</checkstyle.version>
+        <checkstyle.version>8.19</checkstyle.version>
         <freemarker.version>2.3.29</freemarker.version>
         <jacoco.version>0.8.2</jacoco.version>
         <hibernate.validator.version>6.0.13.Final</hibernate.validator.version> <!-- javax.validation -->

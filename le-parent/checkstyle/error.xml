@@ -17,12 +17,9 @@
     </module>
 
     <module name="TreeWalker">
-        <module name="SuppressWarningsHolder" />
-        <module name="OuterTypeFilename"/>
-        <module name="OneTopLevelClass"/>
-
         <!-- Annotations -->
         <module name="PackageAnnotation"/>
+        <module name="SuppressWarningsHolder" />
 
         <!-- Block -->
         <module name="AvoidNestedBlocks"/>
@@ -47,6 +44,26 @@
             <property name="commentFormat" value="This is expected"/>
             <property name="exceptionVariableName" value="expected|ignore"/>
         </module>
+
+        <!-- Coding -->
+        <module name="CovariantEquals"/>
+        <module name="DefaultComesLast"/>
+        <module name="EmptyStatement"/>
+        <module name="IllegalToken">
+            <property name="tokens" value="LITERAL_NATIVE"/>
+        </module>
+        <module name="NoClone"/>
+        <module name="SuperClone"/>
+        <module name="NoFinalizer"/>
+        <module name="SuperFinalize"/>
+        <module name="PackageDeclaration"/>
+        <module name="StringLiteralEquality"/>
+
+        <!-- Design -->
+        <module name="OneTopLevelClass"/>
+
+        <!-- Miscellaneous -->
+        <module name="OuterTypeFilename"/>
 
         <!-- Modifiers -->
         <module name="ModifierOrder"/>

@@ -29,7 +29,7 @@ public class LPAttrConfigServiceImplDeploymentTestNG extends LPDeploymentTestNGB
         List<AttrConfig> customConfig = new ArrayList<>();
         List<AttrConfig> renderConfig = lpAttrConfigService.render(systemMetadata, customConfig, entityMatchEnabled);
         List<AttrConfig> copiedList = new ArrayList<>();
-        renderConfig.forEach(e -> copiedList.add(e.clone()));
+        renderConfig.forEach(e -> copiedList.add(e.cloneAttrConfig()));
 
         List<AttrConfig> trimConfig = lpAttrConfigService.trim(renderConfig);
         List<AttrConfig> renderConfig2 = lpAttrConfigService.render(systemMetadata, trimConfig, entityMatchEnabled);

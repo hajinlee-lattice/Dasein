@@ -5,7 +5,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 public class LedpException extends RuntimeException {
 
     private static final long serialVersionUID = 4758154339163073679L;
-    private LedpCode code;
+    private final LedpCode code;
 
     public LedpException(LedpCode code) {
         this(code, null, new String[] {});

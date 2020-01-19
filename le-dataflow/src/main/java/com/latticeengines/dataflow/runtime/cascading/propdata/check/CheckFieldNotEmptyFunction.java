@@ -76,7 +76,7 @@ public class CheckFieldNotEmptyFunction extends BaseOperation implements Functio
                     functionCall.getOutputCollector().add(result);
                 }
             } else {
-                if (checkEmptyVal == null || checkEmptyVal == "") {
+                if (checkEmptyVal == null || "".equals(checkEmptyVal)) {
                     result = setTupleValues(result, keyFieldVal, checkField, checkEmptyVal);
                     functionCall.getOutputCollector().add(result);
                 }

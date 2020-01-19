@@ -410,8 +410,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         return new BucketRestriction(BusinessEntity.Account, InterfaceName.AccountId.name(), bkt);
     }
 
-    @Override
-    public Object clone() {
+    public MetadataSegment cloneSegment() {
         MetadataSegment clone = new MetadataSegment();
         clone.setCreated(new Date());
         clone.setCreatedBy(this.getCreatedBy());

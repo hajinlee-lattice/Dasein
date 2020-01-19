@@ -242,8 +242,7 @@ public class VdbMetadataField implements Cloneable {
         return str1.equals(str2);
     }
 
-    @Override
-    public Object clone() {
+    VdbMetadataField cloneVdbMetadata() {
         VdbMetadataField field = new VdbMetadataField();
         field.setColumnName(getColumnName());
         field.setSource(getSource());

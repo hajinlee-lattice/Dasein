@@ -9,7 +9,6 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
@@ -33,7 +32,7 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
     @Override
     protected void handleCustomSegment() {
         if (aiModel.getTrainingSegment() != null) {
-            baseSegment = (MetadataSegment) aiModel.getTrainingSegment().clone();
+            baseSegment = aiModel.getTrainingSegment().cloneSegment();
         }
     }
 

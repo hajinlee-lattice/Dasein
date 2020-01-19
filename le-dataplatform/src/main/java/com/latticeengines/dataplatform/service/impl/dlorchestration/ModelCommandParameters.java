@@ -163,7 +163,6 @@ public class ModelCommandParameters {
 
     public void setMetadataTable(String metadataTable) {
         this.metadataTable = metadataTable;
-        ;
     }
 
     public List<String> getKeyCols() {

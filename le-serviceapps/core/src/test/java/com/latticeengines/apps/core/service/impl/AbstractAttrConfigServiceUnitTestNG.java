@@ -249,7 +249,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
         List<AttrConfig> customConfig = new ArrayList<>();
         List<AttrConfig> renderConfig = cdlAttrConfigServiceImpl.render(metadataList, customConfig, entityMatchEnabled);
         List<AttrConfig> copiedList = new ArrayList<>();
-        renderConfig.forEach(e -> copiedList.add(e.clone()));
+        renderConfig.forEach(e -> copiedList.add(e.cloneAttrConfig()));
 
         List<AttrConfig> trimConfig = cdlAttrConfigServiceImpl.trim(renderConfig);
         List<AttrConfig> renderConfig2 = cdlAttrConfigServiceImpl.render(metadataList, trimConfig, entityMatchEnabled);
