@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -208,18 +209,14 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
     }
 
     private void waitForDataFeed(String customerSpace) {
-        try {
-            DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
-            int idleCounter = 0;
-            while (DataFeed.Status.RUNNING_STATUS.contains(dataFeed.getStatus())) {
-                Thread.sleep(TimeUnit.MINUTES.toMillis(3));
-                dataFeed = dataFeedProxy.getDataFeed(customerSpace);
-                if (++idleCounter > 60) {
-                    throw new RuntimeException("Cannot start cleanup job! Please try again later.");
-                }
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+        int idleCounter = 0;
+        while (DataFeed.Status.RUNNING_STATUS.contains(dataFeed.getStatus())) {
+            SleepUtils.sleep(TimeUnit.MINUTES.toMillis(3));
+            dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+            if (++idleCounter > 60) {
+                throw new RuntimeException("Cannot start cleanup job! Please try again later.");
             }
-        } catch (InterruptedException e) {
-
         }
     }
 

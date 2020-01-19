@@ -26,6 +26,7 @@ import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
@@ -285,16 +286,12 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
                 .getAllStatusMessages(statusMonitor.getPid());
         Assert.assertNotNull(messages);
         Assert.assertEquals(messages.size(), 3);
-        
+
         // throw new Exception();
     }
 
     private void addReaderDelay() {
-        try {
-            Thread.sleep(2000);
-        } catch (Exception e) {
-            //Ignore
-        }
+        SleepUtils.sleep(2000L);
     }
 
     private List<DataIntegrationStatusMonitorMessage> generateListMessages(

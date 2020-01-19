@@ -51,6 +51,7 @@ import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroStreamsIterator;
+import com.latticeengines.common.exposed.util.SleepUtils;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-aws-context.xml" })
@@ -215,11 +216,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         verifyNoAccess();
         Policy policy = getCustomerPolicy(dropBoxId, accountId);
         s3Service.setBucketPolicy(testBucket, policy.toJson());
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        SleepUtils.sleep(10000L);
         verifyAccess();
 
         String bucketPolicy = s3Service.getBucketPolicy(testBucket);
@@ -244,11 +241,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         Assert.assertFalse(bucketPolicy.contains(dropBoxId), bucketPolicy);
         Assert.assertTrue(bucketPolicy.contains(dropBoxId2), bucketPolicy);
 
-        try {
-            Thread.sleep(10000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        SleepUtils.sleep(10000L);
         verifyNoAccess();
     }
 

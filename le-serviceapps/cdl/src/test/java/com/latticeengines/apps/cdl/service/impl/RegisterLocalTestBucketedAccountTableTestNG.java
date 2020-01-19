@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 
@@ -109,8 +108,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends CDLFunctionalTe
                 runnables.add(runnable);
             }
         }
-        ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("register-serving-store", 4);
-        ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 3);
+        ThreadPoolUtils.runInParallel(runnables);
     }
 
     private Runnable registerServingStore(BusinessEntity entity) {

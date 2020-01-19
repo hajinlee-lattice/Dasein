@@ -284,7 +284,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
                 try {
                     dataFileWriter.append(account.getAsRecord(schema));
                 } catch (IOException ioe) {
-                    // Do Nothing
+                    log.warn("failed to write a avro datdum", ioe);
                 }
             });
             dataFileWriter.flush();

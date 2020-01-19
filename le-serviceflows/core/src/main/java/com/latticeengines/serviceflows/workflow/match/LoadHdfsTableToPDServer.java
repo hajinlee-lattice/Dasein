@@ -99,7 +99,7 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
                     try {
                         dropTablePstmt.executeUpdate();
                     } catch (Exception e) {
-                        // ignore
+                        log.warn("Faled to execute the drop table statement", e);
                     }
                 }
 

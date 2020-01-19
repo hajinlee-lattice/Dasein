@@ -284,7 +284,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             if (FieldInterpretationCollections.PrimaryMatchingFields.contains(keyField)) {
                 field.setPrimaryField(true);
             }
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             // Ignore. As this field doesn't belong to FieldInterpretation enum.
         }
         fieldList.add(field);

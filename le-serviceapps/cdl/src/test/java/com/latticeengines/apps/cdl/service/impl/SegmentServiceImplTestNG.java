@@ -21,6 +21,7 @@ import org.testng.log4testng.Logger;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.KryoUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -93,12 +94,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         RatingEngine ratingEngine1 = createRatingEngine(segment2);
         RatingEngine ratingEngine2 = createRatingEngine(segment1);
 
-        try {
-            Thread.sleep(5 * 1000);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-
+        SleepUtils.sleep(5000L);
         setRestriction(segment2, ratingEngine2);
 
         boolean exception = false;
@@ -187,7 +183,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertEquals(e.getCode(), LedpCode.LEDP_40057);
             Assert.assertTrue(e.getMessage().contains("Contact.Attr1"), e.getMessage());
         }
-        
+
         Restriction b4c = cloneRestriction(b4);
         ((BucketRestriction) b4c).getBkt().setValues(Collections.emptyList());
         ((LogicalRestriction) contactRestriction).getRestrictions().set(1, b4c);
@@ -217,11 +213,7 @@ public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
         segment.setDisplayName(segmentName);
         MetadataSegment createdSegment = segmentService.createOrUpdateSegment(segment);
 
-        try {
-            Thread.sleep(2 * 1000);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        SleepUtils.sleep(2000L);
 
         return segmentService.findByName(createdSegment.getName());
     }

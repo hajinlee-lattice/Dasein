@@ -73,7 +73,7 @@ class EMRScalingCallable implements Callable<Boolean> {
                 if (CollectionUtils.size(runnables) == 1) {
                     runnables.get(0).run();
                 } else {
-                    ThreadPoolUtils.runRunnablesInParallel(pool, runnables, 10, 1);
+                    ThreadPoolUtils.runInParallel(pool, runnables, 10, 1);
                 }
             }
         } catch (Exception e) {

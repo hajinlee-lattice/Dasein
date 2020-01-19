@@ -563,8 +563,8 @@ public class UserServiceImpl implements UserService {
                             success = success && globalUserManagementService.revokeRight(right.getAuthority(), tenantId,
                                     username);
                         }
-                    } catch (Exception e) {
-                        // ignore
+                    } catch (Exception ignore) {
+                        // right already revoked
                     }
                 }
             }

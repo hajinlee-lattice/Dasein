@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
@@ -14,6 +16,8 @@ import com.latticeengines.transform.exposed.metadata.Tag;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdVisidbDsSpamindicator implements RealTimeTransform {
+
+    private static final Logger log = LoggerFactory.getLogger(StdVisidbDsSpamindicator.class);
 
     private static final long serialVersionUID = 2222617772602907048L;
 
@@ -98,8 +102,8 @@ public class StdVisidbDsSpamindicator implements RealTimeTransform {
         try {
             Float.valueOf(companyName);
             return 1;
-        } catch (Exception e) {
-            // pass
+        } catch (Exception ignore) {
+            // companyName is not a float. good
         }
 
         return 0;

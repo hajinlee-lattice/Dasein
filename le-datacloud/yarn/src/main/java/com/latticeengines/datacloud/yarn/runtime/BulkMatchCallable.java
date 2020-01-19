@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
@@ -15,6 +19,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 
 public class BulkMatchCallable implements Callable<MatchContext> {
+
+    private static final Logger log = LoggerFactory.getLogger(BulkMatchCallable.class);
 
     private MatchInput matchInput;
     private String podId;
@@ -31,11 +37,7 @@ public class BulkMatchCallable implements Callable<MatchContext> {
     @Override
     public MatchContext call() {
         HdfsPodContext.changeHdfsPodId(podId);
-        try {
-            Thread.sleep(new Random().nextInt(200));
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        SleepUtils.sleep(new Random().nextInt(200));
         return matchBlock(matchInput);
     }
 

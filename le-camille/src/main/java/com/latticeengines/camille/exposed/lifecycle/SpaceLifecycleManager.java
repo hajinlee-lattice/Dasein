@@ -56,6 +56,7 @@ public class SpaceLifecycleManager {
             camille.create(spacesPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Spaces path @ {}", spacesPath);
         } catch (KeeperException.NodeExistsException e) {
+            log.debug("Spaces path already exits, ignoring create.");
         }
 
         Path spacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,

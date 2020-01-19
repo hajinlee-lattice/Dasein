@@ -1,8 +1,9 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -15,20 +16,20 @@ import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
 public class PlaymakerTenantEntityMgrImplTestNG extends PlaymakerTestNGBase {
 
-    @Autowired
+    @Inject
     private PlaymakerTenantEntityMgr playMakerEntityMgr;
 
-    @Autowired
+    @Inject
     private OAuthUserEntityMgr users;
 
     @Test(groups = "functional")
-    public void testCRUD() throws Exception {
+    public void testCRUD() {
 
         PlaymakerTenant tenant = getTenant();
         try {
             playMakerEntityMgr.deleteByTenantName(tenant.getTenantName());
         } catch (Exception ex) {
-
+            logger.warn("Error during tenant deletion, ignored", ex);
         }
         PlaymakerTenant result = playMakerEntityMgr.create(tenant);
 
@@ -54,7 +55,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends PlaymakerTestNGBase {
         Assert.assertNull(user);
 
         tenant = getTenant();
-        result = playMakerEntityMgr.create(tenant);
+        playMakerEntityMgr.create(tenant);
     }
 
     @Test(groups = "functional")
@@ -63,7 +64,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends PlaymakerTestNGBase {
         try {
             playMakerEntityMgr.deleteByTenantName(tenant.getTenantName());
         } catch (Exception ex) {
-
+            logger.warn("Error during tenant deletion, ignored", ex);
         }
         PlaymakerTenant result = playMakerEntityMgr.create(tenant);
 
@@ -81,7 +82,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends PlaymakerTestNGBase {
         Assert.assertTrue(user.getPasswordExpired());
 
         tenant = getTenant();
-        result = playMakerEntityMgr.create(tenant);
+        playMakerEntityMgr.create(tenant);
         user = users.get(user.getUserId());
         Assert.assertFalse(user.getPasswordExpired());
     }

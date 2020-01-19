@@ -22,6 +22,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -132,11 +133,7 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
                 }
                 log.info(logMsg);
             }
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                // Ignore InterruptedException
-            }
+            SleepUtils.sleep(5000L);
         } while (!status.isTerminal());
         LogManager.getLogger(BaseRestApiProxy.class).setLevel(level);
 

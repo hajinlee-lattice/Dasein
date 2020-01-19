@@ -13,11 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -286,14 +281,10 @@ public class CheckpointService {
     }
 
     private void cloneRedshiftTables(Map<String, String> redshiftTablesToClone) {
-        if (MapUtils.isEmpty(redshiftTablesToClone)) {
-            return;
-        }
-        int poolSize = Math.min(2, redshiftTablesToClone.size());
-        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("redshift-clone", poolSize);
-        List<Future<?>> futures = new ArrayList<>();
-        redshiftTablesToClone.forEach((src, tgt) -> {
-            Future<?> future = executorService.submit(() -> {
+        if (MapUtils.isNotEmpty(redshiftTablesToClone)) {
+            ThreadPoolUtils.doInParallel(redshiftTablesToClone.entrySet(), entry -> {
+                String src = entry.getKey();
+                String tgt = entry.getValue();
                 String msg = "Clone redshift table " + src + " to " + tgt;
                 try (PerformanceTimer timer = new PerformanceTimer(msg)) {
                     redshiftService.cloneTable(src, tgt);
@@ -302,25 +293,11 @@ public class CheckpointService {
                     dataUnit.setName(tgt);
                     dataUnit.setRedshiftTable(tgt.toLowerCase());
                     dataUnitProxy.create(mainTestTenant.getId(), dataUnit);
-                }
-            });
-            futures.add(future);
-        });
-        while (!futures.isEmpty()) {
-            List<Future<?>> completed = new ArrayList<>();
-            futures.forEach(future -> {
-                try {
-                    future.get(5, TimeUnit.SECONDS);
-                    completed.add(future);
-                } catch (TimeoutException e) {
-                    // ignore
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Failed to clone redshift table.", e);
                 }
             });
-            completed.forEach(futures::remove);
         }
-        executorService.shutdown();
     }
 
     private void unzipCheckpoint(String checkpoint, String version) throws IOException {
@@ -857,12 +834,10 @@ public class CheckpointService {
         if (!isEntityMatchEnabled()) {
             return;
         }
-
-        ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("entity-match-copy", 2);
-        ThreadPoolUtils.runRunnablesInParallel(tp, Arrays.asList( //
-                copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Account.name()),
-                copyEntitySeedTable(checkpoint, checkpointVersion, BusinessEntity.Contact.name())), 10, 1);
-        tp.shutdown();
+        ThreadPoolUtils.doInParallel(Arrays.asList( //
+                BusinessEntity.Account.name(), //
+                BusinessEntity.Contact.name() //
+        ), entity -> copyEntitySeedTable(checkpoint, checkpointVersion, entity));
     }
 
     private Runnable copyEntitySeedTable(String checkpoint, String checkpointVersion, String entity) {

@@ -118,7 +118,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                     recommendationEntityMgr.delete(rec);
                 }
             } catch (Exception ex) {
-                // ignore error in cleanup
+                log.warn("Exception during teardown.", ex);
             }
         });
     }
@@ -531,9 +531,9 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
          * recommendationEntityMgr.findRecommendationCount(
          * lastModificationDate3, //
          * SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
-         * 
+         *
          * Assert.assertEquals(recommendationCount, 1);
-         * 
+         *
          * recommendations =
          * recommendationEntityMgr.findRecommendations(lastModificationDate3, //
          * (recommendationCount - minPageSize), minPageSize,

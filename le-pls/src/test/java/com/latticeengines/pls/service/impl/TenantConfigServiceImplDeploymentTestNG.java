@@ -73,11 +73,7 @@ public class TenantConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNG
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId);
-        try {
-            camille.delete(path);
-        } catch (Exception ex) {
-            // ignore
-        }
+        camille.delete(path);
 
         CustomerSpaceProperties properties = new CustomerSpaceProperties();
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
@@ -246,7 +242,7 @@ public class TenantConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNG
 
         url = null;
         newUrl = configService.removeDLRestServicePart(url);
-        Assert.assertEquals(newUrl, null);
+        Assert.assertNull(newUrl);
     }
 
     @Test(groups = "deployment")
@@ -323,8 +319,9 @@ public class TenantConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNG
     private void removeFlagDefinition(String flagId) {
         try {
             FeatureFlagClient.remove(flagId);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // the flag has already been removed
+            // or there is no node for feature flags
         }
     }
 }

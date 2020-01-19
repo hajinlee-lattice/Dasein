@@ -34,7 +34,7 @@ import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
 public class VdbEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
 
-    public static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
+    private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 25;
 
@@ -55,12 +55,13 @@ public class VdbEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
     private Tenant tenant;
 
     @BeforeClass(groups = "deployment.vdb")
-    public void setup() throws Exception {
+    public void setup() {
         customerSpace = CustomerSpace.parse(customer);
         tenant = createTenant(customerSpace.toString());
         try {
             tenantService.discardTenant(tenant);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
+            // tenant not exist
         }
         tenantService.registerTenant(tenant);
     }

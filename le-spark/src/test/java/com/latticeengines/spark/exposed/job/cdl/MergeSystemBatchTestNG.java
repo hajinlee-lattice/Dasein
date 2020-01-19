@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,24 +21,12 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testUpsert() {
-
-        ExecutorService workers = ThreadPoolUtils.getFixedSizeThreadPool("Merge-system-batch-test", 2);
         List<Runnable> runnables = new ArrayList<>();
-
-        Runnable runnable1 = () -> testSingleSystemBatch();
-        runnables.add(runnable1);
-
-        Runnable runnable2 = () -> testSystemBatchKeepPrefix();
-        runnables.add(runnable2);
-
-        Runnable runnable3 = () -> testHasSystemBatchWithoutPrefix();
-        runnables.add(runnable3);
-
-        Runnable runnable4 = () -> testHasSystemBatchPrimarySecondary();
-        runnables.add(runnable4);
-
-        ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
-        workers.shutdownNow();
+        runnables.add(this::testSingleSystemBatch);
+        runnables.add(this::testSystemBatchKeepPrefix);
+        runnables.add(this::testHasSystemBatchWithoutPrefix);
+        runnables.add(this::testHasSystemBatchPrimarySecondary);
+        ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
     private void testSingleSystemBatch() {

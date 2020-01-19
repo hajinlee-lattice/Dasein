@@ -3,6 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.DomainUtils;
 
@@ -16,6 +18,8 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
 public class DomainMergeAndCleanFunction extends BaseOperation implements Function {
+
+    private static final Logger log = LoggerFactory.getLogger(DomainMergeAndCleanFunction.class);
 
     private static final long serialVersionUID = -1474963150979757098L;
     private List<String> domainNames;
@@ -40,6 +44,7 @@ public class DomainMergeAndCleanFunction extends BaseOperation implements Functi
                     return;
                 }
             } catch (Exception e) {
+                log.warn("Exception during Domain merge", e);
             }
         }
         functionCall.getOutputCollector().add(Tuple.size(1));

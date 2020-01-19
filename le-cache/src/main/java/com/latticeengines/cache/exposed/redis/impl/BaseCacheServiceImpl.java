@@ -31,6 +31,7 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
 
     @Value("${cache.lock.build.seconds}")
     private long cacheBuild;
+
     @Value("${cache.lock.clear.seconds}")
     private long cacheClear;
 
@@ -61,7 +62,7 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
 
     @Override
     public void deleteIdsByTenant(Tenant tenant) {
-        log.info("Delete entities by tenant: %s", tenant);
+        log.info("Delete entities by tenant: {}", tenant);
         getCacheWriter().deleteIdsByTenant(tenant);
     }
 
@@ -82,7 +83,7 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
 
     @Override
     public void deleteEntitiesByIds(List<String> ids) {
-        log.info("Delete entities by ids: %s", ids);
+        log.info("Delete entities by ids: {}", ids);
         getCacheWriter().deleteEntitiesByIds(ids);
     }
 
@@ -107,6 +108,7 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
             this.tenant = tenant;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void run() {
             if (tenant == null) {
@@ -117,7 +119,7 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
             String requestId = UUID.randomUUID().toString();
             if (redisDistributedLock.lock(key, requestId, cacheBuild, false)) {
                 try {
-                    log.info("Start to build cache for tenant %s.", tenant.getPid());
+                    log.info("Start to build cache for tenant {}.", tenant.getPid());
                     MultiTenantContext.setTenant(tenant);
                     EntityListCache entityListCache = getCacheWriter().getEntitiesAndNonExistEntitityIdsByTenant(tenant);
                     List<T> entities = entityListCache.getExistEntities();
@@ -133,8 +135,8 @@ public abstract class BaseCacheServiceImpl<T extends HasId<String>> implements C
                         getCacheWriter().setEntities(nonExistEntities);
                     }
                     MultiTenantContext.setTenant(null);
-                } catch (LedpException ledpException) {
-                    // some other threads get the new locks
+                } catch (LedpException ledpException) {                    //
+                    log.warn("some other threads get the new locks", ledpException);
                 } finally {
                     redisDistributedLock.releaseLock(key, requestId);
                 }

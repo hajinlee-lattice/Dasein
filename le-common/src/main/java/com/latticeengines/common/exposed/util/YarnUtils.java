@@ -82,11 +82,8 @@ public class YarnUtils {
             } catch (Exception e) {
                 log.warn("Failed to get application status of application id " + applicationId);
             }
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
+
+            SleepUtils.sleep(5000L);
             i++;
 
             if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
@@ -120,11 +117,8 @@ public class YarnUtils {
             } catch (Exception e) {
                 log.warn("Failed to get application status of application id " + applicationId);
             }
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
+
+            SleepUtils.sleep(5000L);
             i++;
 
             if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {

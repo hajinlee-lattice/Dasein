@@ -17,6 +17,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -119,11 +120,8 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
         p.pipelineStepName = "Invalid_step_name";
         pipelineSteps.add(p);
 
-        try {
-            pipelineService.createPipeline("P1-Fail", "Trying to create invalid pipeline", pipelineSteps);
-        } catch (LedpException e) {
-            // expected, so do nothing
-        }
+        Assert.assertThrows(LedpException.class,
+                () -> pipelineService.createPipeline("P1-Fail", "Trying to create invalid pipeline", pipelineSteps));
         Pipeline result = pipelineEntityMgr.findByName("P1-Fail");
         assertNull(result);
     }

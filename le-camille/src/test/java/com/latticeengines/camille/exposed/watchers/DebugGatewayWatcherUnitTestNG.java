@@ -3,7 +3,6 @@ package com.latticeengines.camille.exposed.watchers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 
 import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
@@ -44,8 +43,7 @@ public class DebugGatewayWatcherUnitTestNG {
         runnables.add(simpleCheck("T6", "PT5S", 5000));
         runnables.add(simpleCheck("T7", "PT2.5S", 2500));
         runnables.add(simpleCheck("T8", "PT3.6S", 4000));
-        ExecutorService pool = ThreadPoolUtils.getFixedSizeThreadPool("test-pool", 8);
-        ThreadPoolUtils.runRunnablesInParallel(pool, runnables, 1, 1);
+        ThreadPoolUtils.runInParallel(runnables);
     }
 
     private Runnable simpleCheck(String tenantId, String duration, long wait2) {

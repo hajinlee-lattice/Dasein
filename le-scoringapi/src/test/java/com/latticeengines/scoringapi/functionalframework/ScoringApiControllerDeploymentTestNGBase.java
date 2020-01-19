@@ -424,7 +424,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 FieldInterpretation fi = FieldInterpretation.valueOf(field.getFieldName());
                 Assert.assertEquals(field.isPrimaryField(),
                         FieldInterpretationCollections.PrimaryMatchingFields.contains(fi));
-            } catch (Exception e) {
+            } catch (Exception ignore) {
                 // Ignore. As it is not a Mapped to FieldInterpretation
             }
         }

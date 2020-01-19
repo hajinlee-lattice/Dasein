@@ -12,9 +12,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
@@ -35,6 +37,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 @Component("jobCacheWriter")
 public class RedisJobCacheWriter implements JobCacheWriter {
+
+    private static final Logger log = LoggerFactory.getLogger(RedisJobCacheWriter.class);
 
     private static final Map<Class<? extends Throwable>, Boolean> RETRY_EXCEPTIONS = new HashMap<>();
     private static final String CACHE_KEY_PREFIX = CacheName.Constants.JobsCacheName;
@@ -61,7 +65,7 @@ public class RedisJobCacheWriter implements JobCacheWriter {
     @Value("${workflow.jobs.cache.namespace:default}")
     private String namespace;
 
-    @Autowired
+    @Inject
     private RedisTemplate<String, Object> redisTemplate;
 
     private RetryTemplate retryTemplate;
@@ -215,7 +219,7 @@ public class RedisJobCacheWriter implements JobCacheWriter {
             } else if (obj instanceof Number) {
                 return ((Number) obj).longValue();
             }
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             // do nothing, cache will be considered expired
         }
         return null;

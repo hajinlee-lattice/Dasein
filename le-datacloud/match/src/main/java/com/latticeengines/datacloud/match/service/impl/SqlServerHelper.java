@@ -38,6 +38,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.latticeengines.common.exposed.util.LocationUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.datasource.DataSourceService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
@@ -651,13 +652,9 @@ public class SqlServerHelper implements DbHelper {
 
     private MatchContext waitForResult(String rootUid, String contextId) {
         log.debug("Waiting for result of RootOperationUID={}, ContextId={}", rootUid, contextId);
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         do {
-            try {
-                Thread.sleep(100L);
-            } catch (Exception e) {
-                // ignore
-            }
+            SleepUtils.sleep(100L);
             if (contextMap.containsKey(contextId)) {
                 log.debug("Found fetch result for RootOperationUID={}, ContextId={}", rootUid, contextId);
                 return contextMap.remove(contextId);
@@ -710,7 +707,7 @@ public class SqlServerHelper implements DbHelper {
                                     }
                                 }
                             } catch (InterruptedException e) {
-                                // skip
+                                log.warn("Polling from context queue interrupted.", e);
                             }
                         }
 
@@ -727,11 +724,7 @@ public class SqlServerHelper implements DbHelper {
                 } catch (Exception e) {
                     log.warn("Error from fetcher.", e);
                 } finally {
-                    try {
-                        Thread.sleep(50L);
-                    } catch (Exception e1) {
-                        // ignore
-                    }
+                    SleepUtils.sleep(50L);
                 }
             }
         }
@@ -791,13 +784,9 @@ public class SqlServerHelper implements DbHelper {
         int foundResultCount = 0;
 
         log.debug("Waiting for results of <ContextId, RootOperationUID>: {}", Arrays.toString(ids.toArray()));
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         do {
-            try {
-                Thread.sleep(100L);
-            } catch (Exception e) {
-                // ignore
-            }
+            SleepUtils.sleep(100L);
 
             for (Pair<String, String> idPair : ids) {
                 String contextId = idPair.getLeft();

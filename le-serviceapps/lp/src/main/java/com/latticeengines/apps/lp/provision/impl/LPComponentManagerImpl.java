@@ -17,6 +17,7 @@ import com.latticeengines.apps.lp.provision.LPComponentManager;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
@@ -145,11 +146,8 @@ public class LPComponentManagerImpl implements LPComponentManager {
             }
         }
 
-        try {
-            Thread.sleep(500); // wait for replication lag
-        } catch (Exception e) {
-            // ignore
-        }
+        // wait for replication lag
+        SleepUtils.sleep(500);
 
         assignAccessLevelByEmails(userName, internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
         assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());

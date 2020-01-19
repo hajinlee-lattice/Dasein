@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -29,6 +28,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
@@ -90,7 +90,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     @Inject
     private TestSftpProvider sftpProvider;
 
-    private ExecutorService verificationWorkers;
     private Map<String, Ingestion> ingestions = new HashMap<>();
     private String orbVersion;
     private int timeout = 2700000;
@@ -161,7 +160,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
     public void setup() {
         prepareCleanPod(POD_ID);
         prepareIngestions();
-        verificationWorkers = ThreadPoolUtils.getFixedSizeThreadPool("ingestion-test", 2);
         prepareBomboraFiles();
     }
 
@@ -170,7 +168,6 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
         for (Ingestion ingestion : ingestions.values()) {
             ingestionEntityMgr.delete(ingestion);
         }
-        verificationWorkers.shutdownNow();
         recoverBomboraFiles();
     }
 
@@ -330,7 +327,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
             }
         }
         if (CollectionUtils.isNotEmpty(verifiers)) {
-            ThreadPoolUtils.runRunnablesInParallel(verificationWorkers, verifiers, 60, 1);
+            ThreadPoolUtils.runInParallel(verifiers);
         }
     }
 
@@ -351,11 +348,7 @@ public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTest
                 && System.currentTimeMillis() - startTime <= timeout) {
             ingestionProxy.scan(POD_ID);
             status = ingestionVersionService.findProgressAtVersion(name, version);
-            try {
-                Thread.sleep(60000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
+            SleepUtils.sleep(60000L);
         }
         Assert.assertEquals(status, ProgressStatus.FINISHED);
         progresses = ingestionProgressEntityMgr.findProgressesByField(fields, null);

@@ -572,7 +572,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
             Map<String, Type> leadEnrichmentAttributeMap, CSVPrinter csvFilePrinter, long recordCount,
             Map<String, String> fieldNameMapping, boolean enrichmentEnabledForInternalAttributes,
-            boolean enableMatching) throws Exception {
+            boolean enableMatching) {
 
         ExecutorService scoreExecutorService = ThreadPoolUtils.getFixedSizeThreadPool("ScoringProcessorThreads",
                 threadpoolSize);
@@ -583,7 +583,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                         builder, leadEnrichmentAttributeMap, csvFilePrinter, counter, recordCount, fieldNameMapping,
                         enrichmentEnabledForInternalAttributes, enableMatching)));
 
-        ThreadPoolUtils.runCallablesInParallel(scoreExecutorService, callables, threadPoolTimeoutMin, threadTimeoutSec);
+        ThreadPoolUtils.callInParallel(scoreExecutorService, callables, threadPoolTimeoutMin, threadTimeoutSec);
         ThreadPoolUtils.shutdownAndAwaitTermination(scoreExecutorService, threadPoolTimeoutMin);
     }
 

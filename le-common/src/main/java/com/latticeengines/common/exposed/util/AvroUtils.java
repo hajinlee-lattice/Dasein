@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -89,7 +88,7 @@ public class AvroUtils {
     private static final String SQLSERVER_TYPE_LONG = "long";
     private static Schema NULL_SCHEMA = Schema.create(Schema.Type.NULL);
     private static Logger log = LoggerFactory.getLogger(AvroUtils.class);
-    
+
     // java type -> (avro schema type, whether java type is primitive)
     // TODO: Java type as Date/Timestamp, List and Map are to be added
     private static final Map<Class<?>, Pair<Type, Boolean>> TYPE_MAP = ImmutableMap
@@ -292,28 +291,30 @@ public class AvroUtils {
         if (matches.size() == 1) {
             return countOneFile(configuration, matches.get(0));
         }
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(4, matches.size()));
 
+        ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("avro-count", Math.min(4, matches.size()));
         List<Callable<Long>> counters = new ArrayList<>();
         long count = 0L;
-        for (int i = 0; i < matches.size(); i++) {
-            String match = matches.get(i);
-            counters.add(() -> countOneFile(configuration, match));
-            if (counters.size() >= 256 || i == matches.size() - 1) {
-                List<Long> partialCounts = ThreadPoolUtils.runCallablesInParallel(executorService, counters, 180, 1);
-                count += partialCounts.stream().mapToLong(c -> c).sum();
-                counters.clear();
+        try {
+            for (int i = 0; i < matches.size(); i++) {
+                String match = matches.get(i);
+                counters.add(() -> countOneFile(configuration, match));
+                if (counters.size() >= 256 || i == matches.size() - 1) {
+                    List<Long> partialCounts = ThreadPoolUtils.callInParallel(tp, counters, 120, 1);
+                    count += partialCounts.stream().mapToLong(c -> c).sum();
+                    counters.clear();
+                }
             }
+        } finally {
+            tp.shutdown();
         }
 
-        executorService.shutdown();
         log.info(String.format("Totally %d records in %s", count, StringUtils.join(globs, ",")));
         return count;
     }
 
     private static Long countOneFile(Configuration configuration, String path) {
-        // log.info("Counting number of records in " + path);
-        Long count = 0L;
+        long count = 0L;
 
         try (DataFileStream<GenericRecord> stream = getAvroFileStream(configuration, new Path(path))) {
             try {
@@ -321,7 +322,7 @@ public class AvroUtils {
                     count += stream.getBlockCount();
                 }
             } catch (NoSuchElementException e) {
-                // log.info("Seems no next block in current stream.");
+                log.debug("Seems no next block in current stream.");
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to count avro at " + path, e);
@@ -1146,7 +1147,7 @@ public class AvroUtils {
         });
         ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("avro-count", Math.min(4, callables.size()));
         try {
-            List<Long> counts = ThreadPoolUtils.runCallablesInParallel(tp, callables, 120, 1);
+            List<Long> counts = ThreadPoolUtils.callInParallel(tp, callables, 120, 1);
             long total = 0L;
             if (CollectionUtils.isNotEmpty(counts)) {
                 for (Long c : counts) {

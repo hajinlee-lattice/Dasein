@@ -70,7 +70,7 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
             user1Creds.setUsername(username);
             user1Creds.setPassword(password);
             globalUserManagementService.registerUser(INTERNAL_ADMIN_USERNAME, user1, user1Creds);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             // user already created
         }
     }

@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -339,7 +338,6 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
     }
 
     private void copyAvrosFromS3(String tgtDir, String s3Dir, Collection<String> avros) {
-        ExecutorService workers = ThreadPoolUtils.getFixedSizeThreadPool("ingestion-copy", 8);
         List<Runnable> runnables = new ArrayList<>();
         avros.forEach(avro -> {
             Runnable runnable = () -> {
@@ -355,16 +353,15 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
             };
             runnables.add(runnable);
             if (runnables.size() >= 64) {
-                ThreadPoolUtils.runRunnablesInParallel(workers, runnables, //
+                ThreadPoolUtils.runInParallel(runnables, //
                         (int) TimeUnit.HOURS.toMinutes(1), 10);
                 runnables.clear();
             }
         });
         if (CollectionUtils.isNotEmpty(runnables)) {
-            ThreadPoolUtils.runRunnablesInParallel(workers, runnables, //
+            ThreadPoolUtils.runInParallel(runnables, //
                     (int) TimeUnit.HOURS.toMinutes(1), 10);
         }
-        workers.shutdown();
     }
 
 }

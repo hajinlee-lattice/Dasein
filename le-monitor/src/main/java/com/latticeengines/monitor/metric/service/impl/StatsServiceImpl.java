@@ -1,6 +1,9 @@
 package com.latticeengines.monitor.metric.service.impl;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +24,7 @@ public class StatsServiceImpl implements StatsService {
 
     private static final Logger log = LoggerFactory.getLogger(StatsServiceImpl.class);
 
-    @Autowired
+    @Inject
     private MetricService metricService;
 
     @Autowired
@@ -30,6 +33,8 @@ public class StatsServiceImpl implements StatsService {
 
     @Value("${monitor.health.inspection.enabled}")
     private boolean inspectionEnabled;
+
+    private AtomicBoolean metricSvcUnavailable = new AtomicBoolean(false);
 
     @Override
     public void register(Inspection inspection) {
@@ -53,8 +58,14 @@ public class StatsServiceImpl implements StatsService {
             for (Measurement<?, ?> measurement : measurements) {
                 try {
                     metricService.write(MetricDB.INSPECTION, measurement);
+                    if (metricSvcUnavailable.get()) {
+                        metricSvcUnavailable.set(false);
+                    }
                 } catch (Exception e) {
-                    // ignore
+                    if (!metricSvcUnavailable.get()) {
+                        metricSvcUnavailable.set(true);
+                        log.warn("failed to write to the Inspection DB", e);
+                    }
                 }
             }
         }

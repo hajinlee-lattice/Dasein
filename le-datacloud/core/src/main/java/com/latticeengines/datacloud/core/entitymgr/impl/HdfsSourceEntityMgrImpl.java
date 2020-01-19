@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,11 +15,11 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.datacloud.core.source.HasSqlPresence;
@@ -36,6 +38,8 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 @Component("hdfsSourceEntityMgr")
 public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
+    private static final Logger log = LoggerFactory.getLogger(HdfsSourceEntityMgrImpl.class);
+
     private static final long SLEEP_DURATION_IN_EXCEPTION_HADLING = 1000L;
 
     private static final String SUCCESS_FILE_SUFFIX = "_SUCCESS";
@@ -46,12 +50,10 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     private static final String HDFS_PATH_SEPARATOR = "/";
 
-    private static final Logger log = LoggerFactory.getLogger(HdfsSourceEntityMgrImpl.class);
-
-    @Autowired
+    @Inject
     HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     YarnConfiguration yarnConfiguration;
 
     @Override
@@ -85,7 +87,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                     version = version.replace("\n", "");
                     return StringUtils.trim(version);
                 } catch (Exception e) {
-                    sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
+                    SleepUtils.sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
                 }
             }
         }
@@ -105,7 +107,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 version = version.replace("\n", "");
                 return StringUtils.trim(version);
             } catch (Exception e) {
-                sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
+                SleepUtils.sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
             }
         }
         throw new RuntimeException("Could not determine the current version of source " + sourceName);
@@ -147,7 +149,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
                 Long mills = Long.valueOf(HdfsUtils.getHdfsFileContents(yarnConfiguration, versionFile));
                 return new Date(mills);
             } catch (Exception e) {
-                sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
+                SleepUtils.sleep(SLEEP_DURATION_IN_EXCEPTION_HADLING);
             }
         }
         return null;
@@ -579,14 +581,6 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
 
         log.info("Deleted " + source + " at version " + version);
-    }
-
-    private void sleep(long sleepDuration) {
-        try {
-            Thread.sleep(sleepDuration);
-        } catch (InterruptedException e2) {
-            // ignore
-        }
     }
 
 }

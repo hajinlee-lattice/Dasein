@@ -37,7 +37,6 @@
         <!-- Block -->
         <module name="AvoidNestedBlocks"/>
         <module name="EmptyBlock">
-            <property name="tokens" value="LITERAL_CATCH"/>
             <property name="tokens" value="ARRAY_INIT"/>
             <property name="tokens" value="LITERAL_DEFAULT"/>
             <property name="tokens" value="LITERAL_CASE"/>
@@ -80,9 +79,6 @@
         <!-- Sizes -->
         <module name="AnonInnerLength">
             <property name="max" value="50"/>
-        </module>
-        <module name="ExecutableStatementCount">
-            <property name="max" value="40"/>
         </module>
 
     </module>

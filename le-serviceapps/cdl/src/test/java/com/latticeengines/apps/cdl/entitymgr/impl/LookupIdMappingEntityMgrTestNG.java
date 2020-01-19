@@ -23,6 +23,7 @@ import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
@@ -106,11 +107,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         duplicateLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
         duplicateLookupIdMap.setOrgId(orgId);
         duplicateLookupIdMap.setOrgName(orgName);
-        try {
-            lookupIdMappingEntityMgr.createExternalSystem(duplicateLookupIdMap);
-            Assert.fail("Should not be able to create duplicate entry");
-        } catch (Exception ex) {
-        }
+        Assert.assertThrows(() -> lookupIdMappingEntityMgr.createExternalSystem(duplicateLookupIdMap));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateDuplicate" })
@@ -296,11 +293,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         updatedFieldMapping.add(new ExportFieldMetadataMapping("ZipCode", "zipcode", false));
         lookupIdMapWithFieldMapping.setExportFieldMappings(updatedFieldMapping);
 
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        SleepUtils.sleep(2000L);
 
         lookupIdMappingEntityMgr.updateLookupIdMap(lookupIdMapWithFieldMapping.getId(), lookupIdMapWithFieldMapping);
 

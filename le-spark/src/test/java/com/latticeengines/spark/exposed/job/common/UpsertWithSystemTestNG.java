@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,18 +20,12 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testUpsert() {
-
-        ExecutorService workers = ThreadPoolUtils.getFixedSizeThreadPool("Upsert-with-systems-test", 2);
         List<Runnable> runnables = new ArrayList<>();
-        Runnable runnable1 = () -> testHasNoSystemBatch();
-        runnables.add(runnable1);
-        Runnable runnable2 = () -> testHasSystemBatch();
-        runnables.add(runnable2);
-        Runnable runnable3 = () -> testHasInputOnly();
-        runnables.add(runnable3);
+        runnables.add(this::testHasNoSystemBatch);
+        runnables.add(this::testHasSystemBatch);
+        runnables.add(this::testHasInputOnly);
 
-        ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
-        workers.shutdownNow();
+        ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
     private void testHasNoSystemBatch() {

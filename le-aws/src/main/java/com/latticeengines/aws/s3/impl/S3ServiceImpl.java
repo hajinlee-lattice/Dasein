@@ -83,8 +83,6 @@ public class S3ServiceImpl implements S3Service {
 
     private static final long MB = 1024L * 1024L;
 
-    private static ExecutorService workers;
-
     @Inject
     private AmazonS3 s3Client;
 
@@ -386,7 +384,7 @@ public class S3ServiceImpl implements S3Service {
                 });
             }
         }
-        ThreadPoolUtils.runRunnablesInParallel(workers(), runnables, 600, 1);
+        ThreadPoolUtils.runInParallel(runnables, 600, 1);
     }
 
     @Override
@@ -509,19 +507,6 @@ public class S3ServiceImpl implements S3Service {
 
     private AmazonS3 s3Client() {
         return s3Client;
-    }
-
-    private static ExecutorService workers() {
-        if (workers == null) {
-            initializeWorkers();
-        }
-        return workers;
-    }
-
-    private static synchronized void initializeWorkers() {
-        if (workers == null) {
-            workers = ThreadPoolUtils.getFixedSizeThreadPool("s3-service", 8);
-        }
     }
 
     private static String sanitizePathToKey(String path) {

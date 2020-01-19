@@ -17,6 +17,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayGroup;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -156,10 +157,6 @@ public class PlayGroupResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private void sleepToAllowDbWriterReaderSync() {
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        SleepUtils.sleep(10000L);
     }
 }

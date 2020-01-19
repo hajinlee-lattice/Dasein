@@ -352,6 +352,7 @@ public class MetadataConverter {
         if (schema.getType() == Schema.Type.UNION) {
             // only support [supported-type null] unions.
             if (schema.getTypes().size() != 2) {
+                throw new UnsupportedOperationException("only support [supported-type null] unions");
             }
             boolean foundNull = false;
             Schema.Type foundType = null;

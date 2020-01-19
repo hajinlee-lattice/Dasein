@@ -10,11 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -70,7 +68,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractAttrConfigService.class);
 
-    static final long DEFAULT_LIMIT = 500L;
+    private static final long DEFAULT_LIMIT = 500L;
 
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
@@ -84,14 +82,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     @Inject
     protected BatonService batonService;
 
-    @Resource(name = "localCacheService")
-    private CacheService localCacheService;
-
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
 
     protected abstract List<ColumnMetadata> getSystemMetadata(Category category);
-
-    private static ExecutorService workers;
 
     @Override
     public List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render) {
@@ -134,7 +127,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             runnables.add(runnable);
         });
         // fork join execution
-        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+        ThreadPoolUtils.runInParallel("attr-config", runnables);
         return configs;
     }
 
@@ -157,7 +150,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             runnables.add(runnable);
         });
         // fork join execution
-        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+        ThreadPoolUtils.runInParallel("attr-config", runnables);
         return attrConfigOverview;
     }
 
@@ -198,6 +191,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     accounts =
                             zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.ACCOUNT.getDataLicense());
                 } catch (Exception e) {
+                    log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
                 }
                 overview.setLimit(accounts);
                 break;
@@ -207,6 +201,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     contacts =
                             zkConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(MultiTenantContext.getShortTenantId(), DataLicense.CONTACT.getDataLicense());
                 } catch (Exception e) {
+                    log.warn("Failed to get max premium lead enrichment attrs from ZK", e);
                 }
                 overview.setLimit(contacts);
                 break;
@@ -378,7 +373,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 };
                 runnables.add(runnable);
             });
-            ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+            ThreadPoolUtils.runInParallel("attr-config", runnables);
 
             ValidationDetails details = attrValidationService.validate(existingAttrConfigs, request.getAttrConfigs(),
                     mode);
@@ -445,7 +440,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                         };
                         runnables.add(runnable);
                     });
-                    ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+                    ThreadPoolUtils.runInParallel("attr-config", runnables);
                     int count = CollectionUtils.isNotEmpty(existingAttrConfigs) ? existingAttrConfigs.size() : 0;
                     String msg = String.format("Rendered %d attr configs for tenant %s", count, tenantId);
                     renderSpan.log(msg);
@@ -568,7 +563,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 });
 
                 // fork join execution
-                ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+                ThreadPoolUtils.runInParallel("attr-config", runnables);
             }
             return attrConfigGrpsForTrim;
         }
@@ -884,16 +879,5 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
         }
         return results;
-    }
-
-    private static ExecutorService getWorkers() {
-        if (workers == null) {
-            synchronized (AbstractAttrConfigService.class) {
-                if (workers == null) {
-                    workers = ThreadPoolUtils.getCachedThreadPool("attr-config-svc");
-                }
-            }
-        }
-        return workers;
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -93,12 +94,9 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
             dataCollectionProxy.updateDataCloudBuildNumber(customerSpace.toString(),
                     configuration.getDataCloudBuildNumber());
         }
-        try {
-            // wait for local cache clean up
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+
+        // wait for local cache clean up
+        SleepUtils.sleep(5000L);
 
         // update bucket metadata and bucketed score summary
         updateBucketMetadata();

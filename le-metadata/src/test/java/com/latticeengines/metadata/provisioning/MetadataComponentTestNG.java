@@ -5,6 +5,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -30,6 +32,8 @@ import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class MetadataComponentTestNG extends MetadataFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(MetadataComponentTestNG.class);
 
     private static final String serviceName = "Metadata";
     private static final String tenantName = "Metadata Component Test Tenant";
@@ -57,8 +61,8 @@ public class MetadataComponentTestNG extends MetadataFunctionalTestNGBase {
         tenant.setName("Metadata component manager test tenant");
         try {
             tenantService.discardTenant(tenant);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // tenant not exist
         }
     }
 
