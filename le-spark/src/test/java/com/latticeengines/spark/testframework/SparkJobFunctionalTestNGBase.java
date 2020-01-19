@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.spark.service.impl.LivyServerManager;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
@@ -59,6 +58,7 @@ import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
+import com.latticeengines.spark.service.impl.LivyServerManager;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-spark-context.xml" })
@@ -332,10 +332,12 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return recordName;
     }
 
-    private void copyCSVDataToHdfs(String dirPath, String fileName, String[] headers, Object[] values) throws IOException {
+    private void copyCSVDataToHdfs(String dirPath, String fileName, String[] headers, Object[] values)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
             try (OutputStream outputStream = fs.create(new Path(dirPath + File.separator + fileName))) {
-                try (CSVPrinter csvPrinter = new CSVPrinter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
+                try (CSVPrinter csvPrinter = new CSVPrinter(
+                        new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
                         LECSVFormat.format.withHeader(headers))) {
                     csvPrinter.printRecord(values);
                 }

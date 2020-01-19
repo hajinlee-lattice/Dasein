@@ -2,13 +2,13 @@ package com.latticeengines.spark.testframework;
 
 import javax.inject.Inject;
 
-import com.latticeengines.spark.service.impl.LivyServerManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
+import com.latticeengines.spark.service.impl.LivyServerManager;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-spark-context.xml" })

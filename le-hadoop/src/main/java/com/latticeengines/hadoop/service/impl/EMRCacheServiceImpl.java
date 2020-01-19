@@ -2,7 +2,6 @@ package com.latticeengines.hadoop.service.impl;
 
 import javax.inject.Inject;
 
-import com.latticeengines.common.exposed.util.ConsulUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
+import com.latticeengines.common.exposed.util.ConsulUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
@@ -69,7 +69,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
         return _impl.getClusterIdFromAWS(clusterName);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|clusterid\", #clusterName)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|clusterid\", #clusterName)", unless = "#result == null")
     public String getClusterIdFromAWS(String clusterName) {
         String clusterId = "";
         try {
@@ -90,7 +90,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     }
 
     @Override
-    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)", unless = "#result == null")
     public String getMasterIp(String clusterName) {
         String masterIp = null;
         try {
