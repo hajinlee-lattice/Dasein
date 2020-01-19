@@ -1325,8 +1325,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             }
 
         } catch (Exception e) {
-            log.error("exception occurred: " + e.getMessage());
-            log.error("exception call stack: \n" + e.getStackTrace());
+            log.error("exception occurred.", e);
         }
     }
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter
+        xmlns="https://github.com/spotbugs/filter/3.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0
+            https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.12/spotbugs/etc/findbugsfilter.xsd">
+
+    <!-- https://github.com/KengoTODA/findbugs-slf4j -->
+    <Match classregex="com\.latticeengines\..*">
+        <Bug pattern="SLF4J_UNKNOWN_ARRAY,SLF4J_PLACE_HOLDER_MISMATCH,SLF4J_LOGGER_SHOULD_BE_PRIVATE,SLF4J_LOGGER_SHOULD_BE_FINAL,SLF4J_ILLEGAL_PASSED_CLASS,SLF4J_SIGN_ONLY_FORMAT,SLF4J_MANUALLY_PROVIDED_MESSAGE" />
+    </Match>
+
+</FindBugsFilter>

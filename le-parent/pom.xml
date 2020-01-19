@@ -209,6 +209,8 @@
         <jacoco.destfile>jacoco.exec</jacoco.destfile>
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
         <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize> <!-- for java 8 compatibility, where this variable is empty -->
+        <spotbugs.failOnError>false</spotbugs.failOnError>
+        <spotbugs.omit.visitors>BadAppletConstructor,BadlyOverriddenAdapter,CheckExpectedWarnings,Naming,UnreadFields,FindDeadLocalStores,SwitchFallthrough,XMLFactoryBypass,InvalidJUnitTest</spotbugs.omit.visitors>
         <surefire.reuse.forks>true</surefire.reuse.forks>
     </properties>
 
@@ -953,6 +955,22 @@
                         <groupId>com.github.spotbugs</groupId>
                         <artifactId>spotbugs-maven-plugin</artifactId>
                         <version>${maven.spotbugs.version}</version>
+                        <configuration>
+                            <fork>true</fork>
+                            <maxHeap>4096</maxHeap>
+                            <failOnError>${spotbugs.failOnError}</failOnError>
+                            <includeTests>true</includeTests>
+                            <omitVisitors>${spotbugs.omit.visitors}</omitVisitors>
+                            <excludeFilterFile>${env.WSHOME}/le-parent/spotbugs/spotbugs-${checker}-exclude.xml</excludeFilterFile>
+                            <includeFilterFile>${env.WSHOME}/le-parent/spotbugs/spotbugs-${checker}-include.xml</includeFilterFile>
+                            <plugins>
+                                <plugin>
+                                    <groupId>jp.skypencil.findbugs.slf4j</groupId>
+                                    <artifactId>bug-pattern</artifactId>
+                                    <version>1.5.0</version>
+                                </plugin>
+                            </plugins>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>spotbugs-${checker}</id>
@@ -960,10 +978,6 @@
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
-                                <configuration>
-                                    <effort>min</effort>
-                                    <failOnError>false</failOnError>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -987,6 +1001,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.4</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -999,7 +1014,6 @@
                     <doCheck>false</doCheck>
                     <doUpdate>false</doUpdate>
                 </configuration>
-                <version>1.4</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -1008,6 +1022,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
+                            <LE-SCM-Branch>${buildScmBranch}</LE-SCM-Branch>
                             <LE-SCM-Revision>${buildNumber}</LE-SCM-Revision>
                         </manifestEntries>
                     </archive>
