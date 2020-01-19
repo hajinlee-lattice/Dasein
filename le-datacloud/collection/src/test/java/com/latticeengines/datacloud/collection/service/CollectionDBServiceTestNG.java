@@ -270,6 +270,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
                 "6B744B27-3AD0-4313-82C2-3F171398E5F5,8B7BB325-E1AE-48B0-B0A0-BF1A7D16B89D,B01DB53F-D787-426E-8F64-56D974E593A3," +
                 "C51AD6B8-8CA5-4A0F-B742-0805C3A84E54", ',');
 
+        //mark these workers as occurred one day before start, so the test data on s3 would not be cleaned after test
         Timestamp ts = new Timestamp(start.getTime() - 86400000);
         for (String workerId: orbWorkers) {
             CollectionWorker worker = new CollectionWorker();
