@@ -8,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -31,10 +32,7 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
         List<String> superAdmins = Collections.singletonList(
                 NamingUtils.timestamp(this.getClass().getSimpleName()) + "@lattice-engines.com");
         // wait 1s, generate different name
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
+        SleepUtils.sleep(1000L);
         List<String> latticeAdmins = Collections.singletonList(
                 NamingUtils.timestamp(this.getClass().getSimpleName()) + "@lattice-engines.com");
         List<String> externalAdmins = Collections.singletonList("latticeengines8@gmail.com");

@@ -73,7 +73,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
             fileExporters.add(new JsonFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
 
             ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("playlaunch-export", 2);
-            List<String> exportFiles = ThreadPoolUtils.runCallablesInParallel(executorService, fileExporters,
+            List<String> exportFiles = ThreadPoolUtils.callInParallel(executorService, fileExporters,
                     (int) TimeUnit.DAYS.toMinutes(1), 30);
             if (exportFiles.size() != fileExporters.size()) {
                 throw new RuntimeException("Failed to generate some of the export files");

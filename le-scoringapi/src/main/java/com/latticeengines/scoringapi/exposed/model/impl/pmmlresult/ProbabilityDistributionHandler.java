@@ -29,7 +29,7 @@ public class ProbabilityDistributionHandler extends PMMLResultHandlerBase {
         try {
             r = distribution.getResult();
             result.put(ScoreType.CLASSIFICATION, r);
-        } catch (EvaluationException e) {
+        } catch (EvaluationException ignore) {
             // this means it's Lattice RF model
         }
 

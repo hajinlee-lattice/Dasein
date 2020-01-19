@@ -80,7 +80,7 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
             } else {
 
-                ThreadPoolUtils.runRunnablesInParallel(getUploadWorkers(), uploaders, //
+                ThreadPoolUtils.runInParallel(getUploadWorkers(), uploaders, //
                         60, 5);
 
             }

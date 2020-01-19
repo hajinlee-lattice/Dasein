@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.locks.RateLimitedResourceManager;
 import com.latticeengines.camille.exposed.util.CamilleTestEnvironment;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitDefinition;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 
@@ -146,11 +147,7 @@ public class RateLimitingResourceManagerUnitTestNG {
             executor.execute(() -> {
                 RateLimitedAcquisition acquisition;
                 for (int j = 0; j < numLoops; j++) {
-                    try {
-                        Thread.sleep(new Random().nextInt(100));
-                    } catch (Exception e) {
-                        // ignore
-                    }
+                    SleepUtils.sleep(new Random().nextInt(100));
                     acquisition = RateLimitedResourceManager.acquire(resource, inquiringQuantities, 1,
                             TimeUnit.SECONDS);
                     if (acquisition.isAllowed()) {

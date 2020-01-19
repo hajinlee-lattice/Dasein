@@ -151,7 +151,7 @@ public class AttributeUtils {
             Method m = null;
             try {
                 m = attrClass.getMethod(methodName, String.class);
-            } catch (Exception e) {
+            } catch (Exception ignore) {
                 // no method, skip
             }
 
@@ -228,7 +228,7 @@ public class AttributeUtils {
         try {
             destValue = property.getReadMethod().invoke(attribute);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            // warn
+            log.warn("Failed to invoke a read method attribute", e);
         }
         return destValue;
     }
@@ -237,7 +237,7 @@ public class AttributeUtils {
         try {
             property.getWriteMethod().invoke(attribute, value);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            // warn
+            log.warn("Failed to invoke a write method attribute", e);
         }
     }
 

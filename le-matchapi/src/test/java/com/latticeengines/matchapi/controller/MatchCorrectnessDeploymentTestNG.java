@@ -41,6 +41,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -380,11 +381,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
                 }
                 log.info(logMsg);
 
-                try {
-                    Thread.sleep(5000L);
-                } catch (InterruptedException e) {
-                    // Ignore InterruptedException
-                }
+                SleepUtils.sleep(5000L);
 
             } while (!status.isTerminal());
 

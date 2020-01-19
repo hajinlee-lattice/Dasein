@@ -13,7 +13,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -266,9 +265,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         }
 
         if (CollectionUtils.size(runnables) > 1) {
-            int poolSize = Math.min(4, numTargets);
-            ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("spark-job-verifier", poolSize);
-            ThreadPoolUtils.runRunnablesInParallel(executors, runnables, 30, 5);
+            ThreadPoolUtils.runInParallel(runnables);
         } else if (CollectionUtils.size(runnables) == 1) {
             runnables.get(0).run();
         }
@@ -292,9 +289,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         }
 
         if (CollectionUtils.size(runnables) > 1) {
-            int poolSize = Math.min(4, numTargets);
-            ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("spark-job-verifier", poolSize);
-            ThreadPoolUtils.runRunnablesInParallel(executors, runnables, 30, 5);
+            ThreadPoolUtils.runInParallel(runnables);
         } else if (CollectionUtils.size(runnables) == 1) {
             runnables.get(0).run();
         }

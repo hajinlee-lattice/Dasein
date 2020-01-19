@@ -20,6 +20,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -159,10 +160,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
                 pidToFail = progresses.get(0).getPid();
                 stageToFail = progresses.get(0).getCurrentStage();
             }
-            try {
-                Thread.sleep(20000);
-            } catch (InterruptedException e) {
-            }
+            SleepUtils.sleep(20000L);
         }
         Assert.assertEquals(progresses.size(), 0);
         Object[][] orchs = getOrchestrations();
@@ -185,10 +183,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         while (progresses.size() == 1 && (System.currentTimeMillis() - startTime) <= 40 * 60000) {
             progresses = orchService.scan(POD_ID);
             progresses.forEach(progress -> log.info(progress.toString()));
-            try {
-                Thread.sleep(20000);
-            } catch (InterruptedException e) {
-            }
+            SleepUtils.sleep(20000L);
         }
         Assert.assertEquals(progresses.size(), 0);
         progressToFail = orchestrationProgressEntityMgr.findProgress(pidToFail);

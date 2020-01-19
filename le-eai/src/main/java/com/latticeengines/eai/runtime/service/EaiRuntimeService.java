@@ -20,6 +20,7 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -221,13 +222,8 @@ public abstract class EaiRuntimeService<T extends EaiJobConfiguration> {
         int i = 0;
         do {
             status = jobProxy.getJobStatus(appId);
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
+            SleepUtils.sleep(5000L);
             i++;
-
             if (i == maxTries) {
                 break;
             }

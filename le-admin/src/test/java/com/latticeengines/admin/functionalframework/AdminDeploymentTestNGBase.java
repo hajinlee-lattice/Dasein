@@ -32,8 +32,8 @@ public class AdminDeploymentTestNGBase extends AdminAbstractTestNGBase {
 
         try {
             deleteTenant(TestContractId, TestTenantId);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // tenant does not exist
         }
         createTenant(TestContractId, TestTenantId);
 
@@ -46,8 +46,8 @@ public class AdminDeploymentTestNGBase extends AdminAbstractTestNGBase {
     public void tearDown() throws Exception {
         try {
             deleteTenant(TestContractId, TestTenantId);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // tenant does not exist
         }
     }
 

@@ -68,7 +68,7 @@ public class CDLImpactValidator extends AttrValidator {
             if (!AttrState.Inactive.equals(attrState)) {
                 List<Runnable> runnables = generateParallelJob(attrConfig, customerSpace, attributes);
                 // fork join execution
-                ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 10, 1);
+                ThreadPoolUtils.runInParallel(getWorkers(), runnables, 10, 1);
             }
         }
     }

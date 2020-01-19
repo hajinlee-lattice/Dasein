@@ -16,6 +16,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
@@ -93,11 +94,7 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends CDLDep
         extSysAuth.setId(extSysAuthenticationRef.getId());
         extSysAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
         extSysAuth = extSysAuthenticationProxy.updateAuthentication(mainCustomerSpace, extSysAuth.getId(), extSysAuth);
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        SleepUtils.sleep(2000L);
         verifyCurrentAuthentication(extSysAuth);
     }
 
@@ -106,7 +103,7 @@ public class ExternalSystemAuthenticationResourceDeploymentTestNG extends CDLDep
         List<ExternalSystemAuthentication> extSysAuthLst = extSysAuthenticationProxy
                 .findAuthentications(mainCustomerSpace);
         assertNotNull(extSysAuthLst);
-        assertTrue(extSysAuthLst.size() == 1);
+        assertEquals(extSysAuthLst.size(), 1);
         ExternalSystemAuthentication currAuth = extSysAuthLst.get(0);
         verifyCurrentAuthentication(currAuth);
         assertEquals(currAuth.getId(), extSysAuthenticationRef.getId());

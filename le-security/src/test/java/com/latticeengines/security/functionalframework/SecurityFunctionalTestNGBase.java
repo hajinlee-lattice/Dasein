@@ -321,7 +321,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         try {
             globalUserManagementService.grantRight(right, tenantId, username);
         } catch (LedpException e) {
-            // ignore
+            log.debug("User {} already has {} right to tenant {}", username, right, tenantId);
         }
     }
 

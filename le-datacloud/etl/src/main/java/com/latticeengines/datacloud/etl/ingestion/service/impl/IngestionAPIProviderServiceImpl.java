@@ -107,8 +107,6 @@ public class IngestionAPIProviderServiceImpl extends IngestionProviderServiceImp
             if (!HdfsUtils.isDirectory(yarnConfiguration, ingestionDir.toString())
                     || !HdfsUtils.fileExists(yarnConfiguration, success.toString())) {
                 result.add(apiConfiguration.getFileName());
-            } else {
-
             }
         } catch (IOException e) {
             throw new RuntimeException("Fail to look for missing files for ingestion " + ingestion.toString(), e);

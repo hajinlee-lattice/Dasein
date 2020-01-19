@@ -993,7 +993,7 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                 }
             }
         } catch (Exception e) {
-            // ignore
+            log.warn("Failed to load TEZ configuration", e);
         }
 
         if (jobProperties != null) {

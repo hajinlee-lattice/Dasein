@@ -19,6 +19,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.match.service.impl.DnBAuthenticationServiceImpl.DnBTokenCache;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
@@ -32,7 +33,7 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional")
     public void testAuthentication() {
         // test case 1: local cached token
         String token1 = dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, null);
@@ -43,12 +44,7 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
 
         // test case 2: multiple threads report same expired token around same
         // time, they are expected to get same updated token
-        Callable<String> task = new Callable<String>() {
-            @Override
-            public String call() {
-                return dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, token1);
-            }
-        };
+        Callable<String> task = () -> dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, token1);
         ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool(this.getClass().getSimpleName(), 5);
         List<Future<String>> futures = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
@@ -75,11 +71,8 @@ public class DnBAuthenticationServiceImplTestNG extends DataCloudMatchFunctional
         // verify redis cached token is updated
         Assert.assertNotEquals(redisCache.getToken(), token3);
         // verify local cached token is same as redis cached token
-        try {
-            // Wait and make sure local cache has finished reloading
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-        }
+        // Wait and make sure local cache has finished reloading
+        SleepUtils.sleep(5000L);
         Assert.assertEquals(dnBAuthenticationService.requestToken(DnBKeyType.REALTIME, null), redisCache.getToken());
     }
 }

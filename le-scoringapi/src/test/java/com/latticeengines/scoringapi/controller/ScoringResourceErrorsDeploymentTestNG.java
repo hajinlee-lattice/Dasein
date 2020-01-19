@@ -17,7 +17,7 @@ import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 
 public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void missingModelId() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -30,7 +30,7 @@ public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerD
         Assert.assertEquals(handlerAndErrors.getValue().getDescription(), LedpCode.LEDP_31101.getMessage());
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void invalidModelId() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -42,7 +42,7 @@ public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerD
         Assert.assertEquals(handlerAndErrors.getValue().getError(), LedpCode.LEDP_31102.getExternalCode());
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void missingDomain() throws IOException {
         String url = apiHostPort + "/score/record";
         ScoreRequest scoreRequest = getScoreRequest();
@@ -63,7 +63,8 @@ public class ScoringResourceErrorsDeploymentTestNG extends ScoringApiControllerD
 
         try {
             oAuth2RestTemplate.postForEntity(url, scoreRequest, ExceptionHandlerErrors.class);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
+            // true remote exceptions are handled below
         }
         String responseText = ledpResponseErrorHandler.getResponseString();
         ExceptionHandlerErrors errors = JsonUtils.deserialize(responseText, ExceptionHandlerErrors.class);

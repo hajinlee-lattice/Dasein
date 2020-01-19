@@ -11,15 +11,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.dao.ExportFieldMetadataMappingDao;
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -28,16 +26,11 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
-
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Inject
     ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
-
-    @Inject
-    ExportFieldMetadataMappingDao exportFieldMetadataMappingDao;
 
     private LookupIdMap lookupIdMap;
 
@@ -98,19 +91,15 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
 
         assertNotNull(exportFieldMappings);
         assertEquals(exportFieldMappings.size(), 3);
-        
+
         Set<String> sourceFieldNames = exportFieldMappings.stream().map(ExportFieldMetadataMapping::getSourceField)
                 .collect(Collectors.toSet());
-        
+
         sourceFieldNames.contains(InterfaceName.AccountId.toString());
         sourceFieldNames.contains(InterfaceName.CompanyName.toString());
         sourceFieldNames.contains(InterfaceName.Email.toString());
 
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        SleepUtils.sleep(2000L);
 
         lookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdMap.getId());
 
@@ -154,11 +143,7 @@ public class ExportFieldMetadataMappingEntityMgrImplTestNG extends CDLFunctional
 
         exportFieldMetadataMappingEntityMgr.update(lookupIdMap);
 
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        SleepUtils.sleep(2000L);
 
         List<ExportFieldMetadataMapping> updatedExportFieldMappings = exportFieldMetadataMappingEntityMgr
                 .findByOrgId(lookupIdMap.getOrgId(), mainTestTenant.getPid());

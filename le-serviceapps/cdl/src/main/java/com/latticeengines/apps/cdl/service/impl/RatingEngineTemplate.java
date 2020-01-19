@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -39,8 +38,6 @@ public abstract class RatingEngineTemplate {
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineTemplate.class);
 
-    private ExecutorService tpForParallelStream;
-
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
 
@@ -64,7 +61,7 @@ public abstract class RatingEngineTemplate {
         constructRatingEngineSummary(re, tenantId, lastRefreshedDate, modelSummaryToBucketListMap)) //
                 .collect(Collectors.toList());
 
-        return ThreadPoolUtils.runCallablesInParallel(getTpForParallelStream(), callables, 30, 1);
+        return ThreadPoolUtils.callInParallel(callables);
     }
 
     @VisibleForTesting
@@ -190,16 +187,5 @@ public abstract class RatingEngineTemplate {
             return null;
         }
         return dataFeed.getLastPublished();
-    }
-
-    private ExecutorService getTpForParallelStream() {
-        if (tpForParallelStream == null) {
-            synchronized (this) {
-                if (tpForParallelStream == null) {
-                    tpForParallelStream = ThreadPoolUtils.getCachedThreadPool("re-template");
-                }
-            }
-        }
-        return tpForParallelStream;
     }
 }

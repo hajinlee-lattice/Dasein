@@ -21,6 +21,7 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
@@ -68,7 +69,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
         uploadTestFileIfNotExists(fileName);
     }
 
-    public boolean uploadTestFileIfNotExists(String fileName) {
+    private boolean uploadTestFileIfNotExists(String fileName) {
         try {
             JSch jsch = new JSch();
             Session session = jsch.getSession(sftpUserName, sftpHost, sftpPort);
@@ -101,16 +102,16 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
     }
 
     public boolean waitForFileToBeDownloaded(Configuration yarnConfiguration) {
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < 10000) {
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir + "/" + fileName)) {
                     return true;
                 }
-                Thread.sleep(1000L);
             } catch (Exception e) {
-                // ignore
+                log.warn("HDFS Exception. Will retry later.", e);
             }
+            SleepUtils.sleep(1000L);
         }
         return false;
     }

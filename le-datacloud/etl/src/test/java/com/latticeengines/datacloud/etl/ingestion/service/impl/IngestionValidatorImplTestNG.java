@@ -15,6 +15,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.CronUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.etl.ingestion.entitymgr.IngestionEntityMgr;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionValidator;
 import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTestNGBase;
@@ -49,16 +50,16 @@ public class IngestionValidatorImplTestNG extends DataCloudEtlFunctionalTestNGBa
     public void testIsIngestionTriggered() {
         // Case 1: SchedularEnabled is false
         ingestion.setSchedularEnabled(false);
-        Assert.assertEquals(false, ingestionValidator.isIngestionTriggered(ingestion));
+        Assert.assertFalse(ingestionValidator.isIngestionTriggered(ingestion));
         ingestion.setSchedularEnabled(true);
-        Assert.assertEquals(true, ingestionValidator.isIngestionTriggered(ingestion));
+        Assert.assertTrue(ingestionValidator.isIngestionTriggered(ingestion));
 
         // Case 2: IngestionType PATCH_BOOK should always be manually triggered,
         // no automated trigger
         ingestion.setIngestionType(IngestionType.PATCH_BOOK);
-        Assert.assertEquals(false, ingestionValidator.isIngestionTriggered(ingestion));
+        Assert.assertFalse(ingestionValidator.isIngestionTriggered(ingestion));
         ingestion.setIngestionType(IngestionType.SFTP);
-        Assert.assertEquals(true, ingestionValidator.isIngestionTriggered(ingestion));
+        Assert.assertTrue(ingestionValidator.isIngestionTriggered(ingestion));
 
         // Case 3:
         Calendar calendar = Calendar.getInstance();
@@ -70,7 +71,7 @@ public class IngestionValidatorImplTestNG extends DataCloudEtlFunctionalTestNGBa
         log.info("Generated cron expression: {}; Current time: {}, Latest scheduled time: {}",
                 ingestion.getCronExpression(), currentTime, latestScheduledTime);
         // No logged trigger time, ingestion should be triggered
-        Assert.assertEquals(true, ingestionValidator.isIngestionTriggered(ingestion));
+        Assert.assertTrue(ingestionValidator.isIngestionTriggered(ingestion));
 
         // Insert a progress to DB with start time equal to latestScheduledTime,
         // ingestion should not be triggered.
@@ -79,19 +80,15 @@ public class IngestionValidatorImplTestNG extends DataCloudEtlFunctionalTestNGBa
         // time. Add retry for this test to minimize the chance to hit the
         // corner case.
         ingestionEntityMgr.logTriggerTime(Arrays.asList(ingestion), latestScheduledTime);
-        Assert.assertEquals(false, ingestionValidator.isIngestionTriggered(ingestion));
+        Assert.assertFalse(ingestionValidator.isIngestionTriggered(ingestion));
         ingestionEntityMgr.logTriggerTime(Arrays.asList(ingestion), new Date());
-        Assert.assertEquals(false, ingestionValidator.isIngestionTriggered(ingestion));
+        Assert.assertFalse(ingestionValidator.isIngestionTriggered(ingestion));
 
         // Wait for (intervalInSec + 1) seconds, CronUtils.getPreviousFireTime
         // should return next scheduled time, ingestion should be triggered
         // again
-        try {
-            Thread.sleep(1000 * (intervalInSec + 1));
-        } catch (InterruptedException e) {
-            // continue
-        }
-        Assert.assertEquals(true, ingestionValidator.isIngestionTriggered(ingestion));
+        SleepUtils.sleep(1000 * (intervalInSec + 1));
+        Assert.assertTrue(ingestionValidator.isIngestionTriggered(ingestion));
     }
 
     private void prepareSimpleIngestion() {

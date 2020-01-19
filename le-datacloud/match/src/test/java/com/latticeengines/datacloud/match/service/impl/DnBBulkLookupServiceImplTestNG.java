@@ -15,6 +15,7 @@ import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBBatchMatchContext;
@@ -39,7 +40,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
 
     @Inject
     private DnBBulkLookupFetcherImpl dnbBulkLookupFetcher;
-    
+
     @Inject
     private DnBAuthenticationService dnbAuthenticationService;
 
@@ -115,10 +116,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         // Set token to be invalid
         dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, INVALID_BATCH_TOKEN);
         // Wait for local cache to be refreshed
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-        }
+        SleepUtils.sleep(5000L);
         // Expected dispatch service to refresh token and make a successful call
         // via
         // retry
@@ -128,10 +126,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         // Set token to be invalid
         dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, INVALID_BATCH_TOKEN);
         // Wait for local cache to be refreshed
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-        }
+        SleepUtils.sleep(5000L);
         // Expected status service to refresh token and make a successful call
         // via retry
         List<DnBBatchMatchContext> contexts = Arrays.asList(batchContext);
@@ -153,10 +148,7 @@ public class DnBBulkLookupServiceImplTestNG extends DataCloudMatchFunctionalTest
         // Set token to be invalid
         dnbAuthenticationService.refreshToken(DnBKeyType.BATCH, INVALID_BATCH_TOKEN);
         // Wait for local cache to be refreshed
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-        }
+        SleepUtils.sleep(5000L);
         // Expected fetch service to refresh token and make a successful call
         // via retry
         batchContext = dnbBulkLookupFetcher.getResult(batchContext);

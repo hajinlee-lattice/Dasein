@@ -51,8 +51,8 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
             try {
                 Path nodePath = new Path(entry.getKey());
                 docDir.add(nodePath, new Document(entry.getValue()), true);
-            } catch (IllegalArgumentException e) {
-                // ignore
+            } catch (IllegalArgumentException ignore) {
+                // tread as no document tree
             }
         }
         constructByDocumentDirectory(docDir);
@@ -434,8 +434,8 @@ public class SerializableDocumentDirectory implements Iterable<SerializableDocum
                 try {
                     metadataProvided = mapper.readValue(metaNode.getDocument().getData(),
                             Metadata.class);
-                } catch (NullPointerException | IOException e) {
-                    // ignore
+                } catch (NullPointerException | IOException ignore) {
+                    // treat as no metadata
                 }
 
                 if (metadataProvided != null) {

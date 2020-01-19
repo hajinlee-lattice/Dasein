@@ -28,6 +28,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -91,12 +92,9 @@ public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
         Date updateTime = table.getUpdated();
         assertNotNull(updateTime);
         addDataRules(table);
-        try {
-            // sleep 1s let the update time different
-            Thread.sleep(1000l);
-        } catch (InterruptedException e) {
 
-        }
+        // sleep 2s let the update time different
+        SleepUtils.sleep(2000L);
         metadataService.updateTable(CustomerSpace.parse(customerSpace), table);
         validateTable(table);
 

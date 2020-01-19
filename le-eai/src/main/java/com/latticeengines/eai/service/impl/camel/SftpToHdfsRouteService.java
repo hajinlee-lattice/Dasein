@@ -7,6 +7,7 @@ import java.net.URLEncoder;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
@@ -16,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.jcraft.jsch.Channel;
@@ -42,7 +42,8 @@ public class SftpToHdfsRouteService extends EaiRuntimeService<SftpToHdfsRouteCon
     private static final String KNOWN_HOSTS_FILE = "./known_hosts";
     private static final Logger log = LoggerFactory.getLogger(SftpToHdfsRouteService.class);
     private static final Long timeout = TimeUnit.HOURS.toMillis(48);
-    @Autowired
+
+    @Inject
     private Configuration yarnConfiguration;
 
     private String hdfsHostPort;
@@ -179,7 +180,7 @@ public class SftpToHdfsRouteService extends EaiRuntimeService<SftpToHdfsRouteCon
         try {
             destFileSize.set(checkDestFileSize(config));
         } catch (Exception e) {
-            // ignore
+            log.warn("Ignoring error during file size checking", e);
         }
 
         if (sourceFileSize.get() == null || sourceFileSize.get() == 0) {
@@ -187,7 +188,7 @@ public class SftpToHdfsRouteService extends EaiRuntimeService<SftpToHdfsRouteCon
         }
 
         if (destFileSize.get() != null && sourceFileSize.get() != null) {
-            Double percentage = destFileSize.get().doubleValue() / sourceFileSize.get().doubleValue();
+            double percentage = destFileSize.get().doubleValue() / sourceFileSize.get().doubleValue();
             // keep only two decimal digit
             percentage = Math.round(percentage * 100.0) / 100.0;
             progress.set(percentage);

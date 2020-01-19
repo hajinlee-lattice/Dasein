@@ -14,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -99,10 +100,6 @@ public class PlayTypeResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     }
 
     private void sleepToAllowDbWriterReaderSync() {
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        SleepUtils.sleep(10000L);
     }
 }

@@ -118,7 +118,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
         for (ExportRequest request : requests) {
             exporters.add(new HdfsS3Exporter(request));
         }
-        ThreadPoolUtils.runRunnablesInParallel(getS3ExportWorkers(), exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
+        ThreadPoolUtils.runInParallel(getS3ExportWorkers(), exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
         log.info(String.format("Finished to export from hdfs to s3. tenantIds=%s", StringUtils.join(tenants, ",")));
     }
 
@@ -323,7 +323,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                             return "";
                         });
                         if (CollectionUtils.size(callables) >= 4) {
-                            List<String> returns = ThreadPoolUtils.runCallablesInParallel(getDistCpWorkers(), callables, //
+                            List<String> returns = ThreadPoolUtils.callInParallel(getDistCpWorkers(), callables, //
                                     (int) TimeUnit.DAYS.toMinutes(1), 10);
                             failedFolders.addAll(returns.stream() //
                                     .filter(StringUtils::isNotBlank).collect(Collectors.toList()));
@@ -331,7 +331,7 @@ public class ExportToS3ServiceImpl implements ExportToS3Service {
                         }
                     }
                     if (CollectionUtils.isNotEmpty(callables)) {
-                        List<String> returns = ThreadPoolUtils.runCallablesInParallel(getDistCpWorkers(), callables, //
+                        List<String> returns = ThreadPoolUtils.callInParallel(getDistCpWorkers(), callables, //
                                 (int) TimeUnit.DAYS.toMinutes(1), 10);
                         failedFolders.addAll(returns.stream() //
                                 .filter(StringUtils::isNotBlank).collect(Collectors.toList()));

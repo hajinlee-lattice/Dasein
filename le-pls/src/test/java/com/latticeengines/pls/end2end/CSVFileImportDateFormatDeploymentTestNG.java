@@ -15,6 +15,8 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,6 +48,9 @@ import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(CSVFileImportDateFormatDeploymentTestNG.class);
+
     private static final String CONTACT_DATE_FILE = "Contact_Date.csv";
 
     private static final String CUSTOM = "Custom";
@@ -303,7 +308,7 @@ public class CSVFileImportDateFormatDeploymentTestNG extends CSVFileImportDeploy
                         record.get("Lattice Field Name"), record.get("Data Type"));
             }
         } catch (Exception e) {
-            // unexpected exception happened
+            log.warn("failed to read csv", e);
         } finally {
             parser.close();
         }

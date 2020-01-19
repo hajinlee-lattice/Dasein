@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -126,8 +125,7 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         int[] batches = BatchUtils.divideBatches(totalSize, batchCnt);
 
         List<Ingester> ingesters = initializeIngester(patchConfig, currentDate, progress, batches);
-        ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("patchbook-ingest", maxConcurrentBatchCnt);
-        ThreadPoolUtils.runRunnablesInParallel(executors, ingesters, (int) TimeUnit.DAYS.toMinutes(1), 10);
+        ThreadPoolUtils.runInParallel(ingesters, (int) TimeUnit.DAYS.toMinutes(1), 10);
 
         updateCurrentVersion(ingestion, progress.getVersion());
 
@@ -315,10 +313,10 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
     /**
      * Only ingest columns which are needed or for reference in transformer
-     * 
+     *
      * For Domain, DUNS and Items, add PATCH_ prefix to avoid potential
      * attribute name conflict in dataflow
-     * 
+     *
      * @return
      */
     private List<Pair<String, Class<?>>> constructSchema() {
@@ -346,7 +344,7 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
     /**
      * Data and Schema (constructSchema) should be aligned
-     * 
+     *
      * @param books
      * @return
      */

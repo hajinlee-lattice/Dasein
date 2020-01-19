@@ -142,8 +142,8 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
             String errorStr = responseList.get(0).getScores().get(0).getError();
             Assert.assertNotNull(errorStr);
             Assert.assertEquals(errorStr, LedpCode.LEDP_31026.toString());
-        } catch (Exception e) {
-
+        } catch (Exception ignore) {
+            // ignored because this is to testing an exception case
         }
     }
 

@@ -168,7 +168,7 @@ public class AMStatsDedupAggRollupWithHQDuns extends BaseOperation implements Bu
                     msg = String.format("%s\n\n%s\n", msg,
                             om.writeValueAsString(expandedTupleMap.get(dim).generateTuple()));
                 } catch (JsonProcessingException e) {
-                    // ignore
+                    log.warn("Failed to write expanded tuple map into json", e);
                 }
                 throw new RuntimeException(msg, ex);
             }

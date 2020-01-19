@@ -10,9 +10,9 @@ public enum SamlIntegrationRole {
 
     LATTICE_USER (AccessLevel.EXTERNAL_USER),
     LATTICE_ADMIN (AccessLevel.EXTERNAL_ADMIN);
-    
+
     private AccessLevel accessLevel;
-    
+
     SamlIntegrationRole(AccessLevel accessLevel) {
         this.accessLevel = accessLevel;
     }
@@ -29,11 +29,9 @@ public enum SamlIntegrationRole {
         for(String extRoleStr : integrationRoles) {
             try {
                 SamlIntegrationRole integrationRole = SamlIntegrationRole.valueOf(extRoleStr);
-                if (integrationRole != null) {
-                    latticeRoles.add(integrationRole.getAccessLevel().toString());
-                }
-            } catch (IllegalArgumentException e) {
-                // Ignore
+                latticeRoles.add(integrationRole.getAccessLevel().toString());
+            } catch (IllegalArgumentException ignore) {
+                // extRoleStr is not a SamlIntegrationRole
             }
         }
         return latticeRoles;

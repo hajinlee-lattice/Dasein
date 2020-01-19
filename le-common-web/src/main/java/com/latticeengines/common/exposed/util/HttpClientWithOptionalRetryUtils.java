@@ -16,9 +16,13 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Deprecated
 public class HttpClientWithOptionalRetryUtils {
+    private static final Logger log = LoggerFactory.getLogger(HttpClientWithOptionalRetryUtils.class);
+
     private static final long MAX_WAIT_INTERVAL = 60000L;
     private static final int MAX_RETRIES = 12;
     private static HttpClient httpClientIgnoreSsl = HttpClientUtils.newHttpClient();
@@ -125,11 +129,7 @@ public class HttpClientWithOptionalRetryUtils {
 
         do {
             long waitTime = Math.min(RetryUtils.getExponentialWaitTime(retries), MAX_WAIT_INTERVAL);
-            try {
-                Thread.sleep(waitTime);
-            } catch (InterruptedException e) {
-                // Do nothing if sleep interrupted
-            }
+            SleepUtils.sleep(waitTime);
 
             try {
                 response = httpClient.execute(request);

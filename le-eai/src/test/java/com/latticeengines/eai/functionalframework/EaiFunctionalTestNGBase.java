@@ -68,7 +68,8 @@ public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTes
                 CustomerSpace.parse(customer), "Eai");
         try {
             camille.delete(docPath);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
+            // docPath does not exist
         }
 
         Path connectTimeoutDocPath = docPath.append("SalesforceEndpointConfig").append("HttpClient")

@@ -182,7 +182,7 @@ public class DataFlowApiDeploymentTestNGBase extends AbstractTestNGSpringContext
 
         try {
             metadataProxy.deleteTable(CUSTOMERSPACE.toString(), table.getName());
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             // ignore if table doesn't exist yet
         }
 
@@ -192,8 +192,7 @@ public class DataFlowApiDeploymentTestNGBase extends AbstractTestNGSpringContext
     protected AppSubmission submitDataFlow(DataFlowConfiguration configuration) {
         String url = String.format("%s/dataflowapi/dataflows/", getRestAPIHostPort());
         try {
-            AppSubmission submission = restTemplate.postForObject(url, configuration, AppSubmission.class);
-            return submission;
+            return restTemplate.postForObject(url, configuration, AppSubmission.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

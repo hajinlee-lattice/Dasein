@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -22,18 +21,11 @@ public class CreateCdlEventTableJobTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {
-
-        ExecutorService workers = ThreadPoolUtils.getFixedSizeThreadPool("Create-Cdl-Event-Table-test", 2);
-        List<Runnable> runnables = new ArrayList<>();
-
-        Runnable runnable1 = () -> testWithInputTableAccountTable();
-        runnables.add(runnable1);
-
-        Runnable runnable2 = () -> testWithInputTableAccountTableApsTable();
-        runnables.add(runnable2);
-
-        ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
-        workers.shutdownNow();
+        List<Runnable> runnables = Arrays.asList( //
+                this::testWithInputTableAccountTable, //
+                this::testWithInputTableAccountTableApsTable //
+        );
+        ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
     private void testWithInputTableAccountTable() {

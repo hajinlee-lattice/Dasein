@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.yarn.client.YarnClient;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.etl.publication.service.PublicationProgressService;
 import com.latticeengines.datacloud.etl.publication.service.PublishConfigurationParser;
@@ -34,7 +35,7 @@ abstract class AbstractPublishService {
     private YarnClient yarnClient;
 
     protected FinalApplicationStatus waitForApplicationToFinish(ApplicationId appId, PublicationProgress progress) {
-        Long timeout = TimeUnit.HOURS.toMillis(HANGING_THRESHOLD_HOURS);
+        long timeout = TimeUnit.HOURS.toMillis(HANGING_THRESHOLD_HOURS);
         int errors = 0;
         FinalApplicationStatus status = FinalApplicationStatus.UNDEFINED;
         do {
@@ -68,11 +69,7 @@ abstract class AbstractPublishService {
                     throw new RuntimeException("Exceeded maximum error allowance.", e);
                 }
             } finally {
-                try {
-                    Thread.sleep(10000L);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
+                SleepUtils.sleep(10000L);
             }
         } while (!YarnUtils.TERMINAL_STATUS.contains(status));
         return status;

@@ -38,7 +38,7 @@ public class TenantLifecycleManager {
             camille.create(tenantsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Tenants path @ {}", tenantsPath);
         } catch (KeeperException.NodeExistsException e) {
-            // ignore
+            log.debug("Tenants path already exists, ignore creation");
         }
 
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);

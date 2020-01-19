@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -14,6 +16,8 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.UnknownHttpStatusCodeException;
 
 public class LedpResponseErrorHandler extends DefaultResponseErrorHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(LedpResponseErrorHandler.class);
 
     private String responseString = null;
     private HttpStatus statusCode = null;
@@ -48,12 +52,9 @@ public class LedpResponseErrorHandler extends DefaultResponseErrorHandler {
     protected byte[] getResponseBody(ClientHttpResponse response) {
         try {
             InputStream responseBody = response.getBody();
-            if (responseBody != null) {
-                return FileCopyUtils.copyToByteArray(responseBody);
-            }
-        }
-        catch (IOException ex) {
-            // ignore
+            return FileCopyUtils.copyToByteArray(responseBody);
+        } catch (IOException ex) {
+            log.warn("Failed to convert response body to byte array", ex);
         }
         return new byte[0];
     }
@@ -67,12 +68,9 @@ public class LedpResponseErrorHandler extends DefaultResponseErrorHandler {
     private String getResponseBodyAsString(ClientHttpResponse response) {
         try {
             InputStream responseBody = response.getBody();
-            if (responseBody != null) {
-                return IOUtils.toString(responseBody, getCharset(response));
-            }
-        }
-        catch (IOException ex) {
-            // ignore
+            return IOUtils.toString(responseBody, getCharset(response));
+        } catch (IOException ex) {
+            log.warn("Failed to convert response body to String", ex);
         }
         return null;
     }

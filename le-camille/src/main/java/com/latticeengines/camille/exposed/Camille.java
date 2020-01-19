@@ -197,8 +197,10 @@ public class Camille {
     }
 
     public void delete(Path path) throws Exception {
-        client.delete().deletingChildrenIfNeeded().forPath(path.toString());
-        // log.info(String.format("Camille deleting doc at %s", path));
+        if (exists(path)) {
+            client.delete().deletingChildrenIfNeeded().forPath(path.toString());
+            // log.info(String.format("Camille deleting doc at %s", path));
+        }
     }
 
     public boolean exists(Path path) throws Exception {

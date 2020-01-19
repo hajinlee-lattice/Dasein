@@ -46,12 +46,13 @@ public class MetadataComponentManagerTestNG extends MetadataFunctionalTestNGBase
         tenant.setName("Metadata component manager test tenant");
         try {
             tenantService.discardTenant(tenant);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
+            // tenant not exist
         }
     }
 
     @Test(groups = { "functional" })
-    public void testProvisionTenant() throws Exception {
+    public void testProvisionTenant() {
         tenantService.registerTenant(tenant);
         componentManager.provisionImportTables(CustomerSpace.parse(customerSpace), new DocumentDirectory());
         List<Table> tables = mdService.getImportTables(CustomerSpace.parse(customerSpace));

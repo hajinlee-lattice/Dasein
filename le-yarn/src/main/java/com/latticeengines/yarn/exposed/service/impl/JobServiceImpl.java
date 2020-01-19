@@ -37,6 +37,7 @@ import org.springframework.yarn.client.YarnClient;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -67,17 +68,17 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    @Autowired
+    @Inject
     protected YarnClient defaultYarnClient;
 
     @Autowired
     @Qualifier("yarnConfiguration")
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private MapReduceCustomizationService mapReduceCustomizationService;
 
-    @Autowired
+    @Inject
     private YarnClientCustomizationService yarnClientCustomizationService;
 
     @Value("${dataplatform.customer.basedir}")
@@ -156,8 +157,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
         yarnClientCustomizationService.addCustomizations(client, yarnClientName, appMasterProperties,
                 containerProperties);
         try {
-            ApplicationId applicationId = client.submitApplication();
-            return applicationId;
+            return client.submitApplication();
         } finally {
             yarnClientCustomizationService.finalize(yarnClientName, appMasterProperties, containerProperties);
         }
@@ -185,8 +185,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
             if (StringUtils.isEmpty(yarnClientName)) {
                 throw new IllegalStateException("Yarn client name cannot be empty.");
             }
-            CommandYarnClient client = (CommandYarnClient) applicationContext.getBean(yarnClientName);
-            return client;
+            return (CommandYarnClient) applicationContext.getBean(yarnClientName);
         } catch (Throwable e) {
             log.error("Error while getting yarnClient for application " + yarnClientName, e);
         } finally {
@@ -357,11 +356,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
                 }
             }
 
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
+            SleepUtils.sleep(5000L);
 
             if ((System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
                 break;

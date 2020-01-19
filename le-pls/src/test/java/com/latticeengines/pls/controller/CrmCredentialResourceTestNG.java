@@ -19,11 +19,7 @@ public class CrmCredentialResourceTestNG extends PlsFunctionalTestNGBaseDeprecat
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), "contractId", "tenantId",
                 "spaceId");
-        try {
-            camille.delete(path);
-        } catch (Exception ex) {
-            //ignore
-        }
+        camille.delete(path);
         camille.create(path, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
         turnOffSslChecking();
     }

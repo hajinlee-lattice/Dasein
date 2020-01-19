@@ -201,24 +201,28 @@ public class ModelSummaryParser {
                 summary.setId("ms__" + uuidInPath + "-PLSModel");
             }
         } catch (Exception e) {
-            // ignore
+            log.warn("Failed to replace uuid in summary by the uuid in path", e);
         }
 
+        boolean parsedFromJson = false;
         try {
             if (json.has("Tenant")) {
                 summary.setTenant(mapper.treeToValue(json.get("Tenant"), Tenant.class));
+                parsedFromJson = true;
             } else if (details.has("Tenant")) {
                 summary.setTenant(mapper.treeToValue(details.get("Tenant"), Tenant.class));
-            } else {
-                Tenant tenant = new Tenant();
-                tenant.setPid(-1L);
-                tenant.setRegisteredTime(System.currentTimeMillis());
-                tenant.setId("FAKE_TENANT");
-                tenant.setName("Fake Tenant");
-                summary.setTenant(tenant);
+                parsedFromJson = true;
             }
-        } catch (JsonProcessingException e) {
-            // ignore
+        } catch (JsonProcessingException ignore) {
+            // ignore json error, will directly set fake tenant.
+        }
+        if (!parsedFromJson) {
+            Tenant tenant = new Tenant();
+            tenant.setPid(-1L);
+            tenant.setRegisteredTime(System.currentTimeMillis());
+            tenant.setId("FAKE_TENANT");
+            tenant.setName("Fake Tenant");
+            summary.setTenant(tenant);
         }
 
         // parse predictors

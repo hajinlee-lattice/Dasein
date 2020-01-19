@@ -123,8 +123,8 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
             Assert.assertNotNull(node);
             Assert.assertEquals("10", node.getDocument().getData());
             camille.delete(servicePath);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // servicePath already removed
         }
         bootstrap(getPLSDocumentDirectory());
         state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);

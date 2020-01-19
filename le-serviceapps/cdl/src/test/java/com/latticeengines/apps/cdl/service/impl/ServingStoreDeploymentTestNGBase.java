@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -99,9 +98,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
                 }
             });
         });
-        ExecutorService tp = ThreadPoolUtils.getFixedSizeThreadPool("test-setup", 2);
-        ThreadPoolUtils.runRunnablesInParallel(tp, runnables, 30, 1);
-        tp.shutdown();
+        ThreadPoolUtils.runInParallel(runnables);
         MultiTenantContext.setTenant(mainTestTenant);
         Assert.assertFalse(zkConfigService.isInternalEnrichmentEnabled(CustomerSpace.parse(mainCustomerSpace)));
 

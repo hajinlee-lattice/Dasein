@@ -97,7 +97,7 @@ public class ZendeskUser {
     public void setRole(String role) {
         try {
             this.role = ZendeskRole.fromString(role);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             // ignore parsing error
         }
     }

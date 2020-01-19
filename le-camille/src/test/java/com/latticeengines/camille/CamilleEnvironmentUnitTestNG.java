@@ -93,11 +93,7 @@ public class CamilleEnvironmentUnitTestNG {
 
             CamilleEnvironment.stop();
 
-            try {
-                CamilleEnvironment.start(Mode.RUNTIME, config);
-                Assert.fail("A RuntimeException was expected.");
-            } catch (RuntimeException e) {
-            }
+            Assert.assertThrows(RuntimeException.class, () -> CamilleEnvironment.start(Mode.RUNTIME, config));
         } finally {
             CamilleEnvironment.stop();
         }

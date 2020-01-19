@@ -51,7 +51,7 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
             try {
                 FileUtils.forceMkdir(path.toFile());
             } catch (IOException e) {
-                // ignore
+                throw new RuntimeException("Failed to create directory", e);
             }
         }
         this.options = readSubdirectories();
@@ -184,17 +184,14 @@ public class SubdirectoryOptionsProvider implements OptionsProvider {
         if (watcherThread != null) {
             watcherThread.interrupt();
         }
-        watcherThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    watcher = FileSystems.getDefault().newWatchService();
-                    registerAll(path);
-                    startWatching();
-                    watcher.close();
-                } catch (IOException | InterruptedException e) {
-                    // ignore
-                }
+        watcherThread = new Thread(() -> {
+            try {
+                watcher = FileSystems.getDefault().newWatchService();
+                registerAll(path);
+                startWatching();
+                watcher.close();
+            } catch (IOException | InterruptedException e) {
+                log.warn("Failed to start a fs watcher", e);
             }
         });
         watcherThread.start();

@@ -158,8 +158,8 @@ public class ComponentOrchestratorTestNG extends AdminFunctionalTestNGBase {
         TestContractId = "LE_" + UUID.randomUUID().toString();
         try {
             deleteTenant(TestContractId, TestTenantId);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // tenant does not exist
         }
         createTenant(TestContractId, TestTenantId);
 
