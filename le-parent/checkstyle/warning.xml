@@ -68,6 +68,13 @@
         <module name="FallThrough">
             <property name="reliefPattern" value="falls? ?thr(u|ough)"/>
         </module>
+        <module name="IllegalInstantiation">
+            <property name="classes" value="java.lang.Boolean"/>
+            <property name="classes" value="java.lang.Integer"/>
+            <property name="classes" value="java.lang.Long"/>
+            <property name="classes" value="java.lang.Float"/>
+            <property name="classes" value="java.lang.Double"/>
+        </module>
         <module name="InnerAssignment"/>
         <module name="MissingSwitchDefault"/>
         <module name="NestedForDepth">
