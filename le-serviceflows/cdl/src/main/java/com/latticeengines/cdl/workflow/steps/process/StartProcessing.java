@@ -600,7 +600,16 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 }
             }
             putObjectInContext(CONSOLIDATE_INPUT_TEMPLATES, tableTemplateMap);
+            if (MapUtils.isNotEmpty(tableTemplateMap)) {
+                List<String> systemsInOrder = getTemplatesInOrder();
+                putObjectInContext(CONSOLIDATE_TEMPLATES_IN_ORDER, systemsInOrder);
+            }
         }
+    }
+
+    private List<String> getTemplatesInOrder() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private void associateTemplates(List<String> tables, List<String> systems, Map<String, String> tableTemplateMap) {

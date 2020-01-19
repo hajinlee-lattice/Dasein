@@ -97,7 +97,7 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         MergeSystemBatchConfig config = new MergeSystemBatchConfig();
         config.setJoinKey("Id");
         config.setKeepPrefix(true);
-        config.setTemplates(Arrays.asList("template1", "template2"));
+        config.setTemplates(Arrays.asList("template_not_exist1", "template1", "template2", "template_not_exist2"));
         return config;
     }
 
@@ -174,7 +174,7 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         config.setJoinKey("Id");
         config.setKeepPrefix(false);
         config.setNotOverwriteByNull(true);
-        config.setTemplates(Arrays.asList("template2", "template3"));
+        config.setTemplates(Arrays.asList("template1_not_exist", "template2", "template3", "template4_not_exist"));
         return config;
     }
 
