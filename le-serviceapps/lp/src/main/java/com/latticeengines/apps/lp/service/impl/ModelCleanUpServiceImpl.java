@@ -168,7 +168,7 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
 
     private void removeDir(String pathInfo, String path) {
         try {
-            if(path != "") {
+            if(!"".equals(path)) {
                 log.info(String.format("Clean up model, Remove %s. Path: %s", pathInfo, path));
                 HdfsUtils.rmdir(yarnConfiguration, path);
             }

@@ -53,14 +53,14 @@ public class DuplicatedValueCheckAggregator
         boolean returnVal = true;
         Object grpObjVal = "";
         for (int i = 0; i < checkField.size(); i++) {
-            if (i == 0 && (grpObjVal != "")) {
+            if (i == 0 && !"".equals(grpObjVal)) {
                 grpObjVal = String.valueOf(group.getObject(checkField.get(i)));
             } else {
-                if (grpObjVal != "") {
+                if (!"".equals(grpObjVal)) {
                     grpObjVal = grpObjVal + ","
-                            + String.valueOf(group.getObject(checkField.get(i)));
+                            + group.getObject(checkField.get(i));
                 }
-                if (grpObjVal == "") {
+                if ("".equals(grpObjVal)) {
                     grpObjVal = String.valueOf(group.getObject(checkField.get(i)));
                 }
             }

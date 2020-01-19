@@ -10,7 +10,7 @@ PROJECT=$2
 
 echo "Generating lint report using checker ${CHECKER}"
 
-if ! [ -z "$PROJECT" ]; then
+if [[ -n "$PROJECT" ]]; then
     pushd "./le-$PROJECT"
 fi
 
@@ -18,11 +18,11 @@ mvn -T8 -q -Pcheckstyle-report -Dchecker=${CHECKER} validate \
     && mvn -q -Pcheckstyle-report -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate \
     && mvn -q -Pcheckstyle-report -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate
 
-if ! [ -z "${PROJECT}" ]; then
+if [[ -n "${PROJECT}" ]]; then
     popd
 fi
 
-if [ -z "${PROJECT}" ]; then
+if [[ -z "${PROJECT}" ]]; then
     PROJ_OPT=""
 else
     PROJ_OPT="--proj ${PROJECT}"

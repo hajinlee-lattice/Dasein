@@ -16,7 +16,7 @@ public final class DimensionUtils {
     public static List<List<AttrDimension>> getRollupPaths(List<AttrDimension> tree) {
         TopologicalTraverse traverse = new TopologicalTraverse();
         List<List<AttrDimension>> paths = new ArrayList<>();
-        List<AttrDimension> reversed = traverse.sort(tree, AttrDimension::clone);
+        List<AttrDimension> reversed = traverse.sort(tree, AttrDimension::cloneDimension);
         reversed.forEach(dim -> {
             List<List<AttrDimension>> newPaths = new ArrayList<>();
             for (List<AttrDimension> path: paths) {

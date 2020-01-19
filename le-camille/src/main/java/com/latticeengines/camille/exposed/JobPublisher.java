@@ -3,6 +3,7 @@ package com.latticeengines.camille.exposed;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -24,8 +25,9 @@ public class JobPublisher {
 
     public Path getRequestPath(String jobID)
     {
-        if((jobID == null) || (jobID == ""))
+        if(StringUtils.isBlank(jobID)) {
             jobID = UUID.randomUUID().toString();
+        }
 
         return rootPath.append(requestsFolder).append(jobID);
     }

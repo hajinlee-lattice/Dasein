@@ -36,7 +36,7 @@ public class VdbMetadataFieldUnitTestNG {
     @Test(groups = "unit")
     public void testClone() {
         VdbMetadataField field1 = getTestField();
-        VdbMetadataField field2 = (VdbMetadataField)field1.clone();
+        VdbMetadataField field2 = field1.cloneVdbMetadata();
         Assert.assertEquals(field1.getColumnName(), field2.getColumnName());
         Assert.assertEquals(field1.getSource(), field2.getSource());
         Assert.assertEquals(field1.getSourceToDisplay(), field2.getSourceToDisplay());
@@ -53,27 +53,27 @@ public class VdbMetadataFieldUnitTestNG {
     @DataProvider(name = "vdbMetadataFieldDataProviderNotEqualsArgs")
     public static Object[][] vdbMetadataFieldDataProviderEqualsArgs() {
         VdbMetadataField field = getTestField();
-        VdbMetadataField field1 = (VdbMetadataField)field.clone();
+        VdbMetadataField field1 = field.cloneVdbMetadata();
         field1.setColumnName("A1");
-        VdbMetadataField field2 = (VdbMetadataField)field.clone();
+        VdbMetadataField field2 = field.cloneVdbMetadata();
         field2.setSource("B1");
-        VdbMetadataField field3 = (VdbMetadataField)field.clone();
+        VdbMetadataField field3 = field.cloneVdbMetadata();
         field3.setSourceToDisplay("C1");
-        VdbMetadataField field4 = (VdbMetadataField)field.clone();
+        VdbMetadataField field4 = field.cloneVdbMetadata();
         field4.setDisplayName("D1");
-        VdbMetadataField field5 = (VdbMetadataField)field.clone();
+        VdbMetadataField field5 = field.cloneVdbMetadata();
         field5.setTags("E1");
-        VdbMetadataField field6 = (VdbMetadataField)field.clone();
+        VdbMetadataField field6 = field.cloneVdbMetadata();
         field6.setCategory("F1");
-        VdbMetadataField field7 = (VdbMetadataField)field.clone();
+        VdbMetadataField field7 = field.cloneVdbMetadata();
         field7.setApprovedUsage("G1");
-        VdbMetadataField field8 = (VdbMetadataField)field.clone();
+        VdbMetadataField field8 = field.cloneVdbMetadata();
         field8.setFundamentalType("H1");
-        VdbMetadataField field9 = (VdbMetadataField)field.clone();
+        VdbMetadataField field9 = field.cloneVdbMetadata();
         field9.setDescription("I1");
-        VdbMetadataField field10 = (VdbMetadataField)field.clone();
+        VdbMetadataField field10 = field.cloneVdbMetadata();
         field10.setDisplayDiscretization("J1");
-        VdbMetadataField field11 = (VdbMetadataField)field.clone();
+        VdbMetadataField field11 = field.cloneVdbMetadata();
         field11.setStatisticalType("K1");
 
         return new Object[][] { { field1 }, //

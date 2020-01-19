@@ -7,7 +7,7 @@ import springfox.documentation.RequestHandler;
 public class SwaggerUtils {
 
     public static Predicate<RequestHandler> getApiSelector(final String ... classCanonicalNameRegex) {
-        return (requestHandler) -> {
+        return requestHandler -> {
             if (requestHandler != null) {
                 String canonicalName = requestHandler.getHandlerMethod().getMethod().getDeclaringClass().getCanonicalName();
                 for (String pattern : classCanonicalNameRegex) {

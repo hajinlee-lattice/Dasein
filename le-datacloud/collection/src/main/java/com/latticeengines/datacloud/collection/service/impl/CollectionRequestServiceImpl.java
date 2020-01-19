@@ -144,11 +144,11 @@ public class CollectionRequestServiceImpl implements CollectionRequestService {
         for (int i = 0; i < toAdd.size(); i = next) {
 
             //slide through pre-filtered reqs
-            for (; i < toAdd.size() && rawReqFilter.get(i); ++i) ;
+            while(i < toAdd.size() && rawReqFilter.get(i)) {
+                ++i;
+            }
             if (i == toAdd.size()) {
-
                 break;
-
             }
 
             //accumulate micro-batch to process

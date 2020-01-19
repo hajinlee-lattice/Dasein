@@ -212,7 +212,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
                     ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);
                     if (cm != null && cm.getBitOffset() != null) {
                         // avoid in-place mutation of cached objects
-                        ColumnMetadata cm2 = cm.clone();
+                        ColumnMetadata cm2 = cm.cloneCm();
                         cm2.setAttrName(attributeLookup.getAttribute());
                         return cm2;
                     } else {
