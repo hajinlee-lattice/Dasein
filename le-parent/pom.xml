@@ -34,7 +34,7 @@
         <maven.assembly.version>3.1.0</maven.assembly.version>
         <maven.exec.version>1.6.0</maven.exec.version>
         <maven.checkstyle.version>3.1.0</maven.checkstyle.version>
-        <maven.spotbugs.version>3.1.9</maven.spotbugs.version>
+        <maven.spotbugs.version>3.1.12</maven.spotbugs.version>
         <maven.scala.version>4.0.1</maven.scala.version>
         <maven.dependency.version>3.1.1</maven.dependency.version>
 
@@ -955,14 +955,14 @@
                         <version>${maven.spotbugs.version}</version>
                         <executions>
                             <execution>
-                                <id>spotbugs</id>
+                                <id>spotbugs-${checker}</id>
                                 <phase>validate</phase>
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
                                 <configuration>
-                                    <onlyAnalyze>org.latticeengines.*</onlyAnalyze>
-                                    <xmlOutput>true</xmlOutput>
+                                    <effort>min</effort>
+                                    <failOnError>false</failOnError>
                                 </configuration>
                             </execution>
                         </executions>
