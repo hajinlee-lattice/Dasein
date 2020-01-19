@@ -18,7 +18,7 @@
     <Match classregex="com\.latticeengines\..*">
         <And>
             <Bug category="CORRECTNESS" />
-            <Bug code="NP,SLF4J,MF,RCN,RC,GC,SA,BC,RpC,ICAST,RE,HE" pattern="BC_IMPOSSIBLE_INSTANCEOF" />
+            <Bug code="NP,SLF4J,MF,RCN,RC,GC,SA,BC,RpC,ICAST,RE,HE,INT,EC" pattern="BC_IMPOSSIBLE_INSTANCEOF" />
         </And>
     </Match>
 
