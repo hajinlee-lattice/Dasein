@@ -11,7 +11,6 @@ import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.Tag;
-import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public interface S3Service {
@@ -26,7 +25,7 @@ public interface S3Service {
 
     List<String> listSubFolders(String bucket, String parentDir);
 
-    MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync);
+    void uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync);
 
     void uploadLocalFile(String bucket, String key, File file, Boolean sync);
 
