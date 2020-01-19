@@ -6,8 +6,9 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{col}
-
+import org.apache.commons.collections4.CollectionUtils
 import scala.collection.JavaConverters._
+import util.control.Breaks._
 
 class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
   private val customerAccountIdField = InterfaceName.CustomerAccountId.name
@@ -17,7 +18,7 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
     val config: MergeSystemBatchConfig = lattice.config
     val joinKey = config.getJoinKey
     val templates = 
-      if (config.getTemplates == null) getTemplates(lattice.input.head.columns, joinKey) else config.getTemplates.asScala.toList 
+      if (CollectionUtils.isEmpty(config.getTemplates)) getTemplates(lattice.input.head.columns, joinKey) else config.getTemplates.asScala.toList 
       
       val overwriteByNull: Boolean =
         if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
@@ -27,8 +28,11 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
               
       } else {
         for ( i <- 1 until templates.length) {
-          var rhsDf = selectSystemBatch(lattice.input.head, templates(i), joinKey, config.isKeepPrefix)
-          lhsDf = MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), Set(), overwriteByNull = overwriteByNull) 
+          breakable {
+            var rhsDf = selectSystemBatch(lattice.input.head, templates(i), joinKey, config.isKeepPrefix)
+            if (rhsDf.count() == 0) break
+            lhsDf = MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), Set(), overwriteByNull = overwriteByNull) 
+          }
         }
         lattice.output = lhsDf :: Nil
       }

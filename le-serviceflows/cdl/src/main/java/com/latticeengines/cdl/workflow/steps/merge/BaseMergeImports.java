@@ -103,6 +103,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected Table masterTable;
     Map<BusinessEntity, Boolean> softDeleteEntities;
     protected Map<String, String> tableTemplateMap;
+    protected List<String> templatesInOrder;
 
     protected boolean hasSystemBatch;
 
@@ -152,7 +153,10 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class, String.class);
         hasSystemBatch = MapUtils.isNotEmpty(tableTemplateMap) && systemBatchStore != null;
-        log.info("Has System Batch=" + hasSystemBatch);
+        if (hasSystemBatch) {
+            templatesInOrder = getListObjectFromContext(CONSOLIDATE_TEMPLATES_IN_ORDER, String.class);
+        }
+        log.info("Has Batch System=" + hasSystemBatch);
         List<DataFeedImport> imports = JsonUtils.convertList(entityImportsMap.get(entity), DataFeedImport.class);
         if (CollectionUtils.isNotEmpty(imports)) {
             List<Table> tables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
@@ -235,7 +239,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setAddTimestamps(false);
         config.setCloneSrcFields(cloneSrcFlds);
         config.setRenameSrcFields(renameSrcFlds);
-        setupSystems(config);
+        setupTemplates(config);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         if (StringUtils.isNotBlank(targetTablePrefix)) {
@@ -245,7 +249,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    private void setupSystems(MergeImportsConfig config) {
+    private void setupTemplates(MergeImportsConfig config) {
         if (!hasSystemBatch) {
             return;
         }

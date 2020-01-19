@@ -22,7 +22,7 @@ public class ExtractEmbeddedEntityTableConfig extends TransformerConfig {
     private List<String> systemIdFlds;
 
     @JsonProperty("System")
-    private String system;
+    private String template;
 
     // EntityId field name in embedded entity table (EntityId field name in
     // EntityIds table is fixed as "EntityId")
@@ -53,12 +53,12 @@ public class ExtractEmbeddedEntityTableConfig extends TransformerConfig {
         this.systemIdFlds = systemIdFlds;
     }
 
-    public String getSystem() {
-        return system;
+    public String getTemplate() {
+        return template;
     }
 
-    public void setSystem(String system) {
-        this.system = system;
+    public void setTemplate(String template) {
+        this.template = template;
     }
 
     public String getEntityIdFld() {
