@@ -275,7 +275,7 @@ public class S3ServiceImpl implements S3Service {
                 try {
                     retry.execute(context -> {
                         s3Client.deleteObject(bucket, filePrefix);
-                        log.info("Uploading {} to {}/{}", file.getName(), bucket, finalPrefix);
+                        log.info("Uploading {} to {}/{}", file.getName(), bucket, filePrefix);
                         if (file.length() > uploadPartSize) {
                             uploadInputStreamMultiPart(bucket, filePrefix, new FileInputStream(file), file.length());
                         } else {
@@ -286,7 +286,8 @@ public class S3ServiceImpl implements S3Service {
                     });
                     log.info("Uploaded {} out of {} files.", uploadedObjects.incrementAndGet(), numFiles);
                 } catch (Exception e) {
-                    log.info("Failed to upload {} to {}/{} with error {}.", file.getName(), bucket, finalPrefix, e.getMessage());
+                    log.info("Failed to upload {} to {}/{} with error {}.", file.getName(), bucket, filePrefix,
+                            e.getMessage());
                     failedUploadFiles.add(file);
                 }
             });
@@ -328,9 +329,10 @@ public class S3ServiceImpl implements S3Service {
                         field.setAccessible(true);
                         PutObjectRequest putObjectRequest = (PutObjectRequest) field.get(uploadMonitor);
                         failedUploadFiles.add(putObjectRequest.getFile());
-                        log.info("Upload doesn't complete with file {}", putObjectRequest.getFile().getName());
+                        log.info("Failed to upload {} to {}/{} with error {}.", putObjectRequest.getFile().getName(),
+                                putObjectRequest.getBucketName(), putObjectRequest.getKey(), e.getMessage());
                     } catch (Exception exception) {
-                        log.error("Can't get put request from upload monitor with exception {}.", exception.getMessage());
+                        log.error("Can't get file info from upload monitor with error {}.", exception.getMessage());
                     }
                 }
             }
