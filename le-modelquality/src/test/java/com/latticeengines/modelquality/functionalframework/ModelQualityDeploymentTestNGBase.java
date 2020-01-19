@@ -362,7 +362,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         selectedConfig2.setPropData(propData);
         selectedConfig2.setSampling(sampling);
 
-        return Arrays.asList(new SelectedConfig[] { selectedConfig1, selectedConfig2 });
+        return Arrays.asList(selectedConfig1, selectedConfig2);
     }
 
     protected String uploadPipelineStepFile(PipelineStepType type) throws Exception {
@@ -370,13 +370,11 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
         org.springframework.core.io.Resource resource = new ClassPathResource(
                 "com/latticeengines/modelquality/service/impl/assignconversionratetoallcategoricalvalues." //
                         + type.getFileExtension());
-        ;
         switch (type) {
         case PYTHONRTS:
             resource = new ClassPathResource("com/latticeengines/modelquality/service/impl/assignconversionrate.py");
             break;
-        default:
-            break;
+        default: break;
         }
 
         map.add("file", resource);

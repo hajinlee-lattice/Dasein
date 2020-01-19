@@ -30,7 +30,7 @@ public class AMMetadataStoreImpl implements AMMetadataStore {
     public Flux<ColumnMetadata> getMetadata(Namespace1<String> namespace) {
         String dcVersion = namespace.getCoord1();
         return getRawFlux(dcVersion) //
-                .map(ColumnMetadata::clone); // column metadata proxy cache should be read only
+                .map(ColumnMetadata::cloneCm); // column metadata proxy cache should be read only
     }
 
     @Override
@@ -38,7 +38,7 @@ public class AMMetadataStoreImpl implements AMMetadataStore {
         String dcVersion = namespace.getCoord1();
         return getRawFlux(dcVersion) //
                 .parallel().runOn(scheduler) //
-                .map(ColumnMetadata::clone); // column metadata proxy cache should be read only
+                .map(ColumnMetadata::cloneCm); // column metadata proxy cache should be read only
     }
 
     private Flux<ColumnMetadata> getRawFlux(String dcVersion) {

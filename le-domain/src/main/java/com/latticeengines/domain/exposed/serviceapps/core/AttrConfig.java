@@ -282,9 +282,7 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         return flag2;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public AttrConfig clone() {
+    public AttrConfig cloneAttrConfig() {
         AttrConfig obj = null;
         try {
             obj = (AttrConfig) super.clone();
@@ -294,6 +292,7 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         HashMap<String, AttrConfigProp<?>> map = null;
         if (this.attrProps instanceof HashMap) {
             map = (HashMap<String, AttrConfigProp<?>>) this.attrProps;
+            //noinspection unchecked
             obj.attrProps = (Map<String, AttrConfigProp<?>>) map.clone();
         }
         return obj;

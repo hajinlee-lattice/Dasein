@@ -723,7 +723,6 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "ROW_NUMBER() OVER ( ORDER BY PlayGroup.[Last_Modification_Date], PlayGroup.[PlayGroup_ID]) RowNum "
                 + getPlayGroupWhereClause()
                 + " ) AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
-        ;
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue("start", start);

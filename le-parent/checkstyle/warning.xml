@@ -23,16 +23,15 @@
     </module>
 
     <module name="TreeWalker">
-        <module name="SuppressWarningsHolder" />
-        <module name="OuterTypeFilename"/>
-        <module name="OneTopLevelClass"/>
-
+        <!-- Annotations -->
+        <module name="PackageAnnotation"/>
         <module name="SuppressWarnings">
             <property name="format"
                       value="^unchecked$|^unused$"/>
             <property name="tokens"
                       value="CLASS_DEF,INTERFACE_DEF,ENUM_DEF,ENUM_CONSTANT_DEF,ANNOTATION_DEF,ANNOTATION_FIELD_DEF,CTOR_DEF"/>
         </module>
+        <module name="SuppressWarningsHolder" />
 
         <!-- Block -->
         <module name="AvoidNestedBlocks"/>
@@ -58,8 +57,43 @@
             <property name="exceptionVariableName" value="expected|ignore"/>
         </module>
 
-        <!-- Annotations -->
-        <module name="PackageAnnotation"/>
+        <!-- Coding -->
+        <module name="CovariantEquals"/>
+        <module name="DefaultComesLast"/>
+        <module name="EmptyStatement"/>
+        <module name="EqualsAvoidNull">
+            <property name="ignoreEqualsIgnoreCase" value="true"/>
+        </module>
+        <module name="EqualsHashCode"/>
+        <module name="FallThrough">
+            <property name="reliefPattern" value="falls? ?thr(u|ough)"/>
+        </module>
+        <module name="InnerAssignment"/>
+        <module name="MissingSwitchDefault"/>
+        <module name="NestedForDepth">
+            <property name="max" value="2"/>
+        </module>
+        <module name="NestedIfDepth">
+            <property name="max" value="4"/>
+        </module>
+        <module name="NoClone"/>
+        <module name="SuperClone"/>
+        <module name="NoFinalizer"/>
+        <module name="SuperFinalize"/>
+        <module name="PackageDeclaration"/>
+        <module name="ReturnCount">
+            <property name="max" value="5"/>
+            <property name="maxForVoid" value="3"/>
+        </module>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="StringLiteralEquality"/>
+
+        <!-- Design -->
+        <module name="HideUtilityClassConstructor"/>
+        <module name="InnerTypeLast"/>
+        <module name="InterfaceIsType"/>
+        <module name="MutableException"/>
+        <module name="OneTopLevelClass"/>
 
         <!-- Imports -->
         <module name="AvoidStarImport"/>
@@ -72,13 +106,43 @@
             <property name="option" value="top"/>
         </module>
 
+        <!-- Metrics -->
+        <module name="BooleanExpressionComplexity">
+            <property name="max" value="5"/>
+        </module>
+        <module name="ClassDataAbstractionCoupling">
+            <property name="max" value="10"/>
+        </module>
+        <module name="SuppressionXpathSingleFilter">
+            <property name="files" value=".*(TestNG|TestNGBase).java"/>
+            <property name="checks" value="ClassDataAbstractionCoupling"/>
+        </module>
+        <module name="CyclomaticComplexity">
+            <property name="max" value="32"/>
+        </module>
+        <module name="NPathComplexity">
+            <property name="max" value="512"/>
+        </module>
+
+        <!-- Miscellaneous -->
+        <module name="OuterTypeFilename"/>
+
         <!-- Modifiers -->
         <module name="ModifierOrder"/>
         <module name="RedundantModifier"/>
 
+        <!-- Naming -->
+        <module name="PackageName"/>
+        <module name="TypeName"/>
+
         <!-- Sizes -->
         <module name="AnonInnerLength">
             <property name="max" value="50"/>
+        </module>
+        <module name="ParameterNumber">
+            <property name="max" value="10"/>
+            <property name="ignoreOverriddenMethods" value="true"/>
+            <property name="tokens" value="METHOD_DEF"/>
         </module>
 
     </module>

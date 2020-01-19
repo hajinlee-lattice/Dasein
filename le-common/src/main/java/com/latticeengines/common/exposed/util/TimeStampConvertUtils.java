@@ -548,10 +548,8 @@ public class TimeStampConvertUtils {
                                         fallbackSuccess = true;
                                     } catch (DateTimeParseException e2) {
                                         if (ENABLE_DEBUG_LOG) {
-                                            if (ENABLE_DEBUG_LOG) {
-                                                log.debug("Failed to parse value with fallback Java format string: " +
-                                                        javaDateFormatStr + " " + fallbackJavaTimeFormatStr);
-                                            }
+                                            log.debug("Failed to parse value with fallback Java format string: " +
+                                                    javaDateFormatStr + " " + fallbackJavaTimeFormatStr);
                                         }
                                     }
                                 }

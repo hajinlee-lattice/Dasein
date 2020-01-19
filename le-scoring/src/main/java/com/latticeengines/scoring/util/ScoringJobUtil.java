@@ -94,7 +94,7 @@ public class ScoringJobUtil {
         ObjectNode jsonObj = new ObjectMapper().createObjectNode();
         for (Field field : fields) {
             String type = AvroUtils.getType(field).getName();
-            if (type.equals("string") || type.equals("bytes"))
+            if ("string".equals(type) || "bytes".equals(type))
                 jsonObj.put(field.name(), 1);
             else
                 jsonObj.put(field.name(), 0);

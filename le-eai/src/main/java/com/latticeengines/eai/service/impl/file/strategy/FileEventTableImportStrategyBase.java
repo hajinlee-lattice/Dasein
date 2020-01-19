@@ -2,7 +2,6 @@ package com.latticeengines.eai.service.impl.file.strategy;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,14 +135,14 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put("eai.redis.endpoint", elastiCacheService.getPrimaryEndpointAddress());
         props.put("eai.redis.local", String.valueOf(localRedis));
         props.put("eai.import.use.s3.input", ctx.getProperty(ImportProperty.USE_S3_INPUT, String.class, "false"));
-        props.put("eai.import.aws.s3.bucket", ctx.getProperty(ImportProperty.S3_BUCKET, String.class, ""));;
+        props.put("eai.import.aws.s3.bucket", ctx.getProperty(ImportProperty.S3_BUCKET, String.class, ""));
         props.put("eai.import.aws.s3.object.key", ctx.getProperty(ImportProperty.S3_OBJECT_KEY, String.class, ""));
         props.put("eai.import.aws.s3.file.size", ctx.getProperty(ImportProperty.S3_FILE_SIZE, String.class, "0"));
         props.put("eai.import.aws.region", awsRegion);
         props.put("eai.import.aws.access.key", CipherUtils.encrypt(awsAccessKey));
         props.put("eai.import.aws.secret.key", CipherUtils.encrypt(awsSecretKey));
         props.put(MapReduceProperty.INPUT.name(), hdfsFileToImport);
-        List<String> cacheFiles = new ArrayList<>();
+        List<String> cacheFiles;
         try {
             cacheFiles = EaiJobUtil.getCacheFiles(ctx.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class),
                     versionManager.getCurrentVersionInStack(stackName));
