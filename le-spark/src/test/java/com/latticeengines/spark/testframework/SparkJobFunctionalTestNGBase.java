@@ -58,6 +58,7 @@ import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 import com.latticeengines.spark.exposed.service.SparkJobService;
+import com.latticeengines.spark.service.impl.LivyServerManager;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-spark-context.xml" })
@@ -76,6 +77,9 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
 
     @Inject
     private SparkJobService sparkJobService;
+
+    @Inject
+    private LivyServerManager livyServerManager;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -135,7 +139,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     protected void reuseLivyEnvironment(int sessionId) {
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
+            livyHost = livyServerManager.getLivyHost();
         } else {
             livyHost = "http://localhost:8998";
         }
@@ -328,10 +332,12 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         return recordName;
     }
 
-    private void copyCSVDataToHdfs(String dirPath, String fileName, String[] headers, Object[] values) throws IOException {
+    private void copyCSVDataToHdfs(String dirPath, String fileName, String[] headers, Object[] values)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(yarnConfiguration)) {
             try (OutputStream outputStream = fs.create(new Path(dirPath + File.separator + fileName))) {
-                try (CSVPrinter csvPrinter = new CSVPrinter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
+                try (CSVPrinter csvPrinter = new CSVPrinter(
+                        new OutputStreamWriter(outputStream, StandardCharsets.UTF_8),
                         LECSVFormat.format.withHeader(headers))) {
                     csvPrinter.printRecord(values);
                 }

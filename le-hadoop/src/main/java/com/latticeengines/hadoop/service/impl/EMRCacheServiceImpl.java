@@ -1,7 +1,5 @@
 package com.latticeengines.hadoop.service.impl;
 
-import java.util.Collections;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,17 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.aws.emr.EMRService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
-import com.latticeengines.common.exposed.util.Base64Utils;
-import com.latticeengines.common.exposed.util.HttpClientUtils;
-import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.common.exposed.util.ConsulUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 
@@ -77,7 +69,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
         return _impl.getClusterIdFromAWS(clusterName);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|clusterid\", #clusterName)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|clusterid\", #clusterName)", unless = "#result == null")
     public String getClusterIdFromAWS(String clusterName) {
         String clusterId = "";
         try {
@@ -98,7 +90,7 @@ public class EMRCacheServiceImpl implements EMRCacheService {
     }
 
     @Override
-    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.EMRClusterCacheName, key = "T(java.lang.String).format(\"%s|masterip\", #clusterName)", unless = "#result == null")
     public String getMasterIp(String clusterName) {
         String masterIp = null;
         try {
@@ -121,30 +113,11 @@ public class EMRCacheServiceImpl implements EMRCacheService {
 
     private String getClusterIdFromConsul(String clusterName) {
         String consulKey = "emr/" + clusterName + "/ClusterId";
-        return getValueFromConsul(consulKey);
+        return ConsulUtils.getValueFromConsul(consul, consulKey);
     }
 
     private String getMasterIpFromConsul(String clusterName) {
         String consulKey = "emr/" + clusterName + "/MasterIp";
-        return getValueFromConsul(consulKey);
+        return ConsulUtils.getValueFromConsul(consul, consulKey);
     }
-
-    private String getValueFromConsul(String key) {
-        String kvUrl = consul + "/v1/kv/" + key;
-        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
-        RetryTemplate retry = RetryUtils.getRetryTemplate(5, null, //
-                Collections.singleton(HttpClientErrorException.NotFound.class));
-        try {
-            JsonNode json = retry.execute(context -> restTemplate.getForObject(kvUrl, JsonNode.class));
-            if (json != null && json.size() >= 1) {
-                String data = json.get(0).get("Value").asText();
-                return new String(Base64Utils.decodeBase64(data));
-            }
-        } catch (HttpClientErrorException.NotFound e) {
-            // key not exists
-            return null;
-        }
-        return null;
-    }
-
 }
