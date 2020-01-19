@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
-import com.latticeengines.spark.service.impl.LivyServerManager;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
 import org.apache.hadoop.conf.Configuration;
@@ -30,6 +29,7 @@ import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.service.SparkSQLService;
 import com.latticeengines.query.factory.SparkQueryProvider;
 import com.latticeengines.spark.exposed.service.LivySessionService;
+import com.latticeengines.spark.service.impl.LivyServerManager;
 
 @Component
 public class SparkSQLQueryTester {
@@ -78,7 +78,8 @@ public class SparkSQLQueryTester {
         return session;
     }
 
-    public void setupTestContext(CustomerSpace customerSpace, AttributeRepository attrRepo, Map<String, String> tblPathMap) {
+    public void setupTestContext(CustomerSpace customerSpace, AttributeRepository attrRepo,
+            Map<String, String> tblPathMap) {
         this.customerSpace = customerSpace;
         this.attrRepo = attrRepo;
         this.tblPathMap = tblPathMap;
@@ -161,10 +162,10 @@ public class SparkSQLQueryTester {
         AvroUtils.AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroPath + "/*.avro");
         iterator.forEachRemaining(record -> {
             Map<String, Object> row = new HashMap<>();
-            for (Field field: record.getSchema().getFields()) {
+            for (Field field : record.getSchema().getFields()) {
                 Object value = record.get(field.name());
                 if (value instanceof Utf8) {
-                    value = ((Utf8)value).toString();
+                    value = ((Utf8) value).toString();
                 }
                 row.put(field.name(), value);
             }

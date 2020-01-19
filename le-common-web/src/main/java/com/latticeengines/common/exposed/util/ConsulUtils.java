@@ -1,12 +1,13 @@
 package com.latticeengines.common.exposed.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Collections;
+
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class ConsulUtils {
 
