@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -97,7 +98,8 @@ public class SchemaGenerator {
         }
         // error checking
         if (classes.isEmpty()) {
-            throw new ClassNotFoundException("class not found for package: " + packages);
+            throw new ClassNotFoundException("class not found for package: " //
+                    + StringUtils.join(packages, ","));
         }
 
         MetadataSources mdSources = new MetadataSources(serviceRegistry);
