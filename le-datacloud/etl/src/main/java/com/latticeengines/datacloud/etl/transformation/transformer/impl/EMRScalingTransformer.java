@@ -54,7 +54,7 @@ public class EMRScalingTransformer extends AbstractTransformer<EMRScalingConfig>
             valid = false;
         }
         if (config.getDelta() == null || config.getDelta() <= 0) {
-            log.warn("Invalid value of delta: " + String.valueOf(config.getDelta()));
+            log.warn("Invalid value of delta: " + config.getDelta());
             valid = false;
         }
         return valid;

@@ -3,7 +3,9 @@ package com.latticeengines.spark.service.impl;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +17,11 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.client.api.YarnClient;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
@@ -24,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -36,6 +44,9 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     @Inject
     private LivyServerManager livyServerManager;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     private static final Logger log = LoggerFactory.getLogger(LivySessionServiceImpl.class);
 
@@ -133,11 +144,13 @@ public class LivySessionServiceImpl implements LivySessionService {
                 throw new RuntimeException("Failed to parse livy response: " + response, e);
             }
             String appId = json.get("appId").asText();
+            String appName = json.get("name").asText();
             String state = json.get("state").asText();
             String driverLogUrl = json.get("appInfo").get("driverLogUrl").asText();
             String sparkUiUrl = json.get("appInfo").get("sparkUiUrl").asText();
             session.setState(state);
             session.setAppId(appId);
+            session.setAppName(appName);
             session.setDriverLogUrl(driverLogUrl);
             session.setSparkUiUrl(sparkUiUrl);
             return session;
@@ -168,6 +181,7 @@ public class LivySessionServiceImpl implements LivySessionService {
             log.debug("Current session state: " + current.getState());
         }
         if (state.equals(current.getState())) {
+            current.setAppId(getAppId(current.getAppName()));
             return current;
         } else {
             throw new RuntimeException(
@@ -181,6 +195,28 @@ public class LivySessionServiceImpl implements LivySessionService {
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.10.1", //
                 "org.apache.spark:spark-avro_2.11:2.4.4" //
         );
+    }
+
+    private String getAppId(final String appName) {
+        String appId = null;
+        try (YarnClient yarnClient = YarnClient.createYarnClient()) {
+            yarnClient.init(yarnConfiguration);
+            yarnClient.start();
+            Set<String> appTypes = Sets.newHashSet("SPARK");
+            EnumSet<YarnApplicationState> states = EnumSet.copyOf(Collections.singleton(YarnApplicationState.RUNNING));
+            List<ApplicationReport> reports = yarnClient.getApplications(appTypes, states);
+            yarnClient.stop();
+            ApplicationReport report = reports.stream() //
+                    .filter(r -> r.getName().equals(appName)).findFirst().orElse(null);
+            if (report != null) {
+                appId = report.getApplicationId().toString();
+            } else {
+                log.warn("There is no running app named " + appName);
+            }
+        } catch (IOException | YarnException e) {
+            log.warn("Failed to retrieve application id", e);
+        }
+        return appId;
     }
 
 }
