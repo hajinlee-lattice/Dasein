@@ -144,15 +144,17 @@ public class LivySessionServiceImpl implements LivySessionService {
                 throw new RuntimeException("Failed to parse livy response: " + response, e);
             }
             String appId = json.get("appId").asText();
-            String appName = json.get("name").asText();
             String state = json.get("state").asText();
             String driverLogUrl = json.get("appInfo").get("driverLogUrl").asText();
             String sparkUiUrl = json.get("appInfo").get("sparkUiUrl").asText();
             session.setState(state);
             session.setAppId(appId);
-            session.setAppName(appName);
             session.setDriverLogUrl(driverLogUrl);
             session.setSparkUiUrl(sparkUiUrl);
+            if (json.has("name")) {
+                String appName = json.get("name").asText();
+                session.setAppName(appName);
+            }
             return session;
         } else {
             return null;
@@ -181,7 +183,10 @@ public class LivySessionServiceImpl implements LivySessionService {
             log.debug("Current session state: " + current.getState());
         }
         if (state.equals(current.getState())) {
-            current.setAppId(getAppId(current.getAppName()));
+            String appName = current.getAppName();
+            if (StringUtils.isNotBlank(appName)) {
+                current.setAppId(getAppId(appName));
+            }
             return current;
         } else {
             throw new RuntimeException(
@@ -197,7 +202,7 @@ public class LivySessionServiceImpl implements LivySessionService {
         );
     }
 
-    private String getAppId(final String appName) {
+    private String getAppId(@NotNull final String appName) {
         String appId = null;
         try (YarnClient yarnClient = YarnClient.createYarnClient()) {
             yarnClient.init(yarnConfiguration);
