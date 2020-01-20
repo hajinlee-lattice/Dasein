@@ -36,7 +36,6 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.spark.LivySession;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.service.LivySessionService;
 
 
@@ -45,9 +44,6 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     @Inject
     private LivyServerManager livyServerManager;
-
-    @Inject
-    private EMRCacheService emrCacheService;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -175,7 +171,6 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     private LivySession waitForSessionState(LivySession session, String state) {
         LivySession current = getSession(session);
-        emrCacheService.getMasterIp();
         while (!LivySession.TERMINAL_STATES.contains(current.getState())) {
             try {
                 Thread.sleep(10000L);
