@@ -213,7 +213,7 @@ public class LivySessionServiceImpl implements LivySessionService {
             } else {
                 log.warn("There is no running app named " + appName);
             }
-        } catch (IOException| YarnException e) {
+        } catch (IOException | YarnException e) {
             log.warn("Failed to retrieve application id", e);
         }
         return appId;
