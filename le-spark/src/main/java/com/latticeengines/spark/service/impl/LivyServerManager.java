@@ -3,6 +3,7 @@ package com.latticeengines.spark.service.impl;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
@@ -46,7 +47,7 @@ public class LivyServerManager {
     private String getNextLivyServerUrl(String emrClusterName) {
         if (serverQueue.size() == 0) {
             // reload the server queue. Newly added server will also be loaded here.
-            if (populateServerQueue(emrClusterName) == false) {
+            if (!populateServerQueue(emrClusterName)) {
                 // if no external livy server, return the EMR internal livy server
                 return emrCacheService.getLivyUrl();
             }
@@ -55,7 +56,7 @@ public class LivyServerManager {
         while (serverQueue.size() != 0) {
             String nextServerUrl = serverQueue.poll();
 
-            if (isLivyServerReachable(nextServerUrl) == true) {
+            if (isLivyServerReachable(nextServerUrl)) {
                 log.info("Picked livy server " + nextServerUrl);
                 return nextServerUrl;
             } else {
@@ -75,7 +76,7 @@ public class LivyServerManager {
 
         // first check if the key even exists in consul KV store; if not, return right
         // away
-        if (ConsulUtils.isKeyExists(consul, consulKey) == false) {
+        if (!ConsulUtils.isKeyExists(consul, consulKey)) {
             return false;
         }
 
@@ -93,6 +94,15 @@ public class LivyServerManager {
             serverQueue.offer("http://" + ip + ":8998");
         }
 
+        if (!serverQueue.isEmpty()) {
+            // shuffle the queue to avoid everyone starts with the first one in consul
+            int shuffle = new Random(System.currentTimeMillis()).nextInt(serverQueue.size());
+            for (int i = 0; i < shuffle; i++) {
+                String ip = serverQueue.poll();
+                serverQueue.offer(ip);
+            }
+        }
+
         return true;
     }
 
@@ -101,8 +111,7 @@ public class LivyServerManager {
             HttpURLConnection connection = (HttpURLConnection) new URL(serverUrl).openConnection();
             connection.setRequestMethod("HEAD");
             int responseCode = connection.getResponseCode();
-
-            return (responseCode == 200) ? true : false;
+            return responseCode == 200;
         } catch (Exception e) {
             log.error("Check server availability failed" + e);
         }
