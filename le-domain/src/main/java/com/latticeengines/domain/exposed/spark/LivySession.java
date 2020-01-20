@@ -36,6 +36,9 @@ public class LivySession {
     @JsonProperty("AppId")
     private String appId;
 
+    @JsonProperty("AppName")
+    private String appName;
+
     @JsonProperty("DriverLogUrl")
     private String driverLogUrl;
 
@@ -80,6 +83,14 @@ public class LivySession {
 
     public void setAppId(String appId) {
         this.appId = appId;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     public String getDriverLogUrl() {
