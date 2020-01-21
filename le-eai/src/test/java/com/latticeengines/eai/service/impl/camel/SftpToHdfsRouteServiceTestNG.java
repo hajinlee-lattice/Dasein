@@ -6,6 +6,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,8 @@ import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
 @Component("sftpToHdfsRouteServiceTestNG")
 public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(SftpToHdfsRouteServiceTestNG.class);
 
     private static final String hdfsDir = "/tmp/sftp2hdfsfunctional";
 

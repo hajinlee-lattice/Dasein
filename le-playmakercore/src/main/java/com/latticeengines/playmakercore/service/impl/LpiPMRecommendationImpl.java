@@ -186,7 +186,7 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     @Component
     class CleanupExecutor {
 
-        private Logger cleanupExecutorLog = LoggerFactory.getLogger(CleanupExecutor.class);
+        private final Logger cleanupExecutorLog = LoggerFactory.getLogger(CleanupExecutor.class);
 
         @Value("${playmaker.update.bulk.max:1000}")
         private int maxUpdateRows;

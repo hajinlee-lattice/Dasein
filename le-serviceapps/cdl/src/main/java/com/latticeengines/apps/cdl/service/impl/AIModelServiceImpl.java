@@ -41,7 +41,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
-import com.latticeengines.domain.exposed.cdl.util.FeatureImportanceUtil;
+import com.latticeengines.domain.exposed.cdl.util.FeatureImportanceMgr;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
@@ -84,7 +84,7 @@ import reactor.core.publisher.Flux;
 @Component("aiModelService")
 public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implements AIModelService {
 
-    private static Logger log = LoggerFactory.getLogger(AIModelServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AIModelServiceImpl.class);
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -123,7 +123,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     private DataCollectionService dataCollectionService;
 
     @Inject
-    private FeatureImportanceUtil featureImportanceUtil;
+    private FeatureImportanceMgr featureImportanceUtil;
 
     @Inject
     private BatonService batonService;

@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
@@ -31,8 +29,6 @@ import reactor.core.publisher.Flux;
 
 @Component
 public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetadataService {
-
-    private static Logger log = LoggerFactory.getLogger(ExportFieldMetadataServiceBase.class);
 
     @Inject
     private ExportFieldMetadataDefaultsService defaultExportFieldMetadataService;

@@ -43,7 +43,7 @@ import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    private static Logger LOG = Logger.getLogger(ScoreExternalResourceDeploymentTestNG.class);
+    private static final Logger LOG = Logger.getLogger(ScoreExternalResourceDeploymentTestNG.class);
 
     private static final String MARKETO_CRED_NAME = "TestProfileFromScoringAPI";
 

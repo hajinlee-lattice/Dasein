@@ -28,9 +28,10 @@ import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfiguration> extends AbstractStep<T>
         implements ApplicationContextAware {
-    private static final String AWS_PYTHON_BATCH_CONFIGURATION = "AWS_PYTHON_BATCH_CONFIGURATION";
 
-    private static Logger log = LoggerFactory.getLogger(BaseAwsPythonBatchStep.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseAwsPythonBatchStep.class);
+
+    private static final String AWS_PYTHON_BATCH_CONFIGURATION = "AWS_PYTHON_BATCH_CONFIGURATION";
 
     @Value("${hadoop.fs.web.defaultFS}")
     String webHdfs;
@@ -64,7 +65,7 @@ public abstract class BaseAwsPythonBatchStep<T extends AWSPythonBatchConfigurati
             if (configuration.isSubmission()) {
                 config = getObjectFromContext(AWS_PYTHON_BATCH_CONFIGURATION, AWSPythonBatchConfiguration.class);
                 if (config != null) {
-                    log.info("There's batch job running, jobId=", config.getJobId());
+                    log.info("There's batch job running, jobId={}", config.getJobId());
                     return;
                 }
                 config = configuration;

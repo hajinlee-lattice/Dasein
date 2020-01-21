@@ -11,6 +11,8 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
@@ -31,8 +33,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
-
 public class VdbEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(VdbEaiServiceImplDeploymentTestNG.class);
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 

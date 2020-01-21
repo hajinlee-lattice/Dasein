@@ -22,11 +22,15 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class SAMLUtils {
+public final class SAMLUtils {
 
-    public static final Logger log = LoggerFactory.getLogger(SAMLUtils.class);
+    protected SAMLUtils() {
+        throw new UnsupportedOperationException();
+    }
 
-    public static final String ALIAS = "/alias/";
+    private static final Logger log = LoggerFactory.getLogger(SAMLUtils.class);
+
+    private static final String ALIAS = "/alias/";
 
     public static String getTenantIdFromLocalEntityId(String entityId) {
         log.info("entityId = " + entityId);

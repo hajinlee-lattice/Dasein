@@ -49,7 +49,8 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInputConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(PrepareBulkMatchInput.class);
+    private static final Logger log = LoggerFactory.getLogger(PrepareBulkMatchInput.class);
+
     private Schema schema;
 
     @Inject

@@ -223,7 +223,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     private class RealtimeMatchCallable implements Callable<Boolean> {
 
-        private Logger log = LoggerFactory.getLogger(RealtimeMatchCallable.class);
+        private final Logger log = LoggerFactory.getLogger(RealtimeMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
         private ConcurrentLinkedDeque<Map<String, Object>> result = new ConcurrentLinkedDeque<>();
         private final String dataCloudVersion;
@@ -295,7 +295,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
         private class SingleRun implements Callable<MatchOutput> {
 
-            private Logger log = LoggerFactory.getLogger(SingleRun.class);
+            private final Logger log = LoggerFactory.getLogger(SingleRun.class);
             private MatchInput matchInput;
 
             SingleRun(MatchInput matchInput) {
@@ -317,7 +317,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     private class BulkMatchCallable implements Callable<Boolean> {
 
-        private Logger log = LoggerFactory.getLogger(BulkMatchCallable.class);
+        private final Logger log = LoggerFactory.getLogger(BulkMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
         private final String dataCloudVersion;
 

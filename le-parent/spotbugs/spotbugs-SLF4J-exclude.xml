@@ -6,7 +6,7 @@
             https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.12/spotbugs/etc/findbugsfilter.xsd">
 
     <Match classregex="com\.latticeengines\..*">
-        <Bug pattern="SLF4J_FORMAT_SHOULD_BE_CONST,SLF4J_LOGGER_SHOULD_BE_NON_STATIC" />
+        <Bug pattern="SLF4J_FORMAT_SHOULD_BE_CONST,SLF4J_SIGN_ONLY_FORMAT,SLF4J_LOGGER_SHOULD_BE_NON_STATIC" />
     </Match>
 
 </FindBugsFilter>

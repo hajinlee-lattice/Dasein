@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 public class BitCodeBookUtils {
 
-    private static Logger log = LoggerFactory.getLogger(BitCodeBookUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(BitCodeBookUtils.class);
 
     /**
      * @param codeBookMap

@@ -6,11 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -34,12 +35,12 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 @Component("csvToHdfsService")
 public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(CSVToHdfsService.class);
+    private static final Logger log = LoggerFactory.getLogger(CSVToHdfsService.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
     @Override

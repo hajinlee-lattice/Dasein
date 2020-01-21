@@ -32,9 +32,12 @@ import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import reactor.core.publisher.Flux;
 
 @Component
-public class FeatureImportanceUtil {
+public class FeatureImportanceMgr {
 
-    private static Logger log = LoggerFactory.getLogger(FeatureImportanceUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(FeatureImportanceMgr.class);
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Value("${cdl.feature.importance.transform.suffixes}")
     private String featureImportanceTransformSuffixes;
@@ -53,9 +56,6 @@ public class FeatureImportanceUtil {
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
-
-    @Inject
-    private Configuration yarnConfiguration;
 
     private class AttrFeatureImportance {
         private double featureImportance;

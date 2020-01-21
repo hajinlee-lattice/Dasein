@@ -51,7 +51,7 @@ import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 @Component("playLaunchService")
 public class PlayLaunchServiceImpl implements PlayLaunchService {
 
-    private static Logger log = LoggerFactory.getLogger(PlayLaunchServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayLaunchServiceImpl.class);
 
     private static final String NULL_KEY = "NULL_KEY";
 

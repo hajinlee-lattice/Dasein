@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @Component("marketoExportFieldMetadataService")
 public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataServiceBase {
 
-    private static Logger log = LoggerFactory.getLogger(MarketoExportFieldMetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MarketoExportFieldMetadataServiceImpl.class);
 
     @Inject
     private ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;

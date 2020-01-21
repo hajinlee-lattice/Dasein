@@ -82,12 +82,16 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
-public class AvroUtils {
+public final class AvroUtils {
+
+    protected AvroUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String SQLSERVER_TYPE_INT = "int";
     private static final String SQLSERVER_TYPE_LONG = "long";
     private static Schema NULL_SCHEMA = Schema.create(Schema.Type.NULL);
-    private static Logger log = LoggerFactory.getLogger(AvroUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(AvroUtils.class);
 
     // java type -> (avro schema type, whether java type is primitive)
     // TODO: Java type as Date/Timestamp, List and Map are to be added

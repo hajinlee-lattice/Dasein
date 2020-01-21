@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,20 +22,18 @@ import com.latticeengines.pls.service.ScoringRequestConfigService;
 /**
  * @author jadusumalli
  * Serves the ScoringRequestConfiguration functionality for Marketo Integration
- * 
+ *
  */
 @Component
 public class ScoringRequestConfigServiceImpl implements ScoringRequestConfigService {
 
-    private static Logger LOG = Logger.getLogger(ScoringFileMetadataServiceImpl.class);
-    
     @Inject
     private ScoringRequestConfigEntityManager scoringRequestConfigEntityMgr;
 
     @Value("${pls.marketo.scoring.webhook.resource}")
     private String webhookResource;
 
-    
+
     @Override
     public void createScoringRequestConfig(ScoringRequestConfig scoringRequestConfig) {
         validateAndProcessScoringRequestConfig(scoringRequestConfig, false);
@@ -62,16 +59,16 @@ public class ScoringRequestConfigServiceImpl implements ScoringRequestConfigServ
         if(scoringRequestConfig.getMarketoCredential() == null) {
             throw new LedpException(LedpCode.LEDP_18191, new String[] {"Marketo Profile association"});
         }
-        
+
         // Validate update request fields
         if (updateRequest) {
             if(StringUtils.isBlank(scoringRequestConfig.getConfigId())) {
                 throw new LedpException(LedpCode.LEDP_18193, new String[] {"Missing required Configuration ID"});
             }
         }
-        
+
     }
-    
+
     @Override
     public List<ScoringRequestConfigSummary> findAllByMarketoCredential(Long credentialPid) {
         return scoringRequestConfigEntityMgr.findAllByMarketoCredential(credentialPid);
@@ -90,14 +87,14 @@ public class ScoringRequestConfigServiceImpl implements ScoringRequestConfigServ
         addUserInterfaceContext(scoringReqConfig);
         return scoringReqConfig;
     }
-    
+
     private void addUserInterfaceContext(ScoringRequestConfig scoringReqConfig) {
         if (scoringReqConfig == null) {
             return;
         }
         scoringReqConfig.setWebhookResource(webhookResource);
     }
-    
+
     @Override
     public void updateScoringRequestConfig(ScoringRequestConfig scoringRequestConfig) {
         validateAndProcessScoringRequestConfig(scoringRequestConfig, true);

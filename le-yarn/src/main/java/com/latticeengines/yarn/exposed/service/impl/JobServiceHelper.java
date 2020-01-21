@@ -5,10 +5,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.zeroturnaround.exec.ProcessExecutor;
@@ -27,12 +28,12 @@ import com.latticeengines.yarn.exposed.service.JobNameService;
 @Component
 public class JobServiceHelper {
 
-    protected static final Logger log = LoggerFactory.getLogger(JobServiceHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(JobServiceHelper.class);
 
-    @Autowired
+    @Inject
     private JobNameService jobNameService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${dataplatform.yarn.job.basedir}")

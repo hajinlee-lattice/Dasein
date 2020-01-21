@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/jwt")
 public class JwtResource {
 
-    Logger log = Logger.getLogger(this.getClass());
+    private static final Logger log = Logger.getLogger(JwtResource.class);
 
     @Autowired
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;

@@ -12,8 +12,6 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
@@ -21,7 +19,6 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Table(name = "Config")
 public class DellEbiConfig implements HasPid, Serializable, Comparable<DellEbiConfig> {
 
-    protected static final Logger log = LoggerFactory.getLogger(DellEbiConfig.class);
     private static final long serialVersionUID = 3568465584606850312L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

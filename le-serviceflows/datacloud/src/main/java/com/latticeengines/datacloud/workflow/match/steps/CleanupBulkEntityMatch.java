@@ -30,10 +30,10 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CleanupBulkEntityMatch extends BaseWorkflowStep<CleanupBulkEntityMatchConfiguration> {
 
+    private static final Logger log = LoggerFactory.getLogger(CleanupBulkEntityMatch.class);
+
     private static final String OUTPUT_DIR = "Output";
     private static final String ERROR_DIR = "Error";
-
-    private static Logger log = LoggerFactory.getLogger(CleanupBulkEntityMatch.class);
 
     @Inject
     private S3Service s3Service;
@@ -88,7 +88,7 @@ public class CleanupBulkEntityMatch extends BaseWorkflowStep<CleanupBulkEntityMa
                         true);
             }
         } catch (Exception e) {
-            log.error("Failed to upload files for directory {}, error = {}", hdfsDir, e);
+            log.error("Failed to upload files for directory {}", hdfsDir, e);
         }
     }
 
@@ -103,7 +103,7 @@ public class CleanupBulkEntityMatch extends BaseWorkflowStep<CleanupBulkEntityMa
             try {
                 HdfsUtils.rmdir(yarnConfiguration, testDir);
             } catch (IOException e) {
-                log.error("Failed to remove test directory ({}), error = {}", testDir, e);
+                log.error("Failed to remove test directory ({})", testDir, e);
             }
         }
     }

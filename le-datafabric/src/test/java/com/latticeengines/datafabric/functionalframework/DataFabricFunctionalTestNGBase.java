@@ -15,7 +15,7 @@ import com.latticeengines.datafabric.service.message.FabricMessageService;
 @ContextConfiguration(locations = { "classpath:test-datafabric-context.xml" })
 public abstract class DataFabricFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    protected static final Logger log = LoggerFactory.getLogger(DataFabricFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFabricFunctionalTestNGBase.class);
 
     protected static final String BASE_DIR = "/Pods/Default/Services/PropData/Sources";
 

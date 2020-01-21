@@ -370,7 +370,7 @@ public class HdfsToS3PathBuilder {
             }
             return path;
         } catch (Exception ex) {
-            log.warn("Could not get S3 path!", ex.getMessage());
+            log.warn("Could not get S3 path!", ex);
         }
         return path;
     }

@@ -27,13 +27,13 @@ import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.ingestion.SftpConfiguration;
 
-public class SftpUtils {
+public final class SftpUtils {
 
-    private static Logger log = LoggerFactory.getLogger(SftpUtils.class);
-
-    public interface SftpFilenameFilter {
-        boolean accept(String filename);
+    protected SftpUtils() {
+        throw new UnsupportedOperationException();
     }
+
+    private static final Logger log = LoggerFactory.getLogger(SftpUtils.class);
 
     /**
      * Check whether a file existed on SFTP
@@ -44,7 +44,7 @@ public class SftpUtils {
      * @param fileName
      * @return
      */
-    public static final boolean ifFileExists(@NotNull SftpConfiguration config, @NotNull String fileName) {
+    public static boolean ifFileExists(@NotNull SftpConfiguration config, @NotNull String fileName) {
         validateSftpConfig(config);
         Preconditions.checkArgument(StringUtils.isNotBlank(fileName));
 
@@ -81,7 +81,7 @@ public class SftpUtils {
      *            SFTP configuration
      * @return file list (relative path under SFTP root dir)
      */
-    public static final List<String> getFileList(SftpConfiguration config) {
+    public static List<String> getFileList(SftpConfiguration config) {
         validateSftpConfig(config);
         return getFileList(config, null);
     }
@@ -127,7 +127,7 @@ public class SftpUtils {
     /**
      * Get directory list to scan. If there is sub-folder, return sub-folder
      * list whose name satisfies name pattern. No recursive searching.
-     * 
+     *
      * @param config
      * @param channel
      * @param calendar
@@ -218,7 +218,7 @@ public class SftpUtils {
      * @param newPath:
      *            new folder/file name
      */
-    public static final void renamePath(@NotNull SftpConfiguration config, @NotNull String oldPath,
+    public static void renamePath(@NotNull SftpConfiguration config, @NotNull String oldPath,
             @NotNull String newPath) {
         validateSftpConfig(config);
         Preconditions.checkArgument(StringUtils.isNotBlank(oldPath));

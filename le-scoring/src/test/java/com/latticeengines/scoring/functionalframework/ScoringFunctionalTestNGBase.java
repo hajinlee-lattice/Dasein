@@ -23,7 +23,7 @@ import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 @ContextConfiguration(locations = { "classpath:test-scoring-context.xml" })
 public class ScoringFunctionalTestNGBase extends YarnFunctionalTestNGBase {
 
-    protected static final Logger log = LoggerFactory.getLogger(ScoringFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoringFunctionalTestNGBase.class);
 
     @Inject
     private ScoringOrderedEntityMgrListForDbClean scoringOrderedEntityMgrListForDbClean;

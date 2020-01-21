@@ -163,7 +163,7 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
     }
 
     protected void updateStatusToFailed(TransformationProgress progress, String errorMsg, Exception e) {
-        progressHelper.updateStatusToFailed(progressEntityMgr, progress, errorMsg, e, log);
+        progressHelper.updateStatusToFailed(progressEntityMgr, progress, errorMsg, e, getClass().getSimpleName());
     }
 
     @Override

@@ -34,11 +34,11 @@ import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
 @Component("awsBatchjobService")
 public class AwsBatchJobServiceImpl implements AwsBatchJobService {
 
+    private static final Logger log = LoggerFactory.getLogger(AwsBatchJobServiceImpl.class);
+
     private static final String LAUNCHER_PY = "launcher.py";
 
     private static final String APP_PY = "app.py";
-
-    protected static final Logger log = LoggerFactory.getLogger(AwsBatchJobServiceImpl.class);
 
     @Inject
     private BatchService batchService;

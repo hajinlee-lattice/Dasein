@@ -15,7 +15,7 @@ import com.latticeengines.serviceflows.functionalframework.ServiceFlowsWorkflowD
 @ContextConfiguration(locations = { "classpath:serviceflows-cdl-workflow-context.xml", "classpath:test-serviceflows-cdl-context.xml" })
 public abstract class CDLWorkflowDeploymentTestNGBase extends ServiceFlowsWorkflowDeploymentTestNGBase {
 
-    private static Logger log = Logger.getLogger(CDLWorkflowDeploymentTestNGBase.class);
+    private static final Logger log = Logger.getLogger(CDLWorkflowDeploymentTestNGBase.class);
 
     @Inject
     private WorkflowProxy workflowProxy;

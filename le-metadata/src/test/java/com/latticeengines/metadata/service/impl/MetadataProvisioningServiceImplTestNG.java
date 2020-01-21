@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
-import com.latticeengines.metadata.provisioning.MetadataComponentTestNG;
 import com.latticeengines.metadata.service.MetadataProvisioningService;
 import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.security.exposed.service.TenantService;
@@ -27,7 +26,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 @Component
 public class MetadataProvisioningServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(MetadataComponentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataProvisioningServiceImplTestNG.class);
 
     @Inject
     private MetadataProvisioningService metadataProvisioningService;

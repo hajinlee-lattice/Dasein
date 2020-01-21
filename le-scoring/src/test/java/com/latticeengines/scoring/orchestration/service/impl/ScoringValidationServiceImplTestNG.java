@@ -4,6 +4,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,6 +24,8 @@ import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBas
 import com.latticeengines.scoring.orchestration.service.ScoringValidationService;
 
 public class ScoringValidationServiceImplTestNG extends ScoringFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ScoringValidationServiceImplTestNG.class);
 
     @Value("${scoring.test.table}")
     private String testInputTable;

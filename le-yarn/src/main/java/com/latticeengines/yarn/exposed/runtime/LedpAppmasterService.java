@@ -8,8 +8,6 @@ import org.springframework.yarn.integration.ip.mind.MindRpcMessageHolder;
 
 public abstract class LedpAppmasterService extends MindAppmasterService implements SmartLifecycle {
 
-    protected static Logger log = LoggerFactory.getLogger(LedpAppmasterService.class);
-
     @Override
     protected abstract MindRpcMessageHolder handleMindMessageInternal(MindRpcMessageHolder message);
 

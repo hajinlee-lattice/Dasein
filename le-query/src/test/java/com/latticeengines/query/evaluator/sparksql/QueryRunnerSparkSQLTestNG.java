@@ -24,7 +24,7 @@ import com.latticeengines.query.evaluator.QueryRunnerTestNG;
 @Listeners(SparkSQLTestInterceptor.class)
 public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements RedshiftAndSparkQueryTester {
 
-    private static Logger log = LoggerFactory.getLogger(QueryRunnerSparkSQLTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(QueryRunnerSparkSQLTestNG.class);
 
     private static final String BITENCODED_NOMINAL_ATTR = "TechIndicator_EmailCampaigns";
 

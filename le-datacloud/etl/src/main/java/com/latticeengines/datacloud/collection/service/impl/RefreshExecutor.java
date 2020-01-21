@@ -13,13 +13,13 @@ import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 
 public class RefreshExecutor implements RefreshJobExecutor {
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(RefreshExecutor.class);
 
     private final RefreshService refreshService;
     private static final int MAX_RETRY = 50;
     private final String jobSubmitter;
 
-    public RefreshExecutor(RefreshService refreshService) {
+    RefreshExecutor(RefreshService refreshService) {
         this.refreshService = refreshService;
         this.jobSubmitter = refreshService.getClass().getSimpleName();
     }

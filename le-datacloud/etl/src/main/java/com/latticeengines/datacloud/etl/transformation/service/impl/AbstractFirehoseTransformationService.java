@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public abstract class AbstractFirehoseTransformationService<T extends TransformationConfiguration>
         extends AbstractTransformationService<T> {
-    private static Logger LOG = LoggerFactory.getLogger(AbstractFirehoseTransformationService.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractFirehoseTransformationService.class);
 
     private static final String AVRO_DIR_FOR_CONVERSION = "AVRO_DIR_FOR_CONVERSION";
 
@@ -84,8 +84,8 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
             latestBaseVersions = findSortedVersionsInDir(rootBaseSourceDir, null);
 
             if (latestBaseVersions.isEmpty()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No version if found in base source");
+                if (log.isDebugEnabled()) {
+                    log.debug("No version if found in base source");
                 }
                 return null;
             }
@@ -93,8 +93,8 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
             List<String> versionsToProcess = compareVersionLists(source, latestBaseVersions, latestVersions,
                     rootBaseSourceDir);
             if (versionsToProcess == null) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Didn't find any unprocessed version in base source");
+                if (log.isDebugEnabled()) {
+                    log.debug("Didn't find any unprocessed version in base source");
                 }
                 return null;
             }
@@ -135,8 +135,8 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
             boolean foundProcessedEntry = false;
             // try to find matching version in source version list
             for (String latestVersion : latestVersions) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Compare: " + baseVersion);
+                if (log.isDebugEnabled()) {
+                    log.debug("Compare: " + baseVersion);
                 }
                 if (baseVersion.equals(latestVersion)) {
                     // if found equal version then skip further checking for
@@ -181,12 +181,12 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
                 shouldSkip = true;
             }
         } catch (IOException e) {
-            LOG.error("Could not lookup for success flag" + e);
+            log.error("Could not lookup for success flag" + e);
             shouldSkip = true;
         }
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Should skip version " + baseVersion + " = " + shouldSkip);
+        if (log.isDebugEnabled()) {
+            log.debug("Should skip version " + baseVersion + " = " + shouldSkip);
         }
         return shouldSkip;
     }
@@ -195,8 +195,8 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
             throws IOException {
         boolean isUnsafe = isAlreadyBeingProcessed(source, baseVersion) || !hasSuccessFlag(pathForSuccessFlagLookup);
         if (isUnsafe) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unsafe to process base version " + baseVersion);
+            if (log.isDebugEnabled()) {
+                log.debug("Unsafe to process base version " + baseVersion);
             }
         }
         return isUnsafe;
@@ -215,8 +215,8 @@ public abstract class AbstractFirehoseTransformationService<T extends Transforma
         try {
             latestVersion = findLatestVersionInDir(rootSourceDir.toString(), null);
             latestBaseVersion = findLatestVersionInDir(rootBaseSourceDir.toString(), null);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("latestVersion = " + latestVersion + ", latestBaseVersion = " + latestBaseVersion);
+            if (log.isDebugEnabled()) {
+                log.debug("latestVersion = " + latestVersion + ", latestBaseVersion = " + latestBaseVersion);
             }
         } catch (IOException e) {
             throw new LedpException(LedpCode.LEDP_25010, e);

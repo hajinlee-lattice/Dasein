@@ -18,7 +18,7 @@ import com.latticeengines.workflow.exposed.build.AbstractStep;
 
 public abstract class BaseAwsBatchStep<T extends AWSBatchConfiguration> extends AbstractStep<T>
         implements ApplicationContextAware {
-    private static Logger log = LoggerFactory.getLogger(BaseAwsBatchStep.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseAwsBatchStep.class);
 
     protected ApplicationContext applicationContext;
 

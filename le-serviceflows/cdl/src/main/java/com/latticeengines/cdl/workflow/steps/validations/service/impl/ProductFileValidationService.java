@@ -64,9 +64,7 @@ import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 public class ProductFileValidationService
         extends InputFileValidationService<ProductFileValidationConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(ProductFileValidationService.class);
-
-    private static final String S3_ATLAS_DATA_TABLE_DIR = "/%s/atlas/Data/Tables";
+    private static final Logger log = LoggerFactory.getLogger(ProductFileValidationService.class);
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;

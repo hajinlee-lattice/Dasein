@@ -14,7 +14,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 
 class BlockDivider {
 
-    private static Logger log = LoggerFactory.getLogger(BlockDivider.class);
+    private static final Logger log = LoggerFactory.getLogger(BlockDivider.class);
     private String avroPath;
     private List<String> fields;
     private List<Schema.Type> fieldTypes;

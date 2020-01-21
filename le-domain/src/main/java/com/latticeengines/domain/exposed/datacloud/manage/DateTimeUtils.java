@@ -9,7 +9,11 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DateTimeUtils {
+public final class DateTimeUtils {
+
+    protected DateTimeUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
     private static final String DATE_TZ_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
@@ -17,7 +21,7 @@ public class DateTimeUtils {
     private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     private static final SimpleDateFormat formatterTZ = new SimpleDateFormat(DATE_TZ_FORMAT);
     private static final SimpleDateFormat formatterTX = new SimpleDateFormat(DATE_TX_FORMAT);
-    private static Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     static {

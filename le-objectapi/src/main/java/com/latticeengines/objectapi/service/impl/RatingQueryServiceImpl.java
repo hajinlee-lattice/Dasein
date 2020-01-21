@@ -52,7 +52,7 @@ import reactor.core.publisher.Flux;
 @Service("ratingQueryService")
 public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements RatingQueryService {
 
-    private static Logger log = LoggerFactory.getLogger(RatingQueryServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingQueryServiceImpl.class);
 
     private final TransactionService transactionService;
 

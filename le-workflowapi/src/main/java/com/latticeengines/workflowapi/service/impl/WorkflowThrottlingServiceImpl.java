@@ -34,12 +34,12 @@ import com.latticeengines.domain.exposed.cdl.workflowThrottling.ThrottlingResult
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowJobSchedulingObject;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowScheduler;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConfiguration;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingSystemStatus;
+import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingUtils;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.IsForCurrentStack;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.NotExceedingEnvQuota;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.NotExceedingTenantQuota;
 import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingConstraints.WorkflowThrottlingConstraint;
-import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingSystemStatus;
-import com.latticeengines.domain.exposed.cdl.workflowThrottling.WorkflowThrottlingUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -101,7 +101,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
                 WorkflowThrottlingUtils.overwriteConfig(config, props, "pod");
             }
         } catch (Exception e) {
-            log.warn("Unable to retrieve pod {} property file. {}", podid, e);
+            log.warn("Unable to retrieve pod {} property file.", podid, e);
         }
         try { // check division overwrite
             Path path = PathBuilder.buildWorkflowThrottlingDivisionConfigPath(podid, division);
@@ -111,7 +111,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
                 WorkflowThrottlingUtils.overwriteConfig(config, props, "stack");
             }
         } catch (Exception e) {
-            log.warn("Unable to retrieve division {} property file. {}", podid, e);
+            log.warn("Unable to retrieve division {} property file.", podid, e);
         }
         // add tenant specific map
         for (String customerSpace : customerSpaces) {
@@ -130,7 +130,7 @@ public class WorkflowThrottlingServiceImpl implements WorkflowThrottlingService 
                     }
                 }
             } catch (Exception e) {
-                log.warn("Unable to retrieve tenant {} property file. {}", customerSpace, e);
+                log.warn("Unable to retrieve tenant {} property file.", customerSpace, e);
             }
         }
         return config;

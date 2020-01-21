@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 public class ExportFieldMetadataMappingEntityMgrImpl
         extends BaseReadWriteRepoEntityMgrImpl<ExportFieldMetadataMappingRepository, ExportFieldMetadataMapping, Long>
         implements ExportFieldMetadataMappingEntityMgr {
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(ExportFieldMetadataMappingEntityMgrImpl.class);
 
     @Inject
     private ExportFieldMetadataMappingEntityMgrImpl _self;

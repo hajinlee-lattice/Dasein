@@ -11,12 +11,11 @@ import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.security.exposed.service.impl.UserServiceImpl;
 
 @Component("prospectingUserService")
 public class ProspectingUserServiceImpl implements ProspectingUserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProspectingUserServiceImpl.class);
 
     @Inject
     private EmailService emailService;

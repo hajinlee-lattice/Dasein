@@ -56,7 +56,7 @@ import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
  * dpltc deploy -a workflowapi,datacloudapi,eai
  */
 public class IngestionResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
-    private static Logger log = LoggerFactory.getLogger(IngestionResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionResourceDeploymentTestNG.class);
 
     private static final String POD_ID = IngestionResourceDeploymentTestNG.class.getSimpleName();
     private static final String DNB_INGESTION = "DnBCacheSeedTest";

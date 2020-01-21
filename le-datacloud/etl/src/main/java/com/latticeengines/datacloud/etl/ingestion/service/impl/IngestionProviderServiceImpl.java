@@ -17,7 +17,7 @@ import com.latticeengines.monitor.exposed.service.EmailService;
 
 public abstract class IngestionProviderServiceImpl implements IngestionProviderService {
 
-    private static Logger log = LoggerFactory.getLogger(IngestionProviderServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionProviderServiceImpl.class);
 
     @Inject
     protected Configuration yarnConfiguration;

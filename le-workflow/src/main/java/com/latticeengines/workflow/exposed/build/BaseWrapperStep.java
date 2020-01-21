@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C extends WorkflowConfiguration>
         extends BaseWorkflowStep<T> {
 
-    private static Logger log = LoggerFactory.getLogger(BaseWrapperStep.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseWrapperStep.class);
     protected C workflowConf;
 
     @Override

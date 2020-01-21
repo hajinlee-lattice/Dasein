@@ -25,7 +25,7 @@ import com.latticeengines.saml.util.SAMLUtils;
 
 public class SuccessHandler implements AuthenticationSuccessHandler {
 
-    public static final Logger log = LoggerFactory.getLogger(SuccessHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(SuccessHandler.class);
 
     private static final String LATTICE_ROLES = "lattice.roles";
     private static final String LATTICE_NAME_LAST = "lattice.name.last";

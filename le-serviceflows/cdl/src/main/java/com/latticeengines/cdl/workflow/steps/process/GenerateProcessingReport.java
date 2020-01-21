@@ -71,7 +71,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfiguration> {
 
-    protected static final Logger log = LoggerFactory.getLogger(GenerateProcessingReport.class);
+    private static final Logger log = LoggerFactory.getLogger(GenerateProcessingReport.class);
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;

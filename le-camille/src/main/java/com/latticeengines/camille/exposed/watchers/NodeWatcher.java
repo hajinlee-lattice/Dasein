@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class NodeWatcher {
 
     private static final ConcurrentMap<String, NodeCache> watchers = new ConcurrentHashMap<>();
-    private static Logger log = LoggerFactory.getLogger(NodeWatcher.class);
+    private static final Logger log = LoggerFactory.getLogger(NodeWatcher.class);
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> watchers.values().forEach(cache -> {

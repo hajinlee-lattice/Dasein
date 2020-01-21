@@ -28,7 +28,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
@@ -98,43 +97,39 @@ import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("modelingFileMetadataService")
 public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataService {
     private static final Logger log = LoggerFactory.getLogger(ModelingFileMetadataServiceImpl.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
-    @Autowired
+    @Inject
     private CDLService cdlService;
 
-    @Autowired
-    private TenantService tenantService;
-
-    @Autowired
+    @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
     @Inject
     private CommonTenantConfigServiceImpl appTenantConfigService;
 
-    @Autowired
+    @Inject
     private ImportWorkflowSpecProxy importWorkflowSpecProxy;
 
-    @Autowired
+    @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
 
     @Override
@@ -1519,15 +1514,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     private static void printTableAttributes(String tableType, Table table) {
         if (table == null) {
-            log.info("\n{} Table is null");
-        }
-        log.info("\n{} - Table name {} (display name {}) contains the following Attributes:\n", tableType,
-                table.getName(), table.getDisplayName());
-        List<Attribute> attributes = table.getAttributes();
-        if (CollectionUtils.isNotEmpty(attributes)) {
-            for (Attribute attribute : attributes) {
-                log.info("   Name: " + attribute.getName() + "  Physical Data Type: " +
-                        attribute.getPhysicalDataType() + "  DisplayName: " + attribute.getDisplayName());
+            log.info("\n{} Table is null", tableType);
+        } else {
+            log.info("\n{} - Table name {} (display name {}) contains the following Attributes:\n", tableType,
+                    table.getName(), table.getDisplayName());
+            List<Attribute> attributes = table.getAttributes();
+            if (CollectionUtils.isNotEmpty(attributes)) {
+                for (Attribute attribute : attributes) {
+                    log.info("   Name: " + attribute.getName() + "  Physical Data Type: " +
+                            attribute.getPhysicalDataType() + "  DisplayName: " + attribute.getDisplayName());
+                }
             }
         }
     }

@@ -52,7 +52,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 @Component("playLaunchChannelService")
 public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
-    private static Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImpl.class);
 
     @Inject
     private PlayService playService;

@@ -34,7 +34,9 @@
         <maven.assembly.version>3.1.0</maven.assembly.version>
         <maven.exec.version>1.6.0</maven.exec.version>
         <maven.checkstyle.version>3.1.0</maven.checkstyle.version>
+        <checkstyle.version>8.19</checkstyle.version>
         <maven.spotbugs.version>3.1.12</maven.spotbugs.version>
+        <spotbugs.version>3.1.12</spotbugs.version>
         <maven.scala.version>4.0.1</maven.scala.version>
         <maven.dependency.version>3.1.1</maven.dependency.version>
 
@@ -90,7 +92,6 @@
         <akka.version>2.4.20</akka.version> <!-- match flink version -->
 
         <!-- versions should be easy to upgrade: keep them updated! -->
-        <checkstyle.version>8.19</checkstyle.version>
         <freemarker.version>2.3.29</freemarker.version>
         <jacoco.version>0.8.2</jacoco.version>
         <hibernate.validator.version>6.0.13.Final</hibernate.validator.version> <!-- javax.validation -->
@@ -2527,6 +2528,13 @@
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-ri</artifactId>
             <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>${spotbugs.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!--Runtime only deps:do not want to use in our code -->

@@ -37,7 +37,7 @@ public class BucketEncodeFunction extends BaseOperation implements Function {
 
     private static final long serialVersionUID = -1L;
 
-    private static Logger log = LoggerFactory.getLogger(BucketEncodeFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(BucketEncodeFunction.class);
 
     private final Map<String, Integer> argPosMap = new HashMap<>();
     private final Map<String, Integer> namePosMap;

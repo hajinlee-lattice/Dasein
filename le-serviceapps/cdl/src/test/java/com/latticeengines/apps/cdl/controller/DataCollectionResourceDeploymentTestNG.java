@@ -13,7 +13,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLDataSpace;
@@ -75,17 +74,6 @@ public class DataCollectionResourceDeploymentTestNG extends CDLDeploymentTestNGB
         }
         Assert.assertEquals(cdlDataSpace.getEntities().get(BusinessEntity.PeriodTransaction).get(BusinessEntity.DataStore.Serving).get(0).getTableRole(), TableRoleInCollection.AggregatedPeriodTransaction);
         Assert.assertNotNull(cdlDataSpace.getOthers());
-
-        try {
-            log.info(" ");
-            //log.info(JsonUtils.serialize(CDLDataSpace));
-            log.info(JsonUtils.serialize(cdlDataSpace));
-            log.info(" ");
-
-        }
-        catch(Exception e) {
-            log.info(e.getMessage());
-        }
     }
 
 }

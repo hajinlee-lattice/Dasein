@@ -40,7 +40,7 @@ import com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor;
 public class EntityQueryServiceImplSparkSQLTestNG extends EntityQueryServiceImplTestNG //
         implements RedshiftAndSparkQueryObjectAPITester {
 
-    private static Logger log = LoggerFactory.getLogger(EntityQueryServiceImplSparkSQLTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(EntityQueryServiceImplSparkSQLTestNG.class);
 
     @Inject
     private SparkSQLQueryTester sparkSQLQueryTester;

@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @Component("s3ExportFieldMetadataService")
 public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataServiceBase {
 
-    private static Logger log = LoggerFactory.getLogger(S3ExportFieldMetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(S3ExportFieldMetadataServiceImpl.class);
 
     protected S3ExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.AWS_S3);
@@ -27,10 +27,10 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
         log.info("Calling S3ExportFieldMetadataService");
-        
+
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
                 Arrays.asList(BusinessEntity.Account));
-        
+
         Map<String, ColumnMetadata> contactAttributesMap = getServingMetadataMap(customerSpace,
                 Arrays.asList(BusinessEntity.Contact));
 

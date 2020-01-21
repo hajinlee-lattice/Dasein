@@ -28,7 +28,7 @@ public class MatchOutput {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS z";
     private static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-    private static Logger log = LoggerFactory.getLogger(MatchOutput.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchOutput.class);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
 
     static {

@@ -21,7 +21,7 @@ import com.latticeengines.common.exposed.util.SleepUtils;
 
 public class WatcherCache<K, V> {
 
-    private static Logger log = LoggerFactory.getLogger(WatcherCache.class);
+    private static final Logger log = LoggerFactory.getLogger(WatcherCache.class);
     private static final double SEC_TO_MSEC = 1000.0;
     private static final Random random = new Random(System.currentTimeMillis());
 

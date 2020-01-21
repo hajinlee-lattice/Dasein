@@ -5,9 +5,13 @@ import org.hibernate.exception.LockAcquisitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatabaseUtils {
+public final class DatabaseUtils {
 
-    private static Logger log = LoggerFactory.getLogger(DatabaseUtils.class);
+    protected DatabaseUtils() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(DatabaseUtils.class);
 
     public static void retry(String operationName, Closure<?> action) {
         retry(operationName, 10, action);

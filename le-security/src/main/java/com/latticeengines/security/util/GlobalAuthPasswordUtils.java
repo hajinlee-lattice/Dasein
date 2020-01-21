@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class GlobalAuthPasswordUtils {
 
-    private static Logger log = LoggerFactory.getLogger(GlobalAuthPasswordUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalAuthPasswordUtils.class);
 
     private static final byte[] SALT = "Bard4Everyone!".getBytes();
 

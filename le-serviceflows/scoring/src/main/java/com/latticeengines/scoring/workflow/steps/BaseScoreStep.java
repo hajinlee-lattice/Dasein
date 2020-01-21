@@ -5,10 +5,11 @@ import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -28,12 +29,13 @@ import com.latticeengines.proxy.exposed.scoring.ScoringProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends BaseWorkflowStep<T> {
-    private static final Logger log = LoggerFactory.getLogger(Score.class);
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(BaseScoreStep.class);
+
+    @Inject
     private ScoringProxy scoringProxy;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Override

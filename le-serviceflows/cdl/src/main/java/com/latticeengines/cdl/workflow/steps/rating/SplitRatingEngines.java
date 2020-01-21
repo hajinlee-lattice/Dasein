@@ -15,6 +15,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -37,6 +39,8 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Component("splitRatingEngines")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SplitRatingEngines extends BaseWorkflowStep<ProcessRatingStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(SplitRatingEngines.class);
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;

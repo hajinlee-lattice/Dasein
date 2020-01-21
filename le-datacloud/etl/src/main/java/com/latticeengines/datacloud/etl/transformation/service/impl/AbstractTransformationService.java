@@ -42,7 +42,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public abstract class AbstractTransformationService<T extends TransformationConfiguration>
         implements TransformationService<T> {
 
-    private static Logger log = LoggerFactory.getLogger(AbstractTransformationService.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractTransformationService.class);
 
     private static final String SUCCESS_FLAG = "_SUCCESS";
     private static final String TRANSFORMATION_CONF = "_CONF";
@@ -72,8 +72,6 @@ public abstract class AbstractTransformationService<T extends TransformationConf
 
     @Inject
     private MetadataProxy metadataProxy;
-
-    abstract Logger getLogger();
 
     abstract Date checkTransformationConfigurationValidity(T transformationConfiguration);
 
@@ -136,8 +134,8 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         } catch (Exception e) {
             throw new RuntimeException("Failed to start a new progress for " + getSource(), e);
         }
-        LoggingUtils.logInfo(getLogger(), progress,
-                "Started a new progress with version=" + transformationConfiguration.getVersion());
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress,
+                "Started a new progress with version=" + transformationConfiguration.getVersion()));
         return progress;
     }
 
@@ -160,11 +158,11 @@ public abstract class AbstractTransformationService<T extends TransformationConf
         // update status
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
-        LoggingUtils.logInfo(getLogger(), progress, "Start transforming ...");
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress, "Start transforming ..."));
 
         progress = transformHook(progress, transformationConfiguration);
         if (progress != null) {
-            LoggingUtils.logInfoWithDuration(getLogger(), progress, "transformed.", startTime);
+            log.info(LoggingUtils.logWithDuration(getClass().getSimpleName(), progress, "transformed.", startTime));
             return progressEntityMgr.updateStatus(progress, ProgressStatus.FINISHED);
         } else {
             return null;
@@ -352,11 +350,11 @@ public abstract class AbstractTransformationService<T extends TransformationConf
     }
 
     protected boolean checkProgressStatus(TransformationProgress progress) {
-        return progressHelper.checkProgressStatus(progress, getLogger());
+        return progressHelper.checkProgressStatus(progress);
     }
 
     protected void logIfRetrying(TransformationProgress progress) {
-        progressHelper.logIfRetrying(progress, getLogger());
+        progressHelper.logIfRetrying(progress, getClass().getSimpleName());
     }
 
     protected String snapshotDirInHdfs(TransformationProgress progress) {
@@ -369,7 +367,8 @@ public abstract class AbstractTransformationService<T extends TransformationConf
                 HdfsUtils.rmdir(yarnConfiguration, targetDir);
             }
         } catch (Exception e) {
-            LoggingUtils.logError(getLogger(), progress, "Failed to cleanup hdfs dir " + targetDir, e);
+            log.error(LoggingUtils.log(getClass().getSimpleName(), progress, "Failed to cleanup hdfs dir " + targetDir),
+                    e);
             return false;
         }
         return true;
@@ -434,62 +433,69 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             String parsedType = AvroUtils.getJavaType(AvroUtils.getType(parsedField)).getCanonicalName();
             String providedType = AvroUtils.getJavaType(AvroUtils.getType(provideField)).getCanonicalName();
             if (!parsedType.equals(providedType)) {
-                throw new IllegalStateException("For " + i + "-th attribute, " +
-                        "provided schema [" + provideField.name() + "] uses the type " + providedType //
+                throw new IllegalStateException("For " + i + "-th attribute, " + "provided schema ["
+                        + provideField.name() + "] uses the type " + providedType //
                         + ", while the parsed schema [" + parsedField.name() + "] is " + parsedType);
             }
         }
     }
 
     public void updateStatusToFailed(TransformationProgress progress, String errorMsg, Exception e) {
-        progressHelper.updateStatusToFailed(progressEntityMgr, progress, errorMsg, e, getLogger());
+        progressHelper.updateStatusToFailed(progressEntityMgr, progress, errorMsg, e, getClass().getSimpleName());
     }
 
     protected TransformationProgress finishProgress(TransformationProgress progress) {
-        return progressHelper.finishProgress(progressEntityMgr, progress, getLogger());
+        return progressHelper.finishProgress(progressEntityMgr, progress, getClass().getName());
     }
 
     protected String sourceDirInHdfs(Source source) {
         String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(source).toString();
-        getLogger().info("sourceDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
+        log.info(LoggingUtils.log(getClass().getSimpleName(),
+                "sourceDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs));
         return sourceDirInHdfs;
     }
 
     protected String sourceVersionDirInHdfs(Source source, String version) {
         String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
-        getLogger().info("sourceVersionDirInHdfs for " + source.getSourceName() + " = " + sourceDirInHdfs);
+        log.info(LoggingUtils.log(getClass().getSimpleName(),
+                "sourceVersionDirInHdfs for " + source.getSourceName() + " = " + sourceDirInHdfs));
         return sourceDirInHdfs;
     }
 
     private String targetTableDirInHdfs(TableSource tableSource) {
         String path = hdfsPathBuilder.constructTablePath(tableSource.getTable().getName(),
                 tableSource.getCustomerSpace(), tableSource.getTable().getNamespace()).toString();
-        getLogger().info("targetTableDirInHdfs for " + tableSource.getSourceName() + " = " + path);
+        log.info(LoggingUtils.log(getClass().getSimpleName(),
+                "targetTableDirInHdfs for " + tableSource.getSourceName() + " = " + path));
         return path;
     }
 
     protected String sourceVersionDirInHdfs(TransformationProgress progress) {
         String sourceDirInHdfs = hdfsPathBuilder.constructTransformationSourceDir(getSource(), progress.getVersion())
                 .toString();
-        getLogger().info("sourceVersionDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs);
+        log.info(LoggingUtils.log(getClass().getSimpleName(),
+                "sourceVersionDirInHdfs for " + getSource().getSourceName() + " = " + sourceDirInHdfs));
         return sourceDirInHdfs;
     }
 
     protected String initialDataFlowDirInHdfs(TransformationProgress progress) {
         String workflowDir = dataFlowDirInHdfs(progress, CollectionDataFlowKeys.TRANSFORM_FLOW);
-        getLogger().info("initialDataFlowDirInHdfs for " + getSource().getSourceName() + " = " + workflowDir);
+        log.info(LoggingUtils.log(getClass().getSimpleName(),
+                "initialDataFlowDirInHdfs for " + getSource().getSourceName() + " = " + workflowDir));
         return workflowDir;
     }
 
     protected String dataFlowDirInHdfs(TransformationProgress progress, String dataFlowName) {
         String dataflowDir = hdfsPathBuilder.constructWorkFlowDir(getSource(), dataFlowName)
                 .append(progress.getRootOperationUID()).toString();
-        getLogger().info("dataFlowDirInHdfs for " + getSource().getSourceName() + " = " + dataflowDir);
+        log.info(LoggingUtils.log(getClass().getSimpleName(),
+                "dataFlowDirInHdfs for " + getSource().getSourceName() + " = " + dataflowDir));
         return dataflowDir;
     }
 
     protected String finalWorkflowOuputDir(String workflowDir, TransformationProgress progress) {
-        // Firehose transformation has special setting. Otherwise, it is the passed in workflowDir
+        // Firehose transformation has special setting. Otherwise, it is the passed in
+        // workflowDir
         return workflowDir;
     }
 
@@ -530,7 +536,7 @@ public abstract class AbstractTransformationService<T extends TransformationConf
             log.info("Found spark partition directories = {} under path {}", partitionDirs, rootDir);
             return !CollectionUtils.isEmpty(partitionDirs);
         } catch (IOException e) {
-            log.warn("Failed to check whether there are spark partition directories in path {}, error={}", rootDir, e);
+            log.warn("Failed to check whether there are spark partition directories in path {}", rootDir, e);
             return false;
         }
     }

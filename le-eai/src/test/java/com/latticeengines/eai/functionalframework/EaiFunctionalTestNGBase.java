@@ -11,8 +11,6 @@ import org.apache.camel.testng.AbstractCamelTestNGSpringContextTests;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.zookeeper.ZooDefs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -36,7 +34,6 @@ import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
 public class EaiFunctionalTestNGBase extends AbstractCamelTestNGSpringContextTests
         implements EaiFunctionalTestNGInterface {
 
-    protected static final Logger log = LoggerFactory.getLogger(EaiFunctionalTestNGBase.class);
     protected static final long WORKFLOW_WAIT_TIME_IN_MILLIS = TimeUnit.MINUTES.toMillis(90);
 
     @Inject

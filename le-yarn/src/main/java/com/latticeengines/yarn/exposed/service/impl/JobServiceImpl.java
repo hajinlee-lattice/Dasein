@@ -58,10 +58,10 @@ import com.latticeengines.yarn.exposed.service.YarnClientCustomizationService;
 @Component("jobService")
 public class JobServiceImpl implements JobService, ApplicationContextAware {
 
+    private static final Logger log = LoggerFactory.getLogger(JobServiceImpl.class);
+
     // 60 * (5s delay + 10s connection timeout) = 15 minute
     private static final int MAX_CONTINUOUS_EXCEPTIONS = 60;
-
-    protected static final Logger log = LoggerFactory.getLogger(JobServiceImpl.class);
 
     private static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
             FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);

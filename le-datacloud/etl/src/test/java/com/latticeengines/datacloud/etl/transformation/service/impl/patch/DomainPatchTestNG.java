@@ -17,7 +17,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.patch.DomainPatch;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
-import com.latticeengines.datacloud.etl.transformation.service.impl.dunsredirect.DunsGuideBookDepivotTestNG;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PatchBook;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -26,7 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.patch.D
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class DomainPatchTestNG extends PipelineTransformationTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(DunsGuideBookDepivotTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DomainPatchTestNG.class);
 
     private GeneralSource domainPatch = new GeneralSource("DomainPatchBook");
     private GeneralSource ams = new GeneralSource("AccountMasterSeedMerged");

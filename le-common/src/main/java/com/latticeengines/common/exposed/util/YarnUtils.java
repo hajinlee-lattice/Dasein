@@ -15,9 +15,13 @@ import org.springframework.yarn.client.YarnClient;
 
 import com.google.common.base.Strings;
 
-public class YarnUtils {
+public final class YarnUtils {
 
-    private static Logger log = LoggerFactory.getLogger(YarnUtils.class);
+    protected YarnUtils() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(YarnUtils.class);
 
     public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
             FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);

@@ -59,7 +59,7 @@ import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 @Component("playService")
 public class PlayServiceImpl implements PlayService {
 
-    private static Logger log = LoggerFactory.getLogger(PlayServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayServiceImpl.class);
 
     @Value("${cdl.play.service.threadpool.size:20}")
     private Integer fetcherNum;

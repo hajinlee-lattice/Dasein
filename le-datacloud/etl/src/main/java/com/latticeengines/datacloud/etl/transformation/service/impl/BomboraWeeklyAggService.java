@@ -7,10 +7,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.fs.Path;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -20,24 +19,18 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
+
 @Component("bomboraWeeklyAggService")
 public class BomboraWeeklyAggService
         extends SimpleTransformationServiceBase<BasicTransformationConfiguration, TransformationFlowParameters>
         implements TransformationService<BasicTransformationConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(BomboraWeeklyAggService.class);
-
-    @Autowired
+    @Inject
     private BomboraWeeklyAgg source;
 
     @Override
     public Source getSource() {
         return source;
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return log;
     }
 
     @Override

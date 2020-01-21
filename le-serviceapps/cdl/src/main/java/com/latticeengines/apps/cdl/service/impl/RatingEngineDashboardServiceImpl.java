@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
 @Component("ratingEngineDashboardService")
 public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate implements RatingEngineDashboardService {
 
-    private static Logger log = LoggerFactory.getLogger(RatingEngineDashboardServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingEngineDashboardServiceImpl.class);
 
     @Inject
     private RatingEngineService ratingEngineService;

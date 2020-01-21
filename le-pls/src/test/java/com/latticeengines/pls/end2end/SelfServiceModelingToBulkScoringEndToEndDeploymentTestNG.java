@@ -67,8 +67,10 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
 public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
+    private static final Logger log = //
+            LoggerFactory.getLogger(SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG.class);
+
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/selfServiceModeling/csvfiles";
-    private static final Logger log = LoggerFactory.getLogger(SelfServiceModelingEndToEndDeploymentTestNG.class);
 
     private static final int TOTAL_TRAINING_LINES = 1126;
 

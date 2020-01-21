@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 @Component("exportFieldMetadataMappingDao")
 public class ExportFieldMetadataMappingDaoImpl extends BaseDaoImpl<ExportFieldMetadataMapping> implements ExportFieldMetadataMappingDao {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(ExportFieldMetadataMappingDaoImpl.class);
 
     @Override
     protected Class<ExportFieldMetadataMapping> getEntityClass() {
@@ -38,13 +38,13 @@ public class ExportFieldMetadataMappingDaoImpl extends BaseDaoImpl<ExportFieldMe
 
         Map<String, ExportFieldMetadataMapping> updatedFieldMappingMap = updatedFieldMapping.stream()
                 .collect(Collectors.toMap(ExportFieldMetadataMapping::getSourceField, Function.identity()));
-        
+
         log.info(JsonUtils.serialize(updatedFieldMappingMap));
 
         LinkedList<String> unusedFieldMapping = existingFieldMapping.stream().map(ExportFieldMetadataMapping::getSourceField)
                 .filter(sourceField -> !updatedFieldMappingMap.containsKey(sourceField))
                 .collect(Collectors.toCollection(LinkedList::new));
-        
+
         log.info(JsonUtils.serialize(unusedFieldMapping));
 
         updatedFieldMapping.forEach(fieldMapping -> {
@@ -75,14 +75,14 @@ public class ExportFieldMetadataMappingDaoImpl extends BaseDaoImpl<ExportFieldMe
             }
             log.info(JsonUtils.serialize(retrievedFieldMappingMap));
         });
-        
+
         log.info(JsonUtils.serialize(retrievedFieldMappingMap));
 
         if (retrievedFieldMappingMap.size() > 0) {
             retrievedFieldMappingMap.values().stream().map(ExportFieldMetadataMapping::getPid)
                     .forEach(pid -> super.deleteByPid(pid, true));
         }
-        
+
 
         return updatedFieldMapping;
     }
