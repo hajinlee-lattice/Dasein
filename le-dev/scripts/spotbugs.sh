@@ -27,7 +27,7 @@ if [[ -n "$PROJECT" ]]; then
     pushd "${WSHOME}/le-${PROJECT}"
     mvn -q -Pspotbugs -Dchecker=${CHECKER} validate
 else
-    mvn -T4 -q -Pspotbugs -Dchecker=${CHECKER} validate
+    mvn -T4 -Pspotbugs -Dchecker=${CHECKER} validate
 fi
 
 if [[ -n "${PROJECT}" ]]; then
