@@ -27,11 +27,11 @@ public class ServiceAppsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrA
 
     // have to use @Autowire + @Qualifier, other wise cannot init the bean
     @Autowired
-    @Qualifier(value = "entityManagerFactory")
+    @Qualifier("entityManagerFactory")
     private EntityManager entityManager;
 
     @Autowired
-    @Qualifier(value = "entityManagerFactoryReader")
+    @Qualifier("entityManagerFactoryReader")
     private EntityManager entityManagerReader;
 
     @Before("execution(* com.latticeengines.apps.*.entitymgr.impl.*.find*(..))")

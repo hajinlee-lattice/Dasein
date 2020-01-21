@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -24,8 +25,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -68,8 +67,7 @@ public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestN
     @Inject
     private DynamoService dynamoService;
 
-    @Autowired
-    @Qualifier("dynamoExportService")
+    @Resource(name = "dynamoExportService")
     private ExportService exportService;
 
     @Inject

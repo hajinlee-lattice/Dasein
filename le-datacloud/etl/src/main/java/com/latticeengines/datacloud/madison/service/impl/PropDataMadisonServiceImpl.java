@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -13,8 +16,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -42,23 +43,22 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
+    @Inject
     private com.latticeengines.datacloud.madison.entitymanager.PropDataMadisonEntityMgr propDataMadisonEntityMgr;
 
-    @Autowired
+    @Inject
     private PropDataMadisonDataFlowService propDataMadisonDataFlowService;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
 
-    @Autowired
-    @Qualifier("propdataMadisonJdbcTemplate")
+    @Resource(name = "propdataMadisonJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
+    @Inject
     protected SqoopProxy sqoopProxy;
 
     @Value("${propdata.madison.datasource.url}")

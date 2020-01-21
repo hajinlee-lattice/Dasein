@@ -2,9 +2,10 @@ package com.latticeengines.dataplatform.qbean;
 
 import java.util.concurrent.Callable;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -23,54 +24,54 @@ import com.latticeengines.dataplatform.service.modeling.ModelingJobService;
 import com.latticeengines.db.exposed.service.DbMetadataService;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
 import com.latticeengines.quartzclient.qbean.QuartzJobBean;
+
 @Lazy
 @Component("dlOrchestrationQuartzJob")
 public class DLOrchestrationJobBean implements QuartzJobBean {
 
-    @Autowired
-    @Qualifier("commonTaskExecutor")
+    @Resource(name = "commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelingJobService modelingJobService;
 
-    @Autowired
+    @Inject
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelStepYarnProcessor modelStepYarnProcessor;
 
-    @Autowired
+    @Inject
     private ModelCommandLogService modelCommandLogService;
 
-    @Autowired
+    @Inject
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelDownloadFlagEntityMgr modelDownloadFlagEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelStepProcessor modelStepFinishProcessor;
 
-    @Autowired
+    @Inject
     private ModelStepProcessor modelStepOutputResultsProcessor;
 
-    @Autowired
+    @Inject
     private ModelStepProcessor modelStepRetrieveMetadataProcessor;
 
-    @Autowired
+    @Inject
     private AlertService alertService;
 
-    @Autowired
+    @Inject
     private DebugProcessorImpl debugProcessorImpl;
 
     @Value("${dataplatform.dlorchestrationjob.wait.time}")
     private int waitTime = 180;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${hadoop.yarn.resourcemanager.webapp.address}")
@@ -93,7 +94,7 @@ public class DLOrchestrationJobBean implements QuartzJobBean {
 
     private int featuresThreshold = -1;
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
     @Value("${dataplatform.dlorchestrationjob.max.pool.size}")

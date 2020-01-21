@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
@@ -13,7 +14,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
@@ -54,8 +54,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
-    @Autowired
-    @Qualifier(value = "redshiftJdbcTemplate")
+    @Resource(name = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
     @Inject

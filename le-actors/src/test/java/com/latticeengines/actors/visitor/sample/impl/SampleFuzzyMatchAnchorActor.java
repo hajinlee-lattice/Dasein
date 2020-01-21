@@ -1,9 +1,7 @@
 package com.latticeengines.actors.visitor.sample.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import javax.annotation.Resource;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +19,8 @@ import akka.actor.ActorRef;
 @Component("sampleFuzzyMatchAnchorActor")
 @Scope("prototype")
 public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(SampleFuzzyMatchAnchorActor.class);
 
-    @Autowired
-    @Qualifier("sampleMatchGuideBook")
+    @Resource(name = "sampleMatchGuideBook")
     protected SampleMatchGuideBook guideBook;
 
     @Override

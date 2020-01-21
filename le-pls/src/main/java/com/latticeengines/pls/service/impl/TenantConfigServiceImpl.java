@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -50,20 +50,19 @@ public class TenantConfigServiceImpl implements TenantConfigService {
     @Value("${pls.dataloader.rest.api}")
     private String defaultDataLoaderUrl;
 
-    @Autowired
-    @Qualifier("propertiesFileFeatureFlagProvider")
+    @Resource(name = "propertiesFileFeatureFlagProvider")
     private DefaultFeatureFlagProvider defaultFeatureFlagProvider;
 
-    @Autowired
+    @Inject
     private TenantDeploymentService tenantDeploymentService;
 
-    @Autowired
+    @Inject
     private CommonTenantConfigService commonTenantConfigService;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     @PostConstruct

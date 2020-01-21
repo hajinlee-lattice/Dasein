@@ -22,12 +22,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -79,11 +80,10 @@ public class SqlServerHelper implements DbHelper {
     private final Set<String> timeoutContextIds = new ConcurrentSkipListSet<>(); // Set<ContextId>
     private ExecutorService executor;
 
-    @Autowired
+    @Inject
     private DataSourceService dataSourceService;
 
-    @Autowired
-    @Qualifier("columnSelectionService")
+    @Resource(name = "columnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
     @Value("${datacloud.match.realtime.group.size:20}")
@@ -98,11 +98,10 @@ public class SqlServerHelper implements DbHelper {
     @Value("${datacloud.match.realtime.fetchers.enable:false}")
     private boolean enableFetchers;
 
-    @Autowired
-    @Qualifier("commonTaskScheduler")
+    @Resource(name = "commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
-    @Autowired
+    @Inject
     private DomainCollectService domainCollectService;
 
     private boolean fetchersInitiated = false;

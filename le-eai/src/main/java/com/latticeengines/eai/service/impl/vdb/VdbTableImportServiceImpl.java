@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -26,8 +27,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -108,8 +107,7 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Value("${eai.vdb.batch.size}")
     private int batchSize;
 
-    @Autowired
-    @Qualifier("commonTaskExecutor")
+    @Resource(name = "commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     private static final int MAX_RETRIES = 3;

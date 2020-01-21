@@ -5,11 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -28,12 +27,10 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
     private static String dataCloudVersion;
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    @Qualifier("accountMasterColumnSelectionService")
+    @Resource(name = "accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
-    @Autowired
-    @Qualifier("accountMasterColumnEntityMgr")
+    @Resource(name = "accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> columnEntityMgr;
 
     @Inject

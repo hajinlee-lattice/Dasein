@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -70,12 +71,10 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     @Autowired
     private DimensionalQueryService dimensionalQueryService;
 
-    @Autowired
-    @Qualifier("accountMasterColumnSelectionService")
+    @Resource(name = "accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
-    @Autowired
-    @Qualifier("accountMasterColumnMetadataService")
+    @Resource(name = "accountMasterColumnMetadataService")
     private ColumnMetadataService columnMetadataService;
 
     @Autowired

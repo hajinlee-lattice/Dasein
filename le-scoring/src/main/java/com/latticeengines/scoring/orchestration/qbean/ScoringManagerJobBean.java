@@ -2,9 +2,10 @@ package com.latticeengines.scoring.orchestration.qbean;
 
 import java.util.concurrent.Callable;
 
+import javax.annotation.Resource;
+
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,8 +21,7 @@ import com.latticeengines.scoring.orchestration.service.impl.ScoringManagerCalla
 @Component("scoringManagerJob")
 public class ScoringManagerJobBean implements QuartzJobBean {
 
-    @Autowired
-    @Qualifier("commonTaskExecutor")
+    @Resource(name = "commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     @Autowired

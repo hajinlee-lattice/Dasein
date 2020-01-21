@@ -5,6 +5,7 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -13,7 +14,6 @@ import javax.net.ssl.X509TrustManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -50,8 +50,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     @Value("${common.test.ulysses.url}")
     protected String ulyssesHostPort;
 
-    @Autowired
-    @Qualifier("deploymentTestBed")
+    @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Autowired

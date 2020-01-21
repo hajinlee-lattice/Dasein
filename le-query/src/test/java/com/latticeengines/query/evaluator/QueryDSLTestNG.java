@@ -6,10 +6,9 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,8 +33,7 @@ import com.querydsl.sql.SQLTemplates;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 
-    @Autowired
-    @Qualifier("redshiftDataSource")
+    @Resource(name = "redshiftDataSource")
     private DataSource redshiftDataSource;
 
     @Test(groups = "functional")

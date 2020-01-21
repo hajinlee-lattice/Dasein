@@ -16,6 +16,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,8 +24,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -104,8 +103,7 @@ public class TestPlayCreationHelper {
 
     private static final Logger log = LoggerFactory.getLogger(TestPlayCreationHelper.class);
 
-    @Autowired
-    @Qualifier(value = "deploymentTestBed")
+    @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Inject

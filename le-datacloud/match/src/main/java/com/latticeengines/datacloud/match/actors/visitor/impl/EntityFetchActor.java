@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +22,7 @@ public class EntityFetchActor extends DataSourceWrapperActorTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(EntityFetchActor.class);
 
-    @Autowired
-    @Qualifier("entityFetchService")
+    @Resource(name = "entityFetchService")
     private DataSourceLookupServiceBase entityFetchService;
 
     @PostConstruct
