@@ -3,4 +3,26 @@
         "https://checkstyle.org/dtds/import_control_1_4.dtd">
 <import-control pkg="com.latticeengines" strategyOnMismatch="allowed">
 
+    <disallow class="com.google.inject.Inject"/>
+
+    <!-- use javax.inject.Inject -->
+    <disallow class="org.springframework.beans.factory.annotation.Autowired"/>
+
+    <!-- org.apache.commons.lang3.StringUtils -->
+    <disallow class="^((?!org\.apache\.commons\.lang3).)*\.StringUtils$" regex="true"/>
+    <disallow class="^.*\.StringUtil$" regex="true"/>
+
+    <!-- org.apache.commons.collections4.CollectionUtils -->
+    <disallow class="^((?!org\.apache\.commons\.collections4).)*\.CollectionUtils$" regex="true"/>
+    <disallow class="^.*\.CollectionUtil" regex="true"/>
+
+    <!-- org.apache.commons.collections4.MapUtils -->
+    <disallow class="^((?!org\.apache\.commons\.collections4).)*\.MapUtils$" regex="true"/>
+    <disallow class="^.*\.MapUtil" regex="true"/>
+
+    <subpackage name="([^.]+\.)+controller" regex="true">
+        <!-- should use GetMapping, PostMapping, PutMapping and DeleteMapping -->
+        <disallow class="org.springframework.web.bind.annotation.RequestMapping"/>
+    </subpackage>
+
 </import-control>
