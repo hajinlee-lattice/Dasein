@@ -79,6 +79,9 @@
             <property name="separated" value="true"/>
             <property name="option" value="top"/>
         </module>
+        <module name="ImportControl">
+            <property name="file" value="le-parent/checkstyle/import-control-error.xml"/>
+        </module>
 
     </module>
 
