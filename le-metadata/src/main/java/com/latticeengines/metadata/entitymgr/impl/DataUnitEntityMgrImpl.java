@@ -68,6 +68,12 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         return convertList(entities, false);
     }
 
+    @Override
+    public List<DataUnit> findByStorageType(DataUnit.StorageType storageType) {
+        List<DataUnitEntity> entities = readerRepository.findByStorageType(storageType);
+        return convertList(entities, false);
+    }
+
     private boolean reformatS3DataUnit(DataUnit dataUnit) {
         if (DataUnit.StorageType.S3.equals(dataUnit.getStorageType())) {
             S3DataUnit s3DataUnit = (S3DataUnit) dataUnit;
