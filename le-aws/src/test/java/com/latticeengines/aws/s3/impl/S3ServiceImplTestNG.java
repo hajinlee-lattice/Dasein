@@ -2,13 +2,17 @@ package com.latticeengines.aws.s3.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -45,6 +49,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.util.Md5Utils;
 import com.latticeengines.aws.s3.S3KeyFilter;
@@ -246,8 +251,8 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "functional", dataProvider = "S3AvroIteratorData")
-    public void testS3AvroRecordIterater(String[] data) {
-        String prefix = this.getClass().getSimpleName() + "/TestS3AvroRecordIterater";
+    public void testS3AvroRecordIterator(String[] data) {
+        String prefix = this.getClass().getSimpleName() + "/TestS3AvroRecordIterator";
         String columnName = "TestColumn";
         uploadAvroIterDataToS3(prefix, columnName, data);
         Iterator<InputStream> streamIter = s3Service.getObjectStreamIterator(testBucket, prefix, new S3KeyFilter() {
@@ -265,10 +270,30 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
             }
         }
         Assert.assertEquals(nRow, expected.size());
+        clearS3Prefix(prefix);
+    }
 
+    private void clearS3Prefix(String prefix) {
         if (s3Service.isNonEmptyDirectory(testBucket, prefix)) {
             s3Service.cleanupPrefix(testBucket, prefix);
         }
+    }
+
+    @Test(groups = "functional")
+    public void testUploadLocalDirectory() {
+        String dirName = "TestUploadLocalDirectory";
+        String prefix = this.getClass().getSimpleName() + "/" + dirName;
+        String columnName = "TestColumn";
+        String[] data = new String[]{"A", "AA", "BB", "AA", "BB", "CC", "CC", "DD", "EE", "FF", "FF", "HH"};
+        uploadLocalAvroToS3(prefix, dirName, columnName, data);
+        List<S3ObjectSummary> s3ObjectSummaries = s3Service.listObjects(testBucket, prefix);
+        Assert.assertEquals(data.length, s3ObjectSummaries.size());
+        long sizeOnS3 = s3ObjectSummaries.stream().mapToLong(s3ObjectSummary -> s3ObjectSummary.getSize()).sum();
+        File dir = new File(dirName);
+        long sizeOnLocal = Arrays.stream(dir.listFiles()).mapToLong(file -> file.length()).sum();
+        Assert.assertEquals(sizeOnS3, sizeOnLocal);
+        deleteDir(dir);
+        clearS3Prefix(prefix);
     }
 
     // Every 1-d ARRAY is a test case.
@@ -277,66 +302,109 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
     // "TestColumn" with value as "A")
     @DataProvider(name = "S3AvroIteratorData")
     private Object[][] getS3AvroIteratorData() {
-        return new Object[][] {
+        return new Object[][]{
                 // Single file with single row
-                { new String[] { "A" } }, //
+                {new String[]{"A"}}, //
                 // Multiple files with multiple rows
-                { new String[] { "AA", "A", "A" } }, //
-                { new String[] { "A", "AA", "A" } }, //
-                { new String[] { "A", "A", "AA" } }, //
-                { new String[] { "AAA", "AAA", "AAA" } }, //
+                {new String[]{"AA", "A", "A"}}, //
+                {new String[]{"A", "AA", "A"}}, //
+                {new String[]{"A", "A", "AA"}}, //
+                {new String[]{"AAA", "AAA", "AAA"}}, //
                 // Single empty file
-                { new String[] { null } }, //
+                {new String[]{null}}, //
                 // All empty files
-                { new String[] { null, null, null } }, //
+                {new String[]{null, null, null}}, //
                 // Some empty files
-                { new String[] { "AA", "A", null } }, //
-                { new String[] { "A", null, null, "AA" } }, //
-                { new String[] { null, "AA", "A" } }, //
+                {new String[]{"AA", "A", null}}, //
+                {new String[]{"A", null, null, "AA"}}, //
+                {new String[]{null, "AA", "A"}}, //
         };
     }
 
-    private void uploadAvroIterDataToS3(String prefix, String columnName, String[] data) {
+    private List<GenericRecord> generateRecords(Schema schema, String columnName, String data) {
+        List<GenericRecord> records = new ArrayList<>();
+        if (data != null) {
+            GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+            String content = data;
+            for (int j = 0; j < content.length(); j++) {
+                builder.set(columnName, content.substring(j, j + 1));
+                records.add(builder.build());
+            }
+        }
+        return records;
+    }
+
+    private void writeData(Schema schema, List<GenericRecord> records, OutputStream out) {
+        try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<>())) {
+            try (DataFileWriter<GenericRecord> creator = writer.create(schema, out)) {
+                for (GenericRecord datum : records) {
+                    try {
+                        creator.append(datum);
+                    } catch (Exception e) {
+                        log.error("Data for the error row: " + datum.toString());
+                        throw new IOException(e);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to convert GenericRecord to OutputStream", e);
+        }
+    }
+
+    private List<Pair<String, Class<?>>> getColumns(String columnName) {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of(columnName, String.class));
+        return columns;
+    }
 
-        if (s3Service.isNonEmptyDirectory(testBucket, prefix)) {
-            s3Service.cleanupPrefix(testBucket, prefix);
-        }
-
+    private void uploadAvroIterDataToS3(String prefix, String columnName, String[] data) {
+        List<Pair<String, Class<?>>> columns = getColumns(columnName);
+        clearS3Prefix(prefix);
         for (int i = 0; i < data.length; i++) {
             String fileName = "File_" + i;
             Schema schema = AvroUtils.constructSchema(fileName, columns);
-            List<GenericRecord> records = new ArrayList<>();
-            if (data[i] != null) {
-                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-                String content = data[i];
-                for (int j = 0; j < content.length(); j++) {
-                    builder.set(columnName, content.substring(j, j + 1));
-                    records.add(builder.build());
-                }
-            }
-
+            List<GenericRecord> records = generateRecords(schema, columnName, data[i]);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            try (DataFileWriter<GenericRecord> writer = new DataFileWriter<>(new GenericDatumWriter<>())) {
-                try (DataFileWriter<GenericRecord> creator = writer.create(schema, out)) {
-                    for (GenericRecord datum : records) {
-                        try {
-                            creator.append(datum);
-                        } catch (Exception e) {
-                            log.error("Data for the error row: " + datum.toString());
-                            throw new IOException(e);
-                        }
-
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Fail to convert GenericRecord to OutputStream", e);
-            }
-
+            writeData(schema, records, out);
             String objectKey = prefix + "/" + fileName + ".avro";
             s3Service.uploadInputStream(testBucket, objectKey, new ByteArrayInputStream(out.toByteArray()), true);
             log.info("Uploaded data {} to S3 object {}", data[i], objectKey);
+        }
+    }
+
+    private void deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                deleteDir(new File(dir, children[i]));
+            }
+        }
+        dir.delete();
+    }
+
+    private void makeDir(String dirName) {
+        File dir = new File(dirName);
+        deleteDir(dir);
+        dir.mkdir();
+    }
+
+    private void uploadLocalAvroToS3(String prefix, String dirName, String columnName, String[] data) {
+        List<Pair<String, Class<?>>> columns = getColumns(columnName);
+        clearS3Prefix(prefix);
+        try {
+            makeDir(dirName);
+            for (int i = 0; i < data.length; i++) {
+                String fileName = "TestFile_" + UUID.randomUUID().toString().replace("-", "");
+                Schema schema = AvroUtils.constructSchema(fileName, columns);
+                List<GenericRecord> records = generateRecords(schema, columnName, data[i]);
+                File file = new File(dirName, fileName + ".avro");
+                FileOutputStream out = new FileOutputStream(file);
+                writeData(schema, records, out);
+            }
+            File directory = new File(dirName);
+            s3Service.uploadLocalDirectory(testBucket, prefix, directory.getCanonicalPath(), true);
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to upload avro files to š3", e);
         }
     }
 
