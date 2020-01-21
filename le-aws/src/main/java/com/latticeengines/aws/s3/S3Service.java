@@ -78,8 +78,8 @@ public interface S3Service {
      * Generate a read only URL to access the specified key under the input bucket. The URL will expires at
      * the given date.
      *
-     * @param bucket   specified S3 bucket, should not be {@literal null}
-     * @param key      object key, should not be {@literal null}
+     * @param bucket specified S3 bucket, should not be {@literal null}
+     * @param key object key, should not be {@literal null}
      * @param expireAt date where the generated url will expire
      * @return generated URL that have read access to the specified object
      */
