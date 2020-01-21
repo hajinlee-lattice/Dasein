@@ -5,11 +5,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -26,7 +27,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.am.Deri
 import com.latticeengines.domain.exposed.datacloud.transformation.config.am.MapAttributeConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-
 public class TblDrivenTransformationTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
@@ -45,7 +45,7 @@ public class TblDrivenTransformationTestNG
     private String[][] keys;
     private int totalAttributes;
 
-    @Autowired
+    @Inject
     protected SourceAttributeEntityMgr sourceAttributeEntityMgr;
 
 

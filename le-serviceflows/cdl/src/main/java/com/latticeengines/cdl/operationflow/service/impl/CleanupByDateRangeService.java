@@ -9,9 +9,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -31,9 +32,9 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 @Lazy(value = false)
 public class CleanupByDateRangeService extends MaintenanceOperationService<CleanupByDateRangeConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(CleanupByDateRangeService.class);
+    private static final Logger log = LoggerFactory.getLogger(CleanupByDateRangeService.class);
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Override

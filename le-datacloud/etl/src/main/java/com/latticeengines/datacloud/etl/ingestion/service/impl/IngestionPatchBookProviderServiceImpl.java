@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +47,7 @@ import com.latticeengines.proxy.exposed.matchapi.PatchProxy;
 @Component("ingestionPatchBookProviderService")
 public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServiceImpl {
 
-    private static Logger log = LoggerFactory.getLogger(IngestionPatchBookProviderServiceImpl.class);
-
+    private static final Logger log = LoggerFactory.getLogger(IngestionPatchBookProviderServiceImpl.class);
 
     @Value("${datacloud.patcher.ingest.batch.size.min}")
     private int minBatchSize;
@@ -65,9 +63,6 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
     @Inject
     private IngestionProgressService ingestionProgressService;
-
-    @Inject
-    protected Configuration yarnConfiguration;
 
     @Inject
     private HdfsPathBuilder hdfsPathBuilder;
@@ -147,86 +142,6 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
             ingesters.add(ingester);
         }
         return ingesters;
-    }
-
-    private class Ingester implements Runnable {
-
-        private final PatchBookConfiguration patchConfig;
-        private final Date currentDate;
-        private final IngestionProgress progress;
-        private final int batchSeq;
-        private final long maxPid;
-        private final long minPid;
-
-        Ingester(PatchBookConfiguration patchConfig, Date currentDate, IngestionProgress progress, int batchSeq,
-                int batchSize, long minPid) {
-            this.patchConfig = patchConfig;
-            this.currentDate = currentDate;
-            this.progress = progress;
-            this.batchSeq = batchSeq;
-            this.minPid = minPid;
-            // maxPid is exclusive
-            this.maxPid = minPid + batchSize;
-        }
-
-        @Override
-        public void run() {
-            if (!patchConfig.isSkipValidation()) {
-                validate();
-            }
-            ingest();
-        }
-
-        private void validate() {
-            try (PerformanceTimer timer = new PerformanceTimer(
-                    String.format(
-                            "Validated PatchBook with type=%s, mode=%s, minPid=%d, maxPid(exclusive)=%d",
-                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
-                            maxPid))) {
-                PatchRequest patchRequest = new PatchRequest();
-                patchRequest.setMode(patchConfig.getPatchMode());
-                patchRequest.setDataCloudVersion(progress.getDataCloudVersion());
-                patchRequest.setStartPid(minPid);
-                patchRequest.setEndPid(maxPid);
-
-                PatchValidationResponse patchResponse = patchProxy.validatePatchBook(patchConfig.getBookType(),
-                        patchRequest);
-                if (!patchResponse.isSuccess()) {
-                    log.error(String.format("PatchBook validation failed. PatchRequest: %s. PatchResponse: %s",
-                            JsonUtils.serialize(patchRequest), JsonUtils.serialize(patchResponse)));
-                    throw new RuntimeException("PatchBook validation failed");
-                }
-            }
-        }
-
-        private void ingest() {
-            try (PerformanceTimer timer = new PerformanceTimer(
-                    String.format(
-                            "Imported PatchBook with type=%s, mode=%s, minPid=%d, maxPid = %d",
-                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
-                            maxPid))) {
-                log.info(String.format(
-                        "Importing PatchBook with type=%s, mode=%s, minPid=%d, maxPid= %d",
-                        patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid));
-                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(
-                        minPid, maxPid, patchConfig.getBookType(),
-                        PatchMode.HotFix.equals(patchConfig.getPatchMode()));
-                List<PatchBook> activeBooks = getActiveBooks(books, currentDate, minPid, maxPid);
-                String fileName = "part-" + batchSeq + ".avro";
-                try {
-                    long importSize = importToHdfs(activeBooks, progress.getDestination(), fileName, patchConfig);
-                    if (importSize != activeBooks.size()) {
-                        throw new RuntimeException(
-                                String.format("For batch %d: expected to import %d rows, but actually imported %d rows",
-                                        batchSeq, activeBooks.size(), importSize));
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                postProcess(books, progress.getDataCloudVersion(), patchConfig, currentDate);
-            }
-        }
-
     }
 
     private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate, long minPid,
@@ -402,6 +317,86 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     @VisibleForTesting
     void setPatchBookEntityMgr(PatchBookEntityMgr patchBookEntityMgr) {
         this.patchBookEntityMgr = patchBookEntityMgr;
+    }
+
+    private class Ingester implements Runnable {
+
+        private final PatchBookConfiguration patchConfig;
+        private final Date currentDate;
+        private final IngestionProgress progress;
+        private final int batchSeq;
+        private final long maxPid;
+        private final long minPid;
+
+        Ingester(PatchBookConfiguration patchConfig, Date currentDate, IngestionProgress progress, int batchSeq,
+                 int batchSize, long minPid) {
+            this.patchConfig = patchConfig;
+            this.currentDate = currentDate;
+            this.progress = progress;
+            this.batchSeq = batchSeq;
+            this.minPid = minPid;
+            // maxPid is exclusive
+            this.maxPid = minPid + batchSize;
+        }
+
+        @Override
+        public void run() {
+            if (!patchConfig.isSkipValidation()) {
+                validate();
+            }
+            ingest();
+        }
+
+        private void validate() {
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    String.format(
+                            "Validated PatchBook with type=%s, mode=%s, minPid=%d, maxPid(exclusive)=%d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
+                            maxPid))) {
+                PatchRequest patchRequest = new PatchRequest();
+                patchRequest.setMode(patchConfig.getPatchMode());
+                patchRequest.setDataCloudVersion(progress.getDataCloudVersion());
+                patchRequest.setStartPid(minPid);
+                patchRequest.setEndPid(maxPid);
+
+                PatchValidationResponse patchResponse = patchProxy.validatePatchBook(patchConfig.getBookType(),
+                        patchRequest);
+                if (!patchResponse.isSuccess()) {
+                    log.error(String.format("PatchBook validation failed. PatchRequest: %s. PatchResponse: %s",
+                            JsonUtils.serialize(patchRequest), JsonUtils.serialize(patchResponse)));
+                    throw new RuntimeException("PatchBook validation failed");
+                }
+            }
+        }
+
+        private void ingest() {
+            try (PerformanceTimer timer = new PerformanceTimer(
+                    String.format(
+                            "Imported PatchBook with type=%s, mode=%s, minPid=%d, maxPid = %d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
+                            maxPid))) {
+                log.info(String.format(
+                        "Importing PatchBook with type=%s, mode=%s, minPid=%d, maxPid= %d",
+                        patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid));
+                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(
+                        minPid, maxPid, patchConfig.getBookType(),
+                        PatchMode.HotFix.equals(patchConfig.getPatchMode()));
+                List<PatchBook> activeBooks = getActiveBooks(books, currentDate, minPid, maxPid);
+                String fileName = "part-" + batchSeq + ".avro";
+                try {
+                    long importSize = importToHdfs(activeBooks, progress.getDestination(), fileName, patchConfig);
+                    if (importSize != activeBooks.size()) {
+                        throw new RuntimeException(
+                                String.format("For batch %d: expected to import %d rows, but actually imported %d rows",
+                                        batchSeq, activeBooks.size(), importSize));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                postProcess(books, progress.getDataCloudVersion(), patchConfig, currentDate);
+            }
+        }
+
     }
 
 }

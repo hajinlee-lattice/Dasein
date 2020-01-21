@@ -9,12 +9,11 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
-import com.latticeengines.testframework.exposed.proxy.admin.AdminLoginProxy;
 
 @Component("globalAuthLoginProxy")
 public class PlsLoginProxy extends BaseRestApiProxy {
 
-    private static final Logger log = LoggerFactory.getLogger(AdminLoginProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(PlsLoginProxy.class);
 
     public PlsLoginProxy() {
         super(PropertyUtils.getProperty("common.test.pls.url"), "pls");

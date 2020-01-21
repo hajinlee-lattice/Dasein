@@ -3,11 +3,11 @@ package com.latticeengines.scoringapi.score.impl;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -26,15 +26,15 @@ public class ScoreRequestConfigProcessorImpl implements ScoreRequestConfigProces
     private static final int INITIAL_CACHE_SIZE = 100;
     private static final int MAX_CACHE_SIZE = 10000;
 
-    private Logger log = LoggerFactory.getLogger(ScoreRequestConfigProcessorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ScoreRequestConfigProcessorImpl.class);
 
     private Cache<String, ScoringRequestConfigContext> scoringRequestConfigCache;
 
-    @Autowired
+    @Inject
     private PlsInternalProxy plsInternalProxy;
 
     @PostConstruct
-    public void initialize() throws Exception {
+    public void initialize() {
         scoringRequestConfigCache = Caffeine.newBuilder().initialCapacity(INITIAL_CACHE_SIZE)
                 .maximumSize(MAX_CACHE_SIZE).expireAfterWrite(6, TimeUnit.HOURS).build();
     }

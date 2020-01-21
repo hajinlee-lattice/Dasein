@@ -10,17 +10,16 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.modelquality.DataSet;
 import com.latticeengines.modelquality.dao.DataSetDao;
-import com.latticeengines.modelquality.service.impl.FileModelRunServiceImpl;
 
 @Component("dataSetDao")
 public class DataSetDaoImpl extends ModelQualityBaseDaoImpl<DataSet> implements DataSetDao {
+
+    private static final Logger log = LoggerFactory.getLogger(DataSetDaoImpl.class);
 
     @Override
     protected Class<DataSet> getEntityClass() {
         return DataSet.class;
     }
-
-    private static final Logger log = LoggerFactory.getLogger(FileModelRunServiceImpl.class);
 
     @Override
     public DataSet findByTenantAndTrainingSet(String tenantID, String trainingSetFilePath) {

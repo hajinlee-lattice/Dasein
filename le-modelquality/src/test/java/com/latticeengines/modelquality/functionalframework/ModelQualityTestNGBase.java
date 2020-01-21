@@ -1,7 +1,8 @@
 package com.latticeengines.modelquality.functionalframework;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -32,38 +33,38 @@ public class ModelQualityTestNGBase extends AbstractTestNGSpringContextTests {
     @Value("${modelquality.file.upload.hdfs.dir}")
     protected String hdfsDir;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected AlgorithmEntityMgr algorithmEntityMgr;
-    @Autowired
+    @Inject
     protected DataFlowEntityMgr dataFlowEntityMgr;
-    @Autowired
+    @Inject
     protected DataSetEntityMgr dataSetEntityMgr;
-    @Autowired
+    @Inject
     protected PipelineEntityMgr pipelineEntityMgr;
-    @Autowired
+    @Inject
     protected PipelineStepEntityMgr pipelineStepEntityMgr;
-    @Autowired
+    @Inject
     protected PipelineToPipelineStepsEntityMgr pipelineToPipelineStepsEntityMgr;
-    @Autowired
+    @Inject
     protected PropDataEntityMgr propDataEntityMgr;
-    @Autowired
+    @Inject
     protected ModelRunEntityMgr modelRunEntityMgr;
-    @Autowired
+    @Inject
     protected ModelConfigEntityMgr modelConfigEntityMgr;
-    @Autowired
+    @Inject
     protected SamplingEntityMgr samplingEntityMgr;
-    @Autowired
+    @Inject
     protected AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
-    @Autowired
+    @Inject
     protected AnalyticTestEntityMgr analyticTestEntityMgr;
-    @Autowired
+    @Inject
     protected PipelineService pipelineService;
-    @Autowired
+    @Inject
     protected AnalyticPipelineService analyticPipelineService;
-    @Autowired
+    @Inject
     protected AnalyticTestService analyticTestService;
 
     protected void cleanupHdfs() throws Exception {

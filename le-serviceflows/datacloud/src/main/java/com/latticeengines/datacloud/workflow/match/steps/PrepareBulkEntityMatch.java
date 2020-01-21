@@ -34,7 +34,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PrepareBulkEntityMatch extends BaseWorkflowStep<PrepareBulkEntityMatchConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(PrepareBulkEntityMatch.class);
+    private static final Logger log = LoggerFactory.getLogger(PrepareBulkEntityMatch.class);
 
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
@@ -68,7 +68,7 @@ public class PrepareBulkEntityMatch extends BaseWorkflowStep<PrepareBulkEntityMa
             }
             HdfsUtils.mkdir(yarnConfiguration, destDir);
         } catch (IOException e) {
-            log.error("Failed to ensure destination dir {} is there, error = {}", destDir, e);
+            log.error("Failed to ensure destination dir {} is there", destDir, e);
             throw new RuntimeException(e);
         }
 
@@ -89,7 +89,7 @@ public class PrepareBulkEntityMatch extends BaseWorkflowStep<PrepareBulkEntityMa
             log.info("Test file is copied from S3 (bucket={}, file={}) to dest ({})", config.getSrcBucket(), srcPath,
                     destFilePath);
         } catch (IOException e) {
-            log.error("Failed to copy test file from S3 (bucket={}, file={}) to dest directory ({}), error = {}",
+            log.error("Failed to copy test file from S3 (bucket={}, file={}) to dest directory ({})",
                     config.getSrcBucket(), config.getSrcTestFilePath(), config.getDestTestDirectory(), e);
             throw new RuntimeException(e);
         }

@@ -6,8 +6,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -32,10 +33,9 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
-
 public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
-    @Autowired
+    @Inject
     private EventQueryService eventQueryService;
 
     private static final String PRODUCT_ID = "6368494B622E0CB60F9C80FEB1D0F95F";

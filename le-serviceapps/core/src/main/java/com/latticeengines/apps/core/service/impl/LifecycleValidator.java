@@ -23,8 +23,9 @@ import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 @Component("lifecycleValidator")
 public class LifecycleValidator extends AttrValidator {
 
-    private static Logger log = LoggerFactory.getLogger(LifecycleValidator.class);
-    public static final String VALIDATOR_NAME = "LIFECYCLE_VALIDATOR";
+    private static final Logger log = LoggerFactory.getLogger(LifecycleValidator.class);
+
+    static final String VALIDATOR_NAME = "LIFECYCLE_VALIDATOR";
 
     protected LifecycleValidator() {
         super(VALIDATOR_NAME);

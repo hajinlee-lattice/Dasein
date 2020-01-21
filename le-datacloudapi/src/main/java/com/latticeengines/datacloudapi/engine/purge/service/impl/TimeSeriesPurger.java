@@ -33,7 +33,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 @Component("timeSeriesPurger")
 public class TimeSeriesPurger extends VersionedPurger {
 
-    private static Logger log = LoggerFactory.getLogger(TimeSeriesPurger.class);
+    private static final Logger log = LoggerFactory.getLogger(TimeSeriesPurger.class);
 
     @Override
     protected SourceType getSourceType() {

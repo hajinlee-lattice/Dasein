@@ -1,19 +1,18 @@
 package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
 
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.BomboraFirehose;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.datacloud.etl.transformation.service.impl.BomboraFirehoseIngestionService;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.source.BomboraFirehoseConfiguration;
-
 public class BomboraFirehoseDeploymentTestNG extends FirehoseTransformationDeploymentTestNGBase<BomboraFirehoseConfiguration> {
 
-    @Autowired
+    @Inject
     BomboraFirehoseIngestionService refreshService;
 
-    @Autowired
+    @Inject
     BomboraFirehose source;
 
     @Override

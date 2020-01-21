@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ import jcifs.smb.SmbFile;
 @Component("smbFileFlowService")
 public class SmbFileFlowServiceImpl extends BaseFileFlowService {
 
-    static final Logger log = LoggerFactory.getLogger(SmbFileFlowServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SmbFileFlowServiceImpl.class);
 
     @Value("${dellebi.smbaccount}")
     private String smbAccount;
@@ -41,10 +42,10 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
     @Value("${dellebi.datatarget.stagefinal.dbname}")
     private String stageFinalTargetDB;
 
-    @Autowired
+    @Inject
     private SmbFilesMBean smbFilesMBean;
 
-    public SmbFile getScanedFile(DataFlowContext context) {
+    private SmbFile getScanedFile(DataFlowContext context) {
 
         NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("", smbAccount, smbPS);
         jcifs.Config.setProperty("jcifs.smb.client.disablePlainTextPasswords", "false");
@@ -153,7 +154,7 @@ public class SmbFileFlowServiceImpl extends BaseFileFlowService {
             return stageFinalTargetDB;
     }
 
-    protected boolean isValidFile(SmbFile file) {
+    private boolean isValidFile(SmbFile file) {
 
         String fileName = file.getName();
 

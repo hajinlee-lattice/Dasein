@@ -149,7 +149,7 @@ public class DbCreds {
 
     public static class Builder {
 
-        private static Logger log = LoggerFactory.getLogger(Builder.class);
+        private static final Logger log = LoggerFactory.getLogger(Builder.class);
 
         private String user;
         private String password;

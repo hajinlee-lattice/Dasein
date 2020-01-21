@@ -26,7 +26,9 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @SuppressWarnings("rawtypes")
 public class TransformationExecutorImpl implements TransformationExecutor {
-    private static final Logger log = LoggerFactory.getLogger(TransformationExecutor.class);
+
+    private static final Logger log = LoggerFactory.getLogger(TransformationExecutorImpl.class);
+
     private static final int MAX_RETRY = 3;
 
     private String jobSubmitter;

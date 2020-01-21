@@ -3,9 +3,10 @@ package com.latticeengines.datacloud.etl.orchestration.entitymgr.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -25,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.orchestration.PredefinedSched
 public class OrchestrationEntityMgrImplTestNG extends DataCloudEtlFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(OrchestrationEntityMgrImplTestNG.class);
 
-    @Autowired
+    @Inject
     private OrchestrationEntityMgr orchestrationEntityMgr;
 
     private List<Orchestration> orchestrations = new ArrayList<>();

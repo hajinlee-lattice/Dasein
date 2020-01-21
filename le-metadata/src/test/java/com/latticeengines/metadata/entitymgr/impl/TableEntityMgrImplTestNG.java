@@ -15,10 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -41,12 +42,11 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
-
 public class TableEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(TableEntityMgrImplTestNG.class);
 
-    @Autowired
+    @Inject
     private MetadataService metadataService;
 
     @Override

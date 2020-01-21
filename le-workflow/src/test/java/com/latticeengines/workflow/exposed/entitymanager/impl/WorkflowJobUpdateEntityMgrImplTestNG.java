@@ -2,7 +2,8 @@ package com.latticeengines.workflow.exposed.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -11,9 +12,8 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
-
 public class WorkflowJobUpdateEntityMgrImplTestNG extends WorkflowTestNGBase {
-    @Autowired
+    @Inject
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     private WorkflowJobUpdate jobUpdate1;

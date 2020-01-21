@@ -58,7 +58,7 @@ import avro.shaded.com.google.common.collect.Sets;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
 
-    protected static final Logger log = LoggerFactory.getLogger(BaseWorkflowStep.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseWorkflowStep.class);
 
     protected static final String PREMATCH_EVENT_TABLE = "PREMATCH_EVENT_TABLE";
     protected static final String PREMATCH_UPSTREAM_EVENT_TABLE = "PREMATCH_UPSTREAM_EVENT_TABLE";

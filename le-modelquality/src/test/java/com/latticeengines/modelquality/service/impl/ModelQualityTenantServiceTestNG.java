@@ -2,7 +2,8 @@ package com.latticeengines.modelquality.service.impl;
 
 import java.lang.reflect.Field;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -14,15 +15,14 @@ import com.latticeengines.modelquality.functionalframework.ModelQualityFunctiona
 import com.latticeengines.modelquality.service.ModelQualityTenantService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-
 public class ModelQualityTenantServiceTestNG extends ModelQualityFunctionalTestNGBase {
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private ModelQualityTenantService modelQualityTenantService;
 
     private String testTenant = "testMQTenant";

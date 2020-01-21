@@ -1,8 +1,9 @@
 package com.latticeengines.proxy.exposed.cdl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -11,7 +12,7 @@ import org.testng.annotations.Test;
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
 public class RatingEngineProxyTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
     private static final String customerSpace = "tenant";

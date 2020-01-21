@@ -4,8 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -15,15 +16,14 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-
 public class HdfsToS3RouteDeploymentTestNG extends EaiFunctionalTestNGBase {
 
     public static final String TEST_CUSTOMER = "EaiTester";
 
-    @Autowired
+    @Inject
     private HdfsToS3RouteTestNG hdfsToS3RouteTestNG;
 
-    @Autowired
+    @Inject
     private EaiProxy eaiProxy;
 
     @Value("${common.le.stack}")

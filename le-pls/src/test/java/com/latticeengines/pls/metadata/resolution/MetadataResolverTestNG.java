@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.io.FileUtils;
@@ -24,7 +25,6 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -53,16 +53,14 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDepreca
 
 public class MetadataResolverTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    private static Logger log = LoggerFactory.getLogger(MetadataResolverTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataResolverTestNG.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    String hdfsPath = "/tmp/test_metadata_resolution";
-
-    String hdfsPath2 = "/tmp/test_metadata_resolution2";
-
-    String hdfsPath3 = "/tmp/test_metadata_resolution3";
+    private String hdfsPath = "/tmp/test_metadata_resolution";
+    private String hdfsPath2 = "/tmp/test_metadata_resolution2";
+    private String hdfsPath3 = "/tmp/test_metadata_resolution3";
 
 
     @BeforeClass(groups = "functional")

@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeBodyPart;
@@ -15,7 +16,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,12 +32,18 @@ import com.latticeengines.monitor.util.EmailTemplateBuilder;
 import com.latticeengines.monitor.util.EmailTemplateBuilder.Template;
 import com.latticeengines.monitor.util.EmailUtils;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @Component
 public class EmailServiceImpl implements EmailService {
-    public static Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
+
+    // need to manipulate this log in EmailServiceImplTestNG
+    @SuppressFBWarnings({"SLF4J_LOGGER_SHOULD_BE_PRIVATE", "SLF4J_LOGGER_SHOULD_BE_FINAL"})
+    protected static Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
+
     private static final String COMMA = ", ";
 
-    @Autowired
+    @Inject
     private EmailSettings emailsettings;
 
     @Value("${monitor.email.enabled:true}")
@@ -675,8 +681,7 @@ public class EmailServiceImpl implements EmailService {
                     Collections.singleton(user.getEmail()));
             log.info(String.format("Sending PLS segment export complete email to %s succeeded.", user.getEmail()));
         } catch (Exception e) {
-            log.error("Failed to send PLS segment export complete email to %s. Exception message=%s", user.getEmail(),
-                    e.getMessage());
+            log.error("Failed to send PLS segment export complete email to {}.", user.getEmail(), e);
         }
     }
 
@@ -787,8 +792,7 @@ public class EmailServiceImpl implements EmailService {
                     mp, Collections.singleton(user.getEmail()));
             log.info(String.format("Sending %s export complete email to %s succeeded.", type, user.getEmail()));
         } catch (Exception e) {
-            log.error("Failed to send %s export complete email to %s. Exception message=%s", type, user.getEmail(),
-                    e.getMessage());
+            log.error("Failed to send {} export complete email to {}.", type, user.getEmail(), e);
         }
     }
 

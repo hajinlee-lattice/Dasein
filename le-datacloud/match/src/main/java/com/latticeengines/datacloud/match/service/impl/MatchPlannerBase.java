@@ -59,7 +59,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public abstract class MatchPlannerBase implements MatchPlanner {
 
-    private static Logger log = LoggerFactory.getLogger(MatchPlannerBase.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchPlannerBase.class);
 
     @Inject
     private PublicDomainService publicDomainService;

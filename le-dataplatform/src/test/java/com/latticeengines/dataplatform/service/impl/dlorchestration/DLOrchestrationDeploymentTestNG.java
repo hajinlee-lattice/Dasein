@@ -7,10 +7,11 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -40,22 +41,22 @@ import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 @ContextConfiguration(locations = { "classpath:test-dataplatform-context.xml" })
 public class DLOrchestrationDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private ModelCommandLogService modelCommandLogService;
 
-    @Autowired
+    @Inject
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private JdbcTemplate dlOrchestrationJdbcTemplate;
 
-    @Autowired
+    @Inject
     private ModelCommandIdEntityMgr modelCommandIdEntityMgr;
 
     private StandaloneHttpServer httpServer;

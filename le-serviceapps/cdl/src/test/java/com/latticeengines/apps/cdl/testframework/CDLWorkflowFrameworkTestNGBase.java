@@ -8,7 +8,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.yarn.client.YarnClient;
 
@@ -41,13 +40,13 @@ public abstract class CDLWorkflowFrameworkTestNGBase extends CDLDeploymentTestNG
 
     protected YarnFunctionalTestNGBase platformTestBase;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient defaultYarnClient;
 
-    @Autowired
+    @Inject
     protected WorkflowService workflowService;
 
     public abstract void testWorkflow() throws Exception;

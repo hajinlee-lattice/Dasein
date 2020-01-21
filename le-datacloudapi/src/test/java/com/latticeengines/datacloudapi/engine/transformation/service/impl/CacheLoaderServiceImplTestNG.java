@@ -3,10 +3,11 @@ package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -31,13 +32,13 @@ public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBa
     private static final String avroDir = "/tmp/CacheLoaderServiceImplTestNG";
     private static final String AM_CACHE_FILE = "am_cache.avro";
 
-    @Autowired
+    @Inject
     private CacheLoaderService<GenericRecord> cacheLoaderService;
 
-    @Autowired
+    @Inject
     private DnBCacheService dnbCacheService;
 
-    @Autowired
+    @Inject
     private NameLocationService nameLocationService;
 
     @Test(groups = "deployment", enabled = true)

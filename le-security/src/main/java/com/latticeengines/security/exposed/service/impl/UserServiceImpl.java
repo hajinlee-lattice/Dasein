@@ -8,12 +8,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -47,16 +48,16 @@ public class UserServiceImpl implements UserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalTenantManagementService globalTenantManagementService;
 
-    @Autowired
+    @Inject
     private GlobalSessionManagementService globalSessionManagementService;
 
     private static EmailValidator emailValidator = EmailValidator.getInstance();
@@ -194,7 +195,7 @@ public class UserServiceImpl implements UserService {
         GlobalAuthUser globalAuthUser = globalUserManagementService.findByEmailNoJoin(samlLoginResp.getUserId());
         User userInfoFromSaml = IntegrationUserUtils.buildUserFrom(samlLoginResp);
         if (globalAuthUser == null) {
-            LOGGER.info("Creating new User: %s for Tenant: %s", samlLoginResp.getUserId(), tenantDeploymentId);
+            LOGGER.info("Creating new User: {} for Tenant: {}", samlLoginResp.getUserId(), tenantDeploymentId);
             globalUserManagementService.registerExternalIntegrationUser(userName, userInfoFromSaml);
         }
         List<String> gaUserRights = globalUserManagementService.getRights(userInfoFromSaml.getEmail(),

@@ -53,7 +53,7 @@ import net.lingala.zip4j.exception.ZipException;
 @ContextConfiguration(locations = { "classpath:test-query-context.xml" })
 public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    private static Logger log = LoggerFactory.getLogger(QueryFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(QueryFunctionalTestNGBase.class);
 
     @Inject
     protected QueryEvaluator queryEvaluator;

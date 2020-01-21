@@ -2,9 +2,10 @@ package com.latticeengines.scoring.orchestration.service.impl;
 
 import java.sql.Timestamp;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
@@ -17,7 +18,6 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandResultEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-
 public class ScoringServiceValidationAspectTestNG extends ScoringFunctionalTestNGBase {
 
     @SuppressWarnings("unused")
@@ -28,16 +28,16 @@ public class ScoringServiceValidationAspectTestNG extends ScoringFunctionalTestN
     @Value("${scoring.test.table}")
     private String testInputTable;
 
-    @Autowired
+    @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringServiceValidationAspect scoringServiceValidationAspect;
     
     @Test(groups = "functional", enabled = false)

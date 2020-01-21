@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.transformer.RecommendationAvroToCsvTransformer;
 
 public class RecommendationAvroToCsvTransformerTestNG {
-    private static Logger log = LoggerFactory.getLogger(RecommendationAvroToCsvTransformerTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RecommendationAvroToCsvTransformerTestNG.class);
 
     private Map<String, String> accountDisplayNames;
     private Map<String, String> contactDisplayNames;

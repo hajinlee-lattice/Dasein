@@ -2,6 +2,8 @@ package com.latticeengines.saml.service.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.opensaml.common.xml.SAMLConstants;
 import org.opensaml.saml2.metadata.EntityDescriptor;
@@ -10,7 +12,6 @@ import org.opensaml.saml2.metadata.SingleSignOnService;
 import org.opensaml.xml.parse.ParserPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -32,15 +33,15 @@ import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
 @Component("IdentityProviderService")
 public class IdentityProviderServiceImpl implements IdentityProviderService {
-    public static final Logger log = LoggerFactory.getLogger(IdentityProviderServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(IdentityProviderServiceImpl.class);
 
-    @Autowired
+    @Inject
     private IdentityProviderEntityMgr identityProviderEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthTenantEntityMgr globalAuthTenantEntityMgr;
 
-    @Autowired
+    @Inject
     private ParserPool parserPool;
 
     @Override
@@ -111,7 +112,7 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
             resp.setValid(false);
             Exception ex = new LedpException(LedpCode.LEDP_33001, new String[] { e.getMessage() });
             resp.setExceptionMessage(ex.getMessage());
-            log.info("%s , Root Cause: %s", ex.getMessage(), e.getMessage());
+            log.error("Error:",  e);
         }
         return resp;
     }
@@ -123,7 +124,7 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
 
         EntityDescriptor descriptor = (EntityDescriptor) SAMLUtils.deserialize(parserPool,
                 identityProvider.getMetadata());
-        
+
         // Get SingleSignonURL
         IDPSSODescriptor ssoDescriptor = descriptor.getIDPSSODescriptor(SAMLConstants.SAML20P_NS);
         if (ssoDescriptor == null) {
@@ -134,14 +135,14 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
                 .orElseThrow(() -> new LedpException(LedpCode.LEDP_33001,
                         new String[] { "Could not find SSO POST binding" }));
         String ssoBindingUrl = ssoPostBinding.getLocation();
-        
+
         SamlConfigMetadata samlConfigMetadata = new SamlConfigMetadata();
         samlConfigMetadata.setEntityId(descriptor.getEntityID());
         samlConfigMetadata.setSingleSignOnService(ssoBindingUrl);
-        
+
         return samlConfigMetadata;
     }
-    
+
     @Override
     public SamlConfigMetadata getConfigMetadata(Tenant tenant) {
         GlobalAuthTenant gatenant = globalAuthTenantEntityMgr.findByTenantId(tenant.getId());
@@ -152,9 +153,9 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
         if (CollectionUtils.isEmpty(identityProviders)) {
             throw new LedpException(LedpCode.LEDP_33004, new String[] {tenant.getId()});
         }
-        
+
         IdentityProvider idp = identityProviders.get(0);
         return extractMetadataConfig(idp);
-        
+
     }
 }

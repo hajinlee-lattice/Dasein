@@ -3,10 +3,11 @@ package com.latticeengines.workflowapi.flows;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -36,7 +37,6 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-
 public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
@@ -44,22 +44,22 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
 
     protected static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/customevent";
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private MatchCommandProxy matchCommandProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${common.test.microservice.url}")
     protected String microserviceHostPort;
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     private Table accountTable;

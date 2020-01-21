@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Component("atlasExportService")
 public class AtlasExportServiceImpl implements AtlasExportService {
 
-    private static Logger log = LoggerFactory.getLogger(AtlasExportServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AtlasExportServiceImpl.class);
 
     @Inject
     private AtlasExportEntityMgr atlasExportEntityMgr;

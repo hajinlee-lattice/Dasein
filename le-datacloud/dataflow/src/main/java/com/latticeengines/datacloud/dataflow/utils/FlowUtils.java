@@ -18,9 +18,13 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
 import cascading.operation.Function;
 
-public class FlowUtils {
+public final class FlowUtils {
 
-    private static Logger log = LoggerFactory.getLogger(FlowUtils.class);
+    protected FlowUtils() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(FlowUtils.class);
     private static Pattern varcharPattern = Pattern.compile("(?<=VARCHAR\\().*?(?=\\))");
 
     @SuppressWarnings("rawtypes")

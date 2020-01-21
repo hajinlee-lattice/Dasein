@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -43,7 +42,6 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
-
 public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
@@ -57,10 +55,10 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     private MetadataSegment segment;
     private List<PlayType> playTypes;
 
-    @Autowired
+    @Inject
     private SegmentProxy segmentProxy;
 
-    @Autowired
+    @Inject
     private PlayProxy playProxy;
 
     @Inject

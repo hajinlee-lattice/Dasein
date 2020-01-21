@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.dmg.pmml.PMML;
 import org.jpmml.schema.Version;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -24,7 +27,9 @@ import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 @Component("pmmlFileValidationService")
 public class PmmlFileValidationServiceImpl extends ArtifactValidation {
 
-    public static final Set<String> SUPPORTED_VERSIONS = new TreeSet<>();
+    private static final Logger log = LoggerFactory.getLogger(PmmlFileValidationServiceImpl.class);
+
+    private static final Set<String> SUPPORTED_VERSIONS = new TreeSet<>();
 
     static {
         for (Version version : Version.values()) {
@@ -38,7 +43,7 @@ public class PmmlFileValidationServiceImpl extends ArtifactValidation {
         super(ArtifactType.PMML);
     }
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Override

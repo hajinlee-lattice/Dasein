@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -23,7 +24,7 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 @ContextConfiguration(locations = { "classpath:test-admin-context.xml" })
 public class DynamicOptionsServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private DynamicOptionsService dynamicOptionsService;
 
     @Test(groups = "functional")

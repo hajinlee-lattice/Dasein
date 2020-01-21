@@ -89,10 +89,10 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Value("${common.test.oauth.url}")
     protected String authHostPort;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
     @Inject

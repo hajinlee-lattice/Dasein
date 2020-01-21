@@ -10,7 +10,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -28,7 +27,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.DataUnitCrossTenantService;
-
 public class DataUnitCrossTenantServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataUnitCrossTenantServiceImplTestNG.class);
@@ -38,7 +36,7 @@ public class DataUnitCrossTenantServiceImplTestNG extends MetadataFunctionalTest
 
     @Inject
     private S3Service s3Service;
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
     @Inject
     private DynamoService dynamoService;

@@ -4,13 +4,14 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -57,7 +58,7 @@ public class LeadPrioritizationEndToEndDeploymentTestNG extends PlsDeploymentTes
     @Value("${pls.modelingservice.testdsdbport}")
     private int dataSourcePort;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private static String tenant;

@@ -24,7 +24,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Component("computeOrphanRecordsStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ComputeOrphanRecordsStep extends RunDataFlow<ComputeOrphanRecordsStepConfiguration> {
-    private static Logger log = LoggerFactory.getLogger(ComputeOrphanRecordsStep.class);
+    private static final Logger log = LoggerFactory.getLogger(ComputeOrphanRecordsStep.class);
 
     @Inject
     private MetadataProxy metadataProxy;

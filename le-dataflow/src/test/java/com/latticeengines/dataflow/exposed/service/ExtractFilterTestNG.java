@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,15 +29,14 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-
 public class ExtractFilterTestNG extends DataFlowFunctionalTestNGBase {
 
     public static final String OUTPUT_PATH = "/tmp/ExtractFilterTest/output";
     public static final String INPUT_PATH = "/tmp/ExtractFilterTest/input";
-    @Autowired
+    @Inject
     private DataTransformationService dataTransformationService;
 
-    @Autowired
+    @Inject
     private ExtractFilterBuilder extractFilterBuilder;
 
     @Resource(name = "yarnConfiguration")

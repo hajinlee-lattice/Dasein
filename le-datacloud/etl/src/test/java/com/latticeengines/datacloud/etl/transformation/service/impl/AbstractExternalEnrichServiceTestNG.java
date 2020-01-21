@@ -20,7 +20,6 @@ import com.latticeengines.datacloud.etl.testframework.DataCloudEtlFunctionalTest
 import com.latticeengines.datacloud.etl.transformation.service.ExternalEnrichService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.ExternalEnrichRequest;
-
 public class AbstractExternalEnrichServiceTestNG extends DataCloudEtlFunctionalTestNGBase {
 
     @SuppressWarnings("unused")

@@ -145,7 +145,7 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
                         // TODO add timeout to prevent hanging
                         readQueue.put(seed);
                     } catch (InterruptedException e) {
-                        log.error("Interrupted when putting seed(ID={}) into readQueue. error = {}", seed.getId(), e);
+                        log.error("Interrupted when putting seed(ID={}) into readQueue.", seed.getId(), e);
                     }
                 });
             }
@@ -166,7 +166,7 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
             writeService.shutdown();
             writeService.awaitTermination(maxWriterLagInHours, TimeUnit.HOURS);
         } catch (InterruptedException e) {
-            log.error("Commit entity {} for tenant {} is interrupted, error = {}", entity, tenant.getId(), e);
+            log.error("Commit entity {} for tenant {} is interrupted", entity, tenant.getId(), e);
             throw new RuntimeException(e);
         }
 
@@ -247,7 +247,7 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
                             // TODO add timeout to prevent hanging
                             writeQueue.put(new WriteSeedLookupRequest(seeds.get(entityId), entryMap.get(entityId)));
                         } catch (InterruptedException e) {
-                            log.error("Interrupted when putting seed(ID={}) into writeQueue. error = {}", entityId, e);
+                            log.error("Interrupted when putting seed(ID={}) into writeQueue.", entityId, e);
                         }
                     }
                 } catch (InterruptedException e) {

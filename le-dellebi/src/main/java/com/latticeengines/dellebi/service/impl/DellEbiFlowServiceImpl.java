@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
-import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.dellebi.util.LoggingUtils;
@@ -26,8 +25,10 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 @Component("dellEbiFlowService")
 public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
-    private static final Logger log = LoggerFactory.getLogger(DailyFlow.class);
-    static final int FAIL_TRIES = 3;
+    private static final Logger log = LoggerFactory.getLogger(DellEbiFlowServiceImpl.class);
+
+    private static final int FAIL_TRIES = 3;
+
     @Resource(name = "localFileFlowService")
     private FileFlowService localFileFlowService;
 

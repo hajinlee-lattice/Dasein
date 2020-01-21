@@ -14,7 +14,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 @Aspect
 public class GlobalAuthRetryAspect {
 
-    public static Logger log = LoggerFactory.getLogger(GlobalAuthRetryAspect.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalAuthRetryAspect.class);
 
     @Around("execution(public * com.latticeengines.auth.exposed.entitymanager.impl.GlobalAuthAuthenticationEntityMgrImpl.find*(..)) "
             + "|| execution(public * com.latticeengines.auth.exposed.entitymanager.impl.GlobalAuthUserEntityMgrImpl.find*(..))")

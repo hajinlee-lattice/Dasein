@@ -14,9 +14,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -32,13 +33,12 @@ import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 import com.latticeengines.modelquality.service.PipelineService;
 import com.latticeengines.proxy.exposed.pls.PlsHealthCheckProxy;
-
 public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private PipelineService pipelineService;
 
-    @Autowired
+    @Inject
     private PipelineEntityMgr pipelineEntityMgr;
 
     private PlsHealthCheckProxy plsHealthCheckProxy = null;

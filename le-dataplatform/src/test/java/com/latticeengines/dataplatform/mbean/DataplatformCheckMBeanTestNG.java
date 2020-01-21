@@ -2,14 +2,14 @@ package com.latticeengines.dataplatform.mbean;
 
 import static org.testng.Assert.assertTrue;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-
 public class DataplatformCheckMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private DataplatformCheckMBean dataplatformCheckMBean;
 
     @Test(groups = { "functional.platform", "functional.production" }, enabled = false)

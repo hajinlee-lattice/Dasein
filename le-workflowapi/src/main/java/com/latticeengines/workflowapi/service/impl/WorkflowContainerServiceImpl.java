@@ -58,7 +58,7 @@ import io.opentracing.util.GlobalTracer;
 @Component("workflowContainerService")
 public class WorkflowContainerServiceImpl implements WorkflowContainerService {
 
-    private static final Logger log = LoggerFactory.getLogger(WorkflowContainerService.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowContainerServiceImpl.class);
 
     @Inject
     private JobEntityMgr jobEntityMgr;

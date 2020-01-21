@@ -6,12 +6,13 @@ import static org.testng.Assert.assertNotNull;
 import java.io.File;
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -33,24 +34,23 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
-
 public class PythonScriptModelCopyServiceImplTestNG extends LPFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PythonScriptModelCopyServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private PythonScriptModelService pythonScriptModelService;
 
     @Value("${pls.modelingservice.basedir}")
     private String customerBase;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
     @Value("${aws.customer.s3.bucket}")

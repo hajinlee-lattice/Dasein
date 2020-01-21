@@ -2,7 +2,8 @@ package com.latticeengines.workflow.core;
 
 import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
 
@@ -10,10 +11,9 @@ import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
-
 public class AwsApsGeneratorStepFunctionTestNG extends WorkflowTestNGBase {
 
-    @Autowired
+    @Inject
     private BatchService batchService;
 
     @Test(groups = "manual", enabled = true)

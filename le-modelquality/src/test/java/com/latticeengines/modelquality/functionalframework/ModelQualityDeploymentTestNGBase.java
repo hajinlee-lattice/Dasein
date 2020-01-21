@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -52,15 +52,14 @@ import com.latticeengines.modelquality.service.impl.PipelineStepType;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
-
 public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ModelQualityDeploymentTestNGBase.class);
 
-    @Autowired
+    @Inject
     protected ModelQualityProxy modelQualityProxy;
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     @Value("${common.test.pls.url}")
@@ -69,12 +68,12 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
     @Value("${common.test.admin.url}")
     protected String adminDeployedHostPort;
 
-    @Autowired
+    @Inject
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     protected Tenant mainTestTenant;
 
-    @Autowired
+    @Inject
     private AnalyticPipelineService analyticPipelineService;
 
     @Resource(name = "modelRunService")

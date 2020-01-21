@@ -9,9 +9,9 @@ import org.testng.annotations.Test;
 
 public class NameNodeHAInfrastructureTestNG extends DataPlatformInfrastructureTestNGBase {
 
-    protected static final Logger log = LoggerFactory.getLogger(NameNodeHAInfrastructureTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(NameNodeHAInfrastructureTestNG.class);
 
-    private String ACTIVE = "active";
+    private static final String ACTIVE = "active";
 
     @Test(groups = "infrastructure", enabled = true)
     public void testConsistentReadFromBothNameNodes() throws Exception {

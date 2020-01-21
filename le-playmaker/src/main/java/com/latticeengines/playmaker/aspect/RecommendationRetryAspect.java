@@ -19,7 +19,7 @@ import com.latticeengines.playmaker.entitymgr.impl.JdbcTemplateFactoryImpl;
 @Aspect
 public class RecommendationRetryAspect {
 
-    public static Logger log = LoggerFactory.getLogger(RecommendationRetryAspect.class);
+    private static final Logger log = LoggerFactory.getLogger(RecommendationRetryAspect.class);
 
     @Inject
     private JdbcTemplateFactoryImpl templateFactory;

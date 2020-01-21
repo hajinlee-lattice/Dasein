@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.fs.FileStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -33,9 +31,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
  */
 @Component("tempSourcePurger")
 public class TempSourcePurger extends CollectionPurger {
-
-    @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory.getLogger(TempSourcePurger.class);
 
     @Override
     protected SourceType getSourceType() {

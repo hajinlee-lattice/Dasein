@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 @Component
 public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctionalTestNGBase {
 
-    private static Logger log = LoggerFactory.getLogger(IngestionProgressEntityMgrImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionProgressEntityMgrImplTestNG.class);
 
     private static final String INGESTION_NAME = "TestBomboraFirehose";
     private static final String HDFS_POD = "FunctionalBomboraFireHose";
@@ -72,8 +72,8 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
         ingestionEntityMgr.delete(ingestion);
     }
 
-    @Test(groups = "functional", enabled = true)
-    public void testIngestionProgress() throws JsonProcessingException {
+    @Test(groups = "functional")
+    public void testIngestionProgress() {
         progress = ingestionProgressEntityMgr.saveProgress(progress);
         Assert.assertNotNull(progress.getPid(), "Failed to save ingestion progress");
 
@@ -95,12 +95,12 @@ public class IngestionProgressEntityMgrImplTestNG extends DataCloudEtlFunctional
 
     }
 
-    @Test(groups = "functional", enabled = true)
-    public void testRetryFailedIngestionProgress() throws JsonProcessingException {
+    @Test(groups = "functional")
+    public void testRetryFailedIngestionProgress() {
         failedProgress = ingestionProgressEntityMgr.saveProgress(failedProgress);
         List<IngestionProgress> progresses = ingestionProgressEntityMgr.findRetryFailedProgresses();
         Assert.assertNotNull(progresses);
-        Assert.assertEquals(progresses.size() > 0, true);
+        Assert.assertTrue(progresses.size() > 0);
         for (IngestionProgress progress : progresses) {
             log.info("Failed progress: " + progress.toString());
         }

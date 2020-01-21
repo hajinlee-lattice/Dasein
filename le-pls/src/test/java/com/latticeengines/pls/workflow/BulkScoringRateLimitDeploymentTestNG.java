@@ -6,7 +6,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -24,10 +25,9 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-
 public class BulkScoringRateLimitDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
     private String file1 = "file1.csv";

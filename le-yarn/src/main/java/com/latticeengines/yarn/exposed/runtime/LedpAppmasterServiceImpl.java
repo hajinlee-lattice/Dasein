@@ -1,9 +1,13 @@
 package com.latticeengines.yarn.exposed.runtime;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.yarn.integration.ip.mind.MindRpcMessageHolder;
 
 public class LedpAppmasterServiceImpl extends LedpAppmasterService {
+
+    private static final Logger log = LoggerFactory.getLogger(LedpAppmasterServiceImpl.class);
 
     private Exception e;
 

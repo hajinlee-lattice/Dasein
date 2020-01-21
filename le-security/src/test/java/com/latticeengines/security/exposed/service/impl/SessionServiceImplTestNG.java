@@ -16,8 +16,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -30,17 +31,16 @@ import com.latticeengines.security.exposed.GrantedRight;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
-
 public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     private Ticket ticket;
     private Tenant tenant;
     private final String testUsername = "sessionservice_tester@test.lattice-engines.com";
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
     @BeforeClass(groups = "functional")

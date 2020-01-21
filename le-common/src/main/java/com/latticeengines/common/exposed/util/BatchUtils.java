@@ -4,9 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BatchUtils {
+public final class BatchUtils {
 
-    private static Logger log = LoggerFactory.getLogger(BatchUtils.class);
+    protected BatchUtils() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(BatchUtils.class);
 
     /**
      * Based on total number of records, minimum number of records per batch,

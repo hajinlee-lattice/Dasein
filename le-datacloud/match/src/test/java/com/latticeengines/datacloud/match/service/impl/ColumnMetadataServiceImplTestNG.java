@@ -2,8 +2,9 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -19,10 +20,10 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 @Component
 public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private BeanDispatcherImpl beanDispatcher;
 
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
     private static final String BOMBORA = "Bombora";
     private static final String HG = "HG";

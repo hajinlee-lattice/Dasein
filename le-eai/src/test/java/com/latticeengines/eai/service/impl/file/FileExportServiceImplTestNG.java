@@ -13,13 +13,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.JobID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,15 +41,14 @@ import com.latticeengines.eai.file.runtime.mapreduce.CSVExportJob;
 import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.eai.service.impl.file.strategy.CSVFileExportStrategyBase;
-
 public class FileExportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("TestCustomer");
 
-    @Autowired
+    @Inject
     private ExportService fileExportService;
 
-    @Autowired
+    @Inject
     private CSVFileExportStrategyBase csvFileExportStrategyBase;
 
     private URL dataUrl;

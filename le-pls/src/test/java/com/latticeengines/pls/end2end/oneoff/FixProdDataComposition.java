@@ -6,13 +6,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.codehaus.plexus.util.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -28,13 +29,12 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
 public class FixProdDataComposition extends PlsFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private Configuration conf;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     private String fileName = "dc.txt" + System.currentTimeMillis();

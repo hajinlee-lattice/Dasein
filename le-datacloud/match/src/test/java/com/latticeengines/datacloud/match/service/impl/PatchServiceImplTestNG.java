@@ -1,7 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -28,13 +29,13 @@ public class PatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
     private static final String GREG_GOOGLER_ACCOUNT_ID = "530000381629";
     private static final String GREG_GOOGLER_DUNS = "039024002";
 
-    @Autowired
+    @Inject
     private PatchService patchService;
 
-    @Autowired
+    @Inject
     private AccountLookupService accountLookupService;
 
-    @Autowired
+    @Inject
     private DnBCacheService dnBCacheService;
 
     @Value("${common.le.stack}")

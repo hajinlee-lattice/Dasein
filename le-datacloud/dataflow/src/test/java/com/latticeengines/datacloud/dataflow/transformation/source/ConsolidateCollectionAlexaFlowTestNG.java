@@ -19,9 +19,10 @@ import com.latticeengines.datacloud.dataflow.framework.DataCloudDataFlowFunction
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.dataflow.atlas.ConsolidateCollectionParameters;
 
-
 public class ConsolidateCollectionAlexaFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(ConsolidateCollectionAlexaFlow.class);
+
+    private static final Logger log = LoggerFactory.getLogger(ConsolidateCollectionAlexaFlowTestNG.class);
+
     private static final String FIELD_DOMAIN = "URL";
     private static final String FIELD_TIMESTAMP = "LE_Last_Upload_Date";
     private static final String SAMPLE_AVRO_PATH = "transformation.source/alexa-sample.avro";

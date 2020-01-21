@@ -41,9 +41,10 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 
 @Component
 public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
-    public final String POD_ID = this.getClass().getSimpleName();
 
-    private static Logger log = LoggerFactory.getLogger(PurgeServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(PurgeServiceImplTestNG.class);
+
+    private final String POD_ID = this.getClass().getSimpleName();
 
     @Inject
     private PurgeService purgeService;

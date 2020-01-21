@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.dataflow.operations.OperationLogUtils;
 
 public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(DomainOwnershipRebuildTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AMSeedCleanByDomainOwnerTestNG.class);
 
     private static final String DOMSRC_DNB = DataCloudConstants.DOMSRC_DNB;
     private static final String DOMSRC_ORB = DataCloudConstants.DOMSRC_ORB;
@@ -39,7 +39,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
     private GeneralSource alexa = new GeneralSource("AlexaMostRecent");
     private GeneralSource source = amsClean;
 
-    @Test(groups = "pipeline1", enabled = true)
+    @Test(groups = "pipeline1")
     public void testTransformation() {
         prepareDomOwnTable();
         prepareAmSeed();

@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.avro.file.FileReader;
@@ -27,7 +29,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -70,7 +71,7 @@ public class RecordTransformerSerialTestNG extends ScoringApiFunctionalTestNGBas
 
     private File modelExtractionDir;
 
-    @Autowired
+    @Inject
     private RecordTransformer recordTransformer;
 
     @BeforeClass(groups = "functional")

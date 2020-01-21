@@ -4,7 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testng.annotations.Test;
 
@@ -13,10 +14,9 @@ import com.latticeengines.datacloud.core.datasource.DataSourceUtils;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.DataSourcePool;
-
 public class ZkConfigurationServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ZkConfigurationService zkConfigurationService;
 
     @Test(groups = "functional", enabled = false)

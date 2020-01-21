@@ -6,10 +6,11 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.HttpServerErrorException;
@@ -28,7 +29,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class ArtifactResourceDeploymentTestNG extends MetadataDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ArtifactResourceDeploymentTestNG.class);
 
@@ -39,7 +39,7 @@ public class ArtifactResourceDeploymentTestNG extends MetadataDeploymentTestNGBa
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @Value("${common.test.microservice.url}")

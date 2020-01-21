@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 
 abstract class AbstractPublishService {
 
-    private static Logger log = LoggerFactory.getLogger(AbstractPublishService.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractPublishService.class);
     private static final Integer HANGING_THRESHOLD_HOURS = 24;
     private static final Integer MAX_ERRORS = 100;
 

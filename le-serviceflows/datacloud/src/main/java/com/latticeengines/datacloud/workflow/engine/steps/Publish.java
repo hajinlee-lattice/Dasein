@@ -29,7 +29,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
-    public static final Logger log = LoggerFactory.getLogger(Publish.class);
+    private static final Logger log = LoggerFactory.getLogger(Publish.class);
 
     private static final String SLACK_BOT = "SourcePublisher";
 

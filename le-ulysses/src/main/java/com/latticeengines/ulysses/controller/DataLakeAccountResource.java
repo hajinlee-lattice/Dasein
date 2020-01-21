@@ -10,6 +10,7 @@ import javax.inject.Provider;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,7 +56,7 @@ public class DataLakeAccountResource {
         this.batonService = batonService;
     }
 
-    @Inject
+    @Autowired
     @Qualifier(AccountDanteFormatter.Qualifier)
     private Provider<AccountDanteFormatter> accountDanteFormatterProvider;
 

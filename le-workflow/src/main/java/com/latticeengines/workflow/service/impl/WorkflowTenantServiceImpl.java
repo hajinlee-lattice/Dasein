@@ -1,8 +1,9 @@
 package com.latticeengines.workflow.service.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -15,9 +16,9 @@ import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 @Component("workflowTenantService")
 public class WorkflowTenantServiceImpl implements WorkflowTenantService {
 
-    private static final Logger log = LoggerFactory.getLogger(WorkflowTenantService.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowTenantServiceImpl.class);
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Override

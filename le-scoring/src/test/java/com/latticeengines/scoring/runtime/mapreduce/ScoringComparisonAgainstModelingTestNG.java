@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
@@ -24,7 +26,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
@@ -55,22 +58,23 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
-
 public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ScoringComparisonAgainstModelingTestNG.class);
 
     private static final double EPS = 1e-6;
 
     @Value("${dataplatform.customer.basedir}")
     protected String customerBaseDir;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     protected static String customer = "Mulesoft_Relaunch_Orchestration";
 
     protected static String tenant;
 
-    @Autowired
+    @Inject
     protected ModelingService modelingService;
 
     private String inputLeadsTable;
@@ -95,13 +99,13 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
 
     protected String scorePath;
 
-    @Autowired
+    @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
     @Value("${scoring.test.table}")

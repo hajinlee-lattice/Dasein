@@ -29,6 +29,7 @@ def main():
         totalCategoryCntr += categoryCntr
         totalNumFiles += len(fileCntrs)
     report = "%s/%s/%s" % (proj_dir, TARGET_DIR, AGGREGATED_REPORT_FILE)
+    print("%d bugs in %d files in total" % (totalNumBugs, totalNumFiles))
     print("Writing aggregated report to %s" % report)
     with open(report, 'w') as fout:
         fout.write("\n%d bugs in %d files in total\n" % (totalNumBugs, totalNumFiles))

@@ -20,7 +20,7 @@ import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 @Component("validateCredentialResourceHelper")
 public class ValidateCredentialResourceHelper {
 
-    private Logger log = LoggerFactory.getLogger(ValidateCredentialResourceHelper.class);
+    private static final Logger log = LoggerFactory.getLogger(ValidateCredentialResourceHelper.class);
 
     @Inject
     private EaiCredentialValidationService eaiCredentialValidationService;

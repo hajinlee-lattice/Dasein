@@ -15,7 +15,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,10 +41,10 @@ import net.lingala.zip4j.exception.ZipException;
 @ContextConfiguration(locations = { "classpath:test-objectapi-context.xml" })
 public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     protected QueryEvaluator queryEvaluator;
 
-    @Autowired
+    @Inject
     private TestArtifactService testArtifactService;
 
     @Inject

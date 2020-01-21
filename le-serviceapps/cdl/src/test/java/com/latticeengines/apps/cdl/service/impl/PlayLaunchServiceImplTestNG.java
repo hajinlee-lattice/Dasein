@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -56,7 +55,6 @@ import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private static long CURRENT_TIME_MILLIS = System.currentTimeMillis();
@@ -70,7 +68,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private PlayLaunchChannelService playLaunchChannelService;
 
-    @Autowired
+    @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Inject

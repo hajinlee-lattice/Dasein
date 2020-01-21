@@ -1,8 +1,7 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
@@ -13,13 +12,11 @@ import com.latticeengines.datacloud.core.source.impl.HGDataRaw;
 @Component("hgDataRawArchiveService")
 public class HGDataRawArchiveService extends AbstractBulkArchiveService implements BulkArchiveService {
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
+    @Inject
+    private ArchiveProgressEntityMgr progressEntityMgr;
 
-    @Autowired
-    ArchiveProgressEntityMgr progressEntityMgr;
-
-    @Autowired
-    HGDataRaw source;
+    @Inject
+    private HGDataRaw source;
 
     @Override
     public String getBeanName() {
@@ -31,9 +28,6 @@ public class HGDataRawArchiveService extends AbstractBulkArchiveService implemen
 
     @Override
     ArchiveProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
-
-    @Override
-    Logger getLogger() { return log; }
 
     @Override
     String getSrcTableSplitColumn() { return getSource().getDownloadSplitColumn(); }

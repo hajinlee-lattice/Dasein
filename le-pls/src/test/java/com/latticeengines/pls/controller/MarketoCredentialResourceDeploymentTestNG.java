@@ -18,7 +18,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,7 +37,6 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsMarketoCredentialProxy;
 import com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper;
-
 public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Value("${pls.marketo.enrichment.webhook.url}")
@@ -47,7 +45,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
     @Value("${pls.marketo.scoring.webhook.resource}")
     private String scoringWebhookResource;
 
-    @Autowired
+    @Inject
     private PlsInternalProxy plsInternalProxy;
 
     private static final String CREDENTIAL_NAME = "TEST-DP-MARKETO-SCORING-CONFIG-";

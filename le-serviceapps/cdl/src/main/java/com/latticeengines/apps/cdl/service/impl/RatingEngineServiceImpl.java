@@ -100,7 +100,7 @@ import reactor.core.publisher.ParallelFlux;
 @Component("ratingEngineService")
 public class RatingEngineServiceImpl extends RatingEngineTemplate implements RatingEngineService {
 
-    private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
 
     private static Long defaultActiveModelQuotaLimit = 50L;
 
@@ -330,7 +330,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
 
         String ratingEngineId = ratingEngine.getId();
-        log.info("Creating new iteration for rating engine %s", ratingEngineId);
+        log.info("Creating new iteration for rating engine {}", ratingEngineId);
 
         RatingModelService<AIModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());

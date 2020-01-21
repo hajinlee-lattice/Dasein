@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +19,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -34,7 +35,7 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunctionalTestNGBase {
-    
+
     private static final Logger log = LoggerFactory.getLogger(DataFlowOperationFunctionalTestNGBase.class);
 
     public final String TARGET_PATH = "/tmp/DataFlowOperationTestOutput";
@@ -42,8 +43,9 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
     protected final String DYNAMIC_SOURCE = "DynamicSource";
     public final boolean LOCAL = true;
 
-    @Autowired
+    @Inject
     private DataTransformationService dataTransformationService;
+
     protected Configuration configuration = new Configuration();
 
     @BeforeMethod(groups = "functional")
@@ -138,7 +140,6 @@ public abstract class DataFlowOperationFunctionalTestNGBase extends DataFlowFunc
     protected Table execute(DataFlowBuilder builder, int partitions) {
         return execute(builder, TARGET_PATH, partitions, null);
     }
-
 
     protected Table execute(DataFlowBuilder builder, String targetPath, int partitions, Properties properties) {
         builder.setLocal(LOCAL);

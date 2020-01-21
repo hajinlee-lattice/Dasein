@@ -11,8 +11,9 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -50,16 +51,16 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     private static final String RATING_BUCKET_FIELD = "RATING_BUCKET_FIELD";
 
-    @Autowired
+    @Inject
     private RatingEntityPreviewService ratingEntityPreviewService;
 
-    @Autowired
+    @Inject
     private RatingCoverageProxy ratingCoverageProxy;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Autowired
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
     private Play play;

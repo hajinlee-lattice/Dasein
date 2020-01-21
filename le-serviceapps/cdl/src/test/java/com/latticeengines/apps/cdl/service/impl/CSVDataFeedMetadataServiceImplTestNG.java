@@ -1,9 +1,10 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import javax.inject.Inject;
+
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
@@ -12,12 +13,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-
 public class CSVDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CSVDataFeedMetadataServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private CSVDataFeedMetadataServiceImpl csvDataFeedMetadataService;
 
     @Test(groups = "functional")

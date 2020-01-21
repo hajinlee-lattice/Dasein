@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBa
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public class AttributeUtils {
-    private static Logger log = LoggerFactory.getLogger(AttributeUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(AttributeUtils.class);
 
     public static void copyPropertiesFromAttribute(Attribute source, Attribute dest) {
         copyPropertiesFromAttribute(source, dest, true);

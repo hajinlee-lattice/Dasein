@@ -17,6 +17,9 @@
     </Match>
 
     <!-- Malicious code vulnerability (MALICIOUS_CODE) -->
+    <Match classregex="com\.latticeengines\..*">
+        <Bug category="MALICIOUS_CODE" />
+    </Match>
 
     <!-- Multithreaded correctness (MT_CORRECTNESS)  -->
     <Match classregex="com\.latticeengines\..*">
@@ -24,10 +27,19 @@
     </Match>
 
     <!-- Performance (PERFORMANCE) -->
+    <Match classregex="com\.latticeengines\..*">
+        <Bug category="PERFORMANCE" />
+    </Match>
 
     <!-- Security (SECURITY) -->
+    <Match classregex="com\.latticeengines\..*">
+        <Bug category="SECURITY" />
+    </Match>
 
     <!-- Dodgy code (STYLE) -->
+    <Match classregex="com\.latticeengines\..*">
+        <Bug category="STYLE" />
+    </Match>
 
     <!-- SLF4J  -->
 

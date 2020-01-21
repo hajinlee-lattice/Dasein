@@ -60,7 +60,7 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to execute Listener for CampaignDeltaCalculationWorkflow successfully", e.getMessage());
+            log.error("Failed to execute Listener for CampaignDeltaCalculationWorkflow successfully", e);
         }
     }
 }

@@ -73,6 +73,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Component("patchService")
 public class PatchServiceImpl implements PatchService {
 
+    private static final Logger log = LoggerFactory.getLogger(PatchServiceImpl.class);
+
     private static final String BOOK_SOURCE_PATCHER = "Patcher";
     private static final String PATCH_LOG_KEY_MODE = "Mode";
     private static final String PATCH_LOG_KEY_TYPE = "Type";
@@ -83,8 +85,6 @@ public class PatchServiceImpl implements PatchService {
     // should not be greater than 7 day
     // leave 2 hour buffer to prevent exceeding limit
     private static final int PATCH_LOG_FILE_URL_EXPIRES_IN_HOURS = 7 * 24 - 2;
-
-    private static final Logger log = LoggerFactory.getLogger(PatchServiceImpl.class);
 
     @Value("${datacloud.match.realtime.max.input:1000}")
     private int maxRealTimeInput;
@@ -354,7 +354,7 @@ public class PatchServiceImpl implements PatchService {
         try {
             accountLookupService.updateLookupEntry(targetEntry, dataCloudVersion);
         } catch (Exception e) {
-            log.error("Failed to update AccountLookupEntry(DUNS={},Domain={},LatticeAccountId={}), error={}",
+            log.error("Failed to update AccountLookupEntry(DUNS={},Domain={},LatticeAccountId={})",
                     targetEntry.getDuns(), targetEntry.getDomain(), targetEntry.getLatticeAccountId(), e);
             patchLog.setStatus(PatchStatus.Failed);
             patchLog.setMessage(e.getMessage());
@@ -511,8 +511,7 @@ public class PatchServiceImpl implements PatchService {
                                 ? null
                                 : record.getMatchedDuns());
                     } catch (Exception e) {
-                        log.error("Failed to perform realtime match, current batch size = {}, error = {}",
-                                currentTuples.size(), e);
+                        log.error("Failed to perform realtime match, current batch size = {}", currentTuples.size(), e);
                         // a stream that generates tuples.size() nulls
                         return Stream.<String>generate(() -> null).limit(currentTuples.size());
                     }
@@ -921,7 +920,7 @@ public class PatchServiceImpl implements PatchService {
                 .collect(Collectors.toList());
         if (!activeBookIds.isEmpty()) {
             // cleanup expireAfterVersion for entries that are active
-            log.info("Set expireAfterVersion to NULL for PatchBooks, size = {}",
+            log.info("Set expireAfterVersion to NULL for PatchBooks, version = {}, size = {}",
                     dataCloudVersion, activeBookIds.size());
             patchBookEntityMgr.setExpireAfterVersion(activeBookIds, null);
         }

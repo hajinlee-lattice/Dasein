@@ -3,17 +3,17 @@ package com.latticeengines.modelquality.service.impl;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modelquality.DataFlow;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 import com.latticeengines.modelquality.service.DataFlowService;
-
 public class DataFlowServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private DataFlowService dataFlowService;
 
     @Test(groups = "functional")

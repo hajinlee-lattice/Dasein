@@ -12,11 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -32,7 +35,9 @@ import com.latticeengines.scoring.service.ScoringJobService;
 
 public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunctionalTestNGBase {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(ScoringJobServiceImplUsingInterfaceIdTestNG.class);
+
+    @Inject
     private ScoringJobService scoringJobService;
 
     private String tenant;

@@ -8,6 +8,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -25,6 +27,8 @@ import com.latticeengines.domain.exposed.datafabric.CompositeGraphEntity;
 
 
 public class TestDynamoGraphEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(TestDynamoGraphEntityMgrTestNG.class);
 
     @Inject
     private DynamoService dynamoService;

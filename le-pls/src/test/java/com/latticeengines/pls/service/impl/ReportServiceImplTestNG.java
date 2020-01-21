@@ -4,7 +4,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -18,20 +19,19 @@ import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class ReportServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String TENANT1 = "TENANT1";
     private static final String TENANT2 = "TENANT2";
     private static final String REPORT_DATA = "{\"report\": \"abd\" }";
 
-    @Autowired
+    @Inject
     private ReportEntityMgr reportEntityMgr;
 
-    @Autowired
+    @Inject
     private ReportService reportService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @BeforeClass(groups = "functional")

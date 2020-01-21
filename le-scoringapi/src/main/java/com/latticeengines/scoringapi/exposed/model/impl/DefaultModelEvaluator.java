@@ -36,7 +36,7 @@ import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
 public class DefaultModelEvaluator implements ModelEvaluator {
-    private static final Logger log = LoggerFactory.getLogger(ModelEvaluator.class);
+    private static final Logger log = LoggerFactory.getLogger(DefaultModelEvaluator.class);
 
     protected final PMMLManager manager;
 

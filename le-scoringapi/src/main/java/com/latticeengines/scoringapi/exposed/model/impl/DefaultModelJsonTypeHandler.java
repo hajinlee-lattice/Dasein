@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.jpmml.evaluator.CacheUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -54,10 +54,10 @@ import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
     private static final Logger log = LoggerFactory.getLogger(DefaultModelJsonTypeHandler.class);
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private Warnings warnings;
 
     @Value("${aws.customer.s3.bucket}")
@@ -168,7 +168,7 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
                 HdfsUtils.copyHdfsToLocal(yarnConfiguration, path, localPathToPersist + DATA_COMPOSITION_FILENAME);
             }
         } catch (IOException e) {
-            log.error("Failed to get DataComposition file, error=", e.getMessage());
+            log.error("Failed to get DataComposition file", e);
             throw new LedpException(LedpCode.LEDP_31000, new String[] { path });
         }
         DataComposition dataComposition = JsonUtils.deserialize(content, DataComposition.class);

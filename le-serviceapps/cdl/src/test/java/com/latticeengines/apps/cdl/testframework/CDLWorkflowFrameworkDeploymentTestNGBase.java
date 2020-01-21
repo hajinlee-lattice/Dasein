@@ -199,7 +199,7 @@ public abstract class CDLWorkflowFrameworkDeploymentTestNGBase extends CDLWorkfl
             numRecords = AvroUtils.count(yarnConfiguration, extractPath + "/*.avro");
             log.info("Uploaded {} records from {} to {}", numRecords, fileName, extractPath);
         } catch (IOException e) {
-            log.error("Failed to upload file {}, error={}", fileName, e);
+            log.error("Failed to upload file {}", fileName, e);
             throw new RuntimeException(e);
         }
         Extract extract = new Extract();
@@ -250,7 +250,7 @@ public abstract class CDLWorkflowFrameworkDeploymentTestNGBase extends CDLWorkfl
             ObjectMapper om = new ObjectMapper();
             return om.readValue(templateIs, Table.class);
         } catch (IOException e) {
-            log.error("Failed to read import template from file {}, error={}", templateFileName, e);
+            log.error("Failed to read import template from file {}", templateFileName, e);
             throw new RuntimeException(e);
         }
     }

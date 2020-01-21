@@ -3,7 +3,8 @@ package com.latticeengines.security.exposed.jwt;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -12,10 +13,9 @@ import com.latticeengines.domain.exposed.pls.JwtReplyParameters;
 import com.latticeengines.domain.exposed.pls.JwtRequestParameters;
 import com.latticeengines.security.exposed.jwt.handler.impl.ZendeskJwtHandler;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
-
 public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private JwtManager jwtManager;
 
     @Test(groups = "functional")

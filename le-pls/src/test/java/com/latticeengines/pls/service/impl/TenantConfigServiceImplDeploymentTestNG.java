@@ -3,6 +3,8 @@ package com.latticeengines.pls.service.impl;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.zookeeper.ZooDefs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,7 +41,6 @@ import com.latticeengines.pls.service.TenantDeploymentConstants;
 import com.latticeengines.pls.service.TenantDeploymentService;
 import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
-
 public class TenantConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
 
     private static final String contractId = "PLSTenantConfig";
@@ -54,13 +55,13 @@ public class TenantConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNG
     @Value("${pls.dataloader.rest.api}")
     private String defaultDataLoaderUrl;
 
-    @Autowired
+    @Inject
     private TenantConfigService configService;
 
-    @Autowired
+    @Inject
     private TenantDeploymentService tenantDeploymentService;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     @Autowired

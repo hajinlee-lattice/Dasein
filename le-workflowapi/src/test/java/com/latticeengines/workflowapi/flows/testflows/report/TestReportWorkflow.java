@@ -1,6 +1,7 @@
 package com.latticeengines.workflowapi.flows.testflows.report;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("testReportWorkflow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TestReportWorkflow extends AbstractWorkflow<TestReportWorkflowConfiguration> {
-    @Autowired
+    @Inject
     private TestRegisterReport registerReport;
 
     @Override

@@ -2,9 +2,10 @@ package com.latticeengines.datacloud.collection.entitymgr.impl;
 
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,9 +18,9 @@ import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 public class RefreshProgressEntityMgrImpl
         extends AbstractProgressEntityMgr<RefreshProgress> implements RefreshProgressEntityMgr {
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(RefreshProgressEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     RefreshProgressDao progressDao;
 
     @Override

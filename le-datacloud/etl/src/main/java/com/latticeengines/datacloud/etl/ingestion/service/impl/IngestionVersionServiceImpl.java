@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.orchestration.DataCloudEngine
 
 @Component("ingestionVersionService")
 public class IngestionVersionServiceImpl implements IngestionVersionService, DataCloudEngineVersionService {
-    private static Logger log = LoggerFactory.getLogger(IngestionVersionServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionVersionServiceImpl.class);
 
     @Inject
     protected Configuration yarnConfiguration;

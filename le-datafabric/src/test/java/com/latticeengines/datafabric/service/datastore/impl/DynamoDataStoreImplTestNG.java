@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -31,7 +32,7 @@ public class DynamoDataStoreImplTestNG extends AbstractTestNGSpringContextTests 
 
     private AmazonDynamoDBClient client;
 
-    @Autowired
+    @Inject
     private DynamoService dynamoService;
 
     @Value("${common.le.environment}")

@@ -27,14 +27,14 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     sudo mv ${ARTIFACT_DIR}/spark-${SPARK_VERSION}-bin-hadoop2.7 ${SPARK_HOME}
 
     if [[ ! -f "${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar" ]]; then
-        JERSEY_URL="http://repo1.maven.org/maven2/com/sun/jersey/jersey-bundle/1.19.1/jersey-bundle-1.19.1.jar"
+        JERSEY_URL="https://repo1.maven.org/maven2/com/sun/jersey/jersey-bundle/1.19.1/jersey-bundle-1.19.1.jar"
         wget ${JERSEY_URL} -O ${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar
     fi
     sudo cp ${ARTIFACT_DIR}/jersey-bundle-1.19.1.jar ${SPARK_HOME}/jars
 
     PARANAMER_PATH="${HOME}/.m2/repository/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar"
     if [[ ! -f "${PARANAMER_PATH}" ]]; then
-        PARANAMER_URL="http://repo1.maven.org/maven2/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar"
+        PARANAMER_URL="https://repo1.maven.org/maven2/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar"
         wget ${PARANAMER_URL} -O ${PARANAMER_PATH}
     fi
 
@@ -69,6 +69,7 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     sudo mv ${ARTIFACT_DIR}/${ARTIFACT_NAME} ${LIVY_HOME}
     sudo chown -R ${USER} ${LIVY_HOME}
     mkdir ${LIVY_HOME}/logs
+    sudo chmod a+w ${LIVY_HOME}/logs
 fi
 
 cp -f ${WSHOME}/le-dev/spark/livy.conf ${LIVY_HOME}/conf

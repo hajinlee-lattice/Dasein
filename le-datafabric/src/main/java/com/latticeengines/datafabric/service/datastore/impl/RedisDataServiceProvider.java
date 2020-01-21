@@ -22,7 +22,7 @@ import redis.clients.util.Pool;
 @Component("redisDataService")
 public class RedisDataServiceProvider implements FabricDataServiceProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(FabricDataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RedisDataServiceProvider.class);
 
     @Value("${datafabric.dataService.redis.servers:localhost}")
     private String redisServers;

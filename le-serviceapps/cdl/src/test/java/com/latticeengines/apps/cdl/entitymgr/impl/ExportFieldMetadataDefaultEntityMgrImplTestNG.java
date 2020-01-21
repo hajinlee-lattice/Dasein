@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -22,8 +20,6 @@ import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ExportFieldMetadataDefaultEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
-
-    private Logger log = LoggerFactory.getLogger(getClass());
 
     @Inject
     private ExportFieldMetadataDefaultsEntityMgr defaultExportFieldMetadataEntityMgr;

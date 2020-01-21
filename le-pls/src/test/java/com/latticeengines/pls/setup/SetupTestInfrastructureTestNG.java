@@ -6,9 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -26,11 +27,10 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.security.exposed.AccessLevel;
-
 public class SetupTestInfrastructureTestNG extends PlsFunctionalTestNGBaseDeprecated {
     private static final Logger log = LoggerFactory.getLogger(SetupTestInfrastructureTestNG.class);
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "infrastructure", enabled = true)

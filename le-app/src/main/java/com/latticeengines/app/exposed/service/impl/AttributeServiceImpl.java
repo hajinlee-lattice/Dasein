@@ -42,7 +42,7 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 @Component("selectedAttrService")
 public class AttributeServiceImpl implements AttributeService {
 
-    private Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(AttributeServiceImpl.class);
 
     private static final String UNIQUE_CONSTRAINT_SELECTED_ATTRIBUTES = "UQ__SELECTED__";
 

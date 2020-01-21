@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -40,11 +41,11 @@ public class AccountMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
     @Value("${datacloud.match.planner.account.executors.num}")
     private int executorNum;
 
-    @Inject
+    @Autowired
     @Qualifier("matchActorSystem")
     protected MatchActorSystem matchActorSystem;
 
-    @Inject
+    @Autowired
     @Qualifier("matchGuideBook")
     protected MatchGuideBook guideBook;
 

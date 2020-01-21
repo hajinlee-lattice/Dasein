@@ -24,7 +24,7 @@ public class ConsolidateRetainFieldFlow extends ConsolidateBaseFlow<ConsolidateR
             return source;
         }
         source = source.retain(new FieldList(config.getFieldsToRetain()));
-        log.info("Consolidate fields to retain=", config.getFieldsToRetain());
+        log.info("Consolidate fields to retain={}", config.getFieldsToRetain());
         return source;
     }
 

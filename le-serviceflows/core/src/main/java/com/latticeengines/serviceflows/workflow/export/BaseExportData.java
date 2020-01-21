@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -40,10 +39,10 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
 
     private static final Logger log = LoggerFactory.getLogger(BaseExportData.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private EaiProxy eaiProxy;
 
     @Inject
@@ -166,7 +165,7 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
                     try {
                         HdfsUtils.rmdir(yarnConfiguration, path);
                     } catch (IOException e) {
-                        log.error("Failed to delete path {}, error = {}", path, e);
+                        log.error("Failed to delete path {}", path, e);
                     }
                 });
                 log.info("Removing original files {} after merged", csvFiles);

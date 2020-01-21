@@ -3,7 +3,8 @@ package com.latticeengines.admin.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -22,19 +23,18 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.security.TenantStatus;
-
 public class TenantEntityMgrImplTestNG extends AdminFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private TestLatticeComponent testLatticeComponent;
 
-    @Autowired
+    @Inject
     private TenantConfigEntityMgr tenantConfigEntityMgr;
 
-    @Autowired
+    @Inject
     private ServiceConfigEntityMgr serviceConfigEntityMgr;
 
     @Test(groups = "functional", timeOut = 10000)

@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -35,10 +36,10 @@ public class DataCloudYarnServiceImplDeploymentTestNG extends DataCloudYarnFunct
     private static final String fileName = "BulkMatchInput.avro";
     private static final String podId = "PropDataYarnServiceImplTestNG";
 
-    @Autowired
+    @Inject
     private DataCloudYarnService dataCloudYarnService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @BeforeClass(groups = "deployment")

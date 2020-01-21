@@ -2,14 +2,14 @@ package com.latticeengines.dataplatform.mbean;
 
 import static org.testng.Assert.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
-
 public class HDFSAccessMBeanTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private HDFSAccessMBean hdfsAcMBean;
 
     @Test(groups = { "functional.platform", "functional.production" })

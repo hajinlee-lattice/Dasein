@@ -3,9 +3,10 @@ package com.latticeengines.scoring.service.impl;
 import java.util.Collections;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,13 +15,12 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.proxy.exposed.scoring.ScoringProxy;
-
 public class ScoringJobServiceImplDeploymentTestNG extends ScoringJobServiceImplTestNG {
 
     @Value("${common.test.microservice.url}")
     private String microserviceUrl;
 
-    @Autowired
+    @Inject
     private ScoringProxy scoringProxy;
 
     protected static String customer = "Mulesoft_Relaunch_Deployment";

@@ -3,7 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +81,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         DnBBatchMatchContext batchContext = prepareBulkMatchInput();
         batchContext = dnBBulkLookupDispatcher.sendRequest(batchContext);
         Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.SUBMITTED);
-        log.info(String.format("serviceBatchId=%s", batchContext.getServiceBatchId()));
+        log.info("serviceBatchId={}", batchContext.getServiceBatchId());
         // Submit to DnB realtime match
         realtimeLookup();
         // Get result from DnB bulk match
@@ -104,7 +104,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
     }
 
     private DnBBatchMatchContext bulkLookup(DnBBatchMatchContext batchContext) {
-        List<DnBBatchMatchContext> contexts = Arrays.asList(batchContext);
+        List<DnBBatchMatchContext> contexts = Collections.singletonList(batchContext);
         dnbBulkLookupStatusChecker.checkStatus(contexts);
 
         while (batchContext.getDnbCode() == DnBReturnCode.IN_PROGRESS
@@ -229,7 +229,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
                 }
             }
             csvFileParser.close();
-            log.info(String.format("Submitted %d rows from Fortune1000 to DnB api", contextsRealtime.size()));
+            log.info("Submitted {} rows from Fortune1000 to DnB api", contextsRealtime.size());
         } catch (IOException e) {
             e.printStackTrace();
         }

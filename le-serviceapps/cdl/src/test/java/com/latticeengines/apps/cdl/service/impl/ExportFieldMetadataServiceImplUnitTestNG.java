@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -24,17 +22,14 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestNGBase {
 
-
-    private Logger log = LoggerFactory.getLogger(getClass());
-
     @Inject
     private ExportFieldMetadataDefaultsService exportService;
 
-    List<ExportFieldMetadataDefaults> defaultMarketoExportFields;
-    List<ExportFieldMetadataDefaults> defaultS3ExportFields;
-    List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
-    List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
-    List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
+    private List<ExportFieldMetadataDefaults> defaultMarketoExportFields;
+    private List<ExportFieldMetadataDefaults> defaultS3ExportFields;
+    private List<ExportFieldMetadataDefaults> defaultLinkedInExportFields;
+    private List<ExportFieldMetadataDefaults> defaultFacebookExportFields;
+    private List<ExportFieldMetadataDefaults> defaultOutreachExportFields;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {

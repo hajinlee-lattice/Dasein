@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -36,15 +37,15 @@ import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 
 
 public class ImportWorkflowUtilsTestNG extends PlsFunctionalTestNGBase {
-    private static Logger log = LoggerFactory.getLogger(ImportWorkflowUtilsTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportWorkflowUtilsTestNG.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ImportWorkflowSpecProxy importWorkflowSpecProxy;
 
-    String csvHdfsPath = "/tmp/test_import_workflow";
+    private String csvHdfsPath = "/tmp/test_import_workflow";
 
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {

@@ -34,7 +34,7 @@ import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.util.SAMLUtils;
 
 public class MetadataSynchronizer {
-    private static Logger log = LoggerFactory.getLogger(MetadataSynchronizer.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataSynchronizer.class);
 
     private static final String SP_METADATA_TEMPLATE = "/metadata/applatticeenginescom_sp.xml";
 

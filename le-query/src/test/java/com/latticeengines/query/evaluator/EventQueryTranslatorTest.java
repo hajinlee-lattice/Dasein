@@ -36,7 +36,7 @@ import com.querydsl.sql.SQLQuery;
 
 public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
-    private static Logger log = LoggerFactory.getLogger(EventQueryTranslatorTest.class);
+    private static final Logger log = LoggerFactory.getLogger(EventQueryTranslatorTest.class);
 
     // private static final String PROD_ID1 =
     // "3872223C9BA06C649D68E415E23A9446";

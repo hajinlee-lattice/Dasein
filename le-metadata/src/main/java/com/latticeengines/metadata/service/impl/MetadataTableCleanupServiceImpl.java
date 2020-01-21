@@ -3,10 +3,11 @@ package com.latticeengines.metadata.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +23,9 @@ import com.latticeengines.metadata.service.MetadataTableCleanupService;
 @Component("metadataTableCleanupServiceImpl")
 public class MetadataTableCleanupServiceImpl implements MetadataTableCleanupService {
 
-    private static final Logger log = LoggerFactory.getLogger(MetadataTableCleanupService.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataTableCleanupServiceImpl.class);
 
-    @Autowired
+    @Inject
     private MetadataService metadataService;
 
     @Value("${metadata.table.cleanup.size}")

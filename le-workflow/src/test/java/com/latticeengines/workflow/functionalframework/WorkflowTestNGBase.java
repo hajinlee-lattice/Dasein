@@ -1,10 +1,10 @@
 package com.latticeengines.workflow.functionalframework;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobRepositoryTestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -26,22 +26,22 @@ public class WorkflowTestNGBase extends SecurityFunctionalTestNGBase {
 
     protected static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 5;
 
-    @Autowired
+    @Inject
     private JobRepository jobRepository;
 
-    @Autowired
+    @Inject
     private DataSource dataSource;
 
-    @Autowired
+    @Inject
     protected WorkflowService workflowService;
 
-    @Autowired
+    @Inject
     protected WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     protected WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     protected JobRepositoryTestUtils jobRepositoryTestUtils;

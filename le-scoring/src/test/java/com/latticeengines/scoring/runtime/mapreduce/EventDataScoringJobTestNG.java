@@ -7,8 +7,9 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -28,7 +29,7 @@ import com.latticeengines.yarn.functionalframework.YarnMiniClusterFunctionalTest
 @ContextConfiguration(locations = { "classpath:test-scoring-context.xml" })
 public class EventDataScoringJobTestNG extends YarnMiniClusterFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ScoringJobService scoringJobService;
 
     private String tenant;

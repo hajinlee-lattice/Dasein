@@ -4,17 +4,17 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.ulysses.EnrichedAccount;
 import com.latticeengines.ulysses.entitymgr.EnrichedAccountEntityMgr;
 import com.latticeengines.ulysses.testframework.UlyssesTestNGBase;
-
 public class EnrichedAccountEntityMgrImplTestNG extends UlyssesTestNGBase {
 
-    @Autowired
+    @Inject
     private EnrichedAccountEntityMgr enrichedAccountEntityMgr;
 
     @BeforeClass(groups = "functional")

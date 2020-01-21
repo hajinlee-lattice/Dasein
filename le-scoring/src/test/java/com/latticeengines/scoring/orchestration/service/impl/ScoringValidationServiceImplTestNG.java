@@ -4,7 +4,10 @@ import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
@@ -20,16 +23,17 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommand;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringValidationService;
-
 public class ScoringValidationServiceImplTestNG extends ScoringFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ScoringValidationServiceImplTestNG.class);
 
     @Value("${scoring.test.table}")
     private String testInputTable;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
-    @Autowired
+    @Inject
     private ScoringValidationService scoringValidationService;
 
     private String inputLeadsTable;

@@ -19,7 +19,7 @@ import com.latticeengines.graphdb.DependenciesToGraphAction;
 @Component
 public class DependencyChecker {
 
-    private static Logger log = LoggerFactory.getLogger(DependencyChecker.class);
+    private static final Logger log = LoggerFactory.getLogger(DependencyChecker.class);
 
     @Inject
     private DependenciesToGraphAction dependenciesToGraphAction;

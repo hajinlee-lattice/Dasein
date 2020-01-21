@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 @Component("accountMasterColumnSelectionService")
 public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionService {
 
-    private Logger log = LoggerFactory.getLogger(AccountMasterColumnSelectionServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountMasterColumnSelectionServiceImpl.class);
 
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;

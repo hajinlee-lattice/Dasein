@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -16,7 +18,8 @@ import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -28,7 +31,9 @@ import com.latticeengines.domain.exposed.metadata.ArtifactType;
 @Component("pivotMappingFileValidationService")
 public class PivotMappingFileValidationServiceImpl extends ArtifactValidation {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(PivotMappingFileValidationServiceImpl.class);
+
+    @Inject
     private Configuration yarnConfiguration;
 
     private String[] expectedHeaders = new String[] { "SourceColumn", "TargetColumn", "SourceColumnType", "Value" };

@@ -3,7 +3,8 @@ package com.latticeengines.workflow.cache;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -18,7 +19,7 @@ import com.latticeengines.domain.exposed.workflow.JobListCache;
 @ContextConfiguration(locations = {"classpath:test-workflow-context.xml"})
 public class RedisTenantJobIdListCacheWriterTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private TenantJobIdListCacheWriter writer;
 
     private ObjectMapper mapper = new ObjectMapper();

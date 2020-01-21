@@ -7,12 +7,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -63,7 +63,7 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected Path tableLocation1;
     protected Path tableLocation2;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
@@ -74,25 +74,25 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     @Value("${metadata.hive.enabled:false}")
     private boolean hiveEnabled;
 
-    @Autowired
+    @Inject
     protected AttributeEntityMgr attributeEntityMgr;
 
-    @Autowired
+    @Inject
     protected TableEntityMgr tableEntityMgr;
 
-    @Autowired
+    @Inject
     protected TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private DataSource hiveDataSource;
 
-    @Autowired
+    @Inject
     protected TableTypeHolder tableTypeHolder;
 
-    @Autowired
+    @Inject
     protected GlobalAuthFunctionalTestBed functionalTestBed;
 
-    @Autowired
+    @Inject
     private MetadataService metadataService;
 
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
