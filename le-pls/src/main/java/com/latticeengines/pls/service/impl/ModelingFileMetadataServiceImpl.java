@@ -649,15 +649,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         BusinessEntity businessEntity = BusinessEntity.getByName(entity);
         schemaTable = getSchemaTable(customerSpace, businessEntity, feedType, withoutId);
+        S3ImportSystem defaultSystem = cdlService.getDefaultImportSystem(customerSpace.toString());
         if (dataFeedTask == null) {
             table = TableUtils.clone(schemaTable, schemaTable.getName());
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, null);
-            EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA, fieldMappingDocument);
+            EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA,
+                    fieldMappingDocument, defaultSystem);
         } else {
             table = dataFeedTask.getImportTemplate();
             regulateFieldMapping(fieldMappingDocument, BusinessEntity.getByName(entity), feedType, table);
             if (table.getAttribute(InterfaceName.AccountId) == null) {
-                EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA, fieldMappingDocument);
+                EntityMatchGAConverterUtils.convertSavingMappings(enableEntityMatch, enableEntityMatchGA,
+                        fieldMappingDocument, defaultSystem);
             }
         }
         resolveMetadata(sourceFile, fieldMappingDocument, table, true, schemaTable, BusinessEntity.getByName(entity));
