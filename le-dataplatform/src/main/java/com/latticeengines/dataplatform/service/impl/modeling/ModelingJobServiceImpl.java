@@ -4,6 +4,8 @@ import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -28,6 +30,8 @@ import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
 @Component("modelingJobService")
 public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJobService {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelingJobServiceImpl.class);
 
     @Autowired
     protected ModelEntityMgr modelEntityMgr;

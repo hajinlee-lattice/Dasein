@@ -528,7 +528,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 return checkDataCloudChange(currentBuildNumber, customerSpace.toString(), status);
             }
         } catch (Exception e) {
-            log.error("Unable to check datacloud refresh for tenant {}. Error = {}", tenant.getId(), e);
+            log.error("Unable to check datacloud refresh for tenant {}", tenant.getId(), e);
         }
         return false;
     }
@@ -546,7 +546,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     String.class);
             return filterDetail(schedulerName, jsonMap);
         }catch (Exception e) {
-            log.error("Failed to retrieve scheduling group for scheduler {}, error = {}", schedulerName, e);
+            log.error("Failed to retrieve scheduling group for scheduler {}", schedulerName, e);
             throw new RuntimeException(e);
         }
     }

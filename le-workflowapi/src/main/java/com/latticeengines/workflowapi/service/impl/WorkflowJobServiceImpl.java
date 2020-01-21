@@ -572,7 +572,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     log.info("WorkflowThrottling Submitted workflow job pid={} tenant={} ApplicationId={}", o.getPid(), o.getTenant().getId(), appId);
                     logWaitTime(o, podid, division, o.getTenant());
                 } catch (Exception e) {
-                    log.error("Failed to submit workflow job pid={} for tenant {}. Error={}", o.getPid(), o.getTenant().getId(), e);
+                    log.error("Failed to submit workflow job pid={} for tenant {}.", o.getPid(), o.getTenant().getId(), e);
                 }
             }
             return submitted;
@@ -1036,10 +1036,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                             workflowJob.setStatus(status.name());
                         } else {
                             workflowJob.setStatus(JobStatus.FAILED.name());
-                            log.warn("Cannot understand status return from YARN, failing the job. WorkflowId=%s. "
-                                            + "Heartbeat created time=%s. Heartbeat last update time=%s. "
-                                            + "Allowed pending threshold=%s. Current time=%s. "
-                                            + "DiffBetweenCurrentAndCreate=%s.",
+                            log.warn("Cannot understand status return from YARN, failing the job. WorkflowId={}. "
+                                            + "Heartbeat created time={}. Heartbeat last update time={}. "
+                                            + "Allowed pending threshold={}. Current time={}. "
+                                            + "DiffBetweenCurrentAndCreate={}.",
                                     workflowJob.getWorkflowId(), jobUpdate.getCreateTime(),
                                     jobUpdate.getLastUpdateTime(), ALLOWED_PENDING_THRESHOLD, currentTimeMillis,
                                     currentTimeMillis - jobUpdate.getCreateTime());
@@ -1056,8 +1056,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                         if (currentTimeMillis - jobUpdate.getCreateTime() > NOTIFICATION_THRESHOLD) {
                             // log an error for now. In future, an notification will be sent to SQS.
                             log.error("Log an error for now. In future, an notification will be sent to SQS. "
-                                            + "WorkflowId=%s. Current time=%s. Heartbeat create time=%s. "
-                                            + "Notification threshold=%s",
+                                            + "WorkflowId={}. Current time={}. Heartbeat create time={}. "
+                                            + "Notification threshold={}",
                                     workflowJob.getWorkflowId(), currentTimeMillis, jobUpdate.getCreateTime(),
                                     NOTIFICATION_THRESHOLD);
                         }

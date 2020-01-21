@@ -3,7 +3,8 @@ package com.latticeengines.pls.entitymanager.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -13,10 +14,9 @@ import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
-
 public class SelectedAttrEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private SelectedAttrEntityMgr entityMgr;
 
     private Tenant tenant1;

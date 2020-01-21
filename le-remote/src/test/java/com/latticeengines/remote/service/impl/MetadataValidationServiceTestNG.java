@@ -9,8 +9,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -21,10 +22,9 @@ import com.latticeengines.domain.exposed.modeling.Metadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
 import com.latticeengines.remote.exposed.exception.MetadataValidationException;
 import com.latticeengines.remote.exposed.service.MetadataValidationResult;
-
 public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private MetadataValidationServiceImpl metadataValidationService;
 
     @Test(groups = { "functional" })

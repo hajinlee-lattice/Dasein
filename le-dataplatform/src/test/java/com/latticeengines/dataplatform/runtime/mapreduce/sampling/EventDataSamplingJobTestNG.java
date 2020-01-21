@@ -2,7 +2,8 @@ package com.latticeengines.dataplatform.runtime.mapreduce.sampling;
 
 import java.util.Properties;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -12,10 +13,9 @@ import com.latticeengines.dataplatform.functionalframework.DataplatformMiniClust
 import com.latticeengines.dataplatform.service.impl.ModelingServiceImpl;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
-
 public class EventDataSamplingJobTestNG extends DataplatformMiniClusterFunctionalTestNG {
 
-    @Autowired
+    @Inject
     private ModelingService modelingService;
 
     private String input = ClassLoader

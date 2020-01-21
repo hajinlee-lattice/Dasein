@@ -7,8 +7,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,13 +19,12 @@ import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-
 public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private Oauth2Interface oauth2Service;
 
-    @Autowired
+    @Inject
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
 
     private String tenantId;

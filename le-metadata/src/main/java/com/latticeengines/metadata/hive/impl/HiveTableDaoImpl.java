@@ -18,7 +18,7 @@ import com.latticeengines.metadata.hive.util.HiveUtils;
 @Component("hiveTableDao")
 public class HiveTableDaoImpl implements HiveTableDao {
 
-    private Logger log = LoggerFactory.getLogger(HiveTableDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HiveTableDaoImpl.class);
 
     @Autowired
     private Configuration yarnConfiguration;

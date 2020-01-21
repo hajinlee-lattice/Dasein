@@ -5,8 +5,6 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
@@ -18,8 +16,6 @@ import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.security.exposed.Constants;
 
 public class PlsDeploymentTestNGBaseDeprecated extends PlsAbstractTestNGBaseDeprecated {
-
-    protected static final Logger log = LoggerFactory.getLogger(PlsDeploymentTestNGBaseDeprecated.class);
 
     @Value("${common.test.pls.url}")
     private String deployedHostPort;

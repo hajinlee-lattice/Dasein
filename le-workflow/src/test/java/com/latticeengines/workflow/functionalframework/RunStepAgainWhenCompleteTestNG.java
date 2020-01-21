@@ -6,8 +6,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
@@ -16,19 +17,18 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-
 public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
 
-    @Autowired
+    @Inject
     private FailableStep failableStep;
 
-    @Autowired
+    @Inject
     private SuccessfulStep successfulStep;
 
-    @Autowired
+    @Inject
     private RunAgainWhenCompleteStep runAgainWhenCompleteStep;
 
-    @Autowired
+    @Inject
     private RunCompletedStepAgainWorkflow runCompletedStepAgainWorkflow;
 
     private WorkflowJob workflowJob1;

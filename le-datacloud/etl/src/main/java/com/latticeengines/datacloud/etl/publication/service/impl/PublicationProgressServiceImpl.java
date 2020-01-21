@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
 @Component("publicationProgressService")
 public class PublicationProgressServiceImpl implements PublicationProgressService {
 
-    private static Logger log = LoggerFactory.getLogger(PublicationProgressServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PublicationProgressServiceImpl.class);
 
     @Inject
     private PublicationEntityMgr publicationEntityMgr;

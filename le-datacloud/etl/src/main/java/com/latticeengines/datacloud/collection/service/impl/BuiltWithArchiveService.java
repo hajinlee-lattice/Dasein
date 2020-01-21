@@ -1,8 +1,7 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
@@ -13,13 +12,11 @@ import com.latticeengines.datacloud.core.source.impl.BuiltWith;
 @Component("builtWithArchiveService")
 public class BuiltWithArchiveService extends AbstractCollectionArchiveService implements CollectedArchiveService {
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
+    @Inject
+    private ArchiveProgressEntityMgr progressEntityMgr;
 
-    @Autowired
-    ArchiveProgressEntityMgr progressEntityMgr;
-
-    @Autowired
-    BuiltWith source;
+    @Inject
+    private BuiltWith source;
 
     @Override
     public String getBeanName() {
@@ -31,8 +28,5 @@ public class BuiltWithArchiveService extends AbstractCollectionArchiveService im
 
     @Override
     ArchiveProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
-
-    @Override
-    Logger getLogger() { return log; }
 
 }

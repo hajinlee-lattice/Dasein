@@ -1,7 +1,8 @@
 package com.latticeengines.proxy.exposed;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -19,7 +20,7 @@ public class RestApiClientTestNG extends AbstractTestNGSpringContextTests {
     private static final String PUBLIC_URL = "https://testapp.lattice-engines.com";
     private static final String PRIVATE_URL = "https://internal-private-lpi-a-1832171025.us-east-1.elb.amazonaws.com";
 
-    @Autowired
+    @Inject
     private ApplicationContext applicationContext;
 
     @Test(groups = "functional")

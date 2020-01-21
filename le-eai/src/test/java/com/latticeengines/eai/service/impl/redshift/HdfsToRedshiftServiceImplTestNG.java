@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -28,7 +30,6 @@ import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
-
 public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(HdfsToRedshiftServiceImplTestNG.class);
@@ -38,10 +39,10 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
 
     private static final String TEST_TABLE = "eai_test";
 
-    @Autowired
+    @Inject
     private HdfsToRedshiftService hdfsToRedshiftService;
 
-    @Autowired
+    @Inject
     private EaiYarnService eaiYarnService;
 
     @Value("${common.le.stack}")
@@ -57,7 +58,7 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     @Qualifier(value = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
-    @Autowired
+    @Inject
     private RedshiftService redshiftService;
 
     @SuppressWarnings("unused")

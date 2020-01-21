@@ -2,10 +2,11 @@ package com.latticeengines.workflowapi.functionalframework;
 
 import static org.testng.Assert.assertEquals;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -49,13 +50,13 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     @Value("${workflowapi.modelingservice.basedir}")
     protected String modelingServiceHdfsBaseDir;
 
-    @Autowired
+    @Inject
     protected SoftwareLibraryService softwareLibraryService;
 
-    @Autowired
+    @Inject
     protected WorkflowJobService workflowJobService;
 
-    @Autowired
+    @Inject
     protected VersionManager versionManager;
 
     @Value("${workflowapi.test.sfdc.user.name}")
@@ -70,19 +71,19 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
     @Value("${dataplatform.hdfs.stack:}")
     private String stackName;
 
-    @Autowired
+    @Inject
     protected PlsInternalProxy plsInternalProxy;
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected YarnFunctionalTestNGBase platformTestBase;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private YarnClient defaultYarnClient;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     protected Tenant tenant;

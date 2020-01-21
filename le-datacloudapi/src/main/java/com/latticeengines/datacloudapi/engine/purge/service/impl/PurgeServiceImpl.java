@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 @Component("purgeService")
 public class PurgeServiceImpl implements PurgeService {
 
-    private static Logger log = LoggerFactory.getLogger(PurgeServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PurgeServiceImpl.class);
 
     // Source list which is never purged
     @SuppressWarnings("serial")

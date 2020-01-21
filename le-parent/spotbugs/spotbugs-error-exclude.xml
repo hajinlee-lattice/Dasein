@@ -23,6 +23,12 @@
     </Match>
 
     <!-- Malicious code vulnerability (MALICIOUS_CODE) -->
+    <Match classregex="com\.latticeengines\..*">
+        <And>
+            <Bug category="MALICIOUS_CODE" />
+            <Bug code="EI2,EI,MS" />
+        </And>
+    </Match>
 
     <!-- Multithreaded correctness (MT_CORRECTNESS)  -->
     <Match classregex="com\.latticeengines\..*">
@@ -39,17 +45,23 @@
 
     <!-- Security (SECURITY) -->
     <Match classregex="com\.latticeengines\..*">
-        <Bug category="SECURITY" />
+        <And>
+            <Bug category="SECURITY" />
+            <Bug code="SQL" />
+        </And>
     </Match>
 
     <!-- Dodgy code (STYLE) -->
     <Match classregex="com\.latticeengines\..*">
-        <Bug category="STYLE" />
+        <And>
+            <Bug category="STYLE" />
+            <Bug code="NP,SLF4J,REC,RCN,UC,RV,BC,Eq,ICAST,IM,FE,DB,DMI" />
+        </And>
     </Match>
 
     <!-- SLF4J  -->
     <Match classregex="com\.latticeengines\..*">
-        <Bug pattern="SLF4J_FORMAT_SHOULD_BE_CONST,SLF4J_LOGGER_SHOULD_BE_NON_STATIC" />
+        <Bug pattern="SLF4J_FORMAT_SHOULD_BE_CONST,SLF4J_SIGN_ONLY_FORMAT,SLF4J_LOGGER_SHOULD_BE_NON_STATIC" />
     </Match>
 
     <Match classregex="com\.latticeengines\..*">

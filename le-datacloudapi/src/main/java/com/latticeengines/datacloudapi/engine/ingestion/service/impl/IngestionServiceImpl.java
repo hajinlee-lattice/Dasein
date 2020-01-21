@@ -42,7 +42,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("ingestionService")
 public class IngestionServiceImpl implements IngestionService {
-    private static Logger log = LoggerFactory.getLogger(IngestionServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionServiceImpl.class);
 
     @Inject
     IngestionEntityMgr ingestionEntityMgr;

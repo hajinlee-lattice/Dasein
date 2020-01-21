@@ -3,7 +3,8 @@ package com.latticeengines.eai.controller;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
@@ -13,7 +14,6 @@ import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
-
 public class ValidateCredentialResourceDeploymentTestNG extends EaiFunctionalTestNGBase {
 
     @Value("${eai.test.salesforce.username}")
@@ -31,7 +31,7 @@ public class ValidateCredentialResourceDeploymentTestNG extends EaiFunctionalTes
     @Value("${eai.salesforce.sandbox.loginurl}")
     private String sandboxLoginUrl;
 
-    @Autowired
+    @Inject
     private ValidateCredentialProxy validateCredentialProxy;
 
     // test production

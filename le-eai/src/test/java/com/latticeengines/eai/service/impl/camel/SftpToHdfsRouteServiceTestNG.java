@@ -2,11 +2,14 @@ package com.latticeengines.eai.service.impl.camel;
 
 import java.io.InputStream;
 
+import javax.inject.Inject;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -28,6 +31,8 @@ import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 @Component("sftpToHdfsRouteServiceTestNG")
 public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(SftpToHdfsRouteServiceTestNG.class);
+
     private static final String hdfsDir = "/tmp/sftp2hdfsfunctional";
 
     private static final int sftpPort = 22;
@@ -42,7 +47,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
     @Value("${eai.test.sftp.password.encrypted}")
     private String sftpPassword;
 
-    @Autowired
+    @Inject
     private SftpToHdfsRouteService sftpToHdfsRouteService;
 
     @BeforeClass(groups = "functional")

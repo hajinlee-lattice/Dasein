@@ -3,9 +3,10 @@ package com.latticeengines.scoring.service.impl;
 import java.util.Arrays;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,10 +17,9 @@ import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.service.ScoringJobService;
 import com.latticeengines.scoring.util.ScoringTestUtils;
-
 public class ScoringContainerTestNG extends ScoringFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ScoringJobService scoringJobService;
 
     private String customer = "test_customer";

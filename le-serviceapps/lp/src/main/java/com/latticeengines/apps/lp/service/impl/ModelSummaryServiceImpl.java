@@ -67,7 +67,8 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 @Component("modelSummaryService")
 public class ModelSummaryServiceImpl implements ModelSummaryService {
 
-    public static final Logger log = LoggerFactory.getLogger(ModelSummaryServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryServiceImpl.class);
+
     public static final String PREDICTORS = "Predictors";
     public static final String ELEMENTS = "Elements";
     public static final String VALUES = "Values";

@@ -39,7 +39,7 @@ public class QueryDiagnostics {
         } catch (Exception e) {
             if (!queryLoggingPathLogged) {
                 queryLoggingPathLogged = true;
-                log.info("Failed to find config {} for customer {} in podId {}. Defaulting to false. Exception: {}",
+                log.info("Failed to find config {} for customer {} in podId {}. Defaulting to false.",
                         path, podId, customerSpace, e);
             }
         }

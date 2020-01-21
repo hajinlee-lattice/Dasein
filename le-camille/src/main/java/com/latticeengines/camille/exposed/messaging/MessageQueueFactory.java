@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 public class MessageQueueFactory {
 
-    private Logger log = LoggerFactory.getLogger(MessageQueueFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(MessageQueueFactory.class);
 
     public static MessageQueueFactory instance() {
         if (instance == null) {

@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 public class LockManager {
 
     private static final ConcurrentMap<String, InterProcessReadWriteLock> locks = new ConcurrentHashMap<>();
-    private static Logger log = LoggerFactory.getLogger(LockManager.class);
+    private static final Logger log = LoggerFactory.getLogger(LockManager.class);
     private static final ConcurrentSkipListSet<String> privateLocks = new ConcurrentSkipListSet<>();
 
     public static void registerDivisionPrivateLock(String lockName) {

@@ -2,18 +2,18 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.net.URL;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-
 public class EventDataScoringJobMethodTestNG extends ScoringFunctionalTestNGBase{
 
-    @Autowired
+    @Inject
     private Configuration hadoopConfiguration;
 
     @Value("${dataplatform.customer.basedir}")

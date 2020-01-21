@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
@@ -34,7 +34,7 @@ public class SampleMatchGuideBook extends GuideBook {
 
     private ActorRef fuzzyMatchAnchor;
 
-    @Autowired
+    @Inject
     private SampleMatchActorSystem actorSystem;
 
     private List<String> dummyPathGraph;

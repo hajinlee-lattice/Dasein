@@ -5,10 +5,11 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -23,26 +24,25 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
 public class CleanUpEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CleanUpEndToEndDeploymentTestNG.class);
 
     private static final String TRAINING_CSV_FILE = "Lattice_Relaunch_Small.csv";
 
-    @Autowired
+    @Inject
     private SelfServiceModelingEndToEndDeploymentTestNG selfServiceModeling;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     private String modelId;

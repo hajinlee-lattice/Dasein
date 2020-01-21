@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 @Aspect
 public class MatchStepAspect {
 
-    public static Logger log = LoggerFactory.getLogger(MatchStepAspect.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchStepAspect.class);
 
     private ThreadLocal<String> tracker = new ThreadLocal<>();
     private ConcurrentMap<String, Long> logThreshold = new ConcurrentHashMap<>();

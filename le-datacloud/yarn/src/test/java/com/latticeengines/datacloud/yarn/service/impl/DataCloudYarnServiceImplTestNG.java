@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -15,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -50,10 +50,10 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
     private static final String avroDir = "/tmp/PropDataYarnServiceTestNG";
     private static final String podId = "PropDataYarnServiceImplTestNG";
 
-    @Autowired
+    @Inject
     private DataCloudYarnService dataCloudYarnService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Resource(name = "accountMasterColumnSelectionService")

@@ -24,6 +24,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @ContextConfiguration(locations = { "classpath:test-monitor-context.xml" })
 public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//PowerMockTestCase
 
@@ -37,7 +39,9 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     private Tenant tenant;
     private User user;
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_FINAL")
     private Logger origLog;
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_FINAL")
     private Logger newLog;
     private List<String> logs;
 

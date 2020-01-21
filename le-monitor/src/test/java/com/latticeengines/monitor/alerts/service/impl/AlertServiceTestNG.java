@@ -2,17 +2,17 @@ package com.latticeengines.monitor.alerts.service.impl;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
-
 public class AlertServiceTestNG extends MonitorFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private AlertService alertService;
 
     @BeforeClass(groups = "functional")

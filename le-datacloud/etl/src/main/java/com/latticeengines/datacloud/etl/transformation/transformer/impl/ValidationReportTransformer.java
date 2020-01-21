@@ -16,11 +16,11 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Va
 @Component("validationReportTransformer")
 public class ValidationReportTransformer extends AbstractDataflowTransformer<ValidationReportTransformerConfig, SourceValidationFlowParameters> {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(ValidationReportTransformer.class);
 
-    private static String transfomerName = "validationReportTransformer";
+    private static final String transfomerName = "validationReportTransformer";
 
-    private static String dataFlowBeanName = "sourceValidationFlow";
+    private static final String dataFlowBeanName = "sourceValidationFlow";
 
     @Override
     public String getName() {

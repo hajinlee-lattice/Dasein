@@ -3,7 +3,6 @@ package com.latticeengines.datafabric.functionalframework;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -27,6 +26,5 @@ public abstract class DataFabricConnectFunctionalTestNGBase extends AbstractTest
 
     @Autowired
     protected Configuration conf;
-
 
 }

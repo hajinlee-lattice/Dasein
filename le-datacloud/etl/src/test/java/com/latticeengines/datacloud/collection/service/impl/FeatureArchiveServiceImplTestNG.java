@@ -3,7 +3,8 @@ package com.latticeengines.datacloud.collection.service.impl;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
@@ -13,17 +14,16 @@ import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.datacloud.core.source.impl.Feature;
 import com.latticeengines.datacloud.core.util.DateRange;
 
-
 @Component
 public class FeatureArchiveServiceImplTestNG extends CollectionArchiveServiceImplTestNGBase {
 
-    @Autowired
+    @Inject
     FeatureArchiveService collectedArchiveService;
 
-    @Autowired
+    @Inject
     Feature source;
 
-    @Autowired
+    @Inject
     ArchiveProgressEntityMgr progressEntityMgr;
 
     CollectedArchiveService getCollectedArchiveService() {

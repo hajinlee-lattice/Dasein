@@ -24,7 +24,7 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class CalculateFittedExpectedRevenueFunction extends BaseOperation implements Function {
 
-    private static final Logger log = LoggerFactory.getLogger(CalculateExpectedRevenueFunction.class);
+    private static final Logger log = LoggerFactory.getLogger(CalculateFittedExpectedRevenueFunction.class);
 
     private static final long serialVersionUID = 8540065221465151489L;
 

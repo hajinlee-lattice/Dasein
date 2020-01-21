@@ -3,8 +3,8 @@ package com.latticeengines.pls.functionalframework;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 
@@ -13,16 +13,15 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Segment;
 import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
-
 public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
 
-    @Autowired
+    @Inject
     private MarketoCredentialEntityMgr marketoCredentialEntityMgr;
 
     @Value("${pls.test.functional.api}")
     private String hostPort;
 
-    @Autowired
+    @Inject
     private GlobalAuthFunctionalTestBed functionalTestBed;
 
     @PostConstruct

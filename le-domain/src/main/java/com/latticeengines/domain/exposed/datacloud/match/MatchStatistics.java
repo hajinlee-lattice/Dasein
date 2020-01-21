@@ -23,7 +23,7 @@ public class MatchStatistics {
     private static final PeriodFormatter periodFormatter = new PeriodFormatterBuilder()
             .appendHours().appendLiteral(":").appendMinutes().appendLiteral(":").appendSeconds()
             .appendLiteral(".").appendMillis3Digit().toFormatter();
-    private static Logger log = LoggerFactory.getLogger(MatchStatistics.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchStatistics.class);
     private Integer rowsRequested;
     private Integer rowsMatched = 0;
     private Long timeElapsedInMsec;

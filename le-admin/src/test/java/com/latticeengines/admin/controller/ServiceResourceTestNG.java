@@ -6,7 +6,8 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -17,10 +18,9 @@ import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.functionalframework.TestLatticeComponent;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
-
 public class ServiceResourceTestNG extends AdminFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private TestLatticeComponent testLatticeComponent;
 
     @Test(groups = "functional")

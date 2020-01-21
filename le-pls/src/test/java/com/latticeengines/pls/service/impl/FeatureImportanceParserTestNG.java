@@ -5,19 +5,19 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.net.URL;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
-
 public class FeatureImportanceParserTestNG extends PlsFunctionalTestNGBaseDeprecated {
     
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration = new Configuration();
     private String defaultFs = null;
     private String inputFile = null;

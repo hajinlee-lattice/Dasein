@@ -1,11 +1,9 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.datacloud.collection.entitymgr.RefreshProgressEntityMgr;
 import com.latticeengines.datacloud.collection.service.PivotService;
 import com.latticeengines.datacloud.core.source.PivotedSource;
@@ -15,16 +13,11 @@ import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 @Component("hgDataPivotService")
 public class HGDataPivotService extends AbstractPivotService implements PivotService {
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
+    @Inject
+    private RefreshProgressEntityMgr progressEntityMgr;
 
-    @Autowired
-    ArchiveProgressEntityMgr archiveProgressEntityMgr;
-
-    @Autowired
-    RefreshProgressEntityMgr progressEntityMgr;
-
-    @Autowired
-    HGDataPivoted source;
+    @Inject
+    private HGDataPivoted source;
 
     @Override
     public String getBeanName() {
@@ -36,9 +29,6 @@ public class HGDataPivotService extends AbstractPivotService implements PivotSer
 
     @Override
     RefreshProgressEntityMgr getProgressEntityMgr() { return progressEntityMgr; }
-
-    @Override
-    Logger getLogger() { return log; }
 
     @Override
     protected void executeDataFlow(RefreshProgress progress) {

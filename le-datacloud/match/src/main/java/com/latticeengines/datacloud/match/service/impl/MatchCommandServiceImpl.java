@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 @Component("matchCommandService")
 public class MatchCommandServiceImpl implements MatchCommandService {
 
-    private static Logger log = LoggerFactory.getLogger(MatchCommandServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchCommandServiceImpl.class);
 
     @Value("${datacloud.match.block.attempts.max}")
     private Integer maxBlockAttempts;

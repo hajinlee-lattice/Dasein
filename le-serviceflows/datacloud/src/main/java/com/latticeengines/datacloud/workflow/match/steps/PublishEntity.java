@@ -24,7 +24,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PublishEntity extends BaseWorkflowStep<PublishEntityConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(PublishEntity.class);
+    private static final Logger log = LoggerFactory.getLogger(PublishEntity.class);
 
     @Inject
     private EntityMatchInternalService entityMatchInternalService;

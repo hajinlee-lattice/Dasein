@@ -33,7 +33,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 @Component("bulkMatchServiceWithDerivedColumnCache")
 public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchService {
 
-    private static Logger log = LoggerFactory.getLogger(BulkMatchServiceWithDerivedColumnCacheImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BulkMatchServiceWithDerivedColumnCacheImpl.class);
 
     @Inject
     protected MatchCommandService matchCommandService;

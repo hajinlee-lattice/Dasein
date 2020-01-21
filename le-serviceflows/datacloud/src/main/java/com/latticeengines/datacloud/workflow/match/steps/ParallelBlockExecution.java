@@ -60,7 +60,8 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecutionConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(ParallelBlockExecution.class);
+    private static final Logger log = LoggerFactory.getLogger(ParallelBlockExecution.class);
+
     private static final int MAX_ERRORS = 100;
     private static final Long MATCH_TIMEOUT = TimeUnit.DAYS.toMillis(3);
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.json";

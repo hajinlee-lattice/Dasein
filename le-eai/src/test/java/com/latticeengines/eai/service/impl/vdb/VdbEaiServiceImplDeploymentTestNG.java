@@ -8,10 +8,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -30,15 +33,15 @@ import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
-
-
 public class VdbEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(VdbEaiServiceImplDeploymentTestNG.class);
 
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
 
     private static final long MAX_MILLIS_TO_WAIT = 1000L * 60 * 25;
 
-    @Autowired
+    @Inject
     private EaiService eaiService;
 
     @Value("${eai.test.vdb.connector.tenant:DLTestTenant}")

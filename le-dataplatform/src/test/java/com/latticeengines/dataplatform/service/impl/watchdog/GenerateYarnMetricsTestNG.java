@@ -1,19 +1,19 @@
 package com.latticeengines.dataplatform.service.impl.watchdog;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.yarn.exposed.service.YarnService;
-
 public class GenerateYarnMetricsTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private GenerateYarnMetrics generateYarnMetrics;
 
-    @Autowired
+    @Inject
     private YarnService yarnService;
 
     @BeforeClass(groups = { "functional" })

@@ -19,12 +19,13 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Component("matchCdlMergeStep")
 public class MatchCdlMergeStep extends RunDataFlow<MatchCdlMergeConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(MatchCdlMergeStep.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchCdlMergeStep.class);
     private Table tableWithAccountId;
     private Table tableWithoutAccountId;
 
     @Inject
     private MatchCdlWithAccountIdWorkflow accountIdWorkflow;
+
     @Inject
     private MatchCdlWithoutAccountIdWorkflow noAccountIdWorkflow;
 

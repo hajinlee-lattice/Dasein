@@ -15,7 +15,6 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -30,12 +29,23 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.RecommendationService;
-import com.latticeengines.playmakercore.service.impl.LpiPMRecommendationImpl.CleanupExecutor;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 
 @Component("recommendationService")
 public class RecommendationServiceImpl implements RecommendationService {
-    @Autowired
+
+    private static final Logger log = LoggerFactory.getLogger(RecommendationServiceImpl.class);
+
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    @Inject
+    private PlayProxy playProxy;
+
+    @Inject
+    private CleanupExecutor cleanupExecutor;
+
+    @Inject
     private RecommendationEntityMgr recommendationEntityMgr;
 
     @Override
@@ -77,20 +87,6 @@ public class RecommendationServiceImpl implements RecommendationService {
         return recommendationEntityMgr.findRecommendationsAsMap(lastModificationDate, offset, max, syncDestination,
                 playIds, orgInfo);
     }
-
-    private static final Logger log = LoggerFactory.getLogger(LpiPMRecommendationImpl.class);
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    // @Inject
-    // private RecommendationEntityMgr recommendationEntityMgr;
-
-    @Inject
-    private PlayProxy playProxy;
-
-    @Inject
-    private CleanupExecutor cleanupExecutor;
 
     // @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum,
@@ -216,7 +212,7 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Component
     class CleanupExecutor {
 
-        private Logger cleanupExecutorLog = LoggerFactory.getLogger(CleanupExecutor.class);
+        private final Logger cleanupExecutorLog = LoggerFactory.getLogger(CleanupExecutor.class);
 
         @Value("${playmaker.update.bulk.max:1000}")
         private int maxUpdateRows;

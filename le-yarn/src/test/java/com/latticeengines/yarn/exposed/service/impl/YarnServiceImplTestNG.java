@@ -6,13 +6,14 @@ import static org.testng.Assert.assertNotNull;
 import java.util.List;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedulerInfo;
 import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.SchedulerTypeInfo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -21,13 +22,12 @@ import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.service.JobService;
 import com.latticeengines.yarn.exposed.service.YarnService;
 import com.latticeengines.yarn.functionalframework.YarnFunctionalTestNGBase;
-
 public class YarnServiceImplTestNG extends YarnFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private YarnService yarnService;
 
     @Test(groups = { "functional" })

@@ -57,7 +57,7 @@ import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploadWrapperConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(CleanupByUploadStep.class);
+    private static final Logger log = LoggerFactory.getLogger(CleanupByUploadStep.class);
 
     private static int prepareStep, cleanupStep, collectMasterStep, cleanupMasterStep, collectStep;
 

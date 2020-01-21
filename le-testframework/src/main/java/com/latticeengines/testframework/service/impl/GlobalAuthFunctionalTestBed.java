@@ -4,10 +4,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 
@@ -30,15 +31,15 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 @Component("globalAuthFunctionalTestBed")
 public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
-    private static Logger log = LoggerFactory.getLogger(GlobalAuthFunctionalTestBed.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalAuthFunctionalTestBed.class);
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
     @Override

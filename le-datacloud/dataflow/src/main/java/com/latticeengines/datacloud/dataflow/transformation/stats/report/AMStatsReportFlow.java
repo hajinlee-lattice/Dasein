@@ -19,7 +19,7 @@ import cascading.tuple.Fields;
 @Component("amStatsReportFlow")
 public class AMStatsReportFlow extends AMStatsFlowBase {
 
-    private static Logger log = LoggerFactory.getLogger(AMStatsReportFlow.class);
+    private static final Logger log = LoggerFactory.getLogger(AMStatsReportFlow.class);
 
     @Override
     public Node construct(AccountMasterStatsParameters parameters) {

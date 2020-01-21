@@ -8,13 +8,14 @@ import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -40,13 +41,13 @@ public class ModelStepRetrieveMetadataProcessorImplTestNG extends DataPlatformFu
 
     private static final Logger log = LoggerFactory.getLogger(ModelStepRetrieveMetadataProcessorImplTestNG.class);
 
-    @Autowired
+    @Inject
     private ModelStepRetrieveMetadataProcessorImpl modelStepRetrieveMetadataProcessor;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
     private StandaloneHttpServer httpServer;

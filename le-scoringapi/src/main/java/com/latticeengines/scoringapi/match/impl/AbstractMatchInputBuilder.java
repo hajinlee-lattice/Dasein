@@ -35,7 +35,7 @@ import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
 
-    private Logger log = LoggerFactory.getLogger(AbstractMatchInputBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractMatchInputBuilder.class);
 
     @Override
     public MatchInput buildMatchInput(CustomerSpace space, //

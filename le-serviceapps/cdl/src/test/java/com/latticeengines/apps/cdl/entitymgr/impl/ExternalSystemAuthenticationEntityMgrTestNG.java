@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(ExternalSystemAuthenticationEntityMgrTestNG.class);
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;

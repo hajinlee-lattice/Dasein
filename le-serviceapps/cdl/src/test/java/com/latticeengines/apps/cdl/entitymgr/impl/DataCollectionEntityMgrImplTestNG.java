@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
@@ -43,16 +43,16 @@ public class DataCollectionEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DataCollectionEntityMgrImplTestNG.class);
 
-    @Autowired
+    @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
-    @Autowired
+    @Inject
     private TableEntityMgr tableEntityMgr;
 
-    @Autowired
+    @Inject
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
-    @Autowired
+    @Inject
     private SegmentService segmentService;
 
     private static final String tableName1 = "Table1";

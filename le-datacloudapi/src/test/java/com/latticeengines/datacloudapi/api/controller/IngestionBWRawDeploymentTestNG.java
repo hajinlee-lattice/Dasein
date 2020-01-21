@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.SleepUtils;
@@ -27,20 +28,19 @@ import com.latticeengines.domain.exposed.datacloud.manage.Ingestion;
 import com.latticeengines.domain.exposed.datacloud.manage.IngestionProgress;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.proxy.exposed.datacloudapi.IngestionProxy;
-
 public class IngestionBWRawDeploymentTestNG extends PropDataApiDeploymentTestNGBase {
     private final String POD_ID = "Default"; //this.getClass().getSimpleName();
 
-    @Autowired
+    @Inject
     private IngestionEntityMgr ingestionEntityMgr;
 
-    @Autowired
+    @Inject
     private IngestionProgressEntityMgr ingestionProgressEntityMgr;
 
-    @Autowired
+    @Inject
     private IngestionProxy ingestionProxy;
 
-    @Autowired
+    @Inject
     private IngestionVersionService ingestionVersionService;
 
     private static final String INGESTION = "BWRawTest";

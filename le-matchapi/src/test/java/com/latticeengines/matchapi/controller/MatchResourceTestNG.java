@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Level;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -46,12 +47,12 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
 
     private static final String MATCH_ENDPOINT = "/match/matches/realtime";
 
-    private static Logger log = LoggerFactory.getLogger(MatchResourceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchResourceTestNG.class);
 
-    @Autowired
+    @Inject
     private TestMatchInputService testMatchInputService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     @Value("${common.le.stack}")

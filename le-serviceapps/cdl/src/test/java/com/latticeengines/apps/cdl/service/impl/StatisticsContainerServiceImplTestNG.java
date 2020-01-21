@@ -4,7 +4,8 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -17,13 +18,12 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-
 public class StatisticsContainerServiceImplTestNG extends CDLFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private StatisticsContainerService statisticsContainerService;
 
-    @Autowired
+    @Inject
     private DataCollectionService dataCollectionService;
 
     private StatisticsContainer container;

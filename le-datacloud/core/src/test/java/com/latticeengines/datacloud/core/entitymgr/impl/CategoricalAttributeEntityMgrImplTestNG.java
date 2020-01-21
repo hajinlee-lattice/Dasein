@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -23,7 +25,7 @@ public class CategoricalAttributeEntityMgrImplTestNG extends DataCloudCoreFuncti
     public static final String TEST_DIMENSION = "TestDimension";
     private static final List<String> TEST_ATTRS = Arrays.asList("Level1", "Level2", "Level3");
 
-    @Autowired
+    @Inject
     private CategoricalAttributeEntityMgr attributeEntityMgr;
 
     @Autowired

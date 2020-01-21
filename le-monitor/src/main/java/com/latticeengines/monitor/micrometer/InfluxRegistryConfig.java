@@ -28,7 +28,7 @@ import io.micrometer.influx.InfluxMeterRegistry;
 @Configuration
 public class InfluxRegistryConfig {
 
-    private Logger log = LoggerFactory.getLogger(InfluxRegistryConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(InfluxRegistryConfig.class);
 
     @Value("${monitor.metrics.micrometer.influxdb.enabled:false}")
     private boolean enableMonitoring;

@@ -31,7 +31,7 @@ public enum JobStatus {
     RETRIED(8, "Retried", true), //
     ENQUEUED(9, "Enqueued", false); //
 
-    private static Logger log = LoggerFactory.getLogger(JobStatus.class);
+    private static final Logger log = LoggerFactory.getLogger(JobStatus.class);
     private static Map<String, JobStatus> statusCodeMap = new HashMap<>();
 
     static {

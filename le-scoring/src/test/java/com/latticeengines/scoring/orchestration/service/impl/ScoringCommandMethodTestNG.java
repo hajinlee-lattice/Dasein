@@ -7,7 +7,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.sql.Timestamp;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
@@ -27,28 +28,27 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringCommandLogService;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
-
 public class ScoringCommandMethodTestNG extends ScoringFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private AlertService alertService;
 
-    @Autowired
+    @Inject
     private ScoringCommandLogService scoringCommandLogService;
 
-    @Autowired
+    @Inject
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
-    @Autowired
+    @Inject
     private ScoringProcessorCallable scoringProcessor;
 
     @Value("${scoring.test.table}")

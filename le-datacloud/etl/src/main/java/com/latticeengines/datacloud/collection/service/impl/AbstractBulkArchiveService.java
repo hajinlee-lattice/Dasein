@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
 import com.latticeengines.datacloud.collection.service.BulkArchiveService;
@@ -17,7 +18,9 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBase<ArchiveProgress>
         implements BulkArchiveService {
 
-    private Logger log;
+    private static final Logger log = LoggerFactory.getLogger(AbstractBulkArchiveService.class);
+
+    private String beanName;
     private ArchiveProgressEntityMgr entityMgr;
     private BulkSource source;
 
@@ -29,10 +32,10 @@ public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBas
     abstract String getSrcTableSplitColumn();
 
     @PostConstruct
-    private void setEntityMgrs() {
+    private void postConstruct() {
         source = getSource();
         entityMgr = getProgressEntityMgr();
-        log = getLogger();
+        beanName = getBeanName();
     }
 
     @Override
@@ -43,7 +46,7 @@ public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBas
     @Override
     public ArchiveProgress startNewProgress(String creator) {
         ArchiveProgress progress = entityMgr.insertNewProgress(source, null, null, creator);
-        LoggingUtils.logInfo(log, progress, "Started a new progress");
+        log.info(LoggingUtils.log(beanName, progress, "Started a new progress"));
         return progress;
     }
 
@@ -58,14 +61,14 @@ public abstract class AbstractBulkArchiveService extends SourceRefreshServiceBas
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
         entityMgr.updateStatus(progress, ProgressStatus.DOWNLOADING);
-        LoggingUtils.logInfo(log, progress, "Start downloading ...");
+        log.info(LoggingUtils.log(beanName, progress, "Start downloading ..."));
 
         // download incremental raw data and dest table snapshot
         if (!importBulkRawDataAndUpdateProgress(progress)) {
             return progress;
         }
 
-        LoggingUtils.logInfoWithDuration(log, progress, "Downloaded.", startTime);
+        log.info(LoggingUtils.logWithDuration(getClass().getSimpleName(), progress, "Downloaded.", startTime));
         return entityMgr.updateStatus(progress, ProgressStatus.DOWNLOADED);
     }
 

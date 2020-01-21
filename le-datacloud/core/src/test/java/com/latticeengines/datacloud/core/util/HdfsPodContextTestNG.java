@@ -8,15 +8,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTestNGBase;
-
 public class HdfsPodContextTestNG extends DataCloudCoreFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
     @Test(groups = "functional")

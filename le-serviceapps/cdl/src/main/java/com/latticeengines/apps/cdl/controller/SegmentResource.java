@@ -41,7 +41,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/segments")
 public class SegmentResource {
 
-    private static Logger log = LoggerFactory.getLogger(SegmentResource.class);
+    private static final Logger log = LoggerFactory.getLogger(SegmentResource.class);
 
     @Inject
     private SegmentService segmentService;

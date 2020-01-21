@@ -31,7 +31,6 @@ import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.SQLTemplates;
 
-
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 

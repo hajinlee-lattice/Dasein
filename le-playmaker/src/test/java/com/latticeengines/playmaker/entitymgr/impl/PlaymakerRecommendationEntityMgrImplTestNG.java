@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -23,14 +24,13 @@ import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
-
 public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(PlaymakerRecommendationEntityMgrImplTestNG.class);
 
-    @Autowired
+    @Inject
     private PlaymakerTenantEntityMgr playMakerTenantEntityMgr;
 
-    @Autowired
+    @Inject
     private PlaymakerRecommendationEntityMgr playMakerRecommendationEntityMgr;
 
     private PlaymakerTenant tenant;

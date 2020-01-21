@@ -2,7 +2,8 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -21,7 +22,6 @@ import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfig
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToDynamoConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
-
 public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctionalTestNGBase {
 
     private static final String POD_ID = "PublicationServiceImplTestNG";
@@ -30,13 +30,13 @@ public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctional
     private static final String CURRENT_VERSION = "version1";
     private static final String SUBMITTER = PublicationProgressServiceImplTestNG.class.getSimpleName();
 
-    @Autowired
+    @Inject
     private PublicationProgressService publicationProgressService;
 
-    @Autowired
+    @Inject
     private PublicationProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     private PublicationEntityMgr publicationEntityMgr;
 
     private Publication sqlPublication;

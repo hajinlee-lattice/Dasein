@@ -3,7 +3,8 @@ package com.latticeengines.datacloud.collection.service.impl;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
@@ -11,17 +12,16 @@ import com.latticeengines.datacloud.collection.service.CollectedArchiveService;
 import com.latticeengines.datacloud.core.source.CollectedSource;
 import com.latticeengines.datacloud.core.source.impl.OrbIntelligence;
 
-
 @Component
 public class OrbIntelligenceArchiveServiceImplTestNG extends CollectionArchiveServiceImplTestNGBase {
 
-    @Autowired
+    @Inject
     OrbIntelligenceArchiveService collectedArchiveService;
 
-    @Autowired
+    @Inject
     OrbIntelligence source;
 
-    @Autowired
+    @Inject
     ArchiveProgressEntityMgr progressEntityMgr;
 
     CollectedArchiveService getCollectedArchiveService() {

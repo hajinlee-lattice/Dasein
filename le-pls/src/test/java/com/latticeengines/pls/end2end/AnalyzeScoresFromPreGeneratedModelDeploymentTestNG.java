@@ -3,9 +3,10 @@ package com.latticeengines.pls.end2end;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.annotations.AfterClass;
@@ -32,10 +33,10 @@ public class AnalyzeScoresFromPreGeneratedModelDeploymentTestNG extends PlsDeplo
     @Value("${common.test.scoringapi.url}")
     private String scoringApiHostPort;
 
-    @Autowired
+    @Inject
     private ScoreCorrectnessService scoreCorrectnessService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @BeforeClass(groups = "deployment.lp")

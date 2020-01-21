@@ -1,9 +1,9 @@
 package com.latticeengines.matchapi.testframework;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -18,13 +18,13 @@ import com.latticeengines.monitor.exposed.metric.service.MetricService;
 @ContextConfiguration(locations = { "classpath:test-matchapi-context.xml" })
 public abstract class MatchapiAbstractTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private MetricService metricService;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @PostConstruct

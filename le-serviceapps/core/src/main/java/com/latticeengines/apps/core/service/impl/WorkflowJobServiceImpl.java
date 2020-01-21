@@ -18,7 +18,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {
 
-    private static final Logger log = LoggerFactory.getLogger(WorkflowJobService.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImpl.class);
 
     private final WorkflowProxy workflowProxy;
 

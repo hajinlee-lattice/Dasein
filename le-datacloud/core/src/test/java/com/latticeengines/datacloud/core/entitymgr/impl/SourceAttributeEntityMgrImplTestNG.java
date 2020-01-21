@@ -4,9 +4,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,13 +17,12 @@ import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
-
 public class SourceAttributeEntityMgrImplTestNG extends DataCloudCoreFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceAttributeEntityMgr sourceAttributeEntityMgr;
 
     @Test(groups = "functional")

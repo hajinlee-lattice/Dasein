@@ -6,10 +6,11 @@ import static org.testng.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -26,18 +27,17 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
-
 public class S3ExportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
     public static final CustomerSpace TEST_CUSTOMER = CustomerSpace.parse("S3ExportServiceImplTestNG");
 
-    @Autowired
+    @Inject
     private ExportService s3ExportService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private S3Service s3Service;
 
     private String sourceFilePath;

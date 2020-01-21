@@ -211,7 +211,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                 } finally {
                     FileUtils.deleteQuietly(localFile);
                 }
-                log.debug("Uploaded PlayLaunch File to HDFS : %s", recFilePathForDestination);
+                log.debug("Uploaded PlayLaunch File to HDFS : {}", recFilePathForDestination);
                 return recFilePathForDestination;
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18213, e, new String[] { getFileFormat() });

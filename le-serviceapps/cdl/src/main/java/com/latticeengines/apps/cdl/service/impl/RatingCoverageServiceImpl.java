@@ -78,7 +78,7 @@ import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 @Component("ratingCoverageService")
 public class RatingCoverageServiceImpl implements RatingCoverageService {
 
-    private static Logger log = LoggerFactory.getLogger(RatingCoverageServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingCoverageServiceImpl.class);
 
     private static final String DEFAULT_ID_FOR_MODEL_RULE = "DEFAULT_ID_FOR_MODEL_RULE";
 

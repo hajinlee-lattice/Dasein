@@ -2,7 +2,6 @@ package com.latticeengines.saml;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,11 +18,11 @@ import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.saml.util.SAMLUtils;
 
 public class FailureHandler implements AuthenticationFailureHandler {
-    public static final Logger log = LoggerFactory.getLogger(FailureHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(FailureHandler.class);
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
-            AuthenticationException exception) throws IOException, ServletException {
+            AuthenticationException exception) throws IOException {
         try {
             log.info(String.format("Failed to authenticate: %s", exception));
             String tenantId = SAMLUtils.getTenantFromAlias(request.getPathInfo());

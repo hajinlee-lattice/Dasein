@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 @Component("orchestrationService")
 public class OrchestrationServiceImpl implements OrchestrationService {
 
-    private static Logger log = LoggerFactory.getLogger(OrchestrationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(OrchestrationServiceImpl.class);
 
     @Inject
     private OrchestrationEntityMgr orchestrationEntityMgr;

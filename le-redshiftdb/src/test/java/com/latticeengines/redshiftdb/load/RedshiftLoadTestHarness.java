@@ -19,14 +19,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public class RedshiftLoadTestHarness {
 
-    private int loadLevel = 1;
-    private JdbcTemplate redshiftJdbcTemplate;
-    private static final Logger log = LoggerFactory.getLogger(RedshiftLoadTestNG.class);
-    List<AbstractLoadTest> testers = new ArrayList<>();
+    private static final Logger log = LoggerFactory.getLogger(RedshiftLoadTestHarness.class);
+
+    private List<AbstractLoadTest> testers = new ArrayList<>();
 
     public RedshiftLoadTestHarness(int load, int stmtsPerTester, Set<LoadTestStatementType> possibleStmtTypes,
             int maxSleepTime, JdbcTemplate jdbcTemplate) {
-        redshiftJdbcTemplate = jdbcTemplate;
 
         // setup testers as per the config
         Random random = new Random();
@@ -40,21 +38,22 @@ public class RedshiftLoadTestHarness {
             LoadTestStatementType statementType = typesArray[random.nextInt(possibleStmtTypes.size())];
             switch (statementType.getTesterType()) {
             case "QueryLoadTest":
-                testers.add(new QueryLoadTest(i, stmtsPerTester, maxSleepTime, redshiftJdbcTemplate, statementType));
+                testers.add(new QueryLoadTest(i, stmtsPerTester, maxSleepTime, jdbcTemplate, statementType));
                 break;
 
             case "AlterDDLLoadTest":
-                testers.add(new AlterDDLLoadTest(i, stmtsPerTester, maxSleepTime, redshiftJdbcTemplate));
+                testers.add(new AlterDDLLoadTest(i, stmtsPerTester, maxSleepTime, jdbcTemplate));
                 break;
 
             case "QueryMultiConditionalTest":
-                testers.add(new MultiConditionalQueryLoadTest(i, stmtsPerTester, maxSleepTime, redshiftJdbcTemplate));
+                testers.add(new MultiConditionalQueryLoadTest(i, stmtsPerTester, maxSleepTime, jdbcTemplate));
                 break;
             }
         }
     }
 
     public String run() {
+        int loadLevel = 1;
         if (loadLevel < 1) {
             return "loadLevel needs to be greater than 1. Terminating Test";
         }

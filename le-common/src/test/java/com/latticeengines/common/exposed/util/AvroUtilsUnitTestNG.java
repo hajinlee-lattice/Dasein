@@ -40,7 +40,7 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class AvroUtilsUnitTestNG {
 
-    private static Logger log = LoggerFactory.getLogger(AvroUtilsUnitTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AvroUtilsUnitTestNG.class);
 
     @SuppressWarnings("deprecation")
     @Test(groups = "unit")

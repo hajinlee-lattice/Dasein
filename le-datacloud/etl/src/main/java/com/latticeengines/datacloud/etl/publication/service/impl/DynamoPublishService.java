@@ -41,7 +41,7 @@ import com.latticeengines.yarn.exposed.service.JobService;
 public class DynamoPublishService extends AbstractPublishService
         implements PublishService<PublishToDynamoConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(DynamoPublishService.class);
+    private static final Logger log = LoggerFactory.getLogger(DynamoPublishService.class);
 
     private static final String PARTITION_KEY = "Id";
     private static final String PREFIX = "_REPO_DataCloud_RECORD_";

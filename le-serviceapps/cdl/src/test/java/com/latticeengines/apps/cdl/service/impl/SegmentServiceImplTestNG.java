@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 
 public class SegmentServiceImplTestNG extends CDLFunctionalTestNGBase {
 
-    private Logger log = Logger.getLogger(getClass());
+    private static final Logger log = Logger.getLogger(SegmentServiceImplTestNG.class);
 
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";

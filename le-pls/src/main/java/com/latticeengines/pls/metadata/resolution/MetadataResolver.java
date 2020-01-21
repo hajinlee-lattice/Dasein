@@ -51,7 +51,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 
 public class MetadataResolver {
-    private static Logger log = LoggerFactory.getLogger(MetadataResolver.class);
+    private static final Logger log = LoggerFactory.getLogger(MetadataResolver.class);
     private static List<String> ACCEPTED_BOOLEAN_VALUES = Arrays.asList("true", "false", "yes", "no");
     public static final String USER_PREFIX = "user_";
 

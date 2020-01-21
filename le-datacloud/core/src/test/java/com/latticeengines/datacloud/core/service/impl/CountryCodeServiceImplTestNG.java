@@ -8,9 +8,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -23,7 +24,7 @@ public class CountryCodeServiceImplTestNG extends DataCloudCoreFunctionalTestNGB
     private static final Logger log = LoggerFactory.getLogger(CountryCodeServiceImplTestNG.class);
     private static final String FILENAME = "CountryCode.csv";
 
-    @Autowired
+    @Inject
     private CountryCodeService countryCodeService;
 
     @Test(groups = "functional")

@@ -1,10 +1,10 @@
 package com.latticeengines.scoring.workflow.listeners;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
@@ -17,12 +17,12 @@ import com.latticeengines.workflow.listener.LEJobListener;
 @Component("SendEmailAfterScoringCompletionListener")
 public class SendEmailAfterScoringCompletionListener extends LEJobListener {
 
-    private static final Logger log = LoggerFactory.getLogger(JobExecutionListener.class);
+    private static final Logger log = LoggerFactory.getLogger(SendEmailAfterScoringCompletionListener.class);
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private PlsInternalProxy plsInternalProxy;
 
     @Override

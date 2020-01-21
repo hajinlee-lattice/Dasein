@@ -48,7 +48,7 @@ import com.latticeengines.yarn.exposed.service.JobService;
 
 @Component("ingestionSFTPProviderService")
 public class IngestionSFTPProviderServiceImpl extends IngestionProviderServiceImpl {
-    private static Logger log = LoggerFactory.getLogger(IngestionSFTPProviderServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionSFTPProviderServiceImpl.class);
 
     @Inject
     private HdfsPathBuilder hdfsPathBuilder;

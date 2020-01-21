@@ -11,7 +11,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,18 +27,17 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
-
 public class CDLDataCleanupResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CDLDataCleanupResourceDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private CDLProxy cdlProxy;
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Inject

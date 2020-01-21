@@ -5,8 +5,13 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.pls.Action;
 
-public class ActionContext {
-    private static Logger log = LoggerFactory.getLogger(ActionContext.class);
+public final class ActionContext {
+
+    protected ActionContext() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(ActionContext.class);
 
     private static ThreadLocal<Action> action = new ThreadLocal<Action>();
 

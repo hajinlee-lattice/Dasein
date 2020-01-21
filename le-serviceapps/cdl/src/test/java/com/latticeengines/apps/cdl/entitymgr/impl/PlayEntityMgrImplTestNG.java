@@ -7,9 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -27,7 +28,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayEntityMgrImplTestNG.class);
@@ -38,16 +38,16 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private static final String UPDATED_BY = "updated@lattice-engines.com";
     private static final String PLAY_SEGMENT_NAME = "PlayTargetSegment";
 
-    @Autowired
+    @Inject
     private PlayEntityMgr playEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayTypeService playTypeService;
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private Play play;

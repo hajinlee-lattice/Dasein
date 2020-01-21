@@ -9,11 +9,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.mockito.Mockito;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,10 +48,10 @@ public class JobCacheServiceTestNG extends AbstractTestNGSpringContextTests {
     private static final long WAIT_INTERVALS = 100;
     private static final double MULTIPLIER = 1.5;
 
-    @Autowired
+    @Inject
     private JobCacheService service;
 
-    @Autowired
+    @Inject
     private JobCacheWriter writer;
 
     private WorkflowJobEntityMgr workflowJobEntityMgr;

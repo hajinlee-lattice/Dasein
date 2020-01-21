@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
  */
 public abstract class VersionedPurger implements SourcePurger {
 
-    private static Logger log = LoggerFactory.getLogger(VersionedPurger.class);
+    private static final Logger log = LoggerFactory.getLogger(VersionedPurger.class);
 
     @Inject
     protected PurgeStrategyEntityMgr purgeStrategyEntityMgr;

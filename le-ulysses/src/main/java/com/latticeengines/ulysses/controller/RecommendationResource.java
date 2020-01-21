@@ -1,10 +1,10 @@
 package com.latticeengines.ulysses.controller;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,13 +26,12 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/recommendations")
 public class RecommendationResource {
-    private static final Logger log = LoggerFactory.getLogger(TalkingPointResource.class);
+    private static final Logger log = LoggerFactory.getLogger(RecommendationResource.class);
 
     @Inject
     private LpiPMRecommendation lpiPMRecommendation;
 
-    @Inject
-    @Qualifier(RecommendationDanteFormatter.Qualifier)
+    @Resource(name =RecommendationDanteFormatter.Qualifier)
     private DanteFormatter<Recommendation> recommendationDanteFormatter;
 
     @GetMapping(value = "/{recommendationId}", headers = "Accept=application/json")

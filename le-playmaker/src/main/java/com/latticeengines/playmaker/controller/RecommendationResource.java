@@ -31,7 +31,7 @@ import io.swagger.annotations.ApiParam;
 @RequestMapping(value = "/playmaker")
 public class RecommendationResource {
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
+    private static final Logger log = LoggerFactory.getLogger(RecommendationResource.class);
 
     @Inject
     private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;

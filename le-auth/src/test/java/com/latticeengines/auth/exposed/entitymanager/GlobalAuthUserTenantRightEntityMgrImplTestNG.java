@@ -2,7 +2,8 @@ package com.latticeengines.auth.exposed.entitymanager;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -10,10 +11,9 @@ import com.latticeengines.auth.testframework.AuthFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
-
 public class GlobalAuthUserTenantRightEntityMgrImplTestNG extends AuthFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private GlobalAuthUserTenantRightEntityMgr globalAuthUserTenantRightEntityMgr;
 
     @Test(groups = "functional")

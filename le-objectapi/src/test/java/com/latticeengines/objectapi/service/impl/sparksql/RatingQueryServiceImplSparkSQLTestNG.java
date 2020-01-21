@@ -46,7 +46,7 @@ import com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor;
 public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNGBase
         implements RedshiftAndSparkQueryObjectAPITester {
 
-    private static Logger log = LoggerFactory.getLogger(RatingQueryServiceImplSparkSQLTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingQueryServiceImplSparkSQLTestNG.class);
 
     private final class AccountAttr {
         static final String CompanyName = "CompanyName";

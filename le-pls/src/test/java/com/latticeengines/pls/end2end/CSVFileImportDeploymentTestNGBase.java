@@ -5,10 +5,11 @@ import static org.testng.Assert.assertEquals;
 import java.io.IOException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -58,25 +59,26 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     protected static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
 
     private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
-    @Autowired
+
+    @Inject
     protected FileUploadService fileUploadService;
 
-    @Autowired
+    @Inject
     protected SourceFileService sourceFileService;
 
-    @Autowired
+    @Inject
     protected ModelingFileMetadataService modelingFileMetadataService;
 
-    @Autowired
+    @Inject
     protected WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     protected DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     protected CDLService cdlService;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     protected SourceFile baseAccountFile;
@@ -94,7 +96,6 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
     protected DataFeedTask webVisitDataFeedTask;
 
     protected DataFeedTask webVisitPathPatternDataFeedTask;
-
 
     protected void prepareBaseData(String entity) {
         switch (entity) {

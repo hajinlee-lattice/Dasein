@@ -3,9 +3,10 @@ package com.latticeengines.eai.service.impl.camel;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -20,10 +21,10 @@ import com.latticeengines.eai.service.EaiYarnService;
 @Component("sftpToHdfsEaiServiceTestNG")
 public class SftpToHdfsEaiServiceTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private SftpToHdfsRouteServiceTestNG routeServiceTestNG;
 
-    @Autowired
+    @Inject
     private EaiYarnService eaiYarnService;
 
     @BeforeClass(groups = "functional")

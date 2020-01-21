@@ -1,6 +1,7 @@
 package com.latticeengines.saml.testframework;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
@@ -10,10 +11,10 @@ import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed
 
 @Component
 public class SamlFunctionalTestBed extends SamlTestBed {
-    @Autowired
+    @Inject
     private GlobalAuthFunctionalTestBed globalAuthFunctionalTestBed;
 
-    @Autowired
+    @Inject
     private IdentityProviderService identityProviderService;
 
     @Override

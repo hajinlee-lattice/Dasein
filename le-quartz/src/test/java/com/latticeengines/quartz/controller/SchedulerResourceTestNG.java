@@ -6,7 +6,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -38,7 +39,7 @@ public class SchedulerResourceTestNG extends AbstractTestNGSpringContextTests {
     @Value("${quartz.test.functional.testjob.cron:}")
     private String testJobCronTrigger;
 
-    @Autowired
+    @Inject
     private QuartzSchedulerProxy quartzSchedulerProxy;
 
     @Test(groups = "functional", dependsOnMethods = { "addJob", "addRepeatJob" }, enabled = false)

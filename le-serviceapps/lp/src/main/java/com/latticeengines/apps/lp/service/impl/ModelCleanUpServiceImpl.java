@@ -31,7 +31,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("modelCleanUpService")
 public class ModelCleanUpServiceImpl implements ModelCleanUpService {
-    private static Logger log = LoggerFactory.getLogger(ModelCleanUpServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelCleanUpServiceImpl.class);
 
     private static final String MODEL_SUMMARY_SUPPORTING_FILES_PATH = "/user/s-analytics/customers/%s/models/%s";
     private static final String MATCHED_AND_SCORED_TRAINING_CSV_FILES_PATH = "/user/s-analytics/customers/%s/data/%s";

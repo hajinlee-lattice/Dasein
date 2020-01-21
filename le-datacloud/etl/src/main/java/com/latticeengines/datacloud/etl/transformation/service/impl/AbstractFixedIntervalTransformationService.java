@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 
 public abstract class AbstractFixedIntervalTransformationService<T extends TransformationConfiguration>
         extends AbstractTransformationService<T> {
-    private static Logger LOG = LoggerFactory.getLogger(AbstractFixedIntervalTransformationService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractFixedIntervalTransformationService.class);
     private static final int SECONDS_TO_MILLIS = 1000;
 
     abstract List<String> compareVersionLists(Source source, List<String> latestBaseVersions,

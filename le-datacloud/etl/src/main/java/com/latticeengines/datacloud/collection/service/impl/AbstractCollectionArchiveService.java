@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
@@ -18,6 +20,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 public abstract class AbstractCollectionArchiveService extends SourceRefreshServiceBase<ArchiveProgress>
         implements CollectedArchiveService {
 
+    private static final Logger log = LoggerFactory.getLogger(AbstractCollectionArchiveService.class);
+
     abstract ArchiveProgressEntityMgr getProgressEntityMgr();
 
     @Override
@@ -26,8 +30,8 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
     @Override
     public ArchiveProgress startNewProgress(Date startDate, Date endDate, String creator) {
         ArchiveProgress progress = getProgressEntityMgr().insertNewProgress(getSource(), startDate, endDate, creator);
-        LoggingUtils.logInfo(getLogger(), progress,
-                "Started a new progress with StartDate=" + startDate + " endDate=" + endDate);
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress,
+                "Started a new progress with StartDate=" + startDate + " endDate=" + endDate));
         return progress;
     }
 
@@ -42,14 +46,14 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
         logIfRetrying(progress);
         long startTime = System.currentTimeMillis();
         getProgressEntityMgr().updateStatus(progress, ProgressStatus.DOWNLOADING);
-        LoggingUtils.logInfo(getLogger(), progress, "Start downloading ...");
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress, "Start downloading ..."));
 
         // download incremental raw data and dest table snapshot
         if (!importIncrementalRawDataAndUpdateProgress(progress)) {
             return progress;
         }
 
-        LoggingUtils.logInfoWithDuration(getLogger(), progress, "Downloaded.", startTime);
+        log.info(LoggingUtils.logWithDuration(getClass().getSimpleName(), progress, "Downloaded.", startTime));
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.DOWNLOADED);
     }
 
@@ -80,10 +84,10 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
         String whereClause = constructWhereClauseByDates(getSource().getDownloadSplitColumn(), progress.getStartDate(),
                 progress.getEndDate());
 
-        long rowsToDownload = jdbcTemplateCollectionDB
+        Long rowsToDownload = jdbcTemplateCollectionDB
                 .queryForObject("SELECT COUNT(*) FROM " + getSource().getCollectedTableName() + " WHERE "
                         + whereClause.substring(1, whereClause.lastIndexOf("\"")), Long.class);
-
+        rowsToDownload = (rowsToDownload == null) ? 0L : rowsToDownload;
         if (rowsToDownload == 0) {
             progress.setRowsDownloadedToHdfs(rowsToDownload);
             return true;
@@ -94,14 +98,14 @@ public abstract class AbstractCollectionArchiveService extends SourceRefreshServ
                         + " WHERE " + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
                 Date.class);
 
-        LoggingUtils.logInfo(getLogger(), progress, "Resolved StartDate=" + earliest);
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress, "Resolved StartDate=" + earliest));
 
         Date latest = jdbcTemplateCollectionDB.queryForObject(
                 "SELECT MAX([" + getSource().getTimestampField() + "]) FROM " + getSource().getCollectedTableName()
                         + " WHERE " + whereClause.substring(1, whereClause.lastIndexOf("\"")).replace(">=", ">"),
                 Date.class);
 
-        LoggingUtils.logInfo(getLogger(), progress, "Resolved EndDate=" + latest);
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress, "Resolved EndDate=" + latest));
 
         progress.setStartDate(earliest);
         progress.setEndDate(latest);

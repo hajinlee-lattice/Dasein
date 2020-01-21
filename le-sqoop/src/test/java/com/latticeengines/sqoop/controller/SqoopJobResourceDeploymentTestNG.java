@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -37,10 +39,10 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @ContextConfiguration(locations = { "classpath:test-sqoop-context.xml" })
 public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Autowired

@@ -14,7 +14,8 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 
 public class PropertyUtils extends PropertyPlaceholderConfigurer {
-    private static Logger log = LoggerFactory.getLogger(PropertyUtils.class);
+
+    private static final Logger log = LoggerFactory.getLogger(PropertyUtils.class);
 
     private static Map<String, String> propertiesMap;
 

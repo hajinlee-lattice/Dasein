@@ -14,7 +14,7 @@ import com.latticeengines.monitor.exposed.metrics.MetricsAspect;
 @Aspect
 public class BaseMetricsAspectImpl implements MetricsAspect {
 
-    public static Logger log = LoggerFactory.getLogger(BaseMetricsAspectImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseMetricsAspectImpl.class);
 
     private ThreadLocal<String> tracker = new ThreadLocal<>();
 

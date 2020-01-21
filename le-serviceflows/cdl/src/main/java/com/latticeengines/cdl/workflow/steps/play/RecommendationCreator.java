@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Component
 class RecommendationCreator {
 
-    private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(RecommendationCreator.class);
 
     void generateRecommendations(PlayLaunchContext playLaunchContext, List<Map<String, Object>> accountList,
             Map<Object, List<Map<String, String>>> mapForAccountAndContactList,

@@ -6,8 +6,13 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 
-public class HdfsPodContext {
-    private static Logger log = LoggerFactory.getLogger(HdfsPodContext.class);
+public final class HdfsPodContext {
+
+    protected HdfsPodContext() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(HdfsPodContext.class);
 
     private static ThreadLocal<String> podId = new ThreadLocal<>();
 

@@ -34,9 +34,9 @@ import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
-public abstract class RatingEngineTemplate {
+abstract class RatingEngineTemplate {
 
-    private static Logger log = LoggerFactory.getLogger(RatingEngineTemplate.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingEngineTemplate.class);
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;

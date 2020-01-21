@@ -45,7 +45,7 @@ import com.latticeengines.testframework.service.impl.TestPlayCreationHelper;
 
 public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(PlayLaunchWorkflowDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(CampaignLaunchWorkflowDeploymentTestNG.class);
 
     @Inject
     private DropBoxProxy dropBoxProxy;

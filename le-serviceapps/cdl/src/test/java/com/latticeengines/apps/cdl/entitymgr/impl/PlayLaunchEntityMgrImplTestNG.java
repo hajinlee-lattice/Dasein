@@ -9,10 +9,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -32,21 +33,20 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchEntityMgrImplTestNG.class);
 
-    @Autowired
+    @Inject
     private PlayEntityMgr playEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayLaunchEntityMgr playLaunchEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayTypeService playTypeService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private Play play;

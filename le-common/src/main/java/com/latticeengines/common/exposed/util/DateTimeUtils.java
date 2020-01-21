@@ -10,9 +10,13 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DateTimeUtils {
+public final class DateTimeUtils {
 
-    private static Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
+    protected DateTimeUtils() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(DateTimeUtils.class);
     private static Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
     private static Long earliest;
     private static Long latest;

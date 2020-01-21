@@ -6,9 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -28,24 +27,15 @@ public class AccountMasterReduceService extends AbstractFixedIntervalTransformat
         implements TransformationService<AccountMasterReduceConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "accountMasterReduceFlow";
 
-    private static final Logger log = LoggerFactory.getLogger(AccountMasterReduceService.class);
-
-    private boolean isManual = true;
-
-    @Autowired
+    @Inject
     private ReducedAccountMaster reducedAccountMaster;
 
-    @Autowired
+    @Inject
     private AccountMasterReduceDataFlowService accountMasterReduceDataFlowService;
 
     @Override
     public Source getSource() {
         return reducedAccountMaster;
-    }
-
-    @Override
-    Logger getLogger() {
-        return log;
     }
 
     @Override
@@ -105,6 +95,7 @@ public class AccountMasterReduceService extends AbstractFixedIntervalTransformat
             List<String> latestVersions, String baseDir) {
         List<String> unprocessedBaseVersion = new ArrayList<>();
 
+        boolean isManual = true;
         if (isManual) {
             unprocessedBaseVersion.add(latestBaseVersions.get(0));
             return unprocessedBaseVersion;
@@ -130,7 +121,6 @@ public class AccountMasterReduceService extends AbstractFixedIntervalTransformat
             boolean foundProcessedEntry = false;
             // try to find matching version in source version list
             for (String latestVersion : latestVersions) {
-                log.debug("Compare: " + baseVersion);
                 if (baseVersion.equals(latestVersion)) {
                     // if found equal version then skip further checking for
                     // this version and break from this inner loop

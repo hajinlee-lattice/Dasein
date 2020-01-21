@@ -8,8 +8,9 @@ import static org.testng.Assert.assertFalse;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
@@ -35,29 +36,28 @@ import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandState;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
-
 public class ModelStepOutputResultsProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final String YARN_APPLICATION_ID = "yarnApplicationId";
     private static final String TEMP_EVENTTABLE = "2ModelStepOutputResultsProcessorImplTestNG_eventtable";
     private static final String METADATA_DIAGNOSTIC_FILE = "metadata-diagnostics.json";
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelStepProcessor modelStepOutputResultsProcessor;
 
-    @Autowired
+    @Inject
     private JdbcTemplate dlOrchestrationJdbcTemplate;
 
-    @Autowired
+    @Inject
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
 
     @Mock
     private ModelingService modelingService;
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();

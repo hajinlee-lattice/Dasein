@@ -419,7 +419,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                         removeFromSet(null, MAIN_TRACKING_SET, tenantId);
                     }
                 } catch (Exception e) {
-                    log.error("Failed to retry PA for tenant {}, error = {}", tenantId, e);
+                    log.error("Failed to retry PA for tenant {}", tenantId, e);
                     updateRetryCount(tenantId);
                     setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
                 }
@@ -467,7 +467,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             MultiTenantContext.setTenant(tenant);
             dataFeedService.increasedRetryCount(MultiTenantContext.getShortTenantId());
         } catch (Exception e) {
-            log.error("Failed to increase retry count for tenant {}. error = {}", tenantId, e);
+            log.error("Failed to increase retry count for tenant {}", tenantId, e);
         }
     }
 
@@ -603,7 +603,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             applicationId = cdlProxy.scheduleProcessAnalyze(tenant.getId(), true, request);
             log.info("Submit PA job with appId = {} for tenant = {} successfully", applicationId, tenantId);
         } catch (Exception e) {
-            log.error("Failed to submit job for tenant = {}, error = {}", tenantId, e);
+            log.error("Failed to submit job for tenant = {}", tenantId, e);
             setPASubmissionFailTime(REDIS_TEMPLATE_KEY, tenantId);
         }
         return applicationId;
@@ -824,7 +824,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         try {
             redisTemplate.opsForZSet().remove(key, tenantId);
         } catch (Exception e) {
-            log.warn("Failed to remove tenant {} from tracking set {}. {}", tenantId, key, e);
+            log.warn("Failed to remove tenant {} from tracking set {}.", tenantId, key, e);
         }
     }
 
@@ -866,7 +866,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
             return true;
         } catch (Exception e) {
-            log.error("cannot retry this tenant {}, error: {}", tenantId, e);
+            log.error("cannot retry this tenant {}", tenantId, e);
             return false;
         }
     }

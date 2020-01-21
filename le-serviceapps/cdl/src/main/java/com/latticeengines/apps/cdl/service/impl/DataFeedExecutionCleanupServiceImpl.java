@@ -29,7 +29,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 @Component("dataFeedExecutionCleanupService")
 public class DataFeedExecutionCleanupServiceImpl implements DataFeedExecutionCleanupService {
 
-    private static final Logger log = LoggerFactory.getLogger(DataFeedExecutionCleanupService.class);
+    private static final Logger log = LoggerFactory.getLogger(DataFeedExecutionCleanupServiceImpl.class);
 
     @Inject
     private DataFeedExecutionEntityMgr dataFeedExecutionEntityMgr;

@@ -41,7 +41,7 @@ import com.latticeengines.spark.exposed.job.cdl.CreateCdlEventTableJob;
 public class CreateCdlEventTableStep
         extends RunSparkJob<CreateCdlEventTableConfiguration, CreateCdlEventTableJobConfig> {
 
-    private static Logger log = LoggerFactory.getLogger(CreateCdlEventTableStep.class);
+    private static final Logger log = LoggerFactory.getLogger(CreateCdlEventTableStep.class);
 
     @Inject
     private MetadataProxy metadataProxy;

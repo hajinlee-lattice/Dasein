@@ -1,12 +1,11 @@
 package com.latticeengines.metadata.controller;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,16 +22,13 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/admin")
 public class AdminResource {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(AdminResource.class);
-
-    @Autowired
+    @Inject
     private MetadataProvisioningService metadataProvisioningService;
 
-    @Autowired
+    @Inject
     private MetadataService mdService;
 
-    @RequestMapping(value = "/provision", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/provision")
     @ResponseBody
     @ApiOperation(value = "Provision Import Tables")
     public Boolean provisionImportTables(@RequestBody Tenant tenant) {

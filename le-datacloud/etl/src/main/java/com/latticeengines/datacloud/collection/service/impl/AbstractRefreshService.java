@@ -9,6 +9,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
@@ -28,6 +30,8 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 public abstract class AbstractRefreshService extends SourceRefreshServiceBase<RefreshProgress>
         implements RefreshService {
 
+    private static final Logger log = LoggerFactory.getLogger(AbstractRefreshService.class);
+
     abstract RefreshProgressEntityMgr getProgressEntityMgr();
 
     @Override
@@ -39,7 +43,8 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
     public RefreshProgress startNewProgress(Date pivotDate, String baseSourceVersion, String creator) {
         RefreshProgress progress = getProgressEntityMgr().insertNewProgress(getSource(), pivotDate, creator);
         progress.setBaseSourceVersion(baseSourceVersion);
-        LoggingUtils.logInfo(getLogger(), progress, "Started a new progress with pivotDate=" + pivotDate);
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress,
+                "Started a new progress with pivotDate=" + pivotDate));
         getProgressEntityMgr().updateStatus(progress, ProgressStatus.NEW);
         return progress;
     }
@@ -55,14 +60,14 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
         long startTime = System.currentTimeMillis();
         logIfRetrying(progress);
         getProgressEntityMgr().updateStatus(progress, ProgressStatus.TRANSFORMING);
-        LoggingUtils.logInfo(getLogger(), progress, "Start transforming ...");
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress, "Start transforming ..."));
 
         // merge raw and snapshot, then output most recent records
         if (!transformInternal(progress)) {
             return progress;
         }
 
-        LoggingUtils.logInfoWithDuration(getLogger(), progress, "Transformed.", startTime);
+        log.info(LoggingUtils.logWithDuration(getClass().getSimpleName(), progress, "Transformed.", startTime));
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.TRANSFORMED);
     }
 
@@ -77,7 +82,7 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
         long startTime = System.currentTimeMillis();
         logIfRetrying(progress);
         getProgressEntityMgr().updateStatus(progress, ProgressStatus.UPLOADING);
-        LoggingUtils.logInfo(getLogger(), progress, "Start uploading ...");
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress, "Start uploading ..."));
 
         if (getSource() instanceof HasSqlPresence) {
             // upload source
@@ -88,22 +93,25 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
                 return progress;
             }
 
-            long rowsUploaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + destTable,
+            Long rowsUploaded = jdbcTemplateCollectionDB.queryForObject("SELECT COUNT(*) FROM " + destTable,
                     Long.class);
+            rowsUploaded = (rowsUploaded == null) ? 0L : rowsUploaded;
             progress.setRowsUploadedToSql(rowsUploaded);
-            LoggingUtils.logInfoWithDuration(getLogger(), progress,
-                    "Uploaded " + rowsUploaded + " rows to " + destTable, uploadStartTime);
+            log.info(LoggingUtils.logWithDuration(getClass().getSimpleName(), progress,
+                    "Uploaded " + rowsUploaded + " rows to " + destTable, uploadStartTime));
         }
 
         // finish
-        LoggingUtils.logInfoWithDuration(getLogger(), progress, "Uploaded.", startTime);
+        log.info(LoggingUtils.logWithDuration(getClass().getSimpleName(), progress, "Uploaded.", startTime));
+
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.UPLOADED);
     }
 
     @Override
     public RefreshProgress finish(RefreshProgress progress) {
-        getLogger().info(String.format("Refreshing %s successful, generated Rows=%d", progress.getSourceName(),
-                progress.getRowsGeneratedInHdfs()));
+        log.info(LoggingUtils.log(getClass().getSimpleName(),
+                String.format("Refreshing %s successful, generated Rows=%d", progress.getSourceName(),
+                        progress.getRowsGeneratedInHdfs())));
         return finishProgress(progress);
     }
 
@@ -205,7 +213,8 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
         String bakTableName = destTable + "_bak";
 
         try {
-            LoggingUtils.logInfo(getLogger(), progress, "Create a clean stage table " + stageTableName);
+            log.info(LoggingUtils.log(getClass().getSimpleName(), progress,
+                    "Create a clean stage table " + stageTableName));
             dropJdbcTableIfExists(stageTableName);
             createStageTable();
 
@@ -218,7 +227,8 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
                         + FinalApplicationStatus.SUCCEEDED + " but rather " + status);
             }
 
-            LoggingUtils.logInfo(getLogger(), progress, "Creating indices on the stage table " + stageTableName);
+            log.info(LoggingUtils.log(getClass().getSimpleName(), progress,
+                    "Creating indices on the stage table " + stageTableName));
             createIndicesOnStageTable();
         } catch (Exception e) {
             updateStatusToFailed(progress, "Failed to upload " + destTable + " to DB.", e);
@@ -249,7 +259,8 @@ public abstract class AbstractRefreshService extends SourceRefreshServiceBase<Re
         dropJdbcTableIfExists(destTable);
         jdbcTemplateCollectionDB.execute("IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'"
                 + srcTable + "') AND type in (N'U')) EXEC sp_rename '" + srcTable + "', '" + destTable + "'");
-        LoggingUtils.logInfo(getLogger(), progress, String.format("Rename %s to %s.", srcTable, destTable));
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress,
+                String.format("Rename %s to %s.", srcTable, destTable)));
     }
 
     protected String getStageTableName() {

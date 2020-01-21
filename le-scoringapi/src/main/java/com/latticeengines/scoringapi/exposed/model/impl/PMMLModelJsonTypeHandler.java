@@ -8,8 +8,6 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -24,9 +22,6 @@ import com.latticeengines.scoringapi.exposed.model.ModelEvaluator;
 
 @Component
 public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
-
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(DefaultModelJsonTypeHandler.class);
 
     @Override
     public boolean accept(String modelJsonType) {

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
@@ -14,7 +15,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-
 public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
@@ -46,7 +45,7 @@ public class DataFileResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private ModelSummaryParser modelSummaryParser;

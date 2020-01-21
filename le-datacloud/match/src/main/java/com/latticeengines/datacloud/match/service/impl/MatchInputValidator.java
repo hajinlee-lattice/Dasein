@@ -35,8 +35,13 @@ import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class MatchInputValidator {
-    private static Logger log = LoggerFactory.getLogger(MatchInputValidator.class);
+public final class MatchInputValidator {
+
+    protected MatchInputValidator() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(MatchInputValidator.class);
 
     public static void validateRealTimeInput(MatchInput input, int maxRealTimeInput) {
         validateRealTimeInput(input, maxRealTimeInput, null);

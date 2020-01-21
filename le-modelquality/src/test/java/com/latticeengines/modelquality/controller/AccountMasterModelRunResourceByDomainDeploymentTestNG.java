@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseAccountMasterModelRunDeploymentTestNG {
 
-    private static Logger log = LoggerFactory.getLogger(AccountMasterModelRunResourceByDomainDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountMasterModelRunResourceByDomainDeploymentTestNG.class);
 
     @Override
     @BeforeClass(groups = "deployment")

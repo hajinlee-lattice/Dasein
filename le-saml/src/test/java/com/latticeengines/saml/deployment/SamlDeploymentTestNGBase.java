@@ -1,6 +1,7 @@
 package com.latticeengines.saml.deployment;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
@@ -9,7 +10,7 @@ import com.latticeengines.saml.testframework.SamlTestNGBase;
 
 public abstract class SamlDeploymentTestNGBase extends SamlTestNGBase {
 
-    @Autowired
+    @Inject
     protected SamlTestBed samlDeploymentTestBed;
 
     protected IdentityProvider identityProvider;

@@ -18,8 +18,9 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
@@ -38,7 +39,6 @@ import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationSe
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper;
-
 public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private static final String TENANT1 = "TENANT1";
@@ -61,10 +61,10 @@ public class MarketoCredentialServiceImplTestNG extends PlsFunctionalTestNGBase 
     private static final MarketoMatchField MARKETO_MATCH_FIELD_4 = new MarketoMatchField();
     private static final MarketoMatchField MARKETO_MATCH_FIELD_5 = new MarketoMatchField();
 
-    @Autowired
+    @Inject
     private MarketoCredentialService marketoCredentialService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private MarketoRestValidationService mockedRestValidationService = Mockito.mock(MarketoRestValidationService.class);

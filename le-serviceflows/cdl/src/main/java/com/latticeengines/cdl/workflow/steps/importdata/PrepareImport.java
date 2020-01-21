@@ -24,6 +24,8 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -51,6 +53,8 @@ import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 @Component("prepareImport")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(PrepareImport.class);
 
     private static final String INPUT_ROOT = "/atlas/rawinput";
     private static final String IN_PROGRESS = "/inprogress";

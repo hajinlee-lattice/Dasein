@@ -6,10 +6,11 @@ import static org.testng.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -28,13 +29,13 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
 
     public static final String JOB_NAME = "testCustomQuartzJob";
     public static final String JOB_GROUP = "CustomQuartzJobs";
-    @Autowired
+    @Inject
     private Scheduler scheduler;
 
-    @Autowired
+    @Inject
     private SchedulerEntityMgr schedulerEntityMgr;
 
-    @Autowired
+    @Inject
     private JobHistoryEntityMgr jobHistoryEntityMgr;
 
     @Value("${quartz.test.functional.testjob.primary.url:}")

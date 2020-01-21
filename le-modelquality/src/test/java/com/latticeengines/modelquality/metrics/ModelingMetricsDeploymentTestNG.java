@@ -3,8 +3,9 @@ package com.latticeengines.modelquality.metrics;
 import java.io.File;
 import java.nio.charset.Charset;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -14,10 +15,9 @@ import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.modelquality.functionalframework.ModelQualityTestNGBase;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
-
 public class ModelingMetricsDeploymentTestNG extends ModelQualityTestNGBase {
 
-    @Autowired
+    @Inject
     private MetricService metricService;
 
     @Test(groups = "deployment")

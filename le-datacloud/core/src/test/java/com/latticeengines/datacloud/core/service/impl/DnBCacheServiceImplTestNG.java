@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
@@ -18,11 +19,10 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBCache;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
-
 public class DnBCacheServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(DnBCacheServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private DnBCacheService dnbCacheService;
 
     private List<DnBCache> whiteCaches = new ArrayList<DnBCache>();

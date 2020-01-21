@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -9,10 +10,9 @@ import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.AccountLookupRequest;
-
 public class AccountLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private AccountLookupService accountLookupService;
 
     @Value("${common.le.stack}")

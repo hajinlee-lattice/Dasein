@@ -3,10 +3,11 @@ package com.latticeengines.eai.service.impl.camel;
 import java.io.File;
 import java.io.InputStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -29,10 +30,10 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
     private static final String S3_PREFIX = "hdfs2s3";
     private static final String FILENAME = "camel.avro";
 
-    @Autowired
+    @Inject
     private HdfsToS3ExportService routeService;
 
-    @Autowired
+    @Inject
     private S3Service s3Service;
 
     @Value("${common.le.stack}")

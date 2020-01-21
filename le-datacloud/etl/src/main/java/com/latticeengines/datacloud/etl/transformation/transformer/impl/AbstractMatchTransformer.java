@@ -6,14 +6,12 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
-import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.RequestContext;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -27,20 +25,14 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransformerConfig> {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractTransformer.class);
-
-    @Inject
-    protected HdfsPathBuilder hdfsPathBuilder;
+    private static final Logger log = LoggerFactory.getLogger(AbstractMatchTransformer.class);
 
     @Inject
     private MetadataProxy metadataProxy;
 
-    @Inject
-    private Configuration yarnConfiguration;
-
     @Override
     public boolean validateConfig(MatchTransformerConfig config, List<String> baseSources) {
-        String error = null;
+        String error;
         if (baseSources.size() != 1) {
             error = "Match only one result at a time";
             log.error(error);
@@ -83,22 +75,6 @@ abstract class AbstractMatchTransformer extends AbstractTransformer<MatchTransfo
             log.info("Tablename = {}, Extract path = {}, Final match input path = {}, partitionKeys = {}", tableName,
                     table.getExtracts().get(0).getPath(), avroDir, tableSource.getPartitionKeys());
             CustomerSpace customerSpace = tableSource.getCustomerSpace();
-
-            // M29: in PA, the provided table avsc might not be updated.
-            // because we often update table schema after the transformation pipeline
-//            Schema schema = null;
-//            try {
-//                String avscPath = hdfsPathBuilder //
-//                        .constructTableSchemaFilePath(tableName, customerSpace, "").toString();
-//                InputStream is = HdfsUtils.getInputStream(yarnConfiguration, avscPath);
-//                schema = new Schema.Parser().parse(is);
-//            } catch (IOException e) {
-//                log.warn("Failed to get schema from avsc", e);
-//            }
-//            if (schema == null) {
-//                table = metadataProxy.getTable(customerSpace.toString(), tableName);
-//                schema = TableUtils.createSchema("input", table);
-//            }
 
             table = metadataProxy.getTable(customerSpace.toString(), tableName);
             Schema schema = TableUtils.createSchema("input", table);

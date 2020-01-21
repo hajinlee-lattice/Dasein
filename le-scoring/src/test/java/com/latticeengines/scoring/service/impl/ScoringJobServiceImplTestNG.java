@@ -3,9 +3,12 @@ package com.latticeengines.scoring.service.impl;
 import java.util.Arrays;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
@@ -17,9 +20,11 @@ import com.latticeengines.scoring.service.ScoringJobService;
 
 public class ScoringJobServiceImplTestNG extends ScoringComparisonAgainstModelingTestNG {
 
+    private static final Logger log = LoggerFactory.getLogger(ScoringJobServiceImplTestNG.class);
+
     protected static String customer = "Mulesoft_Relaunch_JobService";
 
-    @Autowired
+    @Inject
     private ScoringJobService scoringJobService;
 
     @Override

@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -27,12 +28,11 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.ams.Lat
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
-
 public class LatticeIdAssignServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(LatticeIdAssignServiceTestNG.class);
 
-    @Autowired
+    @Inject
     AccountMasterSeed source;
 
     GeneralSource amId = new GeneralSource("AccountMasterId");

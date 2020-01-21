@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -35,6 +37,8 @@ import com.latticeengines.yarn.exposed.service.EMREnvService;
 @Component("entityMatchCheckpoint")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(EntityMatchCheckpoint.class);
 
     @Inject
     private EMREnvService emrEnvService;

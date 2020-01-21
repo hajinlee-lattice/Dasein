@@ -23,7 +23,7 @@ import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 @Component("eaiCredentialValidationService")
 public class EaiCredentialValidationServiceImpl implements EaiCredentialValidationService {
 
-    private Logger log = LoggerFactory.getLogger(EaiCredentialValidationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(EaiCredentialValidationServiceImpl.class);
 
     @Inject
     private CrmCredentialZKService crmCredentialZKService;

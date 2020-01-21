@@ -35,7 +35,7 @@ public class AccountFileValidationService
         extends InputFileValidationService<AccountFileValidationConfiguration> {
 
 
-    private static Logger log = LoggerFactory.getLogger(AccountFileValidationService.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountFileValidationService.class);
 
     @Override
     public EntityValidationSummary validate(AccountFileValidationConfiguration accountFileValidationServiceConfiguration,
