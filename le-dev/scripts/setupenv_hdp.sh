@@ -89,7 +89,7 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     hdfs dfs -mkdir /spark-history
 
     echo "Uploading TEZ ..."
-    TEZ_VERSION=0.9.0
+    TEZ_VERSION=0.9.1
     if [[ ! -f "$ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz" ]]; then
         wget --trust-server-names "https://s3.amazonaws.com/latticeengines-dev/artifacts/tez/${TEZ_VERSION}/tez-${TEZ_VERSION}.tar.gz" \
             -O $ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz

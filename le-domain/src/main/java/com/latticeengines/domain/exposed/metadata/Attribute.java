@@ -293,7 +293,9 @@ public class Attribute
     public void setInterfaceName(String interfaceNameString) {
         InterfaceName interfaceName = null;
         try {
-            interfaceName = InterfaceName.valueOf(interfaceNameString);
+            if (StringUtils.isNotBlank(interfaceNameString)) {
+                interfaceName = InterfaceName.valueOf(interfaceNameString);
+            }
         }  catch (Exception e) {
             log.warn("Cannot parse {} to a InterfaceName", interfaceNameString);
         }
