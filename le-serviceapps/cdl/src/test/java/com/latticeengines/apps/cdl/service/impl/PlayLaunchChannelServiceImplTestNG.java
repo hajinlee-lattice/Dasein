@@ -4,9 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -33,30 +34,29 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.SalesforceChannelConfig
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchChannelServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private PlayLaunchChannelService playLaunchChannelService;
 
-    @Autowired
+    @Inject
     private PlayLaunchService playLaunchService;
 
-    @Autowired
+    @Inject
     private PlayService playService;
 
-    @Autowired
+    @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayTypeService playTypeService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private SegmentProxy segmentProxy;
 
     private Play play;

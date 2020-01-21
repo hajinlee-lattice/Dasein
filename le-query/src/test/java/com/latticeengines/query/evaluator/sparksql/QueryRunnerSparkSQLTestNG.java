@@ -7,9 +7,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -33,7 +34,7 @@ public class QueryRunnerSparkSQLTestNG extends QueryRunnerTestNG implements Reds
         return BITENCODED_NOMINAL_ATTR;
     }
 
-    @Autowired
+    @Inject
     private SparkSQLQueryTester sparkSQLQueryTester;
 
     @BeforeClass(groups = SPARK_TEST_GROUP)

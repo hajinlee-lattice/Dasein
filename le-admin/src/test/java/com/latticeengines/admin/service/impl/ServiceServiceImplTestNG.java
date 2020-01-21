@@ -5,7 +5,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -24,16 +25,15 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.AccessLevel;
-
 public class ServiceServiceImplTestNG extends AdminFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ServiceService serviceService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private TestLatticeComponent testLatticeComponent;
 
     @BeforeMethod(groups = "functional")

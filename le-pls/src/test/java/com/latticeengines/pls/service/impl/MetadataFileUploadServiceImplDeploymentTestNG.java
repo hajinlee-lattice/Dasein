@@ -10,8 +10,9 @@ import static org.testng.Assert.assertTrue;
 import java.io.InputStream;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -27,13 +28,12 @@ import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
 public class MetadataFileUploadServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private MetadataFileUploadService metadataFileUploadService;
 
     @BeforeClass(groups = "deployment")

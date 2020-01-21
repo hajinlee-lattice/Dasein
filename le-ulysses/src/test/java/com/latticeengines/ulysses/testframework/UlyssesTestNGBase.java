@@ -1,6 +1,7 @@
 package com.latticeengines.ulysses.testframework;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -20,13 +21,13 @@ import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListen
 @ContextConfiguration(locations = { "classpath:test-ulysses-context.xml" })
 public class UlyssesTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     protected FabricMessageService messageService;
 
-    @Autowired
+    @Inject
     protected FabricDataService dataService;
 
-    @Autowired
+    @Inject
     protected DynamoService dynamoService;
 
     @Value("${common.le.environment}")

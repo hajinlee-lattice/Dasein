@@ -2,7 +2,8 @@ package com.latticeengines.datacloud.core.entitymgr.impl;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -18,10 +19,10 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 @Component
 public class HdfsSourceEntityMgrImplTestNG extends DataCloudCoreFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     Feature testSource;
 
     @BeforeMethod(groups = "functional")

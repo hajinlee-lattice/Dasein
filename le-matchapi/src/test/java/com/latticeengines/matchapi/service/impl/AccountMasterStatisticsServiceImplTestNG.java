@@ -2,9 +2,10 @@ package com.latticeengines.matchapi.service.impl;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,15 +15,14 @@ import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.matchapi.service.AccountMasterStatisticsService;
 import com.latticeengines.matchapi.testframework.MatchapiFunctionalTestNGBase;
-
 public class AccountMasterStatisticsServiceImplTestNG extends MatchapiFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AccountMasterStatisticsServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private CategoricalAttributeEntityMgr attributeEntityMgr;
 
-    @Autowired
+    @Inject
     private AccountMasterStatisticsService accountMasterStatisticsService;
 
     @Test(groups = "functional", enabled = true)

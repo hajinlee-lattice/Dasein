@@ -3,8 +3,9 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.Source;
@@ -16,10 +17,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.source.
 @Component
 public class BomboraDepivotServiceImplTestNG extends FixedIntervalTransformationServiceTestNGBase<BomboraDepivotConfiguration> {
 
-    @Autowired
+    @Inject
     BomboraDepivotedService refreshService;
 
-    @Autowired
+    @Inject
     BomboraDepivoted source;
 
     @Override

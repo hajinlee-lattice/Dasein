@@ -4,7 +4,8 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -17,19 +18,18 @@ import com.latticeengines.saml.service.IdentityProviderService;
 import com.latticeengines.saml.testframework.SamlTestBed;
 import com.latticeengines.saml.testframework.SamlTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class IdentityProviderServiceTestNG extends SamlTestNGBase {
 
-    @Autowired
+    @Inject
     private IdentityProviderService identityProviderService;
 
-    @Autowired
+    @Inject
     private IdentityProviderEntityMgr identityProviderEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private SamlTestBed samlFunctionalTestBed;
 
     private IdentityProvider identityProvider;

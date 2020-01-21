@@ -5,8 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -19,7 +20,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
 public class WorkflowProxyTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
     private static final List<String> jobIds = Arrays.asList("12345", "12346", "123456");

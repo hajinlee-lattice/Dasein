@@ -5,8 +5,9 @@ import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -28,7 +29,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class AttributeServiceImplTestNG extends AppFunctionalTestNGBase {
 
     private static final CustomerSpace CUSTOMER_SPACE = CustomerSpace
@@ -37,19 +37,19 @@ public class AttributeServiceImplTestNG extends AppFunctionalTestNGBase {
     private static final String ATTRIBUTE_NAME_2 = "TestAttribute_2";
     private static final String ATTRIBUTE_NAME_3 = "TestAttribute_3";
 
-    @Autowired
+    @Inject
     private AttributeCustomizationPropertyEntityMgr attributeCustomizationPropertyEntityMgr;
 
-    @Autowired
+    @Inject
     private CategoryCustomizationPropertyEntityMgr categoryCustomizationPropertyEntityMgr;
 
-    @Autowired
+    @Inject
     private AttributeCustomizationService attributeCustomizationService;
 
-    @Autowired
+    @Inject
     private AttributeService attributeService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private String propertyName = "hidden";

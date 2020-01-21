@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
@@ -17,7 +17,7 @@ public abstract class SampleDataSourceWrapperActorTemplate extends ActorTemplate
 
     private static Map<String, SampleDataSourceLookupRequest> requestMap = new HashMap<>();
 
-    @Autowired
+    @Inject
     protected SampleMatchActorSystem sampleMatchActorSystem;
 
     protected abstract SampleDataSourceLookupService getDataSourceLookupService();

@@ -1,6 +1,7 @@
 package com.latticeengines.admin.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -10,10 +11,9 @@ import com.latticeengines.admin.functionalframework.AdminFunctionalTestNGBase;
 import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
-
 public class FeatureFlagResourceTestNG extends AdminFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private FeatureFlagService featureFlagService;
 
     @BeforeMethod(groups = "functional")

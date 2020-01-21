@@ -4,7 +4,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -12,14 +13,13 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.remote.marketo.LeadField;
 import com.latticeengines.remote.exposed.service.marketo.MarketoSoapService;
 import com.latticeengines.remote.service.impl.RemoteFunctionalTestNGBase;
-
 public class MarketoSoapServiceTestNG extends RemoteFunctionalTestNGBase {
 
     private static final String SOAP_ENDPOINT = "https://548-NPP-225.mktoapi.com/soap/mktows/2_9";
     private static final String USERID = "latticedev1_51452907527AB5250FC168";
     private static final String ENCRYPTIONKEY = "5355338341004080552277AABB55226700FFCD724863";
 
-    @Autowired
+    @Inject
     private MarketoSoapService marketoSoapService;
 
     @Test(groups = "functional")

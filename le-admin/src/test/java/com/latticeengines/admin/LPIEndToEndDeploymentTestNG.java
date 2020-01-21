@@ -10,10 +10,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
@@ -46,7 +47,6 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
-
 public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private static final String tenantName = "Global Test Tenant" + System.currentTimeMillis();
@@ -57,19 +57,19 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     private static final String HDFS_POD_PATH = "/Pods/%s/Contracts/%s";
     private static final String HDFS_MODELING_BASE_PATH = "/user/s-analytics/customers";
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ServiceService serviceService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private PLSComponentDeploymentTestNG plsComponentDeploymentTestNG;
 
     @Value("${admin.test.contract}")

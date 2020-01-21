@@ -2,7 +2,8 @@ package com.latticeengines.scoringapi.controller;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -12,10 +13,9 @@ import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.scoringapi.EnrichRequest;
 import com.latticeengines.domain.exposed.scoringapi.EnrichResponse;
 import com.latticeengines.network.exposed.scoringapi.ScoringApiEnrichInterface;
-
 public class EnrichResourceDeploymentTestNG extends ScoringResourceDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private ScoringApiEnrichInterface scoringApiEnrichProxy;
 
     @Test(groups = "deployment", enabled = true)

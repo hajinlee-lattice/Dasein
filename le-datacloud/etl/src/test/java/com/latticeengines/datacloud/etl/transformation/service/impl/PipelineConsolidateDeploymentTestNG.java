@@ -10,10 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -39,7 +40,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-
 public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PipelineConsolidateDeploymentTestNG.class);
@@ -59,7 +59,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     @BeforeMethod(groups = "deployment")

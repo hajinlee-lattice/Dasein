@@ -6,9 +6,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -24,19 +25,18 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class FileUploadServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private FileUploadService fileUploadService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private InputStream fileInputStream;

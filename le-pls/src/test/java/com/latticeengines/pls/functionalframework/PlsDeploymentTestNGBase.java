@@ -26,7 +26,6 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
-
 public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 
     @Autowired

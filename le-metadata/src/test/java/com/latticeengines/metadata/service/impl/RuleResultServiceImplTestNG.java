@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -18,10 +19,9 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.RuleResultService;
-
 public class RuleResultServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private RuleResultService ruleResultService;
 
     private static int counter = 1;

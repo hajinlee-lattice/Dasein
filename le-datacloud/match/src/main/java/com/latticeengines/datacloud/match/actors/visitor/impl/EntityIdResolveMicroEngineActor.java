@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -34,11 +35,11 @@ public class EntityIdResolveMicroEngineActor extends ExecutorMicroEngineTemplate
 
     private static final Logger log = LoggerFactory.getLogger(EntityIdResolveMicroEngineActor.class);
 
-    @Inject
+    @Autowired
     @Qualifier("matchActorSystem")
     private MatchActorSystem matchActorSystem;
 
-    @Inject
+    @Autowired
     @Qualifier("matchGuideBook")
     private MatchGuideBook guideBook;
 

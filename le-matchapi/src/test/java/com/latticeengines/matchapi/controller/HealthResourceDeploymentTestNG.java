@@ -1,8 +1,9 @@
 package com.latticeengines.matchapi.controller;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -16,7 +17,7 @@ public class HealthResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase
 
     private static final Logger log = LoggerFactory.getLogger(HealthResourceDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     protected MatchHealthProxy matchHealthProxy;
 
     @Test(groups = "deployment")

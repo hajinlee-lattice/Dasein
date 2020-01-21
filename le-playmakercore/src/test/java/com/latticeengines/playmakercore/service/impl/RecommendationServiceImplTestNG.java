@@ -5,7 +5,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -25,7 +26,7 @@ import com.latticeengines.playmakercore.service.RecommendationService;
 @ContextConfiguration(locations = { "classpath:test-playmakercore-context.xml" })
 public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private RecommendationService recommendationService;
 
     private Recommendation recommendation;

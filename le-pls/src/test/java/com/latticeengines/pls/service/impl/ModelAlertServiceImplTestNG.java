@@ -8,9 +8,10 @@ import static org.testng.Assert.assertTrue;
 import java.net.URL;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelAlertService;
-
 public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private String modelId = String.format("ms__%s-PLSModel", UUID.randomUUID());
@@ -43,10 +43,10 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
     private URL rfModelUrl;
     private URL topPredictorUrl;
 
-    @Autowired
+    @Inject
     private ModelAlertService modelAlertService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${pls.modelingservice.basedir}")

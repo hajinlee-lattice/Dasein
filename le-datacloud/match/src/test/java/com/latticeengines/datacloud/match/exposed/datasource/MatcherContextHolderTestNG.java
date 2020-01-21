@@ -8,17 +8,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.MatchClient;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
-
 public class MatcherContextHolderTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private MatchClientRoutingDataSource dataSource;
 
     private ExecutorService executor = Executors.newFixedThreadPool(MatchClient.values().length);

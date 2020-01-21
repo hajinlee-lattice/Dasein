@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema.Type;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -17,7 +19,6 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -61,12 +62,11 @@ import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
-
 public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformationDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PipelineConsolidateTrxDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private YarnConfiguration yarnConfiguration;
 
     private String tableName1 = "ConsolidateTrxTable1";

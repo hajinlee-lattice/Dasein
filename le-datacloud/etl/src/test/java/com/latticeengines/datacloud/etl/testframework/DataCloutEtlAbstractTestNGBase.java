@@ -22,6 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -72,11 +73,11 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
     @Inject
     private S3Service s3Service;
 
-    @Inject
+    @Autowired
     @Qualifier(value = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateCollectionDB;
 
-    @Inject
+    @Autowired
     @Qualifier(value = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;
 

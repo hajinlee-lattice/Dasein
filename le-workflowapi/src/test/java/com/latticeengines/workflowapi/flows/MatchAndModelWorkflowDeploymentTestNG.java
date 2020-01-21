@@ -19,7 +19,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -51,7 +50,6 @@ import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.lp.ModelCopyProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
 public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
@@ -59,24 +57,24 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
 
     protected static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private Table accountTable;
 
-    @Autowired
+    @Inject
     private ModelMetadataService modelMetadataService;
 
-    @Autowired
+    @Inject
     private MatchAndModelWorkflowSubmitter matchAndModelWorkflowSubmitter;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
-    @Autowired
+    @Inject
     private ModelNoteService modelNoteService;
 
     @Inject

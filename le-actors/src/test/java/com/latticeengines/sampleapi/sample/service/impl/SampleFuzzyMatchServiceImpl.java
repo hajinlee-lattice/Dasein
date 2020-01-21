@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.visitor.sample.SampleMatchKeyTuple;
@@ -30,7 +31,7 @@ public class SampleFuzzyMatchServiceImpl implements SampleFuzzyMatchService {
 
     private static final int MAX_ALLOWED_RECORD_COUNT = 200;
 
-    @Autowired
+    @Inject
     private SampleMatchActorSystem actorSystem;
 
     @Override

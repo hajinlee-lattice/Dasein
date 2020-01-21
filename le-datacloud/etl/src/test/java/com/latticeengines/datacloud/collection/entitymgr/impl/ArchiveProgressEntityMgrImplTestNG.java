@@ -3,7 +3,8 @@ package com.latticeengines.datacloud.collection.entitymgr.impl;
 import java.io.IOException;
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -13,14 +14,13 @@ import com.latticeengines.datacloud.collection.testframework.DataCloudCollection
 import com.latticeengines.datacloud.core.source.impl.Feature;
 import com.latticeengines.domain.exposed.datacloud.manage.ArchiveProgress;
 
-
 @Component
 public class ArchiveProgressEntityMgrImplTestNG extends DataCloudCollectionFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ArchiveProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     Feature source;
 
     @Test(groups = "functional")

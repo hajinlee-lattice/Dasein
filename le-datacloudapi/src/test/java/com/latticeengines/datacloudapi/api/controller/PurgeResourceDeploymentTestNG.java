@@ -2,9 +2,10 @@ package com.latticeengines.datacloudapi.api.controller;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -18,7 +19,7 @@ public class PurgeResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     public final String POD_ID = this.getClass().getSimpleName();
 
-    @Autowired
+    @Inject
     private PurgeProxy purgeProxy;
 
     /**

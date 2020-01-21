@@ -2,10 +2,11 @@ package com.latticeengines.scoring.runtime.mapreduce;
 
 import java.sql.Timestamp;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.CollectionUtils;
@@ -20,7 +21,6 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.domain.exposed.scoring.ScoringCommandStep;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringStepYarnProcessor;
-
 public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringWithAvroDatatypeFileAndModelTestNG.class);
@@ -28,13 +28,13 @@ public class ScoringWithAvroDatatypeFileAndModelTestNG extends ScoringFunctional
     // !!! need to comment out the clearTables() in ScoringFunctionalTestNGBase
     // when using this test in QA environment !!!
 
-    @Autowired
+    @Inject
     private ScoringStepYarnProcessor scoringStepYarnProcessor;
 
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
     // need do change it according to the customer

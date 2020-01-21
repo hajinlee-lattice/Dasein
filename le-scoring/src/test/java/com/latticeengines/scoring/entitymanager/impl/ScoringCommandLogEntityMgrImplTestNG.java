@@ -4,7 +4,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.sql.Timestamp;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -15,13 +16,12 @@ import com.latticeengines.domain.exposed.scoring.ScoringCommandStatus;
 import com.latticeengines.scoring.entitymanager.ScoringCommandEntityMgr;
 import com.latticeengines.scoring.entitymanager.ScoringCommandLogEntityMgr;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-
 public class ScoringCommandLogEntityMgrImplTestNG extends ScoringFunctionalTestNGBase{
 
-    @Autowired
+    @Inject
     private ScoringCommandLogEntityMgr scoringCommandLogEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
     @BeforeMethod(groups = "functional", enabled = false)

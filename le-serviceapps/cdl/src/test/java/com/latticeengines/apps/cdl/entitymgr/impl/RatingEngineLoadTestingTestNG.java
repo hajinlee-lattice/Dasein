@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -45,7 +44,7 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
-    @Autowired
+    @Inject
     private List<DataSource> datasources;
 
     private DataSourceStatusThread dsStatusThread;

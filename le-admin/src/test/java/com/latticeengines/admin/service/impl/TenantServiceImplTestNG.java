@@ -2,7 +2,8 @@ package com.latticeengines.admin.service.impl;
 
 import java.util.Collection;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,10 +15,9 @@ import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
-
 public class TenantServiceImplTestNG extends AdminFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @Test(groups = "functional")

@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -54,7 +56,6 @@ import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
-
 public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DynamoExportServiceImplTestNG.class);
@@ -64,14 +65,14 @@ public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestN
     private static final String LATTICE_ACCOUNT = LatticeAccount.class.getSimpleName();
     private static final String ACCOUNT_LOOKUP_ENTRY = AccountLookupEntry.class.getSimpleName();
 
-    @Autowired
+    @Inject
     private DynamoService dynamoService;
 
     @Autowired
     @Qualifier("dynamoExportService")
     private ExportService exportService;
 
-    @Autowired
+    @Inject
     private FabricDataService fabricDataService;
 
     @Value("${common.le.environment}")

@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
@@ -9,12 +10,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummaryMetrics;
 import com.latticeengines.modelquality.entitymgr.ModelSummaryMetricsEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
-
 public class ModelSummaryMetricsServiceImplTestNG extends ModelQualityFunctionalTestNGBase {
 
     private String tenantName;
 
-    @Autowired
+    @Inject
     private ModelSummaryMetricsEntityMgr modelSummaryMetricsEntityMgr;
 
     private ModelSummaryMetrics summary1;

@@ -34,7 +34,6 @@ import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
 import com.latticeengines.scoringapi.score.AdditionalScoreConfig;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
-
 public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ScoreRequestProcessorImplTestNG.class);

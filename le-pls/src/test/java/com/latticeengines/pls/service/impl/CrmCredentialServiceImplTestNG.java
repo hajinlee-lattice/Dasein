@@ -2,7 +2,8 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.Collections;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -28,13 +29,12 @@ import com.latticeengines.pls.functionalframework.SourceCredentialValidationServ
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
 import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
-
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
-    @Autowired
+    @Inject
     private CrmCredentialService crmService;
 
     private final String contractId = "PLSCrmConfig";
@@ -64,7 +64,7 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
 
     private CustomerSpace customerSpace;
 
-    @Autowired
+    @Inject
     private ValidateCredentialProxy validateCredentialProxy;
 
     @BeforeClass(groups = { "functional" })

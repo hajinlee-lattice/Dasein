@@ -4,7 +4,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -16,13 +17,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.ArtifactService;
 import com.latticeengines.metadata.service.ModuleService;
-
 public class ModuleEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ModuleService moduleService;
 
-    @Autowired
+    @Inject
     private ArtifactService artifactService;
 
     @BeforeClass(groups = "functional")

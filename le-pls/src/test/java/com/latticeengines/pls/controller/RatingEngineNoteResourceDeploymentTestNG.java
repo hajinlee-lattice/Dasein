@@ -2,7 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -14,7 +15,6 @@ import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-
 public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String content1 = "content1";
@@ -22,7 +22,7 @@ public class RatingEngineNoteResourceDeploymentTestNG extends PlsDeploymentTestN
     private static final String user1 = "user1";
     private static final String user2 = "user2";
 
-    @Autowired
+    @Inject
     private PlayResourceDeploymentTestNG playResourceDeploymentTestNG;
 
     private RatingEngine ratingEngine;

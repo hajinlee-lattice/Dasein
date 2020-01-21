@@ -2,8 +2,9 @@ package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -16,14 +17,13 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.HdfsFileDownloader;
 import com.latticeengines.pls.service.impl.HdfsFileDownloaderImpl.DownloadBuilder;
-
 public class HdfsFileDownloadImplTestNG extends PlsFunctionalTestNGBase {
 
     private static String CONTENTS = "contents";
     private String tenantId;
     private String modelId;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${pls.modelingservice.basedir}")

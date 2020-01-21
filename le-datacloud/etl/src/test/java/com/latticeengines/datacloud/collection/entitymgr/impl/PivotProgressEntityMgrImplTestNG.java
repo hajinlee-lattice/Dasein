@@ -3,7 +3,8 @@ package com.latticeengines.datacloud.collection.entitymgr.impl;
 import java.io.IOException;
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -16,10 +17,10 @@ import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 @Component
 public class PivotProgressEntityMgrImplTestNG extends DataCloudCollectionFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private RefreshProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     FeaturePivoted source;
 
     @Test(groups = "functional")

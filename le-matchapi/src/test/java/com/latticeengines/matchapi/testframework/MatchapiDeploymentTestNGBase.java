@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -22,7 +24,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
@@ -39,31 +40,30 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.proxy.exposed.matchapi.AMStatsProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-
 public class MatchapiDeploymentTestNGBase extends MatchapiAbstractTestNGBase {
 
     @Value("${common.test.matchapi.url}")
     private String hostPort;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
 
-    @Autowired
+    @Inject
     protected MatchProxy matchProxy;
 
-    @Autowired
+    @Inject
     protected AMStatsProxy amStatsProxy;
 
-    @Autowired
+    @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
     @Override

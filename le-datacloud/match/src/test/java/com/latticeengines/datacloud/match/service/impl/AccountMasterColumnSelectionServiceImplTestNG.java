@@ -1,10 +1,11 @@
-
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-
 public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static String dataCloudVersion;
@@ -36,7 +36,7 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
     @Qualifier("accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> columnEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Test(groups = "functional")

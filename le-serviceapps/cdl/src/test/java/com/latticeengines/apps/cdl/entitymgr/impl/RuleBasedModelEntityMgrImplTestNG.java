@@ -11,9 +11,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -39,7 +40,6 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
-
 public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RuleBasedModelEntityMgrImplTestNG.class);
@@ -58,10 +58,10 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private static final String ATTR2 = "Revenue";
     private static final String ATTR3 = "Has Cisco WebEx";
 
-    @Autowired
+    @Inject
     private RuleBasedModelEntityMgr ruleBasedModelEntityMgr;
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
     private RatingEngine ratingEngine;

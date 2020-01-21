@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.entitymgr.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -13,7 +14,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy.IdTy
 @Component("latticeIdStrategyEntityMgrImplTestNG")
 public class LatticeIdStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private LatticeIdStrategyEntityMgr latticeIdStrategyEntityMgr;
 
     private static final String STRATEGY = "AccountMasterSeedRebuild";

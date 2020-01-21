@@ -4,10 +4,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,11 +17,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-
 public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(DataCloudVersionEntityMgrImplTestNG.class);
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     @BeforeClass(groups = "functional")

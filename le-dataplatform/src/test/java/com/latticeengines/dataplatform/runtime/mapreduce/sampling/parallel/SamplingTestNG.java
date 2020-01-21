@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.FileReader;
 import org.apache.avro.file.SeekableInput;
@@ -25,7 +27,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.JobID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 import org.testng.Assert;
@@ -52,7 +53,7 @@ public class SamplingTestNG extends DataplatformMiniClusterFunctionalTestNG {
     private static final Double DEFAULT_ERROR_RANGE = 0.05;
     private static final Double STRIGENT_ERROR_RANGE = 0.01;
 
-    @Autowired
+    @Inject
     private ModelingService modelingService;
 
     @Value("${dataplatform.sampling.parallel.trainingset.number}")

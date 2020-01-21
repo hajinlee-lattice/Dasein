@@ -3,7 +3,8 @@ package com.latticeengines.datacloud.core.entitymgr.impl;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -15,14 +16,13 @@ import com.latticeengines.datacloud.core.entitymgr.TestCategoricalAttributeEntit
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 
-
 @Component("testCategoricalAttributeEntityMgr")
 public class TestCategoricalAttributeEntityMgrImpl  implements TestCategoricalAttributeEntityMgr {
 
-    @Autowired
+    @Inject
     private CategoricalAttributeDao attributeDao;
 
-    @Autowired
+    @Inject
     private CategoricalDimensionDao dimensionDao;
 
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)

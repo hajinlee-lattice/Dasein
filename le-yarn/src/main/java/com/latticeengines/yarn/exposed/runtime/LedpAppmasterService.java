@@ -1,7 +1,5 @@
 package com.latticeengines.yarn.exposed.runtime;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.yarn.integration.ip.mind.MindAppmasterService;
 import org.springframework.yarn.integration.ip.mind.MindRpcMessageHolder;

@@ -6,7 +6,8 @@ import static org.testng.Assert.assertNull;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -18,13 +19,12 @@ import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandResult;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
-
 public class ModelCommandResultEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
     @BeforeMethod(groups = "functional")

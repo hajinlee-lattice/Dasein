@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.hive.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -10,10 +11,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.hive.HiveTableDao;
-
 public class HiveTableDaoImplTestNG extends MetadataFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private HiveTableDao hiveTableDao;
 
     private Tenant tenant;

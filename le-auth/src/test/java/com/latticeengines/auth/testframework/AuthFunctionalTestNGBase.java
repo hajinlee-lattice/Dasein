@@ -1,6 +1,7 @@
 package com.latticeengines.auth.testframework;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -17,10 +18,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 public class AuthFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
 
-    @Autowired
+    @Inject
     protected GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
-    @Autowired
+    @Inject
     protected GlobalAuthUserEntityMgr gaUserEntityMgr;
 
     protected GlobalAuthUser createGlobalAuthUser() {

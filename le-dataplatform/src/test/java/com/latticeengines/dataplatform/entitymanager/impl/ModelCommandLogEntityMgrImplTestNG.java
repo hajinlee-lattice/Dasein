@@ -2,7 +2,8 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -14,16 +15,15 @@ import com.latticeengines.dataplatform.service.dlorchestration.ModelCommandLogSe
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
-
 public class ModelCommandLogEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ModelCommandLogEntityMgr modelCommandLogEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandLogService modelCommandLogService;
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
     @BeforeMethod(groups = "functional")

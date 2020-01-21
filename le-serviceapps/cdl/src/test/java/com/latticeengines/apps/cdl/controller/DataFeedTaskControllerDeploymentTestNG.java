@@ -2,9 +2,10 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -13,10 +14,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-
 public class DataFeedTaskControllerDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private CDLProxy cdlProxy;
 
     @BeforeClass(groups = {"deployment"})

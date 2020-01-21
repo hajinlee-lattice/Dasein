@@ -4,16 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
@@ -34,14 +33,13 @@ public abstract class TransformationDeploymentTestNGBase<T extends Transformatio
     private static final int MAX_LOOPS = 400;
     private static final Logger log = LoggerFactory.getLogger(TransformationDeploymentTestNGBase.class);
 
-    @Autowired
-    TransformationProgressEntityMgr progressEntityMgr;
+    @Inject
+    private TransformationProgressEntityMgr progressEntityMgr;
 
     Source source;
-    TransformationService<T> transformationService;
-    Collection<TransformationProgress> progresses = new HashSet<>();
+    private TransformationService<T> transformationService;
+    private Collection<TransformationProgress> progresses = new HashSet<>();
     String baseSourceVersion = HdfsPathBuilder.dateFormat.format(new Date());
-    protected Calendar calendar = GregorianCalendar.getInstance();
 
     protected abstract TransformationService<T> getTransformationService();
 
@@ -54,7 +52,7 @@ public abstract class TransformationDeploymentTestNGBase<T extends Transformatio
     protected abstract String getPathForResult();
 
     @BeforeMethod(groups = { "deployment" })
-    public void setUp() throws Exception {
+    public void setUp() {
         source = getSource();
         prepareCleanPod(source.getSourceName());
         transformationService = getTransformationService();

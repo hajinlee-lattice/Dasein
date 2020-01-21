@@ -5,9 +5,10 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,18 +31,17 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
-
 public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private S3ImportTemplateDisplay templateDisplay;
 
-    @Autowired
+    @Inject
     private ModelingFileMetadataService modelingFileMetadataService;
 
-    @Autowired
+    @Inject
     private FileUploadService fileUploadService;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
     private static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/end2end/cdlCSVImport/";

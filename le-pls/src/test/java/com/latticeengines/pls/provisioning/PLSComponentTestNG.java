@@ -2,7 +2,8 @@ package com.latticeengines.pls.provisioning;
 
 import java.util.Collections;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -27,7 +28,6 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-
 public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
 
     private static final BatonService batonService = new BatonServiceImpl();
@@ -38,13 +38,13 @@ public class PLSComponentTestNG extends PlsFunctionalTestNGBase {
     private static final String spaceID = CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID;
     private static final String testAdminUsername = "pls-installer-tester@lattice-engines.com";
 
-    @Autowired
+    @Inject
     private PLSComponentManager componentManager;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
     @Test(groups = "functional")

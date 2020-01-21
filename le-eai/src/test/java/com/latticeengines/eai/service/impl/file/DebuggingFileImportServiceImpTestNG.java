@@ -12,11 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -30,13 +31,12 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.ImportService;
-
 public class DebuggingFileImportServiceImpTestNG extends EaiFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ImportService fileImportService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private URL metadataUrl;

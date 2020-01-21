@@ -3,7 +3,8 @@ package com.latticeengines.pls.service.impl;
 import java.util.Date;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -30,13 +31,13 @@ public class MetadataSegmentExportServiceImplDeploymentTestNG extends AbstractTe
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
-    @Autowired
+    @Inject
     private MetadataSegmentExportService metadataSegmentExportService;
 
-    @Autowired
+    @Inject
     private AtlasExportProxy atlasExportProxy;
 
-    @Autowired
+    @Inject
     private TestPlayCreationHelper testPlayCreationHelper;
 
     @BeforeClass(groups = "deployment")

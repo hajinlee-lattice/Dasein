@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.entitymgr.RefreshProgressEntityMgr;
@@ -11,16 +12,16 @@ import com.latticeengines.datacloud.core.source.impl.HGData;
 @Component
 public class HGDataRefreshServiceImplTestNG extends RefreshBulkServiceImplTestNGBase {
 
-    @Autowired
+    @Inject
     HGDataRefreshService refreshService;
 
-    @Autowired
+    @Inject
     BulkArchiveServiceImplTestNGBase hgDataRawArchiveServiceImplDeploymentTestNG;
 
-    @Autowired
+    @Inject
     HGData source;
 
-    @Autowired
+    @Inject
     RefreshProgressEntityMgr progressEntityMgr;
 
     @Override

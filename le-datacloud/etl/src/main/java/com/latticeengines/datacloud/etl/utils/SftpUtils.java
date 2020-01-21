@@ -97,7 +97,7 @@ public final class SftpUtils {
      * @return file list (relative path under SFTP root dir)
      */
     @VisibleForTesting
-    static final List<String> getFileList(@NotNull SftpConfiguration config, Calendar calendar) {
+    static List<String> getFileList(@NotNull SftpConfiguration config, Calendar calendar) {
         try {
             log.info(String.format("Connecting to SFTP %s... ", config.getSftpHost()));
 

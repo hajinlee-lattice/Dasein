@@ -3,7 +3,8 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
-
 public class RatingEngineNoteServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final String content1 = "content1";
@@ -26,10 +26,10 @@ public class RatingEngineNoteServiceImplTestNG extends CDLFunctionalTestNGBase {
     private static final String user2 = "user2";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
-    @Autowired
+    @Inject
     private RatingEngineNoteService ratingEngineNoteService;
 
     private RatingEngine ratingEngine;

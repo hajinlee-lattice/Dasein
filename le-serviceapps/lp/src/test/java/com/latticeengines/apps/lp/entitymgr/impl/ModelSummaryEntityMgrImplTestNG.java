@@ -11,8 +11,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -35,13 +36,12 @@ import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
-
 public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
-    @Autowired
+    @Inject
     private KeyValueEntityMgr keyValueEntityMgr;
 
     private Tenant tenant1;
@@ -49,7 +49,7 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
     private ModelSummary summary1;
     private ModelSummary summary2;
 
-    @Autowired
+    @Inject
     private ModelSummaryCacheWriter modelSummaryCacheWriter;
 
     @BeforeClass(groups = "functional")

@@ -6,8 +6,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -30,16 +31,16 @@ public class GlobalSessionManagementServiceImplTestNG extends SecurityFunctional
 
     private Ticket ticket;
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalSessionManagementService globalSessionManagementService;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
-    @Autowired
+    @Inject
     private GlobalAuthTenantEntityMgr globalAuthTenantEntityMgr;
 
     @BeforeClass(groups = "functional")

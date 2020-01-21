@@ -10,8 +10,9 @@ import static org.testng.Assert.assertTrue;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,7 +29,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
 
     private static final String TENANT1 = "TENANT1";
@@ -43,10 +43,10 @@ public class PythonScriptModelServiceTestNG extends LPFunctionalTestNGBase {
     private static final String MODEL_ID = "MODEL_ID";
     private static final String TABLE_NAME = "TABLE_NAME";
 
-    @Autowired
+    @Inject
     private PythonScriptModelService pythonScriptModelService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private ModelSummaryService mockedModelSummaryService = Mockito.mock(ModelSummaryService.class);

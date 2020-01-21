@@ -3,18 +3,18 @@ package com.latticeengines.monitor.alerts.service.impl;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.monitor.exposed.alerts.service.PagerDutyService;
-
 public class PagerDutyServiceTestNG extends MonitorFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private PagerDutyService pagerDutyService;
 
     @BeforeClass(groups = "functional")

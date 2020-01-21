@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.collection.testframework;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -50,13 +52,13 @@ public abstract class DataCloudCollectionAbstractTestNGBase extends AbstractTest
     @Value("${datacloud.collection.sqoop.mapper.number}")
     private int numMappers;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     // PropData CollectionDB is shutdown

@@ -4,8 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -19,10 +20,10 @@ import com.latticeengines.proxy.exposed.eai.EaiProxy;
 @Component("sftpToHdfsEaiServiceDeploymentTestNG")
 public class SftpToHdfsEaiServiceDeploymentTestNG extends EaiFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private SftpToHdfsRouteServiceTestNG routeServiceTestNG;
 
-    @Autowired
+    @Inject
     private EaiProxy eaiProxy;
 
     @BeforeClass(groups = "deployment")

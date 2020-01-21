@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -24,19 +25,18 @@ import com.latticeengines.domain.exposed.datacloud.manage.DnBMatchCommand;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
-
 public class DnbMatchCommandServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private DnbMatchCommandService dnbMatchService;
 
-    @Autowired
+    @Inject
     private DnbMatchCommandEntityMgr dnbMatchEntityMgr;
 
-    @Autowired
+    @Inject
     private MatchCommandEntityMgr matchCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
     @DataProvider(name = "matchCommandDataProvider")
