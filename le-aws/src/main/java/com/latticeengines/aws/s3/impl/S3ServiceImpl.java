@@ -313,9 +313,10 @@ public class S3ServiceImpl implements S3Service {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync) {
+    public MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync) {
         prefix = sanitizePathToKey(prefix);
-        TransferManager tm = new TransferManager(s3Client, Executors.newFixedThreadPool(8));
+        ExecutorService uploadService = Executors.newFixedThreadPool(8);
+        TransferManager tm = new TransferManager(s3Client, uploadService);
         tm.getConfiguration().getMultipartUploadThreshold();
         final MultipleFileUpload upload = tm.uploadDirectory(bucket, prefix, new File(localDir), true);
         final MutableInt uploadedObjects = new MutableInt(0);
@@ -339,8 +340,11 @@ public class S3ServiceImpl implements S3Service {
                 uploadFileList(bucket, virtualDirectoryKeyPrefix.toString(), failedUploadFiles, tm);
             }
             setAclRecursive(bucket, prefix);
+            tm.shutdownNow(false);
+        } else {
+            uploadService.shutdown();
         }
-        tm.shutdownNow(false);
+        return upload;
     }
 
     @Override

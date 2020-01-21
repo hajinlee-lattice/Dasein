@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.model.BucketLifecycleConfiguration;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.Tag;
+import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public interface S3Service {
@@ -25,7 +26,7 @@ public interface S3Service {
 
     List<String> listSubFolders(String bucket, String parentDir);
 
-    void uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync);
+    MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync);
 
     void uploadLocalFile(String bucket, String key, File file, Boolean sync);
 
@@ -77,8 +78,8 @@ public interface S3Service {
      * Generate a read only URL to access the specified key under the input bucket. The URL will expires at
      * the given date.
      *
-     * @param bucket specified S3 bucket, should not be {@literal null}
-     * @param key object key, should not be {@literal null}
+     * @param bucket   specified S3 bucket, should not be {@literal null}
+     * @param key      object key, should not be {@literal null}
      * @param expireAt date where the generated url will expire
      * @return generated URL that have read access to the specified object
      */
