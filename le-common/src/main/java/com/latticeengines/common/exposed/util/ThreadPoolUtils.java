@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.latticeengines.common.exposed.operation.Operation;
 
 public class ThreadPoolUtils {
 
@@ -253,10 +254,6 @@ public class ThreadPoolUtils {
         } else {
             return callable;
         }
-    }
-
-    public interface Operation<T> {
-        void perform(T parameter);
     }
 
     private static ExecutorService getSharedPool() {

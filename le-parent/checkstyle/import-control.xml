@@ -5,20 +5,20 @@
 
     <disallow class="com.google.inject.Inject"/>
 
-<!--    &lt;!&ndash; use javax.inject.Inject &ndash;&gt;-->
-<!--    <disallow class="org.springframework.beans.factory.annotation.Autowired"/>-->
+    <!-- use javax.inject.Inject -->
+    <disallow class="org.springframework.beans.factory.annotation.Autowired"/>
 
-<!--    &lt;!&ndash; org.apache.commons.lang3.StringUtils &ndash;&gt;-->
-<!--    <disallow class="^((?!org\.apache\.commons\.lang3).)*\.StringUtils$" regex="true"/>-->
-<!--    <disallow class="^.*\.StringUtil$" regex="true"/>-->
+    <!-- org.apache.commons.lang3.StringUtils -->
+    <disallow class="^((?!org\.apache\.commons\.lang3).)*\.StringUtils$" regex="true"/>
+    <disallow class="^.*\.StringUtil$" regex="true"/>
 
-<!--    &lt;!&ndash; org.apache.commons.collections4.CollectionUtils &ndash;&gt;-->
-<!--    <disallow class="^((?!org\.apache\.commons\.collections4).)*\.CollectionUtils$" regex="true"/>-->
-<!--    <disallow class="^.*\.CollectionUtil" regex="true"/>-->
+    <!-- org.apache.commons.collections4.CollectionUtils -->
+    <disallow class="^((?!org\.apache\.commons\.collections4).)*\.CollectionUtils$" regex="true"/>
+    <disallow class="^.*\.CollectionUtil" regex="true"/>
 
-<!--    &lt;!&ndash; org.apache.commons.collections4.MapUtils &ndash;&gt;-->
-<!--    <disallow class="^((?!org\.apache\.commons\.collections4).)*\.MapUtils$" regex="true"/>-->
-<!--    <disallow class="^.*\.MapUtil" regex="true"/>-->
+    <!-- org.apache.commons.collections4.MapUtils -->
+    <disallow class="^((?!org\.apache\.commons\.collections4).)*\.MapUtils$" regex="true"/>
+    <disallow class="^.*\.MapUtil" regex="true"/>
 
     <subpackage name="([^.]+\.)+controller" regex="true">
         <!-- should use GetMapping, PostMapping, PutMapping and DeleteMapping -->
