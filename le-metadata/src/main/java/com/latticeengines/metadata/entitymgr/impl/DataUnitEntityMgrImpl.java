@@ -22,7 +22,6 @@ import com.latticeengines.documentdb.entitymgr.impl.BaseDocumentEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
-import com.latticeengines.metadata.repository.document.reader.DataUnitCrossTenantReaderRepository;
 import com.latticeengines.metadata.repository.document.reader.DataUnitReaderRepository;
 import com.latticeengines.metadata.repository.document.writer.DataUnitWriterRepository;
 
@@ -36,9 +35,6 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     @Inject
     private DataUnitReaderRepository readerRepository;
-
-    @Inject
-    private DataUnitCrossTenantReaderRepository dataUnitCrossTenantReaderRepository;
 
     @Override
     public BaseJpaRepository<DataUnitEntity, String> getRepository() {
@@ -74,7 +70,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     @Override
     public List<DataUnit> findByStorageType(DataUnit.StorageType storageType) {
-        List<DataUnitEntity> entities = dataUnitCrossTenantReaderRepository.findByStorageType(storageType);
+        List<DataUnitEntity> entities = readerRepository.findByStorageType(storageType);
         return convertList(entities, false);
     }
 
