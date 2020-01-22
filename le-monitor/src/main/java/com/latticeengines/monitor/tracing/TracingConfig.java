@@ -17,7 +17,6 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import io.jaegertracing.Configuration.ReporterConfiguration;
 import io.jaegertracing.Configuration.SamplerConfiguration;
 import io.jaegertracing.internal.JaegerTracer;
-import io.jaegertracing.internal.samplers.ConstSampler;
 import io.opentracing.Tracer;
 import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.util.GlobalTracer;
@@ -63,7 +62,7 @@ public class TracingConfig {
          * sample 100% for now
          */
         SamplerConfiguration samplerConfig = SamplerConfiguration.fromEnv() //
-                .withType(ConstSampler.TYPE) //
+                .withType("const") //
                 .withParam(1);
         /*-
          * allow log
