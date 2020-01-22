@@ -10,10 +10,10 @@ import org.testng.annotations.Test;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
@@ -37,11 +37,11 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImpor
     @Test(groups = "deployment")
     public void testAddLatticeField() throws Exception {
         baseContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_DATE_FILE,
+                EntityType.Contacts.getSchemaInterpretation(), EntityType.Contacts.getEntity().name(), CONTACT_DATE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_DATE_FILE));
         String feedType = EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.Contacts);
         List<LatticeSchemaField> latticeSchema =
-                modelingFileMetadataService.getSchemaToLatticeSchemaFields(ENTITY_CONTACT, SOURCE, feedType);
+                modelingFileMetadataService.getSchemaToLatticeSchemaFields(EntityType.Contacts.getEntity().name(), SOURCE, feedType);
         boolean createdDate = false;
         for (LatticeSchemaField schemaField : latticeSchema) {
             if (schemaField.getName().equals("CreatedDate")) {
@@ -54,7 +54,7 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImpor
 
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse =
                 modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM,
-                DEFAULT_SYSTEM_TYPE, EntityType.Contacts.getDisplayName(), baseContactFile.getName());
+                        DEFAULT_SYSTEM_TYPE, EntityType.Contacts.getDisplayName(), baseContactFile.getName());
 
         FieldDefinitionsRecord fieldDefinitionsRecord =
                 fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
@@ -65,19 +65,22 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImpor
             }
         }
         //fieldMappingDocument.setIgnoredFields(Collections.singletonList("Created Date"));
+        S3ImportSystem importSystem = cdlService.getS3ImportSystem(mainTestTenant.getName(), DEFAULT_SYSTEM);
+        importSystem.setAccountSystemId(importSystem.generateAccountSystemId());
         modelingFileMetadataService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
                 EntityType.Contacts.getDisplayName(), baseContactFile.getName(), false, fieldDefinitionsRecord);
         baseContactFile = sourceFileService.findByName(baseContactFile.getName());
 
         String dfIdExtra = cdlService.createS3Template(customerSpace, baseContactFile.getName(),
-                SOURCE, ENTITY_CONTACT, feedType, null, ENTITY_CONTACT + "Data");
+                SOURCE, EntityType.Contacts.getEntity().name(), feedType, null, feedType);
         Assert.assertNotNull(baseContactFile);
         Assert.assertNotNull(dfIdExtra);
 
         SourceFile newContactFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(ENTITY_CONTACT), ENTITY_CONTACT, CONTACT_SOURCE_FILE,
+                EntityType.Contacts.getSchemaInterpretation(), EntityType.Contacts.getEntity().name(), CONTACT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
-        latticeSchema = modelingFileMetadataService.getSchemaToLatticeSchemaFields(ENTITY_CONTACT, SOURCE, feedType);
+        latticeSchema = modelingFileMetadataService.getSchemaToLatticeSchemaFields(EntityType.Contacts.getEntity().name(),
+                SOURCE, feedType);
         for (LatticeSchemaField schemaField : latticeSchema) {
             if ("CreatedDate".equals(schemaField.getName())) {
                 Assert.fail("Should not contains CreatedDate in template!");
@@ -101,9 +104,10 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImpor
         newContactFile = sourceFileService.findByName(newContactFile.getName());
 
         dfIdExtra = cdlService.createS3Template(customerSpace, newContactFile.getName(),
-                SOURCE, ENTITY_CONTACT, feedType, null, ENTITY_CONTACT + "Data");
+                SOURCE, EntityType.Contacts.getEntity().name(), feedType, null, feedType);
 
-        latticeSchema = modelingFileMetadataService.getSchemaToLatticeSchemaFields(ENTITY_CONTACT, SOURCE, feedType);
+        latticeSchema = modelingFileMetadataService.getSchemaToLatticeSchemaFields(EntityType.Contacts.getEntity().name(),
+                SOURCE, feedType);
         createdDate = false;
         for (LatticeSchemaField schemaField : latticeSchema) {
             if (schemaField.getName().equals("CreatedDate")) {

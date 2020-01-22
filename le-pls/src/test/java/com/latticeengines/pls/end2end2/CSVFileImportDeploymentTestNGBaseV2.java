@@ -37,15 +37,7 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
 
     protected static final String SOURCE_FILE_LOCAL_PATH = "com/latticeengines/pls/end2end/cdlCSVImport/";
     protected static final String SOURCE = "File";
-    protected static final String FEED_TYPE_SUFFIX = "Schema";
     protected static final String DEFAULT_SYSTEM = "DefaultSystem";
-
-    protected static final String ENTITY_ACCOUNT = "Account";
-    protected static final String ENTITY_CONTACT = "Contact";
-    protected static final String ENTITY_TRANSACTION = "Transaction";
-    protected static final String ENTITY_PRODUCT = "Product";
-    protected static final String ENTITY_ACTIVITY_STREAM = "ActivityStream";
-    protected  static final String ENTITY_CATALOG = "Catalog";
 
     protected static final String ACCOUNT_SOURCE_FILE = "Account_base.csv";
     protected static final String CONTACT_SOURCE_FILE = "Contact_base.csv";
@@ -56,8 +48,6 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
 
     protected static final String ACCOUNT_SOURCE_FILE_MISSING = "Account_missing_Website.csv";
     protected static final String TRANSACTION_SOURCE_FILE_MISSING = "Transaction_missing_required.csv";
-
-    private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
 
     protected static final String DEFAULT_SYSTEM_TYPE = S3ImportSystem.SystemType.Other.name();
 
@@ -99,21 +89,21 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
     protected DataFeedTask webVisitPathPatternDataFeedTask;
 
 
-    protected void prepareBaseData(String entity) throws Exception {
-        switch (entity) {
-            case ENTITY_ACCOUNT:
+    protected void prepareBaseData(EntityType entityType) throws Exception {
+        switch (entityType) {
+            case Accounts:
                 baseAccountFile = uploadSourceFile(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE, EntityType.Accounts,
                         ACCOUNT_SOURCE_FILE);
                 Assert.assertNotNull(baseAccountFile);
                 startCDLImport(baseAccountFile, EntityType.Accounts);
                 break;
-            case ENTITY_CONTACT:
+            case Contacts:
                 baseContactFile = uploadSourceFile(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE, EntityType.Contacts,
                         CONTACT_SOURCE_FILE);
                 Assert.assertNotNull(baseContactFile);
                 startCDLImport(baseContactFile, EntityType.Contacts);
                 break;
-            case ENTITY_TRANSACTION:
+            case ProductPurchases:
                 baseTransactionFile = uploadSourceFile(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE, EntityType.ProductPurchases,
                         TRANSACTION_SOURCE_FILE);
                 Assert.assertNotNull(baseTransactionFile);
@@ -122,30 +112,25 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
         }
     }
 
-    protected void getDataFeedTask(String entity) {
-        switch (entity) {
-            case ENTITY_ACCOUNT:
-                accountDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                        EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.Accounts),
-                        ENTITY_ACCOUNT);
+    protected void getDataFeedTask(EntityType entityType) {
+        DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
+                EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, entityType),
+                entityType.getEntity().name());
+        switch (entityType) {
+            case Accounts:
+                accountDataFeedTask = task;
                 break;
-            case ENTITY_CONTACT:
-                contactDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                        EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.Contacts), ENTITY_CONTACT);
+            case Contacts:
+                contactDataFeedTask = task;
                 break;
-            case ENTITY_TRANSACTION:
-                transactionDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                        EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.ProductPurchases), ENTITY_TRANSACTION);
+            case ProductPurchases:
+                transactionDataFeedTask = task;
                 break;
-            case ENTITY_ACTIVITY_STREAM:
-                webVisitDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                        EntityTypeUtils.generateFullFeedType(DEFAULT_WEBSITE_SYSTEM, EntityType.WebVisit),
-                        ENTITY_ACTIVITY_STREAM);
+            case WebVisit:
+                webVisitDataFeedTask = task;
                 break;
-            case ENTITY_CATALOG:
-                webVisitPathPatternDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
-                        EntityTypeUtils.generateFullFeedType(DEFAULT_WEBSITE_SYSTEM,EntityType.WebVisitPathPattern),
-                        ENTITY_CATALOG);
+            case WebVisitPathPattern:
+                webVisitPathPatternDataFeedTask = task;
                 break;
         }
     }

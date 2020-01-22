@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionSectionName;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 
 public final class CDLExternalSystemUtils {
 
@@ -35,12 +36,15 @@ public final class CDLExternalSystemUtils {
         List<Pair<String, String>> idMappings = new ArrayList<>();
         for (FieldDefinition definition : otherIdDefinitions) {
             if (definition.getExternalSystemType() != null && StringUtils.isNotBlank(definition.getFieldName())) {
+                String externalDisplayName = definition.getFieldName();
                 // setting for field name
                 if (!definition.getFieldName().toUpperCase().endsWith("ID")) {
-                    definition.setFieldName(definition.getExternalSystemName() + "_ID");
+                    definition.setFieldName(definition.getFieldName() + "_ID");
                 }
                 String externalAttrName = getAvroFriendlyString(definition.getFieldName());
-                String externalDisplayName = definition.getColumnName();
+                if (!externalAttrName.startsWith(ImportWorkflowSpecUtils.USER_PREFIX)) {
+                    externalAttrName = ImportWorkflowSpecUtils.USER_PREFIX + externalAttrName;
+                }
                 idMappings.add(Pair.of(externalAttrName, externalDisplayName));
                 switch (definition.getExternalSystemType()) {
                     case CRM:
@@ -56,6 +60,8 @@ public final class CDLExternalSystemUtils {
                         otherIds.add(externalAttrName);
                         break;
                 }
+                // at generating table step, the Attribute name for other field definitions should begin with "user_"
+                definition.setFieldName(externalAttrName);
             } else {
                 log.info("skip the cdl external setting for " + definition.getColumnName());
             }

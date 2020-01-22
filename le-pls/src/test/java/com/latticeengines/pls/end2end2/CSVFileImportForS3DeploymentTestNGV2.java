@@ -44,23 +44,23 @@ public class CSVFileImportForS3DeploymentTestNGV2 extends CSVFileImportDeploymen
     public void importS3Base() throws Exception {
         prepareS3BaseData(EntityType.Accounts);
         prepareS3BaseData(EntityType.Contacts);
-        prepareS3BaseData(EntityType.ProductPurchases);
+        //prepareS3BaseData(EntityType.ProductPurchases);
     }
 
     private void prepareS3BaseData(EntityType entityType) throws Exception {
         switch (entityType) {
             case Accounts:
-            testS3ImportWithTemplateData(ACCOUNT_SOURCE_FILE, entityType);
-            testS3ImportOnlyData(ACCOUNT_SOURCE_FILE, entityType);
-            break;
+                testS3ImportWithTemplateData(ACCOUNT_SOURCE_FILE, entityType);
+                testS3ImportOnlyData(ACCOUNT_SOURCE_FILE, entityType);
+                break;
             case Contacts:
-            testS3ImportWithTemplateData(CONTACT_SOURCE_FILE, entityType);
-            testS3ImportOnlyData(CONTACT_SOURCE_FILE, entityType);
-            break;
+                testS3ImportWithTemplateData(CONTACT_SOURCE_FILE, entityType);
+                testS3ImportOnlyData(CONTACT_SOURCE_FILE, entityType);
+                break;
             case ProductPurchases:
-            testS3ImportWithTemplateData(TRANSACTION_SOURCE_FILE, entityType);
-            testS3ImportOnlyData(TRANSACTION_SOURCE_FILE, entityType);
-            break;
+                testS3ImportWithTemplateData(TRANSACTION_SOURCE_FILE, entityType);
+                testS3ImportOnlyData(TRANSACTION_SOURCE_FILE, entityType);
+                break;
         }
     }
 
