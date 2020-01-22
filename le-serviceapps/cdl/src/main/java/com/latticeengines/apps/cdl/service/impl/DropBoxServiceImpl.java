@@ -122,7 +122,6 @@ public class DropBoxServiceImpl implements DropBoxService {
             if (StringUtils.isBlank(policyDoc)) {
                 iamService.deleteCustomerUser(userName);
             }
-            revokeDropBoxFromBucket(dropBoxId, dropbox.getExternalAccount());
         }
         dropBoxEntityMgr.delete(dropbox);
     }
@@ -306,9 +305,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                 dropbox.setEncryptedSecretKey(response.getSecretKey());
                 break;
             case ExternalAccount:
-                response = grantAccessToExternalAccount(request.getExternalAccountId());
-                dropbox.setExternalAccount(response.getExternalAccountId());
-                break;
+                throw new UnsupportedOperationException("Unsupported access mode " + request.getAccessMode());
             default:
                 throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
         }
@@ -376,8 +373,7 @@ public class DropBoxServiceImpl implements DropBoxService {
                     revokeAccessToLatticeUser(dropbox.getLatticeUser());
                     break;
                 case ExternalAccount:
-                    revokeDropBoxFromBucket(getDropBoxId(), dropbox.getExternalAccount());
-                    break;
+                    throw new UnsupportedOperationException("Unsupported access mode " + dropbox.getAccessMode());
                 default:
                     throw new UnsupportedOperationException("Unknown access mode " + dropbox.getAccessMode());
             }
@@ -594,21 +590,6 @@ public class DropBoxServiceImpl implements DropBoxService {
         policy.setStatements(nonEmptyStmts);
     }
 
-    private GrantDropBoxAccessResponse grantAccessToExternalAccount(String accountId) {
-        if (StringUtils.isBlank(accountId)) {
-            throw new IllegalArgumentException("Must provide a valid account id");
-        }
-        String dropBoxId = getDropBoxId();
-        Policy policy = getCustomerPolicy(dropBoxId, accountId);
-        s3Service.setBucketPolicy(customersBucket, policy.toJson());
-        log.info("Granted access to dropbox " + dropBoxId + " to external account " + accountId);
-
-        GrantDropBoxAccessResponse response = new GrantDropBoxAccessResponse();
-        response.setAccessMode(DropBoxAccessMode.ExternalAccount);
-        response.setExternalAccountId(accountId);
-        return response;
-    }
-
     private Policy getCustomerPolicy(String dropBoxId, String accountId) {
         String bucketPolicy = s3Service.getBucketPolicy(customersBucket);
         List<Statement> statements = new ArrayList<>();
@@ -689,49 +670,6 @@ public class DropBoxServiceImpl implements DropBoxService {
                 }) //
                 .collect(Collectors.toList());
         policy.setStatements(nonEmptyStmts);
-    }
-
-    private void revokeDropBoxFromBucket(String dropBoxId, String accountId) {
-        String bucketPolicy = s3Service.getBucketPolicy(customersBucket);
-        if (StringUtils.isBlank(bucketPolicy)) {
-            return;
-        }
-        Policy policy = Policy.fromJson(bucketPolicy);
-        List<Statement> nonEmptyStmts = policy.getStatements().stream() //
-                .peek(stmt -> {
-                    List<Resource> resourceList = stmt.getResources().stream() //
-                            .filter(rsc -> !rsc.getId().contains(dropBoxId))//
-                            .collect(Collectors.toList());
-                    stmt.setResources(resourceList);
-                }) //
-                .filter(stmt -> {
-                    boolean keep = true;
-                    if (CollectionUtils.isEmpty(stmt.getResources())) {
-                        keep = false;
-                    } else if (stmt.getId().contains(dropBoxId)) {
-                        keep = false;
-                    }
-                    return keep;
-                }) //
-                .collect(Collectors.toList());
-        if (StringUtils.isNotBlank(accountId) && CollectionUtils.isNotEmpty(nonEmptyStmts) //
-                && !accountId.contains(customerAccountId)) {
-            boolean accountIsRedundant = nonEmptyStmts.stream() //
-                    .noneMatch(stmt -> accountId.equals(stmt.getId()));
-            if (accountIsRedundant) {
-                nonEmptyStmts = nonEmptyStmts.stream().peek(stmt -> {
-                    if (PUT_POLICY_ID.equals(stmt.getId())) {
-                        removeAccountFromPutStatement(stmt, accountId);
-                    }
-                }).collect(Collectors.toList());
-            }
-        }
-        policy.setStatements(nonEmptyStmts);
-        if (CollectionUtils.isEmpty(nonEmptyStmts)) {
-            s3Service.deleteBucketPolicy(customersBucket);
-        } else {
-            s3Service.setBucketPolicy(customersBucket, policy.toJson());
-        }
     }
 
     private void insertAccountStatement(String bucketName, String dropBoxId, Statement statement) {

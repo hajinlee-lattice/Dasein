@@ -212,44 +212,6 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
                 "");
     }
 
-    @Test(groups = "functional")
-    public void testBucketPolicy() {
-        if (!s3Service.objectExist(testBucket, dropBoxDir)) {
-            s3Service.createFolder(testBucket, dropBoxDir);
-        }
-
-        verifyNoAccess();
-        Policy policy = getCustomerPolicy(dropBoxId, accountId);
-        s3Service.setBucketPolicy(testBucket, policy.toJson());
-        SleepUtils.sleep(10000L);
-        verifyAccess();
-
-        String bucketPolicy = s3Service.getBucketPolicy(testBucket);
-        Assert.assertTrue(bucketPolicy.contains(dropBoxId));
-        policy = Policy.fromJson(bucketPolicy);
-        revokeAccountFromDropBox(policy, dropBoxId, accountId);
-        Assert.assertTrue(CollectionUtils.isEmpty(policy.getStatements()));
-
-        String dropBoxId2 = RandomStringUtils.randomAlphanumeric(6).toLowerCase();
-        policy = getCustomerPolicy(dropBoxId2, accountId);
-        s3Service.setBucketPolicy(testBucket, policy.toJson());
-        bucketPolicy = s3Service.getBucketPolicy(testBucket);
-        Assert.assertTrue(bucketPolicy.contains(dropBoxId2));
-
-        policy = Policy.fromJson(bucketPolicy);
-        revokeDropBoxFromDropBox(policy, dropBoxId);
-        Assert.assertFalse(policy.toJson().contains(dropBoxId), policy.toJson());
-        Assert.assertTrue(policy.toJson().contains(dropBoxId2), policy.toJson());
-        s3Service.setBucketPolicy(testBucket, policy.toJson());
-
-        bucketPolicy = s3Service.getBucketPolicy(testBucket);
-        Assert.assertFalse(bucketPolicy.contains(dropBoxId), bucketPolicy);
-        Assert.assertTrue(bucketPolicy.contains(dropBoxId2), bucketPolicy);
-
-        SleepUtils.sleep(10000L);
-        verifyNoAccess();
-    }
-
     @Test(groups = "functional", dataProvider = "S3AvroIteratorData")
     public void testS3AvroRecordIterator(String[] data) {
         String prefix = this.getClass().getSimpleName() + "/TestS3AvroRecordIterator";
