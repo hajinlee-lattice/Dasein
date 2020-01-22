@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -28,6 +26,7 @@ import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobExecutionNotFailedException;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobParametersNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.stereotype.Component;
@@ -110,7 +109,7 @@ public class YarnJobLauncher implements ApplicationEventPublisherAware {
      *
      * @param jobLauncher the new job launcher
      */
-    @Inject
+    @Autowired
     public void setJobLauncher(JobLauncher jobLauncher) {
         this.jobLauncher = jobLauncher;
     }
@@ -124,7 +123,7 @@ public class YarnJobLauncher implements ApplicationEventPublisherAware {
         return jobLauncher;
     }
 
-    @Inject
+    @Autowired(required = false)
     public void setJobRegistry(JobRegistry jobRegistry) {
         this.jobRegistry = jobRegistry;
     }
@@ -133,12 +132,12 @@ public class YarnJobLauncher implements ApplicationEventPublisherAware {
         return jobRegistry;
     }
 
-    @Inject
+    @Autowired(required = false)
     public void setJobParametersConverter(JobParametersConverter converter) {
         this.converter = converter;
     }
 
-    @Inject
+    @Autowired(required = false)
     public void setJobExplorer(JobExplorer jobExplorer) {
         this.jobExplorer = jobExplorer;
     }
@@ -152,7 +151,7 @@ public class YarnJobLauncher implements ApplicationEventPublisherAware {
      *
      * @param jobs the new jobs
      */
-    @Inject
+    @Autowired(required = false)
     public void setJobs(Collection<Job> jobs) {
         this.jobs = jobs;
     }
@@ -166,7 +165,7 @@ public class YarnJobLauncher implements ApplicationEventPublisherAware {
         return jobs;
     }
 
-    @Inject
+    @Autowired(required = false)
     public void setYarnBatchProperties(YarnBatchProperties yarnBatchProperties) {
         this.yarnBatchProperties = yarnBatchProperties;
     }
