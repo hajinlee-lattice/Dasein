@@ -12,11 +12,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
+import com.latticeengines.metadata.service.DataUnitCrossTenantService;
 import com.latticeengines.metadata.service.DataUnitRuntimeService;
 import com.latticeengines.metadata.service.DataUnitRuntimeServiceRegistry;
 
 @Component("dataUnitCrossTenantService")
-public class DataUnitCrossTenantServiceImpl implements com.latticeengines.metadata.service.DataUnitCrossTenantService {
+public class DataUnitCrossTenantServiceImpl implements DataUnitCrossTenantService {
 
     private static final Logger log = LoggerFactory.getLogger(DataUnitCrossTenantServiceImpl.class);
 
