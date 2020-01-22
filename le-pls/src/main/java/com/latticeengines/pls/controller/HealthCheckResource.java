@@ -65,6 +65,7 @@ public class HealthCheckResource {
         response.put("CurrentStack", currentStack);
         response.put("ArtifactVersion", versionManager.getCurrentVersion());
         response.put("GitCommit", versionManager.getCurrentGitCommit());
+        response.put("GitBranch", versionManager.getCurrentGitBranch());
         response.put("EMRClusterName", clusterName);
         response.put("EMRClusterId", emrCacheService.getClusterId(clusterName));
         return response;
