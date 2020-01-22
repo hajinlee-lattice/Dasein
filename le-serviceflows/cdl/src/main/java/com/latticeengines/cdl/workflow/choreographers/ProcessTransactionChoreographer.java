@@ -228,7 +228,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 log.info("Need to rebuild " + mainEntity() + " due to business calendar changed.");
                 should = true;
             }
-        } else if (!hasProducts) {
+        } else if (!hasProducts && !shouldSoftDelete(step)) {
             log.info("Skip rebuild " + mainEntity() + " due to missing product table.");
             should = false;
         }
