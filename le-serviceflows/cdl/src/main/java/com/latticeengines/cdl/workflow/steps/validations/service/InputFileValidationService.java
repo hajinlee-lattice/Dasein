@@ -66,7 +66,6 @@ public abstract class InputFileValidationService<T extends InputFileValidationCo
         return map.get(clz);
     }
 
-
     protected static String getFieldValue(GenericRecord record, String field) {
         String value;
         try {

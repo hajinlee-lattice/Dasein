@@ -1,10 +1,10 @@
 package com.latticeengines.scoringapi.controller;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/enrich")
 public class EnrichResource extends BaseEnrich {
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @RequestMapping(value = "/record/{uuid}", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -13,10 +13,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -110,16 +110,16 @@ public class MatchActorSystem extends ActorSystemTemplate {
 
     private ExecutorService dataSourceServiceExecutor;
 
-    @Autowired
-    private MatchDecisionGraphService matchDecisionGraphService;
+    private final MatchDecisionGraphService matchDecisionGraphService;
 
     /****************************
      * Initialization & Destroy
      ****************************/
 
-    @Autowired
-    public MatchActorSystem(ActorFactory actorFactory) {
+    @Inject
+    public MatchActorSystem(ActorFactory actorFactory, MatchDecisionGraphService matchDecisionGraphService) {
         this.actorFactory = actorFactory;
+        this.matchDecisionGraphService = matchDecisionGraphService;
     }
 
     @PreDestroy

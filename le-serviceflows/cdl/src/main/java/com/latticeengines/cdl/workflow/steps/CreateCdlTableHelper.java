@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -13,7 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -36,13 +37,13 @@ public class CreateCdlTableHelper {
 
     private static final Logger log = LoggerFactory.getLogger(CreateCdlTableHelper.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private EventProxy eventProxy;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     public Table getFilterTable(CustomerSpace customerSpace, String recordType, String tableSuffix, String tableName,

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -20,7 +21,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -41,21 +41,21 @@ public class IngestionAPIProviderServiceImpl extends IngestionProviderServiceImp
 
     private static final Logger log = LoggerFactory.getLogger(IngestionAPIProviderServiceImpl.class);
 
-    @Autowired
+    @Inject
     private IngestionProgressService ingestionProgressService;
 
-    @Autowired
+    @Inject
     private IngestionVersionService ingestionVersionService;
 
-    @Autowired
+    @Inject
     private ApplicationContext applicationContext;
 
     private RestApiClient apiClient;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     @PostConstruct

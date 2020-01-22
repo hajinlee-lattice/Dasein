@@ -6,11 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.PrimaryAttributeService;
@@ -30,10 +31,10 @@ public class PrimaryAttributeServiceImpl implements PrimaryAttributeService {
     
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
-    @Autowired
+    @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
     @Override

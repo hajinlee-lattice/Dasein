@@ -15,11 +15,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +50,7 @@ public class DunsGuideBookLookupServiceImpl extends DataSourceLookupServiceBase 
     @Value("${datacloud.match.dynamo.fetchers.chunk.size}")
     private Integer chunkSize;
 
-    @Autowired
+    @Inject
     private DunsGuideBookService dunsGuideBookService;
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);

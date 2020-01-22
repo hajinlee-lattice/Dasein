@@ -2,9 +2,10 @@ package com.latticeengines.saml.entitymgr.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.opensaml.saml2.metadata.EntityDescriptor;
 import org.opensaml.xml.parse.ParserPool;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +22,10 @@ import com.latticeengines.saml.util.SAMLUtils;
 @Component("identityProviderEntityMgr")
 public class IdentityProviderEntityMgrImpl extends BaseEntityMgrImpl<IdentityProvider>
         implements IdentityProviderEntityMgr {
-    @Autowired
+    @Inject
     private IdentityProviderDao identityProviderDao;
 
-    @Autowired
+    @Inject
     private ParserPool parserPool;
 
     @Override

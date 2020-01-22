@@ -2,7 +2,8 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.ModelCommandLogDao;
@@ -14,7 +15,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 @Component("modelCommandLogEntityMgr")
 public class ModelCommandLogEntityMgrImpl extends BaseOrchestrationEntityMgrImpl<ModelCommandLog> implements ModelCommandLogEntityMgr {
 
-    @Autowired
+    @Inject
     private ModelCommandLogDao modelCommandLogDao;
 
     public ModelCommandLogEntityMgrImpl() {

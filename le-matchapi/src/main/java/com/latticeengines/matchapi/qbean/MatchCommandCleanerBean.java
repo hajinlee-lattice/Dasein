@@ -2,7 +2,8 @@ package com.latticeengines.matchapi.qbean;
 
 import java.util.concurrent.Callable;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandCleaner;
@@ -12,7 +13,7 @@ import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 @Component("matchCommandCleanerBean")
 public class MatchCommandCleanerBean implements QuartzJobBean {
 
-    @Autowired
+    @Inject
     private MatchCommandCleaner matchCommandCleaner;
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {

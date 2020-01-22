@@ -1,9 +1,9 @@
 package com.latticeengines.oauth2.authserver;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -50,10 +50,10 @@ public class OAuthServer extends SpringBootServletInitializer {
         @Resource(name = "dataSourceOauth2")
         private DataSource dataSource;
 
-        @Autowired
+    @Inject
         private OneTimeKeyAuthenticationManager authenticationManager;
 
-        @Autowired
+    @Inject
         private LatticeAuthenticationKeyGenerator authenticationKeyGenerator;
 
         @Bean

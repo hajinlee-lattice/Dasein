@@ -8,10 +8,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -43,13 +44,13 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 public class ExportAccountFetcher {
     private static final Logger log = LoggerFactory.getLogger(ExportAccountFetcher.class);
 
-    @Autowired
+    @Inject
     private EntityProxy entityProxy;
 
-    @Autowired
+    @Inject
     private MatchProxy matchProxy;
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     @Value("${playmaker.workflow.segment.pagesize:200}")

@@ -1,6 +1,7 @@
 package com.latticeengines.serviceflows.workflow.match;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -14,13 +15,13 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MockMatchWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private LoadHdfsTableToPDServer loadHdfsTableToPDServer;
 
-    @Autowired
+    @Inject
     private MockMatch mockMatch;
 
-    @Autowired
+    @Inject
     private CreateEventTableFromMatchResult createEventTableFromMatchResult;
 
     @Override

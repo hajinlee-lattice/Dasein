@@ -3,6 +3,8 @@ package com.latticeengines.playmaker.aspect;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -12,7 +14,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
@@ -31,7 +32,7 @@ public class MetricPublishAspect {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MetricPublishAspect.class);
 
-    @Autowired
+    @Inject
     protected MetricService metricService;
 
     @Around("execution(* com.latticeengines.playmaker.entitymgr.impl.PlaymakerRecommendationEntityMgrImpl.getRecommendations(..)) && args(tenantName, lookupSource, start, offset, maximum, syncDestination, playIds, orgInfo, ..)")

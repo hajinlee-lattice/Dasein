@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.Base64Utils;
@@ -24,7 +25,7 @@ public class DedupeHelperImpl implements DedupeHelper {
     private static Pattern junkNamePattern = Pattern.compile(
             "(^|\\s+)[\\[]*(none|no|not|delete|asd|sdf|unknown|undisclosed|null|dont|don't|n\\/a|n\\.a|abc|xyz|noname|nocompany)($|\\s+)");
 
-    @Autowired
+    @Inject
     PublicDomainService publicDomainService;
 
     @Override

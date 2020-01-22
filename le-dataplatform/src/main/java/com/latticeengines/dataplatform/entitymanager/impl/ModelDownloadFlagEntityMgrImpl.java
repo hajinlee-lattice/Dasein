@@ -2,7 +2,8 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryDownloadFlag;
 @Component("modelDownloadFlagEntityMgr")
 public class ModelDownloadFlagEntityMgrImpl extends BaseEntityMgrImpl<ModelSummaryDownloadFlag> implements
         ModelDownloadFlagEntityMgr {
-    @Autowired
+    @Inject
     private ModelDownloadFlagDao modelDownloadFlagDao;
 
     @Override

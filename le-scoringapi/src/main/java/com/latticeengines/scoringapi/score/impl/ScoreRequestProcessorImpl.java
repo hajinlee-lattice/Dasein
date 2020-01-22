@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -20,7 +22,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -68,19 +69,19 @@ import com.latticeengines.scoringapi.transform.RecordTransformer;
 public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implements ScoreRequestProcessor {
     private static final Logger log = LoggerFactory.getLogger(ScoreRequestProcessorImpl.class);
 
-    @Autowired
+    @Inject
     private ModelRetriever modelRetriever;
 
-    @Autowired
+    @Inject
     private RecordTransformer recordTransformer;
 
-    @Autowired
+    @Inject
     private Warnings warnings;
 
-    @Autowired
+    @Inject
     private List<ModelJsonTypeHandler> modelJsonTypeHandlers;
 
-    @Autowired
+    @Inject
     private ScoreHistoryEntityMgr scoreHistoryEntityMgr;
 
     @Value("${scoringapi.score.history.publish.enabled:false}")

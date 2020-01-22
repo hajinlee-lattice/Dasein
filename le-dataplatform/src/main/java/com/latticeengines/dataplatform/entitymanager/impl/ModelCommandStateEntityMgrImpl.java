@@ -2,7 +2,8 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 @Component("modelCommandStateEntityMgr")
 public class ModelCommandStateEntityMgrImpl extends BaseOrchestrationEntityMgrImpl<ModelCommandState> implements ModelCommandStateEntityMgr {
 
-    @Autowired
+    @Inject
     private ModelCommandStateDao modelCommandStateDao;
     
     public ModelCommandStateEntityMgrImpl() {

@@ -1,9 +1,10 @@
 package com.latticeengines.pls.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.Camille;
@@ -17,7 +18,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchHealthProxy;
 @Component("systemConfigService")
 public class SystemStatusServiceImpl implements SystemStatusService {
 
-    @Autowired
+    @Inject
     private MatchHealthProxy matchHealthProxy;
 
     private Camille camille;

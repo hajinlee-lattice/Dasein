@@ -11,12 +11,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -62,13 +62,13 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     @Value("${datacloud.core.accountmasterstats.numericbuckets.enabled:true}")
     private boolean isNumericbucketEnabled;
 
-    @Autowired
+    @Inject
     private AccountMasterFactEntityMgr accountMasterFactEntityMgr;
 
-    @Autowired
+    @Inject
     private CategoricalAttributeEntityMgr categoricalAttributeEntityMgr;
 
-    @Autowired
+    @Inject
     private DimensionalQueryService dimensionalQueryService;
 
     @Resource(name = "accountMasterColumnSelectionService")
@@ -77,7 +77,7 @@ public class AccountMasterStatisticsServiceImpl implements AccountMasterStatisti
     @Resource(name = "accountMasterColumnMetadataService")
     private ColumnMetadataService columnMetadataService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Override

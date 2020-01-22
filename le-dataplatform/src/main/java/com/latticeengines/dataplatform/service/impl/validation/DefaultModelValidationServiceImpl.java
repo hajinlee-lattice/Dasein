@@ -1,9 +1,9 @@
 package com.latticeengines.dataplatform.service.impl.validation;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +22,7 @@ public class DefaultModelValidationServiceImpl extends ModelValidationService {
 
     private static final String DIAGNOSTIC_FILE = "diagnostics.json";
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
     
     @Resource(name = "parallelDispatchService")

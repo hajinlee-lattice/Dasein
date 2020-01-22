@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -27,7 +28,6 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -64,10 +64,10 @@ public class WorkflowTranslator {
 
     private JobBuilderFactory jobBuilderFactory;
 
-    @Autowired
+    @Inject
     private JobRepository jobRepository;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
     private StepBuilderFactory stepBuilderFactory;
@@ -75,7 +75,7 @@ public class WorkflowTranslator {
     @Resource(name = "resourceLessTransactionManager")
     private PlatformTransactionManager transactionManager;
 
-    @Autowired
+    @Inject
     private FinalJobListener finalJobListener;
 
     private BeanValidationService beanValidationService = new BeanValidationServiceImpl();

@@ -3,7 +3,8 @@ package com.latticeengines.dellebi.entitymanager.impl;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +23,7 @@ public class DellEbiExecutionLogEntityMgrImpl extends BaseEntityMgrImpl<DellEbiE
 
     static final int MAXIMUM_FAILURES_ALLOWED = 3;
 
-    @Autowired
+    @Inject
     DellEbiExecutionLogDao dellEbiExecutionLogDao;
 
     @Override

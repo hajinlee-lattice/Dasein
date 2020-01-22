@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.globalauth.saml.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
@@ -17,7 +18,7 @@ import com.latticeengines.security.exposed.globalauth.saml.SamlGlobalAuthenticat
 public class SamlGlobalAuthenticationServiceImpl extends GlobalAuthenticationServiceImpl
         implements SamlGlobalAuthenticationService {
 
-    @Autowired
+    @Inject
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
     @Override

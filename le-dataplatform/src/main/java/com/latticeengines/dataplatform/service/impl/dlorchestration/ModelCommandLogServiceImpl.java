@@ -2,13 +2,14 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandLogEntityMgr;
@@ -28,7 +29,7 @@ public class ModelCommandLogServiceImpl implements ModelCommandLogService {
 
     private DateTimeFormatter dateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecond();
 
-    @Autowired
+    @Inject
     private ModelCommandLogEntityMgr modelCommandLogEntityMgr;
 
     @Override

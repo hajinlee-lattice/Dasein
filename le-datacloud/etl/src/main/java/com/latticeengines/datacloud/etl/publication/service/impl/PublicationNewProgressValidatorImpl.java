@@ -2,11 +2,12 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CronUtils;
@@ -25,16 +26,16 @@ public class PublicationNewProgressValidatorImpl implements PublicationNewProgre
 
     private static final Logger log = LoggerFactory.getLogger(PublicationNewProgressValidatorImpl.class);
 
-    @Autowired
+    @Inject
     private PublicationProgressEntityMgr progressEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private SourceService sourceService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Override

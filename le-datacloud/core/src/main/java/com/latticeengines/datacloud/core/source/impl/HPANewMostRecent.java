@@ -2,7 +2,8 @@ package com.latticeengines.datacloud.core.source.impl;
 
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.CollectedSource;
@@ -17,7 +18,7 @@ public class HPANewMostRecent implements MostRecentSource, DomainBased {
 
     private String cronExpression;
 
-    @Autowired
+    @Inject
     private HPANew baseSource;
 
     @Override

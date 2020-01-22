@@ -3,10 +3,11 @@ package com.latticeengines.workflow.listener;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -26,13 +27,13 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     private volatile Thread callerThread;
     private volatile boolean waitForCaller;
 
-    @Autowired
+    @Inject
     private WorkflowService workflowService;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private JobCacheService jobCacheService;
 
     @Override

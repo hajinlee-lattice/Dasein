@@ -1,7 +1,8 @@
 package com.latticeengines.datacloud.yarn.client;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,7 @@ import com.latticeengines.yarn.exposed.client.SingleContainerClientCustomization
 @Component("dataCoudClientCustomization")
 public class DataCloudClientCustomization extends SingleContainerClientCustomization {
 
-    @Autowired
+    @Inject
     public DataCloudClientCustomization(Configuration yarnConfiguration, VersionManager versionManager,
             @Value("${dataplatform.hdfs.stack:}") String stackName, SoftwareLibraryService softwareLibraryService,
             @Value("${dataplatform.yarn.job.basedir}") String hdfsJobBaseDir,

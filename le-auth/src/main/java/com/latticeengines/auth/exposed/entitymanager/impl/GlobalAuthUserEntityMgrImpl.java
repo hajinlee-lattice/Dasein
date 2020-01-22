@@ -3,9 +3,10 @@ package com.latticeengines.auth.exposed.entitymanager.impl;
 import java.util.Date;
 import java.util.HashMap;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,7 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
 
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthUserEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private GlobalAuthUserDao gaUserDao;
 
     @Override

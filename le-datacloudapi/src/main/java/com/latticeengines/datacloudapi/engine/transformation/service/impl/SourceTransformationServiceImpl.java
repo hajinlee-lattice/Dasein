@@ -3,11 +3,12 @@ package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -34,16 +35,16 @@ public class SourceTransformationServiceImpl implements SourceTransformationServ
 
     private static final Logger log = LoggerFactory.getLogger(SourceTransformationServiceImpl.class);
 
-    @Autowired
+    @Inject
     private List<FixedIntervalSource> fixedIntervalSources;
 
-    @Autowired
+    @Inject
     private List<DataImportedFromHDFS> hdfsImportedSources;
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private TransformationProgressEntityMgr transformationProgressEntityMgr;
 
     @Value("${datacloud.etl.workflow.mem.mb}")

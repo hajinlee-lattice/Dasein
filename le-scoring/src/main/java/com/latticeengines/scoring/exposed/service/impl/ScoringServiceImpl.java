@@ -2,9 +2,10 @@ package com.latticeengines.scoring.exposed.service.impl;
 
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,10 +24,10 @@ public class ScoringServiceImpl implements ScoringService {
 
     private static final String SCORING_CLIENT = "scoringClient";
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private JobEntityMgr jobEntityMgr;
 
     @Value("${dataplatform.trustore.jks}")

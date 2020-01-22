@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +28,10 @@ import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 public class MetadataSegmentExportEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegmentExport>
         implements MetadataSegmentExportEntityMgr {
 
-    @Autowired
+    @Inject
     private MetadataSegmentExportDao metadataSegmentExportDao;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Override

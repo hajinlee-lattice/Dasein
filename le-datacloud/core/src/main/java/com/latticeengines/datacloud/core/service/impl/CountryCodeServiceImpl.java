@@ -9,11 +9,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class CountryCodeServiceImpl implements CountryCodeService {
 
     private static final Logger log = LoggerFactory.getLogger(CountryCodeServiceImpl.class);
 
-    @Autowired
+    @Inject
     private CountryCodeEntityMgr countryCodeEntityMgr;
 
     private ConcurrentMap<String, String> countryCodeWhiteCache = new ConcurrentHashMap<>();

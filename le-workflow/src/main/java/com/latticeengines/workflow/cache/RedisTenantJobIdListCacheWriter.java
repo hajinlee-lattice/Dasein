@@ -8,8 +8,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
@@ -50,7 +50,7 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
     @Value("${workflow.jobs.cache.namespace:default}")
     private String namespace;
 
-    @Autowired
+    @Inject
     private RedisTemplate<String, Object> redisTemplate;
 
     private RetryTemplate retryTemplate;

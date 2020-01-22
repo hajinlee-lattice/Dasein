@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.dao.ModelCommandIdDao;
@@ -11,7 +12,7 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 @Component("modelCommandIdEntityMgr")
 public class ModelCommandIdEntityMgrImpl extends BaseOrchestrationEntityMgrImpl<ModelCommandId> implements ModelCommandIdEntityMgr{
 
-    @Autowired
+    @Inject
     private ModelCommandIdDao modelCommandIdDao;
 
     @Override

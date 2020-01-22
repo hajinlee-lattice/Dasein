@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -23,10 +24,10 @@ import com.latticeengines.metadata.service.RuleResultService;
 @Component("modelReviewService")
 public class ModelReviewServiceImpl implements ModelReviewService {
 
-    @Autowired
+    @Inject
     private MetadataService metadataService;
 
-    @Autowired
+    @Inject
     private RuleResultService ruleResultService;
 
     @Override

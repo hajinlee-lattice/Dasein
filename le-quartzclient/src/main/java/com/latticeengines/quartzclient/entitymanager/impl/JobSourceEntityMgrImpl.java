@@ -1,6 +1,7 @@
 package com.latticeengines.quartzclient.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +15,7 @@ import com.latticeengines.quartzclient.entitymanager.JobSourceEntityMgr;
 @Component("jobSourceEntityMgr")
 public class JobSourceEntityMgrImpl extends BaseEntityMgrImpl<JobSource> implements JobSourceEntityMgr {
 
-    @Autowired
+    @Inject
     private JobSourceDao jobSourceDao;
 
     @Override

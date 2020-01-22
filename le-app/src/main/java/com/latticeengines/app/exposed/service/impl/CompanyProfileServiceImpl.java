@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,13 +39,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(CompanyProfileServiceImpl.class);
 
-    @Autowired
+    @Inject
     private MatchProxy matchProxy;
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @Value("${ulysses.companyprofile.datacloud.version:}")

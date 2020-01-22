@@ -1,6 +1,5 @@
 package com.latticeengines.datacloud.match.actors.visitor;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -49,10 +48,10 @@ public abstract class DataSourceMicroEngineTemplate<T extends DataSourceWrapperA
     protected abstract void recordActorAndTuple(MatchTraveler traveler);
 
 
-    @Resource(name = "matchActorSystem")
+    @Inject
     protected MatchActorSystem matchActorSystem;
 
-    @Resource(name = "matchGuideBook")
+    @Inject
     protected MatchGuideBook guideBook;
 
     @Inject

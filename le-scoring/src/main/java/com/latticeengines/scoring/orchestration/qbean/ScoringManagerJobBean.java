@@ -3,9 +3,9 @@ package com.latticeengines.scoring.orchestration.qbean;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,19 +24,19 @@ public class ScoringManagerJobBean implements QuartzJobBean {
     @Resource(name = "commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
-    @Autowired
+    @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
     @Value("#{T(java.lang.Double).parseDouble(${scoring.cleanup.timeinternval})}")
@@ -48,7 +48,7 @@ public class ScoringManagerJobBean implements QuartzJobBean {
     @Value("#{T(java.lang.Boolean).parseBoolean(${scoring.cleanup.enableCleanHdfs})}")
     private boolean enableCleanHdfs;
 
-    @Autowired
+    @Inject
     private ApplicationContext appCtx;
 
     @Value("${scoring.max.pool.size}")

@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.service.FeatureFlagService;
@@ -30,7 +30,7 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
 
     private Map<LatticeFeatureFlag, FeatureFlagDefinition> flagDefinitionMap = new HashMap<>();
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @Override

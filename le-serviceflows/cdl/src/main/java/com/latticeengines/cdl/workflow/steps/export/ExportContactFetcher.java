@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -29,7 +30,7 @@ public class ExportContactFetcher {
 
     private static final Logger log = LoggerFactory.getLogger(ExportContactFetcher.class);
 
-    @Autowired
+    @Inject
     private EntityProxy entityProxy;
 
     @Value("${playmaker.workflow.segment.pagesize:100}")

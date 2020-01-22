@@ -3,10 +3,11 @@ package com.latticeengines.pls.service.impl;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -37,16 +38,16 @@ public class CrmCredentialServiceImpl implements CrmCredentialService {
 
     private static final Logger log = LoggerFactory.getLogger(CrmCredentialServiceImpl.class);
 
-    @Autowired
+    @Inject
     TenantConfigServiceImpl tenantConfigService;
 
-    @Autowired
+    @Inject
     DataLoaderService dataLoaderService;
 
-    @Autowired
+    @Inject
     CrmCredentialZKService crmCredentialZKService;
 
-    @Autowired
+    @Inject
     ValidateCredentialProxy validateCredentialProxy;
 
     @Override

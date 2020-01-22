@@ -2,7 +2,8 @@ package com.latticeengines.datacloudapi.api.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/publications")
 public class PublicationResource {
 
-    @Autowired
+    @Inject
     private PublicationService publicationService;
 
     @Deprecated // No use in production

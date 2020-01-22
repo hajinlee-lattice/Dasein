@@ -3,10 +3,10 @@ package com.latticeengines.datacloud.yarn.service.impl;
 import java.util.Properties;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -40,10 +40,10 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
     @Resource(name = "jobEntityMgr")
     private JobEntityMgr jobEntityMgr;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private ApplicationContext applicationContext;
 
     @Value("${datacloud.yarn.container.mem.mb}")

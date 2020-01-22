@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,7 @@ public class PublishedTalkingPointEntityMgrImpl
         extends BaseReadWriteRepoEntityMgrImpl<PublishedTalkingPointRepository, PublishedTalkingPoint, Long>
         implements PublishedTalkingPointEntityMgr {
 
-    @Autowired
+    @Inject
     private PublishedTalkingPointDao publishedTalkingPointDao;
 
     @Inject

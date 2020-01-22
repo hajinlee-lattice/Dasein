@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -17,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datafabric.entitymanager.BaseFabricEntityMgr;
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
@@ -29,7 +29,6 @@ import com.latticeengines.datafabric.util.RedisUtil;
 import com.latticeengines.domain.exposed.datafabric.DynamoIndex;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
-
 public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFabricEntityMgr<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseFabricEntityMgrImpl.class);
@@ -37,10 +36,10 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
     public static final String STORE_REDIS = "REDIS";
     public static final String STORE_DYNAMO = "DYNAMO";
 
-    @Autowired
+    @Inject
     protected FabricMessageService messageService;
 
-    @Autowired
+    @Inject
     protected FabricDataService dataService;
 
     private boolean disabled;

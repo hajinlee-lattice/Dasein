@@ -45,6 +45,7 @@ public class SampleMatchGuideBook extends GuideBook {
         fuzzyMatchAnchor = actorSystem.getFuzzyMatchAnchor();
 
         dummyPathGraph = new ArrayList<>();
+        System.out.println(actorSystem.getActorRef(SampleDunsDomainBasedMicroEngineActor.class));
         dummyPathGraph.add(ActorUtils.getPath(actorSystem.getActorRef(SampleDunsDomainBasedMicroEngineActor.class)));
         dummyPathGraph.add(ActorUtils.getPath(actorSystem.getActorRef(SampleDomainBasedMicroEngineActor.class)));
         dummyPathGraph.add(ActorUtils.getPath(actorSystem.getActorRef(SampleDunsBasedMicroEngineActor.class)));

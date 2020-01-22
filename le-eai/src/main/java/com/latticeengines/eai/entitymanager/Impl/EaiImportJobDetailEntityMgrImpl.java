@@ -1,6 +1,7 @@
 package com.latticeengines.eai.entitymanager.Impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import com.latticeengines.eai.entitymanager.EaiImportJobDetailEntityMgr;
 public class EaiImportJobDetailEntityMgrImpl extends BaseEntityMgrImpl<EaiImportJobDetail>
         implements EaiImportJobDetailEntityMgr {
 
-    @Autowired
+    @Inject
     private EaiImportJobDetailDao eaiImportJobDetailDao;
 
     @Override

@@ -1,6 +1,7 @@
 package com.latticeengines.actors.visitor.sample.impl;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import com.latticeengines.actors.exposed.traveler.Traveler;
 import com.latticeengines.actors.template.VisitorActorTemplate;
 import com.latticeengines.actors.utils.ActorUtils;
 import com.latticeengines.actors.visitor.sample.SampleMatchTravelContext;
+import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem;
 import com.latticeengines.actors.visitor.sample.framework.SampleMatchGuideBook;
 
 import akka.actor.ActorRef;
@@ -22,6 +24,9 @@ public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
 
     @Resource(name = "sampleMatchGuideBook")
     protected SampleMatchGuideBook guideBook;
+
+    @Inject
+    private SampleMatchActorSystem actorSystem;
 
     @Override
     public GuideBook getGuideBook() {
@@ -53,8 +58,7 @@ public class SampleFuzzyMatchAnchorActor extends VisitorActorTemplate {
 
     @Override
     protected ActorSystemTemplate getActorSystem() {
-        // TODO Auto-generated method stub
-        return null;
+        return actorSystem;
     }
 
     @Override

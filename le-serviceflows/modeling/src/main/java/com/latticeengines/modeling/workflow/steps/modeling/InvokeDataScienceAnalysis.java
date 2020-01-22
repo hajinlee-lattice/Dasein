@@ -2,9 +2,10 @@ package com.latticeengines.modeling.workflow.steps.modeling;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -39,7 +40,7 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
     @Value("${hadoop.fs.web.defaultFS}")
     private String hdfsWebFS;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     public DataScienceInvocationInfo findInfo() {

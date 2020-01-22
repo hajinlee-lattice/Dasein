@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -42,19 +43,19 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionManagementServiceImpl.class);
 
-    @Autowired
+    @Inject
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthUserEntityMgr gaUserEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthSessionEntityMgr gaSessionEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthUserTenantRightEntityMgr gaUserTenantRightEntityMgr;
 
     @Override

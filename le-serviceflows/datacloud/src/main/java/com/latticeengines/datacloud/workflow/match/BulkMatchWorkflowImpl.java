@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.workflow.match;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -20,16 +21,16 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class BulkMatchWorkflowImpl extends AbstractWorkflow<BulkMatchWorkflowConfiguration>
         implements BulkMatchWorkflow {
 
-    @Autowired
+    @Inject
     private PrepareBulkMatchInput prepareBulkMatchInput;
 
-    @Autowired
+    @Inject
     private ParallelBlockExecution parallelBlockExecution;
 
-    @Autowired
+    @Inject
     private ExportData exportData;
 
-    @Autowired
+    @Inject
     private UpdateFailedMatchListener updateFailedMatchListener;
 
     @Override

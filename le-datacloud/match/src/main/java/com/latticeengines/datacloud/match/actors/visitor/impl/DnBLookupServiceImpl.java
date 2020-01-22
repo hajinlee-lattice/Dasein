@@ -31,7 +31,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -107,28 +106,28 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Value("${datacloud.dnb.bulk.redirect.realtime.threshold:100}")
     private int bulkToRealtimeThreshold;
 
-    @Autowired
+    @Inject
     private DnBRealTimeLookupService dnbRealTimeLookupService;
 
-    @Autowired
+    @Inject
     private DnBBulkLookupDispatcher dnbBulkLookupDispatcher;
 
-    @Autowired
+    @Inject
     private DnBBulkLookupFetcher dnbBulkLookupFetcher;
 
-    @Autowired
+    @Inject
     private DnBBulkLookupStatusChecker dnbBulkLookupStatusChecker;
 
-    @Autowired
+    @Inject
     private DnBCacheService dnbCacheService;
 
-    @Autowired
+    @Inject
     private DnBMatchResultValidator dnbMatchResultValidator;
 
-    @Autowired
+    @Inject
     private NameLocationService nameLocationService;
 
-    @Autowired
+    @Inject
     private DnbMatchCommandService dnbMatchCommandService;
 
     @Inject

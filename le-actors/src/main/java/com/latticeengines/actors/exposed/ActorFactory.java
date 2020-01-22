@@ -1,6 +1,7 @@
 package com.latticeengines.actors.exposed;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,7 @@ import akka.routing.SmallestMailboxPool;
 
 @Component
 public class ActorFactory {
-    @Autowired
+    @Inject
     private ApplicationContext applicationContext;
 
     public ActorRef create(ActorSystem actorSystem, //

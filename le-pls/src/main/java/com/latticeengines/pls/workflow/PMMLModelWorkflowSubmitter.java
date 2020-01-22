@@ -4,10 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(PMMLModelWorkflowSubmitter.class);
 
-    @Autowired
+    @Inject
     private MetadataFileUploadService metadataFileUploadService;
 
     @Value("${pls.modeling.workflow.mem.mb}")

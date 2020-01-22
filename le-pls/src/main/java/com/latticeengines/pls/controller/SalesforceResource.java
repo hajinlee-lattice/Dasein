@@ -2,9 +2,9 @@ package com.latticeengines.pls.controller;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,7 +18,7 @@ import io.swagger.annotations.Api;
 @RestController
 @RequestMapping(value = "/salesforce")
 public class SalesforceResource {
-    @Autowired
+    @Inject
     private SalesforceURLService salesforceURLService;
 
     @RequestMapping(value = "/bis-lp", method=RequestMethod.GET)

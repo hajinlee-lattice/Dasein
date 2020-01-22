@@ -4,6 +4,8 @@
 <import-control pkg="com.latticeengines" strategyOnMismatch="allowed">
 
     <disallow class="com.google.inject.Inject"/>
+    <disallow class="import org.junit.Test"/>
+    <disallow class="org.junit.Assert"/>
 
     <!-- use javax.inject.Inject -->
     <disallow class="org.springframework.beans.factory.annotation.Autowired"/>

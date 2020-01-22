@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,16 +48,16 @@ import io.swagger.annotations.ApiParam;
 @PreAuthorize("hasRole('View_PLS_Data')")
 public class ScoringApiInternalResource {
 
-    @Autowired
+    @Inject
     protected InternalScoringApiInterface internalScoringApiProxy;
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
-    @Autowired
+    @Inject
     private AttributeService attributeService;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @RequestMapping(value = "/record/apiconsole/debug", method = RequestMethod.POST, headers = "Accept=application/json")

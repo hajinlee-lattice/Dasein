@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -38,22 +39,22 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @Component("collectionDataFlowService")
 public class CollectionDataFlowServiceImpl implements CollectionDataFlowService {
 
-    @Autowired
+    @Inject
     protected DataTransformationService dataTransformationService;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
-    @Autowired
+    @Inject
     private HGData hgData;
 
     @Value("${datacloud.collection.cascading.platform}")

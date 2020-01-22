@@ -2,7 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Reports')")
 public class ReportResource {
 
-    @Autowired
+    @Inject
     private ReportService reportService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

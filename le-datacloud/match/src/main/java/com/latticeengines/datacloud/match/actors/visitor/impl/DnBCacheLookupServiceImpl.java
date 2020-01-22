@@ -1,8 +1,9 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.service.DnBCacheService;
@@ -19,13 +20,13 @@ public class DnBCacheLookupServiceImpl extends DataSourceLookupServiceBase {
 
     private static final Logger log = LoggerFactory.getLogger(DnBCacheLookupServiceImpl.class);
 
-    @Autowired
+    @Inject
     private NameLocationService nameLocationService;
 
-    @Autowired
+    @Inject
     private DnBCacheService dnbCacheService;
 
-    @Autowired
+    @Inject
     private DnBMatchResultValidator dnbMatchResultValidator;
 
     @Override

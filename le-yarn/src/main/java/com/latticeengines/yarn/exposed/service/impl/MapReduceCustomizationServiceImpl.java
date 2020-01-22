@@ -2,8 +2,9 @@ package com.latticeengines.yarn.exposed.service.impl;
 
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.mapreduce.Job;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.yarn.exposed.client.mapreduce.MRJobCustomization;
@@ -15,10 +16,10 @@ import com.latticeengines.yarn.exposed.service.MapReduceCustomizationService;
 @Component("mapReduceCustomizationService")
 public class MapReduceCustomizationServiceImpl implements MapReduceCustomizationService {
 
-    @Autowired
+    @Inject
     private MapReduceCustomizationRegistry mapReduceCustomizationRegistry;
 
-    @Autowired
+    @Inject
     private JobNameService jobNameService;
 
     @Override

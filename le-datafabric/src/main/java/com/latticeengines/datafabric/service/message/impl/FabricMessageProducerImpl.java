@@ -4,20 +4,20 @@ import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datafabric.service.message.FabricMessageProducer;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
 import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
-
 public class FabricMessageProducerImpl implements FabricMessageProducer {
 
     private static final Logger log = LoggerFactory.getLogger(FabricMessageProducerImpl.class);
@@ -36,7 +36,7 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
     private Properties props;
     private String derivedTopic;
 
-    @Autowired
+    @Inject
     private FabricMessageService messageService;
 
     public FabricMessageProducerImpl(Builder builder) {

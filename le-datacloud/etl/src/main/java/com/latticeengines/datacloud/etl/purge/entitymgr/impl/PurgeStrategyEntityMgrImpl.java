@@ -2,8 +2,9 @@ package com.latticeengines.datacloud.etl.purge.entitymgr.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 @Component("purgeStrategyEntityMgr")
 public class PurgeStrategyEntityMgrImpl implements PurgeStrategyEntityMgr {
 
-    @Autowired
+    @Inject
     private PurgeStrategyDao purgeStrategyDao;
 
     @Override

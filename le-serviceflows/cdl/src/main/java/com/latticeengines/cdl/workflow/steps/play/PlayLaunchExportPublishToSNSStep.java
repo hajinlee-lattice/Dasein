@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -34,14 +33,13 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("playLaunchExportPublishToSNSStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-
 public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunchExportPublishToSNSConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchExportPublishToSNSStep.class);
 
     @Inject
     private SNSService snsService;
-    @Autowired
+    @Inject
     private ChannelConfigProcessor channelConfigProcessor;
 
     @Inject
