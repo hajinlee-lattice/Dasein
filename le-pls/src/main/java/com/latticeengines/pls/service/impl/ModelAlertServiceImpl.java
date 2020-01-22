@@ -6,8 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +53,7 @@ public class ModelAlertServiceImpl implements ModelAlertService {
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${pls.modelalerts.min.success.events}")

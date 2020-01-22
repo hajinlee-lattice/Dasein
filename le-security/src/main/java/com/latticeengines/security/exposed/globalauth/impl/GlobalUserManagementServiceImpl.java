@@ -11,12 +11,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -72,25 +73,25 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     @Value("${security.zendesk.enabled:false}")
     private boolean zendeskEnabled;
 
-    @Autowired
+    @Inject
     private GlobalAuthAuthenticationEntityMgr gaAuthenticationEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthUserEntityMgr gaUserEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthUserTenantRightEntityMgr gaUserTenantRightEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
 
-    @Autowired
+    @Inject
     private EmailService emailService;
 
-    @Autowired
+    @Inject
     private ZendeskService zendeskService;
 
     @Override

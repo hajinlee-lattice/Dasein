@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.CategoricalAttributeEntityMgr;
@@ -20,7 +21,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("dimensionalQueryService")
 public class DimensionalQueryServiceImpl implements DimensionalQueryService {
 
-    @Autowired
+    @Inject
     private CategoricalAttributeEntityMgr attributeEntityMgr;
 
     @Override

@@ -2,9 +2,9 @@ package com.latticeengines.playmaker.controller;
 
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,10 +26,10 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping(value = "/playmaker/tenants")
 public class TenantResource {
 
-    @Autowired
+    @Inject
     private OAuthUserEntityMgr oAuthUserEntityMgr;
 
-    @Autowired
+    @Inject
     private PlaymakerTenantEntityMgr playmakerEntityMgr;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

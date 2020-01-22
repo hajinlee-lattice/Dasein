@@ -39,11 +39,11 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
-    @Qualifier(value = "entityManagerFactory")
+    @Qualifier("entityManagerFactory")
     private EntityManager entityManager;
 
     @Autowired
-    @Qualifier(value = "entityManagerFactoryReader")
+    @Qualifier("entityManagerFactoryReader")
     private EntityManager entityManagerReader;
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.*.find*(..))")

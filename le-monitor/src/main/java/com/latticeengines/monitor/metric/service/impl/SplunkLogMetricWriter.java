@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -31,8 +30,7 @@ public class SplunkLogMetricWriter implements MetricWriter {
     @Value("${monitor.influxdb.environment:Local}")
     private String environment;
 
-    @Autowired
-    @Qualifier("monitorExecutor")
+    @Resource(name = "monitorExecutor")
     private ThreadPoolTaskExecutor monitorExecutor;
 
     private String logPrefix;

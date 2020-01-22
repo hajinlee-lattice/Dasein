@@ -1,17 +1,17 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -26,16 +26,15 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.DiffferParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.DifferConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-
 @Component(Diff.TRANSFORMER_NAME)
 public class SourceDiffer extends AbstractDataflowTransformer<DifferConfig, DiffferParameters> {
 
     private static final Logger log = LoggerFactory.getLogger(SourceDiffer.class);
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
 
     @Override

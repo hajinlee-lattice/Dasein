@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -22,8 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.esotericsoftware.minlog.Log;
@@ -58,15 +57,13 @@ public class PatchBookValidatorImpl implements PatchBookValidator {
     // TODO remove dummy version after source attr table has versioning
     private static final String DUMMY_SRC_ATTR_DC_VERSION = "2.0.999"; // dummy version for src attr cache
 
-    @Autowired
-    @Qualifier("accountMasterColumnEntityMgr")
+    @Resource(name = "accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> columnEntityMgr;
 
     @Inject
     private CountryCodeService countryCodeService;
 
-    @Autowired
-    @Qualifier("sourceAttributeEntityMgr")
+    @Resource(name = "sourceAttributeEntityMgr")
     private SourceAttributeEntityMgr sourceAttributeEntityMgr;
 
     @Inject

@@ -3,8 +3,8 @@ package com.latticeengines.saml;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.saml.SAMLCredential;
 import org.springframework.security.saml.userdetails.SAMLUserDetailsService;
@@ -22,10 +22,10 @@ import com.latticeengines.security.exposed.service.UserService;
 @Component("latticeUserDetailsService")
 public class LatticeUserDetailsService implements SAMLUserDetailsService {
 
-    @Autowired
+    @Inject
     private IdentityProviderEntityMgr identityProviderEntityMgr;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
     @Override

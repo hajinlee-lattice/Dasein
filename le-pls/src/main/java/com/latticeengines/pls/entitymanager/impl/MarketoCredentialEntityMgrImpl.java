@@ -3,8 +3,9 @@ package com.latticeengines.pls.entitymanager.impl;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +26,13 @@ import com.latticeengines.pls.entitymanager.MarketoCredentialEntityMgr;
 public class MarketoCredentialEntityMgrImpl extends BaseEntityMgrImpl<MarketoCredential>
         implements MarketoCredentialEntityMgr {
 
-    @Autowired
+    @Inject
     private MarketoCredentialDao marketoCredentialDao;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private EnrichmentEntityMgr enrichmentEntityMgr;
 
     @Override

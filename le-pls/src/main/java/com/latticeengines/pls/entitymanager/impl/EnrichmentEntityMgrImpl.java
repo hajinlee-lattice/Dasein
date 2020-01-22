@@ -1,6 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +22,13 @@ import com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr;
 public class EnrichmentEntityMgrImpl extends BaseEntityMgrImpl<Enrichment>
         implements EnrichmentEntityMgr {
 
-    @Autowired
+    @Inject
     private EnrichmentDao enrichmentDao;
 
-    @Autowired
+    @Inject
     private MarketoMatchFieldEntityMgr marketoMatchFieldEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Override

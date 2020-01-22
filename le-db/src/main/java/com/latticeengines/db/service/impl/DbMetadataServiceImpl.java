@@ -5,10 +5,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -23,7 +23,7 @@ public class DbMetadataServiceImpl implements DbMetadataService {
 
     private Map<String, MetadataProvider> metadataProviders;
 
-    @Autowired
+    @Inject
     public void setMetadataProviders(@Value("#{metadataProviders}") Map<String, MetadataProvider> metadataProviders) {
         this.metadataProviders = metadataProviders;
     }

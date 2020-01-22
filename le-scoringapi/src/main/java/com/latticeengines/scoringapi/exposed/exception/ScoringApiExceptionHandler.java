@@ -6,10 +6,11 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -41,13 +42,13 @@ public class ScoringApiExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ScoringApiExceptionHandler.class);
     private static final String SPLUNK_URL = "http://splunksearch.lattice.local:8000/en-US/app/search/search?q=search%20index%3Dscoringapi%20%22";
 
-    @Autowired
+    @Inject
     private AlertService alertService;
 
-    @Autowired
+    @Inject
     private RequestInfo requestInfo;
 
-    @Autowired
+    @Inject
     private Warnings warnings;
 
     @ExceptionHandler

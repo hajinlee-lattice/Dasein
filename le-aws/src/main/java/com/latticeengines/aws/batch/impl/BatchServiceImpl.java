@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +36,7 @@ public class BatchServiceImpl implements BatchService {
 
     private AWSBatch awsBatch = null;
 
-    @Autowired
+    @Inject
     public BatchServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.region}") String region) {
         log.info("Constructing AWSBatch using BasicAWSCredentials.");
         awsBatch = AWSBatchClientBuilder.standard() //

@@ -3,11 +3,12 @@ package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 import java.util.Date;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +25,7 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
 
     private final Logger log = LoggerFactory.getLogger(OAuthUserEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private OAuthUserDao userDao;
 
     @Value("${oauth2.password_expiration_days}")

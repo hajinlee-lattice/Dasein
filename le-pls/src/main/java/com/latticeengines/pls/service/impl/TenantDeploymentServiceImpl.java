@@ -2,11 +2,11 @@ package com.latticeengines.pls.service.impl;
 
 import java.sql.Timestamp;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -26,16 +26,16 @@ import com.latticeengines.security.exposed.util.SecurityUtils;
 @Component("tenantDeploymentService")
 public class TenantDeploymentServiceImpl implements TenantDeploymentService {
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantDeploymentEntityMgr tenantDeploymentEntityMgr;
 
 

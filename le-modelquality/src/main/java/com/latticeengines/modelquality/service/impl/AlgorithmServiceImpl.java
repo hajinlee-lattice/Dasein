@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
@@ -13,7 +14,7 @@ import com.latticeengines.modelquality.service.AlgorithmService;
 @Component("algorithmService")
 public class AlgorithmServiceImpl extends BaseServiceImpl implements AlgorithmService {
 
-    @Autowired
+    @Inject
     private AlgorithmEntityMgr algorithmEntityMgr;
 
     @Override

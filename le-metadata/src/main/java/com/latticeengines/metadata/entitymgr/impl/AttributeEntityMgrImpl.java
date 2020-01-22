@@ -2,7 +2,8 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,10 +20,10 @@ import com.latticeengines.metadata.repository.db.AttributeRepository;
 @Component("attributeEntityMgr")
 public class AttributeEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Attribute, Long> implements AttributeEntityMgr {
 
-    @Autowired
+    @Inject
     private AttributeDao attributeDao;
 
-    @Autowired
+    @Inject
     private AttributeRepository attributeRepository;
 
     @Override

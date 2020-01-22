@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,19 +30,19 @@ import com.latticeengines.modelquality.service.ModelRunService;
 @Component("analyticTestService")
 public class AnalyticTestServiceImpl extends BaseServiceImpl implements AnalyticTestService {
 
-    @Autowired
+    @Inject
     private AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
 
-    @Autowired
+    @Inject
     private DataSetEntityMgr dataSetEntityMgr;
 
-    @Autowired
+    @Inject
     private AnalyticTestEntityMgr analyticTestEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelRunService modelRunService;
 
-    @Autowired
+    @Inject
     private ModelRunEntityMgr modelRunEntityMgr;
 
     @Value("${common.pls.url}")

@@ -1,8 +1,9 @@
 package com.latticeengines.matchapi.controller;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +23,7 @@ import io.swagger.annotations.ApiOperation;
 public class CustomerReportsResource {
 
     private static final Logger log = LoggerFactory.getLogger(CustomerReportsResource.class);
-    @Autowired
+    @Inject
     private CustomerReportService customerReportService;
 
     @RequestMapping(value = "/", method = RequestMethod.POST, headers = "Accept=application/json")

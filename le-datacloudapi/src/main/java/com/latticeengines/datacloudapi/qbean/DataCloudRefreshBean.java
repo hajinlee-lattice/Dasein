@@ -2,7 +2,8 @@ package com.latticeengines.datacloudapi.qbean;
 
 import java.util.concurrent.Callable;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloudapi.engine.ingestion.service.IngestionService;
@@ -14,16 +15,16 @@ import com.latticeengines.quartzclient.qbean.QuartzJobBean;
 @Component("dataCloudRefresh")
 public class DataCloudRefreshBean implements QuartzJobBean {
 
-    @Autowired
+    @Inject
     private SourceTransformationService transformationService;
 
-    @Autowired
+    @Inject
     private PublicationService publicationService;
 
-    @Autowired
+    @Inject
     private IngestionService ingestionService;
 
-    @Autowired
+    @Inject
     private OrchestrationService orchestrationService;
 
     @Override

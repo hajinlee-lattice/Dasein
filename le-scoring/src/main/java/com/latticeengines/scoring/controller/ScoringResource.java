@@ -2,8 +2,9 @@ package com.latticeengines.scoring.controller;
 
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,10 +25,10 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/scoringjobs")
 public class ScoringResource {
 
-    @Autowired
+    @Inject
     private ScoringJobService scoringJobService;
 
-    @Autowired
+    @Inject
     private ScoringService scoringService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -2,9 +2,10 @@ package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import java.util.concurrent.ExecutionException;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -27,14 +28,13 @@ import com.latticeengines.domain.exposed.datacloud.manage.DecisionGraph;
 @Scope("prototype")
 public class MatchJunctionActor extends JunctionActorTemplate {
 
-    @Autowired
+    @Inject
     private MatchDecisionGraphService matchDecisionGraphService;
 
-    @Autowired
-    @Qualifier("matchGuideBook")
+    @Resource(name = "matchGuideBook")
     protected MatchGuideBook guideBook;
 
-    @Autowired
+    @Inject
     private MatchActorSystem matchActorSystem;
 
     @Override

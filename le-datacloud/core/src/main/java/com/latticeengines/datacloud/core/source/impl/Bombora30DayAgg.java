@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DerivedSource;
@@ -16,7 +17,7 @@ public class Bombora30DayAgg implements DomainBased, DerivedSource, HasSqlPresen
 
     private String cronExpression;
 
-    @Autowired
+    @Inject
     private BomboraDepivoted baseSource;
 
     @Override

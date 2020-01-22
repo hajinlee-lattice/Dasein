@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -10,7 +11,6 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,16 +44,16 @@ import io.swagger.annotations.ApiOperation;
 public class AdminResource extends InternalResourceBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdminResource.class);
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
     @RequestMapping(value = "/tenants", method = RequestMethod.POST, headers = "Accept=application/json")

@@ -1,11 +1,11 @@
 package com.latticeengines.scoring.orchestration.service.impl;
 
-
 import java.sql.Timestamp;
+
+import javax.inject.Inject;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.scoring.ScoringCommand;
@@ -21,13 +21,13 @@ import com.latticeengines.scoring.orchestration.service.ScoringStepProcessor;
 @Component("scoringStepFinishProcessor")
 public class ScoringStepFinishProcessorImpl implements ScoringStepProcessor {
 
-    @Autowired
+    @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
     @Override 

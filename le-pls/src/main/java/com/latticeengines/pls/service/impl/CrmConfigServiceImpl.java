@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +13,10 @@ import com.latticeengines.remote.exposed.service.DataLoaderService;
 @Lazy(value = true)
 public class CrmConfigServiceImpl implements CrmConfigService {
 
-    @Autowired
+    @Inject
     TenantConfigServiceImpl tenantConfigService;
 
-    @Autowired
+    @Inject
     DataLoaderService dataLoaderService;
 
     @Override

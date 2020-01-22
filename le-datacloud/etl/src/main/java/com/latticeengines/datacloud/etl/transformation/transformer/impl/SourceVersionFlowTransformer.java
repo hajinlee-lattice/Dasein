@@ -6,11 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -29,7 +30,7 @@ public class SourceVersionFlowTransformer extends AbstractDataflowTransformer<AM
 
     private static final Logger log = LoggerFactory.getLogger(SourceVersionFlowTransformer.class);
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Override

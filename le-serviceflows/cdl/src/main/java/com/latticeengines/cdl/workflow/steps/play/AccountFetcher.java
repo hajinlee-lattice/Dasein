@@ -1,8 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 public class AccountFetcher {
     private static final Logger log = LoggerFactory.getLogger(AccountFetcher.class);
 
-    @Autowired
+    @Inject
     private EntityProxy entityProxy;
 
     // NOTE - do not increase this pagesize beyond 2.5K as it causes failure in

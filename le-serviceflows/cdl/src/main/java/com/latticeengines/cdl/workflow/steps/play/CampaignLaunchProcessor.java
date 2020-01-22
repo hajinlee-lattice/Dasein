@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,16 +50,16 @@ public class CampaignLaunchProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(CampaignLaunchProcessor.class);
 
-    @Autowired
+    @Inject
     private FrontEndQueryCreator frontEndQueryCreator;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
     @Value("${yarn.pls.url}")

@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.core;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -14,10 +15,10 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DummyWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private DummyStep dummyStep;
 
-    @Autowired
+    @Inject
     private DummyAwsStep dummyAwsStep;
 
     @Override

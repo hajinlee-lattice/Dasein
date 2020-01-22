@@ -2,7 +2,8 @@ package com.latticeengines.scoring.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +19,7 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 public class ScoringCommandStateEntityMgrImpl extends BaseScoringEntityMgrImpl<ScoringCommandState> implements
         ScoringCommandStateEntityMgr {
 
-    @Autowired
+    @Inject
     private ScoringCommandStateDao scoringCommandStateDao;
 
     public ScoringCommandStateEntityMgrImpl(){

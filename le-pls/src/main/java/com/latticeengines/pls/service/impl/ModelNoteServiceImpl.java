@@ -4,7 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -18,10 +19,10 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 @Component("modelNoteService")
 public class ModelNoteServiceImpl implements ModelNoteService {
 
-    @Autowired
+    @Inject
     private ModelNoteEntityMgr modelNotesEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     @Override

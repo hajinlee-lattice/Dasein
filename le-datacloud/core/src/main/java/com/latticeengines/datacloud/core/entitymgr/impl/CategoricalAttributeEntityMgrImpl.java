@@ -3,9 +3,10 @@ package com.latticeengines.datacloud.core.entitymgr.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +19,10 @@ import com.latticeengines.domain.exposed.datacloud.manage.CategoricalDimension;
 
 @Component("categoricalAttributeEntityMgrImpl")
 public class CategoricalAttributeEntityMgrImpl implements CategoricalAttributeEntityMgr {
-    @Autowired
+    @Inject
     private CategoricalAttributeDao attributeDao;
 
-    @Autowired
+    @Inject
     private CategoricalDimensionDao dimensionDao;
 
     @Override

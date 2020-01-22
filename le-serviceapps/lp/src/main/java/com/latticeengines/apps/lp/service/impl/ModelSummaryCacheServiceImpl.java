@@ -3,7 +3,8 @@ package com.latticeengines.apps.lp.service.impl;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.lp.cache.ModelSummaryCacheWriter;
@@ -16,10 +17,10 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 @Service("modelSummaryCacheService")
 public class ModelSummaryCacheServiceImpl extends BaseCacheServiceImpl<ModelSummary> implements ModelSummaryCacheService {
 
-    @Autowired
+    @Inject
     private ModelSummaryCacheWriter modelSummaryCacheWriter;
 
-    @Autowired
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     protected CacheWriter getCacheWriter() {

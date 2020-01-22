@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +14,6 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -39,7 +40,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
     private static final String AM_ENRICH_ONLY = "AM_ENRICH_ONLY";
     private static final String AM_MATCH_AND_OR_ENRICH = "AM_MATCH_AND_OR_ENRICH";
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     @Override

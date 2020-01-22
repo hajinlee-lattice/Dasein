@@ -2,7 +2,8 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import com.latticeengines.pls.entitymanager.ModelNoteEntityMgr;
 @Component("modelNotesEntityMgr")
 public class ModelNoteEntityMgrImpl extends BaseEntityMgrImpl<ModelNote> implements ModelNoteEntityMgr {
 
-    @Autowired
+    @Inject
     private ModelNoteDao modelNotesDao;
 
     @Override

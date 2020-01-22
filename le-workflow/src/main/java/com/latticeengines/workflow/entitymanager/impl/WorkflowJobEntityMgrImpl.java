@@ -3,11 +3,12 @@ package com.latticeengines.workflow.entitymanager.impl;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,7 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private WorkflowJobDao workflowJobDao;
 
     private static final String DEFAULT_ERROR_CATEGORY = "UNKNOWN";

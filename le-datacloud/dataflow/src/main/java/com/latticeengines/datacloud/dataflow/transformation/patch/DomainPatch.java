@@ -3,7 +3,8 @@ package com.latticeengines.datacloud.dataflow.transformation.patch;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.ValidationUtils;
@@ -49,7 +50,7 @@ public class DomainPatch extends ConfigurableFlowBase<DomainPatchConfig> {
     private static final String PATCH_DUNS = "_LATTICE_PATCH_DUNS_";
     private static final String PATCH_DOMAINS = "_LATTICE_PATCH_DOMAINS_";
 
-    @Autowired
+    @Inject
     private BeanValidationService beanValidationService;
 
     @Override

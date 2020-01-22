@@ -2,8 +2,9 @@ package com.latticeengines.objectapi.controller;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +33,7 @@ public class EntityResource {
 
     private final EntityQueryService entityQueryService;
 
-    @Autowired
+    @Inject
     public EntityResource(EntityQueryService entityQueryService) {
         this.entityQueryService = entityQueryService;
     }

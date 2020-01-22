@@ -3,12 +3,11 @@ package com.latticeengines.monitor.metric.service.impl;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -27,8 +26,7 @@ public class StatsServiceImpl implements StatsService {
     @Inject
     private MetricService metricService;
 
-    @Autowired
-    @Qualifier("commonTaskScheduler")
+    @Resource(name = "commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @Value("${monitor.health.inspection.enabled}")

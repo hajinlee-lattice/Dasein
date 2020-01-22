@@ -9,12 +9,13 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -36,7 +37,7 @@ public class PagerDutyEmailServiceImpl implements PagerDutyService {
 
     private String pagerDutyEmailAddress;
 
-    @Autowired
+    @Inject
     private EmailService emailService;
 
     private String localHost;

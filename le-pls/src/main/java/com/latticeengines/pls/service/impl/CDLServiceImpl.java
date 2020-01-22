@@ -100,6 +100,7 @@ public class CDLServiceImpl implements CDLService {
     private static final String DELETE_SUCCESSE_MSG = "<p>The delete action will be scheduled to process and analyze after validation. You can track the status from the <a ui-sref=\"home.jobs\">Data Processing Job page</a>.</p>";
 
     private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
+    private static final String DEFAULT_SYSTEM = "DefaultSystem";
 
     @Inject
     protected SourceFileService sourceFileService;
@@ -522,6 +523,11 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public S3ImportSystem getS3ImportSystem(String customerSpace, String systemName) {
         return cdlProxy.getS3ImportSystem(customerSpace, systemName);
+    }
+
+    @Override
+    public S3ImportSystem getDefaultImportSystem(String customerSpace) {
+        return cdlProxy.getS3ImportSystem(customerSpace, DEFAULT_SYSTEM);
     }
 
     @Override

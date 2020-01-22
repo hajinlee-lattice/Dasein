@@ -3,7 +3,8 @@ package com.latticeengines.yarn.exposed.entitymanager.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,7 @@ import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 @Component("jobEntityMgr")
 public class JobEntityMgrImpl extends BaseEntityMgrImpl<Job> implements JobEntityMgr {
 
-    @Autowired
+    @Inject
     private JobDao jobDao;
 
     public JobEntityMgrImpl() {

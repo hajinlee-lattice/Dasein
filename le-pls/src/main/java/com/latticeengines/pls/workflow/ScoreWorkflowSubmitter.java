@@ -4,12 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -39,16 +40,16 @@ public class ScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ScoreWorkflowSubmitter.class);
 
-    @Autowired
+    @Inject
     private MatchCommandProxy matchCommandProxy;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private BucketedScoreService bucketedScoreService;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     public ApplicationId submit(ModelSummary modelSummary, String sourceDisplayName,

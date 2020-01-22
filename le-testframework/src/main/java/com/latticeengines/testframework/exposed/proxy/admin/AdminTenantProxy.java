@@ -1,6 +1,7 @@
 package com.latticeengines.testframework.exposed.proxy.admin;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
@@ -12,7 +13,7 @@ import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 @Component("adminTenantProxy")
 public class AdminTenantProxy extends ProtectedRestApiProxy {
 
-    @Autowired
+    @Inject
     private AdminLoginProxy loginProxy;
 
     public AdminTenantProxy() {

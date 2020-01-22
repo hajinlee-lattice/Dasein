@@ -1,7 +1,11 @@
 package com.latticeengines.pls.util;
 
-import org.apache.commons.collections4.CollectionUtils;
+import java.util.Optional;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
@@ -60,7 +64,7 @@ public class EntityMatchGAConverterUtils {
     }
 
     public static void convertSavingMappings(boolean enableEntityMatch, boolean enableEntityMatchGA,
-                                             FieldMappingDocument fieldMappingDocument) {
+                                             FieldMappingDocument fieldMappingDocument, S3ImportSystem defaultSystem) {
         if (!enableEntityMatchGA) {
             return;
         }
@@ -76,6 +80,34 @@ public class EntityMatchGAConverterUtils {
             } else if (InterfaceName.ContactId.name().equals(fieldMapping.getMappedField())) {
                 fieldMapping.setMappedField(InterfaceName.CustomerContactId.name());
             }
+        }
+        // sync system id mapping with customer Id mapping.
+        if (defaultSystem != null) {
+            if (StringUtils.isNotEmpty(defaultSystem.getAccountSystemId())) {
+                Optional<FieldMapping> customerAccountIdMapping = fieldMappingDocument.getFieldMappings().stream()
+                        .filter(fieldMapping -> InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField()))
+                        .findAny();
+                if (customerAccountIdMapping.isPresent()) {
+                    for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                        if (defaultSystem.getAccountSystemId().equals(fieldMapping.getMappedField())) {
+                            fieldMapping.setUserField(customerAccountIdMapping.get().getUserField());
+                        }
+                    }
+                }
+            }
+            if (StringUtils.isNotEmpty(defaultSystem.getContactSystemId())) {
+                Optional<FieldMapping> customerContactIdMapping = fieldMappingDocument.getFieldMappings().stream()
+                        .filter(fieldMapping -> InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()))
+                        .findAny();
+                if (customerContactIdMapping.isPresent()) {
+                    for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+                        if (defaultSystem.getContactSystemId().equals(fieldMapping.getMappedField())) {
+                            fieldMapping.setUserField(customerContactIdMapping.get().getUserField());
+                        }
+                    }
+                }
+            }
+
         }
     }
 }

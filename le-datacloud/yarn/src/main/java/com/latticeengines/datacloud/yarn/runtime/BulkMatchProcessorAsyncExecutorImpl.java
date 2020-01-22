@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -36,12 +37,12 @@ public class BulkMatchProcessorAsyncExecutorImpl extends AbstractBulkMatchProces
     @Value("${datacloud.dnb.quota.check.disabled}")
     private boolean disableDnBCheck;
 
-    @Autowired
+    @Inject
     private RateLimitingService rateLimitingService;
 
-    @Autowired
+    @Inject
     private MatchMonitorService matchMonitorService;
-    @Autowired
+    @Inject
     private DnbMatchCommandService dnbMatchCommandService;
 
     @Override

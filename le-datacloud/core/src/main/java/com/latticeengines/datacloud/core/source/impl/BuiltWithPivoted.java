@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ public class BuiltWithPivoted implements PivotedSource, DomainBased, HasSqlPrese
     @Value("${propdata.job.builtwith.pivot.schedule:}")
     private String cronExpression;
 
-    @Autowired
+    @Inject
     private BuiltWithMostRecent baseSource;
 
     @Override

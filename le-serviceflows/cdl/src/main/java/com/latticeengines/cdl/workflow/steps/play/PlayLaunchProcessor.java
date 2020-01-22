@@ -21,7 +21,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -72,37 +71,37 @@ public class PlayLaunchProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchProcessor.class);
 
-    @Autowired
+    @Inject
     private AccountFetcher accountFetcher;
 
-    @Autowired
+    @Inject
     private ContactFetcher contactFetcher;
 
-    @Autowired
+    @Inject
     private RecommendationCreator recommendationCreator;
 
-    @Autowired
+    @Inject
     private FrontEndQueryCreator frontEndQueryCreator;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Value("${datadb.datasource.driver}")

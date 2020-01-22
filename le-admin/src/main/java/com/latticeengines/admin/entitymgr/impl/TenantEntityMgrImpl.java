@@ -2,9 +2,10 @@ package com.latticeengines.admin.entitymgr.impl;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
@@ -31,7 +32,7 @@ public class TenantEntityMgrImpl implements TenantEntityMgr {
 
     private final BatonService batonService = new BatonServiceImpl();
 
-    @Autowired
+    @Inject
     public GlobalTenantManagementService globalTenantManagementService;
 
     @Override

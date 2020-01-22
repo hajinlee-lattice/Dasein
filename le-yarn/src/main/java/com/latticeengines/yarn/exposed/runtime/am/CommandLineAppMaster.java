@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.hadoop.conf.Configuration;
@@ -16,7 +18,6 @@ import org.apache.hadoop.yarn.api.records.ContainerStatus;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.am.ContainerLauncherInterceptor;
 import org.springframework.yarn.am.StaticEventingAppmaster;
@@ -30,13 +31,12 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.yarn.exposed.client.AppMasterProperty;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.service.YarnService;
-
 public class CommandLineAppMaster extends StaticEventingAppmaster
         implements ContainerLauncherInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(CommandLineAppMaster.class);
 
-    @Autowired
+    @Inject
     private YarnService yarnService;
 
     private Configuration yarnConfiguration;

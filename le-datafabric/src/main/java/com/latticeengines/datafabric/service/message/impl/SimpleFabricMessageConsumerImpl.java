@@ -8,10 +8,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datafabric.service.message.FabricMessageConsumer;
 import com.latticeengines.datafabric.service.message.FabricMessageService;
@@ -41,7 +42,7 @@ public class SimpleFabricMessageConsumerImpl implements FabricMessageConsumer {
 
     private TopicScope scope;
 
-    @Autowired
+    @Inject
     private FabricMessageService messageService;
 
     private ConsumerConnector consumer;

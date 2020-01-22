@@ -2,11 +2,11 @@ package com.latticeengines.pls.controller;
 
 import java.util.Random;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +40,7 @@ public class SamlConfigResource {
     @Value("${security.app.public.url:https://localhost:3000}")
     private String plsUrl;
 
-    @Autowired
+    @Inject
     private SamlConfigProxy samlConfigProxy;
 
     @RequestMapping(value = "/sp-uri-info", method = RequestMethod.GET)

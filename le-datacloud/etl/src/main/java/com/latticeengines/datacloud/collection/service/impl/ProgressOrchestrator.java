@@ -8,12 +8,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -34,16 +34,16 @@ import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 @Component("progressOrchestrator")
 public class ProgressOrchestrator {
 
-    @Autowired
+    @Inject
     private ServiceFlowsZkConfigService serviceFlowsZkConfigService;
 
-    @Autowired
+    @Inject
     private SourceService sourceService;
 
-    @Autowired
+    @Inject
     private List<ArchiveService> archiveServiceList;
 
-    @Autowired
+    @Inject
     private List<RefreshService> refreshServiceList;
 
     @Value("${propdata.job.schedule.dryrun:true}")

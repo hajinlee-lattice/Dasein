@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateCdlTargetTableFilterStep extends BaseWorkflowStep<CreateCdlTargetTableFilterConfiguration> {
 
-    @Autowired
+    @Inject
     private CreateCdlTableHelper createCdlTableHelper;
 
     @Override

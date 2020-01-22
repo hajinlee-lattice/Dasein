@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -13,7 +14,7 @@ import com.latticeengines.modelquality.entitymgr.PipelineToPipelineStepsEntityMg
 public class PipelineToPipelineStepsEntityMgrImpl extends BaseEntityMgrImpl<PipelineToPipelineSteps>
         implements PipelineToPipelineStepsEntityMgr {
 
-    @Autowired
+    @Inject
     private PipelineToPipelineStepsDao pipelineToPipelineStepsDao;
 
     @Override

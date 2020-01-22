@@ -2,7 +2,8 @@ package com.latticeengines.microservice.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/status")
 public class StatusController {
 
-    @Autowired
+    @Inject
     private StatusService statusService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")

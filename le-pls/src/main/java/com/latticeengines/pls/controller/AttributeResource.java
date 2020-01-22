@@ -2,7 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/attributes")
 public class AttributeResource {
 
-    @Autowired
+    @Inject
     private AttributeCustomizationService attributeCustomizationService;
 
     @RequestMapping(value = "/flags/{name}/{useCase}", method = RequestMethod.POST, headers = "Accept=application/json")

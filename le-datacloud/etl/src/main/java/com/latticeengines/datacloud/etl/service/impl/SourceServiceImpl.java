@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -23,13 +23,13 @@ import com.latticeengines.domain.exposed.metadata.Table;
 @Component("sourceService")
 public class SourceServiceImpl implements SourceService {
 
-    @Autowired
+    @Inject
     private List<Source> sourceList;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
     private Map<String, Source> sourceMap;

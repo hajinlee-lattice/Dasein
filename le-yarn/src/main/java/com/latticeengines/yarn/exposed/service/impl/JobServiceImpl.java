@@ -24,8 +24,6 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -71,8 +69,7 @@ public class JobServiceImpl implements JobService, ApplicationContextAware {
     @Inject
     protected YarnClient defaultYarnClient;
 
-    @Autowired
-    @Qualifier("yarnConfiguration")
+    @Resource(name = "yarnConfiguration")
     protected Configuration yarnConfiguration;
 
     @Inject

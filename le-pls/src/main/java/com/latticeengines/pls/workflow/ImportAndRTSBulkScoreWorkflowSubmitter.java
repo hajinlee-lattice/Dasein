@@ -14,7 +14,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -52,19 +51,19 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ImportAndRTSBulkScoreWorkflowSubmitter.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
-    @Autowired
+    @Inject
     private MatchCommandProxy matchCommandProxy;
 
-    @Autowired
+    @Inject
     private BucketedScoreService bucketedScoreService;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     @Value("${pls.modeling.workflow.mem.mb}")

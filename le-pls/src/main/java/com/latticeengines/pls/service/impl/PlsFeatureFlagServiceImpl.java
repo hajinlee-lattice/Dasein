@@ -1,8 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -16,7 +17,7 @@ public class PlsFeatureFlagServiceImpl implements PlsFeatureFlagService {
 
     private static final Logger log = LoggerFactory.getLogger(PlsFeatureFlagServiceImpl.class);
 
-    @Autowired
+    @Inject
     protected TenantConfigServiceImpl tenantConfigService;
 
     @Override

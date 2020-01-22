@@ -4,10 +4,11 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -25,10 +26,10 @@ public class AMRefreshVersionUpdater extends AbstractTransformer<TransformerConf
     GeneralSource baseSource = new GeneralSource("AMRefreshVersionUpdater");
     GeneralSource targetSource = new GeneralSource("LDCDEV_AMRefreshVersionUpdater");
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private DataCloudVersionService dataCloudVersionService;
 
     @Override

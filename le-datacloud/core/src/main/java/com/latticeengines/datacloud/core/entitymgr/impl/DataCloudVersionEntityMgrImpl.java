@@ -1,11 +1,11 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
-
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -21,7 +21,7 @@ public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr 
 
     private static final Logger log = LoggerFactory.getLogger(DataCloudVersionEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private DataCloudVersionDao dataCloudVersionDao;
 
     @Value("${datacloud.match.latest.data.cloud.major.version}")

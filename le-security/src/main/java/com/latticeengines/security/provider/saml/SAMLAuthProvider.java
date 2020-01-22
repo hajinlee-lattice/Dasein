@@ -2,9 +2,10 @@ package com.latticeengines.security.provider.saml;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.impl.ResponseImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -18,7 +19,7 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 @Component("samlAuthProvider")
 public class SAMLAuthProvider implements AuthenticationProvider {
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
     @Override

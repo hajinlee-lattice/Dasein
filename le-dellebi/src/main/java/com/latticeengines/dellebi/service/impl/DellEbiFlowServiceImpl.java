@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -35,16 +35,16 @@ public class DellEbiFlowServiceImpl implements DellEbiFlowService {
     @Resource(name = "smbFileFlowService")
     private FileFlowService smbFileFlowService;
 
-    @Autowired
+    @Inject
     private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
 
     @Value("${dellebi.output.table.sample}")
     private String targetTable;
 
-    @Autowired
+    @Inject
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
-    @Autowired
+    @Inject
     private JdbcTemplate dellEbiTargetJDBCTemplate;
 
     @Override

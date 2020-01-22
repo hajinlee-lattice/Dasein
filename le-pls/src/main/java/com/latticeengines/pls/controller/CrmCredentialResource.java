@@ -2,7 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,13 +30,13 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_CrmCredential')")
 public class CrmCredentialResource {
 
-    @Autowired
+    @Inject
     private CrmCredentialService crmCredentialService;
 
-    @Autowired
+    @Inject
     private CrmConfigService crmConfigService;
 
-    @Autowired
+    @Inject
     private TenantConfigService tenantConfigService;
 
     @RequestMapping(value = "/{crmType}", method = RequestMethod.POST, headers = "Accept=application/json")

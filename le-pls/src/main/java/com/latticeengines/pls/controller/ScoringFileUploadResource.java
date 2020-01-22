@@ -5,10 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,19 +53,19 @@ public class ScoringFileUploadResource {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringFileUploadResource.class);
 
-    @Autowired
+    @Inject
     private FileUploadService fileUploadService;
 
-    @Autowired
+    @Inject
     private ScoringFileMetadataService scoringFileMetadataService;
 
-    @Autowired
+    @Inject
     private SourceFileService sourceFileService;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     @Value("${pls.fileupload.maxupload.bytes}")

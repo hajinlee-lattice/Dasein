@@ -14,6 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.file.CodecFactory;
 import org.apache.avro.file.DataFileWriter;
@@ -25,7 +27,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.s3.S3Service;
@@ -47,10 +48,10 @@ public class HdfsToS3ExportService extends EaiRuntimeService<HdfsToS3Configurati
     private static final Long MIN_SPLIT_SIZE = 10L * 1024L * 1024L; // 10 MB
     private static final String LOCAL_CACHE = "tmp";
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private S3Service s3Service;
 
     @Override

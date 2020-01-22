@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import com.latticeengines.domain.exposed.dataplatform.metrics.YarnMetricGenerato
 public class YarnMetricGeneratorInfoEntityMgrImpl extends BaseEntityMgrImpl<YarnMetricGeneratorInfo> implements
         YarnMetricGeneratorInfoEntityMgr {
 
-    @Autowired
+    @Inject
     private YarnMetricGeneratorInfoDao dao;
 
     public YarnMetricGeneratorInfoEntityMgrImpl() {

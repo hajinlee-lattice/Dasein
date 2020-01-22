@@ -1,6 +1,7 @@
 package com.latticeengines.metadata.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}")
 public class ArtifactResource {
 
-    @Autowired
+    @Inject
     private ArtifactService artifactService;
 
     @RequestMapping(value = "/modules/{moduleName}/artifacts/{artifactName}", //

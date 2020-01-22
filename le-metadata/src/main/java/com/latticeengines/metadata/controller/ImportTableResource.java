@@ -2,9 +2,10 @@ package com.latticeengines.metadata.controller;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -30,7 +31,7 @@ public class ImportTableResource {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ImportTableResource.class);
 
-    @Autowired
+    @Inject
     private TableResourceHelper tableResourceHelper;
 
     @RequestMapping(value = "/importtables", method = RequestMethod.GET, headers = "Accept=application/json")

@@ -13,13 +13,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -42,13 +43,13 @@ import com.latticeengines.domain.exposed.monitor.SlackSettings;
 public class IngestedFileToSourceDataFlowService extends AbstractTransformationDataFlowService {
     private static final Logger log = LoggerFactory.getLogger(IngestedFileToSourceDataFlowService.class);
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private SimpleCascadingExecutor simpleCascadingExecutor;
 
-    @Autowired
+    @Inject
     private DataCloudNotificationService notificationService;
 
     public void executeDataFlow(Source source, String workflowDir, String baseVersion,

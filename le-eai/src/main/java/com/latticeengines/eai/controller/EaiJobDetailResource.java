@@ -1,6 +1,7 @@
 package com.latticeengines.eai.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("")
 public class EaiJobDetailResource implements EaiJobDetailInterface {
 
-    @Autowired
+    @Inject
     private EaiImportJobDetailService eaiImportJobDetailService;
 
     @Override

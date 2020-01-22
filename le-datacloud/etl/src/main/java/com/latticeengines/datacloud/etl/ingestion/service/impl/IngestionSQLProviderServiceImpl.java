@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -15,7 +17,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -42,22 +43,22 @@ import com.latticeengines.yarn.exposed.service.JobService;
 public class IngestionSQLProviderServiceImpl extends IngestionProviderServiceImpl {
     private static final Logger log = LoggerFactory.getLogger(IngestionSQLProviderServiceImpl.class);
 
-    @Autowired
+    @Inject
     private IngestionProgressService ingestionProgressService;
 
-    @Autowired
+    @Inject
     private IngestionVersionService ingestionVersionService;
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     private SourceService sourceService;
 
-    @Autowired
+    @Inject
     protected JobService jobService;
 
     private static final Integer WORKFLOW_WAIT_TIME_IN_SECOND = (int) TimeUnit.HOURS.toSeconds(24);

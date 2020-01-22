@@ -3,8 +3,9 @@ package com.latticeengines.datacloud.etl.entitymgr.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 @Component("sourceColumnEntityMgr")
 public class SourceColumnEntityMgrImpl implements SourceColumnEntityMgr {
 
-    @Autowired
+    @Inject
     private SourceColumnDao sourceColumnDao;
 
     @Override

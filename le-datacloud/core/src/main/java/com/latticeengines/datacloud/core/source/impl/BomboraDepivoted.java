@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,7 @@ public class BomboraDepivoted implements FixedIntervalSource {
             + "}")
     private long cutoffLimitInSeconds;
 
-    @Autowired
+    @Inject
     private BomboraFirehose baseSource;
 
     @Override

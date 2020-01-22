@@ -4,9 +4,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -24,16 +25,16 @@ import com.latticeengines.security.exposed.service.UserService;
 public class TenantServiceImpl implements TenantService {
     private static final Logger log = LoggerFactory.getLogger(TenantServiceImpl.class);
 
-    @Autowired
+    @Inject
     public GlobalTenantManagementService globalTenantManagementService;
 
-    @Autowired
+    @Inject
     public TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService gaUserManagementService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
     @Override

@@ -1,8 +1,9 @@
 package com.latticeengines.metadata.provisioning;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -15,7 +16,7 @@ public class MetadataComponentManager {
 
     private static final Logger log = LoggerFactory.getLogger(MetadataComponentManager.class);
 
-    @Autowired
+    @Inject
     private MetadataProvisioningService metadataProvisioningService;
 
     public void provisionImportTables(CustomerSpace space, DocumentDirectory configDir) {

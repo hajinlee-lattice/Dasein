@@ -1,11 +1,12 @@
 package com.latticeengines.dataplatform.mbean;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.LocatedFileStatus;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.RemoteIterator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 @ManagedResource(objectName = "Diagnostics:name=HDFSResourceCheck")
 public class HDFSResourceMBean {
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
 
