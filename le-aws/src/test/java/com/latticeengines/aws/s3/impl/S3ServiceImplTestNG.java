@@ -56,7 +56,6 @@ import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroStreamsIterator;
-import com.latticeengines.common.exposed.util.SleepUtils;
 
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-aws-context.xml" })
