@@ -11,6 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
@@ -21,9 +22,9 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testUpsert() {
         List<Runnable> runnables = new ArrayList<>();
-        runnables.add(this::testHasNoSystemBatch);
+        // runnables.add(this::testHasNoSystemBatch);
         runnables.add(this::testHasSystemBatch);
-        runnables.add(this::testHasInputOnly);
+        // runnables.add(this::testHasInputOnly);
 
         ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
@@ -56,7 +57,7 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
 
     private UpsertConfig getHasInputOnlyConfig() {
         UpsertConfig config = UpsertConfig.joinBy("Id");
-        config.setInputSystemBatch(true);
+        config.setAddInputSystemBatch(true);
         config.setBatchTemplateName(null);
         return config;
     }
@@ -120,7 +121,7 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
 
     private UpsertConfig getHasNoSystemBatchConfig() {
         UpsertConfig config = UpsertConfig.joinBy("Id");
-        config.setInputSystemBatch(true);
+        config.setAddInputSystemBatch(true);
         config.setBatchTemplateName("default");
         return config;
     }
@@ -215,7 +216,7 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
 
     private UpsertConfig getHasSystemBatchConfig() {
         UpsertConfig config = UpsertConfig.joinBy("Id");
-        config.setInputSystemBatch(true);
+        config.setAddInputSystemBatch(true);
         config.setBatchTemplateName(null);
         return config;
     }
@@ -243,17 +244,23 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
             String defaultAttr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
             Long defaultAttr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
             Boolean defaultAttr3 = record.get(prefix + "Attr3") == null ? null : (boolean) record.get(prefix + "Attr3");
+            Boolean defaultSource = record.get(prefix + InterfaceName.CDLBatchSource.name()) == null ? null
+                    : (boolean) record.get(prefix + InterfaceName.CDLBatchSource.name());
             prefix = "template1__";
             String template1Attr1 = record.get(prefix + "Attr1") == null ? null : record.get(prefix + "Attr1").toString();
             Long template1Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
             Boolean template1Attr3 = record.get(prefix + "Attr3") == null ? null
                     : (boolean) record.get(prefix + "Attr3");
+            String template1Source = record.get(prefix + InterfaceName.CDLBatchSource.name()) == null ? null
+                    : (String) record.get(prefix + InterfaceName.CDLBatchSource.name()).toString();
             prefix = "template2__";
             String template2Attr1 = record.get(prefix + "Attr1") == null ? null
                     : record.get(prefix + "Attr1").toString();
             Long template2Attr2 = record.get(prefix + "Attr2") == null ? null : (long) record.get(prefix + "Attr2");
             Boolean template2Attr3 = record.get(prefix + "Attr3") == null ? null
                     : (boolean) record.get(prefix + "Attr3");
+            String template2Source = record.get(prefix + InterfaceName.CDLBatchSource.name()) == null ? null
+                    : (String) record.get(prefix + InterfaceName.CDLBatchSource.name()).toString();
             switch (id) {
             case 1:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
@@ -266,6 +273,10 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertEquals(template2Attr2, Long.valueOf(1), record.toString());
                 Assert.assertNull(template2Attr3, record.toString());
 
+                Assert.assertNull(defaultSource, record.toString());
+                Assert.assertNull(template1Source, record.toString());
+                Assert.assertNull(template2Source, record.toString());
+
                 break;
             case 2:
                 assertNulls(record, defaultAttr1, defaultAttr2, defaultAttr3);
@@ -277,6 +288,10 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertEquals(template2Attr1, "24", record.toString());
                 Assert.assertNull(template2Attr2, record.toString());
                 Assert.assertNull(template2Attr3, record.toString());
+
+                Assert.assertNull(defaultSource, record.toString());
+                Assert.assertEquals(template1Source, "1", record.toString());
+                Assert.assertEquals(template2Source, "1", record.toString());
 
                 break;
             case 3:

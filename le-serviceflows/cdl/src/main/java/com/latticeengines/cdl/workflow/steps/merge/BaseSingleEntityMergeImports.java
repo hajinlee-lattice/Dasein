@@ -304,7 +304,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             setTargetTable(step, systemBatchStoreTablePrefix);
         }
         UpsertConfig config = getUpsertConfig(true, true);
-        config.setInputSystemBatch(true);
+        config.setAddInputSystemBatch(true);
         config.setBatchTemplateName(batchTemplateName);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;

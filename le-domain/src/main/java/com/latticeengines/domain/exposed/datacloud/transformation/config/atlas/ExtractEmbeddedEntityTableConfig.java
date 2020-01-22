@@ -21,7 +21,7 @@ public class ExtractEmbeddedEntityTableConfig extends TransformerConfig {
     @JsonProperty("SystemIdFields")
     private List<String> systemIdFlds;
 
-    @JsonProperty("System")
+    @JsonProperty("Template")
     private String template;
 
     // EntityId field name in embedded entity table (EntityId field name in
