@@ -305,7 +305,9 @@ public class DropBoxServiceImpl implements DropBoxService {
                 dropbox.setEncryptedSecretKey(response.getSecretKey());
                 break;
             case ExternalAccount:
-                throw new UnsupportedOperationException("Unsupported access mode " + request.getAccessMode());
+                response = grantAccessToExternalAccount(request.getExternalAccountId());
+                dropbox.setExternalAccount(response.getExternalAccountId());
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown access mode " + request.getAccessMode());
         }
@@ -373,7 +375,8 @@ public class DropBoxServiceImpl implements DropBoxService {
                     revokeAccessToLatticeUser(dropbox.getLatticeUser());
                     break;
                 case ExternalAccount:
-                    throw new UnsupportedOperationException("Unsupported access mode " + dropbox.getAccessMode());
+                    revokeDropBoxFromBucket(getDropBoxId(), dropbox.getExternalAccount());
+                    break;
                 default:
                     throw new UnsupportedOperationException("Unknown access mode " + dropbox.getAccessMode());
             }
@@ -590,6 +593,20 @@ public class DropBoxServiceImpl implements DropBoxService {
         policy.setStatements(nonEmptyStmts);
     }
 
+    private GrantDropBoxAccessResponse grantAccessToExternalAccount(String accountId) {
+        if (StringUtils.isBlank(accountId)) {
+            throw new IllegalArgumentException("Must provide a valid account id");
+        }
+        String dropBoxId = getDropBoxId();
+        log.info("Trying to grant access to dropbox " + dropBoxId + " to external account " + accountId +
+                ". Please contact PLO for help!");
+
+        GrantDropBoxAccessResponse response = new GrantDropBoxAccessResponse();
+        response.setAccessMode(DropBoxAccessMode.ExternalAccount);
+        response.setExternalAccountId(accountId);
+        return response;
+    }
+
     private Policy getCustomerPolicy(String dropBoxId, String accountId) {
         String bucketPolicy = s3Service.getBucketPolicy(customersBucket);
         List<Statement> statements = new ArrayList<>();
@@ -670,6 +687,15 @@ public class DropBoxServiceImpl implements DropBoxService {
                 }) //
                 .collect(Collectors.toList());
         policy.setStatements(nonEmptyStmts);
+    }
+
+    private void revokeDropBoxFromBucket(String dropBoxId, String accountId) {
+        String bucketPolicy = s3Service.getBucketPolicy(customersBucket);
+        if (StringUtils.isBlank(bucketPolicy)) {
+            return;
+        }
+        log.info(String.format("Trying to revoke dropbox access %s for account %s. Please contact PLO for help!",
+                dropBoxId, accountId));
     }
 
     private void insertAccountStatement(String bucketName, String dropBoxId, Statement statement) {
