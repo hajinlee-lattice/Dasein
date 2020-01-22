@@ -615,7 +615,7 @@ public class InternalResource extends InternalResourceBase {
                     String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
                     switch (result) {
                         case "COMPLETED":
-                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr);
+                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr, tenantName);
                             break;
                         case "FAILED":
                             emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);

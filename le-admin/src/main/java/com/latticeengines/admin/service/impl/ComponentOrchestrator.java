@@ -241,9 +241,9 @@ public class ComponentOrchestrator {
                     HttpMethod.PUT, requestEntity, String.class);
 
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
-                emailService.sendPdNewExternalUserEmail(user, tempPassword.getBody(), appPublicUrl);
+                emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, false);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailService.sendPlsNewExternalUserEmail(user, tempPassword.getBody(), appPublicUrl, true);
+                emailService.sendNewUserEmail(user, tempPassword.getBody(), appPublicUrl, true);
                 tenantService.updateTenantEmailFlag(tenantId, true);
             } else {
                 log.info("The user clicked both PD and LPA3");
@@ -262,9 +262,9 @@ public class ComponentOrchestrator {
             Tenant tenant = new Tenant();
             tenant.setName(tenantId);
             if (products.equals(Collections.singletonList(LatticeProduct.PD))) {
-                emailService.sendPdExistingExternalUserEmail(tenant, user, appPublicUrl);
+                emailService.sendExistingUserEmail(tenant, user, appPublicUrl, false);
             } else if (products.equals(Collections.singletonList(LatticeProduct.LPA3))) {
-                emailService.sendPlsExistingExternalUserEmail(tenant, user, appPublicUrl, true);
+                emailService.sendExistingUserEmail(tenant, user, appPublicUrl, true);
                 tenantService.updateTenantEmailFlag(tenantId, true);
             } else {
                 log.info("The user clicked both PD and LPA3");
