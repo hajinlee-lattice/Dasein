@@ -144,8 +144,10 @@ public class QueryEvaluatorService {
     }
 
     private String timerMessage(String method, AttributeRepository attrRepo, SQLQuery<?> sqlQuery) {
-        return String.format("%s tenantId=%s SQLQuery=%s", method, attrRepo.getCustomerSpace().getTenantId(),
-                sqlQuery.getSQL().getSQL().trim().replaceAll(System.lineSeparator(), " "));
+        return String.format("%s tenantId=%s SQLQuery=%s Bindings=%s", method, attrRepo.getCustomerSpace().getTenantId(),
+                sqlQuery.getSQL().getSQL().trim().replaceAll(System.lineSeparator(), " "),
+                sqlQuery.getSQL().getNullFriendlyBindings().toString().trim() //
+                        .replaceAll(System.lineSeparator(), " "));
     }
 
 }
