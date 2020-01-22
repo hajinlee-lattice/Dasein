@@ -38,10 +38,10 @@ public interface EmailService {
     void sendPlsScoreCompletionEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 
     void sendPlsEnrichInternalAttributeErrorEmail(User user, String hostport, String tenantName, String modelName,
-            boolean internal, List<String> internalAttributes);
+                                                  List<String> internalAttributes);
 
     void sendPlsEnrichInternalAttributeCompletionEmail(User user, String hostport, String tenantName, String modelName,
-            boolean internal, List<String> internalAttributes);
+            List<String> internalAttributes);
 
     void sendPlsScoreErrorEmail(User user, String hostport, String tenantName, String modelName, boolean internal);
 

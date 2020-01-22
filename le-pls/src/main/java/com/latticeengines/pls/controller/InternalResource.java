@@ -530,10 +530,10 @@ public class InternalResource extends InternalResourceBase {
                         String modelName = modelSummary.getDisplayName();
                         if (result.equals("COMPLETED")) {
                             emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl, tenantName,
-                                    modelName, true, emailInfo.getExtraInfoList());
+                                    modelName, emailInfo.getExtraInfoList());
                         } else if (result.equals("FAILED")) {
                             emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
-                                    modelName, false, emailInfo.getExtraInfoList());
+                                    modelName, emailInfo.getExtraInfoList());
                         }
                     }
                 }

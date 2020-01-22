@@ -100,8 +100,6 @@ public class EmailTemplateBuilder {
         PLS_JOB_ERROR("pls_job_error.html"), //
         PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS("pls_internal_attribute_enrich_success.html"), //
         PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR("pls_internal_attribute_enrich_error.html"), //
-        PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS_INTERNAL("pls_internal_attribute_enrich_success_internal.html"), //
-        PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL("pls_internal_attribute_enrich_error_internal.html"), //
 
         PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), //
         PLS_EXPORT_SEGMENT_ERROR("pls_export_segment_error.html"), //

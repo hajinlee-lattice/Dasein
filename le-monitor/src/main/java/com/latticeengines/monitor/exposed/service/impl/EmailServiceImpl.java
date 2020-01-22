@@ -328,12 +328,11 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsEnrichInternalAttributeCompletionEmail(User user, String hostport, String tenantName,
-            String modelName, boolean internal, List<String> internalAttributes) {
+            String modelName, List<String> internalAttributes) {
         try {
             log.info("Sending PLS enrich internal attribute (" + modelName + ") complete email to " + user.getEmail()
                     + " started.");
-            sendEmailForEnrichInternalAttribute(user, hostport, tenantName, modelName, internal, internalAttributes,
-                    EmailTemplateBuilder.Template.PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS_INTERNAL,
+            sendEmailForEnrichInternalAttribute(user, hostport, tenantName, modelName, internalAttributes,
                     EmailTemplateBuilder.Template.PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS,
                     EmailSettings.PLS_INTERNAL_ATTRIBUTE_ENRICH_COMPLETION_EMAIL_SUBJECT);
             log.info("Sending PLS enrich internal attribute (" + modelName + ") complete email to " + user.getEmail()
@@ -346,12 +345,11 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPlsEnrichInternalAttributeErrorEmail(User user, String hostport, String tenantName,
-            String modelName, boolean internal, List<String> internalAttributes) {
+            String modelName, List<String> internalAttributes) {
         try {
             log.info("Sending PLS enrich internal attribute (" + modelName + ") error email to " + user.getEmail()
                     + " started.");
-            sendEmailForEnrichInternalAttribute(user, hostport, tenantName, modelName, internal, internalAttributes,
-                    EmailTemplateBuilder.Template.PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL,
+            sendEmailForEnrichInternalAttribute(user, hostport, tenantName, modelName, internalAttributes,
                     EmailTemplateBuilder.Template.PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR,
                     EmailSettings.PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_EMAIL_SUBJECT);
             log.info("Sending PLS enrich internal attribute (" + modelName + ") error email to " + user.getEmail()
@@ -497,8 +495,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void sendEmailForEnrichInternalAttribute(User user, String hostport, String tenantName, String modelName,
-            boolean internal, List<String> internalAttributes, Template internalEmailTemplate, Template emailTemplate,
-            String emailSubject) throws IOException, MessagingException {
+                                                     List<String> internalAttributes, Template emailTemplate,
+                                                     String emailSubject) throws IOException, MessagingException {
         EmailTemplateBuilder builder;
         builder = new EmailTemplateBuilder(emailTemplate);
 

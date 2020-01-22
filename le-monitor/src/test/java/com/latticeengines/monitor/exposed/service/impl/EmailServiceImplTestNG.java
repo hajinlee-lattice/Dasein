@@ -195,13 +195,13 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsEnrichInternalAttributeCompletionEmail() {
-        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, true,
+        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
                 null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending PLS enrich internal attribute (" + MODEL_NAME + ") complete"));
 
-        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, false,
+        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
                 null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
@@ -210,13 +210,13 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsEnrichInternalAttributeErrorEmail() {
-        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, true,
+        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
                 null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending PLS enrich internal attribute (" + MODEL_NAME + ") error"));
 
-        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, false,
+        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
                 null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
