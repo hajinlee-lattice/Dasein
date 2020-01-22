@@ -1,11 +1,12 @@
 package com.latticeengines.ulysses.aspect;
 
+import javax.inject.Inject;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
@@ -29,7 +30,7 @@ public class UlyssesMetricPublishAspect {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(UlyssesMetricPublishAspect.class);
 
-    @Autowired
+    @Inject
     protected MetricService metricService;
 
     @Around("execution(* com.latticeengines.app.exposed.controller.PrimaryAttributeResource.*(..))")

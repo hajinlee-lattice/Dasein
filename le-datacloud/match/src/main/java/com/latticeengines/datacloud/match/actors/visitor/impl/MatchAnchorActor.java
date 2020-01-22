@@ -1,9 +1,8 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -20,8 +19,7 @@ import com.latticeengines.datacloud.match.service.EntityMatchConfigurationServic
 @Scope("prototype")
 public class MatchAnchorActor extends AnchorActorTemplate {
 
-    @Autowired
-    @Qualifier("matchGuideBook")
+    @Resource(name = "matchGuideBook")
     protected MatchGuideBook guideBook;
 
     @Inject

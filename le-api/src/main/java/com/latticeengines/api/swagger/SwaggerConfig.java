@@ -1,6 +1,7 @@
 package com.latticeengines.api.swagger;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +15,7 @@ import com.mangofactory.swagger.plugin.SwaggerSpringMvcPlugin;
 public class SwaggerConfig {
     private SpringSwaggerConfig springSwaggerConfig;
 
-    @Autowired
+    @Inject
     public void setSpringSwaggerConfig(SpringSwaggerConfig springSwaggerConfig) {
         this.springSwaggerConfig = springSwaggerConfig;
     }

@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -22,7 +24,6 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -66,19 +67,19 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private static final Long MATCH_TIMEOUT = TimeUnit.DAYS.toMillis(3);
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.json";
 
-    @Autowired
+    @Inject
     private MatchInternalProxy matchInternalProxy;
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
     @Value("${datacloud.match.block.interval.sec}")
     private int blockRampingRate;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     private YarnClient yarnClient;

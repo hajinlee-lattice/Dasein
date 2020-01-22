@@ -8,9 +8,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
@@ -41,13 +42,13 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
     private static final int MAX_INVALID_LOGIN_ATTEMPTS = 5;
 
-    @Autowired
+    @Inject
     private GlobalAuthAuthenticationEntityMgr gaAuthenticationEntityMgr;
 
-    @Autowired
+    @Inject
     protected GlobalAuthUserEntityMgr gaUserEntityMgr;
 
-    @Autowired
+    @Inject
     protected GlobalAuthTicketEntityMgr gaTicketEntityMgr;
 
     @Override

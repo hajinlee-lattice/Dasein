@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import javax.annotation.Resource;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -29,12 +29,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Component
 public class RealTimeMatchPlannerTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    @Autowired
-    @Qualifier("realTimeMatchPlanner")
+    @Resource(name = "realTimeMatchPlanner")
     MatchPlanner matchPlanner;
 
-    @Autowired
-    @Qualifier("accountMasterColumnSelectionService")
+    @Resource(name = "accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
     @Test(groups = "functional")

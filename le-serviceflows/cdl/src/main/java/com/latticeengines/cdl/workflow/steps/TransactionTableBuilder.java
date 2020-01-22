@@ -9,11 +9,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -33,7 +34,7 @@ public class TransactionTableBuilder {
             + "_(?:[0-9]{2})?[0-9]{2}-[0-3]?[0-9]-[0-3]?[0-9]$";
     protected static Pattern pattern = Pattern.compile(regex);
 
-    @Autowired
+    @Inject
     YarnConfiguration yarnConfiguration;
 
     public Table setupMasterTable(String tablePrefix, String pipelineVersion, Table aggregateTable) {

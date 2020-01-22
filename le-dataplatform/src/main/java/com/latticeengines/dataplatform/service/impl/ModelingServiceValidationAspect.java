@@ -5,10 +5,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
@@ -24,10 +25,10 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 @Aspect
 public class ModelingServiceValidationAspect {
 
-    @Autowired
+    @Inject
     private BeanValidationService beanValidationService;
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
     @Before("execution(* com.latticeengines.dataplatform.service.impl.ModelingServiceImpl.loadData(..)) "

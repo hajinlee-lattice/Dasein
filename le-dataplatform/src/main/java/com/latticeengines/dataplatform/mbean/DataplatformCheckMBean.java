@@ -3,7 +3,8 @@ package com.latticeengines.dataplatform.mbean;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
@@ -12,16 +13,16 @@ import org.springframework.stereotype.Component;
 @ManagedResource(objectName = "Diagnostics:name=DataplatformCheck")
 public class DataplatformCheckMBean {
     
-    @Autowired
+    @Inject
     private DBConnectionMBean dbcMBean;
     
-    @Autowired
+    @Inject
     private HDFSAccessMBean hdfsAcMBean;
     
-    @Autowired
+    @Inject
     private HDFSResourceMBean hdfsRcMBean;
     
-    @Autowired
+    @Inject
     private HTTPFSAccessMBean httpFSMBean;
 
     @ManagedOperation(description = "Check Dataplatform")

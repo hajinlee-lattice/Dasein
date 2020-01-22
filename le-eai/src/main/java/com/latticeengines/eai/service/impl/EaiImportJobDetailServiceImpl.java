@@ -1,5 +1,6 @@
 package com.latticeengines.eai.service.impl;
 
+import javax.inject.Inject;
 import javax.persistence.PersistenceException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -23,10 +24,10 @@ public class EaiImportJobDetailServiceImpl implements EaiImportJobDetailService 
     @Autowired
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private EaiImportJobDetailEntityMgr eaiImportJobDetailEntityMgr;
 
     @Override

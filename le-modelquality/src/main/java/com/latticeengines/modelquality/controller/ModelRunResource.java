@@ -3,7 +3,8 @@ package com.latticeengines.modelquality.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,13 +32,13 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/modelruns")
 public class ModelRunResource implements ModelQualityModelRunInterface, CrudInterface<ModelRunEntityNames> {
 
-    @Autowired
+    @Inject
     private ModelRunService modelRunService;
 
-    @Autowired
+    @Inject
     private ModelRunEntityMgr modelRunEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelProxy modelProxy;
 
     @Override

@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Ba
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-
 /**
  * This is the base implementation of the transformatin service
  * For simpliest sources: single dataflow.

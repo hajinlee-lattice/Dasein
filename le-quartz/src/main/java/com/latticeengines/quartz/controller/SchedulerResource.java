@@ -2,9 +2,9 @@ package com.latticeengines.quartz.controller;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/scheduler")
 public class SchedulerResource {
 
-    @Autowired
+    @Inject
     private SchedulerEntityMgr schedulerEntityMgr;
 
     @RequestMapping(value = "/status", method = RequestMethod.POST)

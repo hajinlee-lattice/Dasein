@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DomainBased;
@@ -8,7 +9,6 @@ import com.latticeengines.datacloud.core.source.DunsBased;
 import com.latticeengines.datacloud.core.source.FixedIntervalSource;
 import com.latticeengines.datacloud.core.source.PurgeStrategy;
 import com.latticeengines.datacloud.core.source.Source;
-
 
 @Component("accountMaster")
 public class AccountMaster implements DomainBased, DunsBased, FixedIntervalSource {
@@ -19,7 +19,7 @@ public class AccountMaster implements DomainBased, DunsBased, FixedIntervalSourc
 
     private static final String MAJOR_VERSION = "2.0";
 
-    @Autowired
+    @Inject
     AccountMasterSeed accountMasterSeed;
 
     private long cutoffLimitInSeconds = DEFAULT_CUTOFF_LIMIT_IN_SECONDS;

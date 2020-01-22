@@ -1,12 +1,12 @@
 package com.latticeengines.dataplatform.service.impl.modeling;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,16 +33,16 @@ public class ModelingJobServiceImpl extends JobServiceImpl implements ModelingJo
 
     private static final Logger log = LoggerFactory.getLogger(ModelingJobServiceImpl.class);
 
-    @Autowired
+    @Inject
     protected ModelEntityMgr modelEntityMgr;
 
-    @Autowired
+    @Inject
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
-    @Autowired
+    @Inject
     protected JobNameService jobNameService;
 
-    @Autowired
+    @Inject
     protected JobEntityMgr jobEntityMgr;
 
     @Resource(name = "awsBatchModelingJobService")

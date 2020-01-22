@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -27,10 +28,10 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
         implements TransformationService<BomboraDepivotConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "bomboraDepivotFlow";
 
-    @Autowired
+    @Inject
     private BomboraDepivoted source;
 
-    @Autowired
+    @Inject
     private FixedIntervalTransformationDataFlowService transformationDataFlowService;
 
     @Override

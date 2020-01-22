@@ -1,7 +1,7 @@
 package com.latticeengines.saml.testframework;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import javax.annotation.Resource;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
@@ -10,8 +10,8 @@ import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed
 
 @Component
 public class SamlDeploymentTestBed extends SamlTestBed {
-    @Autowired
-    @Qualifier(value = "deploymentTestBed")
+
+    @Resource(name = "deploymentTestBed")
     private GlobalAuthDeploymentTestBed globalAuthDeploymentTestBed;
 
     @Override

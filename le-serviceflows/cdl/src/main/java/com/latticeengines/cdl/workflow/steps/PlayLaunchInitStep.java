@@ -1,8 +1,9 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -27,13 +28,13 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStep.class);
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private PlayLaunchProcessor playLaunchProcessor;
 
-    @Autowired
+    @Inject
     private PlayProxy playProxy;
 
     @Value("${yarn.pls.url}")

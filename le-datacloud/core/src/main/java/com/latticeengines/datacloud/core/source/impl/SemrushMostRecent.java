@@ -2,7 +2,8 @@ package com.latticeengines.datacloud.core.source.impl;
 
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.CollectedSource;
@@ -18,7 +19,7 @@ public class SemrushMostRecent implements MostRecentSource, DomainBased, HasSqlP
 
     private String cronExpression;
 
-    @Autowired
+    @Inject
     private Semrush baseSource;
 
     @Override

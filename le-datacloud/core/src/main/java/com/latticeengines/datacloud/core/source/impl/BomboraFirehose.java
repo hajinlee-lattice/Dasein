@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,7 @@ public class BomboraFirehose implements TransformedToAvroSource {
 
     private static final long serialVersionUID = -7091007703522407933L;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
     @Value("${propdata.job.bomborafirehose.archive.schedule:0 0 13 * * *}")

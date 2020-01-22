@@ -5,10 +5,11 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
@@ -28,10 +29,10 @@ public class MetadataProvisioningServiceImpl implements MetadataProvisioningServ
 
     private static final Logger log = LoggerFactory.getLogger(MetadataProvisioningServiceImpl.class);
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private MetadataService mdService;
 
     @Override

@@ -2,7 +2,8 @@ package com.latticeengines.app.exposed.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +15,7 @@ import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 @Component("enrichmentAttrEntityMgr")
 public class SelectedAttrEntityMgrImpl implements SelectedAttrEntityMgr {
 
-    @Autowired
+    @Inject
     private SelectedAttrDao dao;
 
     @Override

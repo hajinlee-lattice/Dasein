@@ -1,16 +1,15 @@
 package com.latticeengines.actors.visitor.sample.framework;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.ActorTemplate;
+import com.latticeengines.actors.exposed.ActorFactory;
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.visitor.sample.impl.SampleDnbLookupActor;
 import com.latticeengines.actors.visitor.sample.impl.SampleDomainBasedMicroEngineActor;
@@ -32,9 +31,12 @@ public class SampleMatchActorSystem extends ActorSystemTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(SampleMatchActorSystem.class);
 
-    public static final int ACTOR_CARDINALITY = 5;
+    public static final int ACTOR_CARDINALITY = 1;
 
-    private ConcurrentMap<String, ActorRef> actorRefMap = new ConcurrentHashMap<>();
+    @Inject
+    public SampleMatchActorSystem(ActorFactory actorFactory) {
+        this.actorFactory = actorFactory;
+    }
 
     @PostConstruct
     public void postConstruct() {
@@ -49,11 +51,6 @@ public class SampleMatchActorSystem extends ActorSystemTemplate {
         log.info("Shutting down match actor system");
         system.shutdown();
         log.info("Completed shutdown of match actor system");
-    }
-
-    @Override
-    public <T extends ActorTemplate> ActorRef getActorRef(Class<T> actorClz) {
-        return actorRefMap.get(actorClz.getCanonicalName());
     }
 
     public ActorRef getFuzzyMatchAnchor() {
@@ -85,6 +82,7 @@ public class SampleMatchActorSystem extends ActorSystemTemplate {
                 SampleDunsBasedMicroEngineActor.class, //
                 SampleLocationToDunsMicroEngineActor.class, //
         };
+
         for (Class<? extends ActorTemplate> clz : microEngineClz) {
             initNamedActor(clz);
             actorNameToType.put(clz.getSimpleName(), ActorType.MICRO_ENGINE);

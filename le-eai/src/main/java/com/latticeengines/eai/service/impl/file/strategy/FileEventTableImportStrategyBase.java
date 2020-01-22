@@ -18,7 +18,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,10 +50,10 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
     private static final Logger log = LoggerFactory.getLogger(FileEventTableImportStrategyBase.class);
 
-    @Autowired
+    @Inject
     private EaiYarnService eaiYarnService;
 
-    @Autowired
+    @Inject
     private VersionManager versionManager;
 
     @Value("${eai.file.csv.error.lines:1000}")

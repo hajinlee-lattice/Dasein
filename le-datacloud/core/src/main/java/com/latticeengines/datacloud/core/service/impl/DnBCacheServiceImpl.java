@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -48,16 +48,15 @@ public class DnBCacheServiceImpl implements DnBCacheService {
 
     private Map<String, DnBCacheEntityMgr> cacheEntityMgrs = new HashMap<String, DnBCacheEntityMgr>();
 
-    @Autowired
+    @Inject
     private FabricMessageService messageService;
 
-    @Autowired
+    @Inject
     private FabricDataService dataService;
 
     private final List<DnBCache> cacheQueue = Collections.synchronizedList(new ArrayList<>());
 
-    @Autowired
-    @Qualifier("commonTaskScheduler")
+    @Resource(name = "commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     private static final int BUFFER_SIZE = 25;

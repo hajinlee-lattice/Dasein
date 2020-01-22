@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +22,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.partition.PartitionHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.yarn.am.AppmasterService;
@@ -47,12 +48,11 @@ import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.ContainerRuntimeProperty;
 import com.latticeengines.yarn.exposed.runtime.progress.LedpProgressReporter;
 import com.latticeengines.yarn.exposed.service.YarnService;
-
 public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmaster {
 
     private static final Logger log = LoggerFactory.getLogger(BatchAppmaster.class);
 
-    @Autowired(required = false)
+    @Inject
     private final Collection<PartitionHandler> partitionHandlers = Collections.emptySet();
 
     private Configuration yarnConfiguration;
@@ -69,10 +69,10 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
 
-    @Autowired
+    @Inject
     protected YarnService yarnService;
 
-    @Autowired
+    @Inject
     protected LedpProgressReporter ledpProgressReporter;
 
     @Override

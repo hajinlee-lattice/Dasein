@@ -1,8 +1,9 @@
 package com.latticeengines.datacloud.madison.entitymanager.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +15,7 @@ public class PropDataMadisonEntityMgrImpl implements com.latticeengines.dataclou
     @SuppressWarnings("unused")
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired
+    @Inject
     private com.latticeengines.datacloud.madison.dao.MadisonLogicDailyProgressDao dailyProgressDao;
 
     @Override

@@ -4,7 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     @SuppressWarnings("unchecked")

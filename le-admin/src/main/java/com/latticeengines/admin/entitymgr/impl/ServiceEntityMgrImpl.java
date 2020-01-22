@@ -1,6 +1,7 @@
 package com.latticeengines.admin.entitymgr.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.entitymgr.ServiceEntityMgr;
@@ -15,7 +16,7 @@ public class ServiceEntityMgrImpl implements ServiceEntityMgr {
 
     private final BatonService batonService = new BatonServiceImpl();
 
-    @Autowired
+    @Inject
     private ServiceConfigService serviceConfigService;
 
     @Override

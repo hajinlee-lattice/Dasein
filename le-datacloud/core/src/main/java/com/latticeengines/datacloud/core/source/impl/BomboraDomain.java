@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.PurgeStrategy;
@@ -12,7 +13,7 @@ public class BomboraDomain implements RefreshedSource {
 
     private static final long serialVersionUID = 8295321788746751057L;
 
-    @Autowired
+    @Inject
     private BomboraDepivoted bomboraDepivoted;
 
     @Override

@@ -4,9 +4,10 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 @Component("dellEbiConfigEntityMgrImpl")
 public class DellEbiConfigEntityMgrImpl extends BaseEntityMgrImpl<DellEbiConfig> implements DellEbiConfigEntityMgr {
 
-    @Autowired
+    @Inject
     private DellEbiConfigDao dellEbiConfigDao;
 
     private List<DellEbiConfig> configs;

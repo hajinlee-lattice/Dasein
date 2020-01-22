@@ -4,21 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
 
 import com.latticeengines.common.exposed.metric.Measurement;
 import com.latticeengines.monitor.exposed.metric.service.StatsService;
 import com.latticeengines.monitor.exposed.metric.stats.Inspection;
 import com.latticeengines.monitor.metric.measurement.HealthCheck;
-
 public class HealthInspection implements Inspection {
 
     private static final Long interval = 10000L;
 
     private String componentName;
 
-    @Autowired
+    @Inject
     private StatsService statsService;
 
     @PostConstruct

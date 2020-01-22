@@ -1,8 +1,9 @@
 package com.latticeengines.security.exposed.globalauth.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
@@ -18,7 +19,7 @@ public class GlobalTenantManagementServiceImpl extends GlobalAuthenticationServi
 
     private static final Logger log = LoggerFactory.getLogger(GlobalTenantManagementServiceImpl.class);
 
-    @Autowired
+    @Inject
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
     @Override

@@ -2,7 +2,8 @@ package com.latticeengines.microservice.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/health")
 public class HealthCheckResource {
 
-    @Autowired
+    @Inject
     private StatusService statusService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")

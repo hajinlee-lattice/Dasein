@@ -2,11 +2,10 @@ package com.latticeengines.apps.lp.qbean;
 
 import java.util.concurrent.Callable;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -61,8 +60,7 @@ public abstract class ModelSummaryDownloadAbstractBean implements QuartzJobBean 
     @Value("${pls.downloader.queue.capacity}")
     private int queueCapacity;
 
-    @Autowired
-    @Qualifier("commonTaskExecutor")
+    @Resource(name = "commonTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
 
     private boolean incremental;

@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
@@ -13,7 +14,7 @@ import com.latticeengines.modelquality.service.SamplingService;
 @Component("samplingService")
 public class SamplingServiceImpl extends BaseServiceImpl implements SamplingService {
 
-    @Autowired
+    @Inject
     private SamplingEntityMgr samplingEntityMgr;
 
     @Override

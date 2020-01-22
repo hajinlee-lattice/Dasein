@@ -15,10 +15,11 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -53,7 +54,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     static final String BEAN_NAME = "profileAccount";
 
     private static final Logger log = LoggerFactory.getLogger(ProfileAccount.class);
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     private int filterStep;

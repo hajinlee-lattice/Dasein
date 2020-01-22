@@ -2,8 +2,9 @@ package com.latticeengines.datacloudapi.api.controller;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/orchestrations")
 public class OrchestrationResource {
 
-    @Autowired
+    @Inject
     private OrchestrationService orchestrationService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

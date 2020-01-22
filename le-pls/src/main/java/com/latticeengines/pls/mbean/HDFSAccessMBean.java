@@ -1,10 +1,11 @@
 package com.latticeengines.pls.mbean;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Component;
 @ManagedResource(objectName = "Diagnostics:name=HDFSAccessCheck2")
 public class HDFSAccessMBean {
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @ManagedOperation(description = "Check HDFS Accessibility")

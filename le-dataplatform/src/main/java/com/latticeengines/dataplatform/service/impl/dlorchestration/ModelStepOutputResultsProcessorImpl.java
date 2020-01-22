@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -56,22 +57,22 @@ public class ModelStepOutputResultsProcessorImpl implements ModelStepProcessor {
     @Value("${dataplatform.customer.basedir}")
     private String customerBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ModelingService modelingService;
 
-    @Autowired
+    @Inject
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private JdbcTemplate dlOrchestrationJdbcTemplate;
 
-    @Autowired
+    @Inject
     private ModelCommandLogService modelCommandLogService;
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
     @Override

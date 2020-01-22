@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -71,34 +70,34 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Value("${metadata.hive.enabled:false}")
     private boolean hiveEnabled;
 
-    @Autowired
+    @Inject
     private AttributeDao attributeDao;
 
-    @Autowired
+    @Inject
     private DataRuleDao dataRuleDao;
 
-    @Autowired
+    @Inject
     private ExtractDao extractDao;
 
-    @Autowired
+    @Inject
     private LastModifiedKeyDao lastModifiedKeyDao;
 
-    @Autowired
+    @Inject
     private PrimaryKeyDao primaryKeyDao;
 
-    @Autowired
+    @Inject
     private TableDao tableDao;
 
-    @Autowired
+    @Inject
     private HiveTableDao hiveTableDao;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private RedshiftService redshiftService;
 
     @Inject

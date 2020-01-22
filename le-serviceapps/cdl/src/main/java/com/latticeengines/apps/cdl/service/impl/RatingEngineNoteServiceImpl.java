@@ -4,7 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
@@ -17,10 +18,10 @@ import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 @Component("ratingEngineNoteService")
 public class RatingEngineNoteServiceImpl implements RatingEngineNoteService {
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
-    @Autowired
+    @Inject
     private RatingEngineNoteEntityMgr ratingEngineNoteEntityMgr;
 
     @Override

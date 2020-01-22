@@ -1,7 +1,8 @@
 package com.latticeengines.modelquality.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.directory.api.util.exception.NotImplementedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -19,10 +20,10 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 @Component("dataSetService")
 public class DataSetServiceImpl extends BaseServiceImpl implements DataSetService {
 
-    @Autowired
+    @Inject
     DataSetEntityMgr dataSetEntityMgr;
 
-    @Autowired
+    @Inject
     ModelSummaryProxy modelSummaryProxy;
 
     @Override

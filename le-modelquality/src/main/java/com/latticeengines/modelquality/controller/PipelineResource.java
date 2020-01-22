@@ -3,9 +3,10 @@ package com.latticeengines.modelquality.controller;
 import java.io.IOException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,10 +36,10 @@ public class PipelineResource implements ModelQualityPipelineInterface, CrudInte
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(PipelineResource.class);
 
-    @Autowired
+    @Inject
     private PipelineEntityMgr pipelineEntityMgr;
 
-    @Autowired
+    @Inject
     private PipelineService pipelineService;
 
     @Override

@@ -11,6 +11,7 @@ import org.apache.log4j.LogManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import com.latticeengines.actors.visitor.sample.framework.SampleMatchActorSystem;
 import com.latticeengines.actors.visitor.sample.impl.SampleDnbLookupActor;
@@ -26,7 +27,8 @@ public class SampleServiceImplTestNG extends AbstractTestNGSpringContextTests {
     @Inject
     private SampleFuzzyMatchService service;
 
-    // @Test(groups = "functional")
+    // this test is broken
+    @Test(groups = "functional", enabled = false)
     public void testActorSystem() throws Exception {
         LogManager.getLogger("com.latticeengines.datacloud.match.actors.visitor").setLevel(Level.DEBUG);
         LogManager.getLogger("com.latticeengines.actors.visitor").setLevel(Level.DEBUG);

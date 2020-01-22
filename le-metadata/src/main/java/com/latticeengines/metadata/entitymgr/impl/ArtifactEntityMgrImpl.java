@@ -2,7 +2,8 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +21,10 @@ import com.latticeengines.metadata.entitymgr.ArtifactEntityMgr;
 @Component("artifactEntityMgr")
 public class ArtifactEntityMgrImpl extends BaseEntityMgrImpl<Artifact> implements ArtifactEntityMgr {
 
-    @Autowired
+    @Inject
     private ArtifactDao artifactDao;
 
-    @Autowired
+    @Inject
     private ModuleDao moduleDao;
 
     @Override

@@ -1,8 +1,8 @@
 package com.latticeengines.pls.provisioning;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 @Component
 public class PLSComponent {
 
-    @Autowired
+    @Inject
     private PLSComponentManager componentManager;
 
     public static final String componentName = "PLS";

@@ -11,11 +11,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 
 import com.latticeengines.camille.exposed.Camille;
@@ -70,16 +71,16 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     private boolean involvedDL = false;
     private boolean involvedZK = false;
 
-    @Autowired
+    @Inject
     private DataLoaderService dataLoaderService;
 
-    @Autowired
+    @Inject
     private AdminTenantProxy adminTenantProxy;
 
-    @Autowired
+    @Inject
     private AdminInternalProxy adminInternalProxy;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     public GlobalAuthDeploymentTestBed(String plsApiHostPort, String adminApiHostPort, String environment) {

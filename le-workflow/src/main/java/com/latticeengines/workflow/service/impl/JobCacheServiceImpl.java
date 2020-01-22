@@ -16,12 +16,12 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
@@ -67,19 +67,19 @@ public class JobCacheServiceImpl implements JobCacheService {
     @Value("${workflow.jobs.cache.jobIdListExpireTimeInMillis:300000}")
     private int idListExpireTimeInMillis; // expire time for job id list cache entries
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
-    @Autowired
+    @Inject
     private ReportService reportService;
 
-    @Autowired
+    @Inject
     private JobCacheWriter cacheWriter;
 
-    @Autowired
+    @Inject
     private TenantJobIdListCacheWriter jobIdListCacheWriter;
 
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("job-cache-service", NUM_THREADS);

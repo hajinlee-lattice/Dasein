@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DomainBased;
@@ -18,7 +19,7 @@ public class ReducedAccountMaster implements DomainBased, DunsBased, FixedInterv
 
     private static final String MAJOR_VERSION = "2.0";
 
-    @Autowired
+    @Inject
     AccountMaster accountMaster;
 
     private long cutoffLimitInSeconds = DEFAULT_CUTOFF_LIMIT_IN_SECONDS;

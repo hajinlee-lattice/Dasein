@@ -1,8 +1,8 @@
 package com.latticeengines.ulysses.service.impl;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
@@ -14,10 +14,10 @@ import com.latticeengines.ulysses.service.EnrichedAccountService;
 @Component("enrichedAccountService")
 public class EnrichedAccountServiceImpl implements EnrichedAccountService {
 
-    @Autowired
+    @Inject
     private FabricMessageService messageService;
 
-    @Autowired
+    @Inject
     private FabricDataService dataService;
 
     private EnrichedAccountEntityMgr scoreAndEnrichmentEntityMgr;

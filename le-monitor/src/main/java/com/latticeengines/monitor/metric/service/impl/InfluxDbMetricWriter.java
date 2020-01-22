@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -21,8 +22,6 @@ import org.influxdb.dto.BatchPoints;
 import org.influxdb.dto.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
@@ -75,8 +74,7 @@ public class InfluxDbMetricWriter implements MetricWriter {
     @Value("${monitor.influxdb.log.level:NONE}")
     private InfluxDB.LogLevel logLevel;
 
-    @Autowired
-    @Qualifier("monitorExecutor")
+    @Resource(name = "monitorExecutor")
     private ThreadPoolTaskExecutor monitorExecutor;
 
     private Boolean enabled = false;

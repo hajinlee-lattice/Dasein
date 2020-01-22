@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DerivedSource;
@@ -12,10 +13,10 @@ public class AccountMasterSeedMerged implements DerivedSource {
 
     private static final long serialVersionUID = -3119903346347156027L;
 
-    @Autowired
+    @Inject
     LatticeCacheSeed latticeCacheSeed;
 
-    @Autowired
+    @Inject
     DnBCacheSeed dnBCacheSeed;
 
     @Override

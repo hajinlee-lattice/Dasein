@@ -3,10 +3,11 @@ package com.latticeengines.datafabric.service.datastore.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datafabric.service.datastore.FabricDataService;
@@ -20,10 +21,10 @@ public class FabricDataServiceImpl implements FabricDataService {
 
     Map<String, FabricDataServiceProvider> serviceProviders;
 
-    @Autowired
+    @Inject
     DynamoDataServiceProvider dynamoService;
 
-    @Autowired
+    @Inject
     RedisDataServiceProvider redisService;
 
     public FabricDataServiceImpl() {

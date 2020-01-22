@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
@@ -31,27 +32,26 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
-
 public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(DataFlowProcessor.class);
 
-    @Autowired
+    @Inject
     private ApplicationContext appContext;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private JobEntityMgr jobEntityMgr;
 
-    @Autowired
+    @Inject
     private DataTransformationService dataTransformationService;
 
-    @Autowired
+    @Inject
     private SoftwareLibraryService softwareLibraryService;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Value("${dataflowapi.checkpoint:false}")

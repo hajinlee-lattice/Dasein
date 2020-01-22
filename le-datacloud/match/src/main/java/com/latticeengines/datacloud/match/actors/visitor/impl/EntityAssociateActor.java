@@ -1,11 +1,10 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +20,7 @@ public class EntityAssociateActor extends DataSourceWrapperActorTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(EntityAssociateActor.class);
 
-    @Autowired
-    @Qualifier("entityAssociateService")
+    @Resource(name = "entityAssociateService")
     private DataSourceLookupServiceBase entityAssociateService;
 
     @PostConstruct

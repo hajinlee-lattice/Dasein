@@ -1,20 +1,19 @@
 package com.latticeengines.datacloud.etl.aspect;
 
+import javax.annotation.Resource;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
 
 @Aspect
 public class HdfsPodSafeAspect {
 
-    @Autowired
-    @Qualifier(value = "sessionFactoryPropDataManage")
+    @Resource(name = "sessionFactoryPropDataManage")
     private SessionFactory sessionFactory;
 
     @Before("execution(* com.latticeengines.datacloud.etl.publication.entitymgr.impl.PublicationProgressEntityMgrImpl.find*(..))")

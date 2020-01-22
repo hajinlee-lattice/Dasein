@@ -78,7 +78,7 @@ public abstract class ActorSystemTemplate {
 
     /**
      * For actors named by class name
-     * 
+     *
      * @param actorClz
      * @return
      */
@@ -88,7 +88,7 @@ public abstract class ActorSystemTemplate {
 
     /**
      * For actors sharing same class but with different actor names
-     * 
+     *
      * @param actorName
      * @return
      */
@@ -98,7 +98,7 @@ public abstract class ActorSystemTemplate {
 
     /**
      * Every actor has unique path
-     * 
+     *
      * @param actorPath
      * @return
      */
@@ -108,7 +108,7 @@ public abstract class ActorSystemTemplate {
 
     /**
      * Every actor has unique reference
-     * 
+     *
      * @param actorRef
      * @return
      */
@@ -119,7 +119,7 @@ public abstract class ActorSystemTemplate {
 
     /**
      * Get actor type by actor name
-     * 
+     *
      * @param actorName
      * @return
      */
@@ -129,7 +129,7 @@ public abstract class ActorSystemTemplate {
 
     /**
      * Get actor type by actor name abbreviation
-     * 
+     *
      * @param actorNameAbbr
      * @return
      */
@@ -140,7 +140,7 @@ public abstract class ActorSystemTemplate {
     /**
      * Metrics actor is to publish performance metrics to external metrics
      * system, eg. InfluxDB
-     * 
+     *
      * @return
      */
     public ActorRef getMetricActor() {

@@ -3,9 +3,10 @@ package com.latticeengines.oauth2.authserver;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,10 +27,10 @@ import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 @Component
 public class OneTimeKeyAuthenticationManager implements AuthenticationManager {
 
-    @Autowired
+    @Inject
     private OAuthUserEntityMgr users;
 
-    @Autowired
+    @Inject
     private OrgIdRegister orgIdRegister;
 
     private PasswordEncoder encoder = new BCryptPasswordEncoder();

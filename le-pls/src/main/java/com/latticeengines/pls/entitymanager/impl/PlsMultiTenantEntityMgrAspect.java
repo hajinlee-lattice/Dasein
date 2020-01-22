@@ -3,6 +3,7 @@ package com.latticeengines.pls.entitymanager.impl;
 import java.util.Arrays;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.aspectj.lang.JoinPoint;
@@ -29,7 +30,7 @@ public class PlsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Qualifier(value = "entityManagerFactoryReader")
     private EntityManager entityManagerReader;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Before("execution(* com.latticeengines.db.entitymgr.impl.ReportEntityMgrImpl.find*(..))")

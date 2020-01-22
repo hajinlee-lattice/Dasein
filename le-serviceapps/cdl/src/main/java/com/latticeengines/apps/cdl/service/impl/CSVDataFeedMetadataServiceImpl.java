@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
@@ -37,7 +38,7 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     private static final Logger log = LoggerFactory.getLogger(CSVDataFeedMetadataServiceImpl.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     protected CSVDataFeedMetadataServiceImpl() {

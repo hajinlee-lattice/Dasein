@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -82,19 +81,19 @@ public class ModelingFileUploadResource {
     private static final Logger log = LoggerFactory.getLogger(ModelingFileUploadResource.class);
     public static final String UPLOAD_FILE_ERROR_TITLE = "Error In File Uploading.";
 
-    @Autowired
+    @Inject
     private FileUploadService fileUploadService;
 
-    @Autowired
+    @Inject
     private ModelingFileMetadataService modelingFileMetadataService;
 
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
 
-    @Autowired
+    @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @Inject

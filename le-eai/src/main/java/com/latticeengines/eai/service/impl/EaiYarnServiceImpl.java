@@ -2,8 +2,9 @@ package com.latticeengines.eai.service.impl;
 
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,10 +19,10 @@ import com.latticeengines.yarn.exposed.service.JobService;
 @Component("eaiYarnService")
 public class EaiYarnServiceImpl implements EaiYarnService {
 
-    @Autowired
+    @Inject
     private JobService jobService;
 
-    @Autowired
+    @Inject
     private JobEntityMgr jobEntityMgr;
 
     @Value("${dataplatform.trustore.jks}")

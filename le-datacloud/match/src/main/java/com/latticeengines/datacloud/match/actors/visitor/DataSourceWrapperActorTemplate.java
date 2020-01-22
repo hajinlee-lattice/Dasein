@@ -3,10 +3,10 @@ package com.latticeengines.datacloud.match.actors.visitor;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.latticeengines.actors.ActorTemplate;
 import com.latticeengines.actors.exposed.traveler.Response;
@@ -19,8 +19,7 @@ public abstract class DataSourceWrapperActorTemplate extends ActorTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceWrapperActorTemplate.class);
 
-    @Autowired
-    @Qualifier("matchActorSystem")
+    @Resource(name = "matchActorSystem")
     protected MatchActorSystem matchActorSystem;
 
     private static final ConcurrentMap<String, DataSourceLookupRequest> requestMap = new ConcurrentHashMap<>();

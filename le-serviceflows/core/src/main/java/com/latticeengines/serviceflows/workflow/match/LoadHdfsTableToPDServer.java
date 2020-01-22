@@ -5,9 +5,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.AbstractMap;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -32,10 +33,10 @@ public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfigura
 
     private static final Logger log = LoggerFactory.getLogger(LoadHdfsTableToPDServer.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private ModelProxy modelProxy;
 
     @Override

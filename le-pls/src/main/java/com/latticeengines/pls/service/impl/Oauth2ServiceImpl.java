@@ -1,7 +1,8 @@
 package com.latticeengines.pls.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
@@ -21,13 +22,13 @@ import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 @Component("oauth2Service")
 public class Oauth2ServiceImpl implements Oauth2Interface {
 
-    @Autowired
+    @Inject
     private Oauth2RestApiProxy oauth2RestApiProxy;
 
-    @Autowired
+    @Inject
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
 
-    @Autowired
+    @Inject
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
     @Value("${common.oauth.url}")

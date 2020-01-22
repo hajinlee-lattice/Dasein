@@ -1,9 +1,9 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
-
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
 @Component("customerReportEntityMgr")
 public class CustomerReportEntityMgrImpl extends BaseEntityMgrImpl<CustomerReport> implements CustomerReportEntityMgr {
 
-    @Autowired
+    @Inject
     private CustomerReportDao customerReportDao;
 
     @Override

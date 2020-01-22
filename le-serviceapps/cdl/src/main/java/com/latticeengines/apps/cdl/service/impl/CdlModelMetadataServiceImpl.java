@@ -3,9 +3,10 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.CdlModelMetadataService;
@@ -19,7 +20,7 @@ public class CdlModelMetadataServiceImpl implements CdlModelMetadataService {
 
     private static final Logger log = LoggerFactory.getLogger(CdlModelMetadataServiceImpl.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Override

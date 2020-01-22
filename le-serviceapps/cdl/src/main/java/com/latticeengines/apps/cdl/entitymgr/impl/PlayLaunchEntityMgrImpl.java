@@ -3,11 +3,12 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Hibernate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,13 +30,13 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 @Component("playLaunchEntityMgr")
 public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> implements PlayLaunchEntityMgr {
 
-    @Autowired
+    @Inject
     private PlayLaunchDao playLaunchDao;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Override

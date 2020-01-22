@@ -5,11 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.hadoop.fs.HdfsResourceLoader;
 import org.springframework.http.HttpEntity;
@@ -52,13 +53,13 @@ public class FileModelRunServiceImpl extends AbstractModelRunServiceImpl {
 
     private static final Logger log = LoggerFactory.getLogger(FileModelRunServiceImpl.class);
 
-    @Autowired
+    @Inject
     private Configuration distCpConfiguration;
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private ModelSummaryMetricsEntityMgr modelSummaryMetricsEntityMgr;
 
     @Override

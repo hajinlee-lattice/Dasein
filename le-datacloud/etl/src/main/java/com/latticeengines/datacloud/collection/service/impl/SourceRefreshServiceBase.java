@@ -2,6 +2,9 @@ package com.latticeengines.datacloud.collection.service.impl;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -10,8 +13,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.yarn.client.YarnClient;
@@ -54,33 +55,31 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     abstract Source getSource();
 
-    @Autowired
+    @Inject
     protected SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
 
-    @Autowired
+    @Inject
     protected CollectionDataFlowService collectionDataFlowService;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
-    @Autowired
-    @Qualifier(value = "propDataCollectionJdbcTemplate")
+    @Resource(name = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateCollectionDB;
 
-    @Autowired
-    @Qualifier(value = "propDataBulkJdbcTemplate")
+    @Resource(name = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;
 
     // DataCloud CollectionDB is shutdown

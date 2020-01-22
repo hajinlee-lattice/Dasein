@@ -13,11 +13,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 public class DynamoDBLookupServiceImpl extends DataSourceLookupServiceBase implements DynamoDBLookupService {
     private static final Logger log = LoggerFactory.getLogger(DynamoDBLookupServiceImpl.class);
 
-    @Autowired
+    @Inject
     private AccountLookupService accountLookupService;
 
     @Value("${datacloud.match.dynamo.fetchers.num}")

@@ -3,10 +3,10 @@ package com.latticeengines.pls.controller;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/fileuploads")
 @PreAuthorize("hasRole('View_PLS_Data')")
 public class FileUploadResource {
-    @Autowired
+    @Inject
     private FileUploadService fileUploadService;
 
     @RequestMapping(value = "{fileName}/import/errors", method = RequestMethod.GET, produces = "application/csv")

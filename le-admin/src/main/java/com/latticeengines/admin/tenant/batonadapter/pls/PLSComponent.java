@@ -4,7 +4,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,10 +25,10 @@ public class PLSComponent extends LatticeComponent {
     @Value("${admin.pls.dryrun}")
     private boolean dryrun;
 
-    @Autowired
+    @Inject
     private DefaultConfigOverwriter overwriter;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     private LatticeComponentInstaller installer = new PLSInstaller();

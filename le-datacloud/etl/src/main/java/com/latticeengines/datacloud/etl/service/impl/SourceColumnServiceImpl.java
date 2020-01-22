@@ -1,7 +1,8 @@
 package com.latticeengines.datacloud.etl.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DerivedSource;
@@ -12,7 +13,7 @@ import com.latticeengines.datacloud.etl.service.SourceColumnService;
 @Component("sourceColumnService")
 public class SourceColumnServiceImpl implements SourceColumnService {
 
-    @Autowired
+    @Inject
     private SourceColumnEntityMgr sourceColumnEntityMgr;
 
     @Override

@@ -6,11 +6,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
@@ -27,11 +27,10 @@ public class DataSourceServiceImpl implements DataSourceService {
     private static final Logger log  = LoggerFactory.getLogger(DataSourceServiceImpl.class);
     private final AtomicInteger roundRobinPos = new AtomicInteger(0);
 
-    @Autowired
+    @Inject
     private ZkConfigurationService zkConfigurationService;
 
-    @Autowired
-    @Qualifier("commonTaskScheduler")
+    @Resource(name = "commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

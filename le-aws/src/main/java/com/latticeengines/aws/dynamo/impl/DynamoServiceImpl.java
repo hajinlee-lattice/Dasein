@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
@@ -65,7 +66,7 @@ public class DynamoServiceImpl implements DynamoService {
     private AmazonDynamoDB localClient;
     private AWSApplicationAutoScalingClient autoScaleClient;
 
-    @Autowired
+    @Inject
     public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint}") String endpoint,
             @Value("${aws.region}") String region) {
         log.info("Constructing DynamoDB client using BasicAWSCredentials.");

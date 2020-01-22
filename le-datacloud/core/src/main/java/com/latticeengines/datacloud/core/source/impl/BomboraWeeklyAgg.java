@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DerivedSource;
@@ -12,7 +13,7 @@ public class BomboraWeeklyAgg implements DerivedSource {
 
     private static final long serialVersionUID = 8420797405204476273L;
 
-    @Autowired
+    @Inject
     private BomboraDepivoted bomboraDepivoted;
 
     @Override

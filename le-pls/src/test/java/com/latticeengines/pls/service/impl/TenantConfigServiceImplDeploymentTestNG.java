@@ -3,11 +3,10 @@ package com.latticeengines.pls.service.impl;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.zookeeper.ZooDefs;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -64,8 +63,7 @@ public class TenantConfigServiceImplDeploymentTestNG extends PlsDeploymentTestNG
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
-    @Autowired
-    @Qualifier("propertiesFileFeatureFlagProvider")
+    @Resource(name = "propertiesFileFeatureFlagProvider")
     private DefaultFeatureFlagProvider defaultFeatureFlagProvider;
 
     private BatonService batonService = new BatonServiceImpl();

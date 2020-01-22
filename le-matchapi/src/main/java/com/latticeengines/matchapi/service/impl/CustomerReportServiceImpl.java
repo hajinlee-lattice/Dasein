@@ -1,6 +1,7 @@
 package com.latticeengines.matchapi.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.CustomerReportEntityMgr;
@@ -9,7 +10,7 @@ import com.latticeengines.matchapi.service.CustomerReportService;
 @Component("customerReportService")
 public class CustomerReportServiceImpl implements CustomerReportService {
 
-    @Autowired
+    @Inject
     private CustomerReportEntityMgr customerReportEntityMgr;
     @Override
     public void saveReport(CustomerReport customerReport) {

@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,13 +19,13 @@ import com.latticeengines.modelquality.entitymgr.AlgorithmEntityMgr;
 @Component("qualityAlgorithmEntityMgr")
 public class AlgorithmEntityMgrImpl extends BaseEntityMgrImpl<Algorithm> implements AlgorithmEntityMgr {
 
-    @Autowired
+    @Inject
     private AlgorithmDao algorithmDao;
 
-    @Autowired
+    @Inject
     private AlgorithmPropertyDefDao algorithmPropertyDefDao;
 
-    @Autowired
+    @Inject
     private AlgorithmPropertyValueDao algorithmPropertyValueDao;
 
     @Override

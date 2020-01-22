@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -23,13 +23,13 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandStatus;
 @Component
 public class CommandEntityMgrImpl implements CommandEntityMgr {
 
-    @Autowired
+    @Inject
     private CommandDao commandDao;
 
-    @Autowired
+    @Inject
     private CommandParameterDao commandParameterDao;
 
-    @Autowired
+    @Inject
     private MatchClientRoutingDataSource dataSource;
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();

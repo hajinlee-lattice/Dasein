@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -12,7 +13,7 @@ import com.latticeengines.modelquality.entitymgr.ScoringDataSetEntityMgr;
 @Component("scoringDataSetEntityMgr")
 public class ScoringDataSetEntityMgrImpl extends BaseEntityMgrImpl<ScoringDataSet> implements ScoringDataSetEntityMgr {
 
-    @Autowired
+    @Inject
     private ScoringDataSetDao scoringDataSetDao;
 
     @Override

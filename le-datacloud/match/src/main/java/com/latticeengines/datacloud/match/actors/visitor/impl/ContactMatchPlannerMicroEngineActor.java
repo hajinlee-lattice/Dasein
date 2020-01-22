@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -35,12 +34,10 @@ public class ContactMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
     @Value("${datacloud.match.planner.contact.executors.num}")
     private int executorNum;
 
-    @Autowired
-    @Qualifier("matchActorSystem")
+    @Resource(name = "matchActorSystem")
     protected MatchActorSystem matchActorSystem;
 
-    @Autowired
-    @Qualifier("matchGuideBook")
+    @Resource(name = "matchGuideBook")
     protected MatchGuideBook guideBook;
 
     @Inject

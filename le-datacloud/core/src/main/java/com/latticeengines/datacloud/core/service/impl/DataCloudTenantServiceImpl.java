@@ -1,8 +1,9 @@
 package com.latticeengines.datacloud.core.service.impl;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,10 +22,10 @@ public class DataCloudTenantServiceImpl implements DataCloudTenantService {
 
     private static final Logger log = LoggerFactory.getLogger(DataCloudTenantServiceImpl.class);
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
     @Value("${datacloud.ga.username}")
