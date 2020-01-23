@@ -141,11 +141,11 @@ public class UserResource {
 
         String tempPass = result.getPassword();
         if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-            emailService.sendPlsNewExternalUserEmail(user, tempPass, apiPublicUrl,
+            emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
                     !tenantService.getTenantEmailFlag(tenant.getId()));
             tenantService.updateTenantEmailFlag(tenant.getId(), true);
         } else {
-            emailService.sendPlsNewInternalUserEmail(tenant, user, tempPass, apiPublicUrl);
+            emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
         }
 
         response.setSuccess(true);
@@ -216,11 +216,11 @@ public class UserResource {
             User user = userService.findByUsername(username);
             if (newUser && user != null) {
                 if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
-                    emailService.sendPlsExistingExternalUserEmail(tenant, user, apiPublicUrl,
+                    emailService.sendExistingUserEmail(tenant, user, apiPublicUrl,
                             !tenantService.getTenantEmailFlag(tenant.getId()));
                     tenantService.updateTenantEmailFlag(tenant.getId(), true);
                 } else {
-                    emailService.sendPlsExistingInternalUserEmail(tenant, user, apiPublicUrl);
+                    emailService.sendExistingUserEmail(tenant, user, apiPublicUrl, false);
                 }
             }
         }

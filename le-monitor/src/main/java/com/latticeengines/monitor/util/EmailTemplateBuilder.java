@@ -90,27 +90,16 @@ public class EmailTemplateBuilder {
     }
 
     public enum Template {
-        PLS_NEW_EXTERNAL_USER("new_user.html"), //
-        PLS_NEW_INTERNAL_USER("new_user.html"), //
-        PLS_NEW_PROSPECTING_USER("new_prospecting_user.html"), //
-        PLS_EXISTING_EXTERNAL_USER("old_user.html"), //
-        PLS_EXISTING_INTERNAL_USER("old_user.html"), //
+        NEW_USER("new_user.html"),//
+        EXISTING_USER("old_user.html"),//
         PLS_FORGET_PASSWORD("forget_password.html"), //
         PLS_FORGET_PASSWORD_CONFIRMATION("forget_password_confirmation.html"), //
-        PD_NEW_EXTERNAL_USER("pd_new_external_user.html"), //
-        PD_EXISITING_EXTERNAL_USER("pd_old_external_user.html"), //
-        PLS_DEPLOYMENT_STEP_SUCCESS("pls_deployment_step_success.html"), //
-        PLS_DEPLOYMENT_STEP_ERROR("pls_deployment_step_error.html"), //
         PLS_ONETIME_SFDC_ACCESS_TOKEN("pls_onetime_sfdc_access_token.html"), //
         SECURITY_GLOBALAUTH_EMAIL_TEMPLATE("security_globalauth_email_template.html"), //
         PLS_JOB_SUCCESS("pls_job_success.html"), //
         PLS_JOB_ERROR("pls_job_error.html"), //
-        PLS_JOB_SUCCESS_INTERNAL("pls_job_success_internal.html"), //
-        PLS_JOB_ERROR_INTERNAL("pls_job_error_internal.html"), //
         PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS("pls_internal_attribute_enrich_success.html"), //
         PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR("pls_internal_attribute_enrich_error.html"), //
-        PLS_INTERNAL_ATTRIBUTE_ENRICH_SUCCESS_INTERNAL("pls_internal_attribute_enrich_success_internal.html"), //
-        PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL("pls_internal_attribute_enrich_error_internal.html"), //
 
         PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), //
         PLS_EXPORT_SEGMENT_ERROR("pls_export_segment_error.html"), //
