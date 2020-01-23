@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -60,6 +61,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
+import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
+import com.latticeengines.monitor.exposed.metrics.impl.InstrumentRegistry;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -101,6 +104,14 @@ public class MatchResource {
     @Value("${camille.zk.pod.id:Default}")
     private String podId;
 
+    @PostConstruct
+    public void postConstruct() {
+        InstrumentRegistry.register(RealtimeMatchInstrument.NAME, new RealtimeMatchInstrument(false));
+        InstrumentRegistry.register(RealtimeMatchInstrument.NAME_MATCHED, new RealtimeMatchInstrument(true));
+        InstrumentRegistry.register(BulkRealtimeMatchInstrument.NAME, new BulkRealtimeMatchInstrument(false));
+        InstrumentRegistry.register(BulkRealtimeMatchInstrument.NAME_MATCHED, new BulkRealtimeMatchInstrument(true));
+    }
+
     @PostMapping(value = "/realtime")
     @ResponseBody
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
@@ -108,6 +119,8 @@ public class MatchResource {
             + "Domain can be anything that can be parsed to a domain, such as website, email, etc. "
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
     )
+    @InvocationMeter(name = "realtime", measurment = "matchapi", instrument = RealtimeMatchInstrument.NAME)
+    @InvocationMeter(name = "realtime-matched", measurment = "matchapi", instrument = RealtimeMatchInstrument.NAME_MATCHED)
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         try {
             setDataCloudVersion(input, null);
@@ -135,6 +148,8 @@ public class MatchResource {
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
             + "Domain can be anything that can be parsed to a domain, such as website, email, etc. "
             + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. ")
+    @InvocationMeter(name = "bulk-realtime", measurment = "matchapi", instrument = BulkRealtimeMatchInstrument.NAME)
+    @InvocationMeter(name = "bulk-realtime-matched", measurment = "matchapi", instrument = BulkRealtimeMatchInstrument.NAME_MATCHED)
     public BulkMatchOutput bulkMatchRealTime(@RequestBody BulkMatchInput input) {
         long time = System.currentTimeMillis();
         try {

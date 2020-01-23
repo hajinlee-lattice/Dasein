@@ -3,11 +3,14 @@ package com.latticeengines.scoringapi.controller;
 import java.text.ParseException;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.MDC;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -26,6 +29,8 @@ import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
+import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
+import com.latticeengines.monitor.exposed.metrics.impl.InstrumentRegistry;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.scoringapi.exposed.ScoreUtils;
 import com.latticeengines.scoringinternalapi.controller.BaseScoring;
@@ -40,10 +45,19 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("")
 public class ScoreResource extends BaseScoring {
 
+    private static final String SINGLE_RECORD_INSTRUMENT = "ScoreRecord";
+    private static final String MULTI_RECORDS_INSTRUMENT = "ScoreRecords";
+
     @Inject
     private BatonService batonService;
 
-    @RequestMapping(value = "/models/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @PostConstruct
+    public void postConstruct() {
+        InstrumentRegistry.register(SINGLE_RECORD_INSTRUMENT, new SingleRecordInstrument(oAuthUserEntityMgr));
+        InstrumentRegistry.register(MULTI_RECORDS_INSTRUMENT, new MultiRecordInstrument(oAuthUserEntityMgr));
+    }
+
+    @GetMapping("/models/{type}")
     @ResponseBody
     @ApiOperation(value = "Get active models")
     public List<Model> getActiveModels(HttpServletRequest request, @PathVariable ModelType type) {
@@ -69,7 +83,7 @@ public class ScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/modeldetails", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/modeldetails")
     @ResponseBody
     @ApiOperation(value = "Get paginated list of models for specified criteria")
     public List<ModelDetail> getPaginatedModels(HttpServletRequest request,
@@ -89,7 +103,7 @@ public class ScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/modeldetails/count", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping("/modeldetails/count")
     @ResponseBody
     @ApiOperation(value = "Get total count of models for specified criteria")
     public int getModelCount(HttpServletRequest request,
@@ -106,8 +120,9 @@ public class ScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/record", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/record")
     @ApiOperation(value = "Score a record")
+    @InvocationMeter(name = "score-record", measurment = "scoringapi", instrument = SINGLE_RECORD_INSTRUMENT)
     public ScoreResponse scorePercentileRecord(HttpServletRequest request, //
             @RequestBody ScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
@@ -122,9 +137,10 @@ public class ScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/records")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
+    @InvocationMeter(name = "score-records", measurment = "scoringapi", instrument = SINGLE_RECORD_INSTRUMENT, errors = true)
     public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
@@ -139,7 +155,7 @@ public class ScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/records/debug")
     @ApiIgnore
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
@@ -157,7 +173,7 @@ public class ScoreResource extends BaseScoring {
         }
     }
 
-    @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/record/debug")
     @ApiIgnore
     @ApiOperation(value = "Score a record including debug info such as probability")
     public ScoreResponse scoreProbabilityRecord(HttpServletRequest request, //

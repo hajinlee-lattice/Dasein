@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -24,14 +25,24 @@ public class MeterRegistryFactoryServiceImpl implements MeterRegistryFactoryServ
     @Resource(name = "rootHostRegistry")
     private MeterRegistry rootHostRegistry;
 
+    @Resource(name = "rootInspectionHostRegistry")
+    private MeterRegistry rootInspectionHostRegistry;
+
     @Override
     public MeterRegistry getServiceLevelRegistry() {
         return rootRegistry;
     }
 
     @Override
-    public MeterRegistry getHostLevelRegistry() {
-        return rootHostRegistry;
+    public MeterRegistry getHostLevelRegistry(MetricDB metricDB) {
+        switch (metricDB) {
+            case LDC_Match:
+                return rootHostRegistry;
+            case INSPECTION:
+                return rootInspectionHostRegistry;
+            default:
+                throw new UnsupportedOperationException();
+        }
     }
 
     /*
@@ -40,8 +51,9 @@ public class MeterRegistryFactoryServiceImpl implements MeterRegistryFactoryServ
     @PreDestroy
     private void cleanup() {
         log.info("Closing all meter registries");
-        rootHostRegistry.close();
         rootRegistry.close();
+        rootHostRegistry.close();
+        rootInspectionHostRegistry.close();
         log.info("All meter registries closed");
     }
 }

@@ -30,7 +30,7 @@ public class InfluxRegistryConfig {
 
     private static final Logger log = LoggerFactory.getLogger(InfluxRegistryConfig.class);
 
-    @Value("${monitor.metrics.micrometer.influxdb.enabled:false}")
+    @Value("${monitor.metrics.micrometer.influxdb.enabled}")
     private boolean enableMonitoring;
 
     @Value("${monitor.influxdb.url}")
@@ -75,6 +75,19 @@ public class InfluxRegistryConfig {
         InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName());
         MeterRegistry registry = getInfluxRegistry(config);
         log.info("Instantiating InfluxHostMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
+                config.enabled(), config.step());
+        // set hostname tags
+        registry.config().commonTags(MetricUtils.TAG_HOST, hostname);
+        return registry;
+    }
+
+    @Lazy
+    @Bean(name = "influxInspectionHostMeterRegistry")
+    public MeterRegistry influxInspectionHostRegistry() {
+        InfluxConfig config = getInfluxConfig(MetricDB.INSPECTION.getDbName());
+        MeterRegistry registry = getInfluxRegistry(config);
+        log.info("Instantiating InfluxInspectionHostMeterRegistry... " + //
+                        "url={},db={},enabled={},step={}m", config.uri(), config.db(),
                 config.enabled(), config.step());
         // set hostname tags
         registry.config().commonTags(MetricUtils.TAG_HOST, hostname);

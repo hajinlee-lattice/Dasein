@@ -52,6 +52,7 @@ import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 
@@ -85,7 +86,7 @@ public class MatchMetricServiceImpl implements MatchMetricService {
             return service.getTotalPendingReqStats().getOrDefault(MatchConstants.REQUEST_NUM, 0);
         }).tag(TAG_SERVICE_NAME, service.getClass().getSimpleName()) //
                 .tag(TAG_MATCH_MODE, isBatchMode ? MatchActorSystem.BATCH_MODE : MatchActorSystem.REALTIME_MODE) //
-                .register(registryFactory.getHostLevelRegistry());
+                .register(registryFactory.getHostLevelRegistry(MetricDB.LDC_Match));
     }
 
     @Override
@@ -97,7 +98,7 @@ public class MatchMetricServiceImpl implements MatchMetricService {
         DistributionSummary.builder(METRIC_DATASOURCE_REQ_BATCH_SIZE) //
                 .tag(TAG_SERVICE_NAME, serviceName) //
                 .tag(TAG_MATCH_MODE, isBatchMode ? MatchActorSystem.BATCH_MODE : MatchActorSystem.REALTIME_MODE) //
-                .register(registryFactory.getHostLevelRegistry())
+                .register(registryFactory.getHostLevelRegistry(MetricDB.LDC_Match))
                 .record(size);
     }
 
@@ -111,7 +112,7 @@ public class MatchMetricServiceImpl implements MatchMetricService {
                 .tag(TAG_ACTOR, defaultIfBlank(history.getSite(), EMPTY_TAG_VALUE)) //
                 .tag(TAG_REJECTED, String.valueOf(Boolean.TRUE.equals(history.getRejected()))) //
                 .tag(TAG_MATCH_MODE, defaultIfBlank(history.getActorSystemMode(), EMPTY_TAG_VALUE)) //
-                .register(registryFactory.getHostLevelRegistry()) //
+                .register(registryFactory.getHostLevelRegistry(MetricDB.LDC_Match)) //
                 .record(Duration.ofMillis(history.getDuration()));
     }
 
@@ -133,7 +134,7 @@ public class MatchMetricServiceImpl implements MatchMetricService {
                 .tag(TAG_DNB_MATCH_STRATEGY,
                         ctx.getMatchStrategy() == null ? EMPTY_TAG_VALUE
                                 : defaultIfEmpty(ctx.getMatchStrategyName(), EMPTY_TAG_VALUE)) //
-                .register(registryFactory.getHostLevelRegistry()) //
+                .register(registryFactory.getHostLevelRegistry(MetricDB.LDC_Match)) //
                 .record(Duration.ofMillis(ctx.getDuration()));
         // TODO add match grade for each match fields
     }
@@ -179,7 +180,7 @@ public class MatchMetricServiceImpl implements MatchMetricService {
 
         Timer.builder(METRIC_MATCH_BULK_SIZE) //
                 .tag(TAG_MATCH_MODE, defaultIfEmpty(bulkMatchOutput.getMatchEngine(), EMPTY_TAG_VALUE)) //
-                .register(registryFactory.getHostLevelRegistry()) //
+                .register(registryFactory.getHostLevelRegistry(MetricDB.LDC_Match)) //
                 .record(Duration.ofMillis(bulkMatchOutput.getTimeElapsed()));
     }
 
@@ -215,7 +216,7 @@ public class MatchMetricServiceImpl implements MatchMetricService {
                 .tag(TAG_TENANT, tenantId) //
                 .tag(TAG_PREDEFINED_SELECTION, predefinedSelection) //
                 .tag(TAG_MATCH_MODE, matchEngine) //
-                .register(registryFactory.getHostLevelRegistry());
+                .register(registryFactory.getHostLevelRegistry(MetricDB.LDC_Match));
     }
 
     private Counter getCounter(@NotNull String metricName, @NotNull String tenantId,
@@ -224,7 +225,7 @@ public class MatchMetricServiceImpl implements MatchMetricService {
                 .tag(TAG_TENANT, tenantId) //
                 .tag(TAG_PREDEFINED_SELECTION, predefinedSelection) //
                 .tag(TAG_MATCH_MODE, matchEngine) //
-                .register(registryFactory.getHostLevelRegistry());
+                .register(registryFactory.getHostLevelRegistry(MetricDB.LDC_Match));
     }
 
     private String getOperationalMode(@NotNull MatchTraveler traveler) {

@@ -2,9 +2,14 @@ package com.latticeengines.domain.exposed.monitor.metric;
 
 public enum MetricDB {
 
-    LEYARN("LEYarn"), SCORING("Scoring"), LDC_Match("DataCloudMatch"), INSPECTION(
-            "Inspection"), MODEL_QUALITY(
-                    "ModelQuality"), TEST_DB("TestDB"), PLAYMAKER("Playmaker"), ULYSSES("Ulysses");
+    LEYARN("LEYarn"), //
+    SCORING("Scoring"), //
+    LDC_Match("DataCloudMatch"), //
+    INSPECTION("Inspection"), //
+    MODEL_QUALITY("ModelQuality"), //
+    PLAYMAKER("Playmaker"), //
+    ULYSSES("Ulysses"), //
+    TEST_DB("TestDB");
 
     private final String dbName;
 
