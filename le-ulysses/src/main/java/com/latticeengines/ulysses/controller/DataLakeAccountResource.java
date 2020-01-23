@@ -75,7 +75,7 @@ public class DataLakeAccountResource {
         InstrumentRegistry.register(INSTRUMENT_CP, new UlyssesInstrument(CompanyProfile));
     }
 
-    @GetMapping(value = "/{accountId}/{attributeGroup}", headers = "Accept=application/json")
+    @GetMapping(value = "/{accountId}/{attributeGroup}")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     @InvocationMeter(name = "talkingpoint", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -85,7 +85,7 @@ public class DataLakeAccountResource {
         return getAccountById(requestEntity, accountId, attributeGroup, null);
     }
 
-    @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat", headers = "Accept=application/json")
+    @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     @InvocationMeter(name = "talkingpoint-dante", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -114,7 +114,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat/aslist",  headers = "Accept=application/json")
+    @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat/aslist")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     @InvocationMeter(name = "talkingpoint-dante-list", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -143,7 +143,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @GetMapping(value = "/spendanalyticssegments/danteformat", headers = "Accept=application/json")
+    @GetMapping(value = "/spendanalyticssegments/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     public FrontEndResponse<List<String>> getAccountSegmentsInDanteFormat() {
