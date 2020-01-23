@@ -53,7 +53,7 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     private static final String URI_SESSIONS = "/sessions";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("~yyyy_MM_dd_HH_mm_ss_z");
-    private static final long SESSION_CREATION_TIMEOUT = TimeUnit.MINUTES.toMillis(10);
+    private static final long SESSION_CREATION_TIMEOUT = TimeUnit.MINUTES.toMillis(30);
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private ObjectMapper om = new ObjectMapper();
