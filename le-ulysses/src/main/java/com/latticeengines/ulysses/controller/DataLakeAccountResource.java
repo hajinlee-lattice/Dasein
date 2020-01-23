@@ -4,13 +4,13 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,7 +55,8 @@ public class DataLakeAccountResource {
         this.batonService = batonService;
     }
 
-    @Resource(name = AccountDanteFormatter.Qualifier)
+    @Inject
+    @Qualifier(AccountDanteFormatter.Qualifier)
     private Provider<AccountDanteFormatter> accountDanteFormatterProvider;
 
     @GetMapping(value = "/{accountId}/{attributeGroup}", headers = "Accept=application/json")
@@ -148,4 +149,5 @@ public class DataLakeAccountResource {
                 : dataLakeService.getAccountById(accountId, attributeGroup,
                         tenantProxy.getOrgInfoFromOAuthRequest(requestEntity), requiredAttributes);
     }
+
 }
