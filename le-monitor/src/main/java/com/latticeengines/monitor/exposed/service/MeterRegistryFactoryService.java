@@ -18,6 +18,13 @@ public interface MeterRegistryFactoryService {
     MeterRegistry getServiceLevelRegistry();
 
     /**
+     * Return the hourly {@link MeterRegistry} that measures all api endpoints
+     *
+     * @return shared root registry
+     */
+    MeterRegistry getGlobalHourlyRegistry();
+
+    /**
      * Return root {@link MeterRegistry} that contains all common tags for both
      * services and host machine
      *

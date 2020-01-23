@@ -50,6 +50,7 @@ public final class MetricNames {
      * metrics for invocation meter
      */
     public static class Invocation {
+        public static final String METRIC_INVOCATION_GLBOAL_HISTORY = "invocation.global.history";
         public static final String METRIC_INVOCATION_HISTORY = "invocation.history";
         public static final String METRIC_INVOCATION_ERROR = "invocation.error";
     }

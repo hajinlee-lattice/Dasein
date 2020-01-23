@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
 import com.latticeengines.objectapi.service.EventQueryService;
 
 import io.swagger.annotations.Api;
@@ -33,6 +34,7 @@ public class EventResource {
     @PostMapping(value = "/count/scoring")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
+    @InvocationMeter(name ="scoring", measurment = "objectapi")
     public Long getScoringCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getScoringCount(frontEndQuery, version);
@@ -41,6 +43,7 @@ public class EventResource {
     @PostMapping(value = "/count/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
+    @InvocationMeter(name ="training", measurment = "objectapi")
     public Long getTrainingCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getTrainingCount(frontEndQuery, version);
@@ -49,6 +52,7 @@ public class EventResource {
     @PostMapping(value = "/count/event")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
+    @InvocationMeter(name ="event", measurment = "objectapi")
     public Long getEventCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return eventQueryService.getEventCount(frontEndQuery, version);

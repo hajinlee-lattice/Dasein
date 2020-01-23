@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
 import com.latticeengines.objectapi.service.RatingQueryService;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
 
@@ -71,6 +72,7 @@ public class RatingResource {
     @PostMapping(value = "/coverage")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rating count for the specified query")
+    @InvocationMeter(name ="rating-rating-coverage", measurment = "objectapi")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
             @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,

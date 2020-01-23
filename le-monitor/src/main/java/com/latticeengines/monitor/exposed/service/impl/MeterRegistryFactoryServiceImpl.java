@@ -25,12 +25,20 @@ public class MeterRegistryFactoryServiceImpl implements MeterRegistryFactoryServ
     @Resource(name = "rootHostRegistry")
     private MeterRegistry rootHostRegistry;
 
+    @Resource(name = "globalHourlyRegistry")
+    private MeterRegistry globalHourlyRegistry;
+
     @Resource(name = "rootInspectionHostRegistry")
     private MeterRegistry rootInspectionHostRegistry;
 
     @Override
     public MeterRegistry getServiceLevelRegistry() {
         return rootRegistry;
+    }
+
+    @Override
+    public MeterRegistry getGlobalHourlyRegistry() {
+        return globalHourlyRegistry;
     }
 
     @Override
@@ -53,6 +61,7 @@ public class MeterRegistryFactoryServiceImpl implements MeterRegistryFactoryServ
         log.info("Closing all meter registries");
         rootRegistry.close();
         rootHostRegistry.close();
+        globalHourlyRegistry.close();
         rootInspectionHostRegistry.close();
         log.info("All meter registries closed");
     }

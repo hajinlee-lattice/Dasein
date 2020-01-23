@@ -47,6 +47,7 @@ public final class MetricTags {
      */
     public static class Invocation {
         public static final String TAG_METHOD_NAME = "MethodName";
+        public static final String TAG_HAS_ERROR = "HasError";
         // generic tags, add more as needed
         public static final String TAG_GENERIC = "Tag%02d";
     }
