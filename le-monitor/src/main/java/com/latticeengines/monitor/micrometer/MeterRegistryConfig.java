@@ -44,7 +44,7 @@ public class MeterRegistryConfig {
 
     private static final Logger log = LoggerFactory.getLogger(MeterRegistryConfig.class);
 
-    @Value("${monitor.metrics.micrometer.enabled:false}")
+    @Value("${monitor.metrics.micrometer.enabled}")
     private boolean enableMonitoring;
 
     @Value("${aws.emr.cluster:}")
@@ -73,6 +73,14 @@ public class MeterRegistryConfig {
             @Qualifier("influxHostMeterRegistry") MeterRegistry influxHostRegistry) {
         log.info("Initializing root host meter registry, micrometer monitoring enabled = {}", enableMonitoring);
         return getCompositeRegistry(true, influxHostRegistry);
+    }
+
+    @Lazy
+    @Bean(name = "rootInspectionHostRegistry")
+    public MeterRegistry rootInspectionHostRegistry(
+            @Qualifier("influxInspectionHostMeterRegistry") MeterRegistry influxInspectionHostMeterRegistry) {
+        log.info("Initializing root Inspection host meter registry, micrometer monitoring enabled = {}", enableMonitoring);
+        return getCompositeRegistry(true, influxInspectionHostMeterRegistry);
     }
 
     private MeterRegistry getCompositeRegistry(boolean addHostLevelTags, MeterRegistry... registries) {
