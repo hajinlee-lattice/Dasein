@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 import io.swagger.annotations.Api;
@@ -28,6 +29,7 @@ public class GenericResource {
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     public String oauthToTenant(RequestEntity<String> requestEntity) {
         return tenantProxy.getTenantNameFromOAuthRequest(requestEntity);
     }
@@ -36,6 +38,7 @@ public class GenericResource {
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     public Map<String, String> oauthToAppId(RequestEntity<String> requestEntity) {
         return tenantProxy.getAppIdFromOAuthRequest(requestEntity);
     }

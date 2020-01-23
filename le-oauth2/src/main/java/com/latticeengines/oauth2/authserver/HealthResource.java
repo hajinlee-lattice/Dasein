@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 
 import io.swagger.annotations.Api;
 import springfox.documentation.annotations.ApiIgnore;
@@ -20,6 +21,7 @@ public class HealthResource {
     @ResponseBody
     @ApiIgnore
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     public StatusDocument healthCheck() {
         return StatusDocument.online();
     }
