@@ -64,7 +64,7 @@ public class InfluxRegistryConfig {
     @Bean(name = "influxMeterRegistry")
     public MeterRegistry influxRegistry() {
         InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName(), stepInMinutes);
-        log.info("Instantiating InfluxMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
+        log.info("Instantiating InfluxMeterRegistry... url={},db={},enabled={},step={}", config.uri(), config.db(),
                 config.enabled(), config.step());
         return getInfluxRegistry(config);
     }
@@ -74,7 +74,7 @@ public class InfluxRegistryConfig {
     public MeterRegistry influxHostRegistry() {
         InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName(), stepInMinutes);
         MeterRegistry registry = getInfluxRegistry(config);
-        log.info("Instantiating InfluxHostMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
+        log.info("Instantiating InfluxHostMeterRegistry... url={},db={},enabled={},step={}", config.uri(), config.db(),
                 config.enabled(), config.step());
         // set hostname tags
         registry.config().commonTags(MetricUtils.TAG_HOST, hostname);
@@ -87,7 +87,7 @@ public class InfluxRegistryConfig {
         InfluxConfig config = getInfluxConfig(MetricDB.INSPECTION.getDbName(), stepInMinutes);
         MeterRegistry registry = getInfluxRegistry(config);
         log.info("Instantiating InfluxInspectionHostMeterRegistry... " + //
-                        "url={},db={},enabled={},step={}m", config.uri(), config.db(),
+                        "url={},db={},enabled={},step={}", config.uri(), config.db(),
                 config.enabled(), config.step());
         // set hostname tags
         registry.config().commonTags(MetricUtils.TAG_HOST, hostname);
@@ -98,7 +98,7 @@ public class InfluxRegistryConfig {
     @Bean(name = "influxGlobalHourlyRegistry")
     public MeterRegistry influxGlobalHourlyRegistry() {
         InfluxConfig config = getInfluxConfig(MetricDB.INSPECTION.getDbName(), 60);
-        log.info("Instantiating InfluxGlobalHourlyRegistry... url={},db={},enabled={},step={}m",
+        log.info("Instantiating InfluxGlobalHourlyRegistry... url={},db={},enabled={},step={}",
                 config.uri(), config.db(), config.enabled(), config.step());
         return getInfluxRegistry(config);
     }
