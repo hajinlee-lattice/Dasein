@@ -13,16 +13,19 @@ public class ImportActionConfiguration extends ActionConfiguration {
 
     @JsonProperty("workflow_id")
     private Long workflowId;
+
     @JsonProperty("data_feed_task_id")
     private String dataFeedTaskId;
+
     @JsonProperty("original_filename")
     private String originalFilename;
+
     @JsonProperty("import_count")
     private Long importCount;
+
     @JsonProperty("registered_tables")
     private List<String> registeredTables;
-    @JsonProperty("table_templates")
-    private List<String> tableTemplates;
+
     @JsonProperty("mock_completed")
     private Boolean mockCompleted;
 
@@ -72,14 +75,6 @@ public class ImportActionConfiguration extends ActionConfiguration {
 
     public void setRegisteredTables(List<String> registeredTables) {
         this.registeredTables = registeredTables;
-    }
-
-    public List<String> getTableTemplates() {
-        return tableTemplates;
-    }
-
-    public void setTableTemplates(List<String> tableTemplates) {
-        this.tableTemplates = tableTemplates;
     }
 
     public Boolean getMockCompleted() {
