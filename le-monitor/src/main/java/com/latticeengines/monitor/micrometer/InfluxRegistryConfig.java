@@ -1,7 +1,9 @@
 package com.latticeengines.monitor.micrometer;
 
-import java.time.Duration;
+import javax.inject.Inject;
 
+import com.latticeengines.common.exposed.metric.RetentionPolicy;
+import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,17 +12,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.common.exposed.util.MetricUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
-import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.monitor.util.MonitoringUtils;
 
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.influx.InfluxConfig;
 import io.micrometer.influx.InfluxMeterRegistry;
+
+import java.time.Duration;
 
 /**
  * Default config for influx micrometer registry
@@ -30,7 +32,7 @@ public class InfluxRegistryConfig {
 
     private static final Logger log = LoggerFactory.getLogger(InfluxRegistryConfig.class);
 
-    @Value("${monitor.metrics.micrometer.influxdb.enabled:false}")
+    @Value("${monitor.metrics.micrometer.influxdb.enabled}")
     private boolean enableMonitoring;
 
     @Value("${monitor.influxdb.url}")
@@ -75,6 +77,19 @@ public class InfluxRegistryConfig {
         InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName());
         MeterRegistry registry = getInfluxRegistry(config);
         log.info("Instantiating InfluxHostMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
+                config.enabled(), config.step());
+        // set hostname tags
+        registry.config().commonTags(MetricUtils.TAG_HOST, hostname);
+        return registry;
+    }
+
+    @Lazy
+    @Bean(name = "influxInspectionHostMeterRegistry")
+    public MeterRegistry influxInspectionHostRegistry() {
+        InfluxConfig config = getInfluxConfig(MetricDB.INSPECTION.getDbName());
+        MeterRegistry registry = getInfluxRegistry(config);
+        log.info("Instantiating InfluxInspectionHostMeterRegistry... " + //
+                        "url={},db={},enabled={},step={}m", config.uri(), config.db(),
                 config.enabled(), config.step());
         // set hostname tags
         registry.config().commonTags(MetricUtils.TAG_HOST, hostname);

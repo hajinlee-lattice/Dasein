@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 
@@ -223,7 +224,7 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
     private <K, V> void monitorCache(@NotNull Cache<K, V> cache, @NotNull String metricName, @NotNull String matchMode,
             boolean isAllocateMode) {
         // use the host registry since cache is related to single instance
-        CaffeineCacheMetrics.monitor(registryFactory.getHostLevelRegistry(), cache, metricName, //
+        CaffeineCacheMetrics.monitor(registryFactory.getHostLevelRegistry(MetricDB.LDC_Match), cache, metricName, //
                 TAG_ALLOCATE_ID_MODE, String.valueOf(isAllocateMode), TAG_MATCH_MODE, matchMode);
     }
 

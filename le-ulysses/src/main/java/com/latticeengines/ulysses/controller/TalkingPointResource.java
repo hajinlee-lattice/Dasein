@@ -39,7 +39,7 @@ public class TalkingPointResource {
     @Resource(name = TalkingPointDanteFormatter.Qualifier)
     private DanteFormatter<TalkingPointDTO> talkingPointDanteFormatter;
 
-    @GetMapping(value = "/{talkingPointId}", headers = "Accept=application/json")
+    @GetMapping(value = "/{talkingPointId}")
     @ResponseBody
     @ApiOperation(value = "Get a TalkingPoint by Id ")
     public TalkingPointDTO getTalkingPointById(@PathVariable String talkingPointId) {
@@ -47,7 +47,7 @@ public class TalkingPointResource {
         return talkingPointProxy.findByName(tenant.getId(), talkingPointId);
     }
 
-    @GetMapping(value = "/{talkingPointId}/danteformat", headers = "Accept=application/json")
+    @GetMapping(value = "/{talkingPointId}/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get a TalkingPoint by Id in danteformat")
     public FrontEndResponse<String> getTalkingPointByIdInDanteFormat(@PathVariable String talkingPointId) {
@@ -62,7 +62,7 @@ public class TalkingPointResource {
         }
     }
 
-    @GetMapping(value = "/playid/{playId}", headers = "Accept=application/json")
+    @GetMapping(value = "/playid/{playId}")
     @ResponseBody
     @ApiOperation(value = "Get published talking points for the given play")
     public List<TalkingPointDTO> getTalkingPointByPlayId(@PathVariable String playId) {
@@ -70,7 +70,7 @@ public class TalkingPointResource {
         return talkingPointProxy.findAllByPlayName(tenant.getId(), playId, true);
     }
 
-    @GetMapping(value = "/playid/{playId}/danteformat", headers = "Accept=application/json")
+    @GetMapping(value = "/playid/{playId}/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get published talking points for the given play in danteformat")
     public FrontEndResponse<List<String>> getTalkingPointByPlayIdInDanteFormat(@PathVariable String playId) {

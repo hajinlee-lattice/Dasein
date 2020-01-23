@@ -1,9 +1,13 @@
 package com.latticeengines.ulysses.controller;
 
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
+
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -29,6 +33,8 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
+import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
+import com.latticeengines.monitor.exposed.metrics.impl.InstrumentRegistry;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
 import com.latticeengines.ulysses.utils.AccountDanteFormatter;
@@ -41,10 +47,18 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/datacollection/accounts")
 public class DataLakeAccountResource {
     private static final Logger log = LoggerFactory.getLogger(DataLakeAccountResource.class);
+
+    private static final String INSTRUMENT_TP = "TalkingPoint";
+    private static final String INSTRUMENT_CP = "CompanyProfile";
+
     private final DataLakeService dataLakeService;
     private final Oauth2RestApiProxy tenantProxy;
     private final PeriodTransactionProxy periodTransactionProxy;
     private final BatonService batonService;
+
+    @Inject
+    @Qualifier(AccountDanteFormatter.Qualifier)
+    private Provider<AccountDanteFormatter> accountDanteFormatterProvider;
 
     @Inject
     public DataLakeAccountResource(DataLakeService dataLakeService, Oauth2RestApiProxy tenantProxy,
@@ -55,13 +69,17 @@ public class DataLakeAccountResource {
         this.batonService = batonService;
     }
 
-    @Inject
-    @Qualifier(AccountDanteFormatter.Qualifier)
-    private Provider<AccountDanteFormatter> accountDanteFormatterProvider;
+    @PostConstruct
+    public void postConstruct() {
+        InstrumentRegistry.register(INSTRUMENT_TP, new UlyssesInstrument(TalkingPoint));
+        InstrumentRegistry.register(INSTRUMENT_CP, new UlyssesInstrument(CompanyProfile));
+    }
 
     @GetMapping(value = "/{accountId}/{attributeGroup}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
+    @InvocationMeter(name = "talkingpoint", measurment = "ulysses", instrument = INSTRUMENT_TP)
+    @InvocationMeter(name = "companyprofile", measurment = "ulysses", instrument = INSTRUMENT_CP)
     public DataPage getAccountById(RequestEntity<String> requestEntity, @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
         return getAccountById(requestEntity, accountId, attributeGroup, null);
@@ -70,6 +88,8 @@ public class DataLakeAccountResource {
     @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
+    @InvocationMeter(name = "talkingpoint-dante", measurment = "ulysses", instrument = INSTRUMENT_TP)
+    @InvocationMeter(name = "companyprofile-dante", measurment = "ulysses", instrument = INSTRUMENT_CP)
     public FrontEndResponse<String> getAccountByIdInDanteFormat(RequestEntity<String> requestEntity,
             @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
@@ -97,6 +117,8 @@ public class DataLakeAccountResource {
     @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat/aslist",  headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
+    @InvocationMeter(name = "talkingpoint-dante-list", measurment = "ulysses", instrument = INSTRUMENT_TP)
+    @InvocationMeter(name = "companyprofile-dante-list", measurment = "ulysses", instrument = INSTRUMENT_CP)
     public FrontEndResponse<List<String>> getAccountsByIdInDanteFormat(RequestEntity<String> requestEntity,
             @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
@@ -149,5 +171,4 @@ public class DataLakeAccountResource {
                 : dataLakeService.getAccountById(accountId, attributeGroup,
                         tenantProxy.getOrgInfoFromOAuthRequest(requestEntity), requiredAttributes);
     }
-
 }
