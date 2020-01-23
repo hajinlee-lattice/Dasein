@@ -443,10 +443,6 @@ public class UserServiceImpl implements UserService {
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
                     user.getExpirationDate(), true);
         }
-
-        String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
-        result.setPassword(tempPass);
-
         return result;
     }
 
