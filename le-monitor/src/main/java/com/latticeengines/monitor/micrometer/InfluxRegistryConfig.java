@@ -1,9 +1,7 @@
 package com.latticeengines.monitor.micrometer;
 
-import javax.inject.Inject;
+import java.time.Duration;
 
-import com.latticeengines.common.exposed.metric.RetentionPolicy;
-import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,17 +10,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import com.latticeengines.common.exposed.metric.RetentionPolicy;
 import com.latticeengines.common.exposed.util.MetricUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.monitor.util.MonitoringUtils;
 
 import io.micrometer.core.instrument.Clock;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.influx.InfluxConfig;
 import io.micrometer.influx.InfluxMeterRegistry;
-
-import java.time.Duration;
 
 /**
  * Default config for influx micrometer registry
