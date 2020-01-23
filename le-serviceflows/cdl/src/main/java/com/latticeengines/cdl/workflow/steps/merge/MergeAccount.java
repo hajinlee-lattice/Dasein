@@ -286,7 +286,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         // dataflow
         config.setSystemIdFlds(systemIds);
         if (hasSystemBatch) {
-            config.setSystem(SystemBatchStoreName.Embded.name());
+            config.setTemplate(SystemBatchTemplateName.Embedded.name());
         }
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;

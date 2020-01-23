@@ -6,32 +6,37 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions.{col}
-
+import org.apache.commons.collections4.CollectionUtils
 import scala.collection.JavaConverters._
+import util.control.Breaks._
 
 class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
   private val customerAccountIdField = InterfaceName.CustomerAccountId.name
   private val customerContactIdField = InterfaceName.CustomerContactId.name
+  private val batchSourceName = InterfaceName.CDLBatchSource.name
   
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeSystemBatchConfig]): Unit = {
     val config: MergeSystemBatchConfig = lattice.config
     val joinKey = config.getJoinKey
     val templates = 
-      if (config.getTemplates == null) getTemplates(lattice.input.head.columns, joinKey) else config.getTemplates.asScala.toList 
+      if (CollectionUtils.isEmpty(config.getTemplates)) getTemplates(lattice.input.head.columns, joinKey) else config.getTemplates.asScala.toList 
       
-      val overwriteByNull: Boolean =
-        if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
-      var lhsDf = selectSystemBatch(lattice.input.head, templates(0), joinKey, config.isKeepPrefix)
-      if (templates.length == 1) {
-          lattice.output = lhsDf :: Nil
-              
-      } else {
-        for ( i <- 1 until templates.length) {
+    val overwriteByNull: Boolean =
+      if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
+    var lhsDf = selectSystemBatch(lattice.input.head, templates(0), joinKey, config.isKeepPrefix)
+    if (templates.length > 1) {
+      for ( i <- 1 until templates.length) {
+        breakable {
           var rhsDf = selectSystemBatch(lattice.input.head, templates(i), joinKey, config.isKeepPrefix)
+          if (rhsDf.count() == 0) break
           lhsDf = MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), Set(), overwriteByNull = overwriteByNull) 
         }
-        lattice.output = lhsDf :: Nil
       }
+    }
+    if (lhsDf.columns.contains(batchSourceName)) {
+      lhsDf = lhsDf.drop(batchSourceName)
+    }
+    lattice.output = lhsDf :: Nil
   }
 
   private def selectSystemBatch(df: DataFrame, template: String, joinKey: String, keepPrefix: Boolean): DataFrame = {

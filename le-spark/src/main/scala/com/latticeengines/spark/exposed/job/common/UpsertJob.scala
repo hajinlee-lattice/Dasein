@@ -1,10 +1,11 @@
 package com.latticeengines.spark.exposed.job.common
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.{col, lit}
+import org.apache.spark.sql.functions.{col, lit, when}
 
 import scala.collection.JavaConverters._
 
@@ -20,7 +21,7 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
     
     if (lattice.input.length == 1) {
       lattice.output = 
-        if (!config.isInputSystemBatch) {
+        if (!config.isAddInputSystemBatch) {
             lattice.input
           } else {
             addTemplatePrefixForInput(lattice.input.head, Seq(config.getJoinKey)) :: Nil
@@ -35,7 +36,7 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
       val overwriteByNull: Boolean =
         if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
         
-      if (!config.isInputSystemBatch) {
+      if (!config.isAddInputSystemBatch) {
         val merged = MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), colsFromLhs, overwriteByNull = overwriteByNull)
         lattice.output = merged :: Nil
       } else {
@@ -81,8 +82,8 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
   
   private def addTemplatePrefix(df: DataFrame, template: String, joinKeys: Seq[String]): DataFrame = {
     val newColumns = df.columns map (c => if (joinKeys.contains(c) || c.startsWith(template)) c else template + "__" + c)
-    return df.toDF(newColumns:_*)
+    var newDf = df.toDF(newColumns:_*)
+    newDf.withColumn(template + "__" + InterfaceName.CDLBatchSource.name, when(lit(true), 1))
   }
-
   
 }

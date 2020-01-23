@@ -118,6 +118,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     // CDL
     public static final String CONSOLIDATE_INPUT_TEMPLATES = "CONSOLIDATE_INPUT_TEMPLATES";
+    public static final String CONSOLIDATE_TEMPLATES_IN_ORDER = "CONSOLIDATE_TEMPLATES_IN_ORDER";
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
     public static final String SOFT_DEELETE_ACTIONS = "SOFT_DEELETE_ACTIONS";
     public static final String HARD_DEELETE_ACTIONS = "HARD_DEELETE_ACTIONS";

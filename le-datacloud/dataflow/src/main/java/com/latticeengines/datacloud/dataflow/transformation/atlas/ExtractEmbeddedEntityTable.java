@@ -87,8 +87,8 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
         Node result = entityIds
                 .join(new FieldList(ENTITY_ID_FIELD), embeddedEntities, new FieldList(ENTITYID_JOIN), JoinType.INNER)
                 .discard(ENTITYID_JOIN);
-        if (StringUtils.isNotBlank(config.getSystem())) {
-            result = result.addColumnWithFixedValue(TEMPLATE_COLUMN, config.getSystem(), String.class);
+        if (StringUtils.isNotBlank(config.getTemplate())) {
+            result = result.addColumnWithFixedValue(TEMPLATE_COLUMN, config.getTemplate(), String.class);
         }
         log.info("fields=" + String.join(",", result.getFieldNames()));
         return result;

@@ -304,7 +304,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             setTargetTable(step, systemBatchStoreTablePrefix);
         }
         UpsertConfig config = getUpsertConfig(true, true);
-        config.setInputSystemBatch(true);
+        config.setAddInputSystemBatch(true);
         config.setBatchTemplateName(batchTemplateName);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
@@ -323,7 +323,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
                 log.info("Add masterTable=" + inputMasterTableName);
                 addBaseTables(step, inputMasterTableName);
             }
-            return SystemBatchStoreName.Other.name();
+            return SystemBatchTemplateName.Other.name();
         }
         return null;
     }
@@ -344,6 +344,11 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         MergeSystemBatchConfig config = new MergeSystemBatchConfig();
         config.setNotOverwriteByNull(true);
         config.setJoinKey(InterfaceName.EntityId.name());
+        List<String> templates = new ArrayList<>();
+        templates.add(SystemBatchTemplateName.Other.name());
+        templates.add(SystemBatchTemplateName.Embedded.name());
+        templates.addAll(templatesInOrder);
+        config.setTemplates(templates);
         return config;
     }
 
