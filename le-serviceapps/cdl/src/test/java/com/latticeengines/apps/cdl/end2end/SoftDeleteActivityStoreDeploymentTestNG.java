@@ -1,9 +1,11 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -63,11 +66,11 @@ public class SoftDeleteActivityStoreDeploymentTestNG extends ProcessActivityStor
         verifyAfterPA();
     }
 
-    private void registerDeleteData() {
+    private void registerDeleteData() throws IOException {
         Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedAccount);
         Table table2 = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedActivityStream);
         List<GenericRecord> recordsBeforeDelete = getRecords(table);
-        List<GenericRecord> recordsBeforeDelete2 = getRecords(table2);
+        List<GenericRecord> recordsBeforeDelete2 = getStreamRecords(table2);
         int originalNumRecords = recordsBeforeDelete.size();
         log.info("There are " + originalNumRecords + " rows in avro before delete.");
         int numRecordsInCsv = 0;
@@ -77,6 +80,7 @@ public class SoftDeleteActivityStoreDeploymentTestNG extends ProcessActivityStor
         sb.append(',');
         sb.append("index");
         sb.append('\n');
+        int deleteSize = recordsBeforeDelete.size() / 2;
         for (GenericRecord record : recordsBeforeDelete) {
             String id = record.get(fieldName).toString();
             sb.append(id);
@@ -85,7 +89,7 @@ public class SoftDeleteActivityStoreDeploymentTestNG extends ProcessActivityStor
             sb.append('\n');
             idSets.add(id);
             numRecordsInCsv++;
-            if (numRecordsInCsv == 10) {
+            if (numRecordsInCsv >= deleteSize) {
                 break;
             }
         }
@@ -118,10 +122,31 @@ public class SoftDeleteActivityStoreDeploymentTestNG extends ProcessActivityStor
         return AvroUtils.getDataFromGlob(yarnConfiguration, paths);
     }
 
-    private void verifyAfterPA() {
+    private List<GenericRecord> getStreamRecords(Table table) throws IOException {
+        Assert.assertNotNull(table);
+        List<Extract> extracts = table.getExtracts();
+        Assert.assertNotNull(extracts);
+        List<String> paths = new ArrayList<>();
+        for (Extract e : extracts) {
+            List<String> allFiles = HdfsUtils.getFilesForDir(yarnConfiguration, e.getPath());
+            allFiles = allFiles.stream().filter(file -> {
+                try {
+                    return HdfsUtils.isDirectory(yarnConfiguration, file);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                return false;
+            }).map(s -> s = s + "/*.avro").collect(Collectors.toList());
+            paths.addAll(allFiles);
+
+        }
+        return AvroUtils.getDataFromGlob(yarnConfiguration, paths);
+    }
+
+    private void verifyAfterPA() throws IOException {
         log.info("Ids that needs to be removed: " + idSets.toString());
         Table table = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedActivityStream);
-        List<GenericRecord> recordsAfterDelete = getRecords(table);
+        List<GenericRecord> recordsAfterDelete = getStreamRecords(table);
         for (GenericRecord record : recordsAfterDelete) {
             String accountId = record.get(InterfaceName.AccountId.name()).toString();
             Assert.assertFalse(idSets.contains(accountId), "Should not contain id " + accountId);
