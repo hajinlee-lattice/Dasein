@@ -18,7 +18,7 @@ public class ProspectingUserServiceImpl implements ProspectingUserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProspectingUserServiceImpl.class);
 
-    @Value("${security.app.public.url:http://localhost:8081}")
+    @Value("${security.app.public.url}")
     private String appPublicUrl;
 
     @Inject
