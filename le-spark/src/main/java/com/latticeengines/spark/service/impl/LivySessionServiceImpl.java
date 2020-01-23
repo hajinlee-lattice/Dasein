@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
@@ -52,6 +53,7 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     private static final String URI_SESSIONS = "/sessions";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("~yyyy_MM_dd_HH_mm_ss_z");
+    private static final long SESSION_CREATION_TIMEOUT = TimeUnit.MINUTES.toMillis(10);
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private ObjectMapper om = new ObjectMapper();
@@ -173,7 +175,9 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     private LivySession waitForSessionState(LivySession session, String state) {
         LivySession current = getSession(session);
-        while (!LivySession.TERMINAL_STATES.contains(current.getState())) {
+        long start = System.currentTimeMillis();
+        while (!LivySession.TERMINAL_STATES.contains(current.getState()) &&
+                (System.currentTimeMillis() - start > SESSION_CREATION_TIMEOUT)) {
             try {
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
@@ -189,6 +193,7 @@ public class LivySessionServiceImpl implements LivySessionService {
             }
             return current;
         } else {
+            stopSession(current);
             throw new RuntimeException(
                     "Session state ends up to be " + current.getState() + " instead of " + state);
         }
