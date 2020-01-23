@@ -27,11 +27,6 @@ class SingleRecordInstrument implements InvocationInstrument {
     }
 
     @Override
-    public boolean hasErrorEvenNoException(MethodSignature signature, Object[] args, Object toReturn) {
-        return getNumErrors(signature, args, toReturn) > 0;
-    }
-
-    @Override
     public double getNumErrors(MethodSignature signature, Object[] args, Object toReturn) {
         ScoreResponse response = (ScoreResponse) toReturn;
         if (response != null) {

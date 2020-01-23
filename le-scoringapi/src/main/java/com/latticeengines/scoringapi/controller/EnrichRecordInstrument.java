@@ -23,11 +23,6 @@ class EnrichRecordInstrument implements InvocationInstrument {
     }
 
     @Override
-    public boolean hasErrorEvenNoException(MethodSignature signature, Object[] args, Object toReturn) {
-        return getNumErrors(signature, args, toReturn) > 0;
-    }
-
-    @Override
     public double getNumErrors(MethodSignature signature, Object[] args, Object toReturn) {
         EnrichResponse response = (EnrichResponse) toReturn;
         if (response != null) {
