@@ -22,6 +22,7 @@ import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,6 +45,7 @@ public class SchedulingPAQueueResource {
     @ResponseBody
     @ApiOperation(value = "getQueueInfo")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     @NoCustomerSpace
     public Map<String, List<String>> getQueueInfo(@RequestParam String schedulerName) {
         return schedulingPAService.showQueue(schedulerName);
@@ -53,6 +55,7 @@ public class SchedulingPAQueueResource {
     @ResponseBody
     @ApiOperation(value = "getPosition")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     @NoCustomerSpace
     public String getPosition(@RequestParam String tenantName, @RequestParam String schedulerName) {
         return schedulingPAService.getPositionFromQueue(schedulerName, tenantName);
@@ -62,6 +65,7 @@ public class SchedulingPAQueueResource {
     @ResponseBody
     @ApiOperation(value = "Trigger Scheduling PA for given scheduler")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     @NoCustomerSpace
     public void triggerSchedulingPA(@PathVariable String schedulerName,
             @RequestParam(required = false) boolean dryRun) {
@@ -72,6 +76,7 @@ public class SchedulingPAQueueResource {
     @ResponseBody
     @ApiOperation(value = "get ActivityBasedPA Flag for a specific scheduler")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     @NoCustomerSpace
     public Boolean isActivityBasedPA(@PathVariable String schedulerName) {
         return schedulingPAService.isSchedulerEnabled(schedulerName);

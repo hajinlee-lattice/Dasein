@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,6 +51,7 @@ public class HealthResource {
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     public StatusDocument healthCheck() {
         if (!ready.get()) {
             getReady();

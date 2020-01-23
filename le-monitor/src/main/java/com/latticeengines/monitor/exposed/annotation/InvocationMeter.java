@@ -13,8 +13,8 @@ import com.latticeengines.monitor.exposed.metrics.impl.InstrumentRegistry;
 @Target(ElementType.METHOD)
 public @interface InvocationMeter {
 
-    String name();
-    String instrument() default InstrumentRegistry.DEFAULT; // value of the name tag
+    String name(); // value of the name tag
+    String instrument() default InstrumentRegistry.DEFAULT; // name of the instrument implementation
     String measurment() default ""; // split into separate measurement
 
     // track errors in a separate metrics stream

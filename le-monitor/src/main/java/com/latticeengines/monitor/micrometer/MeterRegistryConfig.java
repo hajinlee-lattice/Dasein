@@ -83,6 +83,14 @@ public class MeterRegistryConfig {
         return getCompositeRegistry(true, influxInspectionHostMeterRegistry);
     }
 
+    @Lazy
+    @Bean(name = "globalHourlyRegistry")
+    public MeterRegistry globalHourlyRegistry(
+            @Qualifier("influxGlobalHourlyRegistry") MeterRegistry influxGlobalHourlyRegistry) {
+        log.info("Initializing root Inspection host meter registry, micrometer monitoring enabled = {}", enableMonitoring);
+        return getCompositeRegistry(true, influxGlobalHourlyRegistry);
+    }
+
     private MeterRegistry getCompositeRegistry(boolean addHostLevelTags, MeterRegistry... registries) {
         CompositeMeterRegistry compositeRegistry = new CompositeMeterRegistry();
         if (!enableMonitoring || registries == null) {

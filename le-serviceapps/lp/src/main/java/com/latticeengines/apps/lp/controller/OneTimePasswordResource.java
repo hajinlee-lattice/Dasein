@@ -12,6 +12,7 @@ import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.apps.lp.service.OneTimePasswordService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,8 +31,9 @@ public class OneTimePasswordResource {
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Generate a oauth2 one time password")
+    @ApiOperation(value = "Generate an oauth2 one time password")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     @NoCustomerSpace
     public ResponseDocument<String> generateOTP(@RequestParam(value = "user") String user) {
         String password = oneTimePasswordService.generateOTP(user);
