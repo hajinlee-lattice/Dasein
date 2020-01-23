@@ -35,11 +35,6 @@ class MultiRecordInstrument implements InvocationInstrument {
         return CollectionUtils.size(scoreRequest.getRecords());
     }
 
-    @Override
-    public boolean hasErrorEvenNoException(MethodSignature signature, Object[] args, Object toReturn) {
-        return getNumErrors(signature, args, toReturn) > 0;
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public double getNumErrors(MethodSignature signature, Object[] args, Object toReturn) {
