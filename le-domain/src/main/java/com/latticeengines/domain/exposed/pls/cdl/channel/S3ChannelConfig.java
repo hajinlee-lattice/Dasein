@@ -23,43 +23,27 @@ public class S3ChannelConfig implements ChannelConfig {
     @JsonProperty("includeExportAttributes")
     private boolean includeExportAttributes = false;
 
-    public Long getAccountLimit() {
-        return accountLimit;
-    }
+    public Long getAccountLimit() { return accountLimit; }
 
-    public void setAccountLimit(Long accountLimit) {
-        this.accountLimit = accountLimit;
-    }
+    public void setAccountLimit(Long accountLimit) { this.accountLimit = accountLimit; }
 
     @Override
-    public void setAudienceId(String audienceId) {
-
-    }
+    public String getAudienceId() { return ""; }
 
     @Override
-    public String getAudienceId() {
-        return "";
-    }
+    public void setAudienceId(String audienceId) { }
 
     @Override
-    public void setAudienceName(String audienceName) {
-
-    }
+    public String getAudienceName() { return ""; }
 
     @Override
-    public String getAudienceName() {
-        return "";
-    }
+    public void setAudienceName(String audienceName) { }
 
-    public String getS3CampaignExportDir() {
-        return s3CampaignExportDir;
-    }
+    public String getS3CampaignExportDir() { return s3CampaignExportDir; }
 
     public void setS3CampaignExportDir(String s3CampaignExportDir) { this.s3CampaignExportDir = s3CampaignExportDir; }
 
-    public boolean isIncludeExportAttributes() {
-        return includeExportAttributes;
-    }
+    public boolean isIncludeExportAttributes() { return includeExportAttributes; }
 
     public void setIncludeExportAttributes(boolean includeExportAttributes) {
         this.includeExportAttributes = includeExportAttributes;
@@ -67,9 +51,7 @@ public class S3ChannelConfig implements ChannelConfig {
 
     @Override
     @JsonProperty("suppressAccountsWithoutContacts")
-    public boolean isSuppressAccountsWithoutContacts() {
-        return false;
-    }
+    public boolean isSuppressAccountsWithoutContacts() { return false; }
 
     @Override
     @JsonProperty("suppressContactsWithoutEmails")
@@ -77,25 +59,17 @@ public class S3ChannelConfig implements ChannelConfig {
 
     @Override
     @JsonProperty("suppressAccountsWithoutLookupId")
-    public boolean isSuppressAccountsWithoutLookupId() {
-        return false;
-    }
+    public boolean isSuppressAccountsWithoutLookupId() { return false; }
 
     @Override
-    public CDLExternalSystemName getSystemName() {
-        return systemName;
-    }
+    public CDLExternalSystemName getSystemName() { return systemName; }
 
     @Override
     @JsonProperty("audienceType")
-    public AudienceType getAudienceType() {
-        return AudienceType.CONTACTS;
-    }
+    public AudienceType getAudienceType() { return AudienceType.CONTACTS; }
 
     @Override
-    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
-        return false;
-    }
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) { return false; }
 
     @Override
     public void populateLaunchFromChannelConfig(PlayLaunch playLaunch) {
