@@ -19,6 +19,7 @@ import io.jaegertracing.Configuration.SamplerConfiguration;
 import io.jaegertracing.internal.JaegerTracer;
 import io.jaegertracing.internal.samplers.ConstSampler;
 import io.opentracing.Tracer;
+import io.opentracing.mock.MockTracer;
 import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.util.GlobalTracer;
 
@@ -36,6 +37,9 @@ public class TracingConfig {
     @Value("${monitor.tracing.enabled}")
     private boolean tracingEnabled;
 
+    @Value("${monitor.tracing.mock.tracer}")
+    private boolean useMockTracer;
+
     @Value("${monitor.tracing.jaeger.agent.host}")
     private String jaegerAgentHost;
 
@@ -49,8 +53,16 @@ public class TracingConfig {
     @DependsOn("beanEnvironment")
     public Tracer tracer() {
         if (!tracingEnabled) {
-            log.info("Tracing not enabled on stack {}, creating noop tracer", leStack);
-            return NoopTracerFactory.create();
+            log.info("Tracing not enabled on stack {}, creating {} tracer", leStack, useMockTracer ? "mock" : "noop");
+            if (useMockTracer) {
+                MockTracer mockTracer = new MockTracer();
+                // close mock tracer so that finished spans won't saved and wasting memory
+                mockTracer.close();
+                GlobalTracer.registerIfAbsent(mockTracer);
+                return mockTracer;
+            } else {
+                return NoopTracerFactory.create();
+            }
         }
         /*-
          * configure jaeger connection, using UDP sender for now
