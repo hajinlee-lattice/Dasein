@@ -28,14 +28,14 @@ public class DimensionAttributeResource {
     @RequestMapping(value = "/dimensions", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all top level Dimentions")
-    private List<CategoricalDimension> getAllDimensions() {
+    public List<CategoricalDimension> getAllDimensions() {
         return dimensionalQueryService.getAllDimensions();
     }
 
     @RequestMapping(value = "/attributes", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all attributes by Dimension's root Id")
-    private List<CategoricalAttribute> getAllAttributes(@RequestParam(value = "rootId", required = true) Long rootId) {
+    public List<CategoricalAttribute> getAllAttributes(@RequestParam(value = "rootId") Long rootId) {
         return dimensionalQueryService.getAllAttributes(rootId);
     }
 }
