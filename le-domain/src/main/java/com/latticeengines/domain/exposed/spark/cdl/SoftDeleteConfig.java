@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
@@ -13,6 +15,9 @@ public class SoftDeleteConfig extends SparkJobConfig {
 
     @JsonProperty("IdColumn")
     private String idColumn;
+
+    @JsonProperty("PartitionKeys")
+    private List<String> partitionKeys;
 
     @Override
     @JsonProperty("Name")
@@ -34,5 +39,13 @@ public class SoftDeleteConfig extends SparkJobConfig {
 
     public void setIdColumn(String idColumn) {
         this.idColumn = idColumn;
+    }
+
+    public List<String> getPartitionKeys() {
+        return partitionKeys;
+    }
+
+    public void setPartitionKeys(List<String> partitionKeys) {
+        this.partitionKeys = partitionKeys;
     }
 }

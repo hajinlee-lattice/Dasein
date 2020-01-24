@@ -12,6 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
@@ -60,6 +61,7 @@ public class SoftDeleteTxfmrTestNG extends PipelineTransformationTestNGBase {
         SoftDeleteConfig jobConfig = new SoftDeleteConfig();
         jobConfig.setIdColumn(DeleteJoinId);
         jobConfig.setDeleteSourceIdx(0);
+        jobConfig.setPartitionKeys(ImmutableList.of("Company"));
         step1.setConfiguration(JsonUtils.serialize(jobConfig));
 
         // -----------

@@ -74,7 +74,6 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
                 entity.getBatchStore();
         batchStoreTablePrefix = entity.name();
         masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
-        softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
     }
 
     @Override

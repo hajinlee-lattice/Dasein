@@ -34,7 +34,7 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final String WEBSITE_SYSTEM = "Default_Website_System";
-    private static final Instant CURRENT_PA_TIME = LocalDate.of(2017, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
+    protected static final Instant CURRENT_PA_TIME = LocalDate.of(2017, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
     @Inject
     private ActionProxy actionProxy;
@@ -53,7 +53,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     }
 
     @Test(groups = "end2end")
-    private void test() throws Exception {
+    protected void test() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         setupTemplates();
         mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 1,
@@ -135,7 +135,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(sm));
     }
 
-    private List<String> getCandidateFailingSteps() {
+    protected List<String> getCandidateFailingSteps() {
         return Arrays.asList(
                 "aggActivityStreamToDaily",
                 "periodStoresGenerationStep",
