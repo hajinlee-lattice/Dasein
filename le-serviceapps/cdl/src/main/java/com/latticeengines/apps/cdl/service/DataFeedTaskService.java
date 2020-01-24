@@ -53,7 +53,6 @@ public interface DataFeedTaskService {
 
     /**
      *
-     * @param customerSpace Tenant identifier
      * @param entity Account / Contact
      * @return A list of template names ordered by priority.
      */
