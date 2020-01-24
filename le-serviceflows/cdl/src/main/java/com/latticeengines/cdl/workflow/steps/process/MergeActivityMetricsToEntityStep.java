@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -34,10 +33,9 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.TemplateUtils;
-import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -61,7 +59,6 @@ import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -182,8 +179,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         Map<String, Table> mergedMetricsGroupTables = new HashMap<>();
         outputMetadata.forEach((mergedTableLabel, details) -> {
             HdfsDataUnit output = result.getTargets().get(details.getStartIdx());
-            String tableCtxName = String.format(MERGED_METRICS_GROUP_TABLE_FORMAT, mergedTableLabel); // entity_servingEntity (Account_WebVisit)
-            String tableName = TableUtils.getFullTableName(tableCtxName, HashUtils.getCleanedString(UuidUtils.shortenUuid(UUID.randomUUID())));
+            String tableName = customerSpace.getTenantId() + "_" + NamingUtils.timestamp(TableRoleInCollection.WebVisitProfile.name());
             Table mergedTable = toTable(tableName, output);
             if (output.getCount() <= 0) {
                 // create dummy record with meaningless accountId, append to mergedDU
