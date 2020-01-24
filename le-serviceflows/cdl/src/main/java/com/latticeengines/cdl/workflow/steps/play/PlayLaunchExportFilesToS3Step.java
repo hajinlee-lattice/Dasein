@@ -66,7 +66,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
     private String integrationSessionContextTable;
 
     @Value("cdl.campaign.integration.session.context.ttl")
-    private Long sessionContextTTL;
+    private long sessionContextTTL;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -173,7 +173,8 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         session.put("Url", microserviceHostPort + CDL_DATA_INTEGRATION_END_POINT);
         session.put("Mapping", "");
         return new Item().withPrimaryKey("WorkflowId", workflowRequestId)
-                .withLong("TTL", System.currentTimeMillis() + sessionContextTTL).withMap("Session", session);
+                .withLong("TTL", System.currentTimeMillis() + sessionContextTTL)
+                .withString("Session", JsonUtils.serialize(session));
     }
 
     private void tagCreatedS3Objects() {
