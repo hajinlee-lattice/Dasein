@@ -101,7 +101,6 @@ public class ZKConfigServiceImpl implements ZKConfigService {
 
     @Override
     public String getCampaignLaunchEndPointUrl(CustomerSpace customerSpace, String componentName) {
-
         try {
             Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
                     componentName);

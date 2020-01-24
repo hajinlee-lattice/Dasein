@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.service.TenantService;
+
 public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchEntityMgrImplTestNG.class);
@@ -58,8 +59,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private PlayLaunch playLaunch_org2_1;
     private PlayLaunch playLaunch_org2_2;
 
-    List<PlayLaunch> allPlayLaunches;
-    List<PlayType> types;
+    private List<PlayLaunch> allPlayLaunches;
+    private List<PlayType> types;
 
     private String org1 = "org1";
     private String destinationAccountIdColumn_1 = "SFDC_ACCOUNT_ID_COL_1";
@@ -155,7 +156,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testCreateLaunch" })
     public void testBasicOperations() {
 
-        PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch2.getLaunchId());
+        PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch2.getLaunchId(), false);
         Assert.assertNotNull(retreivedPlayLaunch);
         Assert.assertEquals(retreivedPlayLaunch.getLaunchId(), playLaunch2.getLaunchId());
 
@@ -509,7 +510,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private PlayLaunch updatePlayLaunchWithCounts(PlayLaunch launch, LaunchState state, long errored,
             long accountsLaunched, long suppressed, long contactsLaunched, long contactsSuppressed,
             long contactsErrored) throws InterruptedException {
-        launch = playLaunchEntityMgr.findByLaunchId(launch.getLaunchId());
+        launch = playLaunchEntityMgr.findByLaunchId(launch.getLaunchId(), false);
         launch.setLaunchState(state);
         launch.setAccountsErrored(errored);
         launch.setAccountsLaunched(accountsLaunched);
@@ -731,9 +732,9 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private void checkNonExistance() {
 
-        PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch1.getLaunchId());
+        PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch1.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
-        retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch2.getLaunchId());
+        retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch2.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
         List<LaunchState> states = new ArrayList<>();
         states.add(LaunchState.Launching);

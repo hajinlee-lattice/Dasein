@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -53,19 +54,19 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
         if (MessageType.Information.equals(MessageType.valueOf(messageType)) && eventDetail != null) {
             Map<String, String> errorFileMap = eventDetail.getErrorFile();
 
-            if (errorFileMap != null && errorFileMap.containsKey(URL)
-                    && errorFileMap.get(URL).indexOf("dropfolder") >= 0) {
+            if (errorFileMap != null && errorFileMap.containsKey(URL) && errorFileMap.get(URL).contains("dropfolder")) {
                 String errorFile = errorFileMap.get(URL);
                 statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf("dropfolder")));
             }
         } else if (MessageType.Event.equals(MessageType.valueOf(messageType))) {
-            Map<String, Object> errorMap = eventDetail.getError();
-            if (errorMap != null && errorMap.containsKey(MSG)) {
+            if (eventDetail != null && MapUtils.isNotEmpty(eventDetail.getError())
+                    && eventDetail.getError().containsKey(MSG)) {
+                Map<String, Object> errorMap = eventDetail.getError();
                 statusMonitor.setErrorMessage(JsonUtils.serialize(errorMap.get(MSG)));
             }
             log.info(String.format("WorkflowRequestId %s failed with message: %s", statusMonitor.getWorkflowRequestId(),
                     JsonUtils.serialize(eventDetail)));
-            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
+            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), false);
             playLaunch.setLaunchState(LaunchState.SyncFailed);
             playLaunchService.update(playLaunch);
         }

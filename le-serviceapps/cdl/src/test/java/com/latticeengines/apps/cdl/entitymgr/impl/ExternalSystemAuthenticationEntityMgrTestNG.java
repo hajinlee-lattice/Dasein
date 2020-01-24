@@ -41,7 +41,7 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdMappings(null, null, true);
         assertNotNull(lookupIdsMapping);
         assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
         List<ExternalSystemAuthentication> auths = extSysAuthenticationEntityMgr.findAuthentications();

@@ -3,8 +3,8 @@ package com.latticeengines.apps.cdl.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +43,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 
-
 public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private static long CURRENT_TIME_MILLIS = System.currentTimeMillis();
@@ -51,10 +50,10 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
     private static final Logger log = LoggerFactory.getLogger(DataIntegrationStatusMonitoringServiceImplTestNG.class);
 
     @Inject
-    DataIntegrationStatusMonitoringService dataIntegrationStatusMonitoringService;
+    private DataIntegrationStatusMonitoringService dataIntegrationStatusMonitoringService;
 
     @Inject
-    DataIntegrationStatusMessageEntityMgr dataIntegrationStatusMessageEntityMgr;
+    private DataIntegrationStatusMessageEntityMgr dataIntegrationStatusMessageEntityMgr;
 
     private Long BATCH_ID = 1110L;
     private String ENTITY_NAME = "PlayLaunch";
@@ -142,8 +141,8 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
     }
 
-    private DataIntegrationStatusMonitorMessage createDefaultStatusMessage(String workflowRequestId,
-            String eventType, String entityId) {
+    private DataIntegrationStatusMonitorMessage createDefaultStatusMessage(String workflowRequestId, String eventType,
+            String entityId) {
         DataIntegrationStatusMonitorMessage statusMessage = new DataIntegrationStatusMonitorMessage();
         statusMessage.setTenantName(mainTestTenant.getName());
         statusMessage.setWorkflowRequestId(workflowRequestId);
@@ -162,9 +161,8 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
     private DataIntegrationStatusMonitor findDataIntegrationMonitorByWorkflowReqId(String workflowRequestId) {
         addReaderDelay();
-        DataIntegrationStatusMonitor statusMonitor = dataIntegrationStatusMonitoringService
+        return dataIntegrationStatusMonitoringService
                 .getStatus(workflowRequestId);
-        return statusMonitor;
     }
 
     @Test(groups = "functional")
@@ -177,7 +175,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         statusMessage.setMessageType(MessageType.Event.toString());
         statusMessage.setMessage("test");
 
-        Boolean exceptionThrown = false;
+        boolean exceptionThrown = false;
         try {
             dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(statusMessage));
         } catch (Exception e) {
@@ -216,7 +214,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertNotNull(statusMonitor.getEventSubmittedTime());
         Assert.assertEquals(DataIntegrationEventType.ExportStart.toString(), statusMonitor.getStatus());
 
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch1.getId());
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch1.getId(), false);
         Assert.assertEquals(LaunchState.Syncing, playLaunch.getLaunchState());
 
         List<DataIntegrationStatusMessage> messages = dataIntegrationStatusMessageEntityMgr
@@ -226,9 +224,8 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertEquals(messages.size(), 2);
     }
 
-
     @Test(groups = "functional")
-    public void testUpdateWithIncorrectOrder() throws Exception {
+    public void testUpdateWithIncorrectOrder() {
         String workflowRequestId = UUID.randomUUID().toString();
         DataIntegrationStatusMonitorMessage createStatusMonitorMessage = createDefaultStatusMessage(workflowRequestId,
                 DataIntegrationEventType.WorkflowSubmitted.toString(), playLaunch2.getId());
@@ -260,7 +257,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         Assert.assertNotNull(statusMonitor.getEventCompletedTime());
         Assert.assertEquals(DataIntegrationEventType.Completed.toString(), statusMonitor.getStatus());
 
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch2.getId());
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(playLaunch2.getId(), false);
         Assert.assertEquals(LaunchState.PartialSync, playLaunch.getLaunchState());
         Assert.assertEquals(new Long(1), playLaunch.getContactsErrored());
         Assert.assertEquals(new Long(1), playLaunch.getContactsDuplicated());
@@ -296,9 +293,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
 
     private List<DataIntegrationStatusMonitorMessage> generateListMessages(
             DataIntegrationStatusMonitorMessage... statusMessage) {
-        List<DataIntegrationStatusMonitorMessage> statusMessages = new ArrayList();
-        statusMessages.addAll(Arrays.asList(statusMessage));
-        return statusMessages;
+        return Arrays.asList(statusMessage);
     }
 
     private PlayLaunch createPlayLaunch(Play play, String launchId, LaunchState launchState,
@@ -322,7 +317,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
     public void testGetAllStatusesByEntityNameAndIds() {
         List<DataIntegrationStatusMonitor> dataIntegrationStatusMonitors = dataIntegrationStatusMonitoringService
                 .getAllStatusesByEntityNameAndIds(mainTestTenant.getId(), ENTITY_NAME,
-                        Arrays.asList(playLaunch1.getId()));
+                        Collections.singletonList(playLaunch1.getId()));
         assertNotNull(dataIntegrationStatusMonitors);
         assertEquals(dataIntegrationStatusMonitors.size(), 1);
         DataIntegrationStatusMonitor statusMonitor = dataIntegrationStatusMonitors.get(0);

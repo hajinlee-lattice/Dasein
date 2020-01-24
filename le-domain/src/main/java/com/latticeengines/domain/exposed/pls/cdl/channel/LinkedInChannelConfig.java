@@ -85,9 +85,7 @@ public class LinkedInChannelConfig implements ChannelConfig {
     }
 
     @Override
-    public AudienceType getAudienceType() {
-        return audienceType;
-    }
+    public AudienceType getAudienceType() { return audienceType; }
 
     public void setAudienceType(AudienceType audienceType) {
         this.audienceType = audienceType;

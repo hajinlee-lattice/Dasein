@@ -21,7 +21,7 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
     @Override
     void update(PlayLaunch existingPlayLaunch);
 
-    PlayLaunch findByLaunchId(String launchId);
+    PlayLaunch findByLaunchId(String launchId, boolean inflate);
 
     PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId);
 
@@ -55,6 +55,4 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
 
     List<Pair<String, String>> findDashboardOrgIdWithLaunches(Long playId, List<LaunchState> launchStates,
             Long startTimestamp, Long endTimestamp, String orgId, String externalSysType);
-
-    PlayLaunch getLaunchFullyLoaded(String playLaunchId);
 }
