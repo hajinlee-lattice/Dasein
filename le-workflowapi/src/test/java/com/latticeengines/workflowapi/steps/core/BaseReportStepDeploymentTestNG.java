@@ -5,8 +5,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -20,16 +21,15 @@ import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.flows.testflows.report.TestReportWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
-
 public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private WorkflowService workflowService;
 
-    @Autowired
+    @Inject
     private WorkflowJobService workflowJobService;
 
-    @Autowired
+    @Inject
     private ReportService reportService;
 
     @BeforeClass(groups = "deployment")

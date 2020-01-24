@@ -84,7 +84,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
                 ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("deltaCampaignlaunch-export",
                         2);
-                List<String> exportFiles = ThreadPoolUtils.runCallablesInParallel(executorService, fileExporters,
+                List<String> exportFiles = ThreadPoolUtils.callInParallel(executorService, fileExporters,
                         (int) TimeUnit.DAYS.toMinutes(1), 30);
                 if (exportFiles.size() != fileExporters.size()) {
                     throw new RuntimeException("Failed to generate some of the export files");
@@ -103,7 +103,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
                 ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("deltaCampaignlaunch-export",
                         2);
-                List<String> exportFiles = ThreadPoolUtils.runCallablesInParallel(executorService, fileExporters,
+                List<String> exportFiles = ThreadPoolUtils.callInParallel(executorService, fileExporters,
                         (int) TimeUnit.DAYS.toMinutes(1), 30);
                 if (exportFiles.size() != fileExporters.size()) {
                     throw new RuntimeException("Failed to generate some of the export files");
@@ -211,7 +211,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                 } finally {
                     FileUtils.deleteQuietly(localFile);
                 }
-                log.debug("Uploaded PlayLaunch File to HDFS : %s", recFilePathForDestination);
+                log.debug("Uploaded PlayLaunch File to HDFS : {}", recFilePathForDestination);
                 return recFilePathForDestination;
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18213, e, new String[] { getFileFormat() });

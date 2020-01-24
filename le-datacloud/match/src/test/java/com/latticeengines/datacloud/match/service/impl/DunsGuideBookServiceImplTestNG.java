@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -50,10 +52,10 @@ public class DunsGuideBookServiceImplTestNG extends AbstractTestNGSpringContextT
     @Autowired
     private DunsGuideBookServiceImpl service;
 
-    @Autowired
+    @Inject
     private FabricMessageService messageService;
 
-    @Autowired
+    @Inject
     private FabricDataService dataService;
 
     @Mock

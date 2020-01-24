@@ -24,4 +24,6 @@ public interface DataUnitEntityMgr {
 
     DataUnit renameTableName(String tenantId, DataUnit dataUnit, String tableName);
 
+    List<DataUnit> findByStorageType(DataUnit.StorageType storageType);
+
 }

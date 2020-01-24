@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("playTypeService")
 public class PlayTypeServiceImpl implements PlayTypeService {
-    private static final Logger log = LoggerFactory.getLogger(PlayTypeService.class);
+    private static final Logger log = LoggerFactory.getLogger(PlayTypeServiceImpl.class);
 
     @Inject
     private PlayTypeEntityMgr playTypeEntityMgr;

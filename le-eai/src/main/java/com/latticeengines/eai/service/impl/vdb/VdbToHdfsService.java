@@ -8,14 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.eai.ImportContext;
@@ -43,18 +45,18 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 @Component("vdbToHdfsService")
 public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(VdbToHdfsService.class);
+    private static final Logger log = LoggerFactory.getLogger(VdbToHdfsService.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     private CDLProxy cdlProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Override
@@ -208,18 +210,14 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
     }
 
     private void waitForDataFeed(String customerSpace) {
-        try {
-            DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
-            int idleCounter = 0;
-            while (DataFeed.Status.RUNNING_STATUS.contains(dataFeed.getStatus())) {
-                Thread.sleep(TimeUnit.MINUTES.toMillis(3));
-                dataFeed = dataFeedProxy.getDataFeed(customerSpace);
-                if (++idleCounter > 60) {
-                    throw new RuntimeException("Cannot start cleanup job! Please try again later.");
-                }
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+        int idleCounter = 0;
+        while (DataFeed.Status.RUNNING_STATUS.contains(dataFeed.getStatus())) {
+            SleepUtils.sleep(TimeUnit.MINUTES.toMillis(3));
+            dataFeed = dataFeedProxy.getDataFeed(customerSpace);
+            if (++idleCounter > 60) {
+                throw new RuntimeException("Cannot start cleanup job! Please try again later.");
             }
-        } catch (InterruptedException e) {
-
         }
     }
 

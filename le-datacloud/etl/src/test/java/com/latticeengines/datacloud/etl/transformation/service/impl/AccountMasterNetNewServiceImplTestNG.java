@@ -8,11 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -27,7 +28,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.AccountMasterNetNewConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-
 public class AccountMasterNetNewServiceImplTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(AccountMasterNetNewServiceImplTestNG.class);
@@ -40,10 +40,10 @@ public class AccountMasterNetNewServiceImplTestNG
 
     private static final String COUNTRY = "LE_COUNTRY";
 
-    @Autowired
+    @Inject
     PipelineSource source;
 
-    @Autowired
+    @Inject
     AccountMaster baseSource;
 
     String targetSourceName = "AccountMasterNetNew";

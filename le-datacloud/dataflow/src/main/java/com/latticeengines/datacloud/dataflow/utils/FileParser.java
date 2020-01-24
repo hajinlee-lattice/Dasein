@@ -19,7 +19,11 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
-public class FileParser {
+public final class FileParser {
+
+    protected FileParser() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(FileParser.class);

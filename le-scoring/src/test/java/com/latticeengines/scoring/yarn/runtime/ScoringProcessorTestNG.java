@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
@@ -25,7 +27,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -51,12 +52,11 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreMod
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
-
 public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
 
     private ScoringProcessor bulkScoringProcessor;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private String dir;

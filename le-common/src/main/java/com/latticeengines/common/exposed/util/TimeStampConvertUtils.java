@@ -37,7 +37,11 @@ import org.slf4j.LoggerFactory;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
-public class TimeStampConvertUtils {
+public final class TimeStampConvertUtils {
+
+    protected TimeStampConvertUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtils.class);
 
     // Boolean flag to disable debug logging in this class.  log.isDebugEnabled() was not working properly when tested
@@ -548,10 +552,8 @@ public class TimeStampConvertUtils {
                                         fallbackSuccess = true;
                                     } catch (DateTimeParseException e2) {
                                         if (ENABLE_DEBUG_LOG) {
-                                            if (ENABLE_DEBUG_LOG) {
-                                                log.debug("Failed to parse value with fallback Java format string: " +
-                                                        javaDateFormatStr + " " + fallbackJavaTimeFormatStr);
-                                            }
+                                            log.debug("Failed to parse value with fallback Java format string: " +
+                                                    javaDateFormatStr + " " + fallbackJavaTimeFormatStr);
                                         }
                                     }
                                 }
@@ -780,7 +782,7 @@ public class TimeStampConvertUtils {
             try {
                 timeChar = STANDARD_TIME_DELIMITERS.stream().filter(e -> timeVal.indexOf(e) != -1).findFirst().get();
             } catch (NoSuchElementException e) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
             Map<String, java.time.format.DateTimeFormatter> timeFormatsMap =
                     separatorToJavaTimeFormatGroup.get(timeChar);
@@ -789,7 +791,8 @@ public class TimeStampConvertUtils {
                 TemporalAccessor temporalAccessor = null;
                 try {
                     temporalAccessor = formatter.parse(timeVal);
-                } catch(Exception e) {
+                } catch(Exception ignore) {
+                    // means it is not in timestamp format
                 }
                 if(temporalAccessor != null) {
                     conformingTimeFormats.add(timeEntry.getKey());
@@ -803,7 +806,7 @@ public class TimeStampConvertUtils {
         try {
             dateChar = STANDARD_DATE_DELIMITERS.stream().filter(e -> dateVal.indexOf(e) != -1).findFirst().get();
         } catch(NoSuchElementException e) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         Map<String, java.time.format.DateTimeFormatter> dateFormatsMap = separatorToJavaDateFormatGroup.get(dateChar);
         for (Map.Entry<String, java.time.format.DateTimeFormatter> entry : dateFormatsMap.entrySet()) {
@@ -811,7 +814,8 @@ public class TimeStampConvertUtils {
             TemporalAccessor temporalAccessor = null;
             try {
                 temporalAccessor = formatter.parse(dateVal);
-            } catch(Exception e) {
+            } catch(Exception ignore) {
+                // means it is not in timestamp format
             }
             if(temporalAccessor != null) {
                 conformingDateFormats.add(entry.getKey());
@@ -827,7 +831,7 @@ public class TimeStampConvertUtils {
                 }
                 return formats;
             } else {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
         } else {
             return conformingDateFormats;

@@ -116,6 +116,8 @@ public enum InterfaceName {
     CDLCreatedTime, // creation timestamp of CDL entities
     CDLUpdatedTime, // update timestamp of CDL entities
     LatticeExportTime, // timestamp for csv export
+    CDLBatchSource, // indicator if the source contribute the system batch
+                       // store
 
     ConsolidateReport, //
 

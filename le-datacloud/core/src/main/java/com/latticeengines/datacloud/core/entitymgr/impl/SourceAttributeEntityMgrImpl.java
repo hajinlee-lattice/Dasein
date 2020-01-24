@@ -3,7 +3,8 @@ package com.latticeengines.datacloud.core.entitymgr.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,10 +19,10 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 @Component("sourceAttributeEntityMgr")
 public class SourceAttributeEntityMgrImpl implements SourceAttributeEntityMgr {
 
-    @Autowired
+    @Inject
     private SourceAttributeDao sourceAttributeDao;
 
-    @Autowired
+    @Inject
     private CustomerSourceAttributeDao customerSourceAttributeDao;
 
     @Override

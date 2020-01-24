@@ -7,7 +7,11 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
 
-public class RightsUtilities {
+public final class RightsUtilities {
+
+    protected RightsUtilities() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Map<String, EntityAccessRightsData> translateRights(List<String> accessRights) {
         Map<String, EntityAccessRightsData> availableRights = new HashMap<>();

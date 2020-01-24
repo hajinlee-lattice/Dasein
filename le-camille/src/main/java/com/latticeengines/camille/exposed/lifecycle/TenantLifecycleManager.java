@@ -22,7 +22,11 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 
-public class TenantLifecycleManager {
+public final class TenantLifecycleManager {
+
+    protected TenantLifecycleManager() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
@@ -38,7 +42,7 @@ public class TenantLifecycleManager {
             camille.create(tenantsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Tenants path @ {}", tenantsPath);
         } catch (KeeperException.NodeExistsException e) {
-            // ignore
+            log.debug("Tenants path already exists, ignore creation");
         }
 
         Path tenantPath = PathBuilder.buildTenantPath(CamilleEnvironment.getPodId(), contractId, tenantId);

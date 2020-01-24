@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 @Component("ingestionPurger")
 public class IngestionPurger extends VersionedPurger{
 
-    private static Logger log = LoggerFactory.getLogger(IngestionPurger.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionPurger.class);
 
     @Override
     protected SourceType getSourceType() {

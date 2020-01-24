@@ -8,7 +8,11 @@ import org.apache.curator.shaded.com.google.common.base.Preconditions;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
-public class OperationLogUtils {
+public final class OperationLogUtils {
+
+    protected OperationLogUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String DEFAULT_FIELD_NAME = "LE_OperationLogs";
 

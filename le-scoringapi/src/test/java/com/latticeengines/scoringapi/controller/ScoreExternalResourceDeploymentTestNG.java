@@ -22,6 +22,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.exception.ExceptionHandlerErrors;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -42,7 +43,7 @@ import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
-    private static Logger LOG = Logger.getLogger(ScoreExternalResourceDeploymentTestNG.class);
+    private static final Logger LOG = Logger.getLogger(ScoreExternalResourceDeploymentTestNG.class);
 
     private static final String MARKETO_CRED_NAME = "TestProfileFromScoringAPI";
 
@@ -245,10 +246,6 @@ public class ScoreExternalResourceDeploymentTestNG extends ScoringApiControllerD
      * In real world scenario, this is consumed at UI layer, we can are fine with few milli-seconds of delay
      */
     private void addDelay() {
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            //Ignore
-        }
+        SleepUtils.sleep(2000L);
     }
 }

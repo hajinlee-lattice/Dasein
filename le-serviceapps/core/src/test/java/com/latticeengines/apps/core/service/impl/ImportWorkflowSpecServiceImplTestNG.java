@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,7 +16,6 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
-
 public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowSpecServiceImplTestNG.class);
 
@@ -30,7 +28,7 @@ public class ImportWorkflowSpecServiceImplTestNG extends ServiceAppsFunctionalTe
     @Inject
     private S3Service s3Service;
 
-    @Autowired
+    @Inject
     private ImportWorkflowSpecService importWorkflowSpecService;
 
     @Test(groups = "functional")

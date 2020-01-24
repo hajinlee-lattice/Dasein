@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.RequestEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,8 +63,7 @@ public class PurchaseHistoryResource {
     // 2000
     private final LocalDate DEFAULT_SPEND_ANALYTICS_START_DATE = LocalDate.of(DEFAULT_START_YEAR, 1, 1);
 
-    @Inject
-    @Qualifier(PurchaseHistoryDanteFormatter.Qualifier)
+    @Resource(name = PurchaseHistoryDanteFormatter.Qualifier)
     private PurchaseHistoryDanteFormatter purchaseHistoryDanteFormatter;
 
     private String defaultPeriodName = PeriodStrategy.Template.Month.name();

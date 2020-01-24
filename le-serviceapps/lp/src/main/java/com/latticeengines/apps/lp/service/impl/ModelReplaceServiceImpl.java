@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 @Component("modelReplaceService")
 public class ModelReplaceServiceImpl implements ModelReplaceService {
 
-    private static Logger log = LoggerFactory.getLogger(ModelReplaceServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelReplaceServiceImpl.class);
 
     @Inject
     private Configuration yarnConfiguration;
@@ -57,7 +57,7 @@ public class ModelReplaceServiceImpl implements ModelReplaceService {
     }
 
     /**
-     * 
+     *
      * @param sourceTenantId
      *            source tenant has the model we want to use to replace
      * @param sourceModelId

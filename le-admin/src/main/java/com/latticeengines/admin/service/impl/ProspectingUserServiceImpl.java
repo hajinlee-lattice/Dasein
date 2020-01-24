@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.admin.service.ProspectingUserService;
@@ -11,12 +12,14 @@ import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.security.exposed.service.impl.UserServiceImpl;
 
 @Component("prospectingUserService")
 public class ProspectingUserServiceImpl implements ProspectingUserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProspectingUserServiceImpl.class);
+
+    @Value("${security.app.public.url}")
+    private String appPublicUrl;
 
     @Inject
     private EmailService emailService;
@@ -29,7 +32,7 @@ public class ProspectingUserServiceImpl implements ProspectingUserService {
         RegistrationResult result = userService.registerUserWithNoTenant(userReg);
         if (result.isValid()) {
             String tempPass = result.getPassword();
-            emailService.sendPlsNewProspectingUserEmail(userReg.getUser(), tempPass, null);
+            emailService.sendNewUserEmail(userReg.getUser(), tempPass, appPublicUrl, false);
             LOGGER.info(String.format("%s registered as a new prevision user", userReg.getUser().getEmail()));
         } else {
             LOGGER.info(String.format("Failure of prevision user %s registration, user maybe exist",

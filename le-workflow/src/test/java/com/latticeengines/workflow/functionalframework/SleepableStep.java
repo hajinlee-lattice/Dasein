@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 
@@ -17,11 +18,7 @@ public class SleepableStep extends AbstractStep<BaseStepConfiguration> {
     @Override
     public void execute() {
         log.info("Sleeping inside SleepableStep execute()");
-        try {
-            Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-            // Do nothing
-        }
+        SleepUtils.sleep(sleepTime);
         log.info("Done SleepableStep execute()");
     }
 

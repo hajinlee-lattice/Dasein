@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -23,15 +23,14 @@ import com.latticeengines.dataflow.exposed.service.DataTransformationService;
 import com.latticeengines.dataflow.functionalframework.DataFlowFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.dataflow.DataFlowContext;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-
 public class SalesforceFlowsTestNG extends DataFlowFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(SalesforceFlowsTestNG.class);
 
-    @Autowired
+    @Inject
     private CreateInitialEventTable createInitialEventTable;
 
-    @Autowired
+    @Inject
     private DataTransformationService dataTransformationService;
 
     @Resource(name = "yarnConfiguration")

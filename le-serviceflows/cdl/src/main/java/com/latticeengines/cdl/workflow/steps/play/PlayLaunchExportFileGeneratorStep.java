@@ -73,7 +73,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
             fileExporters.add(new JsonFileExporter(yarnConfiguration, config, recAvroHdfsFilePath, fileExportTime));
 
             ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("playlaunch-export", 2);
-            List<String> exportFiles = ThreadPoolUtils.runCallablesInParallel(executorService, fileExporters,
+            List<String> exportFiles = ThreadPoolUtils.callInParallel(executorService, fileExporters,
                     (int) TimeUnit.DAYS.toMinutes(1), 30);
             if (exportFiles.size() != fileExporters.size()) {
                 throw new RuntimeException("Failed to generate some of the export files");
@@ -169,7 +169,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
                         .toString();
                 path = path.endsWith("/") ? path : path + "/";
 
-                String recFilePathForDestination = (path += String.format("Recommendations_%s.%s",
+                String recFilePathForDestination = (path + String.format("Recommendations_%s.%s",
                         DateTimeUtils.currentTimeAsString(fileGeneratedTime), getFileFormat()));
 
                 try {
@@ -178,7 +178,7 @@ public class PlayLaunchExportFileGeneratorStep extends BaseWorkflowStep<PlayLaun
                 } finally {
                     FileUtils.deleteQuietly(localFile);
                 }
-                log.debug("Uploaded PlayLaunch File to HDFS : %s", recFilePathForDestination);
+                log.debug("Uploaded PlayLaunch File to HDFS : {}", recFilePathForDestination);
                 return recFilePathForDestination;
             } catch (Exception e) {
                 throw new LedpException(LedpCode.LEDP_18213, e, new String[] { getFileFormat() });

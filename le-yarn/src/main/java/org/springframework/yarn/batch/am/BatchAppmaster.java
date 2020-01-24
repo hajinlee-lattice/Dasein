@@ -4,23 +4,25 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.partition.PartitionHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.yarn.am.AppmasterService;
@@ -47,21 +49,16 @@ import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.runtime.ContainerRuntimeProperty;
 import com.latticeengines.yarn.exposed.runtime.progress.LedpProgressReporter;
 import com.latticeengines.yarn.exposed.service.YarnService;
-
 public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmaster {
 
     private static final Logger log = LoggerFactory.getLogger(BatchAppmaster.class);
 
-    @Autowired(required = false)
-    private final Collection<PartitionHandler> partitionHandlers = Collections.emptySet();
+    @Inject
+    private Optional<Collection<PartitionHandler>> partitionHandlers;
 
     private Configuration yarnConfiguration;
 
-    private List<JobExecution> jobExecutions = new ArrayList<JobExecution>();
-
-    private String priority;
-
-    private String customer;
+    private List<JobExecution> jobExecutions = new ArrayList<>();
 
     @Value("${dataplatform.yarn.job.runtime.config}")
     private String runtimeConfig;
@@ -69,10 +66,10 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
     @Value("${dataplatform.yarn.job.basedir}")
     private String hdfsJobBaseDir;
 
-    @Autowired
+    @Inject
     protected YarnService yarnService;
 
-    @Autowired
+    @Inject
     protected LedpProgressReporter ledpProgressReporter;
 
     @Override
@@ -89,11 +86,11 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
         }
         super.setParameters(parameters);
 
-        priority = parameters.getProperty(ContainerProperty.PRIORITY.name());
+        String priority = parameters.getProperty(ContainerProperty.PRIORITY.name());
         if (priority == null) {
             throw new LedpException(LedpCode.LEDP_12000);
         }
-        customer = parameters.getProperty(AppMasterProperty.CUSTOMER.name());
+        String customer = parameters.getProperty(AppMasterProperty.CUSTOMER.name());
         if (customer == null) {
             throw new LedpException(LedpCode.LEDP_12007);
         }
@@ -118,9 +115,11 @@ public class BatchAppmaster extends AbstractBatchAppmaster implements YarnAppmas
 
         log.info("Application submitted with app id = " + appId);
 
-        for (PartitionHandler handler : partitionHandlers) {
-            if (handler instanceof AbstractPartitionHandler) {
-                ((AbstractPartitionHandler) handler).setBatchAppmaster(this);
+        if (partitionHandlers.isPresent() && CollectionUtils.isNotEmpty(partitionHandlers.get())) {
+            for (PartitionHandler handler : partitionHandlers.get()) {
+                if (handler instanceof AbstractPartitionHandler) {
+                    ((AbstractPartitionHandler) handler).setBatchAppmaster(this);
+                }
             }
         }
 

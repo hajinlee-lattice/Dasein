@@ -17,15 +17,54 @@
     </module>
 
     <module name="TreeWalker">
-        <module name="SuppressWarningsHolder" />
-        <module name="OuterTypeFilename"/>
-        <module name="OneTopLevelClass"/>
-
         <!-- Annotations -->
         <module name="PackageAnnotation"/>
+        <module name="SuppressWarningsHolder" />
 
         <!-- Block -->
         <module name="AvoidNestedBlocks"/>
+        <module name="EmptyBlock">
+            <property name="tokens" value="ARRAY_INIT"/>
+            <property name="tokens" value="LITERAL_DEFAULT"/>
+            <property name="tokens" value="LITERAL_CASE"/>
+            <property name="tokens" value="INSTANCE_INIT"/>
+            <property name="tokens" value="LITERAL_DO"/>
+            <property name="tokens" value="LITERAL_ELSE"/>
+            <property name="tokens" value="LITERAL_FINALLY"/>
+            <property name="tokens" value="LITERAL_FOR"/>
+            <property name="tokens" value="LITERAL_IF"/>
+            <property name="tokens" value="LITERAL_SWITCH"/>
+            <property name="tokens" value="LITERAL_SYNCHRONIZED"/>
+            <property name="tokens" value="LITERAL_TRY"/>
+            <property name="tokens" value="LITERAL_WHILE"/>
+            <property name="tokens" value="STATIC_INIT"/>
+            <property name="option" value="text"/>
+        </module>
+        <module name="EmptyCatchBlock">
+            <property name="commentFormat" value="This is expected"/>
+            <property name="exceptionVariableName" value="expected|ignore"/>
+        </module>
+
+        <!-- Coding -->
+        <module name="CovariantEquals"/>
+        <module name="DefaultComesLast"/>
+        <module name="EmptyStatement"/>
+        <module name="IllegalToken">
+            <property name="tokens" value="LITERAL_NATIVE"/>
+        </module>
+        <module name="NoClone"/>
+        <module name="SuperClone"/>
+        <module name="NoFinalizer"/>
+        <module name="SuperFinalize"/>
+        <module name="PackageDeclaration"/>
+        <module name="StringLiteralEquality"/>
+
+        <!-- Design -->
+        <module name="HideUtilityClassConstructor"/>
+        <module name="OneTopLevelClass"/>
+
+        <!-- Miscellaneous -->
+        <module name="OuterTypeFilename"/>
 
         <!-- Modifiers -->
         <module name="ModifierOrder"/>
@@ -40,6 +79,9 @@
             <property name="ordered" value="true"/>
             <property name="separated" value="true"/>
             <property name="option" value="top"/>
+        </module>
+        <module name="ImportControl">
+            <property name="file" value="le-parent/checkstyle/import-control-error.xml"/>
         </module>
 
     </module>

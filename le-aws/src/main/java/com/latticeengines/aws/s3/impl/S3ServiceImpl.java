@@ -5,6 +5,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,8 +17,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,9 +25,11 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.HttpMethod;
@@ -67,9 +68,12 @@ import com.amazonaws.services.s3.transfer.MultipleFileUpload;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.amazonaws.services.s3.transfer.Upload;
+import com.amazonaws.services.s3.transfer.internal.UploadImpl;
+import com.amazonaws.services.s3.transfer.internal.UploadMonitor;
 import com.google.common.base.Preconditions;
 import com.latticeengines.aws.s3.S3KeyFilter;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
@@ -82,8 +86,6 @@ public class S3ServiceImpl implements S3Service {
     private static final long SIZE_LIMIT = 5L * 1024L * 1024L * 1024L;
 
     private static final long MB = 1024L * 1024L;
-
-    private static ExecutorService workers;
 
     @Inject
     private AmazonS3 s3Client;
@@ -256,39 +258,92 @@ public class S3ServiceImpl implements S3Service {
                 .distinct().collect(Collectors.toList());
     }
 
+    private void waitForUploadResult(Upload upload, MutableInt uploadedObjects, int numFiles, List<File> failedUploadFiles) {
+        try {
+            log.info(upload.getDescription());
+            upload.waitForCompletion();
+            log.info("Uploaded " + uploadedObjects.incrementAndGet() + " out of " + numFiles + " files.");
+        } catch (InterruptedException e) {
+            UploadImpl uploadImpl = (UploadImpl) upload;
+            UploadMonitor uploadMonitor = (UploadMonitor) uploadImpl.getMonitor();
+            try {
+                Field field = uploadMonitor.getClass().getDeclaredField("origReq");
+                field.setAccessible(true);
+                PutObjectRequest putObjectRequest = (PutObjectRequest) field.get(uploadMonitor);
+                failedUploadFiles.add(putObjectRequest.getFile());
+                log.info("Failed to upload {} to {}/{} with error {}.", putObjectRequest.getFile().getName(),
+                        putObjectRequest.getBucketName(), putObjectRequest.getKey(), e.getMessage());
+            } catch (Exception exception) {
+                log.error("Can't get file info from upload monitor with error {}.", exception.getMessage());
+            }
+        }
+    }
+
+    private void uploadFileList(String bucket, String finalPrefix, List<File> files, TransferManager tm) {
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        try {
+            retry.execute(context -> {
+                final MutableInt uploadedObjects = new MutableInt(0);
+                final int numFiles = files.size();
+                List<File> failedUploadFiles = new ArrayList<>();
+                List<Upload> uploads = new ArrayList<>();
+                for (File file : files) {
+                    String filePrefix = finalPrefix + file.getName();
+                    s3Client.deleteObject(bucket, filePrefix);
+                    Upload upload = tm.upload(bucket, filePrefix, file);
+                    uploads.add(upload);
+                }
+                log.info("Submitted upload jobs for " + numFiles + " files.");
+                for (Upload upload : uploads) {
+                    waitForUploadResult(upload, uploadedObjects, numFiles, failedUploadFiles);
+                }
+                if (CollectionUtils.isNotEmpty(failedUploadFiles)) {
+                    log.info("{} files failed to upload to {}/{}, need to retry upload.", files.size(), bucket, finalPrefix);
+                    files.clear();
+                    files.addAll(failedUploadFiles);
+                    // retry the failed list
+                    throw new RuntimeException();
+                }
+                return true;
+            });
+        } catch (Exception e) {
+            log.info("There are still {} files failed to upload to {}/{} after retry upload 3 times.", files.size(), bucket, finalPrefix);
+        }
+    }
+
     @SuppressWarnings("deprecation")
     @Override
     public MultipleFileUpload uploadLocalDirectory(String bucket, String prefix, String localDir, Boolean sync) {
         prefix = sanitizePathToKey(prefix);
-        TransferManager tm = new TransferManager(s3Client, Executors.newFixedThreadPool(8));
+        ExecutorService uploadService = Executors.newFixedThreadPool(8);
+        TransferManager tm = new TransferManager(s3Client, uploadService);
+        tm.getConfiguration().getMultipartUploadThreshold();
         final MultipleFileUpload upload = tm.uploadDirectory(bucket, prefix, new File(localDir), true);
-        final AtomicInteger uploadedObjects = new AtomicInteger(0);
-
-        ExecutorService waiters = Executors.newFixedThreadPool(8);
-        final Integer numFiles = upload.getSubTransfers().size();
+        final MutableInt uploadedObjects = new MutableInt(0);
+        final int numFiles = upload.getSubTransfers().size();
         log.info("Submitted an upload job for " + numFiles + " files.");
+        List<File> failedUploadFiles = new ArrayList<>();
         if (sync) {
             for (final Upload subUpload : upload.getSubTransfers()) {
-                waiters.execute(() -> {
-                    try {
-                        log.info(subUpload.getDescription());
-                        subUpload.waitForCompletion();
-                        log.info("Uploaded " + uploadedObjects.incrementAndGet() + " out of " + numFiles + " files.");
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
+                waitForUploadResult(subUpload, uploadedObjects, numFiles, failedUploadFiles);
+            }
+            if (CollectionUtils.isNotEmpty(failedUploadFiles)) {
+                StringBuffer virtualDirectoryKeyPrefix;
+                if (StringUtils.isNotEmpty(prefix)) {
+                    virtualDirectoryKeyPrefix = new StringBuffer(prefix);
+                    if (!prefix.endsWith("/")) {
+                        virtualDirectoryKeyPrefix.append("/");
                     }
-                });
+                } else {
+                    virtualDirectoryKeyPrefix = new StringBuffer();
+                }
+                uploadFileList(bucket, virtualDirectoryKeyPrefix.toString(), failedUploadFiles, tm);
             }
-            try {
-                waiters.shutdown();
-                waiters.awaitTermination(100, TimeUnit.HOURS);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-
             setAclRecursive(bucket, prefix);
+            tm.shutdownNow(false);
+        } else {
+            uploadService.shutdown();
         }
-
         return upload;
     }
 
@@ -386,7 +441,7 @@ public class S3ServiceImpl implements S3Service {
                 });
             }
         }
-        ThreadPoolUtils.runRunnablesInParallel(workers(), runnables, 600, 1);
+        ThreadPoolUtils.runInParallel(runnables, 600, 1);
     }
 
     @Override
@@ -456,16 +511,6 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public void setBucketPolicy(String bucket, String policyDoc) {
-        s3Client().setBucketPolicy(bucket, policyDoc);
-    }
-
-    @Override
-    public void deleteBucketPolicy(String bucket) {
-        s3Client().deleteBucketPolicy(bucket);
-    }
-
-    @Override
     public void addTagToObject(String bucket, String key, String tagKey, String tagValue) {
         if (!objectExist(bucket, key)) {
             return;
@@ -509,19 +554,6 @@ public class S3ServiceImpl implements S3Service {
 
     private AmazonS3 s3Client() {
         return s3Client;
-    }
-
-    private static ExecutorService workers() {
-        if (workers == null) {
-            initializeWorkers();
-        }
-        return workers;
-    }
-
-    private static synchronized void initializeWorkers() {
-        if (workers == null) {
-            workers = ThreadPoolUtils.getFixedSizeThreadPool("s3-service", 8);
-        }
     }
 
     private static String sanitizePathToKey(String path) {

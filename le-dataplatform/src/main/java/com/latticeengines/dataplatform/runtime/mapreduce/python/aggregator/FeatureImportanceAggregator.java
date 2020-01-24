@@ -112,7 +112,7 @@ public class FeatureImportanceAggregator implements FileAggregator {
                     return false;
                 }
 
-                String name = file.getPath().getName().toString();
+                String name = file.getPath().getName();
                 return name.equals("diagnostics.json");
             }
 
@@ -121,6 +121,7 @@ public class FeatureImportanceAggregator implements FileAggregator {
             List<FileStatus> files = HdfsUtils.getFileStatusesForDirRecursive(config, hdfsPath, filter, true);
             hdfsPath = files.get(0).getPath().getParent().toString();
         } catch (IOException e) {
+            log.warn("Failed to find a hdfs file using the provided path and filter", e);
         }
 
         HdfsUtils.copyLocalToHdfs(config, getName(), hdfsPath);

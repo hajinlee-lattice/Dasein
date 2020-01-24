@@ -31,7 +31,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("modelCleanUpService")
 public class ModelCleanUpServiceImpl implements ModelCleanUpService {
-    private static Logger log = LoggerFactory.getLogger(ModelCleanUpServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelCleanUpServiceImpl.class);
 
     private static final String MODEL_SUMMARY_SUPPORTING_FILES_PATH = "/user/s-analytics/customers/%s/models/%s";
     private static final String MATCHED_AND_SCORED_TRAINING_CSV_FILES_PATH = "/user/s-analytics/customers/%s/data/%s";
@@ -168,7 +168,7 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
 
     private void removeDir(String pathInfo, String path) {
         try {
-            if(path != "") {
+            if(!"".equals(path)) {
                 log.info(String.format("Clean up model, Remove %s. Path: %s", pathInfo, path));
                 HdfsUtils.rmdir(yarnConfiguration, path);
             }

@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
 public class ThrottleConfigurationEntityMgrImpl extends BaseEntityMgrImpl<ThrottleConfiguration> implements
         ThrottleConfigurationEntityMgr {
 
-    @Autowired
+    @Inject
     private ThrottleConfigurationDao throttleConfigurationDao;
 
     public ThrottleConfigurationEntityMgrImpl() {

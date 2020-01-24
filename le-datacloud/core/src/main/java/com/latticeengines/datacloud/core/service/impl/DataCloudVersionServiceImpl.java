@@ -8,8 +8,9 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.DUN
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 @Component("dataCloudVersionService")
 public class DataCloudVersionServiceImpl implements DataCloudVersionService {
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Value("${datacloud.match.latest.data.cloud.major.version}")

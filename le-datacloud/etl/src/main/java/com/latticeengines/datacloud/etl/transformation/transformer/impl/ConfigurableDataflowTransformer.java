@@ -17,7 +17,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class ConfigurableDataflowTransformer extends AbstractDataflowTransformer<TransformerConfig, TransformationFlowParameters> {
 
-    private static final Logger log = LoggerFactory.getLogger(AbstractTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(ConfigurableDataflowTransformer.class);
 
     private String transformerName;
 

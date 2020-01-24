@@ -17,7 +17,11 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class AMStatsUtils {
+public final class AMStatsUtils {
+
+    protected AMStatsUtils() {
+        throw new UnsupportedOperationException();
+    }
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(AMStatsUtils.class);
 

@@ -38,13 +38,17 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 
-public class ScoringMapperTransformUtil {
+public final class ScoringMapperTransformUtil {
+
+    protected ScoringMapperTransformUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ScoringMapperTransformUtil.class);
 
     private static Charset charSet = Charset.forName("UTF-8");
 
-    public static Map<String, URI> getModelUris(URI[] uris) throws IOException {
+    public static Map<String, URI> getModelUris(URI[] uris) {
         Map<String, URI> modelUris = new HashMap<>();
         boolean scoringScriptProvided = false;
         for (URI uri : uris) {
@@ -54,9 +58,9 @@ public class ScoringMapperTransformUtil {
             if (uri.getPath().endsWith("scoring.py")) {
                 scoringScriptProvided = true;
             } else if (uri.getPath().endsWith("pythonlauncher.sh")) {
+                log.info("model url ends with pythonlauncher.sh");
             } else if (!uri.getPath().endsWith(".jar") && fragment != null && !fragment.endsWith("_scorederivation")) {
-                String uuid = fragment;
-                modelUris.put(uuid, uri);
+                modelUris.put(fragment, uri);
             }
         }
         ScoringMapperValidateUtil.validateLocalizedFiles(scoringScriptProvided, modelUris);
@@ -67,8 +71,7 @@ public class ScoringMapperTransformUtil {
         // key: uuid, value: model contents
         // Note that not every model in the map might be used.
         Map<String, JsonNode> models = new HashMap<String, JsonNode>();
-        String fragment = uri.getFragment();
-        String uuid = fragment;
+        String uuid = uri.getFragment();
         JsonNode modelJsonObj = parseFileContentToJsonNode(uri);
         // use the uuid to identify a model. It is a contact that when
         // mapper localizes the model, it changes its name to be the

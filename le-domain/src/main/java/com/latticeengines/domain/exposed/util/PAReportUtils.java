@@ -12,7 +12,11 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
-public class PAReportUtils {
+public final class PAReportUtils {
+
+    protected PAReportUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(PAReportUtils.class);
 
     public static ObjectNode initEntityReport(BusinessEntity entity) {

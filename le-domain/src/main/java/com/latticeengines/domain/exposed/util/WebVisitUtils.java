@@ -22,7 +22,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
  * Helper for WebVisit activity store related features.
  * TODO remove this when we remove adhoc web visit API
  */
-public class WebVisitUtils {
+public final class WebVisitUtils {
+
+    protected WebVisitUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /*
      * all dimensions for web visit

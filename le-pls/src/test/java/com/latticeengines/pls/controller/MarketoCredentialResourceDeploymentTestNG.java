@@ -18,11 +18,11 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -37,7 +37,6 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsMarketoCredentialProxy;
 import com.latticeengines.testframework.exposed.utils.MarketoConnectorHelper;
-
 public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Value("${pls.marketo.enrichment.webhook.url}")
@@ -46,7 +45,7 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
     @Value("${pls.marketo.scoring.webhook.resource}")
     private String scoringWebhookResource;
 
-    @Autowired
+    @Inject
     private PlsInternalProxy plsInternalProxy;
 
     private static final String CREDENTIAL_NAME = "TEST-DP-MARKETO-SCORING-CONFIG-";
@@ -76,14 +75,10 @@ public class MarketoCredentialResourceDeploymentTestNG extends PlsDeploymentTest
 
     /**
      * As most of the find operations performed on reader connection, we need to add some delay before making find call.
-     * In real world scenario, this is consumed at UI layer, we can are fine with few milli-seconds of delay
+     * In real world scenario, this is consumed at UI layer, we can are fine with a few seconds of delay
      */
     private void addDelay() {
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            //Ignore
-        }
+        SleepUtils.sleep(2000L);
     }
 
     @Test(groups = { "deployment" })

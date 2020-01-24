@@ -2,7 +2,8 @@ package com.latticeengines.dataplatform.mbean;
 
 import static org.testng.Assert.assertTrue;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
@@ -32,7 +33,7 @@ public class DBConnectionMBeanTestNG extends DataPlatformFunctionalTestNGBase {
     @Value("${db.datasource.type}")
     private String daoType;
 
-    @Autowired
+    @Inject
     private DBConnectionMBean dbcMBean;
 
     @Test(groups = { "functional.platform", "functional.production" }, enabled = false)

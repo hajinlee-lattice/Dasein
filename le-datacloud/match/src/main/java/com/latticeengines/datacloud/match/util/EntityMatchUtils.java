@@ -43,7 +43,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 /**
  * Utility functions for entity match
  */
-public class EntityMatchUtils {
+public final class EntityMatchUtils {
+
+    protected EntityMatchUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     // Match Target Entity -> Set(Entity that we will output a list of newly
     // allocated IDs)

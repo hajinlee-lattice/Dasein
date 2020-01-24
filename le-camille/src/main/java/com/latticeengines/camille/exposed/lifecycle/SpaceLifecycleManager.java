@@ -35,7 +35,11 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.PodDivisionScope;
 
-public class SpaceLifecycleManager {
+public final class SpaceLifecycleManager {
+
+    protected SpaceLifecycleManager() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
@@ -56,6 +60,7 @@ public class SpaceLifecycleManager {
             camille.create(spacesPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Spaces path @ {}", spacesPath);
         } catch (KeeperException.NodeExistsException e) {
+            log.debug("Spaces path already exits, ignoring create.");
         }
 
         Path spacePath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,

@@ -7,6 +7,10 @@ import org.slf4j.LoggerFactory;
 
 public final class JacocoUtils {
 
+    protected JacocoUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(JacocoUtils.class);
 
     public static void setJacoco(Properties containerProperties, String execFile) {

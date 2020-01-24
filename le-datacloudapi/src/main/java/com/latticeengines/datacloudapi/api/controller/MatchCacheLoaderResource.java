@@ -1,7 +1,8 @@
 package com.latticeengines.datacloudapi.api.controller;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,7 +20,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/cacheloader")
 public class MatchCacheLoaderResource {
 
-    @Autowired
+    @Inject
     private BaseCacheLoaderService<GenericRecord> cacheLoaderService;
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

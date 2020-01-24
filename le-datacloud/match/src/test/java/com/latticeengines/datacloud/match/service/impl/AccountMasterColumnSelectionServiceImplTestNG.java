@@ -1,4 +1,3 @@
-
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
@@ -6,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -22,21 +22,18 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-
 public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static String dataCloudVersion;
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    @Qualifier("accountMasterColumnSelectionService")
+    @Resource(name = "accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
-    @Autowired
-    @Qualifier("accountMasterColumnEntityMgr")
+    @Resource(name = "accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> columnEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Test(groups = "functional")

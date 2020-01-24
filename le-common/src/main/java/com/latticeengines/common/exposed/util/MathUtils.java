@@ -3,7 +3,11 @@ package com.latticeengines.common.exposed.util;
 import java.util.Arrays;
 import java.util.List;
 
-public class MathUtils {
+public final class MathUtils {
+
+    protected MathUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static <T extends Comparable<T>> T min(List<T> list) {
         T min = null;
         for (T val : list) {

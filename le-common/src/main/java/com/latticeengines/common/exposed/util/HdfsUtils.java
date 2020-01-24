@@ -48,41 +48,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.StreamUtils;
+import org.tukaani.xz.UnsupportedOptionsException;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
 
-public class HdfsUtils {
+public final class HdfsUtils {
+
+    protected HdfsUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(HdfsUtils.class);
     private static final int EOF = -1;
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
-
-    public interface HdfsFileFormat {
-        String AVRO_FILE = ".*.avro";
-        String AVSC_FILE = ".*.avsc";
-        String JSON_FILE = ".*.json";
-    }
-
-    public interface HdfsFilenameFilter {
-        boolean accept(String filename);
-    }
-
-    public interface HdfsFileFilter {
-        boolean accept(FileStatus file);
-    }
-
-    public enum LogFileEncodingType {
-        NONE, GZ;
-
-        public static LogFileEncodingType getEnum(String s) {
-            if (NONE.name().equalsIgnoreCase(s)) {
-                return NONE;
-            } else if (GZ.name().equalsIgnoreCase(s)) {
-                return GZ;
-            }
-            throw new IllegalArgumentException("No Enum specified for this string");
-        }
-    }
 
     public static FileSystem getFileSystem(Configuration configuration) throws IOException {
         return FileSystem.newInstance(configuration);
@@ -429,12 +407,12 @@ public class HdfsUtils {
     // Only return files. Exclude all the sub directory paths
     public static List<String> onlyGetFilesForDirRecursive(Configuration configuration, String hdfsDir,
             HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
-        Set<String> filePaths = new HashSet<String>();
+        Set<String> filePaths = new HashSet<>();
         onlyGetFilesForDirRecursiveHelper(configuration, hdfsDir, filter, returnFirstMatch, filePaths);
         return new ArrayList<>(filePaths);
     }
 
-    public static void onlyGetFilesForDirRecursiveHelper(Configuration configuration, String hdfsDir,
+    private static void onlyGetFilesForDirRecursiveHelper(Configuration configuration, String hdfsDir,
             HdfsFileFilter filter, boolean returnFirstMatch, Set<String> filePaths) throws IOException {
         if (returnFirstMatch && filePaths.size() > 0) {
             return;
@@ -526,12 +504,14 @@ public class HdfsUtils {
                 LocatedFileStatus file = iterator.next();
                 Path filePath = file.getPath();
                 switch (LogFileEncodingType.valueOf(encoding.toUpperCase())) {
-                    case NONE:
-                        is = fs.open(filePath);
-                        break;
-                    case GZ:
-                        is = new GZIPInputStream(fs.open(filePath));
-                        break;
+                case NONE:
+                    is = fs.open(filePath);
+                    break;
+                case GZ:
+                    is = new GZIPInputStream(fs.open(filePath));
+                    break;
+                default:
+                    throw new UnsupportedOptionsException();
                 }
             }
             return is;
@@ -777,6 +757,39 @@ public class HdfsUtils {
             }
         }
         return rows;
+    }
+
+    public static final class HdfsFileFormat {
+
+        protected HdfsFileFormat() {
+            throw new UnsupportedOperationException();
+        }
+
+        public static final String AVRO_FILE = ".*.avro";
+        public static final String AVSC_FILE = ".*.avsc";
+        public static final String JSON_FILE = ".*.json";
+
+    }
+
+    public interface HdfsFilenameFilter {
+        boolean accept(String filename);
+    }
+
+    public interface HdfsFileFilter {
+        boolean accept(FileStatus file);
+    }
+
+    public enum LogFileEncodingType {
+        NONE, GZ;
+
+        public static LogFileEncodingType getEnum(String s) {
+            if (NONE.name().equalsIgnoreCase(s)) {
+                return NONE;
+            } else if (GZ.name().equalsIgnoreCase(s)) {
+                return GZ;
+            }
+            throw new IllegalArgumentException("No Enum specified for this string");
+        }
     }
 
 }

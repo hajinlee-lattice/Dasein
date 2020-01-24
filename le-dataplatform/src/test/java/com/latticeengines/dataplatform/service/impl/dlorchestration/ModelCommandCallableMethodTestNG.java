@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -30,40 +31,39 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStep;
 import com.latticeengines.monitor.alerts.service.impl.AlertServiceImpl;
 import com.latticeengines.monitor.exposed.alerts.service.AlertService;
-
 public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ModelingJobService modelingJobService;
 
-    @Autowired
+    @Inject
     private ModelStepYarnProcessor modelStepYarnProcessor;
 
-    @Autowired
+    @Inject
     private ModelCommandLogService modelCommandLogService;
 
-    @Autowired
+    @Inject
     private ModelStepProcessor modelStepFinishProcessor;
 
-    @Autowired
+    @Inject
     private ModelStepProcessor modelStepOutputResultsProcessor;
 
-    @Autowired
+    @Inject
     private ModelStepProcessor modelStepRetrieveMetadataProcessor;
 
-    @Autowired
+    @Inject
     private ModelCommandStateEntityMgr modelCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private DebugProcessorImpl debugProcessorImpl;
 
-    @Autowired
+    @Inject
     private AlertService alertService;
 
     @Value("${hadoop.yarn.resourcemanager.webapp.address}")
@@ -84,7 +84,7 @@ public class ModelCommandCallableMethodTestNG extends DataPlatformFunctionalTest
     @Value("${dataplatform.dlorchestrationjob.postiveevent.warn.threshold}")
     private int positiveEventWarnThreshold;
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
     @BeforeClass(groups = "functional")

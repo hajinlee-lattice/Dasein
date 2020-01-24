@@ -18,6 +18,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -47,6 +49,8 @@ import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
 
 public class MarketoEaiServiceImplDeploymentTestNG extends EaiFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(MarketoEaiServiceImplDeploymentTestNG.class);
 
     @Inject
     private EaiService eaiService;

@@ -18,7 +18,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.util.ModelAndRecordInfo.ModelInfo;
 
-public class ScoringMapperValidateUtil {
+public final class ScoringMapperValidateUtil {
+
+    protected ScoringMapperValidateUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ScoringMapperValidateUtil.class);
 

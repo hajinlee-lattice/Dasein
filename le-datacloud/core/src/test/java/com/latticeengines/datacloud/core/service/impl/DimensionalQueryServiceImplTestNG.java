@@ -1,11 +1,11 @@
 package com.latticeengines.datacloud.core.service.impl;
 
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -16,19 +16,18 @@ import com.latticeengines.datacloud.core.testframework.DataCloudCoreFunctionalTe
 import com.latticeengines.domain.exposed.datacloud.manage.CategoricalAttribute;
 import com.latticeengines.domain.exposed.datacloud.manage.DimensionalQuery;
 import com.latticeengines.domain.exposed.exception.LedpException;
-
 public class DimensionalQueryServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase {
 
     private static final String TEST_SOURCE = CategoricalAttributeEntityMgrImplTestNG.TEST_SOURCE;
     private static final String TEST_DIMENSION = CategoricalAttributeEntityMgrImplTestNG.TEST_DIMENSION;
 
-    @Autowired
+    @Inject
     private DimensionalQueryService dimensionalQueryService;
 
-    @Autowired
+    @Inject
     private CategoricalAttributeEntityMgr attributeEntityMgr;
 
-    @Autowired
+    @Inject
     private CategoricalAttributeEntityMgrImplTestNG categoricalAttributeEntityMgrImplTestNG;
 
     @Test(groups = "functional")

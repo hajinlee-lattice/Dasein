@@ -3,6 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -14,6 +16,8 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
 public class DunsMergeFunction extends BaseOperation implements Function {
+
+    private static final Logger log = LoggerFactory.getLogger(DunsMergeFunction.class);
 
     private static final long serialVersionUID = -1474963150979757098L;
     private List<String> dunsNames;
@@ -34,6 +38,7 @@ public class DunsMergeFunction extends BaseOperation implements Function {
                     return;
                 }
             } catch (Exception e) {
+                log.warn("Exception during DUNS merge", e);
             }
         }
         functionCall.getOutputCollector().add(Tuple.size(1));

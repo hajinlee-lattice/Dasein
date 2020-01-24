@@ -2,6 +2,9 @@ package com.latticeengines.datacloud.collection.service.impl;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -9,8 +12,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.yarn.client.YarnClient;
@@ -37,6 +39,8 @@ import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 
 public abstract class SourceRefreshServiceBase<P extends Progress> {
 
+    private static final Logger log = LoggerFactory.getLogger(SourceRefreshServiceBase.class);
+
     private static final String SQOOP_OPTION_WHERE = "--where";
 
     private static final String SQOOP_OPTION_BATCH = "--batch";
@@ -49,37 +53,33 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     abstract ProgressEntityMgr<P> getProgressEntityMgr();
 
-    abstract Logger getLogger();
-
     abstract Source getSource();
 
-    @Autowired
+    @Inject
     protected SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
 
-    @Autowired
+    @Inject
     protected CollectionDataFlowService collectionDataFlowService;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
-    @Autowired
-    @Qualifier(value = "propDataCollectionJdbcTemplate")
+    @Resource(name = "propDataCollectionJdbcTemplate")
     protected JdbcTemplate jdbcTemplateCollectionDB;
 
-    @Autowired
-    @Qualifier(value = "propDataBulkJdbcTemplate")
+    @Resource(name = "propDataBulkJdbcTemplate")
     protected JdbcTemplate jdbcTemplateBulkDB;
 
     // DataCloud CollectionDB is shutdown
@@ -133,11 +133,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         }
 
         if (!expectedStatus.equals(progress.getStatus())) {
-            LoggingUtils
-                    .logError(getLogger(),
-                            progress, "Progress is not in the status " + expectedStatus + " but rather "
-                                    + progress.getStatus() + " before " + inProgress + ".",
-                            new IllegalStateException());
+            log.error(LoggingUtils.log(getClass().getSimpleName(), progress, "Progress is not in the status " + expectedStatus + " but rather "
+                    + progress.getStatus() + " before " + inProgress + "."), new IllegalStateException());
             return false;
         }
 
@@ -148,8 +145,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
         if (progress.getStatus().equals(ProgressStatus.FAILED)) {
             int numRetries = progress.getNumRetries() + 1;
             progress.setNumRetries(numRetries);
-            LoggingUtils.logInfo(getLogger(), progress,
-                    String.format("Retry [%d] from [%s].", progress.getNumRetries(), progress.getStatusBeforeFailed()));
+            log.info(LoggingUtils.log(getClass().getSimpleName(), progress, String.format("Retry [%d] from [%s].",
+                    progress.getNumRetries(), progress.getStatusBeforeFailed())));
         }
     }
 
@@ -163,7 +160,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
                 HdfsUtils.rmdir(yarnConfiguration, targetDir);
             }
         } catch (Exception e) {
-            LoggingUtils.logError(getLogger(), progress, "Failed to cleanup hdfs dir " + targetDir, e);
+            log.error(LoggingUtils.log(getClass().getSimpleName(), progress, "Failed to cleanup hdfs dir " + targetDir),
+                    e);
             return false;
         }
         return true;
@@ -207,14 +205,14 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             }
 
         } catch (Exception e) {
-            LoggingUtils.logError(getLogger(), progress, "Failed to import data from source DB.", e);
+            log.error(LoggingUtils.log(getClass().getSimpleName(), progress, "Failed to import data from source DB."), e);
             return false;
         }
         return true;
     }
 
     protected void updateStatusToFailed(P progress, String errorMsg, Exception e) {
-        LoggingUtils.logError(getLogger(), progress, errorMsg, e);
+        log.error(LoggingUtils.log(getClass().getSimpleName(), progress, errorMsg), e);
         progress.setStatusBeforeFailed(progress.getStatus());
         progress.setErrorMessage(errorMsg);
         getProgressEntityMgr().updateStatus(progress, ProgressStatus.FAILED);
@@ -222,7 +220,7 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
 
     protected P finishProgress(P progress) {
         progress.setNumRetries(0);
-        LoggingUtils.logInfo(getLogger(), progress, "Finished.");
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress, "Finished."));
         return getProgressEntityMgr().updateStatus(progress, ProgressStatus.FINISHED);
     }
 
@@ -235,8 +233,8 @@ public abstract class SourceRefreshServiceBase<P extends Progress> {
             version = HdfsPathBuilder.dateFormat.format(archiveProgress.getEndDate());
         }
         Long count = hdfsSourceEntityMgr.count(source, version);
-        LoggingUtils.logInfoWithDuration(getLogger(), progress,
-                String.format("There are %d rows in " + getSource().getSourceName(), count), startTime);
+        log.info(LoggingUtils.logWithDuration(getClass().getSimpleName(), progress,
+                String.format("There are %d rows in " + getSource().getSourceName(), count), startTime));
         return count;
     }
 

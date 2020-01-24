@@ -2,17 +2,17 @@ package com.latticeengines.remote.service.marketo.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.remote.exposed.service.marketo.MarketoRestValidationService;
 import com.latticeengines.remote.service.impl.RemoteFunctionalTestNGBase;
-
 public class MarketoRestValidationServiceTestNG extends RemoteFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private MarketoRestValidationService marketoRestValidationService;
 
     @Test(groups = "functional", enabled = true)

@@ -7,9 +7,10 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -31,16 +32,15 @@ import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementServ
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
-
 public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     GlobalTenantManagementService globalTenantManagementService;
 
-    @Autowired
+    @Inject
     TenantService tenantService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
     @BeforeClass(groups = { "functional", "deployment" })

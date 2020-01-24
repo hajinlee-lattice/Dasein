@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -17,7 +18,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -54,7 +54,6 @@ import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
-
 public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGBase {
 
     @Value("${common.test.pls.url}")
@@ -63,8 +62,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     @Inject
     private ScoringServiceImpl scoringService;
 
-    @Inject
-    @Qualifier(value = "deploymentTestBed")
+    @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Inject

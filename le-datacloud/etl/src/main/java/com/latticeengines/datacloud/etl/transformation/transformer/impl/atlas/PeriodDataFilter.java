@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
@@ -27,7 +28,7 @@ public class PeriodDataFilter
     public static final String TRANSFORMER_NAME = PERIOD_DATA_FILTER;
     private static final Logger log = LoggerFactory.getLogger(PeriodDataFilter.class);
 
-    @Autowired
+    @Inject
     private YarnConfiguration yarnConfiguration;
 
     @Override

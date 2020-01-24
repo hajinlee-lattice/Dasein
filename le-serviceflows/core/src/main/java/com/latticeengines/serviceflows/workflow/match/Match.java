@@ -4,13 +4,15 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.datacloud.CommandParameter;
 import com.latticeengines.domain.exposed.datacloud.Commands;
 import com.latticeengines.domain.exposed.datacloud.CreateCommandRequest;
@@ -32,7 +34,7 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
     private static final EnumSet<MatchCommandStatus> TERMINAL_MATCH_STATUS = EnumSet.of(MatchCommandStatus.COMPLETE,
             MatchCommandStatus.ABORTED, MatchCommandStatus.FAILED);
 
-    @Autowired
+    @Inject
     private MatchCommandProxy matchCommandProxy;
 
     @Override
@@ -78,11 +80,7 @@ public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
             matchCommandStatus = MatchCommandStatus.fromStatus(status.getStatus());
             log.info("Match Status = " + matchCommandStatus);
 
-            try {
-                Thread.sleep(10000L);
-            } catch (InterruptedException e) {
-                // Ignore InterruptedException
-            }
+            SleepUtils.sleep(10000L);
 
         } while (matchCommandStatus != null && !TERMINAL_MATCH_STATUS.contains(matchCommandStatus));
     }

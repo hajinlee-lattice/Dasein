@@ -28,7 +28,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class ScoringJobUtil {
+public final class ScoringJobUtil {
+
+    protected ScoringJobUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static List<String> findModelUrlsToLocalize(Configuration yarnConfiguration, String tenant,
             String customerBaseDir, List<String> modelGuids, boolean useScoreDerivation) {
@@ -94,7 +98,7 @@ public class ScoringJobUtil {
         ObjectNode jsonObj = new ObjectMapper().createObjectNode();
         for (Field field : fields) {
             String type = AvroUtils.getType(field).getName();
-            if (type.equals("string") || type.equals("bytes"))
+            if ("string".equals(type) || "bytes".equals(type))
                 jsonObj.put(field.name(), 1);
             else
                 jsonObj.put(field.name(), 0);

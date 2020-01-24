@@ -9,11 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
@@ -31,7 +32,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
 
     private static final Logger log = LoggerFactory.getLogger(YarnClientCustomizationServiceImpl.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${dataplatform.yarn.job.basedir}")
@@ -40,7 +41,7 @@ public class YarnClientCustomizationServiceImpl implements YarnClientCustomizati
     @Value("${dataplatform.yarn.job.runtime.config}")
     private String runtimeConfig;
 
-    @Autowired
+    @Inject
     private JobServiceHelper jobServiceHelper;
 
     @Override

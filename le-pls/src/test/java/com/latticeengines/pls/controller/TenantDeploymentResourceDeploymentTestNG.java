@@ -14,6 +14,7 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
@@ -33,7 +34,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBaseDepreca
 import com.latticeengines.security.exposed.Constants;
 
 public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestNGBaseDeprecated {
-    
+
     private FeatureFlagDefinition def;
 
     @BeforeClass(groups = "deployment")
@@ -128,7 +129,7 @@ public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestN
         ResponseEntity<ResponseDocument<LaunchJobsResult>> jobsResponseEntity;
         ParameterizedTypeReference jobsResponseType = new ParameterizedTypeReference<ResponseDocument<LaunchJobsResult>>() {};
         do {
-            sleep();
+            SleepUtils.sleep(5000L);
             jobsResponseEntity = restTemplate.exchange(url, HttpMethod.GET, request, jobsResponseType);
             jobsResponse = jobsResponseEntity.getBody();
         } while (jobsResponse.isSuccess() && jobsResponse.getResult() != null &&
@@ -146,12 +147,5 @@ public class TenantDeploymentResourceDeploymentTestNG extends PlsDeploymentTestN
         Assert.assertTrue(depResponse.isSuccess());
         TenantDeployment deployment = depResponse.getResult();
         return deployment;
-    }
-
-    private void sleep() {
-        try {
-            Thread.sleep(5000);
-        } catch (Exception exception) {
-        }
     }
 }

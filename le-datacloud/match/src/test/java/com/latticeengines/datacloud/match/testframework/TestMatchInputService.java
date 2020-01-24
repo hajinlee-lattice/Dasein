@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
@@ -18,10 +19,10 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 @Component("testMatchInputService")
 public class TestMatchInputService {
 
-    @Autowired
+    @Inject
     private AccountMasterColumnServiceImpl accountMasterColumnService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     public MatchInput prepareSimpleRTSMatchInput(Object[][] data) {

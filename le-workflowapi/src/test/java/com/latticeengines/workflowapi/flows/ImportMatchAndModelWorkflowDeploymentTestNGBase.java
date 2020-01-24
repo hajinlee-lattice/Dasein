@@ -6,10 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -35,21 +34,19 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
 public abstract class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiDeploymentTestNGBase {
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(ImportMatchAndModelWorkflowDeploymentTestNGBase.class);
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     private ModelSummaryParser modelSummaryParser = new ModelSummaryParser();
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     SourceFile uploadFile(String resourcePath, SchemaInterpretation schema) {

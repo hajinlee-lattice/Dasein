@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -22,15 +23,14 @@ import com.latticeengines.proxy.exposed.dataflowapi.DataFlowApiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
-
 public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkflowStep<T> {
 
     private static final Logger log = LoggerFactory.getLogger(RunDataFlow.class);
 
-    @Autowired
+    @Inject
     private DataFlowApiProxy dataFlowApiProxy;
 
-    @Autowired
+    @Inject
     protected MetadataProxy metadataProxy;
 
     @Value("${pls.cdl.transform.cascading.partitions}")

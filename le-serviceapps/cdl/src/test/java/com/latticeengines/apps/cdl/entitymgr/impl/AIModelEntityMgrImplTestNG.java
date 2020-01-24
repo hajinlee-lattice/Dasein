@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -26,7 +27,6 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.CustomEventRatingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-
 public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(AIModelEntityMgrImplTestNG.class);
 
@@ -43,10 +43,10 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final String APP_JOB_ID = "application_1510227628013_17833";
 
-    @Autowired
+    @Inject
     private AIModelEntityMgr aiModelEntityMgr;
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
     private RatingEngine crossSellratingEngine;

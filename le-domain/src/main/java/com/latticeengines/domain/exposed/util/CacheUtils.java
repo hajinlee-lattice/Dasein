@@ -2,7 +2,11 @@ package com.latticeengines.domain.exposed.util;
 
 import com.latticeengines.domain.exposed.cache.operation.CacheOperation;
 
-public class CacheUtils {
+public final class CacheUtils {
+
+    protected CacheUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String getKeyOperation(CacheOperation op, String key) {
         return String.format("%d|%s|key|%s", System.currentTimeMillis(), op.name(), key);

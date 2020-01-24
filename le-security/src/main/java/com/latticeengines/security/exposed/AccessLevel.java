@@ -232,8 +232,8 @@ public enum AccessLevel implements GrantedAuthority {
                 if (maxLevel == null || level.compareTo(maxLevel) > 0) {
                     maxLevel = level;
                 }
-            } catch (IllegalArgumentException e) {
-                // ignore
+            } catch (IllegalArgumentException ignore) {
+                // right is not an AccessLevel
             }
         }
         return maxLevel;

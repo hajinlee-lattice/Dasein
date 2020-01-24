@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodProperties;
 
-public class PodLifecycleManager {
+public final class PodLifecycleManager {
+
+    protected PodLifecycleManager() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
@@ -34,6 +38,7 @@ public class PodLifecycleManager {
             camille.create(podsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, false);
             log.debug("created Pods path @ {}", podsPath);
         } catch (KeeperException.NodeExistsException e) {
+            log.debug("Pods already existed, ignoring create");
         }
 
         Path podPath = PathBuilder.buildPodPath(podId);

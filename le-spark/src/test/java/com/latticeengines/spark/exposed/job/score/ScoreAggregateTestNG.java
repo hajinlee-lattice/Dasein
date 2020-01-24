@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,16 +25,11 @@ public class ScoreAggregateTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {
-        ExecutorService workers = ThreadPoolUtils.getFixedSizeThreadPool("score-aggregate-test", 2);
         List<Runnable> runnables = new ArrayList<>();
-        Runnable runnable1 = () -> testSingleProbability();
-        runnables.add(runnable1);
-        Runnable runnable2 = () -> testSingleRevenue();
-        runnables.add(runnable2);
-        Runnable runnable3 = () -> testMultiple();
-        runnables.add(runnable3);
-        ThreadPoolUtils.runRunnablesInParallel(workers, runnables, 60, 1);
-        workers.shutdownNow();
+        runnables.add(this::testSingleProbability);
+        runnables.add(this::testSingleRevenue);
+        runnables.add(this::testMultiple);
+        ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
 
     }
 

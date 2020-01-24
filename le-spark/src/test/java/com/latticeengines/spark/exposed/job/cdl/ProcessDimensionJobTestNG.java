@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class ProcessDimensionJobTestNG extends SparkJobFunctionalTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(ProcessDimensionJob.class);
+    private static final Logger log = LoggerFactory.getLogger(ProcessDimensionJobTestNG.class);
 
     private static final List<Pair<String, Class<?>>> WEB_VISIT_PTN_FIELDS = Arrays.asList( //
             Pair.of(PathPatternName.name(), String.class), //

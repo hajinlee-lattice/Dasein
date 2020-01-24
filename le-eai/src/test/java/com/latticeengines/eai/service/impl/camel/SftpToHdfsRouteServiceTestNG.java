@@ -2,11 +2,14 @@ package com.latticeengines.eai.service.impl.camel;
 
 import java.io.InputStream;
 
+import javax.inject.Inject;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -21,11 +24,14 @@ import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.eai.route.SftpToHdfsRouteConfiguration;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 
 @Component("sftpToHdfsRouteServiceTestNG")
 public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(SftpToHdfsRouteServiceTestNG.class);
 
     private static final String hdfsDir = "/tmp/sftp2hdfsfunctional";
 
@@ -41,7 +47,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
     @Value("${eai.test.sftp.password.encrypted}")
     private String sftpPassword;
 
-    @Autowired
+    @Inject
     private SftpToHdfsRouteService sftpToHdfsRouteService;
 
     @BeforeClass(groups = "functional")
@@ -68,7 +74,7 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
         uploadTestFileIfNotExists(fileName);
     }
 
-    public boolean uploadTestFileIfNotExists(String fileName) {
+    private boolean uploadTestFileIfNotExists(String fileName) {
         try {
             JSch jsch = new JSch();
             Session session = jsch.getSession(sftpUserName, sftpHost, sftpPort);
@@ -101,16 +107,16 @@ public class SftpToHdfsRouteServiceTestNG extends EaiFunctionalTestNGBase {
     }
 
     public boolean waitForFileToBeDownloaded(Configuration yarnConfiguration) {
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < 10000) {
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, hdfsDir + "/" + fileName)) {
                     return true;
                 }
-                Thread.sleep(1000L);
             } catch (Exception e) {
-                // ignore
+                log.warn("HDFS Exception. Will retry later.", e);
             }
+            SleepUtils.sleep(1000L);
         }
         return false;
     }

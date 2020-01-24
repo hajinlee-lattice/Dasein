@@ -18,7 +18,11 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class ConsolidateDataHelper {
+public final class ConsolidateDataHelper {
+
+    protected ConsolidateDataHelper() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateDataHelper.class);
 

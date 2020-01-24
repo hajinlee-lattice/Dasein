@@ -6,9 +6,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -30,26 +29,19 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class BomboraFirehoseIngestionService extends AbstractFirehoseTransformationService<BomboraFirehoseConfiguration>
         implements TransformationService<BomboraFirehoseConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(BomboraFirehoseIngestionService.class);
-
     private static final String DATA_FLOW_BEAN_NAME = "bomboraUntarAndConvertToAvroFlow";
     private static final String SCHEMA = "schema";
     private static final String BOMBORA_FIREHOSE_AVRO_SCHEMA_AVSC = "BomboraFirehoseAvroSchema.avsc";
 
-    @Autowired
+    @Inject
     private BomboraFirehose source;
 
-    @Autowired
+    @Inject
     private FirehoseTransformationDataFlowService transformationDataFlowService;
 
     @Override
     public DataImportedFromHDFS getSource() {
         return source;
-    }
-
-    @Override
-    Logger getLogger() {
-        return log;
     }
 
     @Override

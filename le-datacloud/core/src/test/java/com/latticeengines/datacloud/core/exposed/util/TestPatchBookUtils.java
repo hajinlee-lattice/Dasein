@@ -12,7 +12,11 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 /**
  * Utility class for testing {@link PatchBook} related stuff
  */
-public class TestPatchBookUtils {
+public final class TestPatchBookUtils {
+
+    protected TestPatchBookUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /*
      * Generated MatchKeyTuple for testing, naming convention is <NS>_<MATCH_KEY>_<GROUP>_<OPTIONAL_ID>?

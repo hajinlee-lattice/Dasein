@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -19,12 +20,10 @@ import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.functionalframework.VdbExtractAndImportUtil;
 import com.latticeengines.eai.service.ImportService;
-
-
 public class VdbTableImportServiceImplTestNG extends EaiFunctionalTestNGBase {
-    @Autowired
+    @Inject
     private ImportService vdbTableImportService;
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private SourceImportConfiguration importConfig = new SourceImportConfiguration();

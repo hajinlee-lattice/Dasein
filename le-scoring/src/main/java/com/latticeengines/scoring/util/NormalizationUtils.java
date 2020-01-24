@@ -7,7 +7,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 
-public class NormalizationUtils {
+public final class NormalizationUtils {
+
+    protected NormalizationUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final double offset = 1.1; // Magic Number given by the
                                               // DataScience Team

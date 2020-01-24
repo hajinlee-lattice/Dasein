@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.cdl.util.FeatureImportanceUtil;
+import com.latticeengines.domain.exposed.cdl.util.FeatureImportanceMgr;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
@@ -35,7 +35,7 @@ import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListen
 public class FeatureImportanceUtilTestNG extends AbstractTestNGSpringContextTests {
 
     @Inject
-    private FeatureImportanceUtil featureImportanceUtil;
+    private FeatureImportanceMgr featureImportanceUtil;
 
     @Value("${pls.modelingservice.basedir}")
     private String modelingServiceHdfsBaseDir;

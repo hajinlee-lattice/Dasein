@@ -38,7 +38,7 @@ import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadStepConfiguration> {
 
-    protected static final Logger log = LoggerFactory.getLogger(DeleteByUploadStep.class);
+    private static final Logger log = LoggerFactory.getLogger(DeleteByUploadStep.class);
 
     private static final String CLEANUP_TABLE_PREFIX = "DeleteByFile";
 

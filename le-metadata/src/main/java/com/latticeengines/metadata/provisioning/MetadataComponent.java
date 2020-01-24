@@ -1,8 +1,8 @@
 package com.latticeengines.metadata.provisioning;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 @Component
 public class MetadataComponent {
 
-    @Autowired
+    @Inject
     private MetadataComponentManager componentManager;
 
     public static final String componentName = "Metadata";

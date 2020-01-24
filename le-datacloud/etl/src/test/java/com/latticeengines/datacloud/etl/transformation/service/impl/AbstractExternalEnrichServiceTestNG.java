@@ -6,11 +6,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -33,8 +33,7 @@ public class AbstractExternalEnrichServiceTestNG extends DataCloudEtlFunctionalT
     private static final String INPUT_RECORD_NAME = "DummySource";
     private static final String OUTPUT_RECORD_NAME = "DummySource";
 
-    @Autowired
-    @Qualifier("domainToNameEnrichService")
+    @Resource(name = "domainToNameEnrichService")
     private ExternalEnrichService enrichService;
 
     @Test(groups = "functional")

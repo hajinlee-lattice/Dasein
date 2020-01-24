@@ -6,7 +6,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-public class DSUtils {
+public final class DSUtils {
+
+    protected DSUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("deprecation")
     public static Boolean hasUnUsualChar(String s) {
@@ -23,10 +27,7 @@ public class DSUtils {
                 + "undisclosed|null|don|abc|xyz|nonname|nocompany)($|\\s+)", s))
             return true;
 
-        if (NumberUtils.isNumber(s))
-            return true;
-
-        return false;
+        return NumberUtils.isNumber(s);
     }
 
     @SuppressWarnings("rawtypes")
@@ -44,9 +45,9 @@ public class DSUtils {
             String[] values = mappingList.get(key).toString().split(",");
 
             for (String value : values) {
-                value = value.trim().toLowerCase();
+                String valueLower = value.trim().toLowerCase();
                 // if any(z in y for z in keys): return title
-                if (x.contains(value))
+                if (x.contains(valueLower))
                     return key.toString();
             }
         }

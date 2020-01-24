@@ -2,10 +2,11 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -29,11 +30,11 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TransformationStep extends BaseWorkflowStep<PrepareTransformationStepInputConfiguration>
         implements ApplicationContextAware {
-    private static Logger log = LoggerFactory.getLogger(TransformationStep.class);
+    private static final Logger log = LoggerFactory.getLogger(TransformationStep.class);
 
     private ApplicationContext applicationContext;
 
-    @Autowired
+    @Inject
     private TransformationProgressEntityMgr transformationProgressEntityMgr;
 
     @SuppressWarnings("unchecked")

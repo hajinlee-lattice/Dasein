@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
@@ -12,7 +13,7 @@ import com.latticeengines.modelquality.service.DataFlowService;
 @Component("modelQualityDataFlowService")
 public class DataFlowServiceImpl extends BaseServiceImpl implements DataFlowService {
 
-    @Autowired
+    @Inject
     private DataFlowEntityMgr dataFlowEntityMgr;
 
     @Override

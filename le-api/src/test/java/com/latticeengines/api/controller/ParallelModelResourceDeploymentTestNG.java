@@ -5,6 +5,8 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -12,7 +14,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -33,10 +34,10 @@ public class ParallelModelResourceDeploymentTestNG extends BaseModelResourceDepl
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ParallelModelResourceDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @Value("${common.test.modeling.url}")

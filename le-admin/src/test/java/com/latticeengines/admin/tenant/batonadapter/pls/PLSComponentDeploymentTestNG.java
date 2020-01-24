@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -46,7 +45,7 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
     private static final Logger log = LoggerFactory.getLogger(PLSComponentDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
     @Inject
@@ -123,8 +122,8 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
             Assert.assertNotNull(node);
             Assert.assertEquals("10", node.getDocument().getData());
             camille.delete(servicePath);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // servicePath already removed
         }
         bootstrap(getPLSDocumentDirectory());
         state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);

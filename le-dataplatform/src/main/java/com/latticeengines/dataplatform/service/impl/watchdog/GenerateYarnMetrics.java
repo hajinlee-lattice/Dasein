@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.protocolrecords.GetApplicationsRequest;
 import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.ApplicationResourceUsageReport;
@@ -18,7 +20,6 @@ import org.apache.hadoop.yarn.server.resourcemanager.webapp.dao.CapacitySchedule
 import org.apache.hadoop.yarn.util.Times;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -81,13 +82,13 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
 
     private static final String MAIN = "main";
 
-    @Autowired
+    @Inject
     private MetricService metricService;
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private YarnMetricGeneratorInfoEntityMgr yarnMetricGeneratorInfoEntityMgr;
 
     @Value("${dataplatform.completedjob.querylimit:1000}")
@@ -246,13 +247,13 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
         fieldMap.put("MemorySec", (int) resourceReport.getMemorySeconds());
         fieldMap.put("VcoreSec", (int) resourceReport.getVcoreSeconds());
         fieldMap.put("ElapsedTimeSec",
-                Integer.valueOf((int) Times.elapsed(appReport.getStartTime(), appReport.getFinishTime()) / 1000));
+                (int) Times.elapsed(appReport.getStartTime(), appReport.getFinishTime()) / 1000);
 
         Job job = null;
         try {
             job = workflowProxy.getWorkflowJobFromApplicationId(appReport.getApplicationId().toString());
         } catch (Exception e) {
-            // do nothing
+            log.warn("Failed to get workflow job from applicatio id", e);
         }
         if (job != null && job.getSteps() != null) {
             for (JobStep step : job.getSteps()) {

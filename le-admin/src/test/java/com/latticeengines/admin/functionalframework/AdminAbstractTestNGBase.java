@@ -12,10 +12,10 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
@@ -72,7 +72,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     protected static final FeatureFlagDefinition FLAG_DEFINITION = newFlagDefinition();
     protected static final String FLAG_ID = "TestFlag";
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @Value("${admin.test.contract}")

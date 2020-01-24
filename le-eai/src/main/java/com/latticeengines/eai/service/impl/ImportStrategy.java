@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public abstract class ImportStrategy {
 
-    private Logger log = LoggerFactory.getLogger(ImportStrategy.class);
+    private static final Logger log = LoggerFactory.getLogger(ImportStrategy.class);
 
     private static Map<String, ImportStrategy> strategies = new HashMap<>();
 

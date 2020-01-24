@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.encryption;
 
-public class KeyPolicy {
+public final class KeyPolicy {
+
+    protected KeyPolicy() {
+        throw new UnsupportedOperationException();
+    }
     public static final String MASTER = "master";
     public static final String CONTRACT = "contract";
 }

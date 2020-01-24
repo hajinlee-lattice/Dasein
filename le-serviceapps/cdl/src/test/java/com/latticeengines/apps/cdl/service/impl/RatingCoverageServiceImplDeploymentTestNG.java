@@ -17,7 +17,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -96,7 +95,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
     private RatingRule ratingRule;
 
-    @Autowired
+    @Inject
     private RatingCoverageService ratingCoverageService;
 
     @BeforeClass(groups = "deployment-app")

@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -70,7 +69,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private PlayLaunchChannelService playLaunchChannelService;
 
-    @Autowired
+    @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Inject
@@ -98,8 +97,8 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private LookupIdMap lookupIdMapMarketo;
     private PlayLaunchChannel playLaunchChannelMarketo;
 
-    String org1 = "org1_" + CURRENT_TIME_MILLIS;
-    String org2 = "org2_" + CURRENT_TIME_MILLIS;
+    private String org1 = "org1_" + CURRENT_TIME_MILLIS;
+    private String org2 = "org2_" + CURRENT_TIME_MILLIS;
 
     private String orgIdMarketo = "org1" + CURRENT_TIME_MILLIS;
     private String orgNameMarketo = "marketo_org";
@@ -218,7 +217,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
+    public void teardown() {
         if (playLaunch1 != null) {
             playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         }
@@ -246,7 +245,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateLaunch" })
     public void testBasicOperations() {
-        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch2.getLaunchId());
+        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch2.getLaunchId(), false);
         Assert.assertNotNull(retreivedPlayLaunch);
 
         List<LaunchState> states = new ArrayList<>();
@@ -279,7 +278,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
     public void testUpdateLaunch() throws InterruptedException {
 
-        playLaunch1 = playLaunchService.findByLaunchId(playLaunch1.getLaunchId());
+        playLaunch1 = playLaunchService.findByLaunchId(playLaunch1.getLaunchId(), false);
         assertBucketsToLaunch(playLaunch1, bucketsToLaunch1);
 
         playLaunch1.setLaunchState(LaunchState.Launched);
@@ -288,7 +287,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setAccountsSuppressed(3L);
         playLaunch1.setContactsLaunched(7L);
 
-        playLaunch2 = playLaunchService.findByLaunchId(playLaunch2.getLaunchId());
+        playLaunch2 = playLaunchService.findByLaunchId(playLaunch2.getLaunchId(), false);
         assertBucketsToLaunch(playLaunch2, bucketsToLaunch2);
 
         playLaunch2.setLaunchState(LaunchState.Launched);
@@ -429,7 +428,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(statusMessage2));
         Thread.sleep(1000L);
 
-        playLaunch2 = playLaunchService.findByLaunchId(playLaunch2.getLaunchId());
+        playLaunch2 = playLaunchService.findByLaunchId(playLaunch2.getLaunchId(), false);
 
         assertEquals(playLaunch2.getLaunchState(), LaunchState.Synced);
     }
@@ -471,9 +470,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch1.getLaunchId());
+        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch1.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
-        retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch2.getLaunchId());
+        retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch2.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
 
         checkNonExistance();
@@ -493,7 +492,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch3.setUpdatedBy(CREATED_BY);
         playLaunchService.create(playLaunch3);
 
-        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId());
+        PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId(), false);
         Assert.assertNotNull(retreivedPlayLaunch);
 
         playService.deleteByName(play.getName(), false);
@@ -502,7 +501,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId());
+        retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
     }
 
@@ -577,48 +576,45 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         launchIds.add(playLaunch2.getId());
 
         if (dashboardEntries.getLaunchSummaries().size() > 0) {
-            dashboardEntries.getLaunchSummaries().stream() //
-                    .forEach(entry -> {
-                        Assert.assertNotNull(entry.getLaunchId());
-                        Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
-                        Assert.assertNotNull(entry.getLaunchState());
-                        Assert.assertNotNull(entry.getLaunchTime());
-                        Assert.assertNotNull(entry.getPlayName());
-                        Assert.assertNotNull(entry.getPlayDisplayName());
-                        Assert.assertNotNull(entry.getSelectedBuckets());
-                        Stats stats = entry.getStats();
-                        Assert.assertNotNull(stats);
+            dashboardEntries.getLaunchSummaries().forEach(entry -> {
+                Assert.assertNotNull(entry.getLaunchId());
+                Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
+                Assert.assertNotNull(entry.getLaunchState());
+                Assert.assertNotNull(entry.getLaunchTime());
+                Assert.assertNotNull(entry.getPlayName());
+                Assert.assertNotNull(entry.getPlayDisplayName());
+                Assert.assertNotNull(entry.getSelectedBuckets());
+                Stats stats = entry.getStats();
+                Assert.assertNotNull(stats);
 
-                        PlayLaunch matchingPlayLaunch = playLaunchMap.get(entry.getLaunchId());
-                        Assert.assertEquals(stats.getContactsWithinRecommendations(),
-                                matchingPlayLaunch.getContactsLaunched().longValue());
-                        Assert.assertEquals(stats.getAccountErrors(),
-                                matchingPlayLaunch.getAccountsErrored().longValue());
-                        Assert.assertEquals(stats.getRecommendationsLaunched(),
-                                matchingPlayLaunch.getAccountsLaunched().longValue());
-                        Assert.assertEquals(stats.getAccountsSuppressed(),
-                                matchingPlayLaunch.getAccountsSuppressed().longValue());
-                        Assert.assertNotNull(entry.getDestinationOrgId());
-                        Assert.assertNotNull(entry.getDestinationSysType());
-                        Assert.assertTrue(orgSet.contains(entry.getDestinationOrgId()));
-                        Assert.assertNotNull(entry.getDestinationAccountId());
+                PlayLaunch matchingPlayLaunch = playLaunchMap.get(entry.getLaunchId());
+                Assert.assertEquals(stats.getContactsWithinRecommendations(),
+                        matchingPlayLaunch.getContactsLaunched().longValue());
+                Assert.assertEquals(stats.getAccountErrors(), matchingPlayLaunch.getAccountsErrored().longValue());
+                Assert.assertEquals(stats.getRecommendationsLaunched(),
+                        matchingPlayLaunch.getAccountsLaunched().longValue());
+                Assert.assertEquals(stats.getAccountsSuppressed(),
+                        matchingPlayLaunch.getAccountsSuppressed().longValue());
+                Assert.assertNotNull(entry.getDestinationOrgId());
+                Assert.assertNotNull(entry.getDestinationSysType());
+                Assert.assertTrue(orgSet.contains(entry.getDestinationOrgId()));
+                Assert.assertNotNull(entry.getDestinationAccountId());
 
-                        // Check for DataIntegrationStatusMonitor
-                        assertNotNull(entry.getIntegrationStatusMonitor());
-                        assertEquals(entry.getIntegrationStatusMonitor().getEntityId(), entry.getLaunchId());
-                    });
+                // Check for DataIntegrationStatusMonitor
+                assertNotNull(entry.getIntegrationStatusMonitor());
+                assertEquals(entry.getIntegrationStatusMonitor().getEntityId(), entry.getLaunchId());
+            });
 
             Set<String> playIdSet = ConcurrentHashMap.newKeySet();
 
             Assert.assertNotNull(dashboardEntries.getUniquePlaysWithLaunches());
-            dashboardEntries.getUniquePlaysWithLaunches().stream() //
-                    .forEach(pl -> {
-                        Assert.assertNotNull(pl.getPid());
-                        Assert.assertNotNull(pl.getName());
-                        Assert.assertNotNull(pl.getDisplayName());
-                        Assert.assertFalse(playIdSet.contains(pl.getName()));
-                        playIdSet.add(pl.getName());
-                    });
+            dashboardEntries.getUniquePlaysWithLaunches().forEach(pl -> {
+                Assert.assertNotNull(pl.getPid());
+                Assert.assertNotNull(pl.getName());
+                Assert.assertNotNull(pl.getDisplayName());
+                Assert.assertFalse(playIdSet.contains(pl.getName()));
+                playIdSet.add(pl.getName());
+            });
 
             if (expectedCount > 0) {
                 Assert.assertEquals(dashboardEntries.getUniqueLookupIdMapping().size(), 1);
@@ -626,8 +622,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
                         dashboardEntries.getUniqueLookupIdMapping().get(CDLExternalSystemType.CRM.name()).size(),
                         orgSet.size());
                 dashboardEntries.getUniqueLookupIdMapping() //
-                        .get(CDLExternalSystemType.CRM.name()).stream() //
-                        .forEach(lookupConfig -> {
+                        .get(CDLExternalSystemType.CRM.name()).forEach(lookupConfig -> {
                             Assert.assertNotNull(lookupConfig.getOrgId());
                             Assert.assertEquals(lookupConfig.getExternalSystemType(), CDLExternalSystemType.CRM);
                             Assert.assertTrue(orgSet.contains(lookupConfig.getOrgId()));
@@ -650,8 +645,6 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private List<DataIntegrationStatusMonitorMessage> generateListMessages(
             DataIntegrationStatusMonitorMessage... statusMessage) {
-        List<DataIntegrationStatusMonitorMessage> statusMessages = new ArrayList();
-        statusMessages.addAll(Arrays.asList(statusMessage));
-        return statusMessages;
+        return Arrays.asList(statusMessage);
     }
 }

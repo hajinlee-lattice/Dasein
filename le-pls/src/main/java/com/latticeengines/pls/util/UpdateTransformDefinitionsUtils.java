@@ -15,7 +15,11 @@ import com.latticeengines.domain.exposed.util.GetAndValidateRealTimeTransformUti
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
-public class UpdateTransformDefinitionsUtils {
+public final class UpdateTransformDefinitionsUtils {
+
+    protected UpdateTransformDefinitionsUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(UpdateTransformDefinitionsUtils.class);
 

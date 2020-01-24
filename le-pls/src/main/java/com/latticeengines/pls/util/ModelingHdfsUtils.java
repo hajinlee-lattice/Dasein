@@ -30,7 +30,11 @@ import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 
-public class ModelingHdfsUtils {
+public final class ModelingHdfsUtils {
+
+    protected ModelingHdfsUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String findModelSummaryPath(Configuration config, String dir) throws IOException {
         List<String> paths = HdfsUtils.getFilesForDirRecursive(config, dir, file -> {

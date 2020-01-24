@@ -3,21 +3,28 @@ package com.latticeengines.spark.service.impl;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.apache.hadoop.yarn.client.api.YarnClient;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -25,26 +32,28 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.spark.LivySession;
-import com.latticeengines.hadoop.exposed.service.EMRCacheService;
 import com.latticeengines.spark.exposed.service.LivySessionService;
+
 
 @Service("livySessionService")
 public class LivySessionServiceImpl implements LivySessionService {
 
     @Inject
-    private EMRCacheService emrCacheService;
+    private LivyServerManager livyServerManager;
 
-    @Value("${hadoop.use.emr}")
-    private Boolean useEmr;
+    @Inject
+    private Configuration yarnConfiguration;
 
     private static final Logger log = LoggerFactory.getLogger(LivySessionServiceImpl.class);
 
     private static final String URI_SESSIONS = "/sessions";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("~yyyy_MM_dd_HH_mm_ss_z");
+    private static final long SESSION_CREATION_TIMEOUT = TimeUnit.MINUTES.toMillis(30);
 
     private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     private ObjectMapper om = new ObjectMapper();
@@ -73,7 +82,7 @@ public class LivySessionServiceImpl implements LivySessionService {
             payLoad.putAll(livyConf);
             log.info("livyConf=" + JsonUtils.serialize(livyConf));
         }
-        String host = getLivyHost();
+        String host = livyServerManager.getLivyHost();
         String url = host + URI_SESSIONS;
         String resp;
         try {
@@ -104,10 +113,6 @@ public class LivySessionServiceImpl implements LivySessionService {
             restTemplate.delete(url);
             log.info("Stopped livy session " + session.getAppId() + " : " + session.getSessionUrl());
         }
-    }
-
-    public String getLivyHost() {
-        return Boolean.TRUE.equals(useEmr) ? emrCacheService.getLivyUrl() : "http://localhost:8998";
     }
 
     private String getSessionInfo(LivySession session) {
@@ -148,6 +153,10 @@ public class LivySessionServiceImpl implements LivySessionService {
             session.setAppId(appId);
             session.setDriverLogUrl(driverLogUrl);
             session.setSparkUiUrl(sparkUiUrl);
+            if (json.has("name")) {
+                String appName = json.get("name").asText();
+                session.setAppName(appName);
+            }
             return session;
         } else {
             return null;
@@ -166,7 +175,9 @@ public class LivySessionServiceImpl implements LivySessionService {
 
     private LivySession waitForSessionState(LivySession session, String state) {
         LivySession current = getSession(session);
-        while (!LivySession.TERMINAL_STATES.contains(current.getState())) {
+        long start = System.currentTimeMillis();
+        while (!LivySession.TERMINAL_STATES.contains(current.getState()) &&
+                (System.currentTimeMillis() - start < SESSION_CREATION_TIMEOUT)) {
             try {
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {
@@ -176,8 +187,13 @@ public class LivySessionServiceImpl implements LivySessionService {
             log.debug("Current session state: " + current.getState());
         }
         if (state.equals(current.getState())) {
+            String appName = current.getAppName();
+            if (StringUtils.isNotBlank(appName)) {
+                current.setAppId(getAppId(appName));
+            }
             return current;
         } else {
+            stopSession(current);
             throw new RuntimeException(
                     "Session state ends up to be " + current.getState() + " instead of " + state);
         }
@@ -189,6 +205,28 @@ public class LivySessionServiceImpl implements LivySessionService {
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11:2.10.1", //
                 "org.apache.spark:spark-avro_2.11:2.4.4" //
         );
+    }
+
+    private String getAppId(@NotNull final String appName) {
+        String appId = null;
+        try (YarnClient yarnClient = YarnClient.createYarnClient()) {
+            yarnClient.init(yarnConfiguration);
+            yarnClient.start();
+            Set<String> appTypes = Sets.newHashSet("SPARK");
+            EnumSet<YarnApplicationState> states = EnumSet.copyOf(Collections.singleton(YarnApplicationState.RUNNING));
+            List<ApplicationReport> reports = yarnClient.getApplications(appTypes, states);
+            yarnClient.stop();
+            ApplicationReport report = reports.stream() //
+                    .filter(r -> r.getName().equals(appName)).findFirst().orElse(null);
+            if (report != null) {
+                appId = report.getApplicationId().toString();
+            } else {
+                log.warn("There is no running app named " + appName);
+            }
+        } catch (IOException | YarnException e) {
+            log.warn("Failed to retrieve application id", e);
+        }
+        return appId;
     }
 
 }

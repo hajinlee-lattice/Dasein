@@ -8,7 +8,8 @@ import static org.testng.Assert.assertTrue;
 import java.math.BigInteger;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -18,19 +19,18 @@ import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.dataplatform.service.impl.ModelingServiceTestUtils;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommand;
-
 public class DebugProcessorImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private static final String TEMP_EVENTTABLE = "DebugProcessorImplTestNG_eventtable";
     private static final String TEMP_EVENTTABLE_COPY = TEMP_EVENTTABLE + DebugProcessorImpl.COPY_SUFFIX;
 
-    @Autowired
+    @Inject
     private DebugProcessorImpl debugProcessorImpl;
 
-    @Autowired
+    @Inject
     private JdbcTemplate dlOrchestrationJdbcTemplate;
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
     @BeforeClass(groups = "functional")

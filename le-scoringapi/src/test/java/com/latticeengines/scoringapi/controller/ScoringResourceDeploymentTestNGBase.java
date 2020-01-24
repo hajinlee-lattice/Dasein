@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
@@ -38,7 +37,6 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
-
 public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDeploymentTestNGBase {
     protected static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
     protected static final String SALESFORCE = "SALESFORCE";
@@ -67,7 +65,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     protected int baseAllActiveModelCount = 0;
     protected List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList;
 
-    @Autowired
+    @Inject
     protected InternalScoringApiInterface internalScoringApiProxy;
 
     @Inject
@@ -493,18 +491,12 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
     private Runnable createScoringLoadLimitRunnable(final String url,
             final List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList,
             final boolean isInternalScoring, boolean b) {
-        Runnable runnable = new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    testScore(url, 1, 500000, modelList, isInternalScoring, false, customerSpace, true);
-                } catch (IOException e) {
-                    // ignore
-                }
+        return () -> {
+            try {
+                testScore(url, 1, 500000, modelList, isInternalScoring, false, customerSpace, true);
+            } catch (IOException ignore) {
             }
         };
-        return runnable;
     }
 
     protected void runScoringTest(final String url, final boolean isInternalScoring, boolean isPmmlModel)

@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -16,10 +17,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-
 public class CDLExternalSystemServiceImplTestNG extends CDLFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private CDLExternalSystemService cdlExternalSystemService;
 
     @BeforeClass(groups = "functional")

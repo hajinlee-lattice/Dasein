@@ -14,7 +14,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 
-public class LimitValidatorUtils {
+public final class LimitValidatorUtils {
+
+    protected LimitValidatorUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void checkAmbiguityInFieldNames(List<AttrConfig> attrConfigs) {
         Set<String> attrSet = new HashSet<>();

@@ -1,7 +1,8 @@
 package com.latticeengines.matchapi.testframework;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 
@@ -9,7 +10,6 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
-
 public class MatchapiFunctionalTestNGBase extends MatchapiAbstractTestNGBase {
 
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
@@ -17,10 +17,10 @@ public class MatchapiFunctionalTestNGBase extends MatchapiAbstractTestNGBase {
     @Value("${matchapi.test.functional.hostport}")
     private String hostPort;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
     protected String getRestAPIHostPort() {

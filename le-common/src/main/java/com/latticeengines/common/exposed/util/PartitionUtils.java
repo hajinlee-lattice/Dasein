@@ -8,6 +8,10 @@ import org.apache.commons.collections4.CollectionUtils;
 
 public final class PartitionUtils {
 
+    protected PartitionUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static <T> List<List<T>> partitionCollectionBySize(final Collection<T> collection, int partitionSize) {
         if (partitionSize <= 0) {
             throw new IllegalArgumentException("partitionSize must be positive, but found " + partitionSize);

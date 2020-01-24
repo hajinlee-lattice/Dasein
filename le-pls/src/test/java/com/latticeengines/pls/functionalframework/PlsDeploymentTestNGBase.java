@@ -5,10 +5,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 
@@ -26,11 +25,9 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
-
 public class PlsDeploymentTestNGBase extends PlsAbstractTestNGBase {
 
-    @Autowired
-    @Qualifier(value = "deploymentTestBed")
+    @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Value("${common.test.pls.url}")

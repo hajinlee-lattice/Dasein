@@ -1,15 +1,10 @@
 package com.latticeengines.common.exposed.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class LocationUtilsUnitTestNG {
-
-    @SuppressWarnings("unused")
-    private static Logger log = LoggerFactory.getLogger(LocationUtilsUnitTestNG.class);
 
     @Test(groups = "unit", dataProvider = "usaDataProvider")
     public void testParseUSA(String country) {

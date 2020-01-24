@@ -7,8 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.Assert;
@@ -23,7 +24,6 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDeprecated {
 
     protected static boolean usersInitialized = false;
@@ -33,12 +33,12 @@ public class PlsFunctionalTestNGBaseDeprecated extends PlsAbstractTestNGBaseDepr
 
     private static Map<AccessLevel, User> testingUsers;
 
-    @Autowired
+    @Inject
     private InternalTestUserService internalTestUserService;
 
     private ModelSummaryParser modelSummaryParser = new ModelSummaryParser();;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @Value("${pls.test.functional.api:http://localhost:8080/}")

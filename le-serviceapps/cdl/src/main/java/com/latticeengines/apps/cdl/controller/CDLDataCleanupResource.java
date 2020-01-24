@@ -75,7 +75,7 @@ public class CDLDataCleanupResource {
         try {
             cdlDataCleanupService.createReplaceAction(customerSpace, cleanupOperationConfiguration);
         } catch (Exception e) {
-            log.error("Cannot create cleanup action: {}", e.getMessage());
+            log.error("Cannot create cleanup action: ", e);
             throw e;
         }
     }
@@ -87,7 +87,7 @@ public class CDLDataCleanupResource {
         try {
             tenantCleanupService.removeTenantTables(customerSpace);
         } catch (Exception e) {
-            log.error("error:", e.getMessage());
+            log.error("error:", e);
             throw e;
         }
     }

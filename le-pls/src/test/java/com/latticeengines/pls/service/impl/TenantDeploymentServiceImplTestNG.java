@@ -2,9 +2,10 @@ package com.latticeengines.pls.service.impl;
 
 import java.sql.Timestamp;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -16,13 +17,12 @@ import com.latticeengines.domain.exposed.pls.TenantDeploymentStep;
 import com.latticeengines.pls.entitymanager.TenantDeploymentEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.TenantDeploymentService;
-
 public class TenantDeploymentServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    @Autowired
+    @Inject
     private TenantDeploymentService tenantDeploymentService;
 
-    @Autowired
+    @Inject
     private TenantDeploymentEntityMgr tenantDeploymentEntityMgr;
 
     private TenantDeployment deployment;

@@ -12,7 +12,12 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class TestCDLMatchUtils {
+public final class TestCDLMatchUtils {
+
+    protected TestCDLMatchUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static DynamoDataUnit mockCustomAccount() {
         DynamoDataUnit dynamoDataUnit = new DynamoDataUnit();
         dynamoDataUnit.setName("localtest_account_4");

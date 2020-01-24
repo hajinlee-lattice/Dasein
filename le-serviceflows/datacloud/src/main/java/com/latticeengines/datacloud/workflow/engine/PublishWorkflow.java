@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.workflow.engine;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -17,7 +18,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Lazy
 public class PublishWorkflow extends AbstractWorkflow<PublishWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private Publish publish;
 
     @Override

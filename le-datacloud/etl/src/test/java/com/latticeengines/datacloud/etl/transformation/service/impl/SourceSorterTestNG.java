@@ -9,9 +9,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -26,13 +27,12 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-
 public class SourceSorterTestNG extends PipelineTransformationTestNGBase {
 
     private static final int NUM_ROWS = 80;
     private static final int PARTITIONS = 16;
 
-    @Autowired
+    @Inject
     private AccountMaster accountMaster;
 
     @Test(groups = "functional")

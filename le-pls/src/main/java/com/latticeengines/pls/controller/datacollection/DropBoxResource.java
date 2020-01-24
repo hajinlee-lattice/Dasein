@@ -132,10 +132,7 @@ public class DropBoxResource {
         log.info(String.format("Sending emails to %d external admins starts initiated by %s", runnables.size(),
                 initiator));
 
-        if (tpForParallelStream == null) {
-            tpForParallelStream = ThreadPoolUtils.getFixedSizeThreadPool("dropbox-resource", 4);
-        }
-        ThreadPoolUtils.runRunnablesInParallel(tpForParallelStream, runnables, 10, 1);
+        ThreadPoolUtils.runInParallel(runnables);
         log.info(String.format("Sending emails to %d external admins initiated by %s finishes", runnables.size(),
                 initiator));
     }

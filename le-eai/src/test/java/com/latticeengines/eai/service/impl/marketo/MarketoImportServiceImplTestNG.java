@@ -7,10 +7,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.spring.SpringCamelContext;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -25,20 +26,19 @@ import com.latticeengines.eai.functionalframework.MarketoExtractAndImportUtil;
 import com.latticeengines.eai.routes.marketo.MarketoImportProperty;
 import com.latticeengines.eai.routes.marketo.MarketoRouteConfig;
 import com.latticeengines.eai.service.ImportService;
-
 public class MarketoImportServiceImplTestNG extends EaiFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ImportService marketoImportService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     private SourceImportConfiguration marketoImportConfig = new SourceImportConfiguration();
 
     private ImportContext importContext;
 
-    @Autowired
+    @Inject
     private MarketoRouteConfig marketoRouteConfig;
 
     @BeforeClass(groups = "functional")

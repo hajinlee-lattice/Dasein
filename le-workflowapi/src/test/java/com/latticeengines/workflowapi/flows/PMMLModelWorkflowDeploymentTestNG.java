@@ -10,10 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -39,16 +40,15 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoringapi.score.impl.TestPMMLScoring;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
-
 public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(PMMLModelWorkflowDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
-    @Autowired
+    @Inject
     private TestPMMLScoring testPMMLScoring;
 
     private String pmmlHdfsPath = null;

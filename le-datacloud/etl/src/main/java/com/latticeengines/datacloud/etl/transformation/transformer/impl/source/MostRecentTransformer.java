@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
@@ -28,7 +29,7 @@ public class MostRecentTransformer
     private Date latestToArchive;
     private Date earliestToArchive;
 
-    @Autowired
+    @Inject
     HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     @Override

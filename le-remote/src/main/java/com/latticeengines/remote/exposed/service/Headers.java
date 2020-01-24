@@ -7,7 +7,11 @@ import org.apache.http.message.BasicNameValuePair;
 
 import com.google.common.collect.ImmutableList;
 
-public class Headers {
+public final class Headers {
+
+    protected Headers() {
+        throw new UnsupportedOperationException();
+    }
 
     private static ImmutableList<BasicNameValuePair> headers = null;
 

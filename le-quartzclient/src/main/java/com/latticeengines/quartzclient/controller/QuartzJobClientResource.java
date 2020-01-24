@@ -1,8 +1,8 @@
 package com.latticeengines.quartzclient.controller;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +19,7 @@ import com.latticeengines.quartzclient.service.QuartzJobService;
 @ComponentScan({ "com.latticeengines.quartzclient.service" })
 public class QuartzJobClientResource {
 
-    @Autowired
+    @Inject
     private QuartzJobService quartzJobService;
 
     @RequestMapping(value = "/triggerjob", method = RequestMethod.POST, headers = "Accept=application/json")

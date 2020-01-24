@@ -1,7 +1,8 @@
 package com.latticeengines.dataflowapi.yarn.client;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,7 @@ import com.latticeengines.yarn.exposed.client.SingleContainerClientCustomization
 @Component("dataflowClientCustomization")
 public class DataFlowClientCustomization extends SingleContainerClientCustomization {
 
-    @Autowired
+    @Inject
     public DataFlowClientCustomization(Configuration yarnConfiguration, //
             @Value("${dataplatform.hdfs.stack:}") String stackname,
             VersionManager versionManager, //

@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
@@ -18,13 +19,12 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
-
 public class ModelingServiceValidationTestNG extends DataPlatformFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ModelingService modelingService;
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
     @Value("${dataplatform.dlorchestration.datasource.host}")

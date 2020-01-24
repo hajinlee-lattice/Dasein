@@ -3,7 +3,11 @@ package com.latticeengines.common.exposed.metric;
 /**
  * Tag value constant class for metrics
  */
-public class MetricTags {
+public final class MetricTags {
+
+    protected MetricTags() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String TAG_TENANT = "Tenant";
     public static final String TAG_DYNAMO_TABLE = "Table";
@@ -39,11 +43,13 @@ public class MetricTags {
     }
 
     /*-
-     * tags for tests
+     * tags for generic invocation meter
      */
-    public static class Test {
-        public static final String TAG_TEST_GROUP = "TestGroup";
-        public static final String TAG_TEST_CLASS = "TestClass";
-        public static final String TAG_TEST_METHOD = "TestMethod";
+    public static class Invocation {
+        public static final String TAG_METHOD_NAME = "MethodName";
+        public static final String TAG_HAS_ERROR = "HasError";
+        public static final String TAG_CAN_IGNORE = "CanIgnore";
+        // generic tags, add more as needed
+        public static final String TAG_GENERIC = "Tag%02d";
     }
 }

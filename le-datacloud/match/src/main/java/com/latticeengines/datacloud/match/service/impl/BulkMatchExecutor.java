@@ -2,7 +2,8 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
@@ -12,7 +13,7 @@ import com.latticeengines.datacloud.match.service.MatchExecutor;
 @Component("bulkMatchExecutor")
 class BulkMatchExecutor extends MatchExecutorBase implements MatchExecutor {
 
-    @Autowired
+    @Inject
     private BeanDispatcher beanDispatcher;
 
     @Override

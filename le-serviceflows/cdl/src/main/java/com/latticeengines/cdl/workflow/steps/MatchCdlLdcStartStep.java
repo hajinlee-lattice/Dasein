@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -11,7 +12,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Component("matchCdlLdcStartStep")
 public class MatchCdlLdcStartStep extends BaseWorkflowStep<MatchCdlStepConfiguration> {
 
-    @Autowired
+    @Inject
     protected MetadataProxy metadataProxy;
 
     @Override

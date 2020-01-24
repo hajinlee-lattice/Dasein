@@ -15,7 +15,6 @@ import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -80,19 +79,19 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
     protected RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
-    @Autowired
+    @Inject
     private GlobalTenantManagementService globalTenantManagementService;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
@@ -321,7 +320,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         try {
             globalUserManagementService.grantRight(right, tenantId, username);
         } catch (LedpException e) {
-            // ignore
+            log.debug("User {} already has {} right to tenant {}", username, right, tenantId);
         }
     }
 

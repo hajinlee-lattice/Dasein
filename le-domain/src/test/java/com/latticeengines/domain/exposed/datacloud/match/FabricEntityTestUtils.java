@@ -20,7 +20,11 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.xerial.snappy.Snappy;
 
-class FabricEntityTestUtils {
+final class FabricEntityTestUtils {
+
+    protected FabricEntityTestUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Codec codec = new BZip2Codec();
 
     static GenericRecord bytesToAvro(byte[] bytes, Schema schema, boolean compression, CompressAlgo algo) {

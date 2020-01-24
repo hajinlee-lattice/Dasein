@@ -10,7 +10,11 @@ import org.apache.commons.text.StringEscapeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class EmailUtils {
+public final class EmailUtils {
+
+    protected EmailUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
 

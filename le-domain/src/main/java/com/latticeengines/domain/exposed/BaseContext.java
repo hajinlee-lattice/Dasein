@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
 
+import com.latticeengines.domain.exposed.yarn.YarnProperty;
+
 public class BaseContext {
 
     private Map<String, Object> properties = new HashMap<String, Object>();
@@ -14,7 +16,7 @@ public class BaseContext {
     }
 
     public BaseContext(Configuration yarnConfiguration) {
-        setProperty(BaseProperty.HADOOPCONFIG, yarnConfiguration);
+        setProperty(YarnProperty.HADOOPCONFIG, yarnConfiguration);
     }
 
     public BaseContext(BaseContext other) {

@@ -19,7 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(locations = { "classpath:test-redshiftdb-context.xml" })
 public abstract class AbstractLoadTest implements Callable<String> {
-    private static final Logger log = LoggerFactory.getLogger(RedshiftLoadTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractLoadTest.class);
     protected JdbcTemplate redshiftJdbcTemplate;
     protected String testerID;
     protected LoadTestStatementType sqlStatementType;

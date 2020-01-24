@@ -5,8 +5,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -15,10 +16,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-
 public class AdminResourceDeploymentTestNG extends MetadataDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     protected TenantService tenantService;
 
     // TODO: disabled for M19 release, can try turn back later

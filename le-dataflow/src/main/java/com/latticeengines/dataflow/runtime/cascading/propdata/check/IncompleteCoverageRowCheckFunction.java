@@ -71,15 +71,12 @@ public class IncompleteCoverageRowCheckFunction extends BaseOperation implements
                 keyFieldVal = arguments.getObject(keyField);
             } else {
                 String[] keyFieldList = keyField.split(",");
-                for (int i = 0; i < keyFieldList.length; i++) {
-                    if ((arguments.getObject(keyFieldList[i]) != null)
-                            && (arguments.getObject(keyFieldList[i]) != ""))
-                        if (keyFieldVal == "") {
-                            keyFieldVal = keyFieldVal
-                                    + arguments.getObject(keyFieldList[i]).toString();
+                for (String s : keyFieldList) {
+                    if (arguments.getObject(s) != null && !"".equals(arguments.getObject(s)))
+                        if ("".equals(keyFieldVal)) {
+                            keyFieldVal = keyFieldVal + arguments.getObject(s).toString();
                         } else {
-                            keyFieldVal = keyFieldVal + ","
-                                    + arguments.getObject(keyFieldList[i]).toString();
+                            keyFieldVal = keyFieldVal + "," + arguments.getObject(s).toString();
                         }
                 }
             }
@@ -90,7 +87,7 @@ public class IncompleteCoverageRowCheckFunction extends BaseOperation implements
                             .add(setTupleVal(result, keyFieldVal, checkField, chkCoveragFieldVal));
                 }
             } else {
-                if (chkCoveragFieldVal == "" || chkCoveragFieldVal == null
+                if ("".equals(chkCoveragFieldVal) || chkCoveragFieldVal == null
                         || !coverageFields.contains(chkCoveragFieldVal)) {
                     functionCall.getOutputCollector()
                             .add(setTupleVal(result, keyFieldVal, checkField, chkCoveragFieldVal));

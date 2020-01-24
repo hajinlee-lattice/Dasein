@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -32,7 +31,6 @@ import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.aws.dynamo.impl.DynamoItemServiceImpl;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordExportCounter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -41,17 +39,11 @@ import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 
 public class AtlasLookupCacheExportMapper extends AvroExportMapper implements AvroRowHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(DynamoExportMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(AtlasLookupCacheExportMapper.class);
 
-    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(60);
     private static final int BUFFER_SIZE = 25;
     private static final String ATTR_PARTITION_KEY = "Key";
     private static final String ATTR_ACCOUNT_ID = "AccountId";
-
-    private String recordType;
-    private String repo;
-    private DynamoDataStoreImpl dataStore;
-    private Class<?> entityClass;
 
     private String tenant;
     private String tableName;

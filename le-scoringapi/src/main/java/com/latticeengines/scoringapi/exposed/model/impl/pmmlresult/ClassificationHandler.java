@@ -21,11 +21,11 @@ public class ClassificationHandler extends PMMLResultHandlerBase {
     public void processResult(Evaluator evaluator, Map<ScoreType, Object> result, Object originalResult) {
         Classification distribution = (Classification) originalResult;
         Object r = null;
-        
+
         try {
             r = distribution.getResult();
             result.put(ScoreType.CLASSIFICATION, r);
-        } catch (EvaluationException e) {
+        } catch (EvaluationException ignore) {
             // this means it's Lattice RF model
         }
 

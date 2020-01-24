@@ -15,9 +15,13 @@ import org.springframework.yarn.client.YarnClient;
 
 import com.google.common.base.Strings;
 
-public class YarnUtils {
+public final class YarnUtils {
 
-    private static Logger log = LoggerFactory.getLogger(YarnUtils.class);
+    protected YarnUtils() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(YarnUtils.class);
 
     public static final EnumSet<FinalApplicationStatus> TERMINAL_STATUS = EnumSet.of(FinalApplicationStatus.FAILED,
             FinalApplicationStatus.KILLED, FinalApplicationStatus.SUCCEEDED);
@@ -82,11 +86,8 @@ public class YarnUtils {
             } catch (Exception e) {
                 log.warn("Failed to get application status of application id " + applicationId);
             }
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
+
+            SleepUtils.sleep(5000L);
             i++;
 
             if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {
@@ -120,11 +121,8 @@ public class YarnUtils {
             } catch (Exception e) {
                 log.warn("Failed to get application status of application id " + applicationId);
             }
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                // Do nothing for InterruptedException
-            }
+
+            SleepUtils.sleep(5000L);
             i++;
 
             if (i >= maxTries || (System.currentTimeMillis() - startTime) >= timeoutInSec * 1000L) {

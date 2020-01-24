@@ -21,7 +21,11 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
-public class RestrictionOptimizer {
+public final class RestrictionOptimizer {
+
+    protected RestrictionOptimizer() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void optimize(FrontEndQuery frontEndQuery) {
         if (frontEndQuery.getAccountRestriction() != null) {

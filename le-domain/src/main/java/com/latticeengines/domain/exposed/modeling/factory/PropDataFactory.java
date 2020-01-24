@@ -7,7 +7,11 @@ import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 
-public class PropDataFactory {
+public final class PropDataFactory {
+
+    protected PropDataFactory() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String PROPDATA_NAME_KEY = "propdata.name";
     private static final Logger log = LoggerFactory.getLogger(PropDataFactory.class);

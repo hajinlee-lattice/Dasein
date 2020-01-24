@@ -7,7 +7,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public class ValidateFileHeaderUtils {
+public final class ValidateFileHeaderUtils {
+
+    protected ValidateFileHeaderUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String CSV_INJECTION_CHARACHTERS = "@+-=";
 

@@ -2,7 +2,8 @@ package com.latticeengines.metadata.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Artifact;
@@ -13,7 +14,7 @@ import com.latticeengines.metadata.service.ArtifactService;
 @Component("artifactService")
 public class ArtifactServiceImpl implements ArtifactService {
 
-    @Autowired
+    @Inject
     private ArtifactEntityMgr artifactEntityMgr;
 
     @Override

@@ -8,16 +8,12 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 @Aspect
 public class RateLimiterAspect implements ApplicationContextAware {
-
-    public static Logger log = LoggerFactory.getLogger(RateLimiterAspect.class);
 
     private ApplicationContext applicationContext;
 
@@ -32,9 +28,6 @@ public class RateLimiterAspect implements ApplicationContextAware {
         } else {
             RateCounter rateCounter = applicationContext.getBean(rateLimit.argumentParser());
 
-            if (rateCounter == null) {
-                return joinPoint.proceed();
-            }
             return checkRateLimit(joinPoint, rateLimit, rateCounter);
         }
     }

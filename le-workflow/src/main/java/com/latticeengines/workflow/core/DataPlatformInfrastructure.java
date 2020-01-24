@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.core;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.hibernate.exception.LockAcquisitionException;
@@ -11,7 +12,6 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -37,10 +37,10 @@ public class DataPlatformInfrastructure implements BatchConfigurer {
     @Resource(name = "transactionManagerWorkflow")
     private PlatformTransactionManager transactionManager;
 
-    @Autowired
+    @Inject
     private TaskExecutor simpleAsyncTaskExecutor;
 
-    @Autowired
+    @Inject
     private LEJobExecutionRetriever leJobExecutionRetriever;
 
     @Value("${db.datasource.type}")

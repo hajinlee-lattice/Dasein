@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserDocument;
@@ -18,17 +19,15 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-
-
 public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
     protected Tenant testTenant;
@@ -42,8 +41,8 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
         destroyTestTenant();
         try {
             tenantService.registerTenant(testTenant);
-        } catch (ConstraintViolationException e) {
-            //ignore
+        } catch (ConstraintViolationException ignore) {
+            // tenant already exist
         }
     }
 
@@ -52,13 +51,13 @@ public class UserResourceTestNGBase extends SecurityFunctionalTestNGBase {
             for (User user: userService.getUsers(testTenant.getId())) {
                 makeSureUserDoesNotExist(user.getUsername());
             }
-        } catch (LedpException e ) {
-            // ignore
+        } catch (LedpException ignore) {
+            // user is already deleted
         }
         try {
             tenantService.discardTenant(testTenant);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // tenant is already deleted
         }
     }
 

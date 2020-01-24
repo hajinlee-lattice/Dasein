@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -34,14 +33,13 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("playLaunchExportPublishToSNSStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-
 public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunchExportPublishToSNSConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchExportPublishToSNSStep.class);
 
     @Inject
     private SNSService snsService;
-    @Autowired
+    @Inject
     private ChannelConfigProcessor channelConfigProcessor;
 
     @Inject
@@ -52,10 +50,6 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
 
     @Value("${aws.customer.export.s3.bucket}")
     protected String exportS3Bucket;
-
-    private Map<String, List<ExportFileConfig>> sourceFiles = new HashMap<>();
-
-    private List<String> s3ExportFilePaths;
 
     @Override
     public void execute() {
@@ -70,7 +64,8 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
     public PublishResult publishToSnsTopic(String customerSpace, String workflowRequestId) {
         PlayLaunchExportPublishToSNSConfiguration config = getConfiguration();
         LookupIdMap lookupIdMap = config.getLookupIdMap();
-        sourceFiles = getFiles(PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, s3ExportFilePaths);
+        Map<String, List<ExportFileConfig>> sourceFiles = //
+                getFiles(PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS);
 
         DropBoxSummary dropboxSummary = dropBoxProxy.getDropBox(customerSpace);
         ExternalIntegrationMessageBody messageBody = new ExternalIntegrationMessageBody();
@@ -104,13 +99,11 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
     /**
      * @param key
      *            {@link PlayLaunchWorkflowConfiguration}
-     * @param s3ExportFilePaths
-     *            {@link List}
      * @return {@link Map} with the files from S3
      */
-    private Map<String, List<ExportFileConfig>> getFiles(String key, List<String> s3ExportFilePaths) {
+    private Map<String, List<ExportFileConfig>> getFiles(String key) {
         Map<String, List<ExportFileConfig>> retFiles = new HashMap<>();
-        s3ExportFilePaths = super.getListObjectFromContext(key, String.class);
+        List<String> s3ExportFilePaths = super.getListObjectFromContext(key, String.class);
         s3ExportFilePaths.forEach(exportPath -> {
             List<ExportFileConfig> fileConfigs = retFiles.getOrDefault(FilenameUtils.getExtension(exportPath),
                     new ArrayList<>());
@@ -125,11 +118,6 @@ public class PlayLaunchExportPublishToSNSStep extends BaseWorkflowStep<PlayLaunc
     @VisibleForTesting
     public void setDropBoxProxy(DropBoxProxy dropBoxProxy) {
         this.dropBoxProxy = dropBoxProxy;
-    }
-
-    @VisibleForTesting
-    public void setS3ExportFiles(List<String> exportFiles) {
-        s3ExportFilePaths = exportFiles;
     }
 
 }

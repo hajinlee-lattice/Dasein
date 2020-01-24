@@ -6,7 +6,8 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -23,20 +24,19 @@ import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorith
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.yarn.exposed.entitymanager.JobEntityMgr;
-
 public class JobEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private ModelingJob modelingJob;
     private ModelDefinition modelDef = new ModelDefinition();
     private Model model = new Model();
 
-    @Autowired
+    @Inject
     protected JobEntityMgr jobEntityMgr;
 
-    @Autowired
+    @Inject
     protected ModelEntityMgr modelEntityMgr;
 
-    @Autowired
+    @Inject
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
     @BeforeClass(groups = { "functional", "functional.production" })

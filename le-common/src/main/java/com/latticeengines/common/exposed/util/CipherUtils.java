@@ -22,7 +22,11 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
-public class CipherUtils {
+public final class CipherUtils {
+
+    protected CipherUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(CipherUtils.class);
 
     static final String ENCRYPTED = "encrypted";

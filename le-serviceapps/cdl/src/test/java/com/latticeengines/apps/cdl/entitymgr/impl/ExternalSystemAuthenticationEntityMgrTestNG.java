@@ -19,6 +19,7 @@ import com.latticeengines.apps.cdl.entitymgr.ExternalSystemAuthenticationEntityM
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
@@ -26,7 +27,7 @@ import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
-    private Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(ExternalSystemAuthenticationEntityMgrTestNG.class);
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
@@ -40,7 +41,7 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdMappings(null, null, true);
         assertNotNull(lookupIdsMapping);
         assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
         List<ExternalSystemAuthentication> auths = extSysAuthenticationEntityMgr.findAuthentications();
@@ -95,11 +96,7 @@ public class ExternalSystemAuthenticationEntityMgrTestNG extends CDLFunctionalTe
         updatedSysAuth.setTrayAuthenticationId(UUID.randomUUID().toString());
         updatedSysAuth.setSolutionInstanceId(UUID.randomUUID().toString());
         extSysAuthenticationEntityMgr.updateAuthentication(extSysAuth.getId(), updatedSysAuth);
-        try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            // Ignore
-        }
+        SleepUtils.sleep(2000L);
         updatedSysAuth = extSysAuthenticationEntityMgr.findAuthenticationByAuthId(extSysAuthRef.getId());
         verifyCurrentObject(updatedSysAuth);
         log.info(JsonUtils.serialize(updatedSysAuth));

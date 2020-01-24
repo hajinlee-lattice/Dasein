@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -65,16 +65,16 @@ public class LatticeInsightsResource {
 
     public static final String ATTR_CONFIG_PATH = "/attrconfig";
 
-    @Autowired
+    @Inject
     private AttributeService attributeService;
 
-    @Autowired
+    @Inject
     private EnrichmentService enrichmentService;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
-    @Autowired
+    @Inject
     private LPAttrConfigProxy proxy;
 
     // ------------START for Insights-------------------//

@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.cdl;
 
-public class CDLConstants {
+public final class CDLConstants {
+
+    protected CDLConstants() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String DEFAULT_VISIDB_USER = "Default VisiDB User";
     public static final String DEFAULT_SYSTEM_USER = "system@lattice-engines.com";

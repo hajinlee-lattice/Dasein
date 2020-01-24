@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -40,12 +40,10 @@ public class AccountMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
     @Value("${datacloud.match.planner.account.executors.num}")
     private int executorNum;
 
-    @Inject
-    @Qualifier("matchActorSystem")
+    @Resource(name = "matchActorSystem")
     protected MatchActorSystem matchActorSystem;
 
-    @Inject
-    @Qualifier("matchGuideBook")
+    @Resource(name = "matchGuideBook")
     protected MatchGuideBook guideBook;
 
     @Inject

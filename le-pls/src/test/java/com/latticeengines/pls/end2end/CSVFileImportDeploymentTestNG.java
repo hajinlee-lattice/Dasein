@@ -23,7 +23,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -65,17 +64,16 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
 public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Inject
     private ActionProxy actionProxy;
 
-    @Autowired
+    @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
 
 

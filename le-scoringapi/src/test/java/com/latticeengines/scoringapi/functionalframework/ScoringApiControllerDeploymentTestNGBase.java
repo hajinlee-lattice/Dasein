@@ -9,14 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -89,10 +88,10 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Value("${common.test.oauth.url}")
     protected String authHostPort;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected LatticeOAuth2RestTemplateFactory latticeOAuth2RestTemplateFactory;
 
     @Inject
@@ -101,8 +100,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Inject
     protected MetadataProxy metadataProxy;
 
-    @Autowired
-    @Qualifier(value = "deploymentTestBed")
+    @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
 
     @Inject
@@ -424,7 +422,7 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
                 FieldInterpretation fi = FieldInterpretation.valueOf(field.getFieldName());
                 Assert.assertEquals(field.isPrimaryField(),
                         FieldInterpretationCollections.PrimaryMatchingFields.contains(fi));
-            } catch (Exception e) {
+            } catch (Exception ignore) {
                 // Ignore. As it is not a Mapped to FieldInterpretation
             }
         }

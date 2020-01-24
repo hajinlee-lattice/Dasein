@@ -7,13 +7,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -48,16 +49,16 @@ public class DataExtractionServiceImpl implements DataExtractionService {
 
     private static final Logger log = LoggerFactory.getLogger(DataExtractionServiceImpl.class);
 
-    @Autowired
+    @Inject
     private EaiMetadataService eaiMetadataService;
 
-    @Autowired
+    @Inject
     private EaiImportJobDetailService eaiImportJobDetailService;
 
-    @Autowired
+    @Inject
     private EaiYarnService eaiYarnService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Override

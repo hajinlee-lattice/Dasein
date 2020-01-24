@@ -42,7 +42,7 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
-    private static Logger log = LoggerFactory.getLogger(AbstractGlobalAuthTestBed.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractGlobalAuthTestBed.class);
 
     private static final String customerBase = "/user/s-analytics/customers";
 
@@ -279,7 +279,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     /**
      * Use an already logged in UserDocument
-     * 
+     *
      * @param doc
      */
     public void useSessionDoc(UserDocument doc) {

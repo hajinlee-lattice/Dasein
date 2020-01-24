@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -25,7 +26,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -59,7 +59,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
 
     private static final Logger log = LoggerFactory.getLogger(DataFlowCascadingTestNGBase.class);
 
-    @Autowired
+    @Inject
     private DataTransformationService dataTransformationService;
 
     protected Configuration yarnConfiguration = new Configuration();

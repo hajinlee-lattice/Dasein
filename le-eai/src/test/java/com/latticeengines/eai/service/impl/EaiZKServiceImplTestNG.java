@@ -2,7 +2,8 @@ package com.latticeengines.eai.service.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,10 +17,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.eai.config.HttpClientConfig;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.eai.service.EaiZKService;
-
 public class EaiZKServiceImplTestNG extends EaiFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private EaiZKService eaiZKService;
 
     private String customer = this.getClass().getSimpleName();

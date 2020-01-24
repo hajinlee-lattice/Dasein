@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -15,7 +17,6 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -103,13 +104,13 @@ public class FuzzyMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
     private static final String NAME_PHONE_FILENAME = "BulkFuzzyMatchInput_NamePhone.avro";
     private static final String NAME_ZIPCODE_FILENAME = "BulkFuzzyMatchInput_NameZipCode.avro";
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @Test(groups = "deployment", dataProvider = "realtimeScenarios", enabled = false)

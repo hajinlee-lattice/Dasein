@@ -2,6 +2,7 @@ package com.latticeengines.camille.exposed.config.bootstrap;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,11 @@ import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 /**
  * A high-level class responsible for service registration and bootstrap.
  */
-public class ServiceWarden {
+public final class ServiceWarden {
+
+    protected ServiceWarden() {
+        throw new UnsupportedOperationException();
+    }
     /**
      * To be invoked from code residing within the service itself.
      */
@@ -34,7 +39,7 @@ public class ServiceWarden {
     }
 
     private static String getBootstrapMessageQueueName(String serviceName) {
-        if (serviceName == null || serviceName == "") {
+        if (StringUtils.isBlank(serviceName)) {
             throw new IllegalArgumentException("In getBootstrapMessageQueueName, serviceName cannot be null or empty");
         }
 

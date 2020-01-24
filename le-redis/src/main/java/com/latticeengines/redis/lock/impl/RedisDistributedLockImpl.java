@@ -3,10 +3,10 @@ package com.latticeengines.redis.lock.impl;
 import java.util.Collections;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -18,7 +18,7 @@ import com.latticeengines.redis.lock.RedisDistributedLock;
 @Component("redisDistributedLock")
 public class RedisDistributedLockImpl implements RedisDistributedLock {
 
-    @Autowired
+    @Inject
     private RedisTemplate<String, Object> redisTemplate;
 
     private final Long SUCCESS = 1L;
@@ -28,7 +28,7 @@ public class RedisDistributedLockImpl implements RedisDistributedLock {
     private RedisScript<Long> unlockScript;
 
     private RedisScript<String> getLockScript;
-    
+
     @Value("${common.redis.lock.maxattempts}")
     private int maxAttempts;
     @Value("${common.redis.lock.sleepinterval}")
@@ -88,8 +88,7 @@ public class RedisDistributedLockImpl implements RedisDistributedLock {
     @Override
     public String get(String key) {
         try {
-            String result = redisTemplate.execute(getLockScript, Collections.singletonList(key));
-            return result;
+            return redisTemplate.execute(getLockScript, Collections.singletonList(key));
         } catch (Exception e) {
             logger.error("Exception happened while getting redis lock value: ", e);
         }
@@ -102,7 +101,6 @@ public class RedisDistributedLockImpl implements RedisDistributedLock {
             return setRedis(key, requestId, -1l, false);
         } catch (Exception e) {
             logger.error("Exception happened while releasing redis lock: ", e);
-        } finally {
         }
         return false;
     }

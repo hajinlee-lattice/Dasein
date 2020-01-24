@@ -16,7 +16,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Preconditions;
 import com.latticeengines.domain.exposed.datacloud.ingestion.VersionCheckStrategy;
 
-public class VersionUtils {
+public final class VersionUtils {
+
+    protected VersionUtils() {
+        throw new UnsupportedOperationException();
+    }
     /**
      * If file/directory path contains timestamp info, return versions of most
      * recent xx months/weeks/days or all versions

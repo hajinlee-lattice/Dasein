@@ -8,7 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class WorkflowConfigurationUtils {
+public final class WorkflowConfigurationUtils {
+
+    protected WorkflowConfigurationUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowConfigurationUtils.class);
 

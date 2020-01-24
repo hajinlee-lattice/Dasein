@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -21,17 +22,16 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.source.PivotConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-
 public class FeaturePivotServiceImplTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
-    @Autowired
+    @Inject
     FeaturePivoted source;
 
-    @Autowired
+    @Inject
     FeatureMostRecent baseSource;
 
-    @Autowired
+    @Inject
     private FeaturePivotFlow featurePivotFlow;
 
     ObjectMapper om = new ObjectMapper();

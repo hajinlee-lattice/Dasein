@@ -7,7 +7,11 @@ import java.util.Set;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 
-public class PivotMappingFileUtils {
+public final class PivotMappingFileUtils {
+
+    protected PivotMappingFileUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static List<Attribute> createAttrsFromPivotSourceColumns(Set<String> sourceColumnNames,
             List<Attribute> attrs) {

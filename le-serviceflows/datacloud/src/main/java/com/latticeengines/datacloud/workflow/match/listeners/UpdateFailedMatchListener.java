@@ -16,6 +16,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
@@ -93,12 +94,8 @@ public class UpdateFailedMatchListener extends LEJobListener {
                         yarnClient.killApplication(appId);
                     }
 
-                    try {
-                        log.info("Wait 10 sec to let applications drain.");
-                        Thread.sleep(10000L);
-                    } catch (Exception e) {
-                        // ignore
-                    }
+                    log.info("Wait 10 sec to let applications drain.");
+                    SleepUtils.sleep(10000L);
 
                     String blockId = block.getBlockOperationUid();
                     matchCommandService.updateBlockByApplicationReport(blockId, report);

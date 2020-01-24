@@ -11,11 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -33,16 +34,15 @@ import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.eai.service.impl.file.strategy.FileEventTableImportStrategyBase;
 import com.latticeengines.yarn.exposed.service.JobService;
-
 public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private ImportService fileImportService;
 
-    @Autowired
+    @Inject
     private EaiMetadataService eaiMetadataService;
 
-    @Autowired
+    @Inject
     private FileEventTableImportStrategyBase fileEventTableImportStrategyBase;
 
     private URL metadataUrl;

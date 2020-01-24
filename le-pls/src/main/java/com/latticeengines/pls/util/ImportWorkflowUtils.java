@@ -50,7 +50,11 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 
 
-public class ImportWorkflowUtils {
+public final class ImportWorkflowUtils {
+
+    protected ImportWorkflowUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowUtils.class);
 
     // TODO(jwinter): Reconsider if the Spec section for Custom Fields should be indicated in a different manner
@@ -1000,8 +1004,8 @@ public class ImportWorkflowUtils {
                                     FieldValidationMessage.MessageLevel.ERROR));
                             continue;
                         }
-                        // WARNING if the auto-detected fieldType based on column data doesn’t match the Spec defined
-                        // fieldType of a Lattice Field
+                        // Error/Warning if the auto-detected fieldType based on column data doesn’t match the Spec
+                        // defined fieldType of a Lattice Field
                         if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
                                 definition) && !FieldDefinitionSectionName.Match_To_Accounts_ID.getName().equals(sectionName)
                                 && !FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName)) {
@@ -1011,8 +1015,14 @@ public class ImportWorkflowUtils {
                                     autoDetectedFieldDefinition.getFieldType(),
                                     autoDetectedFieldDefinition.getColumnName(), definition.getFieldType(),
                                     definition.getFieldName(), sectionName);
-                            validations.add(new FieldValidationMessage(fieldName,
-                                    columnName, message, FieldValidationMessage.MessageLevel.WARNING));
+                            if (checkLegalFieldTypeConversions(autoDetectedFieldDefinition.getFieldType(),
+                                    definition.getFieldType()))  {
+                                validations.add(new FieldValidationMessage(fieldName,
+                                        columnName, message, FieldValidationMessage.MessageLevel.WARNING));
+                            } else {
+                                validations.add(new FieldValidationMessage(fieldName,
+                                        columnName, message, FieldValidationMessage.MessageLevel.ERROR));
+                            }
                         }
                         if (UserDefinedType.DATE.equals(definition.getFieldType())) {
                             FieldDefinition existingFieldDefinition = existingFieldDefinitionMap.getOrDefault(fieldName,
@@ -1248,6 +1258,25 @@ public class ImportWorkflowUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * the type with small scope can be parsed into type big scope normally
+     * caution: for UserDefinedType.BOOLEAN, system only accepts four values ("true", "false", "yes", "no") as
+     * boolean in MetadataResolver#isBooleanTypeColumn, so when auto-detected type is boolean, the type for template
+     * is other types except for TEXT, need to error out
+     * @param autoDetectedType
+     * @param templateType
+     * @return
+     */
+    private static boolean checkLegalFieldTypeConversions(UserDefinedType autoDetectedType,
+                                                       UserDefinedType templateType) {
+        if (UserDefinedType.TEXT.equals(templateType)) {
+            return true;
+        } else if (UserDefinedType.NUMBER.equals(templateType)) {
+            return UserDefinedType.INTEGER.equals(autoDetectedType);
+        }
+        return false;
     }
 
     /**

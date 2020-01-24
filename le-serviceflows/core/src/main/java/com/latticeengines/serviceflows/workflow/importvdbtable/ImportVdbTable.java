@@ -3,9 +3,10 @@ package com.latticeengines.serviceflows.workflow.importvdbtable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,7 @@ public class ImportVdbTable extends BaseWorkflowStep<ImportVdbTableStepConfigura
 
     private static final Logger log = LoggerFactory.getLogger(ImportVdbTable.class);
 
-    @Autowired
+    @Inject
     private EaiProxy eaiProxy;
 
     @Override

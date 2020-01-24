@@ -2,7 +2,8 @@ package com.latticeengines.playmaker.functionalframework;
 
 import java.net.InetAddress;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -21,7 +22,7 @@ public class PlaymakerTestNGBase extends AbstractTestNGSpringContextTests {
 
     protected PlaymakerTenant tenant;
 
-    @Autowired
+    @Inject
     protected PlaymakerTenantEntityMgr playMakerEntityMgr;
 
     public void beforeClass() {

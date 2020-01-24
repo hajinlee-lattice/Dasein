@@ -4,11 +4,12 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -28,7 +29,7 @@ public class JdbcTemplateFactoryImpl implements JdbcTemplateFactory {
 
     private Map<String, TemplateInfo> jdbcTemplates = new ConcurrentHashMap<>();
 
-    @Autowired
+    @Inject
     private PlaymakerTenantEntityMgr tenantEntityMgr;
 
     @Value("${playmaker.jdbc.pool.min.size}")

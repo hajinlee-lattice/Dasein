@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public class TestDunsGuideBookUtils {
+public final class TestDunsGuideBookUtils {
+
+    protected TestDunsGuideBookUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static final String TEST_CASE_ID_FIELD = "TestId"; // field used to identify test cases
 
     /**

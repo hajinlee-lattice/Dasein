@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,17 +35,16 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.security.exposed.AccessLevel;
 
-
 @Component("serviceService")
 public class ServiceServiceImpl implements ServiceService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceServiceImpl.class);
 
     private final String listDelimiter = ",";
 
-    @Autowired
+    @Inject
     private ServiceEntityMgr serviceEntityMgr;
 
-    @Autowired
+    @Inject
     private ServiceConfigService serviceConfigService;
 
     private static BatonService batonService = new BatonServiceImpl();
@@ -52,7 +52,7 @@ public class ServiceServiceImpl implements ServiceService {
     public ServiceServiceImpl() {
     }
 
-    @Autowired
+    @Inject
     private ComponentOrchestrator orchestrator;
 
     @Override
@@ -115,9 +115,11 @@ public class ServiceServiceImpl implements ServiceService {
 
             String metaStr = null;
             try {
-                metaStr = camille.get(schemaPath).getData();
+                if (camille.exists(schemaPath)) {
+                    metaStr = camille.get(schemaPath).getData();
+                }
             } catch (Exception e) {
-                // ignore
+                throw new RuntimeException("Failed to read schema from " + schemaPath, e);
             }
 
             ObjectMapper mapper = new ObjectMapper();

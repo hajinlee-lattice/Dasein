@@ -20,7 +20,11 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
 
-public class BitEncodeUtils {
+public final class BitEncodeUtils {
+
+    protected BitEncodeUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 

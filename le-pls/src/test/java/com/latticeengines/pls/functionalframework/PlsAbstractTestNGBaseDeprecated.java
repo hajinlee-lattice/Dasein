@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -49,7 +49,7 @@ public abstract class PlsAbstractTestNGBaseDeprecated extends SecurityFunctional
     @Value("${pls.test.contract}")
     protected String contractId;
 
-    @Autowired
+    @Inject
     private InternalTestUserService internalTestUserService;
 
     protected UserDocument loginAndAttach(AccessLevel level, Tenant tenant) {

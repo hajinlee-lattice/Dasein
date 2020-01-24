@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
@@ -108,9 +109,15 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
+        return getDecoratedMetadata(customerSpace, entity, groups, version, null);
+    }
+
+    @Override
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+             List<ColumnSelection.Predefined> groups, Version version, StoreFilter filter) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
                 shortenCustomerSpace(customerSpace), entity);
-        url += getVersionGroupParm(version, groups);
+        url += getVersionGroupFilterParam(version, groups, filter);
         List<ColumnMetadata> list = getList("serving store metadata", url, ColumnMetadata.class);
         if (CollectionUtils.isNotEmpty(list)) {
             return Flux.fromIterable(list);
@@ -119,16 +126,27 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
         }
     }
 
-    private String getVersionGroupParm(DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
-        StringBuffer url = new StringBuffer();
+    private String getVersionGroupFilterParam(DataCollection.Version version,
+                                              Collection<ColumnSelection.Predefined> groups, StoreFilter filter) {
+        StringBuilder url = new StringBuilder();
+        boolean firstParam = true;
         if (version != null) {
-            url.append("?version=" + version.toString());
-            if (CollectionUtils.isNotEmpty(groups)) {
-                url.append("&groups=" + StringUtils.join(groups, ","));
+            url.append("?version=").append(version.toString());
+            firstParam = false;
+        }
+        if (CollectionUtils.isNotEmpty(groups)) {
+            if (firstParam) {
+                url.append("?groups=").append(StringUtils.join(groups, ","));
+                firstParam = false;
+            } else {
+                url.append("&groups=").append(StringUtils.join(groups, ","));
             }
-        } else {
-            if (CollectionUtils.isNotEmpty(groups)) {
-                url.append("?groups=" + StringUtils.join(groups, ","));
+        }
+        if (filter != null) {
+            if (firstParam) {
+                url.append("?filter=").append(filter.toString());
+            } else {
+                url.append("&filter=").append(filter.toString());
             }
         }
         return url.toString();

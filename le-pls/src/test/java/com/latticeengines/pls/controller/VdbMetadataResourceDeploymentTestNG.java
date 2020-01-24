@@ -108,7 +108,7 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
     }
 
     private VdbMetadataField getFieldToUpdate() {
-        VdbMetadataField field = (VdbMetadataField)originalFields.get(0).clone();
+        VdbMetadataField field = originalFields.get(0).cloneVdbMetadata();
         String displayName = "DisplayName_DeploymentTest_0";
         field.setDisplayName(displayName);
         return field;
@@ -141,7 +141,7 @@ public class VdbMetadataResourceDeploymentTestNG extends PlsDeploymentTestNGBase
         Random random = new Random();
         Integer maxCount = originalFields.size() > maxUpdatesCount ? maxUpdatesCount : originalFields.size();
         for (int i = 0; i < maxCount; i++) {
-            VdbMetadataField field = (VdbMetadataField)originalFields.get(i).clone();
+            VdbMetadataField field = originalFields.get(i).cloneVdbMetadata();
             field.setDisplayName("DisplayName_DeploymentTest_" + random.nextInt(1000));
             fieldsToUpdate.add(field);
         }

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -12,7 +13,7 @@ import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 @Component
 public class RateLimitingServiceImplTestNG extends DataCloudCoreFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private RateLimitingService rateLimitingService;
 
     @Test(groups = "functional")

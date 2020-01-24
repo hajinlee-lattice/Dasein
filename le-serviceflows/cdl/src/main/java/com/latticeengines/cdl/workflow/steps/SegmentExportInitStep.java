@@ -1,9 +1,10 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -29,13 +30,13 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportInitStep.class);
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private SegmentExportProcessorFactory segmentExportProcessorFactory;
 
-    @Autowired
+    @Inject
     private PlsInternalProxy plsInternalProxy;
 
     @Override

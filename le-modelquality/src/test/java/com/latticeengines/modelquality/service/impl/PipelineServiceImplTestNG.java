@@ -14,9 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -31,13 +33,12 @@ import com.latticeengines.modelquality.entitymgr.PipelineEntityMgr;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 import com.latticeengines.modelquality.service.PipelineService;
 import com.latticeengines.proxy.exposed.pls.PlsHealthCheckProxy;
-
 public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private PipelineService pipelineService;
 
-    @Autowired
+    @Inject
     private PipelineEntityMgr pipelineEntityMgr;
 
     private PlsHealthCheckProxy plsHealthCheckProxy = null;
@@ -119,11 +120,8 @@ public class PipelineServiceImplTestNG extends ModelQualityFunctionalTestNGBase 
         p.pipelineStepName = "Invalid_step_name";
         pipelineSteps.add(p);
 
-        try {
-            pipelineService.createPipeline("P1-Fail", "Trying to create invalid pipeline", pipelineSteps);
-        } catch (LedpException e) {
-            // expected, so do nothing
-        }
+        Assert.assertThrows(LedpException.class,
+                () -> pipelineService.createPipeline("P1-Fail", "Trying to create invalid pipeline", pipelineSteps));
         Pipeline result = pipelineEntityMgr.findByName("P1-Fail");
         assertNull(result);
     }

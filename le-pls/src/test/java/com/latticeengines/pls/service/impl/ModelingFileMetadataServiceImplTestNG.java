@@ -8,7 +8,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,7 +19,6 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
-
 public class ModelingFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private InputStream fileInputStream;
@@ -28,7 +28,7 @@ public class ModelingFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBa
     @Value("${pls.modelingservice.basedir}")
     private String modelingBaseDir;
 
-    @Autowired
+    @Inject
     private ModelingFileMetadataService modelingFileMetadataService;
 
     @Override

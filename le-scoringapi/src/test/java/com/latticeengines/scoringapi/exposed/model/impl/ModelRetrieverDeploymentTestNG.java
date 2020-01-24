@@ -4,10 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,12 +18,11 @@ import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiTestUtils;
-
 public class ModelRetrieverDeploymentTestNG extends ScoringApiControllerDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ModelRetrieverDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private ModelRetrieverImpl modelRetriever;
 
     @Test(groups = "deployment", enabled = true)

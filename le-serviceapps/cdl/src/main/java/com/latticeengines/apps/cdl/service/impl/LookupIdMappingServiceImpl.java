@@ -58,7 +58,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     @Override
     public Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
             boolean descending) {
-        List<LookupIdMap> configs = lookupIdMappingEntityMgr.getLookupIdsMapping(externalSystemType, sortby, descending)
+        List<LookupIdMap> configs = lookupIdMappingEntityMgr.getLookupIdMappings(externalSystemType, sortby, descending)
                 .stream().map(this::populateExportFolder)
                 .filter(c -> externalSystemType == null || c.getExternalSystemType() == externalSystemType)
                 .collect(Collectors.toList());

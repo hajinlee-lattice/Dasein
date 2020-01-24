@@ -2,7 +2,8 @@ package com.latticeengines.modelquality.entitymgr.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ import com.latticeengines.modelquality.entitymgr.DataFlowEntityMgr;
 @Component("dataFlowEntityMgr")
 public class DataFlowEntityMgrImpl extends BaseEntityMgrImpl<DataFlow> implements DataFlowEntityMgr {
 
-    @Autowired
+    @Inject
     private DataFlowDao dataFlowDao;
 
     @Override

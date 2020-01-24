@@ -2,11 +2,12 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +32,10 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
 
     private static final Logger log = LoggerFactory.getLogger(StatisticsContainerEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
     private StatisticsContainerDao statisticsContainerDao;
 
-    @Autowired
+    @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     @Override

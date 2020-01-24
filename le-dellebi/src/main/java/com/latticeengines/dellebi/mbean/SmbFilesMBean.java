@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
@@ -19,7 +19,7 @@ import jcifs.smb.SmbFile;
 @Component("smbFilesMBean")
 public class SmbFilesMBean {
 
-    static final Logger log = LoggerFactory.getLogger(SmbFilesMBean.class);
+    private static final Logger log = LoggerFactory.getLogger(SmbFilesMBean.class);
 
     private static final int TIMESTAMP_LENGTH = 6;
 
@@ -27,15 +27,15 @@ public class SmbFilesMBean {
 
     private static final int TOTALL_PARSEDSTR_LENGTH = 20;
 
-    public static final String INVALID_PARSEDSTR = "99999999999999999999";
+    private static final String INVALID_PARSEDSTR = "99999999999999999999";
 
     @Resource(name = "smbFileFlowService")
     protected FileFlowService smbFileFlowService;
 
-    @Autowired
+    @Inject
     protected DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
 
-    public String parseSmbFileName(String fileName) {
+    private String parseSmbFileName(String fileName) {
 
         String lastField;
 
@@ -53,7 +53,7 @@ public class SmbFilesMBean {
         return INVALID_PARSEDSTR;
     }
 
-    public String parseFileNameAsYear(String fileName) {
+    private String parseFileNameAsYear(String fileName) {
         String timestamp = "000000";
         String sequence = "000";
         String priority = "000";
@@ -79,7 +79,7 @@ public class SmbFilesMBean {
         return INVALID_PARSEDSTR;
     }
 
-    public String parseFileNameAsGeneral(String fileName) {
+    private String parseFileNameAsGeneral(String fileName) {
         String timestamp;
         String date;
         String sequence = "000";

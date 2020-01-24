@@ -2,7 +2,8 @@ package com.latticeengines.modelquality.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -11,10 +12,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.modelquality.functionalframework.ModelQualityDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.modelquality.ModelQualityProxy;
-
 public class PropDataResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private ModelQualityProxy modelQualityProxy;
 
     @Test(groups = "deployment", enabled = true)

@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.Test;
 
@@ -33,7 +32,6 @@ public class FixAttribute extends MetadataFunctionalTestNGBase {
     private AttributeEntityMgr attributeEntityMgr;
 
     @Inject
-    @Qualifier("jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
     @Test(groups = "manual")

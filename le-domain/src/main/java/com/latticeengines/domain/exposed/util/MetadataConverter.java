@@ -31,7 +31,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
-public class MetadataConverter {
+public final class MetadataConverter {
+
+    protected MetadataConverter() {
+        throw new UnsupportedOperationException();
+    }
     private static Set<Schema.Type> supportedAvroTypes = new HashSet<Schema.Type>();
 
     static {
@@ -352,6 +356,7 @@ public class MetadataConverter {
         if (schema.getType() == Schema.Type.UNION) {
             // only support [supported-type null] unions.
             if (schema.getTypes().size() != 2) {
+                throw new UnsupportedOperationException("only support [supported-type null] unions");
             }
             boolean foundNull = false;
             Schema.Type foundType = null;

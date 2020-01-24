@@ -5,17 +5,16 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dellebi.entitymanager.DellEbiConfigEntityMgr;
 import com.latticeengines.dellebi.entitymanager.DellEbiExecutionLogEntityMgr;
-import com.latticeengines.dellebi.flowdef.DailyFlow;
 import com.latticeengines.dellebi.service.DellEbiFlowService;
 import com.latticeengines.dellebi.service.FileFlowService;
 import com.latticeengines.dellebi.util.LoggingUtils;
@@ -26,24 +25,26 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLog;
 @Component("dellEbiFlowService")
 public class DellEbiFlowServiceImpl implements DellEbiFlowService {
 
-    private static final Logger log = LoggerFactory.getLogger(DailyFlow.class);
-    static final int FAIL_TRIES = 3;
+    private static final Logger log = LoggerFactory.getLogger(DellEbiFlowServiceImpl.class);
+
+    private static final int FAIL_TRIES = 3;
+
     @Resource(name = "localFileFlowService")
     private FileFlowService localFileFlowService;
 
     @Resource(name = "smbFileFlowService")
     private FileFlowService smbFileFlowService;
 
-    @Autowired
+    @Inject
     private DellEbiConfigEntityMgr dellEbiConfigEntityMgr;
 
     @Value("${dellebi.output.table.sample}")
     private String targetTable;
 
-    @Autowired
+    @Inject
     private DellEbiExecutionLogEntityMgr dellEbiExecutionLogEntityMgr;
 
-    @Autowired
+    @Inject
     private JdbcTemplate dellEbiTargetJDBCTemplate;
 
     @Override

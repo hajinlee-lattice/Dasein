@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -12,7 +13,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.datafabric.entitymanager.BaseFabricMessageMgr;
 import com.latticeengines.datafabric.entitymanager.FabricEntityProcessor;
@@ -27,12 +27,11 @@ import com.latticeengines.domain.exposed.datafabric.RecordKey;
 import com.latticeengines.domain.exposed.datafabric.TopicScope;
 import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
-
 public class BaseFabricMessageMgrImpl<T extends HasId<String>> implements BaseFabricMessageMgr<T> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseFabricMessageMgrImpl.class);
 
-    @Autowired
+    @Inject
     protected FabricMessageService messageService;
 
     private String topic;

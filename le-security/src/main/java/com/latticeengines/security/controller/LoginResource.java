@@ -261,8 +261,9 @@ public class LoginResource {
     public boolean forgotPasswordConfirmation(@RequestBody ResetPasswordConfirmationRequest request) {
         try {
             String userEmail = request.getUserEmail();
+            User user = userService.findByEmail(userEmail);
             String host = request.getHostPort();
-            emailService.sendPlsForgetPasswordConfirmationEmail(userEmail, host);
+            emailService.sendPlsForgetPasswordConfirmationEmail(user, host);
         } catch (Exception e) {
             log.error("Failed to password reset confirmation email.", e);
         }

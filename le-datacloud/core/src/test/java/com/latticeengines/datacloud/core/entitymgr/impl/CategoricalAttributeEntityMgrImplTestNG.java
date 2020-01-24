@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -23,15 +24,15 @@ public class CategoricalAttributeEntityMgrImplTestNG extends DataCloudCoreFuncti
     public static final String TEST_DIMENSION = "TestDimension";
     private static final List<String> TEST_ATTRS = Arrays.asList("Level1", "Level2", "Level3");
 
-    @Autowired
+    @Inject
     private CategoricalAttributeEntityMgr attributeEntityMgr;
 
-    @Autowired
-    @Qualifier("testCategoricalAttributeEntityMgr")
+    @Resource(name = "testCategoricalAttributeEntityMgr")
     private TestCategoricalAttributeEntityMgr testEntityMgr;
 
     private List<CategoricalAttribute> attributes;
     private CategoricalDimension dimension;
+
     @Test(groups = "functional")
     public void test() {
         cleanupHierarchy();

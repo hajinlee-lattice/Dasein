@@ -22,10 +22,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -61,7 +62,6 @@ import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
 public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file2.csv";
@@ -73,10 +73,10 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
     private String SCORE_FILE_METADATA_TEST = "SCORE_FILE_METADATA_TEST/";
     private SourceFile SOURCE_FILE = new SourceFile();
 
-    @Autowired
+    @Inject
     private ScoringFileMetadataService scoringFileMetadataService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @BeforeClass(groups = { "functional" })

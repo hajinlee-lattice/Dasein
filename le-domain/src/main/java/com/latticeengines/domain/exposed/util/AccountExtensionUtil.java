@@ -37,7 +37,11 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public class AccountExtensionUtil {
+public final class AccountExtensionUtil {
+
+    protected AccountExtensionUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(AccountExtensionUtil.class);
 

@@ -5,7 +5,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 
-public class MetadataSegmentExportConverter {
+public final class MetadataSegmentExportConverter {
+
+    protected MetadataSegmentExportConverter() {
+        throw new UnsupportedOperationException();
+    }
 
     public static AtlasExport convertToAtlasExport(MetadataSegmentExport metadataSegmentExport) {
         if (metadataSegmentExport == null) {

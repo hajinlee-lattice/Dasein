@@ -2,7 +2,8 @@ package com.latticeengines.metadata.service.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,7 @@ import com.latticeengines.metadata.service.AttributeService;
 @Component("attributeService")
 public class AttributeServiceImpl implements AttributeService {
 
-    @Autowired
+    @Inject
     private AttributeEntityMgr attributeEntityMgr;
 
     @Override

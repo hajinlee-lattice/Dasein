@@ -2,6 +2,7 @@ package com.latticeengines.pls.service;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -52,6 +53,8 @@ public interface CDLService {
 
     S3ImportSystem getS3ImportSystem(String customerSpace, String systemName);
 
+    S3ImportSystem getDefaultImportSystem(String customerSpace);
+
     List<S3ImportSystem> getAllS3ImportSystem(String customerSpace);
 
     List<S3ImportSystem> getS3ImportSystemWithFilter(String customerSpace, boolean filterAccount,
@@ -72,4 +75,12 @@ public interface CDLService {
     boolean createWebVisitProfile(String customerSpace, EntityType entityType, InputStream inputStream);
 
     boolean checkBundleUpload(String customerSpace);
+
+    /**
+     *
+     * @param customerSpace Identify current tenant
+     * @param entityType EntityType for current template.
+     * @return Attribute name as map key and Attribute display name as map value.
+     */
+    Map<String, String> getDecoratedDisplayNameMapping(String customerSpace, EntityType entityType);
 }

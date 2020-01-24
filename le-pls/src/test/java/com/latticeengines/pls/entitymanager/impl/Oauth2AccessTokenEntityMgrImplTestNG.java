@@ -2,7 +2,8 @@ package com.latticeengines.pls.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -13,16 +14,15 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class Oauth2AccessTokenEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private Oauth2AccessTokenEntityMgr oauth2AccessTokenEntityMgr;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @BeforeClass(groups = "functional")

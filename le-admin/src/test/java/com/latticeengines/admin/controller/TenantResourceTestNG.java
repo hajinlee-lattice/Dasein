@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,10 +18,9 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
-
 public class TenantResourceTestNG extends AdminFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private TestLatticeComponent testLatticeComponent;
 
     @SuppressWarnings("unchecked")

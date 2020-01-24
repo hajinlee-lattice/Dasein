@@ -2,7 +2,11 @@ package com.latticeengines.domain.exposed.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class TypeConversionUtil {
+public final class TypeConversionUtil {
+
+    protected TypeConversionUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String toString(Object fieldVal) {
         if (fieldVal == null) {

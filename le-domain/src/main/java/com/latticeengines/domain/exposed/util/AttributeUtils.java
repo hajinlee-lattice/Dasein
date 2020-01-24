@@ -28,8 +28,12 @@ import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
-public class AttributeUtils {
-    private static Logger log = LoggerFactory.getLogger(AttributeUtils.class);
+public final class AttributeUtils {
+
+    protected AttributeUtils() {
+        throw new UnsupportedOperationException();
+    }
+    private static final Logger log = LoggerFactory.getLogger(AttributeUtils.class);
 
     public static void copyPropertiesFromAttribute(Attribute source, Attribute dest) {
         copyPropertiesFromAttribute(source, dest, true);
@@ -151,7 +155,7 @@ public class AttributeUtils {
             Method m = null;
             try {
                 m = attrClass.getMethod(methodName, String.class);
-            } catch (Exception e) {
+            } catch (Exception ignore) {
                 // no method, skip
             }
 
@@ -228,7 +232,7 @@ public class AttributeUtils {
         try {
             destValue = property.getReadMethod().invoke(attribute);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            // warn
+            log.warn("Failed to invoke a read method attribute", e);
         }
         return destValue;
     }
@@ -237,7 +241,7 @@ public class AttributeUtils {
         try {
             property.getWriteMethod().invoke(attribute, value);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            // warn
+            log.warn("Failed to invoke a write method attribute", e);
         }
     }
 

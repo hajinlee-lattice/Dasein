@@ -8,7 +8,6 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.springframework.batch.core.BatchStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.Listeners;
@@ -32,7 +31,7 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
     @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed testBed;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @Inject

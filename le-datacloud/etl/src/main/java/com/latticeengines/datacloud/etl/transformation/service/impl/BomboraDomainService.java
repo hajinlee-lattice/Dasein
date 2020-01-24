@@ -4,9 +4,10 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.DerivedSource;
@@ -27,17 +28,12 @@ public class BomboraDomainService
 
     private static final Logger log = LoggerFactory.getLogger(BomboraDomainService.class);
 
-    @Autowired
+    @Inject
     private BomboraDomain source;
 
     @Override
     public Source getSource() {
         return source;
-    }
-
-    @Override
-    protected Logger getLogger() {
-        return log;
     }
 
     @Override

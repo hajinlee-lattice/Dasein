@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +21,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 @Component("accountMasterColumnSelectionService")
 public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionService {
 
-    private Logger log = LoggerFactory.getLogger(AccountMasterColumnSelectionServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AccountMasterColumnSelectionServiceImpl.class);
 
     @Resource(name = "accountMasterColumnService")
     private MetadataColumnService<AccountMasterColumn> accountMasterColumnService;
@@ -58,7 +58,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     // (DataCloudVersion, Predefined) -> ColumnSelection (consisted by a list of Column)
     private WatcherCache<ImmutablePair<String, Predefined>, ColumnSelection> predefinedSelectionCache;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     @PostConstruct

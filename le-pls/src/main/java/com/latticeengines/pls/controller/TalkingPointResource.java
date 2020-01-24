@@ -2,7 +2,8 @@ package com.latticeengines.pls.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,13 +36,13 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_Plays')")
 public class TalkingPointResource {
 
-    @Autowired
+    @Inject
     private TalkingPointProxy talkingPointProxy;
 
-    @Autowired
+    @Inject
     private TalkingPointsAttributesProxy talkingPointsAttributesProxy;
 
-    @Autowired
+    @Inject
     private PlayProxy playProxy;
 
     @RequestMapping(value = "", method = RequestMethod.POST)

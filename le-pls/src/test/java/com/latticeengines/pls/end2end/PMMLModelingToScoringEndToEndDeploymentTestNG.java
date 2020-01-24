@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -23,7 +24,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -61,7 +61,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-
 public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String RESOURCE_BASE = "com/latticeengines/pls/end2end/pmml";
@@ -75,10 +74,10 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
 
     private SourceFile sourceFile;
 
-    @Autowired
+    @Inject
     protected InternalScoringApiInterface internalScoringApiProxy;
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
     private Long jobId;

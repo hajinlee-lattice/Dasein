@@ -35,7 +35,7 @@ import com.latticeengines.pls.repository.reader.ScoringRequestConfigReaderReposi
 
 @Component("scoringRequestConfigEntityMgr")
 public class ScoringRequestConfigEntityManagerImpl extends BaseEntityMgrRepositoryImpl<ScoringRequestConfig, Long>  implements ScoringRequestConfigEntityManager {
-    private static Logger LOG = Logger.getLogger(ScoringRequestConfigEntityManagerImpl.class);
+    private static final Logger LOG = Logger.getLogger(ScoringRequestConfigEntityManagerImpl.class);
 
     private static final String SCORING_REQUEST_CONFIG_ID_PREFIX = "src";
     private static final String SCORING_REQUEST_CONFIG_ID_FORMAT = "%s__%s";

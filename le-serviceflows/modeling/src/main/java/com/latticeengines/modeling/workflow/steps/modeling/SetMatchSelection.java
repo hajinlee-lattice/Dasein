@@ -6,6 +6,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
@@ -25,8 +26,8 @@ public class SetMatchSelection extends BaseModelStep<ModelStepConfiguration> {
             try {
                 String indented = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(sourceSummary);
                 log.info("Found source model summary in configuration\n " + indented);
-            } catch (Exception e) {
-                // ignore
+            } catch (JsonProcessingException e) {
+                log.warn("Failed to print source summary", e);
             }
             if (sourceSummary.getPredefinedSelection() != null) {
                 putStringValueInContext(MATCH_PREDEFINED_SELECTION, sourceSummary.getPredefinedSelection().getName());

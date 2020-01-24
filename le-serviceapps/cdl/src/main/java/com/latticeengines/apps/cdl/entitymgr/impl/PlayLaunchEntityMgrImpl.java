@@ -3,11 +3,12 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Hibernate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,13 +30,13 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 @Component("playLaunchEntityMgr")
 public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> implements PlayLaunchEntityMgr {
 
-    @Autowired
+    @Inject
     private PlayLaunchDao playLaunchDao;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Override
@@ -52,7 +53,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void update(PlayLaunch playLaunch) {
-        PlayLaunch existingPlayLaunch = findByLaunchId(playLaunch.getId());
+        PlayLaunch existingPlayLaunch = findByLaunchId(playLaunch.getId(), false);
         if (playLaunch.getLaunchState() != null) {
             existingPlayLaunch.setLaunchState(playLaunch.getLaunchState());
         }
@@ -85,6 +86,8 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         if (playLaunch.getAccountsDuplicated() != null) {
             existingPlayLaunch.setAccountsDuplicated(playLaunch.getAccountsDuplicated());
         }
+
+        existingPlayLaunch.setLaunchCompletionPercent(playLaunch.getLaunchCompletionPercent());
 
         // Contact stats
         if (playLaunch.getContactsSelected() != null) {
@@ -158,7 +161,6 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         }
         existingPlayLaunch.setLaunchUnscored(playLaunch.isLaunchUnscored());
 
-        existingPlayLaunch.setLaunchCompletionPercent(playLaunch.getLaunchCompletionPercent());
         existingPlayLaunch.setUpdatedBy(playLaunch.getUpdatedBy());
         playLaunchDao.update(existingPlayLaunch);
     }
@@ -171,8 +173,13 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public PlayLaunch findByLaunchId(String launchId) {
-        return playLaunchDao.findByLaunchId(launchId);
+    public PlayLaunch findByLaunchId(String launchId, boolean inflate) {
+        PlayLaunch launchRetrieved = playLaunchDao.findByLaunchId(launchId);
+        if (inflate) {
+            Hibernate.initialize(launchRetrieved.getPlayLaunchChannel());
+            Hibernate.initialize(launchRetrieved.getPlay());
+        }
+        return launchRetrieved;
     }
 
     @Override
@@ -233,7 +240,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Modifying
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteByLaunchId(String launchId, boolean hardDelete) {
-        PlayLaunch playLaunch = findByLaunchId(launchId);
+        PlayLaunch playLaunch = findByLaunchId(launchId, false);
         if (playLaunch != null) {
             if (hardDelete) {
                 playLaunchDao.delete(playLaunch);
@@ -285,17 +292,5 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
             Long endTimestamp, String orgId, String externalSysType) {
         return playLaunchDao.findTotalCountByPlayStatesAndTimestamps(playId, states, startTimestamp, endTimestamp,
                 orgId, externalSysType);
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public PlayLaunch getLaunchFullyLoaded(String playLaunchId) {
-        if (playLaunchId != null) {
-            PlayLaunch launchRetrieved = this.findByLaunchId(playLaunchId);
-            Hibernate.initialize(launchRetrieved.getPlayLaunchChannel());
-            Hibernate.initialize(launchRetrieved.getPlay());
-            return launchRetrieved;
-        }
-        throw new NullPointerException("Play launch can not be found");
     }
 }

@@ -14,11 +14,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
-import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 
-public class ErrorUtils {
+public final class ErrorUtils {
 
-    private static final Logger log = LoggerFactory.getLogger(GetResponseErrorHandler.class);
+    protected ErrorUtils() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(ErrorUtils.class);
 
     public static RemoteLedpException handleError(WebClientResponseException webClientException) {
         String body = new String(webClientException.getResponseBodyAsByteArray());

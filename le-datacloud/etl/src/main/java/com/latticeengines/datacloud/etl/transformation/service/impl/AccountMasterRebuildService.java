@@ -6,9 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -28,24 +27,15 @@ public class AccountMasterRebuildService extends AbstractFixedIntervalTransforma
         implements TransformationService<AccountMasterRebuildConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "accountMasterRebuildFlow";
 
-    private static final Logger log = LoggerFactory.getLogger(AccountMasterRebuildService.class);
-
-    private boolean isManual = true;
-
-    @Autowired
+    @Inject
     private AccountMaster accountMaster;
 
-    @Autowired
+    @Inject
     private AccountMasterRebuildDataFlowService accountMasterRebuildDataFlowService;
 
     @Override
     public Source getSource() {
         return accountMaster;
-    }
-
-    @Override
-    Logger getLogger() {
-        return log;
     }
 
     @Override
@@ -102,6 +92,7 @@ public class AccountMasterRebuildService extends AbstractFixedIntervalTransforma
             List<String> latestVersions, String baseDir) {
         List<String> unprocessedBaseVersion = new ArrayList<>();
 
+        boolean isManual = true;
         if (isManual) {
             unprocessedBaseVersion.add(latestBaseVersions.get(0));
             return unprocessedBaseVersion;
@@ -127,7 +118,6 @@ public class AccountMasterRebuildService extends AbstractFixedIntervalTransforma
             boolean foundProcessedEntry = false;
             // try to find matching version in source version list
             for (String latestVersion : latestVersions) {
-                log.debug("Compare: " + baseVersion);
                 if (baseVersion.equals(latestVersion)) {
                     // if found equal version then skip further checking for
                     // this version and break from this inner loop

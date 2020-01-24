@@ -530,10 +530,10 @@ public class InternalResource extends InternalResourceBase {
                         String modelName = modelSummary.getDisplayName();
                         if (result.equals("COMPLETED")) {
                             emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl, tenantName,
-                                    modelName, true, emailInfo.getExtraInfoList());
+                                    modelName, emailInfo.getExtraInfoList());
                         } else if (result.equals("FAILED")) {
                             emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
-                                    modelName, false, emailInfo.getExtraInfoList());
+                                    modelName, emailInfo.getExtraInfoList());
                         }
                     }
                 }
@@ -615,7 +615,7 @@ public class InternalResource extends InternalResourceBase {
                     String url = appPublicUrl + "/atlas/tenant/" + tenantName + "/export/" + exportID;
                     switch (result) {
                         case "COMPLETED":
-                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr);
+                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportTypeStr, tenantName);
                             break;
                         case "FAILED":
                             emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportTypeStr);

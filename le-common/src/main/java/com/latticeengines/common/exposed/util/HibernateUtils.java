@@ -3,7 +3,11 @@ package com.latticeengines.common.exposed.util;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
 
-public class HibernateUtils {
+public final class HibernateUtils {
+
+    protected HibernateUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("unchecked")
     public static <T> T inflateDetails(T proxy) {

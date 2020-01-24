@@ -708,8 +708,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.refreshFrequency = refreshFrequency;
     }
 
-    @Override
-    public ColumnMetadata clone() {
+    public ColumnMetadata cloneCm() {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         KryoUtils.write(bos, this);
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());

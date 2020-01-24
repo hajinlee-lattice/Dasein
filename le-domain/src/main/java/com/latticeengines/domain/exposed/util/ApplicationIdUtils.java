@@ -11,6 +11,10 @@ import com.latticeengines.domain.exposed.cdl.workflowThrottling.FakeApplicationI
 
 public final class ApplicationIdUtils {
 
+    protected ApplicationIdUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final String AWS_JOBID_PATTERN_STR = "[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}";
     private static final String YARN_JOBID_PATTERN_STR = "\\d{13}_\\d{4,}";
     private static final String APPLICATION_PREFIX = "application_";

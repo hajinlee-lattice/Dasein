@@ -4,8 +4,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.influxdb.InfluxDB;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -29,7 +30,7 @@ import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 @ContextConfiguration(locations = { "classpath:test-monitor-metric-context.xml" })
 public class InfluxDbMetricWriterTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private InfluxDbMetricWriter influxDbMetricWriter;
 
     @Test(groups = "functional")

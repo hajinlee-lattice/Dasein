@@ -7,9 +7,10 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeClass;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryParser;
 import com.latticeengines.domain.exposed.security.Tenant;
-
 public class ModelMetadataServiceImplTestNG extends LPFunctionalTestNGBase {
 
     private static final String TENANT = "PMMLTenant.PMMLTenant.Production";
@@ -32,13 +32,13 @@ public class ModelMetadataServiceImplTestNG extends LPFunctionalTestNGBase {
     @Value("${pls.modelingservice.basedir}")
     private String modelingBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private ModelMetadataService modelMetadataService;
 
-    @Autowired
+    @Inject
     private PmmlModelService pmmlModelService;
 
     private ModelSummary summary = null;

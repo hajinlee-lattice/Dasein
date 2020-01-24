@@ -4,9 +4,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.entitymgr.DnbMatchCommandEntityMgr;
@@ -20,7 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DnBMatchCommand;
 public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
     private static final Logger log = LoggerFactory.getLogger(DnbMatchCommandServiceImpl.class);
 
-    @Autowired
+    @Inject
     private DnbMatchCommandEntityMgr dnbMatchEntityMgr;
 
     @Override

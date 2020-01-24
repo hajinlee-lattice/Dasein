@@ -17,10 +17,11 @@ import org.slf4j.LoggerFactory;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.common.exposed.util.SleepUtils;
 
 public class WatcherCache<K, V> {
 
-    private static Logger log = LoggerFactory.getLogger(WatcherCache.class);
+    private static final Logger log = LoggerFactory.getLogger(WatcherCache.class);
     private static final double SEC_TO_MSEC = 1000.0;
     private static final Random random = new Random(System.currentTimeMillis());
 
@@ -123,27 +124,19 @@ public class WatcherCache<K, V> {
     private void waitForCamille() {
         int retries = 0;
         while (!CamilleEnvironment.isStarted() && retries++ < 100) {
-            try {
-                log.info("Wait one sec for camille to start ...");
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+            log.info("Wait one sec for camille to start ...");
+            SleepUtils.sleep(1000L);
         }
     }
 
     private void refresh(String watchedData) {
         if (cache != null) {
-            log.info("Received a signal " + String.valueOf(watchedData));
+            log.info("Received a signal " + watchedData);
             if (waitBeforeRefreshInSec != 0) {
                 log.info(String.format(
                         "To avoid WatcherCache %s refresh congestion for signal %s, wait for %d seconds before start.",
                         cacheName, String.valueOf(watchedData), waitBeforeRefreshInSec));
-                try {
-                    Thread.sleep(waitBeforeRefreshInSec * 1000);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
+                SleepUtils.sleep(waitBeforeRefreshInSec * 1000);
             }
             log.info(String.format("Start refreshing WatcherCache %s for signal %s.", cacheName, watchedData));
             long startTime = System.currentTimeMillis();
@@ -161,7 +154,7 @@ public class WatcherCache<K, V> {
                 cache.invalidateAll(keysToRefresh);
                 keysToRefresh.forEach(this::loadKey);
             }
-            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue()
+            double duration = Long.valueOf(System.currentTimeMillis() - startTime).doubleValue()
                     / SEC_TO_MSEC;
             log.info(String.format(
                     "Finished refreshing the WatcherCache %s for signal %s after %.3f secs.",

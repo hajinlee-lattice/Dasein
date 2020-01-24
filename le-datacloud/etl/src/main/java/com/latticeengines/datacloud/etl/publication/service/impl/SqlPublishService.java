@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.publication.service.impl;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -8,7 +9,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -26,12 +26,12 @@ import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
 @Service("sqlPublishService")
 public class SqlPublishService extends AbstractPublishService implements PublishService<PublishToSqlConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(SqlPublishService.class);
+    private static final Logger log = LoggerFactory.getLogger(SqlPublishService.class);
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
     @PostConstruct

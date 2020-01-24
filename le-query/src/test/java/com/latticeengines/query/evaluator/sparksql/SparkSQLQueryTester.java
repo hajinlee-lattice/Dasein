@@ -29,6 +29,7 @@ import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.service.SparkSQLService;
 import com.latticeengines.query.factory.SparkQueryProvider;
 import com.latticeengines.spark.exposed.service.LivySessionService;
+import com.latticeengines.spark.service.impl.LivyServerManager;
 
 @Component
 public class SparkSQLQueryTester {
@@ -46,6 +47,9 @@ public class SparkSQLQueryTester {
 
     @Inject
     protected QueryEvaluatorService queryEvaluatorService;
+
+    @Inject
+    private LivyServerManager livyServerManager;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -74,7 +78,8 @@ public class SparkSQLQueryTester {
         return session;
     }
 
-    public void setupTestContext(CustomerSpace customerSpace, AttributeRepository attrRepo, Map<String, String> tblPathMap) {
+    public void setupTestContext(CustomerSpace customerSpace, AttributeRepository attrRepo,
+            Map<String, String> tblPathMap) {
         this.customerSpace = customerSpace;
         this.attrRepo = attrRepo;
         this.tblPathMap = tblPathMap;
@@ -101,7 +106,7 @@ public class SparkSQLQueryTester {
     private void reuseLivyEnvironment(int sessionId) {
         String livyHost;
         if (Boolean.TRUE.equals(useEmr)) {
-            livyHost = emrCacheService.getLivyUrl();
+            livyHost = livyServerManager.getLivyHost();
         } else {
             livyHost = "http://localhost:8998";
         }
@@ -157,10 +162,10 @@ public class SparkSQLQueryTester {
         AvroUtils.AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroPath + "/*.avro");
         iterator.forEachRemaining(record -> {
             Map<String, Object> row = new HashMap<>();
-            for (Field field: record.getSchema().getFields()) {
+            for (Field field : record.getSchema().getFields()) {
                 Object value = record.get(field.name());
                 if (value instanceof Utf8) {
-                    value = ((Utf8)value).toString();
+                    value = ((Utf8) value).toString();
                 }
                 row.put(field.name(), value);
             }

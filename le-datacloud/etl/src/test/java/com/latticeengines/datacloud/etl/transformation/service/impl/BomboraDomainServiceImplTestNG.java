@@ -4,10 +4,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -17,7 +18,6 @@ import com.latticeengines.datacloud.core.source.impl.BomboraDomain;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
-
 public class BomboraDomainServiceImplTestNG
         extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(BomboraDomainServiceImplTestNG.class);
@@ -26,13 +26,13 @@ public class BomboraDomainServiceImplTestNG
     private static final String DOMAIN = "Domain";
     private static final String TIMESTAMP = "LE_Last_Upload_Date";
 
-    @Autowired
+    @Inject
     BomboraDomain source;
 
-    @Autowired
+    @Inject
     BomboraDepivoted baseSource;
 
-    @Autowired
+    @Inject
     private BomboraDomainService bomboraDomainService;
 
     @Test(groups = "pipeline2", enabled = true)

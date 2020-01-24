@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,7 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,7 +47,6 @@ import com.latticeengines.proxy.exposed.saml.SamlConfigProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
 import com.latticeengines.security.exposed.service.SessionService;
-import com.latticeengines.security.exposed.service.UserService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -61,16 +60,13 @@ public class SamlLoginResource {
 
     private static final Logger log = LoggerFactory.getLogger(SamlLoginResource.class);
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
+    @Inject
     private SPSamlProxy samlProxy;
 
-    @Autowired
+    @Inject
     private SamlConfigProxy samlConfigProxy;
 
     @Value("${security.app.public.url:https://localhost:3000}")
@@ -187,8 +183,8 @@ public class SamlLoginResource {
     public SimpleBooleanResponse logoutFromSpAndIDP(HttpServletRequest request,
             @PathVariable("tenantId") String tenantDeploymentId, @RequestParam("SAMLResponse") String samlResponse,
             @RequestParam(name = "isSPInitiatedLogout", required = false) String isSPInitiatedLogout) {
-        log.info("SAML Logout Resource: TenantDeploymentId - isSPInitiatedLogout - Response ", tenantDeploymentId,
-                samlResponse, isSPInitiatedLogout);
+        log.info("SAML Logout Resource: TenantDeploymentId - isSPInitiatedLogout - Response: {} - {} - {}",
+                tenantDeploymentId, samlResponse, isSPInitiatedLogout);
 
         String token = request.getHeader(Constants.AUTHORIZATION);
         if (StringUtils.isNotEmpty(token)) {
@@ -210,7 +206,7 @@ public class SamlLoginResource {
      */
     public void getIdpMetadata(HttpServletRequest request, HttpServletResponse response,
             @PathVariable("tenantId") String tenantDeploymentId) {
-        log.info("SAML Metadata Resource: TenantDeploymentId ", tenantDeploymentId);
+        log.info("SAML Metadata Resource: TenantDeploymentId {}", tenantDeploymentId);
 
         try (ServletOutputStream outputStream = response.getOutputStream()) {
             String metadata = samlProxy.getSPMetadata(tenantDeploymentId);
@@ -230,7 +226,7 @@ public class SamlLoginResource {
     @ResponseBody
     @ApiOperation(value = "Lattice initiated SAML Authentication and Login")
     public Map<String, SpSamlLoginResponse> spInitiateLoginRequest(@RequestBody SpSamlLoginRequest spLoginRequest) {
-        log.info("Initiating SP Login for Request: %s", JsonUtils.serialize(spLoginRequest));
+        log.info("Initiating SP Login for Request: {}", JsonUtils.serialize(spLoginRequest));
 
         String tenantDeploymentId = spLoginRequest.getTenantDeploymentId();
         if (StringUtils.isBlank(tenantDeploymentId)) {
@@ -242,7 +238,7 @@ public class SamlLoginResource {
         }
         String encodedRelayState = encode(constructRelayState(spLoginRequest));
         String ssoUrl = String.format("%s?RelayState=%s", samlConfigMetadata.getSingleSignOnService(), encodedRelayState);
-        log.info("SSO Url for Sp Initiated Login: %s", ssoUrl);
+        log.info("SSO Url for Sp Initiated Login: {}", ssoUrl);
         SpSamlLoginResponse spResp = new SpSamlLoginResponse();
         spResp.setSsoUrl(ssoUrl);
         return ImmutableMap.of(SpSamlLoginResponse.class.getSimpleName(), spResp);
@@ -259,7 +255,7 @@ public class SamlLoginResource {
         }
     }
 
-    public String constructRelayState(SpSamlLoginRequest spLoginRequest) {
+    private String constructRelayState(SpSamlLoginRequest spLoginRequest) {
         if(spLoginRequest == null || spLoginRequest.getRequestParameters() == null) {
             return "";
         }

@@ -88,7 +88,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
 
   def loadHdfsUnit(spark: SparkSession, unit: HdfsDataUnit): DataFrame = {
     var path = unit.getPath
-    val fmt = if (unit.getDataFormat != null) unit.getDataFormat.name.toLowerCase else "avro"
+    val fmt: String = if (unit.getDataFormat != null) unit.getDataFormat.name.toLowerCase else "avro"
     val partitionKeys = if (unit.getPartitionKeys == null) List() else unit.getPartitionKeys.asScala.toList
     if (partitionKeys.isEmpty) {
       val suffix = "." + fmt
@@ -100,7 +100,14 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
         }
       }
     }
-    spark.read.format(fmt).load("hdfs://" + path)
+    if (fmt.equals("csv")) {
+      spark.read.format(fmt).option("header", value = true)
+        .option("quote", "\"")
+        .option("escape", "\"").load("hdfs://" + path)
+    }
+    else {
+      spark.read.format(fmt).load("hdfs://" + path)
+    }
   }
 
   def finalizeJob(spark: SparkSession, latticeCtx: LatticeContext[C]): List[HdfsDataUnit] = {

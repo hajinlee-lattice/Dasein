@@ -64,6 +64,7 @@ import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -1498,11 +1499,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         int retries = 0;
         while (segment == null && retries++ < 3) {
             log.info("Wait for 1 sec to retry getting rating engine.");
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+            SleepUtils.sleep(1000L);
             segment = testMetadataSegmentProxy.getSegment(segmentName);
         }
         Assert.assertNotNull(segment,
@@ -1608,11 +1605,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         int retries = 0;
         while (ratingEngine == null && retries++ < 3) {
             log.info("Wait for 1 sec to retry getting rating engine.");
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                // ignore
-            }
+            SleepUtils.sleep(1000L);
             ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), engineId);
         }
         Assert.assertNotNull(ratingEngine,

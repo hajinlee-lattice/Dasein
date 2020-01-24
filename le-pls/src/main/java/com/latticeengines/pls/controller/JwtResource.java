@@ -1,7 +1,8 @@
 package com.latticeengines.pls.controller;
 
+import javax.inject.Inject;
+
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,15 +30,15 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/jwt")
 public class JwtResource {
 
-    Logger log = Logger.getLogger(this.getClass());
+    private static final Logger log = Logger.getLogger(JwtResource.class);
 
-    @Autowired
+    @Inject
     private GlobalAuthTicketEntityMgr gaTicketEntityMgr;
 
-    @Autowired
+    @Inject
     private GlobalAuthUserEntityMgr gaUserEntityMgr;
 
-    @Autowired
+    @Inject
     private JwtManager jwtManager;
 
     @RequestMapping(value = "/handle_request", method = RequestMethod.POST, headers = "Accept=application/json")

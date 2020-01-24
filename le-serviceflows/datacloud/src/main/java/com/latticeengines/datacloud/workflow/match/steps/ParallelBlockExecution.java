@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
@@ -22,7 +24,6 @@ import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -59,24 +61,25 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecutionConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(ParallelBlockExecution.class);
+    private static final Logger log = LoggerFactory.getLogger(ParallelBlockExecution.class);
+
     private static final int MAX_ERRORS = 100;
     private static final Long MATCH_TIMEOUT = TimeUnit.DAYS.toMillis(3);
     private static final String MATCHOUTPUT_BUFFER_FILE = "matchoutput.json";
 
-    @Autowired
+    @Inject
     private MatchInternalProxy matchInternalProxy;
 
-    @Autowired
+    @Inject
     private MatchCommandService matchCommandService;
 
     @Value("${datacloud.match.block.interval.sec}")
     private int blockRampingRate;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     private YarnClient yarnClient;
@@ -128,11 +131,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
                 submitMatchBlocks();
                 waitForMatchBlocks();
-                try {
-                    Thread.sleep(10000L);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
+                SleepUtils.sleep(10000L);
             }
             finalizeMatch();
         } catch (Exception e) {

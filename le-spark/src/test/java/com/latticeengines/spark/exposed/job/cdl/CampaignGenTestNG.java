@@ -35,7 +35,7 @@ import com.latticeengines.spark.testframework.TestJoinTestNGBase;
 
 public class CampaignGenTestNG extends TestJoinTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(TestRecommendationGenTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(CampaignGenTestNG.class);
 
     private static final String destinationAccountId = "D41000001Q3z4EAC";
     private static final int accountLimit = 25;

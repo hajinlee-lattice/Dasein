@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.message.BasicNameValuePair;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.testng.Assert;
@@ -29,13 +30,12 @@ import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
 import com.latticeengines.pls.service.CrmConfigService;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
-
 public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    @Autowired
+    @Inject
     private CrmConfigService crmService;
 
-    @Autowired
+    @Inject
     private DataLoaderService dataLoaderService;
 
     @Value("${pls.dataloader.rest.api}")
@@ -49,8 +49,8 @@ public class CrmConfigServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecate
     public void setup() throws Exception {
         try {
             afterClass();
-        } catch (Exception ex) {
-            // ignore
+        } catch (Exception ignore) {
+            // ignoring any error from test env cleanup
         }
 
         CreateVisiDBDLRequest.Builder builder = new CreateVisiDBDLRequest.Builder(tenant, tenant, tenant);

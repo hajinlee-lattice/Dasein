@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.workflow;
 
-public class WorkflowContextConstants {
+public final class WorkflowContextConstants {
+
+    protected WorkflowContextConstants() {
+        throw new UnsupportedOperationException();
+    }
     public static final String REPORTS = "__REPORTS__";
     public static final String OUTPUTS = "__OUTPUTS__";
 

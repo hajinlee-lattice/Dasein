@@ -24,7 +24,7 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
     protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, String periodTypeName,
             int evaluationPeriod, Set<String> attributeMetadata) {
         super(ratingEngine, aiModel, periodTypeName, evaluationPeriod, attributeMetadata);
-        accountFiltererSegment = (MetadataSegment) ratingEngine.getSegment().clone();
+        accountFiltererSegment = ratingEngine.getSegment().cloneSegment();
     }
 
     @Override

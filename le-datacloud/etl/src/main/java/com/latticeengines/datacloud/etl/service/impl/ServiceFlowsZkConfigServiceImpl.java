@@ -3,12 +3,12 @@ package com.latticeengines.datacloud.etl.service.impl;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +32,7 @@ public class ServiceFlowsZkConfigServiceImpl implements ServiceFlowsZkConfigServ
     private static final String JOB_ENABLED = "JobEnabled";
     private static final String JOB_CRON = "JobCronExpression";
 
-    @Autowired
+    @Inject
     List<Source> sources;
 
     @Value("${datacloud.source.db.json:source_dbs_dev.json}")

@@ -10,10 +10,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,7 +35,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-
 public class PipelineTransformationCacheLoaderDeploymentTestNG extends
         TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
@@ -42,13 +42,13 @@ public class PipelineTransformationCacheLoaderDeploymentTestNG extends
 
     private static final Logger log = LoggerFactory.getLogger(PipelineTransformationCacheLoaderDeploymentTestNG.class);
 
-    @Autowired
+    @Inject
     private PipelineSource source;
 
-    @Autowired
+    @Inject
     private LatticeCacheSeed baseLatticeCacheSource;
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     String targetSourceName = "MatchResult";

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.collection.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.collection.entitymgr.ArchiveProgressEntityMgr;
@@ -11,13 +12,13 @@ import com.latticeengines.datacloud.core.source.impl.HGDataRaw;
 @Component
 public class HGDataRawArchiveServiceImplTestNG extends BulkArchiveServiceImplTestNGBase {
 
-    @Autowired
+    @Inject
     HGDataRawArchiveService archiveService;
 
-    @Autowired
+    @Inject
     HGDataRaw source;
 
-    @Autowired
+    @Inject
     ArchiveProgressEntityMgr progressEntityMgr;
 
     @Override

@@ -2,7 +2,8 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.Collections;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -28,14 +29,12 @@ import com.latticeengines.pls.functionalframework.SourceCredentialValidationServ
 import com.latticeengines.pls.service.CrmCredentialService;
 import com.latticeengines.proxy.exposed.eai.ValidateCredentialProxy;
 import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
-
-@SuppressWarnings("unused")
 public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
-    @Autowired
+    @Inject
     private CrmCredentialService crmService;
 
     private final String contractId = "PLSCrmConfig";
@@ -65,18 +64,14 @@ public class CrmCredentialServiceImplTestNG extends PlsFunctionalTestNGBaseDepre
 
     private CustomerSpace customerSpace;
 
-    @Autowired
+    @Inject
     private ValidateCredentialProxy validateCredentialProxy;
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         Camille camille = CamilleEnvironment.getCamille();
         Path path = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId, spaceId);
-        try {
-            camille.delete(path);
-        } catch (Exception ex) {
-            // ignore
-        }
+        camille.delete(path);
         CustomerSpaceProperties properties = new CustomerSpaceProperties();
         CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(properties, "");
         batonService.createTenant(contractId, tenantId, spaceId, spaceInfo);

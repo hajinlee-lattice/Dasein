@@ -27,7 +27,6 @@ import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.yarn.client.ClientRmTemplate;
 import org.springframework.yarn.client.CommandYarnClient;
@@ -50,15 +49,15 @@ import com.latticeengines.yarn.exposed.service.impl.YarnClientCustomizationServi
 
 public class YarnMiniClusterFunctionalTestNGBase extends YarnFunctionalTestNGBase {
 
-    protected static final Logger log = LoggerFactory.getLogger(YarnMiniClusterFunctionalTestNGBase.class);
+    private static final Logger log = LoggerFactory.getLogger(YarnMiniClusterFunctionalTestNGBase.class);
 
-    @Autowired
+    @Inject
     protected JobService jobService;
 
     @Inject
     protected ManifestService manifestService;
 
-    @Autowired
+    @Inject
     private YarnClientCustomizationService yarnClientCustomizationService;
 
     protected Configuration miniclusterConfiguration;

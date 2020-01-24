@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class CdlModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
-    private static Logger log = LoggerFactory.getLogger(CdlModelWorkflowConfiguration.class);
+    private static final Logger log = LoggerFactory.getLogger(CdlModelWorkflowConfiguration.class);
 
     @Override
     public Collection<String> getSwpkgNames() {

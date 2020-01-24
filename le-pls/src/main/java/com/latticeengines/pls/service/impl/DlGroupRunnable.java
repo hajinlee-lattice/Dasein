@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.dataloader.JobStatus;
 import com.latticeengines.domain.exposed.dataloader.LaunchJobsResult;
 import com.latticeengines.pls.service.DlCallback;
@@ -49,11 +50,7 @@ public class DlGroupRunnable implements Runnable {
                     }
                 }
 
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    // Do nothing if sleep interrupted
-                }
+                SleepUtils.sleep(sleepTime);
             }
 
             if (onCompleted != null) {

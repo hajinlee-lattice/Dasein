@@ -27,8 +27,10 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace3;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 import reactor.core.publisher.Flux;
@@ -62,13 +64,13 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
     }
 
     @Override
-    public Flux<ColumnMetadata> getMetadata(Namespace2<BusinessEntity, DataCollection.Version> namespace) {
+    public Flux<ColumnMetadata> getMetadata(Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> namespace) {
         return getMetadataInParallel(namespace).sequential();
     }
 
     @Override
     public ParallelFlux<ColumnMetadata> getMetadataInParallel(
-            Namespace2<BusinessEntity, DataCollection.Version> namespace) {
+            Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> namespace) {
         BusinessEntity entity = namespace.getCoord1();
         boolean usingAccountServingStore = false;
         TableRoleInCollection role = entity.getServingStore();
@@ -130,31 +132,35 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
             servingStore = Flux.<ColumnMetadata> empty().parallel().runOn(scheduler);
         }
         ThreadLocal<AtomicLong> amCounter = new ThreadLocal<>();
-        if (BusinessEntity.Account.equals(entity)) {
+        if (BusinessEntity.Account.equals(entity) && !StoreFilter.NON_LDC.equals(namespace.getCoord3())) {
             // merge serving store and AM, for Account
-            Namespace1<String> amNs = cdlNamespaceService.resolveDataCloudVersion(version);
-            ParallelFlux<ColumnMetadata> amFlux = amMetadataStore.getMetadataInParallel(amNs) //
-                    .filter(cm -> !InterfaceName.LatticeAccountId.name().equals(cm.getAttrName())) //
-                    .map(cm -> {
-                        cm.setEntity(BusinessEntity.Account);
-                        return cm;
-                    }).doOnNext(cm -> {
-                        if (amCounter.get() == null) {
-                            amCounter.set(new AtomicLong(0));
-                        }
-                        amCounter.get().getAndIncrement();
-                    }) //
-                    .doOnComplete(() -> {
-                        long count = 0;
-                        if (amCounter.get() != null) {
-                            count = amCounter.get().get();
-                        }
-                        log.info("Inserted " + count + " AM attributes.");
-                    });
+            ParallelFlux<ColumnMetadata> amFlux = getLDCMetadataInParallel(version, amCounter);
             return ParallelFlux.from(servingStore, amFlux);
         } else {
             return servingStore;
         }
+    }
+
+    private ParallelFlux<ColumnMetadata> getLDCMetadataInParallel(DataCollection.Version version, ThreadLocal<AtomicLong> amCounter) {
+        Namespace1<String> amNs = cdlNamespaceService.resolveDataCloudVersion(version);
+        return amMetadataStore.getMetadataInParallel(amNs) //
+                .filter(cm -> !InterfaceName.LatticeAccountId.name().equals(cm.getAttrName())) //
+                .map(cm -> {
+                    cm.setEntity(BusinessEntity.Account);
+                    return cm;
+                }).doOnNext(cm -> {
+                    if (amCounter.get() == null) {
+                        amCounter.set(new AtomicLong(0));
+                    }
+                    amCounter.get().getAndIncrement();
+                }) //
+                .doOnComplete(() -> {
+                    long count = 0;
+                    if (amCounter.get() != null) {
+                        count = amCounter.get().get();
+                    }
+                    log.info("Inserted " + count + " AM attributes.");
+                });
     }
 
     @Override

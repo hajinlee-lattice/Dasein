@@ -21,6 +21,7 @@
     <import resource="classpath:monitor-aspects-context.xml"/>
     <import resource="classpath:playmakercore-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
+    <import resource="classpath:monitor-aspects-context.xml" />
     <import resource="classpath:ulysses-aspects-context.xml"/>
     <import resource="classpath:security-aspect-context.xml"/>
 

@@ -1,7 +1,8 @@
 package com.latticeengines.datacloud.core.service.impl;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.LocationUtils;
@@ -15,7 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 @Component("nameLocationService")
 public class NameLocationServiceImpl implements NameLocationService {
 
-    @Autowired
+    @Inject
     private CountryCodeService countryCodeService;
 
     @Override

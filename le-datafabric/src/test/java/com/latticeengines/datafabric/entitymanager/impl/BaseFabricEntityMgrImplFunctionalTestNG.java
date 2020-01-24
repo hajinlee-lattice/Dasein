@@ -90,7 +90,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         }
 
         List<SampleEntity> results = new ArrayList<SampleEntity>();
-        ;
+
         for (SampleEntity entity : entities) {
             results.add(entityManager.findByKey(entity));
         }
@@ -148,7 +148,7 @@ public class BaseFabricEntityMgrImplFunctionalTestNG extends DataFabricFunctiona
         }
 
         List<SampleEntity> results = new ArrayList<SampleEntity>();
-        ;
+
         for (SampleEntity entity : entities) {
             results.add(entityManager.findByKey(entity));
         }

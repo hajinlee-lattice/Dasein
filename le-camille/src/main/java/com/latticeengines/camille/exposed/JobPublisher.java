@@ -3,6 +3,7 @@ package com.latticeengines.camille.exposed;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
@@ -24,8 +25,9 @@ public class JobPublisher {
 
     public Path getRequestPath(String jobID)
     {
-        if((jobID == null) || (jobID == ""))
+        if(StringUtils.isBlank(jobID)) {
             jobID = UUID.randomUUID().toString();
+        }
 
         return rootPath.append(requestsFolder).append(jobID);
     }
@@ -162,9 +164,8 @@ public class JobPublisher {
             try {
                 if(camille.exists(executorDataPath))
                     camille.delete(executorDataPath);
-            }
-            catch (Exception exc) {
-
+            } catch (Exception e) {
+                log.debug("Executor data path {} already removed, ignore delete", executor);
             }
         }
 
@@ -178,26 +179,27 @@ public class JobPublisher {
             return;
         }
 
+        Path requestsPath = rootPath.append(requestsFolder);
+        Camille camille = CamilleEnvironment.getCamille();
         try {
-            Path requestsPath = rootPath.append(requestsFolder);
-            Camille camille = CamilleEnvironment.getCamille();
             if(!camille.exists(requestsPath))
             {
                 camille.create(requestsPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
             }
-
-            Path failuresPath = rootPath.append(failedJobsFolder);
+        } catch (Exception e) {
+            log.debug("Requests path {} already exist, ignore create", requestsPath);
+        }
+        Path failuresPath = rootPath.append(failedJobsFolder);
+        try {
             if(!camille.exists(failuresPath))
             {
                 camille.create(failuresPath, ZooDefs.Ids.OPEN_ACL_UNSAFE, true);
             }
+        } catch (Exception e) {
+            log.debug("Failures path {} already exist, ignore create", requestsPath);
+        }
+        isInitialized = true;
 
-            isInitialized = true;
-        }
-        catch (Exception exc)
-        {
-            // Ignore
-        }
     }
 
     public static final String dataAttribute = "Data";

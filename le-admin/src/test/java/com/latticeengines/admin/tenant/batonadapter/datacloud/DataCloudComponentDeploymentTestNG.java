@@ -2,7 +2,8 @@ package com.latticeengines.admin.tenant.batonadapter.datacloud;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -15,10 +16,9 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
-
 public class DataCloudComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @Test(groups = "deployment")
@@ -39,8 +39,8 @@ public class DataCloudComponentDeploymentTestNG extends BatonAdapterDeploymentTe
                 tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, getServiceName());
         try {
             CamilleEnvironment.getCamille().delete(servicePath);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // servicePath already removed
         }
 
         bootstrap(getDataCloudDocumentDirectory());

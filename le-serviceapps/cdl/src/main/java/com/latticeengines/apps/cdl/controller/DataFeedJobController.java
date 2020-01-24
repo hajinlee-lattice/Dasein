@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,7 +19,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/datacollection/datafeedjob")
 public class DataFeedJobController {
 
-    @Autowired
+    @Inject
     private CDLJobService cdlJobService;
 
     @RequestMapping(value = "/createconsolidatejob", method = RequestMethod.POST, headers = "Accept=application/json")

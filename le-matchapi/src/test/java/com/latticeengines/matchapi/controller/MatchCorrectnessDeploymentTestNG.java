@@ -23,6 +23,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
@@ -33,7 +35,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -41,6 +42,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
@@ -56,7 +58,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
-
 public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(MatchCorrectnessDeploymentTestNG.class);
@@ -67,7 +68,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     private static final String BULK_VALUE = "bulkValue";
     private static final String REALTIME_VALUE = "realtimeValue";
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
     private List<List<Object>> accountPool;
@@ -78,7 +79,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
     @Value("${datacloud.test.match.correctness.rows}")
     private Integer numRecords;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr dataCloudVersionEntityMgr;
 
     @BeforeMethod(groups = "deployment")
@@ -222,7 +223,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     private class RealtimeMatchCallable implements Callable<Boolean> {
 
-        private Logger log = LoggerFactory.getLogger(RealtimeMatchCallable.class);
+        private final Logger log = LoggerFactory.getLogger(RealtimeMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
         private ConcurrentLinkedDeque<Map<String, Object>> result = new ConcurrentLinkedDeque<>();
         private final String dataCloudVersion;
@@ -294,7 +295,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
         private class SingleRun implements Callable<MatchOutput> {
 
-            private Logger log = LoggerFactory.getLogger(SingleRun.class);
+            private final Logger log = LoggerFactory.getLogger(SingleRun.class);
             private MatchInput matchInput;
 
             SingleRun(MatchInput matchInput) {
@@ -316,7 +317,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
 
     private class BulkMatchCallable implements Callable<Boolean> {
 
-        private Logger log = LoggerFactory.getLogger(BulkMatchCallable.class);
+        private final Logger log = LoggerFactory.getLogger(BulkMatchCallable.class);
         private final List<List<Object>> data = new ArrayList<>();
         private final String dataCloudVersion;
 
@@ -380,11 +381,7 @@ public class MatchCorrectnessDeploymentTestNG extends MatchapiDeploymentTestNGBa
                 }
                 log.info(logMsg);
 
-                try {
-                    Thread.sleep(5000L);
-                } catch (InterruptedException e) {
-                    // Ignore InterruptedException
-                }
+                SleepUtils.sleep(5000L);
 
             } while (!status.isTerminal());
 

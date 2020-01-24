@@ -127,7 +127,6 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
                 updateEntityValueMapInContext(servingEntity, STATS_TABLE_NAMES, statsTableName, String.class);
             }
         }
-        // TODO - enrich table attrs
     }
 
     private String getStatsTablePrefix(String servingEntity) {

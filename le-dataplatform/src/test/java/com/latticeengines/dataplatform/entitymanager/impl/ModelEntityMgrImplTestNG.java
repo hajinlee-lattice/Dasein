@@ -3,7 +3,8 @@ package com.latticeengines.dataplatform.entitymanager.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -16,16 +17,15 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.ModelingJob;
 import com.latticeengines.domain.exposed.modeling.algorithm.DecisionTreeAlgorithm;
 import com.latticeengines.domain.exposed.modeling.algorithm.LogisticRegressionAlgorithm;
-
 public class ModelEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private Model model;
     private ModelDefinition modelDef = new ModelDefinition();
 
-    @Autowired
+    @Inject
     protected ModelEntityMgr modelEntityMgr;
 
-    @Autowired
+    @Inject
     protected ModelDefinitionEntityMgr modelDefinitionEntityMgr;
 
     @BeforeClass(groups = { "functional", "functional.production" })

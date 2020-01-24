@@ -26,6 +26,7 @@ import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -591,12 +592,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         MetadataSegment segment = new MetadataSegment();
         segment.setDisplayName(segmentName);
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
-
-        try {
-            Thread.sleep(2 * 1000);
-        } catch (InterruptedException e) {
-        }
-
+        SleepUtils.sleep(2000L);
         return segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), createdSegment.getName());
     }
 

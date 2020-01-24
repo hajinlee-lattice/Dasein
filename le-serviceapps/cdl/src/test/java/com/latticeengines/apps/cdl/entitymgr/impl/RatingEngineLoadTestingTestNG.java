@@ -11,7 +11,6 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -45,7 +44,7 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
 
-    @Autowired
+    @Inject
     private List<DataSource> datasources;
 
     private DataSourceStatusThread dsStatusThread;
@@ -124,8 +123,8 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
         for (int jobIndex = 0; jobIndex < TEST_THREADS; jobIndex++) {
             runnables.add(new RunnableTest(this, MultiTenantContext.getTenant(), jobIndex + 1));
         }
-        log.info("Going to submited {} threads: {} ", TEST_THREADS);
-        ThreadPoolUtils.runRunnablesInParallel(executor, runnables, 10, 1);
+        log.info("Going to submited {} threads.", TEST_THREADS);
+        ThreadPoolUtils.runInParallel(executor, runnables, 10, 1);
     }
 
     public class RunnableTest implements Runnable {

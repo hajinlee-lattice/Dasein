@@ -9,19 +9,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
-import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
-import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 
 @Component
 public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
@@ -51,11 +45,11 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         ProgressEventDetail eventDetail = (ProgressEventDetail) status.getEventDetail();
 
-        switch (statusMonitor.getEntityName()) {
-        case "PlayLaunch":
-            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
-            if(playLaunch == null){
-                log.error("DataIntegrationStatusMonitor NOT updated: Entity " + statusMonitor.getEntityId() + "is not returning the playLaunch.");
+        if (statusMonitor.getEntityName().equals("PlayLaunch")) {
+            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), false);
+            if (playLaunch == null) {
+                log.error("DataIntegrationStatusMonitor NOT updated: Entity " + statusMonitor.getEntityId()
+                        + "is not returning the playLaunch.");
                 return statusMonitor;
             }
             Long recordsProcessed = eventDetail.getProcessed();
@@ -69,15 +63,11 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
             } else {
                 playLaunch.setLaunchState(LaunchState.PartialSync);
             }
-            PlayLaunchChannel playLaunchChannel = playLaunchService.findPlayLaunchChannelByLaunchId(playLaunch.getLaunchId());
-            CDLExternalSystemName systemName = playLaunchChannel != null
-                    && playLaunchChannel.getLookupIdMap() != null
-                            ? playLaunchChannel.getLookupIdMap().getExternalSystemName()
-                            : null;
+
             log.info("Channel Config for launch ID " + playLaunch.getLaunchId() + ": "
                     + JsonUtils.serialize(playLaunch.getChannelConfig()));
             if (playLaunch.getChannelConfig() != null
-                    && checkAudienceType(systemName, playLaunch.getChannelConfig(), AudienceType.ACCOUNTS) == true) {
+                    && playLaunch.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS) {
                 playLaunch.setAccountsErrored(recordsFailed);
                 playLaunch.setAccountsDuplicated(duplicatedRecords);
             } else {
@@ -93,25 +83,4 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
     }
-
-    private Boolean checkAudienceType(CDLExternalSystemName systemName, ChannelConfig channelConfig,
-            AudienceType audienceType) {
-        switch (systemName) {
-        case Marketo:
-        case Outreach:
-            return audienceType == AudienceType.CONTACTS;
-        case LinkedIn:
-            LinkedInChannelConfig linkedInconfig = (LinkedInChannelConfig) channelConfig;
-            return linkedInconfig.getAudienceType() == audienceType;
-        case Facebook:
-            FacebookChannelConfig fbConfig = (FacebookChannelConfig) channelConfig;
-            return fbConfig.getAudienceType() == audienceType;
-        case GoogleAds:
-            GoogleChannelConfig googleConfig = (GoogleChannelConfig) channelConfig;
-            return googleConfig.getAudienceType() == audienceType;
-        default:
-            return null;
-        }
-    }
-
 }

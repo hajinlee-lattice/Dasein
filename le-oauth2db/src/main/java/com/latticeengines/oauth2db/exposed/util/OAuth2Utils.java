@@ -35,7 +35,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 
-public class OAuth2Utils {
+public final class OAuth2Utils {
+
+    protected OAuth2Utils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2Utils.class);
 

@@ -72,7 +72,7 @@ public class BasicStandardizationServiceTestNG extends PipelineTransformationTes
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(0);
         step2.setInputSteps(inputSteps);
-        ;
+
         step2.setTransformer(SourceStandardizationFlow.TRANSFORMER_NAME);
         step2.setTargetSource(source.getSourceName());
         String confParamStr2 = getSecondStepConfig();

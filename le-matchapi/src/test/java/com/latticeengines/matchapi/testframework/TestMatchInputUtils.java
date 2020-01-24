@@ -9,7 +9,11 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public class TestMatchInputUtils {
+public final class TestMatchInputUtils {
+
+    protected TestMatchInputUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static MatchInput prepareSimpleMatchInput(List<List<Object>> mockData) {
         return prepareSimpleMatchInput(mockData, true);

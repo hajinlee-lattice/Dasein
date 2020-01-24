@@ -117,7 +117,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
         config.setOldData(previousAccounts);
         config.setNewData(currentAccounts);
-        config.setJoinKey(InterfaceName.AccountId.name());
+        config.setPrimaryJoinKey(InterfaceName.AccountId.name());
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
@@ -130,8 +130,8 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
         config.setOldData(previousContacts);
         config.setNewData(currentContacts);
-        config.setJoinKey(InterfaceName.ContactId.name());
-        config.setFilterJoinKeyNulls(true);
+        config.setPrimaryJoinKey(InterfaceName.ContactId.name());
+        config.setFilterPrimaryJoinKeyNulls(true);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
@@ -144,8 +144,9 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
         config.setOldData(previousS3Contacts);
         config.setNewData(currentContacts);
-        config.setJoinKey(InterfaceName.ContactId.name());
-        config.setFilterJoinKeyNulls(false);
+        config.setPrimaryJoinKey(InterfaceName.ContactId.name());
+        config.setSecondaryJoinKey(InterfaceName.AccountId.name());
+        config.setFilterPrimaryJoinKeyNulls(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
@@ -158,7 +159,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
         config.setOldData(null);
         config.setNewData(currentAccounts);
-        config.setJoinKey(InterfaceName.AccountId.name());
+        config.setPrimaryJoinKey(InterfaceName.AccountId.name());
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
@@ -171,8 +172,8 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
         config.setOldData(null);
         config.setNewData(currentContacts);
-        config.setJoinKey(InterfaceName.ContactId.name());
-        config.setFilterJoinKeyNulls(true);
+        config.setPrimaryJoinKey(InterfaceName.ContactId.name());
+        config.setFilterPrimaryJoinKeyNulls(true);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
@@ -185,12 +186,12 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
         config.setOldData(null);
         config.setNewData(currentContacts);
-        config.setJoinKey(InterfaceName.ContactId.name());
-        config.setFilterJoinKeyNulls(false);
+        config.setPrimaryJoinKey(InterfaceName.ContactId.name());
+        config.setFilterPrimaryJoinKeyNulls(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
-        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 8);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 9);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
     }
 
@@ -199,8 +200,8 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
         config.setOldData(previousContacts);
         config.setNewData(previousContacts);
-        config.setJoinKey(InterfaceName.ContactId.name());
-        config.setFilterJoinKeyNulls(false);
+        config.setPrimaryJoinKey(InterfaceName.ContactId.name());
+        config.setFilterPrimaryJoinKeyNulls(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
@@ -268,7 +269,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
 
     @SuppressWarnings("unchecked")
     private static <T extends AvroExportable> void createAvroFromJson(String fileName, String jsonPath, Schema schema,
-                                                                      Class<T> elementClazz, Configuration yarnConfiguration) throws Exception {
+            Class<T> elementClazz, Configuration yarnConfiguration) throws Exception {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream tableRegistryStream = classLoader.getResourceAsStream(jsonPath);
         String attributesDoc = StreamUtils.copyToString(tableRegistryStream, Charset.defaultCharset());
@@ -284,7 +285,7 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
                 try {
                     dataFileWriter.append(account.getAsRecord(schema));
                 } catch (IOException ioe) {
-                    // Do Nothing
+                    log.warn("failed to write a avro datdum", ioe);
                 }
             });
             dataFileWriter.flush();

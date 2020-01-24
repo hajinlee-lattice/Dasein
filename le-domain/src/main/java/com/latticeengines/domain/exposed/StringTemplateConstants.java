@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed;
 
-public class StringTemplateConstants {
+public final class StringTemplateConstants {
+
+    protected StringTemplateConstants() {
+        throw new UnsupportedOperationException();
+    }
 
     // Template tokens/values
     public static final String ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN = "TimeRange";

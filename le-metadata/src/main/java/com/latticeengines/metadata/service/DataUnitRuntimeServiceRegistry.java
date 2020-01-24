@@ -8,7 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
-public class DataUnitRuntimeServiceRegistry {
+public final class DataUnitRuntimeServiceRegistry {
+
+    protected DataUnitRuntimeServiceRegistry() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(DataUnitRuntimeServiceRegistry.class);
 

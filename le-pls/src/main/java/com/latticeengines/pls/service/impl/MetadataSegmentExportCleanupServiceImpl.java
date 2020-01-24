@@ -2,12 +2,13 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -25,16 +26,16 @@ public class MetadataSegmentExportCleanupServiceImpl implements MetadataSegmentE
 
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentExportCleanupServiceImpl.class);
 
-    @Autowired
+    @Inject
     private MetadataSegmentExportService metadataSegmentExportService;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Override

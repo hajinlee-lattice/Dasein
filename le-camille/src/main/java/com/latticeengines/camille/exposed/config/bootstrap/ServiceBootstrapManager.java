@@ -22,7 +22,11 @@ import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 
-public class ServiceBootstrapManager {
+public final class ServiceBootstrapManager {
+
+    protected ServiceBootstrapManager() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 

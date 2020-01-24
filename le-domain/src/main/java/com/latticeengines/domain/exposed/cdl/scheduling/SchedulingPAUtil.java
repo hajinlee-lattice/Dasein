@@ -11,7 +11,11 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.security.TenantType;
 
-public class SchedulingPAUtil {
+public final class SchedulingPAUtil {
+
+    protected SchedulingPAUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     /*
      * helper to retrieve tenant ID from scheduling pa object

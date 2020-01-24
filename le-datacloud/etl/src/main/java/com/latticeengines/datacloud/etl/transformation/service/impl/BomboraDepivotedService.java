@@ -6,9 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -29,22 +28,15 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
         implements TransformationService<BomboraDepivotConfiguration> {
     private static final String DATA_FLOW_BEAN_NAME = "bomboraDepivotFlow";
 
-    private static final Logger log = LoggerFactory.getLogger(BomboraDepivotedService.class);
-
-    @Autowired
+    @Inject
     private BomboraDepivoted source;
 
-    @Autowired
+    @Inject
     private FixedIntervalTransformationDataFlowService transformationDataFlowService;
 
     @Override
     public Source getSource() {
         return source;
-    }
-
-    @Override
-    Logger getLogger() {
-        return log;
     }
 
     @Override
@@ -88,7 +80,7 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
     /*
      * GOAL: Ensure that over the period of time missing versions and also
      * handled.
-     * 
+     *
      * LOGIC: return the first element (in high-to-low order) from
      * latestBaseVersions for which there is no entry in latestVersions list
      */
@@ -117,7 +109,6 @@ public class BomboraDepivotedService extends AbstractFixedIntervalTransformation
             boolean foundProcessedEntry = false;
             // try to find matching version in source version list
             for (String latestVersion : latestVersions) {
-                log.debug("Compare: " + baseVersion);
                 if (baseVersion.equals(latestVersion)) {
                     // if found equal version then skip further checking for
                     // this version and break from this inner loop

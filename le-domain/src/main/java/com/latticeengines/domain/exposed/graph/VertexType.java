@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.graph;
 
-public class VertexType {
+public final class VertexType {
+
+    protected VertexType() {
+        throw new UnsupportedOperationException();
+    }
     public static final String TENANT = "TEN";
     public static final String SEGMENT = "SEG";
     public static final String PLAY = "PLY";

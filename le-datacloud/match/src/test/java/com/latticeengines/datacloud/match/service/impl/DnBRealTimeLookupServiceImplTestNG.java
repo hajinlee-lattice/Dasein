@@ -19,6 +19,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
@@ -187,10 +188,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         // Set token to be invalid
         dnbAuthenticationService.refreshToken(DnBKeyType.REALTIME, "abc");
         // Wait for local cache to be refreshed
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-        }
+        SleepUtils.sleep(5000L);
         // Expected the service to refresh token and make a successful call via
         // retry
         MatchKeyTuple tuple = new MatchKeyTuple();

@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -12,10 +13,10 @@ public class DebugProcessorImpl {
 
     public static final String COPY_SUFFIX = "_copy";
 
-    @Autowired
+    @Inject
     private JdbcTemplate dlOrchestrationJdbcTemplate;
 
-    @Autowired
+    @Inject
     private ModelCommandLogService modelCommandLogService;
 
     public void execute(ModelCommand modelCommand, ModelCommandParameters modelCommandParameters) {

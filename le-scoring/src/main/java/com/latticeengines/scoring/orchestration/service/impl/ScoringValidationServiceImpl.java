@@ -1,6 +1,7 @@
 package com.latticeengines.scoring.orchestration.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,10 @@ import com.latticeengines.scoring.orchestration.service.ScoringValidationService
 @Component("scoringValidationService")
 public class ScoringValidationServiceImpl implements ScoringValidationService {
 
-    @Autowired
+    @Inject
     private DbMetadataService dbMetadataService;
 
-    @Autowired
+    @Inject
     private JdbcTemplate scoringJdbcTemplate;
 
     @Override

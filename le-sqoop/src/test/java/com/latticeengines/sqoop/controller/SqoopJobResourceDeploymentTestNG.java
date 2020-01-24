@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -37,14 +38,13 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 @ContextConfiguration(locations = { "classpath:test-sqoop-context.xml" })
 public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private SqoopProxy sqoopProxy;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
-    @Qualifier(value = "sqoopTestJdbcTemplate")
+    @Resource(name = "sqoopTestJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
 
     private static final String SQL_TABLE_PREFIX = "SqoopTest";

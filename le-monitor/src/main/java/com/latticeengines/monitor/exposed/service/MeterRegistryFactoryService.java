@@ -1,5 +1,7 @@
 package com.latticeengines.monitor.exposed.service;
 
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+
 import io.micrometer.core.instrument.MeterRegistry;
 
 /**
@@ -16,10 +18,18 @@ public interface MeterRegistryFactoryService {
     MeterRegistry getServiceLevelRegistry();
 
     /**
-     * Return root {@link MeterRegistry} that contains all common tags for both
-     * services and host machine
+     * Return the hourly {@link MeterRegistry} that measures all api endpoints
      *
      * @return shared root registry
      */
-    MeterRegistry getHostLevelRegistry();
+    MeterRegistry getGlobalHourlyRegistry();
+
+    /**
+     * Return root {@link MeterRegistry} that contains all common tags for both
+     * services and host machine
+     *
+     * @param metricDB the targeting InfuxDB Database
+     * @return shared root registry
+     */
+    MeterRegistry getHostLevelRegistry(MetricDB metricDB);
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.pls.entitymanager.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +21,10 @@ import com.latticeengines.pls.entitymanager.MarketoMatchFieldEntityMgr;
 public class MarketoMatchFieldEntityMgrImpl extends BaseEntityMgrImpl<MarketoMatchField>
         implements MarketoMatchFieldEntityMgr {
 
-    @Autowired
+    @Inject
     private MarketoMatchFieldDao marketoMatchFieldDao;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Override

@@ -3,11 +3,12 @@ package com.latticeengines.datacloud.core.service.impl;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +21,12 @@ import com.latticeengines.monitor.exposed.service.SlackService;
 @Component("dataCloudNotificationService")
 public class DataCloudNotificationServiceImpl implements DataCloudNotificationService {
 
-    private static Logger log = LoggerFactory.getLogger(DataCloudNotificationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DataCloudNotificationServiceImpl.class);
 
     /***********************
      * Slack Configuration
      ***********************/
-    @Autowired
+    @Inject
     private SlackService slackService;
 
     @Value("${datacloud.slack.webhook.url}")
@@ -40,7 +41,7 @@ public class DataCloudNotificationServiceImpl implements DataCloudNotificationSe
     /***********************
      * Email Configuration
      ***********************/
-    @Autowired
+    @Inject
     private EmailService emailService;
 
     // If multiple, separated by ,

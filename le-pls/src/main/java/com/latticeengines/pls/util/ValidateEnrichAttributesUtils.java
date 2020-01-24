@@ -1,6 +1,10 @@
 package com.latticeengines.pls.util;
 
-public class ValidateEnrichAttributesUtils {
+public final class ValidateEnrichAttributesUtils {
+
+    protected ValidateEnrichAttributesUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final int MIN_PREMIUM_ENRICHMENT_ATTRIBUTES = 0;
     public static final int DEFAULT_PREMIUM_ENRICHMENT_ATTRIBUTES = 32;

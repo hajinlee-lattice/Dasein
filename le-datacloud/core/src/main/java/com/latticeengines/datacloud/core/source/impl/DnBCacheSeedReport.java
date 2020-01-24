@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.source.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.CharacterizationSource;
@@ -14,7 +15,7 @@ public class DnBCacheSeedReport implements CharacterizationSource {
 
     private static final long DEFAULT_CUTOFF_LIMIT_IN_SECONDS = 2 * 366 * 24 * 60 * 60L;
 
-    @Autowired
+    @Inject
     DnBCacheSeed dnBCacheSeed;
 
     private long cutoffLimitInSeconds = DEFAULT_CUTOFF_LIMIT_IN_SECONDS;

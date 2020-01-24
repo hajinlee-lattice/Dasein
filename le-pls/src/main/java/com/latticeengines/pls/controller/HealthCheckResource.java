@@ -15,6 +15,7 @@ import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
 import com.latticeengines.hadoop.exposed.service.EMRCacheService;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 import com.latticeengines.pls.service.SystemStatusService;
 
 import io.swagger.annotations.Api;
@@ -44,6 +45,7 @@ public class HealthCheckResource {
     @ResponseBody
     @ApiOperation(value = "Health check")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     public StatusDocument healthCheck() {
         return StatusDocument.online();
     }
@@ -52,6 +54,7 @@ public class HealthCheckResource {
     @ResponseBody
     @ApiOperation(value = "System check")
     @NoMetricsLog
+    @IgnoreGlobalApiMeter
     public StatusDocument systemCheck() {
         StatusDocument status = systemConfigService.getSystemStatus();
         return status;
@@ -65,6 +68,7 @@ public class HealthCheckResource {
         response.put("CurrentStack", currentStack);
         response.put("ArtifactVersion", versionManager.getCurrentVersion());
         response.put("GitCommit", versionManager.getCurrentGitCommit());
+        response.put("GitBranch", versionManager.getCurrentGitBranch());
         response.put("EMRClusterName", clusterName);
         response.put("EMRClusterId", emrCacheService.getClusterId(clusterName));
         return response;

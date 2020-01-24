@@ -16,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.datacloud.etl.transformation.service.impl.minidc.MiniAMDomainDunsTestNG;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TestIterativeStepConfig;
@@ -24,13 +23,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Iterative
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 
 public class IterativeStepTestNG extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(MiniAMDomainDunsTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(IterativeStepTestNG.class);
     GeneralSource source = new GeneralSource("DummyDataSet");
     GeneralSource baseSource = new GeneralSource("dataSet2");
 
     String targetSourceName = source.getSourceName();
     ObjectMapper om = new ObjectMapper();
-    
+
     @Test(groups = "pipeline2", enabled = true)
     public void testTransformation() {
         prepareDataSet1();

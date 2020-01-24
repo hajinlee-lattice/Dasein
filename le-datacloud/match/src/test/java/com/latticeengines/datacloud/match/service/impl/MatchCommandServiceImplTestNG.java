@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -23,15 +24,14 @@ import com.latticeengines.domain.exposed.datacloud.Commands;
 import com.latticeengines.domain.exposed.datacloud.CreateCommandRequest;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandStatus;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
-
 public class MatchCommandServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(MatchCommandServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private MatchCommandsService matchCommandsService;
 
-    @Autowired
+    @Inject
     private MatchClientRoutingDataSource dataSource;
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate();

@@ -114,12 +114,7 @@ public class PipelineTransformationService extends AbstractTransformationService
     private final String STEP = "_step_";
     private final String SUFFIX = "_suffix_" + ThreadLocalRandom.current().nextInt(0, 10000);
 
-    @Override
-    Logger getLogger() {
-        return log;
-    }
-
-    public String getServiceBeanName() {
+    private String getServiceBeanName() {
         return "pipelineTransformationService";
     }
 
@@ -157,7 +152,8 @@ public class PipelineTransformationService extends AbstractTransformationService
         } catch (Exception e) {
             throw new RuntimeException("Failed to start a new progress for " + getSource(), e);
         }
-        LoggingUtils.logInfo(getLogger(), progress, "Started a new progress with version=" + config.getVersion());
+        log.info(LoggingUtils.log(getClass().getSimpleName(), progress,
+                "Started a new progress with version=" + config.getVersion()));
         return progress;
     }
 
@@ -310,7 +306,7 @@ public class PipelineTransformationService extends AbstractTransformationService
                         SourceIngestion baseIngestion = baseIngestions.get(sourceName);
                         source = new IngestionSource(baseIngestion.getIngestionName());
                         involvedIngestionSources.put(sourceName, (IngestionSource) source);
-                    }else {
+                    } else {
                         source = sourceService.findBySourceName(sourceName);
                     }
                     if (source == null) {
@@ -412,7 +408,7 @@ public class PipelineTransformationService extends AbstractTransformationService
 
     private boolean executeTransformSteps(TransformationProgress progress, TransformStep[] steps, String workflowDir,
             PipelineTransformationConfiguration transConf) {
-        Long pipelineStarTime = System.currentTimeMillis();
+        long pipelineStarTime = System.currentTimeMillis();
 
         String name = transConf.getName();
         boolean reportEnabled = true;
@@ -568,10 +564,7 @@ public class PipelineTransformationService extends AbstractTransformationService
             } while (!converged && ((Integer) iterationContext.get(CTX_ITERATION)) < MAX_ITERATION);
             if (converged && succeeded) {
                 log.info("Iterative step " + step.getName() + " converged, final count = "
-                        + String.valueOf(step.getCount()));
-                // Disable hive table creation
-                // createSourceHiveTable(step.getTarget(),
-                // step.getTargetVersion());
+                        + step.getCount());
                 return true;
             } else {
                 if (!converged) {
@@ -745,10 +738,9 @@ public class PipelineTransformationService extends AbstractTransformationService
             return null;
         }
 
-        //log.info("start checking transformation step configs:");
         int currentStep = 0;
         for (TransformationStepConfig step : steps) {
-            //log.info(JsonUtils.serialize(step));
+            // log.info(JsonUtils.serialize(step));
             Transformer transformer = transformerService.findTransformerByName(step.getTransformer());
             if (transformer == null) {
                 error = String.format("Transformer %s does not exist", step.getTransformer());

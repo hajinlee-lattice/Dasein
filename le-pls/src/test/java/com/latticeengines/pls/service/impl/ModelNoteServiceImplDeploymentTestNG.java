@@ -5,8 +5,9 @@ import static org.testng.Assert.assertEquals;
 import java.io.InputStream;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -23,16 +24,15 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class ModelNoteServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private ModelNoteService modelNoteService;
 
-    @Autowired
+    @Inject
     private ModelSummaryProxy modelSummaryProxy;
 
     private ModelNote note1;

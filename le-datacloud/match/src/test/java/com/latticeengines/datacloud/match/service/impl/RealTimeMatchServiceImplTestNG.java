@@ -11,11 +11,12 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import javax.inject.Inject;
+
 import org.apache.log4j.Level;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
@@ -66,19 +67,19 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Value("${common.le.stack}")
     private String leStack;
 
-    @Autowired
+    @Inject
     private RealTimeMatchService realTimeMatchService;
 
-    @Autowired
+    @Inject
     private TestMatchInputService testMatchInputService;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
-    @Autowired
+    @Inject
     private DnBCacheService dnbCacheService;
 
-    @Autowired
+    @Inject
     private CountryCodeService countryCodeService;
 
     // Test against retired V1.0 matcher -- DerivedColumnsCache

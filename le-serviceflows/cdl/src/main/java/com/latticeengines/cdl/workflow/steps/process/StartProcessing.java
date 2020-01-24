@@ -151,7 +151,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             putLongValueInContext(NEW_RECORD_CUT_OFF_TIME, System.currentTimeMillis());
         }
 
-        //entityMatchVersion is using to bumpVersion when we Rematch entityMatch tenant.
+        // entityMatchVersion is using to bumpVersion when we Rematch
+        // entityMatch tenant.
         EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace.toString(),
                 EntityMatchEnvironment.SERVING, false);
         log.info("entityMatchVersion is {}.", entityMatchVersion);
@@ -309,8 +310,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
             if (status != null
                     && (status.getDataCloudBuildNumber() == null
-                    || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
-                    || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
+                            || DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber())
+                            || !status.getDataCloudBuildNumber().equals(currentBuildNumber))
                     && hasAccountBatchStore()) {
                 statusBuildNumber = DataCollectionStatusDetail.NOT_SET.equals(status.getDataCloudBuildNumber()) ? null
                         : status.getDataCloudBuildNumber();
@@ -336,8 +337,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
                 status = DataCollectionStatusUtils.updateTimeForDCChange(status, getLongValueFromContext(PA_TIMESTAMP));
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
-            } else if (StringUtils.compare(
-                    currentVersion == null ? null : currentVersion.getRefreshVersionVersion(),
+            } else if (StringUtils.compare(currentVersion == null ? null : currentVersion.getRefreshVersionVersion(),
                     statusVersion.getRefreshVersionVersion()) != 0) {
                 createSystemAction(ActionType.INTENT_CHANGE, ActionType.INTENT_CHANGE.getDisplayName());
                 DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
@@ -458,7 +458,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     protected List<String> getActionImpactedEngineIds(List<Action> actions) {
         List<String> engineIds = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(actions)) {
-            for (Action action: actions) {
+            for (Action action : actions) {
                 if (ActionType.getRatingRelatedTypes().contains(action.getType()) && //
                         action.getActionConfiguration() instanceof RatingEngineActionConfiguration) {
                     RatingEngineActionConfiguration configuration = //
@@ -489,9 +489,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private List<Action> getSoftOrHardDeleteActions(boolean softDelete, List<Action> actions) {
         ActionType actionType = softDelete ? ActionType.SOFT_DELETE : ActionType.HARD_DELETE;
         if (CollectionUtils.isNotEmpty(actions)) {
-            return actions.stream()
-                    .filter(action -> actionType.equals(action.getType()))
-                    .collect(Collectors.toList());
+            return actions.stream().filter(action -> actionType.equals(action.getType())).collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
@@ -511,8 +509,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private List<Action> getTransactionDeleteActions() {
         List<Action> actionList = getActions();
-        List<Action> deleteActions =
-                actionList.stream().filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType()) || ActionType.DATA_REPLACE.equals(action.getType())).collect(Collectors.toList());
+        List<Action> deleteActions = actionList.stream()
+                .filter(action -> ActionType.CDL_OPERATION_WORKFLOW.equals(action.getType())
+                        || ActionType.DATA_REPLACE.equals(action.getType()))
+                .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(deleteActions)) {
             return deleteActions;
         }
@@ -521,7 +521,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             if (!(action.getActionConfiguration() instanceof CleanupActionConfiguration)) {
                 continue;
             }
-            CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
+            CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action
+                    .getActionConfiguration();
             if (cleanupActionConfiguration.getImpactEntities().contains(BusinessEntity.Transaction)) {
                 deleteTransactionActions.add(action);
             }
@@ -564,6 +565,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private void addActionAssociateTables() {
         List<Action> actionList = getImportActions();
         if (CollectionUtils.isNotEmpty(actionList)) {
+            Map<String, String> tableTemplateMap = new HashMap<>();
             for (Action action : actionList) {
                 if (action.getActionConfiguration() == null) {
                     log.warn(String.format("Action %d does not have a import configuration, may need re-import.",
@@ -592,14 +594,44 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     continue;
                 }
                 dataFeedProxy.addTablesToQueue(customerSpace.toString(), taskId, tables);
+
+                if (configuration.isEntityMatchEnabled()) {
+                    DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
+                            importActionConfiguration.getDataFeedTaskId());
+                    String template = dataFeedTask.getImportTemplate().getName();
+                    associateTemplates(tables, template, tableTemplateMap);
+                }
+            }
+            putObjectInContext(CONSOLIDATE_INPUT_TEMPLATES, tableTemplateMap);
+            if (MapUtils.isNotEmpty(tableTemplateMap)) {
+                setTemplatesInOrder();
             }
         }
     }
 
+    private void setTemplatesInOrder() {
+        List<String> templatesForAccount = dataFeedProxy.getTemplatesBySystemPriority(customerSpace.toString(),
+                BusinessEntity.Account.name());
+        List<String> templatesForContact = dataFeedProxy.getTemplatesBySystemPriority(customerSpace.toString(),
+                BusinessEntity.Contact.name());
+        log.info("Account templates in order=" + String.join(",", templatesForAccount));
+        log.info("Contact templates in order=" + String.join(",", templatesForContact));
+        Map<BusinessEntity, List<String>> templatesInOrder = new HashMap<>();
+        templatesInOrder.put(BusinessEntity.Account, templatesForAccount);
+        templatesInOrder.put(BusinessEntity.Contact, templatesForContact);
+        putObjectInContext(CONSOLIDATE_TEMPLATES_IN_ORDER, templatesInOrder);
+    }
+
+    private void associateTemplates(List<String> tables, String template, Map<String, String> tableTemplateMap) {
+        for (int i = 0; i < tables.size(); i++) {
+            tableTemplateMap.put(tables.get(i), template);
+        }
+    }
+
     /**
-     * check transaction limit has two step:
-     * this is first step, if there is no delete transaction action in this PA
-     * we will check transaction quota limit. otherwise, we will check quota in merge step
+     * check transaction limit has two step: this is first step, if there is no
+     * delete transaction action in this PA we will check transaction quota
+     * limit. otherwise, we will check quota in merge step
      */
     private void reachTransactionLimit() {
         List<Action> deleteTransactionActions = getTransactionDeleteActions();
@@ -607,19 +639,20 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             Long dataCount = this.newTransactionCount;
             DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
             Long transactionDataQuotaLimit = dataLimit.getTransactionDataQuotaLimit();
-            DataCollectionStatus dataCollectionStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-            if (dataCollectionStatus != null && dataCollectionStatus.getDetail() != null && dataCollectionStatus.getTransactionCount() != null) {
+            DataCollectionStatus dataCollectionStatus = getObjectFromContext(CDL_COLLECTION_STATUS,
+                    DataCollectionStatus.class);
+            if (dataCollectionStatus != null && dataCollectionStatus.getDetail() != null
+                    && dataCollectionStatus.getTransactionCount() != null) {
                 DataCollectionStatusDetail detail = dataCollectionStatus.getDetail();
                 dataCount = dataCount + detail.getTransactionCount();
             }
 
             log.info("stored Transaction data is {}.", dataCount);
             if (transactionDataQuotaLimit < dataCount) {
-                throw new IllegalStateException("the Transaction data quota limit is " + transactionDataQuotaLimit +
-                        ", The data you uploaded has exceeded the limit.");
+                throw new IllegalStateException("the Transaction data quota limit is " + transactionDataQuotaLimit
+                        + ", The data you uploaded has exceeded the limit.");
             }
-            log.info("stored data is {}, the Transaction data limit is {}.", dataCount,
-                    transactionDataQuotaLimit);
+            log.info("stored data is {}, the Transaction data limit is {}.", dataCount, transactionDataQuotaLimit);
         }
     }
 
@@ -641,7 +674,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     activeTableNameSet.add(t.toLowerCase());
                 });
                 for (String tableName : tableNames) {
-                    if (activeTableNameSet.contains(tableName.toLowerCase()) || tableNamesForRetry.contains(tableName)) {
+                    if (activeTableNameSet.contains(tableName.toLowerCase())
+                            || tableNamesForRetry.contains(tableName)) {
                         log.info("Unlink table " + tableName + " as " + role + " in " + inactiveVersion);
                         dataCollectionProxy.unlinkTable(customerSpace.toString(), tableName, role, inactiveVersion);
                     } else {
@@ -689,7 +723,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private void verifyActiveDataCollectionVersion() {
         if (!activeVersion.equals(metadataProxy.getMigrationActiveVersion(customerSpace.toString()))) {
             log.error("Current active version for tenant {} doesn't match the one in migration table", customerSpace);
-            throw new IllegalStateException(String.format("Current active data collection version not match for %s", customerSpace));
+            throw new IllegalStateException(
+                    String.format("Current active data collection version not match for %s", customerSpace));
         }
     }
 

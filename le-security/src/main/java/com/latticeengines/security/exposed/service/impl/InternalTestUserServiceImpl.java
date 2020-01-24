@@ -4,8 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -44,13 +45,13 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
 
     private static final Long NINETY_DAYS_IN_MILLISECONDS = 90 * 24 * 60 * 60 * 1000L;
 
-    @Autowired
+    @Inject
     protected GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
     @Override
@@ -70,7 +71,7 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
             user1Creds.setUsername(username);
             user1Creds.setPassword(password);
             globalUserManagementService.registerUser(INTERNAL_ADMIN_USERNAME, user1, user1Creds);
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             // user already created
         }
     }

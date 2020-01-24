@@ -1,9 +1,10 @@
 package com.latticeengines.datafabric.service.datastore.impl;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.dynamo.DynamoService;
@@ -14,9 +15,9 @@ import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
 @Component("dynamoDataService")
 public class DynamoDataServiceProvider implements FabricDataServiceProvider {
 
-    private static final Logger log = LoggerFactory.getLogger(FabricDataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DynamoDataServiceProvider.class);
 
-    @Autowired
+    @Inject
     private DynamoService dynamoService;
 
     @Override

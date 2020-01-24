@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
@@ -20,8 +18,6 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 @Component
 public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements ModelSummaryProxy {
-
-    public static final Logger log = LoggerFactory.getLogger(ModelSummaryProxyImpl.class);
 
     private static final String LOOKUP_ID_DELIM = "|";
 
@@ -296,7 +292,7 @@ public class ModelSummaryProxyImpl extends MicroserviceRestApiProxy implements M
         return JsonUtils.convertList(res, ModelSummary.class);
     }
 
-    String parseOptionalParameter(String baseUrl, String parameterName, String parameterValue) {
+    private String parseOptionalParameter(String baseUrl, String parameterName, String parameterValue) {
         if (StringUtils.isNotEmpty(parameterValue)) {
             return String.format(baseUrl + "?%s=%s", parameterName, parameterValue);
         } else {

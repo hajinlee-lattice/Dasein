@@ -15,7 +15,11 @@ import com.latticeengines.domain.exposed.modelquality.PipelinePropertyValue;
 import com.latticeengines.domain.exposed.modelquality.PipelineStep;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
-public class PipelineFactory extends ModelFactory {
+public final class PipelineFactory extends ModelFactory {
+
+    protected PipelineFactory() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String PIPELINE_NAME_KEY = "pipeline.name";
     private static final Logger log = LoggerFactory.getLogger(PipelineFactory.class);

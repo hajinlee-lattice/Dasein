@@ -5,9 +5,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,13 +37,13 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
     @Value("${propdata.test.env}")
     protected String testEnv;
 
-    @Autowired
+    @Inject
     private MetricService metricService;
 
-    @Autowired
+    @Inject
     private HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @PostConstruct
@@ -69,7 +69,6 @@ public abstract class PropDataApiAbstractTestNGBase extends AbstractTestNGSpring
         headers.add("Accept", "application/json");
         return new HttpEntity<>(JsonUtils.serialize(payload), headers);
     }
-
 
     protected void prepareCleanPod(String podId) {
         HdfsPodContext.changeHdfsPodId(podId);

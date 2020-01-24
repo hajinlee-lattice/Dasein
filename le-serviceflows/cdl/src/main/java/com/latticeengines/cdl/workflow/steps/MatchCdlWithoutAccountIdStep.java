@@ -24,10 +24,10 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchCdlWithoutAccountIdStep extends RunDataFlow<MatchCdlAccountConfiguration> {
 
+    private static final Logger log = LoggerFactory.getLogger(MatchCdlWithoutAccountIdStep.class);
+
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    private static Logger log = LoggerFactory.getLogger(MatchCdlWithoutAccountIdStep.class);
 
     @Override
     public void onConfigurationInitialized() {

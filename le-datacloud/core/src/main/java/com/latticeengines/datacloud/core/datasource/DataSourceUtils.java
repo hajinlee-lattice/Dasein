@@ -16,7 +16,11 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
 
-public class DataSourceUtils {
+public final class DataSourceUtils {
+
+    protected DataSourceUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceUtils.class);
 

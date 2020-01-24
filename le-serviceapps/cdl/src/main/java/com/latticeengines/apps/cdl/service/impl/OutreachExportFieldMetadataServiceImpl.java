@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @Component("outreachExportFieldMetadataService")
 public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataServiceBase {
 
-    private static Logger log = LoggerFactory.getLogger(OutreachExportFieldMetadataServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(OutreachExportFieldMetadataServiceImpl.class);
 
     @Inject
     private ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;

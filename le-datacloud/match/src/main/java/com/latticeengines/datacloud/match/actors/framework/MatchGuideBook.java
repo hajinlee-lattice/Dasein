@@ -1,8 +1,9 @@
 package com.latticeengines.datacloud.match.actors.framework;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
@@ -17,10 +18,10 @@ public class MatchGuideBook extends GuideBook {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(MatchGuideBook.class);
 
-    @Autowired
+    @Inject
     private MatchActorSystem actorSystem;
 
-    @Autowired
+    @Inject
     private MatchDecisionGraphService matchDecisionGraphService;
 
     @Override

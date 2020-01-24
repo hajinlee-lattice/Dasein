@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -19,7 +20,6 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -37,16 +37,16 @@ import com.latticeengines.monitor.exposed.metric.service.MetricService;
 @ContextConfiguration(locations = { "classpath:test-datacloud-yarn-context.xml" })
 public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
 
-    @Autowired
+    @Inject
     private MetricService metricService;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     protected YarnClient yarnClient;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
     @PostConstruct

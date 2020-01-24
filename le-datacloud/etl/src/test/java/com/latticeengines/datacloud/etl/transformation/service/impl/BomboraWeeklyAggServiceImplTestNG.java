@@ -9,8 +9,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -21,7 +22,6 @@ import com.latticeengines.datacloud.core.source.impl.BomboraWeeklyAgg;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
-
 public class BomboraWeeklyAggServiceImplTestNG
         extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {
     private String baseSourceVersion = "2016-10-07_00-00-00_UTC";
@@ -40,13 +40,13 @@ public class BomboraWeeklyAggServiceImplTestNG
     private static final String TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT = "TotalAggregatedScore_HighlyRelevant";
     private static final String TOTAL_AGGREGATED_SCORE_MOST_RELEVANT = "TotalAggregatedScore_MostRelevant";
 
-    @Autowired
+    @Inject
     BomboraWeeklyAgg source;
 
-    @Autowired
+    @Inject
     BomboraDepivoted baseSource;
 
-    @Autowired
+    @Inject
     private BomboraWeeklyAggService bomboraWeeklyAggService;
 
     @Test(groups = "pipeline2")

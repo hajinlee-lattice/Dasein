@@ -2,7 +2,8 @@ package com.latticeengines.modelquality.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/analytictests")
 public class AnalyticTestResource implements ModelQualityAnalyticTestInterface, CrudInterface<AnalyticTestEntityNames> {
 
-    @Autowired
+    @Inject
     private AnalyticTestService analyticTestService;
 
     @Override

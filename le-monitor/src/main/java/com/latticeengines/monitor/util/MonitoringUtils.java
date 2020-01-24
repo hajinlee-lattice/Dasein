@@ -11,7 +11,11 @@ import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 /**
  * MISC utility functions for monitoring
  */
-public class MonitoringUtils {
+public final class MonitoringUtils {
+
+    protected MonitoringUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(MonitoringUtils.class);
 
     private static final String APP_MASTER = "appmaster";

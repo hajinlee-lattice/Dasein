@@ -2,7 +2,8 @@ package com.latticeengines.dataplatform.service.impl.dlorchestration;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataplatform.entitymanager.ModelCommandEntityMgr;
@@ -15,10 +16,10 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 @Component("modelStepFinishProcessor")
 public class ModelStepFinishProcessorImpl implements ModelStepProcessor {
 
-    @Autowired
+    @Inject
     private ModelCommandEntityMgr modelCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ModelCommandResultEntityMgr modelCommandResultEntityMgr;
     
     @Override

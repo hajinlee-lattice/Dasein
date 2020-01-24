@@ -2,7 +2,8 @@ package com.latticeengines.datacloud.collection.service.impl;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
@@ -15,13 +16,13 @@ import com.latticeengines.domain.exposed.datacloud.manage.RefreshProgress;
 @Component
 public class BuiltWithPivotServiceImplTestNG extends PivotServiceImplTestNGBase {
 
-    @Autowired
+    @Inject
     BuiltWithPivotService pivotService;
 
-    @Autowired
+    @Inject
     BuiltWithPivoted source;
 
-    @Autowired
+    @Inject
     RefreshProgressEntityMgr progressEntityMgr;
 
     @Override

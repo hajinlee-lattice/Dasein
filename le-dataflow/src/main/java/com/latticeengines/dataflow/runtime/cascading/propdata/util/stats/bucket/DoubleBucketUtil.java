@@ -15,21 +15,20 @@ public class DoubleBucketUtil extends BucketUtil {
         String lbl = "";
         for (int i = 0; i < buckets.size(); i++) {
             Double bucketA = (Double) buckets.get(i);
-
-            if (val.doubleValue() < bucketA.doubleValue()) {
-
-            } else if (val.equals(bucketA)) {
-                lbl = bucketLbls.get(i);
-                break;
-            } else if (val.doubleValue() > bucketA.doubleValue()) {
-                if (i + 1 >= buckets.size()) {
+            if (val >= bucketA) {
+                if (val.equals(bucketA)) {
                     lbl = bucketLbls.get(i);
                     break;
                 } else {
-                    Double bucketB = (Double) buckets.get(i + 1);
-                    if (val.doubleValue() < bucketB.doubleValue()) {
+                    if (i + 1 >= buckets.size()) {
                         lbl = bucketLbls.get(i);
                         break;
+                    } else {
+                        Double bucketB = (Double) buckets.get(i + 1);
+                        if (val < bucketB) {
+                            lbl = bucketLbls.get(i);
+                            break;
+                        }
                     }
                 }
             }

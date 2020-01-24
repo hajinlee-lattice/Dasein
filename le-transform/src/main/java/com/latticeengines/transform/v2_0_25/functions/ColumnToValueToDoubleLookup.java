@@ -15,21 +15,21 @@ import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public abstract class ColumnToValueToDoubleLookup implements RealTimeTransform {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(ColumnToValueToDoubleLookup.class);
+
     private static final long serialVersionUID = 3553344738920319099L;
 
-    protected static final Logger log = LoggerFactory.getLogger(Assignconversionrate.class);
-    
     protected Map<String, Map<String, Double>> columnToValueToDoubleMap = new HashMap<>();
 
     @Override
     public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
-        
+
         if (!columnToValueToDoubleMap.containsKey(column)) {
             throw new RuntimeException(String.format("%s is not in the lookup. Failing this call.", column));
         }
-        
+
         Object value = record.get(column);
         String valueAsStr = null;
         if (value == null) {
@@ -59,7 +59,7 @@ public abstract class ColumnToValueToDoubleLookup implements RealTimeTransform {
             String contents = FileUtils.readFileToString(new File(filename));
             columnToValueToDoubleMap = JsonUtils.deserialize(contents, Map.class, true);
         } catch (FileNotFoundException e) {
-            log.warn(String.format("Cannot find json file with conversion rate mapping values: %s", filename));
+            log.warn("Cannot find json file with conversion rate mapping values: {}", filename);
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Cannot open json file with conversion rate mapping values: %s", filename), e);

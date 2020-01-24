@@ -1,6 +1,7 @@
 package com.latticeengines.dataplatform.entitymanager.impl.modeling;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +15,7 @@ import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 @Component("modelDefinitionEntityMgr")
 public class ModelDefinitionEntityMgrImpl extends BaseEntityMgrImpl<ModelDefinition> implements ModelDefinitionEntityMgr {
 
-    @Autowired
+    @Inject
     private ModelDefinitionDao modelDefinitionDao;
         
     public ModelDefinitionEntityMgrImpl() {

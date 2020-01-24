@@ -1,9 +1,10 @@
 package com.latticeengines.modeling.workflow.listeners;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
@@ -21,13 +22,13 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
 
     private static final Logger log = LoggerFactory.getLogger(SendEmailAfterModelCompletionListener.class);
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Autowired
+    @Inject
     private PlsInternalProxy plsInternalProxy;
 
     @Override

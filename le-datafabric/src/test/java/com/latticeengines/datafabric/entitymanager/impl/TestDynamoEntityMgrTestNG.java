@@ -7,7 +7,10 @@ import static com.latticeengines.datafabric.entitymanager.impl.TestDynamoEntityM
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -24,9 +27,11 @@ import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 
 public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(TestDynamoEntityMgrTestNG.class);
+
     private TestDynamoEntityMgrImpl entityMgr;
 
-    @Autowired
+    @Inject
     private DynamoService dynamoService;
 
     private String tableName;
@@ -37,12 +42,10 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
     @Value("${common.le.stack}")
     private String leStack;
 
-    private String repo;
-
     @BeforeClass(groups = "dynamo")
     public void setup() throws Exception {
 
-        repo = "TestDynamoEntityMgrTestNG_" + leEnv + "_" + leStack;
+        String repo = "TestDynamoEntityMgrTestNG_" + leEnv + "_" + leStack;
         tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
         dynamoService.deleteTable(tableName);
 

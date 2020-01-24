@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -47,12 +47,10 @@ public class BulkMatchServiceWithAccountMasterServiceImpl extends BulkMatchServi
     private static final String INPUT_AVRO_KEY = "InputAvro";
     private static final String PUBLIC_DOMAIN_KEY = "PublicDomain";
 
-    @Inject
-    @Qualifier("accountMasterColumnMetadataService")
+    @Resource(name = "accountMasterColumnMetadataService")
     private ColumnMetadataService columnMetadataService;
 
-    @Inject
-    @Qualifier("accountMasterColumnSelectionService")
+    @Resource(name = "accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
     @Value("${common.microservice.url}")

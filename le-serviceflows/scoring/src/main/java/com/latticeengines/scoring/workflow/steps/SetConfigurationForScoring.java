@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.util.FeatureImportanceUtil;
+import com.latticeengines.domain.exposed.cdl.util.FeatureImportanceMgr;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -39,7 +39,7 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private FeatureImportanceUtil featureImportanceUtil;
+    private FeatureImportanceMgr featureImportanceUtil;
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;

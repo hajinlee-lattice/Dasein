@@ -12,7 +12,7 @@ public interface PlayLaunchService {
 
     void create(PlayLaunch playLaunch);
 
-    PlayLaunch findByLaunchId(String launchId);
+    PlayLaunch findByLaunchId(String launchId, boolean inflate);
 
     PlayLaunchChannel findPlayLaunchChannelByLaunchId(String launchId);
 

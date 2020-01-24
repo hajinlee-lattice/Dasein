@@ -19,6 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.avro.file.DataFileWriter;
@@ -36,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -68,7 +69,6 @@ import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.yarn.exposed.runtime.SingleContainerYarnProcessor;
-
 public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScoringConfiguration>
         implements ItemProcessor<RTSBulkScoringConfiguration, String>, ApplicationContextAware {
 
@@ -94,16 +94,16 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @SuppressWarnings("unused")
     private ApplicationContext applicationContext;
 
-    @Autowired
+    @Inject
     private PlsInternalProxy plsInternalProxy;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private InternalScoringApiProxy internalScoringApiProxy;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     private String idColumnName = InterfaceName.Id.name();
@@ -572,7 +572,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             DataFileWriter<GenericRecord> dataFileWriter, GenericRecordBuilder builder,
             Map<String, Type> leadEnrichmentAttributeMap, CSVPrinter csvFilePrinter, long recordCount,
             Map<String, String> fieldNameMapping, boolean enrichmentEnabledForInternalAttributes,
-            boolean enableMatching) throws Exception {
+            boolean enableMatching) {
 
         ExecutorService scoreExecutorService = ThreadPoolUtils.getFixedSizeThreadPool("ScoringProcessorThreads",
                 threadpoolSize);
@@ -583,7 +583,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                         builder, leadEnrichmentAttributeMap, csvFilePrinter, counter, recordCount, fieldNameMapping,
                         enrichmentEnabledForInternalAttributes, enableMatching)));
 
-        ThreadPoolUtils.runCallablesInParallel(scoreExecutorService, callables, threadPoolTimeoutMin, threadTimeoutSec);
+        ThreadPoolUtils.callInParallel(scoreExecutorService, callables, threadPoolTimeoutMin, threadTimeoutSec);
         ThreadPoolUtils.shutdownAndAwaitTermination(scoreExecutorService, threadPoolTimeoutMin);
     }
 

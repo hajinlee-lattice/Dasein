@@ -13,14 +13,19 @@ public class ImportActionConfiguration extends ActionConfiguration {
 
     @JsonProperty("workflow_id")
     private Long workflowId;
+
     @JsonProperty("data_feed_task_id")
     private String dataFeedTaskId;
+
     @JsonProperty("original_filename")
     private String originalFilename;
+
     @JsonProperty("import_count")
     private Long importCount;
+
     @JsonProperty("registered_tables")
     private List<String> registeredTables;
+
     @JsonProperty("mock_completed")
     private Boolean mockCompleted;
 

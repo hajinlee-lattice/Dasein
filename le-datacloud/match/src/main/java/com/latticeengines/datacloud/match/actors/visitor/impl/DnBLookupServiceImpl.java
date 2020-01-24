@@ -24,14 +24,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -107,28 +106,28 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Value("${datacloud.dnb.bulk.redirect.realtime.threshold:100}")
     private int bulkToRealtimeThreshold;
 
-    @Autowired
+    @Inject
     private DnBRealTimeLookupService dnbRealTimeLookupService;
 
-    @Autowired
+    @Inject
     private DnBBulkLookupDispatcher dnbBulkLookupDispatcher;
 
-    @Autowired
+    @Inject
     private DnBBulkLookupFetcher dnbBulkLookupFetcher;
 
-    @Autowired
+    @Inject
     private DnBBulkLookupStatusChecker dnbBulkLookupStatusChecker;
 
-    @Autowired
+    @Inject
     private DnBCacheService dnbCacheService;
 
-    @Autowired
+    @Inject
     private DnBMatchResultValidator dnbMatchResultValidator;
 
-    @Autowired
+    @Inject
     private NameLocationService nameLocationService;
 
-    @Autowired
+    @Inject
     private DnbMatchCommandService dnbMatchCommandService;
 
     @Inject
@@ -143,12 +142,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     private final Queue<DnBBatchMatchContext> finishedBatches = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean batchFetchersInitiated = new AtomicBoolean(false);
 
-    @Autowired
-    @Qualifier("dnbBatchScheduler")
+    @Resource(name = "dnbBatchScheduler")
     private ThreadPoolTaskScheduler dnbTimerDispatcher;
 
-    @Autowired
-    @Qualifier("dnbBatchScheduler")
+    @Resource(name = "dnbBatchScheduler")
     private ThreadPoolTaskScheduler dnbTimerStatus;
 
     // flag to indicate whether background executors should keep running
@@ -302,7 +299,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             saveReq(lookupRequestId, returnAddress, request);
             // Bucket single contexts to batched contexts in unsubmittedReqs
             synchronized (unsubmittedBatches) {
-                // If unsubmittedBatches is empty, or last unsubmitted batch is sealed, 
+                // If unsubmittedBatches is empty, or last unsubmitted batch is sealed,
                 // or last unsubmitted batch size is 10K, create a new batch
                 if (unsubmittedBatches.isEmpty() || unsubmittedBatches.get(unsubmittedBatches.size() - 1).isSealed()
                         || unsubmittedBatches.get(unsubmittedBatches.size() - 1).getContexts()

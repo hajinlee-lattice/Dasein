@@ -6,9 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -29,7 +30,7 @@ import com.latticeengines.security.exposed.service.SessionService;
 public class GlobalAuthProvider implements AuthenticationProvider {
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthProvider.class);
 
-    @Autowired
+    @Inject
     private SessionService sessionService;
 
     @Override

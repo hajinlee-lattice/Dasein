@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
@@ -88,28 +87,28 @@ public class TenantServiceImpl implements TenantService {
 
     private final BatonService batonService = new BatonServiceImpl();
 
-    @Autowired
+    @Inject
     private DanteComponent danteComponent;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private ServiceService serviceService;
 
-    @Autowired
+    @Inject
     private ComponentOrchestrator orchestrator;
 
-    @Autowired
+    @Inject
     private DefaultConfigOverwriter overwriter;
 
-    @Autowired
+    @Inject
     private ServiceConfigService serviceConfigService;
 
-    @Autowired
+    @Inject
     private com.latticeengines.security.exposed.service.TenantService tenantService;
 
-    @Autowired
+    @Inject
     private Oauth2RestApiProxy oauthProxy;
 
     @Inject

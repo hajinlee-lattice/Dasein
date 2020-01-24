@@ -3,7 +3,8 @@ package com.latticeengines.datacloudapi.engine.transformation.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,8 +15,8 @@ import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 public abstract class FirehoseTransformationDeploymentTestNGBase<T extends TransformationConfiguration>
         extends TransformationDeploymentTestNGBase<T> {
 
-    @Autowired
-    TransformationProxy transformationProxy;
+    @Inject
+    private TransformationProxy transformationProxy;
 
     @Test(groups = "deployment")
     public void testDeploymentWholeProgress() {

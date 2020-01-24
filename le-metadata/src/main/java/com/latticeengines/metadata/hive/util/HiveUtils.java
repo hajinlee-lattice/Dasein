@@ -13,7 +13,11 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 
-public class HiveUtils {
+public final class HiveUtils {
+
+    protected HiveUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String getCreateStatement(Configuration configuration, String tableName, Table table)
             throws IOException {

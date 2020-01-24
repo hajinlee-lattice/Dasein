@@ -2,8 +2,9 @@ package com.latticeengines.datacloud.etl.transformation.entitymgr.impl;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +14,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.LatticeIdStrategy;
 
 @Component("latticeIdStrategyMgr")
 public class LatticeIdStrategyMgrImpl implements LatticeIdStrategyEntityMgr {
-    @Autowired
+    @Inject
     private LatticeIdStrategyDao latticeIdStrategyDao;
 
     @Override

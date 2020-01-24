@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
@@ -24,7 +24,7 @@ public class AccountMasterColumnServiceImpl extends BaseMetadataColumnServiceImp
     @Resource(name = "accountMasterColumnEntityMgr")
     private MetadataColumnEntityMgr<AccountMasterColumn> metadataColumnEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCloudVersionEntityMgr versionEntityMgr;
 
     private final ConcurrentMap<String, ConcurrentMap<String, AccountMasterColumn>> whiteColumnCache = new ConcurrentHashMap<>();

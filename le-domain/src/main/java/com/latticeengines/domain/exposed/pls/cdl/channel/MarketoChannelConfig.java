@@ -110,14 +110,6 @@ public class MarketoChannelConfig implements ChannelConfig {
             return false;
         }
         MarketoChannelConfig updatedConfig = (MarketoChannelConfig) channelConfig;
-
-        boolean a = StringUtils.isBlank(this.audienceId) ? StringUtils.isNotBlank(updatedConfig.audienceId) //
-                : !this.audienceId.equals(updatedConfig.audienceId);
-        boolean b = StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //
-                : !this.audienceName.equals(updatedConfig.audienceName);
-        boolean c = StringUtils.isBlank(this.folderName) ? StringUtils.isNotBlank(updatedConfig.folderName) //
-                : !this.folderName.equals(updatedConfig.folderName);
-
         return (StringUtils.isBlank(this.audienceId) ? StringUtils.isNotBlank(updatedConfig.audienceId) //
                 : !this.audienceId.equals(updatedConfig.audienceId)) //
                 || (StringUtils.isBlank(this.audienceName) ? StringUtils.isNotBlank(updatedConfig.audienceName) //

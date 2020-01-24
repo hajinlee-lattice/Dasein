@@ -1,14 +1,14 @@
 package com.latticeengines.monitor.exposed.service.impl;
 
 import javax.annotation.PreDestroy;
-import javax.inject.Inject;
+import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -19,13 +19,17 @@ public class MeterRegistryFactoryServiceImpl implements MeterRegistryFactoryServ
 
     private static final Logger log = LoggerFactory.getLogger(MeterRegistryFactoryServiceImpl.class);
 
-    @Inject
-    @Qualifier("rootRegistry")
+    @Resource(name = "rootRegistry")
     private MeterRegistry rootRegistry;
 
-    @Inject
-    @Qualifier("rootHostRegistry")
+    @Resource(name = "rootHostRegistry")
     private MeterRegistry rootHostRegistry;
+
+    @Resource(name = "globalHourlyRegistry")
+    private MeterRegistry globalHourlyRegistry;
+
+    @Resource(name = "rootInspectionHostRegistry")
+    private MeterRegistry rootInspectionHostRegistry;
 
     @Override
     public MeterRegistry getServiceLevelRegistry() {
@@ -33,8 +37,20 @@ public class MeterRegistryFactoryServiceImpl implements MeterRegistryFactoryServ
     }
 
     @Override
-    public MeterRegistry getHostLevelRegistry() {
-        return rootHostRegistry;
+    public MeterRegistry getGlobalHourlyRegistry() {
+        return globalHourlyRegistry;
+    }
+
+    @Override
+    public MeterRegistry getHostLevelRegistry(MetricDB metricDB) {
+        switch (metricDB) {
+            case LDC_Match:
+                return rootHostRegistry;
+            case INSPECTION:
+                return rootInspectionHostRegistry;
+            default:
+                throw new UnsupportedOperationException();
+        }
     }
 
     /*
@@ -43,8 +59,10 @@ public class MeterRegistryFactoryServiceImpl implements MeterRegistryFactoryServ
     @PreDestroy
     private void cleanup() {
         log.info("Closing all meter registries");
-        rootHostRegistry.close();
         rootRegistry.close();
+        rootHostRegistry.close();
+        globalHourlyRegistry.close();
+        rootInspectionHostRegistry.close();
         log.info("All meter registries closed");
     }
 }

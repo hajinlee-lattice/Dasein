@@ -1,10 +1,11 @@
 package com.latticeengines.metadata.hive.impl;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,13 +19,12 @@ import com.latticeengines.metadata.hive.util.HiveUtils;
 @Component("hiveTableDao")
 public class HiveTableDaoImpl implements HiveTableDao {
 
-    private Logger log = LoggerFactory.getLogger(HiveTableDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HiveTableDaoImpl.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
-    @Qualifier("hiveJdbcTemplate")
+    @Resource(name = "hiveJdbcTemplate")
     private JdbcTemplate hiveJdbcTemplate;
 
     @Override

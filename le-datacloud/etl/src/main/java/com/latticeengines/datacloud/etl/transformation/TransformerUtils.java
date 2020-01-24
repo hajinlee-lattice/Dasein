@@ -20,7 +20,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 /**
  * Some code can be shared by transformers
  */
-public class TransformerUtils {
+public final class TransformerUtils {
+
+    protected TransformerUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(TransformerUtils.class);
 

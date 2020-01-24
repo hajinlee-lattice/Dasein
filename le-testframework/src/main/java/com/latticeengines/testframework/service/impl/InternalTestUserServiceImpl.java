@@ -4,8 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -22,15 +25,18 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 @Component("internalTestUserServiceNew")
 public class InternalTestUserServiceImpl implements InternalTestUserService {
+
+    private static final Logger log = LoggerFactory.getLogger(InternalTestUserServiceImpl.class);
+
     private static final Long NINETY_DAYS_IN_MILLISECONDS = 90 * 24 * 60 * 60 * 1000L;
 
-    @Autowired
+    @Inject
     protected GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
     @Override
@@ -52,7 +58,7 @@ public class InternalTestUserServiceImpl implements InternalTestUserService {
                 user1Creds.setPassword(password);
                 globalUserManagementService.registerUser(null, user1, user1Creds);
             }
-        } catch (Exception e) {
+        }  catch (Exception ignore) {
             // user already created
         }
     }

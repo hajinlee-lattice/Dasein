@@ -13,9 +13,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
@@ -42,14 +43,13 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
 
     private static final String TABLE_NAME = "RedshiftServiceImplTestNG_EventTable";
     private static final String STAGING_TABLE_NAME = TABLE_NAME + "_staging";
-    @Autowired
+    @Inject
     private RedshiftService redshiftService;
 
-    @Autowired
+    @Inject
     private S3Service s3Service;
 
-    @Autowired
-    @Qualifier("redshiftJdbcTemplate")
+    @Resource(name = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
     @Value("${aws.test.s3.bucket}")

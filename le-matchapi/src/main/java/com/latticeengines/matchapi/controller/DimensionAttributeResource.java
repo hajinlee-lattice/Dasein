@@ -2,7 +2,8 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +22,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/dimensionattributes")
 public class DimensionAttributeResource {
 
-    @Autowired
+    @Inject
     private DimensionalQueryService dimensionalQueryService;
 
     @RequestMapping(value = "/dimensions", method = RequestMethod.GET, headers = "Accept=application/json")

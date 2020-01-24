@@ -88,7 +88,7 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
                         try {
                             ContractLifecycleManager.delete(contractId);
                         } catch (Exception e2) {
-                            // ignore
+                            log.debug("Contract {} has already been removed.", contractId);
                         }
                     }
 
@@ -124,7 +124,7 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
                                     try {
                                         TenantLifecycleManager.delete(contractId, tenantId);
                                     } catch (Exception e2) {
-                                        // ignore
+                                        log.debug("Tenant {} in contract {} has already been removed.", tenantId, contractId);
                                     }
                                 }
 
@@ -168,8 +168,8 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
 
         try {
             deleteTenant(TestContractId, TestTenantId);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // tenant does not exist
         }
         createTenant(TestContractId, TestTenantId);
 
@@ -181,11 +181,11 @@ public class AdminFunctionalTestNGBase extends AdminAbstractTestNGBase {
     }
 
     @AfterClass(groups = { "functional" })
-    public void tearDown() throws Exception {
+    public void tearDown() {
         try {
             deleteTenant(TestContractId, TestTenantId);
-        } catch (Exception e) {
-            // ignore
+        } catch (Exception ignore) {
+            // tenant does not exist
         }
     }
 

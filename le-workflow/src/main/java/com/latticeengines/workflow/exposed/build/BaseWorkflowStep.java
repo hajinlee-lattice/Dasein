@@ -58,7 +58,7 @@ import avro.shaded.com.google.common.collect.Sets;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
 
-    protected static final Logger log = LoggerFactory.getLogger(BaseWorkflowStep.class);
+    private static final Logger log = LoggerFactory.getLogger(BaseWorkflowStep.class);
 
     protected static final String PREMATCH_EVENT_TABLE = "PREMATCH_EVENT_TABLE";
     protected static final String PREMATCH_UPSTREAM_EVENT_TABLE = "PREMATCH_UPSTREAM_EVENT_TABLE";
@@ -117,6 +117,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVENT_COUNTER_MAP = "EVENT_COUNTER_MAP";
 
     // CDL
+    public static final String CONSOLIDATE_INPUT_TEMPLATES = "CONSOLIDATE_INPUT_TEMPLATES";
+    public static final String CONSOLIDATE_TEMPLATES_IN_ORDER = "CONSOLIDATE_TEMPLATES_IN_ORDER";
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
     public static final String SOFT_DEELETE_ACTIONS = "SOFT_DEELETE_ACTIONS";
     public static final String HARD_DEELETE_ACTIONS = "HARD_DEELETE_ACTIONS";
@@ -185,13 +187,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String STREAM_DIMENSION_METADATA_MAP = "STREAM_DIMENSION_METADATA_MAP";
     protected static final String STREAM_DIMENSION_VALUE_ID_MAP = "STREAM_DIMENSION_VALUE_ID_MAP";
     protected static final String METRICS_GROUP_TABLE_FORMAT = "METRICS_GROUP_%s"; // groupId
-    protected static final String MERGED_METRICS_GROUP_TABLE_FORMAT = "MERGED_METRICS_GROUP_%s"; // entity_servingEntity
     protected static final String ACTIVITY_MERGED_METRICS_SERVING_ENTITIES = "MERGED_METRICS_SERVING_ENTITIES"; // set of merged activity metrics groups' serving entities
     protected static final String SCORE_TRAINING_FILE_INCLUDED_FEATURES = "SCORE_TRAINING_FILE_INCLUDED_FEATURES";
     protected static final String PERIOD_STORE_TABLE_FORMAT = "PERIODSTORE_%s_%s"; // streamId, period
     protected static final String PERIOD_STORE_TABLE_NAME = "PERIOD_STORE_TABLE_NAME";
     protected static final String PERFORM_SOFT_DELETE = "PERFORM_SOFT_DELETE"; //
     protected static final String SOFT_DELETE_RECORD_COUNT = "SOFT_DELETE_RECORD_COUNT"; //
+    protected static final String RAW_STREAM_TABLE_AFTER_DELETE = "RAW_STREAM_TABLE_AFTER_DELETE"; //
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";
@@ -202,6 +204,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE";
     public static final String ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE";
     protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
+    protected static final String SYSTEM_ACCOUNT_MASTER_TABLE_NAME = "SYSTEM_ACCOUNT_MASTER_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
     protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
     protected static final String ACCOUNT_FEATURE_TABLE_NAME = "ACCOUNT_FEATURE_TABLE_NAME";
@@ -282,6 +285,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_TXN_TARGETTABLE, //
             ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE, //
             ACCOUNT_DIFF_TABLE_NAME, //
+            SYSTEM_ACCOUNT_MASTER_TABLE_NAME, //
             ACCOUNT_MASTER_TABLE_NAME, //
             FULL_ACCOUNT_TABLE_NAME, //
             ACCOUNT_EXPORT_TABLE_NAME, //

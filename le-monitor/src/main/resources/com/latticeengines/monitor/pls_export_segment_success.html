@@ -74,21 +74,22 @@
                             <table width="100%" cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                                 <tr style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0; padding: 0;">
                                     <td class="content-block" style="font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 16px; vertical-align: top; margin: 0; padding: 0 0 20px;" valign="top">
-                                        <p style="margin: 20px;">{{firstname}},</p>
+                                        <p style="margin: 20px;">Hi {{firstname}},</p>
                                         <p style="margin: 20px;">
-                                            Your request to export {{requestType}} was successfully completed.
+                                            Congratulations! Your {{requestType}} export was successfully completed.
                                         </p>
 
                                         <p style="margin: 20px;">
-                                            Please click <a href={{downloadLink}}>this link </a> to download the file with your export data.
+                                            <a href={{downloadLink}}>Please click here to download the file.</a>
                                         </p>
                                         <p style="margin: 20px;">
-                                            If you are having trouble with the link, please copy and paste the address below into your web browser: 
+                                            If you are having trouble with the download link, you might try copying and pasting the address in your web browser: {{downloadLink}}
                                         </p>
-                                        <p style="margin: 20px; word-break: break-all;">{{downloadLink}}<br/>
+                                        <p style="margin: 20px;"> You can access your exported files at any time by logging in and going to Jobs > Export. It will be available to download for 7 days. <br/>
                                         </p>
-                                        <p style="margin: 20px;"> You can access your exported file(s) at anytime by clicking on the Jobs icon in the top-right corner and then selecting the Segment Export tab.<br/>
-                                        </p>
+                                        <p style="margin: 20px;">Tenant Name: {{tenantName}</p>
+                                        </br><p style="margin: 20px;">Best regards, </p>
+                                        <p style="margin: 20px;">Lattice Team</p>
                                     </td>
                                 </tr>
 

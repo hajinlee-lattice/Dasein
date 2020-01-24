@@ -331,14 +331,14 @@ public class SourceProfileEnrichStageTestNG extends PipelineTransformationTestNG
                         Assert.assertNotNull(intAlgo);
                         pass = true;
                     } catch (Exception ex) {
-                        // ignore
+                        log.warn("Json deserialization error", ex);
                     }
                     try {
                         DiscreteBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, DiscreteBucket.class);
                         Assert.assertNotNull(intAlgo);
                         pass = true;
                     } catch (Exception ex) {
-                        // ignore
+                        log.warn("Json deserialization error", ex);
                     }
                     Assert.assertTrue(pass);
                     break;

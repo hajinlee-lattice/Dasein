@@ -17,6 +17,10 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public final class ScalingUtils {
 
+    protected ScalingUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(ScalingUtils.class);
 
     private static final double GB = 1024. * 1024 * 1024;

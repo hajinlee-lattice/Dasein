@@ -5,17 +5,17 @@ import static org.mockito.Mockito.spy;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.modelquality.PropData;
 import com.latticeengines.modelquality.functionalframework.ModelQualityFunctionalTestNGBase;
 import com.latticeengines.modelquality.service.PropDataService;
-
 public class PropDataServiceImplFunctionalTestNG extends ModelQualityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private PropDataService propDataService;
 
     @Test(groups = "functional")

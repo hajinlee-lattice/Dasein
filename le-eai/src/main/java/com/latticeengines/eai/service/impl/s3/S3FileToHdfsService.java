@@ -41,20 +41,16 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component("s3FileToHdfsService")
 public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(S3FileToHdfsService.class);
+    private static final Logger log = LoggerFactory.getLogger(S3FileToHdfsService.class);
 
     private static final String S3_FILE_SUFFIX = ".csv";
 
     @Inject
     private Configuration yarnConfiguration;
-
-    @Inject
-    private EMREnvService emrEnvService;
 
     @Inject
     private S3Service s3Service;

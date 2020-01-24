@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -28,37 +29,37 @@ import com.latticeengines.modelquality.service.SamplingService;
 @Component("analyticPipelineService")
 public class AnalyticPipelineServiceImpl extends BaseServiceImpl implements AnalyticPipelineService {
 
-    @Autowired
+    @Inject
     private AnalyticPipelineEntityMgr analyticPipelineEntityMgr;
 
-    @Autowired
+    @Inject
     private PipelineEntityMgr pipelineEntityMgr;
 
-    @Autowired
+    @Inject
     private PipelineService pipelineService;
 
-    @Autowired
+    @Inject
     private AlgorithmEntityMgr algorithmEntityMgr;
 
-    @Autowired
+    @Inject
     private AlgorithmService algorithmService;
 
-    @Autowired
+    @Inject
     private PropDataEntityMgr propdataEntityMgr;
 
-    @Autowired
+    @Inject
     private PropDataService propdataService;
 
-    @Autowired
+    @Inject
     private DataFlowEntityMgr dataflowEntityMgr;
 
-    @Autowired
+    @Inject
     private DataFlowService dataflowService;
 
-    @Autowired
+    @Inject
     private SamplingEntityMgr samplingEntityMgr;
 
-    @Autowired
+    @Inject
     private SamplingService samplingService;
 
     private final String production = "PRODUCTION";

@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 
 public class PostResponseErrorHandler implements ResponseErrorHandler {
-    private static final Logger log = LoggerFactory.getLogger(GetResponseErrorHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(PostResponseErrorHandler.class);
 
     public PostResponseErrorHandler() {
     }

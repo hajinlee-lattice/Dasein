@@ -8,12 +8,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +39,7 @@ public class PmmlModelService extends ModelServiceBase {
     @Value("${pls.modelingservice.basedir}")
     private String modelingBaseDir;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
     @Value("${aws.customer.s3.bucket}")

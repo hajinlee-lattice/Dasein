@@ -157,7 +157,7 @@ public class MockActivityStore extends BaseWorkflowStep<MockActivityStoreConfigu
         if (s3Unit == null) {
             throw new IllegalStateException("There is no S3 data unit for account batch store");
         }
-        String s3Url = s3Unit.getFullPath(useEmr ? "s3a" : "s3n");;
+        String s3Url = s3Unit.getFullPath(useEmr ? "s3a" : "s3n");
         log.info("Found S3 location for account batch store: {}", s3Url);
 
         Pattern pattern = Pattern.compile("s3a://(?<bucket>[^/]+)/(?<prefix>.*)");

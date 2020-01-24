@@ -57,7 +57,7 @@ import com.latticeengines.security.exposed.AccessLevel;
  */
 public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    protected static final Logger log = LoggerFactory.getLogger(EmailServiceImplDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(EmailServiceImplDeploymentTestNG.class);
 
     private static final String INTERNAL_USER_EMAIL = "build@lattice-engines.com";
     private static final String EXTERNAL_USER_EMAIL = "build.lattice.engines@gmail.com";

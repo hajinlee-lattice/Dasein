@@ -1,7 +1,7 @@
 package com.latticeengines.actors.visitor.sample;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import com.latticeengines.actors.exposed.ActorSystemTemplate;
 import com.latticeengines.actors.exposed.traveler.GuideBook;
@@ -25,11 +25,10 @@ public abstract class SampleMicroEngineActorTemplate<T extends SampleDataSourceW
     @Override
     protected abstract void process(Response response);
 
-    @Autowired
+    @Inject
     private SampleMatchActorSystem matchActorSystem;
 
-    @Autowired
-    @Qualifier("sampleMatchGuideBook")
+    @Resource(name = "sampleMatchGuideBook")
     protected SampleMatchGuideBook guideBook;
 
     @Override

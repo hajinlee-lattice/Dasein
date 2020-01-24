@@ -2,11 +2,12 @@ package com.latticeengines.scoring.workflow.steps;
 
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
 
     private static final Logger log = LoggerFactory.getLogger(ExportScoreTrainingFile.class);
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @Override

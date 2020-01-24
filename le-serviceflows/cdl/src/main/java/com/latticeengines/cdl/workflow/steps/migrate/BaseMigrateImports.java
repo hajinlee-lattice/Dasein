@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -37,10 +35,6 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfiguration> extends BaseTransformWrapperStep<T> {
-
-    private static Logger log = LoggerFactory.getLogger(BaseMigrateImports.class);
-
-    private static int migrateStep;
 
     private static final String TRANSFORMER = "EntityMatchImportMigrateTransformer";
 
@@ -145,8 +139,6 @@ public abstract class BaseMigrateImports<T extends BaseMigrateImportStepConfigur
             request.setSubmitter(customerSpace.getTenantId());
             request.setKeepTemp(false);
             request.setEnableSlack(false);
-
-            migrateStep = 0;
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             TransformationStepConfig migrate = migrate();

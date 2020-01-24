@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.core.entitymgr.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,7 +13,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterFact;
 @Component("accountMasterFactEntityMgr")
 public class AccountMasterFactEntityMgrImpl implements AccountMasterFactEntityMgr {
 
-    @Autowired
+    @Inject
     private AccountMasterFactDao accountMasterFactDao;
 
     @Override

@@ -351,7 +351,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     // Used only for Entity Match to copy data from the smaller EntityMatchKeyRecord
     // passed along in the MatchTraveler to
     // the InternalOutputRecord used outside the actor system.
-    void copyFromEntityToInternalOutputRecord(EntityMatchKeyRecord entityRecord, InternalOutputRecord internalRecord) {
+    private void copyFromEntityToInternalOutputRecord(EntityMatchKeyRecord entityRecord, InternalOutputRecord internalRecord) {
         internalRecord.setParsedDomain(entityRecord.getParsedDomain());
         internalRecord.setPublicDomain(entityRecord.isPublicDomain());
         internalRecord.setMatchEvenIsPublicDomain(entityRecord.isMatchEvenIsPublicDomain());

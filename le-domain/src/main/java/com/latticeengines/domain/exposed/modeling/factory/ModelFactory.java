@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
-public class ModelFactory {
+public abstract class ModelFactory {
 
     public static final String MODEL_CONFIG = "modelConfig";
     private static final Logger log = LoggerFactory.getLogger(ModelFactory.class);

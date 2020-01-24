@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -11,14 +12,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
-
-
 public class TenantServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     TenantService tenantService;
 
-    @Autowired
+    @Inject
     GlobalTenantManagementService globalTenantManagementService;
 
     @BeforeClass(groups = "functional")
@@ -27,8 +26,8 @@ public class TenantServiceImplTestNG extends SecurityFunctionalTestNGBase {
         try {
             tenantService.discardTenant(tenant);
             globalTenantManagementService.discardTenant(tenant);
-        } catch(LedpException e) {
-            //ignore
+        } catch(LedpException ignore) {
+            // tenant not exist
         }
     }
 
@@ -38,8 +37,8 @@ public class TenantServiceImplTestNG extends SecurityFunctionalTestNGBase {
         try {
             tenantService.discardTenant(tenant);
             globalTenantManagementService.discardTenant(tenant);
-        } catch(LedpException e) {
-            //ignore
+        } catch(LedpException ignore) {
+            // tenant not exist
         }
     }
 

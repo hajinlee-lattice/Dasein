@@ -4,13 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.BaseProperty;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportContext;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
+import com.latticeengines.domain.exposed.yarn.YarnProperty;
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.eai.service.impl.ExportStrategy;
 
@@ -40,7 +40,7 @@ public class FileExportServiceImpl extends ExportService {
             context.setProperty(ExportProperty.INPUT_FILE_PATH, inputPath);
         } else {
             context.setProperty(ExportProperty.INPUT_FILE_PATH, ExtractUtils
-                    .getSingleExtractPath(context.getProperty(BaseProperty.HADOOPCONFIG, Configuration.class), table));
+                    .getSingleExtractPath(context.getProperty(YarnProperty.HADOOPCONFIG, Configuration.class), table));
         }
         boolean exportUsingDisplayName = exportConfig.getUsingDisplayName();
         context.setProperty(ExportProperty.EXPORT_USING_DISPLAYNAME, String.valueOf(exportUsingDisplayName));

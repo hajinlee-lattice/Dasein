@@ -46,13 +46,15 @@ import com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor;
 public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNGBase
         implements RedshiftAndSparkQueryObjectAPITester {
 
-    private static Logger log = LoggerFactory.getLogger(RatingQueryServiceImplSparkSQLTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RatingQueryServiceImplSparkSQLTestNG.class);
 
+    @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
     private final class AccountAttr {
         static final String CompanyName = "CompanyName";
         static final String Intent = "BmbrSurge_AccountOverdrafts_Intent";
     }
 
+    @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
     private final class ContactAttr {
         static final String Occupation = "Occupation";
     }

@@ -6,8 +6,12 @@ import org.slf4j.LoggerFactory;
 
 public class LedpQueueAssigner {
 
+    protected LedpQueueAssigner() {
+        throw new UnsupportedOperationException();
+    }
+    private static final Logger log = LoggerFactory.getLogger(LedpQueueAssigner.class);
+
     public static final String PRIORITY = "Priority";
-    public static final Logger log = LoggerFactory.getLogger(LedpQueueAssigner.class);
 
     private static final String RTSBULKSCORING_QUEUE_NAME = "RTSBulkScoring";
     private static final String SCORING_QUEUE_NAME = "Scoring";

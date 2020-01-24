@@ -36,7 +36,7 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
 
     private static final int MAX_LOG_VALUE_LENGTH = 50;
 
-    private static Logger log = LoggerFactory.getLogger(MatchStandardizationServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchStandardizationServiceImpl.class);
 
     @Inject
     private PublicDomainService publicDomainService;

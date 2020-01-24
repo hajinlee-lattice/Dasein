@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.playmaker;
 
-public class PlaymakerConstants {
+public final class PlaymakerConstants {
+
+    protected PlaymakerConstants() {
+        throw new UnsupportedOperationException();
+    }
     public static final String ID = "ID";
     public static final String AccountID = "AccountID";
     public static final String SfdcAccountID = "SfdcAccountID";

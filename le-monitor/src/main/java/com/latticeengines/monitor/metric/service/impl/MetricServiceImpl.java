@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.metric.Dimension;
@@ -17,7 +18,7 @@ import com.latticeengines.monitor.metric.service.MetricWriter;
 @Component("metricService")
 public class MetricServiceImpl implements MetricService {
 
-    @Autowired
+    @Inject
     private List<MetricWriter> metricWriters;
 
     @Override

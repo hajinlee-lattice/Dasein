@@ -6,19 +6,19 @@ import static org.testng.Assert.assertNull;
 
 import java.util.Calendar;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.dataplatform.entitymanager.modeling.ThrottleConfigurationEntityMgr;
 import com.latticeengines.dataplatform.functionalframework.DataPlatformFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.modeling.ThrottleConfiguration;
-
 public class ThrottleConfigurationEntityMgrImplTestNG extends DataPlatformFunctionalTestNGBase {
 
     private ThrottleConfiguration config;
 
-    @Autowired
+    @Inject
     protected ThrottleConfigurationEntityMgr throttleConfigurationEntityMgr;
 
     @BeforeClass(groups = {"functional"})

@@ -3,8 +3,8 @@ package com.latticeengines.scoring.functionalframework;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,16 +19,16 @@ import com.latticeengines.scoring.entitymanager.ScoringCommandStateEntityMgr;
 @Configuration
 public class ScoringOrderedEntityMgrListForDbClean {
 
-    @Autowired
+    @Inject
     private ScoringCommandEntityMgr scoringCommandEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandStateEntityMgr scoringCommandStateEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandLogEntityMgr scoringCommandLogEntityMgr;
 
-    @Autowired
+    @Inject
     private ScoringCommandResultEntityMgr scoringCommandResultEntityMgr;
 
     private List<BaseEntityMgr<? extends HasPid>> entityMgrs;

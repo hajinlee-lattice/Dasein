@@ -22,7 +22,11 @@ import com.latticeengines.domain.exposed.modeling.algorithm.AggregationAlgorithm
 import com.latticeengines.domain.exposed.modeling.algorithm.RandomForestAlgorithm;
 import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
 
-public class PythonMRUtils {
+public final class PythonMRUtils {
+
+    protected PythonMRUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static final String METADATA_JSON_PATH = "./metadata.json";
     private static final String DS = "datascience";
 

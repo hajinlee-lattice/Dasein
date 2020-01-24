@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.dataflow.transformation.dunsredirect;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.ValidationUtils;
@@ -24,7 +25,7 @@ public class DunsRedirectFromHQ extends ConfigurableFlowBase<DunsRedirectBookCon
     public static final String DATAFLOW_BEAN_NAME = "DunsRedirectFromHQ";
     public static final String TRANSFORMER_NAME = "DunsRedirectFromHQTransformer";
 
-    @Autowired
+    @Inject
     private BeanValidationService beanValidationService;
 
     @Override

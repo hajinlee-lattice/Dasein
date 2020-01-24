@@ -3,7 +3,8 @@ package com.latticeengines.eai.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -25,13 +26,12 @@ import com.latticeengines.domain.exposed.source.SourceCredentialType;
 import com.latticeengines.eai.exposed.service.EaiCredentialValidationService;
 import com.latticeengines.eai.functionalframework.EaiFunctionalTestNGBase;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
-
 public class EaiCredentialValidationServiceImplTestNG extends EaiFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private CrmCredentialZKService crmCredentialZKService;
 
-    @Autowired
+    @Inject
     private EaiCredentialValidationService eaiCredentialValidationService;
 
     @Value("${eai.test.salesforce.username}")

@@ -4,7 +4,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 
-public class RequestIdUtils {
+public final class RequestIdUtils {
+
+    protected RequestIdUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String IDENTIFIER_KEY = "com.latticeengines.requestid";
     public static final String REQUEST_ID = "Request-Id";

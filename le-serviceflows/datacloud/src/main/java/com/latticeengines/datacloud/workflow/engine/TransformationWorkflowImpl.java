@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.workflow.engine;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class TransformationWorkflowImpl extends AbstractWorkflow<TransformationWorkflowConfiguration>
         implements TransformationWorkflow {
 
-    @Autowired
+    @Inject
     private TransformationStep transformationStep;
 
     @Override

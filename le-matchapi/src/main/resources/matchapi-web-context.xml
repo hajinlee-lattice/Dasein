@@ -6,10 +6,6 @@
         http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
     <import resource="classpath:common-webapp-env-context.xml"/>
-    <import resource="classpath:matchapi-context.xml"/>
-    <import resource="classpath:quartzclient-context.xml"/>
-    <bean class="com.latticeengines.matchapi.swagger.SwaggerConfig" />
-
     <bean id="setEnvironmentService" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="targetClass" value="com.latticeengines.common.exposed.bean.BeanFactoryEnvironment"/>
         <property name="targetMethod" value="setService"/>
@@ -19,6 +15,11 @@
             </list>
         </property>
     </bean>
+
+    <import resource="classpath:monitor-aspects-context.xml"/>
+    <import resource="classpath:matchapi-context.xml"/>
+    <import resource="classpath:quartzclient-context.xml"/>
+    <bean class="com.latticeengines.matchapi.swagger.SwaggerConfig" />
 
     <mvc:annotation-driven>
         <mvc:message-converters>

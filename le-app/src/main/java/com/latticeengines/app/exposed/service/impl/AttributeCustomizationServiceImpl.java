@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.Closure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -38,13 +39,13 @@ import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 public class AttributeCustomizationServiceImpl implements AttributeCustomizationService {
     private static final Logger log = LoggerFactory.getLogger(AttributeCustomizationServiceImpl.class);
 
-    @Autowired
+    @Inject
     private AttributeCustomizationPropertyEntityMgr attributeCustomizationPropertyEntityMgr;
 
-    @Autowired
+    @Inject
     private CategoryCustomizationPropertyEntityMgr categoryCustomizationPropertyEntityMgr;
 
-    @Autowired
+    @Inject
     private AttributeService attributeService;
 
     @SuppressWarnings("rawtypes")

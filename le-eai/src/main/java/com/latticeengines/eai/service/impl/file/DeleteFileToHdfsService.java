@@ -10,11 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -41,12 +42,12 @@ import com.latticeengines.eai.service.ImportService;
 @Component("deleteFileToHdfsService")
 public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(DeleteFileToHdfsService.class);
+    private static final Logger log = LoggerFactory.getLogger(DeleteFileToHdfsService.class);
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private EaiMetadataService eaiMetadataService;
 
     @Override

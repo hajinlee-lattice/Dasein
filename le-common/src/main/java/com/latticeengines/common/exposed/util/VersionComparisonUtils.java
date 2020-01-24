@@ -1,6 +1,10 @@
 package com.latticeengines.common.exposed.util;
 
-public class VersionComparisonUtils {
+public final class VersionComparisonUtils {
+
+    protected VersionComparisonUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static int compareVersion(String version, String otherVersion) {
         String[] versionNumbers = version.split("\\.");

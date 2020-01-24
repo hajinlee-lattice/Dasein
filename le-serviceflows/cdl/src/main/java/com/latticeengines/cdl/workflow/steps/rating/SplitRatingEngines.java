@@ -9,13 +9,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -38,6 +39,8 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Component("splitRatingEngines")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SplitRatingEngines extends BaseWorkflowStep<ProcessRatingStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(SplitRatingEngines.class);
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -165,9 +168,7 @@ public class SplitRatingEngines extends BaseWorkflowStep<ProcessRatingStepConfig
             };
             runnables.add(runnable);
         });
-        ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("dep-attrs", Math.min(8, engineIds.size()));
-        ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 60, 1);
-        threadPool.shutdown();
+        ThreadPoolUtils.runInParallel(runnables);
         return nodes;
     }
 

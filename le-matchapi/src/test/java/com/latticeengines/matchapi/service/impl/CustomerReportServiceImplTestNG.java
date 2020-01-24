@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -14,11 +15,9 @@ import com.latticeengines.domain.exposed.datacloud.customer.CustomerReport;
 import com.latticeengines.domain.exposed.datacloud.customer.IncorrectLookupReproduceDetail;
 import com.latticeengines.matchapi.service.CustomerReportService;
 import com.latticeengines.matchapi.testframework.MatchapiFunctionalTestNGBase;
-
-
 public class CustomerReportServiceImplTestNG extends MatchapiFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private CustomerReportService customerReportService;
     private static String tenantName = CustomerReportServiceImplTestNG.class.getSimpleName();
     private static String reportedByUser = "lattice@lattice-engines.com";

@@ -634,7 +634,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             }
         };
         runnables.add(statsCubeRunnable);
-        ThreadPoolUtils.runRunnablesInParallel(getWorkers(), runnables, 30, 2);
+        ThreadPoolUtils.runInParallel(runnables);
         metadataMap.putAll(concurrentMetadataMap);
         columnNamesMap.putAll(concurrentColumnNamesMap);
         statsCubeMap.putAll(concurrentStatsCubeMap);

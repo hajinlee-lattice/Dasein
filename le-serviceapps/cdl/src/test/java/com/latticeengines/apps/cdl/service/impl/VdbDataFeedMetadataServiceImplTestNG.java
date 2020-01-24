@@ -3,10 +3,11 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -29,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.TableUtils;
-
 public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(VdbDataFeedMetadataServiceImplTestNG.class);
@@ -46,13 +46,13 @@ public class VdbDataFeedMetadataServiceImplTestNG extends CDLFunctionalTestNGBas
 
     private Table resolvedTable;
 
-    @Autowired
+    @Inject
     private VdbDataFeedMetadataServiceImpl vdbDataFeedMetadataService;
 
-    @Autowired
+    @Inject
     private DataFeedTaskManagerServiceImpl dataFeedTaskManagerService;
 
-    @Autowired
+    @Inject
     private CDLExternalSystemService cdlExternalSystemService;
 
     @BeforeClass(groups = "functional")

@@ -14,7 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.RedisIndex;
 
-public class RedisUtil {
+public final class RedisUtil {
+
+    protected RedisUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String INDEX = "REDISINDEX";
 

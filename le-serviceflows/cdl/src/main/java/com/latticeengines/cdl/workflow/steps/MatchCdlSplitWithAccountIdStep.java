@@ -18,7 +18,7 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchCdlSplitWithAccountIdStep extends RunDataFlow<MatchCdlSplitConfiguration> {
 
-    private static Logger log = LoggerFactory.getLogger(MatchCdlSplitWithAccountIdStep.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchCdlSplitWithAccountIdStep.class);
 
     @Override
     public void onConfigurationInitialized() {

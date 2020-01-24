@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,7 +44,6 @@ import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
-
 public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineResourceDeploymentTestNG.class);
@@ -65,16 +65,16 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     private final boolean shouldCreateActionWithRatingEngine1 = true;
     private final boolean shouldCreateActionWithRatingEngine2 = false;
 
-    @Autowired
+    @Inject
     private MetadataSegmentService metadataSegmentService;
 
-    @Autowired
+    @Inject
     private ActionProxy actionProxy;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Autowired
+    @Inject
     private CDLTestDataService cdlTestDataService;
 
     private MetadataSegment segment;

@@ -3,6 +3,7 @@ package com.latticeengines.pls.controller;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -10,7 +11,6 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,28 +37,30 @@ import com.latticeengines.security.exposed.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
+@Deprecated
 @Api(value = "admin", description = "REST resource for managing PLS tenants")
 @RestController
 @RequestMapping(value = "/admin")
 public class AdminResource extends InternalResourceBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InternalResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdminResource.class);
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
-    @Autowired
+    @Inject
     private UserService userService;
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalUserManagementService globalUserManagementService;
 
     @RequestMapping(value = "/tenants", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Add a PLS tenant")
     public Boolean addTenant(@RequestBody Tenant tenant, HttpServletRequest request) {
+        LOGGER.warn("This api should not been used !!!");
         checkHeader(request);
         if (!tenantService.hasTenantId(tenant.getId())) {
             tenantService.registerTenant(tenant);
@@ -72,6 +74,7 @@ public class AdminResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Get list of registered tenants")
     public List<Tenant> getTenants(HttpServletRequest request) {
+        LOGGER.warn("This api should not been used !!!");
         checkHeader(request);
         return tenantService.getAllTenants();
     }
@@ -82,6 +85,7 @@ public class AdminResource extends InternalResourceBase {
     public Boolean deleteTenant(@PathVariable String tenantId,
             @RequestParam(value = "tenantId", required = false, defaultValue = " ") String tenantName,
             HttpServletRequest request) {
+        LOGGER.warn("This api should not been used !!!");
         checkHeader(request);
         Tenant tenant = new Tenant();
         tenant.setName(tenantName);
@@ -95,6 +99,7 @@ public class AdminResource extends InternalResourceBase {
     @ApiOperation(value = "Add a PLS admin user")
     public Boolean addAdminUser(@RequestBody UserRegistrationWithTenant userRegistrationWithTenant,
             HttpServletRequest request) {
+        LOGGER.warn("This api should not been used !!!");
         checkHeader(request);
         return userService.addAdminUser(MultiTenantContext.getEmailAddress(), userRegistrationWithTenant);
     }
@@ -105,6 +110,7 @@ public class AdminResource extends InternalResourceBase {
     public SimpleBooleanResponse updateUsers(@RequestParam(value = "username") String username,
             @RequestParam(value = "tenant") String tenantId, @RequestBody UserUpdateData userUpdateData,
             HttpServletRequest request) throws URIException {
+        LOGGER.warn("This api should not been used !!!");
         checkHeader(request);
 
         username = URIUtil.decode(username);
@@ -171,6 +177,7 @@ public class AdminResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Reset temporary password")
     public String restTempPassword(@RequestBody User user, HttpServletRequest request) {
+        LOGGER.warn("This api should not been used !!!");
         checkHeader(request);
         String username = user.getUsername();
         String tempPass = null;
@@ -188,6 +195,7 @@ public class AdminResource extends InternalResourceBase {
     @ApiOperation(value = "Check whether a user exists by email")
     public Boolean checkUserExistenceByEmail(@RequestParam(value = "useremail") String userEmail,
             HttpServletRequest request) {
+        LOGGER.warn("This api should not been used !!!");
         checkHeader(request);
         User user = userService.findByEmail(userEmail);
         return user != null;
@@ -198,6 +206,7 @@ public class AdminResource extends InternalResourceBase {
     @ApiOperation(value = "set S3Import Email Notification state")
     public void setImportNotifictionStatus(@RequestParam(value = "tenantId") String tenantId, @RequestParam(value =
             "notificationLevel") String notificationLevel) {
+        LOGGER.warn("This api should not been used !!!");
         tenantService.setNotificationStateByTenantId(tenantId, notificationLevel);
     }
 
@@ -206,6 +215,7 @@ public class AdminResource extends InternalResourceBase {
     @ApiOperation(value = "set S3Import Email Notification state")
     public void setEmailNotifictionType(@RequestParam(value = "tenantId") String tenantId, @RequestParam(value =
             "notificationType") String notificationType) {
+        LOGGER.warn("This api should not been used !!!");
         tenantService.setNotificationTypeByTenantId(tenantId, notificationType);
     }
 

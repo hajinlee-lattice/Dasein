@@ -1,7 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,10 +26,10 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/jobs")
 public class JobResource {
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private DLTenantMappingService dlTenantMappingService;
 
     @RequestMapping(value = "/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

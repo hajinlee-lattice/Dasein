@@ -2,8 +2,9 @@ package com.latticeengines.objectapi.controller;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,6 +17,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
+import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
 
@@ -32,7 +34,7 @@ public class EntityResource {
 
     private final EntityQueryService entityQueryService;
 
-    @Autowired
+    @Inject
     public EntityResource(EntityQueryService entityQueryService) {
         this.entityQueryService = entityQueryService;
     }
@@ -40,6 +42,7 @@ public class EntityResource {
     @PostMapping(value = "/count")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
+    @InvocationMeter(name = "entity-count", measurment = "objectapi")
     public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,
             @RequestParam(value = "sqlUser", required = false) String sqlUser) {
@@ -74,6 +77,7 @@ public class EntityResource {
     @PostMapping(value = "/ratingcount")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rating count for the specified query")
+    @InvocationMeter(name ="entity-rating-coverage", measurment = "objectapi")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
             @RequestBody RatingEngineFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version,

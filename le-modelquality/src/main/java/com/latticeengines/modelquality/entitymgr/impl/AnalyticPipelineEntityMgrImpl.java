@@ -1,6 +1,7 @@
 package com.latticeengines.modelquality.entitymgr.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import com.latticeengines.modelquality.entitymgr.AnalyticPipelineEntityMgr;
 public class AnalyticPipelineEntityMgrImpl extends BaseEntityMgrImpl<AnalyticPipeline>
         implements AnalyticPipelineEntityMgr {
 
-    @Autowired
+    @Inject
     private AnalyticPipelineDao analyticPipelineDao;
 
     @Override

@@ -12,10 +12,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.testng.annotations.AfterClass;
@@ -29,12 +30,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
-
 public class AttributeEntityMgrImplTestNG extends MetadataFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(AttributeEntityMgrImplTestNG.class);
 
-    @Autowired
+    @Inject
     private MetadataService metadataService;
 
     @Override

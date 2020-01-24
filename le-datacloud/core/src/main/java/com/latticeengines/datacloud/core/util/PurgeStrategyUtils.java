@@ -11,7 +11,11 @@ import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
-public class PurgeStrategyUtils {
+public final class PurgeStrategyUtils {
+
+    protected PurgeStrategyUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static Set<String> amSourceTypes = ImmutableSet.of(ACCOUNT_MASTER, ACCOUNT_MASTER_LOOKUP, DUNS_GUIDE_BOOK);
 
     public static SourceType getSourceType(Source source) {

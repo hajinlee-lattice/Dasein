@@ -38,7 +38,11 @@ import de.javakaffee.kryoserializers.guava.ReverseListSerializer;
 import de.javakaffee.kryoserializers.guava.TreeMultimapSerializer;
 import de.javakaffee.kryoserializers.guava.UnmodifiableNavigableSetSerializer;
 
-public class KryoUtils {
+public final class KryoUtils {
+
+    protected KryoUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(KryoUtils.class);
 

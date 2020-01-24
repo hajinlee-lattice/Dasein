@@ -24,6 +24,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.monitor.exposed.service.EmailService;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @ContextConfiguration(locations = { "classpath:test-monitor-context.xml" })
 public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//PowerMockTestCase
 
@@ -37,7 +39,9 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     private Tenant tenant;
     private User user;
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_FINAL")
     private Logger origLog;
+    @SuppressFBWarnings("SLF4J_LOGGER_SHOULD_BE_FINAL")
     private Logger newLog;
     private List<String> logs;
 
@@ -80,56 +84,35 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         user.setFirstName("FirstName");
         user.setUsername("build.lattice.engines@gmail.com");
         user.setEmail("build.lattice.engines@gmail.com");
-        emailService.sendPlsNewExternalUserEmail(user, PASSWORD, HOSTPORT, false);
+        emailService.sendNewUserEmail(user, PASSWORD, HOSTPORT, false);
     }
 
+
     @Test(groups = "functional")
-    public void sendPlsNewInternalUserEmail() {
-        emailService.sendPlsNewInternalUserEmail(tenant, user, PASSWORD, HOSTPORT);
+    public void sendNewUserEmail() {
+        emailService.sendNewUserEmail(user, PASSWORD, HOSTPORT, true);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("new PLS internal user"));
+        Assert.assertTrue(logs.get(0).contains("new user email"));
+
+        emailService.sendNewUserEmail(user, PASSWORD, HOSTPORT, false);
+
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("new user email"));
     }
 
-    @Test(groups = "functional")
-    public void sendPlsNewExternalUserEmail() {
-        emailService.sendPlsNewExternalUserEmail(user, PASSWORD, HOSTPORT, true);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("new PLS external user"));
-
-        emailService.sendPlsNewExternalUserEmail(user, PASSWORD, HOSTPORT, false);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("new PLS external user"));
-    }
 
     @Test(groups = "functional")
-    public void sendPlsNewProspectingUserEmail() {
-        emailService.sendPlsNewProspectingUserEmail(user, PASSWORD, null);
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("new PLS prospecting user"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPlsExistingInternalUserEmail() {
-        emailService.sendPlsExistingInternalUserEmail(tenant, user, HOSTPORT);
+    public void sendExistingUserEmail() {
+        emailService.sendExistingUserEmail(tenant, user, HOSTPORT, true);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("existing PLS internal user"));
-    }
+        Assert.assertTrue(logs.get(0).contains("existing user email"));
 
-    @Test(groups = "functional")
-    public void sendPlsExistingExternalUserEmail() {
-        emailService.sendPlsExistingExternalUserEmail(tenant, user, HOSTPORT, true);
+        emailService.sendExistingUserEmail(tenant, user, HOSTPORT, false);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("existing PLS external user"));
-
-        emailService.sendPlsExistingExternalUserEmail(tenant, user, HOSTPORT, false);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("existing PLS external user"));
+        Assert.assertTrue(logs.get(0).contains("existing user email"));
     }
 
     @Test(groups = "functional")
@@ -140,77 +123,6 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
         Assert.assertTrue(logs.get(0).contains("forget password"));
     }
 
-    @Test(groups = "functional")
-    public void sendPdNewExternalUserEmail() {
-        emailService.sendPdNewExternalUserEmail(user, PASSWORD, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("new PD external user"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPdExistingExternalUserEmail() {
-        emailService.sendPdExistingExternalUserEmail(tenant, user, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("existing PD external user"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPlsImportDataSuccessEmail() {
-        emailService.sendPlsImportDataSuccessEmail(user, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("PLS import data complete"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPlsImportDataErrorEmail() {
-        emailService.sendPlsImportDataErrorEmail(user, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("PLS import data error"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPlsEnrichDataSuccessEmail() {
-        emailService.sendPlsEnrichDataSuccessEmail(user, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("PLS enrichment data complete"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPlsEnrichDataErrorEmail() {
-        emailService.sendPlsEnrichDataErrorEmail(user, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("PLS enrich data error"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPlsValidateMetadataSuccessEmail() {
-        emailService.sendPlsValidateMetadataSuccessEmail(user, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("PLS validate metadata complete"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPlsMetadataMissingEmail() {
-        emailService.sendPlsMetadataMissingEmail(user, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("PLS metadata missing"));
-    }
-
-    @Test(groups = "functional")
-    public void sendPlsValidateMetadataErrorEmail() {
-        emailService.sendPlsValidateMetadataErrorEmail(user, HOSTPORT);
-
-        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
-        Assert.assertTrue(logs.get(0).contains("PLS validate metadata error"));
-    }
 
     @Test(groups = "functional")
     public void sendPlsCreateModelCompletionEmail() {
@@ -283,13 +195,13 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsEnrichInternalAttributeCompletionEmail() {
-        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, true,
+        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
                 null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending PLS enrich internal attribute (" + MODEL_NAME + ") complete"));
 
-        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, false,
+        emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
                 null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
@@ -298,13 +210,13 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsEnrichInternalAttributeErrorEmail() {
-        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, true,
+        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
                 null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("Sending PLS enrich internal attribute (" + MODEL_NAME + ") error"));
 
-        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME, false,
+        emailService.sendPlsEnrichInternalAttributeErrorEmail(user, HOSTPORT, TENANT_NAME, MODEL_NAME,
                 null);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
@@ -313,12 +225,12 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsExportSegmentSuccessEmail() {
-        emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type");
+        emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type", TENANT_NAME);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("segment export complet"));
 
-        emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type");
+        emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type", TENANT_NAME);
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("segment export complete"));

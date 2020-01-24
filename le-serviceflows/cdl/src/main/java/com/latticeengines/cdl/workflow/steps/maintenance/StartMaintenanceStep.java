@@ -1,6 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -20,10 +23,12 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class StartMaintenanceStep extends BaseWorkflowStep<StartMaintenanceConfiguration> {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(StartMaintenanceStep.class);
+
+    @Inject
     public DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     public DataCollectionProxy dataCollectionProxy;
 
     private CustomerSpace customerSpace;

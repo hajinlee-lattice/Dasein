@@ -27,6 +27,7 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -100,10 +101,7 @@ public class TimeSeriesDistributer {
                 consumeBatchWriteFutures();
                 if (getTotalBufferSize() > BUFFER_THRESHOLD) {
                     batchWritePeriodData(null);
-                    try {
-                        Thread.sleep(1_000L);
-                    } catch (InterruptedException e) {
-                    }
+                    SleepUtils.sleep(1000L);
                     continue;
                 }
                 batchReadPeriodData();
@@ -116,10 +114,7 @@ public class TimeSeriesDistributer {
             while (getReadBufferSize() != 0) {
                 consumeBatchWriteFutures();
                 batchWritePeriodData(null);
-                try {
-                    Thread.sleep(1_000L);
-                } catch (InterruptedException e) {
-                }
+                SleepUtils.sleep(1000L);
             }
             log.info("Start draining write buffer. Current write buffer size: {}", getWriteBufferSize());
             // drain write buffer

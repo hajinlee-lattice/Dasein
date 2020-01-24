@@ -10,13 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.etl.ingestion.service.IngestionProviderService;
 import com.latticeengines.domain.exposed.datacloud.ingestion.ProviderConfiguration;
 import com.latticeengines.monitor.exposed.service.EmailService;
 
 public abstract class IngestionProviderServiceImpl implements IngestionProviderService {
 
-    private static Logger log = LoggerFactory.getLogger(IngestionProviderServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(IngestionProviderServiceImpl.class);
 
     @Inject
     protected Configuration yarnConfiguration;
@@ -25,16 +26,16 @@ public abstract class IngestionProviderServiceImpl implements IngestionProviderS
     private EmailService emailService;
 
     protected boolean waitForFileToBeIngested(String destPath) {
-        Long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < 10000) {
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, destPath)) {
                     return true;
                 }
-                Thread.sleep(1000L);
             } catch (Exception e) {
-                // ignore
+                log.debug("Failed to check destination hdfs path {}, treat as not exist", destPath);
             }
+            SleepUtils.sleep(1000L);
         }
         return false;
     }

@@ -9,8 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -27,23 +28,22 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.source.MostRecentConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-
 public class FeatureMostRecentTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
 
-    @Autowired
+    @Inject
     FeatureMostRecent source;
 
-    @Autowired
+    @Inject
     private Feature baseSource;
 
-    @Autowired
+    @Inject
     protected HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     private PipelineTransformationService pipelineTransformationService;
 
     ObjectMapper om = new ObjectMapper();

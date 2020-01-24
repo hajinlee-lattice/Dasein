@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataDefaultsEntityMgr;
@@ -16,8 +14,6 @@ import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
 
 @Component("exportFieldMetadataDefaultsService")
 public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetadataDefaultsService {
-
-    private static Logger log = LoggerFactory.getLogger(ExportFieldMetadataDefaultsServiceImpl.class);
 
     @Inject
     ExportFieldMetadataDefaultsEntityMgr exportFieldMetadataDefaultsEntityMgr;
@@ -32,12 +28,12 @@ public class ExportFieldMetadataDefaultsServiceImpl implements ExportFieldMetada
     public List<ExportFieldMetadataDefaults> getAllAttributes(CDLExternalSystemName systemName) {
         return exportFieldMetadataDefaultsEntityMgr.getAllDefaultExportFieldMetadata(systemName);
     }
-    
+
     @Override
     public List<ExportFieldMetadataDefaults> getExportEnabledAttributes(CDLExternalSystemName systemName) {
         return exportFieldMetadataDefaultsEntityMgr.getExportEnabledDefaultFieldMetadata(systemName);
     }
-    
+
     @Override
     public List<ExportFieldMetadataDefaults> getHistoryEnabledAttributes(CDLExternalSystemName systemName) {
         return exportFieldMetadataDefaultsEntityMgr.getHistoryEnabledDefaultFieldMetadata(systemName);

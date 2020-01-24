@@ -1,7 +1,8 @@
 package com.latticeengines.datacloud.core.testframework;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -17,10 +18,10 @@ public abstract class DataCloudCoreFunctionalTestNGBase extends AbstractTestNGSp
     @Value("${propdata.test.env}")
     protected String testEnv;
 
-    @Autowired
+    @Inject
     protected HdfsPathBuilder hdfsPathBuilder;
 
-    @Autowired
+    @Inject
     protected Configuration yarnConfiguration;
 
 }

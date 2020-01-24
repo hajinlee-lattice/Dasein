@@ -10,6 +10,10 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 
 public final class PathBuilder {
+
+    protected PathBuilder() {
+        throw new UnsupportedOperationException();
+    }
     public static Path buildPodsPath() {
         return new Path(Collections.singletonList(PathConstants.PODS));
     }

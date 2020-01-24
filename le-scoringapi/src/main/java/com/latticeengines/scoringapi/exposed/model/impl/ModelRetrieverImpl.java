@@ -24,7 +24,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -97,25 +96,25 @@ public class ModelRetrieverImpl implements ModelRetriever {
     @VisibleForTesting
     static final String LOCAL_MODEL_ARTIFACT_CACHE_DIR = "artifacts/";
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private List<ModelJsonTypeHandler> modelJsonTypeHandlers;
 
-    @Autowired
+    @Inject
     private ScoreArtifactCache scoreArtifactCache;
 
-    @Autowired
+    @Inject
     private ModelDetailsCache modelDetailsCache;
 
-    @Autowired
+    @Inject
     private ModelFieldsCache modelFieldsCache;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
 
     @Inject
@@ -284,7 +283,7 @@ public class ModelRetrieverImpl implements ModelRetriever {
             if (FieldInterpretationCollections.PrimaryMatchingFields.contains(keyField)) {
                 field.setPrimaryField(true);
             }
-        } catch (Exception e) {
+        } catch (Exception ignore) {
             // Ignore. As this field doesn't belong to FieldInterpretation enum.
         }
         fieldList.add(field);

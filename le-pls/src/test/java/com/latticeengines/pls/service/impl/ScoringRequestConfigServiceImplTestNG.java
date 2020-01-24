@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -28,7 +29,6 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.MarketoCredentialService;
 import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.security.exposed.service.TenantService;
-
 public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private static String CREDENTIAL_NAME = "TEST-MARKETO-SCORING-CONFIG-";
@@ -52,13 +52,13 @@ public class ScoringRequestConfigServiceImplTestNG extends PlsFunctionalTestNGBa
     private static final MarketoScoringMatchField MARKETO_SCORE_MATCH_FIELD_5 = new MarketoScoringMatchField();
     private static final MarketoScoringMatchField MARKETO_SCORE_MATCH_FIELD_6 = new MarketoScoringMatchField();
 
-    @Autowired
+    @Inject
     private MarketoCredentialService marketoCredentialService;
 
-    @Autowired
+    @Inject
     private ScoringRequestConfigService scoringRequestConfigService;
 
-    @Autowired
+    @Inject
     private TenantService tenantService;
 
     @Value("${pls.marketo.enrichment.webhook.url}")

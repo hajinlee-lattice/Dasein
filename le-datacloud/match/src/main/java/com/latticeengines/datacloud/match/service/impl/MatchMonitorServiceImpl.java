@@ -8,12 +8,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.latticeengines.datacloud.core.service.DnBCacheService;
@@ -28,38 +27,34 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 public class MatchMonitorServiceImpl implements MatchMonitorService {
     private static final Logger log = LoggerFactory.getLogger(MatchMonitorServiceImpl.class);
 
-    @Autowired
+    @Inject
     private DnBCacheService dnbCacheService;
 
-    @Autowired
+    @Inject
     private MatchActorSystem actorSystem;
 
-    @Autowired
+    @Inject
     private DnBLookupService dnbLookupService;
 
-    @Autowired
     @Resource(name = "dnbLookupService")
     private DataSourceLookupService dnbDataSourceLookupService;
 
-    @Autowired
     @Resource(name = "dnbCacheLookupService")
     private DataSourceLookupService dnbCacheDataSourceLookupService;
 
-    @Autowired
+    @Inject
     private DynamoDBLookupService dynamoDBLookupService;
 
-    @Autowired
     @Resource(name = "dynamoDBLookupService")
     private DataSourceLookupService dynamoDataSourceLookupService;
 
-    @Autowired
+    @Inject
     private DomainCollectService domainCollectService;
 
     // Service in other proj will push metric here
     private ConcurrentMap<String, String> externalMetrics = new ConcurrentHashMap<>();
 
-    @Autowired
-    @Qualifier("commonTaskScheduler")
+    @Resource(name = "commonTaskScheduler")
     private ThreadPoolTaskScheduler scheduler;
 
     @PostConstruct

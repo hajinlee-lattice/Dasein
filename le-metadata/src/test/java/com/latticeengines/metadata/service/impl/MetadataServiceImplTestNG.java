@@ -11,10 +11,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -40,15 +41,14 @@ import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.MetadataService;
-
 public class MetadataServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(MetadataServiceImplTestNG.class);
 
-    @Autowired
+    @Inject
     private MetadataService mdService;
 
-    @Autowired
+    @Inject
     private TableTypeHolder tableTypeHolder;
 
     @Override

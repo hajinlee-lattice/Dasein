@@ -39,4 +39,13 @@ public class VersionManager {
             return null;
         }
     }
+
+    public String getCurrentGitBranch() {
+        try {
+            return Manifests.read("LE-SCM-Branch");
+        } catch (Exception e) {
+            log.warn("Failed to read LE-SCM-Branch from Jar manifest");
+            return null;
+        }
+    }
 }

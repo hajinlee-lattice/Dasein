@@ -3,7 +3,11 @@ package com.latticeengines.common.exposed.metric;
 /**
  * constant class for all monitoring metric names
  */
-public class MetricNames {
+public final class MetricNames {
+
+    protected MetricNames() {
+        throw new UnsupportedOperationException();
+    }
 
     /*-
      * metrics for match
@@ -40,5 +44,14 @@ public class MetricNames {
         public static final String METRIC_DYNAMO_CALL_RETRY_DIST = "match.entity.dynamo.call.retry.dist";
         public static final String METRIC_LOOKUP_CACHE = "match.entity.cache.lookup";
         public static final String METRIC_SEED_CACHE = "match.entity.cache.seed";
+    }
+
+    /*-
+     * metrics for invocation meter
+     */
+    public static class Invocation {
+        public static final String METRIC_INVOCATION_GLBOAL_HISTORY = "invocation.global.history";
+        public static final String METRIC_INVOCATION_HISTORY = "invocation.history";
+        public static final String METRIC_INVOCATION_ERROR = "invocation.error";
     }
 }

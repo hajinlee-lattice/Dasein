@@ -38,7 +38,11 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.netflix.curator.test.TestingServer;
 
-public class CamilleTestEnvironment {
+public final class CamilleTestEnvironment {
+
+    protected CamilleTestEnvironment() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 

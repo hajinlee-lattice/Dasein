@@ -3,8 +3,9 @@ package com.latticeengines.pls.controller;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,15 +23,14 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-
 public class MetadataFileUploadResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private static final String PATH = "com/latticeengines/pls/service/impl/metadatafileuploadserviceimpl";
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     @BeforeClass(groups = "deployment")

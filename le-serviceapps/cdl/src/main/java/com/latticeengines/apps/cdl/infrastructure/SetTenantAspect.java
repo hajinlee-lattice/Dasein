@@ -1,11 +1,12 @@
 package com.latticeengines.apps.cdl.infrastructure;
 
+import javax.inject.Inject;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -16,7 +17,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class SetTenantAspect {
     private static final Logger log = LoggerFactory.getLogger(SetTenantAspect.class);
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     @Before("execution(* com.latticeengines.apps.cdl.service.impl.CDLJobServiceImpl.create*(..)) ")
