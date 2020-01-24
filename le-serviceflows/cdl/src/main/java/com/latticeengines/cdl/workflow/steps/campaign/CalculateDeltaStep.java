@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -118,8 +117,11 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         // 2) compare previous launch universe to current launch universe
 
         SparkJobResult deltaCalculationResult = executeSparkJob(currentLaunchUniverse, previousLaunchUniverse,
-                channel.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS ? InterfaceName.AccountId.name()
-                        : InterfaceName.ContactId.name(),
+                channel.getChannelConfig().getAudienceType().getInterfaceName(),
+                channel.getChannelConfig().isSuppressAccountsWithoutContacts()
+                        && channel.getChannelConfig().getAudienceType() == AudienceType.CONTACTS
+                                ? AudienceType.ACCOUNTS.getInterfaceName()
+                                : null,
                 channel.getChannelConfig().isSuppressAccountsWithoutContacts());
 
         // 3) Generate Metadata tables for delta results
@@ -127,9 +129,9 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     }
 
     private SparkJobResult executeSparkJob(HdfsDataUnit currentLaunchUniverse, HdfsDataUnit previousLaunchUniverse,
-            String joinKey, boolean filterJoinKeyNulls) {
+            String primaryJoinKey, String secondaryJoinKey, boolean filterJoinKeyNulls) {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
-                joinKey, filterJoinKeyNulls, getRandomWorkspace());
+                primaryJoinKey, secondaryJoinKey, filterJoinKeyNulls, getRandomWorkspace());
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {

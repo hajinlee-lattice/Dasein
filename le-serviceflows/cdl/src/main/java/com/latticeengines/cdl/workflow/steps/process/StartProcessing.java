@@ -563,6 +563,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void addActionAssociateTables() {
         List<Action> actionList = getImportActions();
+        Set<String> templates = new HashSet<>();
         if (CollectionUtils.isNotEmpty(actionList)) {
             Map<String, String> tableTemplateMap = new HashMap<>();
             for (Action action : actionList) {
@@ -595,7 +596,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 dataFeedProxy.addTablesToQueue(customerSpace.toString(), taskId, tables);
 
                 if (configuration.isEntityMatchEnabled()) {
-                    List<String> templates = importActionConfiguration.getTableTemplates();
+                    DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
+                            importActionConfiguration.getDataFeedTaskId());
+                    templates.add(dataFeedTask.getImportTemplate().getName());
                     // associateTemplates(tables, templates, tableTemplateMap);
                 }
             }

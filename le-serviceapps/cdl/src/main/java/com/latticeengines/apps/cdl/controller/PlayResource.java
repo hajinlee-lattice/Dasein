@@ -351,7 +351,7 @@ public class PlayResource {
                     launchId);
             playLaunchChannelService.updateLastDeltaWorkflowId(playName, channelId, workflowPid);
             if (StringUtils.isNotBlank(launchId)) {
-                PlayLaunch launch = playLaunchService.findByLaunchId(launchId);
+                PlayLaunch launch = playLaunchService.findByLaunchId(launchId, false);
                 launch.setParentDeltaWorkflowId(workflowPid);
                 launch.setLaunchState(LaunchState.PreProcessing);
                 playLaunchService.update(launch);
@@ -420,7 +420,7 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId) {
         getPlayId(playName);
-        return playLaunchService.findByLaunchId(launchId);
+        return playLaunchService.findByLaunchId(launchId, false);
     }
 
     @PostMapping(value = "/{playName}/launches/{launchId}", headers = "Accept=application/json")
@@ -472,7 +472,7 @@ public class PlayResource {
         }
         PlayUtils.validatePlay(play);
 
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
         if (playLaunch == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
         }
@@ -537,7 +537,7 @@ public class PlayResource {
         }
         PlayUtils.validatePlay(play);
 
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
         if (playLaunch == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
         }
@@ -648,7 +648,7 @@ public class PlayResource {
             @RequestParam("contactsSuppressed") Long contactsSuppressed) {
         log.debug(String.format("Record play launch progress for %s launchId", launchId));
 
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
         playLaunch.setLaunchCompletionPercent(launchCompletionPercent);
         playLaunch.setAccountsLaunched(accountsLaunched);
         playLaunch.setAccountsErrored(accountsErrored);
@@ -668,7 +668,7 @@ public class PlayResource {
             @PathVariable("launchId") String launchId, //
             @PathVariable("action") LaunchState action) {
         getPlayId(playName);
-        PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId);
+        PlayLaunch existingPlayLaunch = playLaunchService.findByLaunchId(launchId, false);
         if (existingPlayLaunch != null) {
             if (LaunchState.canTransit(existingPlayLaunch.getLaunchState(), action)) {
                 existingPlayLaunch.setLaunchState(action);
@@ -689,7 +689,7 @@ public class PlayResource {
             @PathVariable("playName") String playName, //
             @PathVariable("launchId") String launchId, //
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
-        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId);
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
         if (playLaunch != null) {
             playLaunchService.deleteByLaunchId(launchId, hardDelete == Boolean.TRUE);
         }

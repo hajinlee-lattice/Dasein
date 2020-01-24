@@ -51,7 +51,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdMappings(null, null, true);
         Assert.assertNotNull(lookupIdsMapping);
         Assert.assertEquals(lookupIdsMapping.size(), 0, JsonUtils.serialize(lookupIdsMapping));
         Assert.assertTrue(CollectionUtils.isEmpty(lookupIdsMapping));
@@ -84,7 +84,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCreate" })
     public void testFind() {
-        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdMappings(null, null, true);
         Assert.assertTrue(CollectionUtils.isNotEmpty(lookupIdsMapping));
 
         LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);
@@ -267,7 +267,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         lookupIdMapWithFieldMapping.setOrgId("Marketo_FieldMappingTest");
         lookupIdMapWithFieldMapping.setOrgName("Marketo_FieldMappingTest");
 
-        List<ExportFieldMetadataMapping> exportFieldMappings = new ArrayList<ExportFieldMetadataMapping>();
+        List<ExportFieldMetadataMapping> exportFieldMappings = new ArrayList<>();
         exportFieldMappings.add(new ExportFieldMetadataMapping("COMPANY_NAME", "company", false));
         exportFieldMappings.add(new ExportFieldMetadataMapping("Email", "email", false));
         exportFieldMappings.add(new ExportFieldMetadataMapping("Phone", "phone", false));
@@ -287,7 +287,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
                 .getExportFieldMetadataMappings();
         assertNotNull(existingFieldMapping);
 
-        List<ExportFieldMetadataMapping> updatedFieldMapping = new ArrayList<ExportFieldMetadataMapping>();
+        List<ExportFieldMetadataMapping> updatedFieldMapping = new ArrayList<>();
         updatedFieldMapping.add(new ExportFieldMetadataMapping("COMPANY_NAME", "company", false));
         updatedFieldMapping.add(new ExportFieldMetadataMapping("Address", "address", false));
         updatedFieldMapping.add(new ExportFieldMetadataMapping("ZipCode", "zipcode", false));

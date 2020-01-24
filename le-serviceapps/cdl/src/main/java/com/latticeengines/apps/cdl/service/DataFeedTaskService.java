@@ -50,4 +50,11 @@ public interface DataFeedTaskService {
     List<Table> getTemplateTables(String customerSpace, String entity);
 
     S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskUniqueId);
+
+    /**
+     *
+     * @param entity Account / Contact
+     * @return A list of template names ordered by priority.
+     */
+    List<String> getTemplatesBySystemPriority(String customerSpace, String entity);
 }

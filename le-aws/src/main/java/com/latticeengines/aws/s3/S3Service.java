@@ -58,10 +58,6 @@ public interface S3Service {
 
     String getBucketPolicy(String bucket);
 
-    void setBucketPolicy(String bucket, String policyDoc);
-
-    void deleteBucketPolicy(String bucket);
-
     void addTagToObject(String bucket, String key, String tagKey, String tagValue);
 
     List<Tag> getObjectTags(String bucket, String key);

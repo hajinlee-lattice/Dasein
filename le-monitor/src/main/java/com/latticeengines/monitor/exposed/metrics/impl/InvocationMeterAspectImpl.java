@@ -1,9 +1,12 @@
 package com.latticeengines.monitor.exposed.metrics.impl;
 
 import static com.latticeengines.common.exposed.metric.MetricNames.Invocation.METRIC_INVOCATION_ERROR;
+import static com.latticeengines.common.exposed.metric.MetricNames.Invocation.METRIC_INVOCATION_GLBOAL_HISTORY;
 import static com.latticeengines.common.exposed.metric.MetricNames.Invocation.METRIC_INVOCATION_HISTORY;
 import static com.latticeengines.common.exposed.metric.MetricTags.TAG_TENANT;
+import static com.latticeengines.common.exposed.metric.MetricTags.Invocation.TAG_CAN_IGNORE;
 import static com.latticeengines.common.exposed.metric.MetricTags.Invocation.TAG_GENERIC;
+import static com.latticeengines.common.exposed.metric.MetricTags.Invocation.TAG_HAS_ERROR;
 import static com.latticeengines.common.exposed.metric.MetricTags.Invocation.TAG_METHOD_NAME;
 
 import java.lang.reflect.Method;
@@ -23,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 import com.latticeengines.monitor.exposed.annotation.InvocationInstrument;
 import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
 import com.latticeengines.monitor.exposed.metrics.InvocationMeterAspect;
@@ -41,7 +45,7 @@ public class InvocationMeterAspectImpl implements InvocationMeterAspect {
     @Inject
     private MeterRegistryFactoryService registryFactory;
 
-    @Around("@annotation(com.latticeengines.monitor.exposed.annotation.InvocationMeter) " +
+    @Around("@annotation(com.latticeengines.monitor.exposed.annotation.InvocationMeter) " + //
             "|| @annotation(com.latticeengines.monitor.exposed.annotation.InvocationMeters)")
     public Object incrementInvocationMeter(ProceedingJoinPoint joinPoint) throws Throwable {
         Throwable t = null;
@@ -70,6 +74,47 @@ public class InvocationMeterAspectImpl implements InvocationMeterAspect {
         } else {
             throw t;
         }
+    }
+
+    @Around("@annotation(io.swagger.annotations.ApiOperation)")
+    public Object globalInvocationMeter(ProceedingJoinPoint joinPoint) throws Throwable {
+        Throwable t = null;
+        Object toReturn = null;
+        long start = System.currentTimeMillis();
+        try {
+            toReturn = joinPoint.proceed();
+        } catch (Throwable e) {
+            t = e;
+        }
+        long duration = System.currentTimeMillis() - start;
+
+        // do not switch thread, some instrument needs the MultiTenantContext
+        // if have to switch thread, do that after getting tenantId
+        try {
+            String fullName = joinPoint.getTarget().getClass().getCanonicalName();
+            MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+            fullName += signature.getName();
+            boolean canIgnore = signature.getMethod().getAnnotation(IgnoreGlobalApiMeter.class) != null;
+            incrementGlobalInvocationMeter(fullName, duration, t != null, canIgnore);
+        } catch (Exception e) {
+            log.warn("Failed to log the invocation metrics", e);
+        }
+
+        if (t == null) {
+            return toReturn;
+        } else {
+            throw t;
+        }
+    }
+
+    private void incrementGlobalInvocationMeter(String name, long duration, boolean hasError, boolean canIgnore) {
+        MeterRegistry meterRegistry =  registryFactory.getGlobalHourlyRegistry();
+        DistributionSummary.Builder builder = DistributionSummary //
+                .builder(METRIC_INVOCATION_GLBOAL_HISTORY) //
+                .tag(TAG_METHOD_NAME, name) //
+                .tag(TAG_CAN_IGNORE, String.valueOf(canIgnore)) //
+                .tag(TAG_HAS_ERROR, String.valueOf(hasError));
+        builder.register(meterRegistry).record(duration);
     }
 
     private void incrementInvocationCounter(MethodSignature signature, Object[] args, Object toReturn, Throwable t,

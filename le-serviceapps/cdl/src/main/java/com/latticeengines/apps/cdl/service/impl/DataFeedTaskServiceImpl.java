@@ -1,14 +1,19 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.persistence.RollbackException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -249,6 +254,34 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             return null;
         }
         return s3ImportSystemService.getS3ImportSystem(customerSpace, systemName);
+    }
+
+    @Override
+    public List<String> getTemplatesBySystemPriority(String customerSpace, String entity) {
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        List<DataFeedTask> dataFeedTasks =
+                dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntity(entity, dataFeed);
+        if (!CollectionUtils.isEmpty(dataFeedTasks)) {
+            List<S3ImportSystem> allSystems = s3ImportSystemService.getAllS3ImportSystem(customerSpace);
+            List<String> orderedSystem = allSystems.stream()
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.comparing(S3ImportSystem::getPriority))
+                    .map(S3ImportSystem::getName)
+                    .collect(Collectors.toList());
+            List<Pair<String, String>> templatePair = new ArrayList<>();
+            for(DataFeedTask dataFeedTask : dataFeedTasks) {
+                if (dataFeedTask.getImportTemplate() != null) {
+                    String systemName = getSystemNameFromFeedType(dataFeedTask.getFeedType());
+                    if (StringUtils.isNotEmpty(systemName)) {
+                        templatePair.add(Pair.of(systemName, dataFeedTask.getImportTemplate().getName()));
+                    }
+                }
+            }
+            templatePair.sort(Comparator.comparing(pair -> orderedSystem.indexOf(pair.getLeft())));
+            return templatePair.stream().map(Pair::getRight).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private String getSystemNameFromFeedType(String feedType) {

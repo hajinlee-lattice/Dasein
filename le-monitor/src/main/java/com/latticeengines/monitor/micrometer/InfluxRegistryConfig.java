@@ -63,8 +63,8 @@ public class InfluxRegistryConfig {
     @Lazy
     @Bean(name = "influxMeterRegistry")
     public MeterRegistry influxRegistry() {
-        InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName());
-        log.info("Instantiating InfluxMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
+        InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName(), stepInMinutes);
+        log.info("Instantiating InfluxMeterRegistry... url={},db={},enabled={},step={}", config.uri(), config.db(),
                 config.enabled(), config.step());
         return getInfluxRegistry(config);
     }
@@ -72,9 +72,9 @@ public class InfluxRegistryConfig {
     @Lazy
     @Bean(name = "influxHostMeterRegistry")
     public MeterRegistry influxHostRegistry() {
-        InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName());
+        InfluxConfig config = getInfluxConfig(MetricDB.LDC_Match.getDbName(), stepInMinutes);
         MeterRegistry registry = getInfluxRegistry(config);
-        log.info("Instantiating InfluxHostMeterRegistry... url={},db={},enabled={},step={}m", config.uri(), config.db(),
+        log.info("Instantiating InfluxHostMeterRegistry... url={},db={},enabled={},step={}", config.uri(), config.db(),
                 config.enabled(), config.step());
         // set hostname tags
         registry.config().commonTags(MetricUtils.TAG_HOST, hostname);
@@ -84,14 +84,23 @@ public class InfluxRegistryConfig {
     @Lazy
     @Bean(name = "influxInspectionHostMeterRegistry")
     public MeterRegistry influxInspectionHostRegistry() {
-        InfluxConfig config = getInfluxConfig(MetricDB.INSPECTION.getDbName());
+        InfluxConfig config = getInfluxConfig(MetricDB.INSPECTION.getDbName(), stepInMinutes);
         MeterRegistry registry = getInfluxRegistry(config);
         log.info("Instantiating InfluxInspectionHostMeterRegistry... " + //
-                        "url={},db={},enabled={},step={}m", config.uri(), config.db(),
+                        "url={},db={},enabled={},step={}", config.uri(), config.db(),
                 config.enabled(), config.step());
         // set hostname tags
         registry.config().commonTags(MetricUtils.TAG_HOST, hostname);
         return registry;
+    }
+
+    @Lazy
+    @Bean(name = "influxGlobalHourlyRegistry")
+    public MeterRegistry influxGlobalHourlyRegistry() {
+        InfluxConfig config = getInfluxConfig(MetricDB.INSPECTION.getDbName(), 60);
+        log.info("Instantiating InfluxGlobalHourlyRegistry... url={},db={},enabled={},step={}",
+                config.uri(), config.db(), config.enabled(), config.step());
+        return getInfluxRegistry(config);
     }
 
     /*
@@ -104,7 +113,7 @@ public class InfluxRegistryConfig {
         return registry;
     }
 
-    private InfluxConfig getInfluxConfig(@NotNull String db) {
+    private InfluxConfig getInfluxConfig(@NotNull String db, long stepInMinutes) {
         return new InfluxConfig() {
 
             @Override

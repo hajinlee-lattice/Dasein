@@ -420,12 +420,11 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         return post("Kickoff Launch Workflow for play launch channel", url, null, Long.class);
     }
 
-    public Long kickoffWorkflowForLaunch(String customerSpace, String playName, String channelId, String launchId) {
+    public Long kickoffWorkflowForLaunch(String customerSpace, String playName, String launchId) {
         String url = constructUrl(URL_PREFIX + "/{playName}/launches/{launchId}/kickoff-launch",
-                shortenCustomerSpace(customerSpace), playName, channelId);
-        List<String> params = new ArrayList<>();
+                shortenCustomerSpace(customerSpace), playName, launchId);
         log.info("url is " + url);
-        return put("Kickoff Launch Workflow for play launch", url, null, Long.class);
+        return post("Kickoff Launch Workflow for play launch", url, null, Long.class);
     }
 
     public PlayLaunch createNewLaunchByPlayAndChannel(String customerSpace, String playName, String channelId,

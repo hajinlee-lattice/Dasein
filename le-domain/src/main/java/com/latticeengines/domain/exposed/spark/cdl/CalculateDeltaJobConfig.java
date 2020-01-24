@@ -11,20 +11,24 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
     private DataUnit oldData;
     @JsonProperty("NewData")
     private DataUnit newData;
-    @JsonProperty("FilterJoinKeyNulls")
-    private Boolean filterJoinKeyNulls = false;
-    @JsonProperty("JoinKey")
-    private String joinKey;
+    @JsonProperty("FilterPrimaryJoinKeyNulls")
+    private Boolean filterPrimaryJoinKeyNulls = false;
+    @JsonProperty("PrimaryJoinKey")
+    private String primaryJoinKey;
+    @JsonProperty("SecondaryJoinKey")
+    private String secondaryJoinKey;
 
-    public CalculateDeltaJobConfig() { }
+    public CalculateDeltaJobConfig() {
+    }
 
-    public CalculateDeltaJobConfig(DataUnit newData, DataUnit oldData, String joinKey, boolean filterJoinKeyNulls,
-            String workSpace) {
+    public CalculateDeltaJobConfig(DataUnit newData, DataUnit oldData, String primaryJoinKey, String secondaryJoinKey,
+            boolean filterPrimaryJoinKeyNulls, String workSpace) {
         this.setWorkspace(workSpace);
         this.newData = newData;
         this.oldData = oldData;
-        this.joinKey = joinKey;
-        this.filterJoinKeyNulls = filterJoinKeyNulls;
+        this.primaryJoinKey = primaryJoinKey;
+        this.secondaryJoinKey = secondaryJoinKey;
+        this.filterPrimaryJoinKeyNulls = filterPrimaryJoinKeyNulls;
     }
 
     @Override
@@ -54,19 +58,27 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
         this.newData = newData;
     }
 
-    public Boolean isFilterJoinKeyNulls() {
-        return filterJoinKeyNulls;
+    public Boolean getFilterPrimaryJoinKeyNulls() {
+        return filterPrimaryJoinKeyNulls;
     }
 
-    public void setFilterJoinKeyNulls(Boolean filterJoinKeyNulls) {
-        this.filterJoinKeyNulls = filterJoinKeyNulls;
+    public String getSecondaryJoinKey() {
+        return secondaryJoinKey;
     }
 
-    public String getJoinKey() {
-        return joinKey;
+    public void setSecondaryJoinKey(String secondaryJoinKey) {
+        this.secondaryJoinKey = secondaryJoinKey;
     }
 
-    public void setJoinKey(String joinKey) {
-        this.joinKey = joinKey;
+    public void setFilterPrimaryJoinKeyNulls(Boolean filterPrimaryJoinKeyNulls) {
+        this.filterPrimaryJoinKeyNulls = filterPrimaryJoinKeyNulls;
+    }
+
+    public String getPrimaryJoinKey() {
+        return primaryJoinKey;
+    }
+
+    public void setPrimaryJoinKey(String primaryJoinKey) {
+        this.primaryJoinKey = primaryJoinKey;
     }
 }

@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataIntegrationStatusMonitoringEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchChannelEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchChannelService;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
@@ -62,9 +61,6 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Inject
     private PlayLaunchChannelEntityMgr playLaunchChannelEntityMgr;
-
-    @Inject
-    private PlayLaunchEntityMgr playLaunchEntityMgr;
 
     @Inject
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
@@ -119,7 +115,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
         retrievedPlayLaunchChannel.setPlay(play); // ensure play exists if used in resource
         retrievedPlayLaunchChannel
-                .setLastLaunch(playLaunchEntityMgr.findLatestByChannel(retrievedPlayLaunchChannel.getPid()));
+                .setLastLaunch(playLaunchService.findLatestByChannel(retrievedPlayLaunchChannel.getPid()));
         return retrievedPlayLaunchChannel;
     }
 
@@ -235,10 +231,12 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
         PlayLaunch newLaunch = createDefaultLaunchFromPlayAndChannel(play, playLaunchChannel, LaunchState.Queued,
                 autoLaunch);
-        playLaunchEntityMgr.create(newLaunch);
+        playLaunchService.create(newLaunch);
 
         if (launch != null) {
-            playLaunchEntityMgr.update(launch);
+            launch.setLaunchId(newLaunch.getLaunchId());
+            launch.setUpdatedBy(newLaunch.getUpdatedBy());
+            playLaunchService.update(launch);
         }
         playLaunchChannel.setLastLaunch(newLaunch);
         return newLaunch;
@@ -280,7 +278,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Override
     public PlayLaunchChannel updateAudience(String audienceId, String audienceName, String playLaunchId) {
-        PlayLaunch playLaunchRetrieved = playLaunchEntityMgr.getLaunchFullyLoaded(playLaunchId);
+        PlayLaunch playLaunchRetrieved = playLaunchService.findByLaunchId(playLaunchId, true);
         if (playLaunchRetrieved != null) {
             PlayLaunchChannel playLaunchChannel = playLaunchRetrieved.getPlayLaunchChannel();
             Play play = playLaunchRetrieved.getPlay();
@@ -304,7 +302,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     private List<PlayLaunchChannel> addUnlaunchedChannels(List<PlayLaunchChannel> channels) {
-        List<LookupIdMap> allConnections = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        List<LookupIdMap> allConnections = lookupIdMappingEntityMgr.getLookupIdMappings(null, null, true);
         if (CollectionUtils.isNotEmpty(allConnections)) {
             allConnections.forEach(mapping -> addToListIfDoesntExist(mapping, channels));
         }

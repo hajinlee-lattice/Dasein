@@ -82,11 +82,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
-    public PlayLaunch findByLaunchId(String launchId) {
+    public PlayLaunch findByLaunchId(String launchId, boolean inflate) {
         if (StringUtils.isBlank(launchId)) {
             throw new LedpException(LedpCode.LEDP_18146);
         }
-        return playLaunchEntityMgr.findByLaunchId(launchId);
+        return playLaunchEntityMgr.findByLaunchId(launchId, inflate);
     }
 
     @Override
@@ -247,10 +247,9 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     @Override
-    public PlayLaunch updateAudience(String audienceId, String audienceName, String playLaunchId){
-
-        if(playLaunchId != null) {
-            PlayLaunch playLaunch = playLaunchEntityMgr.findByLaunchId(playLaunchId);
+    public PlayLaunch updateAudience(String audienceId, String audienceName, String playLaunchId) {
+        if (playLaunchId != null) {
+            PlayLaunch playLaunch = playLaunchEntityMgr.findByLaunchId(playLaunchId, false);
             playLaunch.setAudienceId(audienceId);
             playLaunch.setAudienceName(audienceName);
             ChannelConfig channelConfig = playLaunch.getChannelConfig();
@@ -268,7 +267,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
             Long startTimestamp, Long endTimestamp, String orgId, String externalSysType,
             boolean skipLoadingAllLookupIdMapping) {
         Map<String, List<LookupIdMap>> allLookupIdMapping = skipLoadingAllLookupIdMapping ? null
-                : LookupIdMapUtils.listToMap(lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true));
+                : LookupIdMapUtils.listToMap(lookupIdMappingEntityMgr.getLookupIdMappings(null, null, true));
 
         List<Pair<String, String>> uniqueOrgIdList = playLaunchEntityMgr.findDashboardOrgIdWithLaunches(playId,
                 launchStates, startTimestamp, endTimestamp, orgId, externalSysType);

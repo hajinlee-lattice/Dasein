@@ -511,16 +511,6 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public void setBucketPolicy(String bucket, String policyDoc) {
-        s3Client().setBucketPolicy(bucket, policyDoc);
-    }
-
-    @Override
-    public void deleteBucketPolicy(String bucket) {
-        s3Client().deleteBucketPolicy(bucket);
-    }
-
-    @Override
     public void addTagToObject(String bucket, String key, String tagKey, String tagValue) {
         if (!objectExist(bucket, key)) {
             return;
