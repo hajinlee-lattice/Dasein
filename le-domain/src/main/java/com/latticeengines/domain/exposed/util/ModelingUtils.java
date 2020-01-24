@@ -33,7 +33,7 @@ public final class ModelingUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static final PivotValuesLookup getPivotValues(Configuration yarnConfiguration,
+    public static PivotValuesLookup getPivotValues(Configuration yarnConfiguration,
             String pivotArtifactPath) throws Exception {
         Map<String, AbstractMap.Entry<String, List<String>>> pivotValuesByTargetColumn = new HashMap<>();
         Map<String, List<AbstractMap.Entry<String, String>>> pivotValuesBySourceColumn = new HashMap<>();
