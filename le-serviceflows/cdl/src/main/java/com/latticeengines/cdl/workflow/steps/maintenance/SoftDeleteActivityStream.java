@@ -79,6 +79,7 @@ public class SoftDeleteActivityStream extends BaseActivityStreamStep<ProcessActi
 
     @Override
     protected void initializeConfiguration() {
+        super.initializeConfiguration();
         customerSpace = configuration.getCustomerSpace();
         entity = configuration.getMainEntity();
         batchStore = entity.getBatchStore();
