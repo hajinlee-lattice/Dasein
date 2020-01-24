@@ -26,9 +26,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 import com.latticeengines.monitor.exposed.annotation.InvocationInstrument;
 import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
-import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 import com.latticeengines.monitor.exposed.metrics.InvocationMeterAspect;
 import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 
