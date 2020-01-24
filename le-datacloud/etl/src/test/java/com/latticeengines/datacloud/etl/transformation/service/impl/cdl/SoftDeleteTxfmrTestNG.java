@@ -1,11 +1,13 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl.cdl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,6 +15,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
@@ -35,14 +39,32 @@ public class SoftDeleteTxfmrTestNG extends PipelineTransformationTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testTransformation() {
+    public void testTransformation() throws IOException {
         prepareBaseSrc();
         prepareDeleteSrc();
         TransformationProgress progress = createNewProgress();
         progress = transformData(progress);
         finish(progress);
-        confirmResultFile(progress);
+        confirmResultFile();
         cleanupProgressTables();
+    }
+
+    private void confirmResultFile() throws IOException {
+        String path = getPathForResult();
+        List<String> allFiles = HdfsUtils.getFilesForDir(yarnConfiguration, path);
+        allFiles = allFiles.stream().filter(file -> {
+            try {
+                return HdfsUtils.isDirectory(yarnConfiguration, file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }).collect(Collectors.toList());
+        allFiles.forEach(file -> Assert.assertTrue(file.endsWith("Company=DnB")));
+        allFiles = allFiles.stream().map(s -> s = s + "/*.avro").collect(Collectors.toList());
+        List<String> subPaths = new ArrayList<>(allFiles);
+        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, subPaths);
+        verifyResultAvroRecords(records.iterator());
     }
 
     @Override
@@ -80,8 +102,7 @@ public class SoftDeleteTxfmrTestNG extends PipelineTransformationTestNGBase {
         Set<String> remainingContactIds = new HashSet<>(Arrays.asList("Contact5", "Contact6", "Contact7", "Contact9"));
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            Assert.assertEquals(record.getSchema().getFields().size(), 4);
-            Assert.assertEquals(record.get("Company").toString(), "DnB");
+            Assert.assertEquals(record.getSchema().getFields().size(), 3);
             Assert.assertNotEquals(record.get(DeleteJoinId).toString(), "Account1");
             Assert.assertNotEquals(record.get(DeleteJoinId).toString(), "Account2");
             Assert.assertNotEquals(record.get(DeleteJoinId).toString(), "Account5");
