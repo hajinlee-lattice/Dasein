@@ -65,7 +65,7 @@
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
         <tez.version>0.9.1</tez.version>
         <netty.version>3.6.2.Final</netty.version> <!-- for hadoop 2.8.5 -->
-        <hdp.guava.version>20.0</hdp.guava.version>
+        <hdp.guava.version>28.2-jre</hdp.guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
         <parquet.version>1.10.1</parquet.version>
@@ -163,7 +163,7 @@
         <jetty.version>9.4.14.v20181114</jetty.version> <!-- camel-salesforce 2.19.1 -->
 
         <!-- DB Drivers -->
-        <c3p0.version>0.9.5.2</c3p0.version>
+        <c3p0.version>0.9.5.5</c3p0.version>
         <influxdb.version>2.8</influxdb.version>
         <hive.version>1.2.1.2.3.6.0-3796</hive.version>
         <sqljdbc.version>7.0.0.jre8</sqljdbc.version>

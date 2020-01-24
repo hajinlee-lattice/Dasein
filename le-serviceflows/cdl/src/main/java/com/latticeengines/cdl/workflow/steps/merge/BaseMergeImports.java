@@ -103,6 +103,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected Table masterTable;
     Map<BusinessEntity, Boolean> softDeleteEntities;
     protected Map<String, String> tableTemplateMap;
+    protected List<String> templatesInOrder;
 
     protected boolean hasSystemBatch;
 
@@ -117,6 +118,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         generateDiffReport();
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
@@ -138,21 +140,16 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         diffReportTablePrefix = entity.name() + "_DiffReport";
 
         if (hasKeyInContext(PERFORM_SOFT_DELETE)) {
-            softDeleteEntities = getMapObjectFromContext(PERFORM_SOFT_DELETE,
-                    BusinessEntity.class, Boolean.class);
+            softDeleteEntities = getMapObjectFromContext(PERFORM_SOFT_DELETE, BusinessEntity.class, Boolean.class);
         } else {
             softDeleteEntities = Collections.emptyMap();
         }
 
-        @SuppressWarnings("rawtypes")
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
                 BusinessEntity.class, List.class);
         if (entityImportsMap == null) {
             return;
         }
-        tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class, String.class);
-        hasSystemBatch = MapUtils.isNotEmpty(tableTemplateMap) && systemBatchStore != null;
-        log.info("Has System Batch=" + hasSystemBatch);
         List<DataFeedImport> imports = JsonUtils.convertList(entityImportsMap.get(entity), DataFeedImport.class);
         if (CollectionUtils.isNotEmpty(imports)) {
             List<Table> tables = imports.stream().map(DataFeedImport::getDataTable).collect(Collectors.toList());
@@ -169,6 +166,15 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                 inputTableNames.add(table.getName());
             }
             setScalingMultiplier(tables);
+        }
+        tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class, String.class);
+        hasSystemBatch = MapUtils.isNotEmpty(tableTemplateMap) && systemBatchStore != null;
+        log.info("Has Batch System=" + hasSystemBatch);
+        if (hasSystemBatch) {
+            Map<BusinessEntity, List> templates = getMapObjectFromContext(CONSOLIDATE_TEMPLATES_IN_ORDER,
+                    BusinessEntity.class, List.class);
+            templatesInOrder = JsonUtils.convertList(templates.get(entity), String.class);
+            log.info("Entity=" + entity.name() + " templates in order=" + String.join(",", templatesInOrder));
         }
     }
 
@@ -215,8 +221,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    TransformationStepConfig concatImports(String targetTablePrefix, String[][] cloneSrcFlds,
-            String[][] renameSrcFlds, String convertBatchStoreTableName, int inputStep) {
+    TransformationStepConfig concatImports(String targetTablePrefix, String[][] cloneSrcFlds, String[][] renameSrcFlds,
+            String convertBatchStoreTableName, int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         if (inputStep == -1) {
@@ -235,7 +241,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setAddTimestamps(false);
         config.setCloneSrcFields(cloneSrcFlds);
         config.setRenameSrcFields(renameSrcFlds);
-        setupSystems(config);
+        setupTemplates(config);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         if (StringUtils.isNotBlank(targetTablePrefix)) {
@@ -245,7 +251,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    private void setupSystems(MergeImportsConfig config) {
+    private void setupTemplates(MergeImportsConfig config) {
         if (!hasSystemBatch) {
             return;
         }
@@ -273,7 +279,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     TransformationStepConfig dedupAndMerge(String joinKey, List<Integer> inputSteps, List<String> inputTables,
-                                           List<String> requiredIdCols) {
+            List<String> requiredIdCols) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         if (CollectionUtils.isEmpty(inputSteps) && CollectionUtils.isEmpty(inputTables)) {
@@ -373,8 +379,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     /**
-     * Retrieve all system IDs for target entity of current tenant (sorted by system
-     * priority from high to low)
+     * Retrieve all system IDs for target entity of current tenant (sorted by
+     * system priority from high to low)
      *
      * @param entity
      *            target entity
@@ -611,8 +617,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
         }
         log.info("rematch_table_name is : {}", JsonUtils.serialize(rematchTables));
-        return (rematchTables != null) && rematchTables.get(configuration.getMainEntity().name()) != null ?
-                rematchTables.get(configuration.getMainEntity().name()) : null;
+        return (rematchTables != null) && rematchTables.get(configuration.getMainEntity().name()) != null
+                ? rematchTables.get(configuration.getMainEntity().name())
+                : null;
     }
 
     protected boolean hasNoImportAndNoBatchStore() {
