@@ -62,7 +62,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public List<LookupIdMap> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
+    public List<LookupIdMap> getLookupIdMappings(CDLExternalSystemType externalSystemType, String sortby,
             boolean descending) {
         if (StringUtils.isNotEmpty(sortby)) {
             sortby = sortby.trim();

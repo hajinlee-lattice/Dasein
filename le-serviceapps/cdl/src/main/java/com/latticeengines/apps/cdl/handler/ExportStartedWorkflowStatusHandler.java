@@ -35,9 +35,8 @@ public class ExportStartedWorkflowStatusHandler implements WorkflowStatusHandler
 
         statusMonitor.setEventStartedTime(status.getEventTime());
 
-        switch (statusMonitor.getEntityName()) {
-        case "PlayLaunch":
-            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId());
+        if (statusMonitor.getEntityName().equals("PlayLaunch")) {
+            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), false);
             playLaunch.setLaunchState(LaunchState.Syncing);
             playLaunchService.update(playLaunch);
         }
