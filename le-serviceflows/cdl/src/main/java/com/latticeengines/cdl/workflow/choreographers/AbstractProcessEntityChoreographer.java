@@ -321,7 +321,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
-    private boolean shouldSoftDelete(AbstractStep<? extends BaseStepConfiguration> step) {
+    protected boolean shouldSoftDelete(AbstractStep<? extends BaseStepConfiguration> step) {
         if (!hasSoftDelete || replace) {
             return false;
         }
@@ -379,6 +379,9 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             log.info("Has more than 30% update, going to rebuild " + mainEntity());
             return true;
         } else if (rebuildDueToActions) {
+            return true;
+        } else if (shouldSoftDelete(step)) {
+            log.info("Common check, no other reason to rebuild, but soft delete happens for " + mainEntity());
             return true;
         }
         log.info("Common check: no reason to rebuild " + mainEntity());
