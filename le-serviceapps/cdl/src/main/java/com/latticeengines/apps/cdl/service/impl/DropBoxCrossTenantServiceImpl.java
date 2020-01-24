@@ -91,7 +91,6 @@ public class DropBoxCrossTenantServiceImpl implements DropBoxCrossTenantService 
             if (StringUtils.isBlank(policyDoc)) {
                 iamService.deleteCustomerUser(userName);
             }
-            revokeDropBoxFromBucket(dropBoxId, dropbox.getExternalAccount());
         }
         entityMgr.delete(dropbox);
     }
@@ -142,50 +141,6 @@ public class DropBoxCrossTenantServiceImpl implements DropBoxCrossTenantService 
                         && CollectionUtils.isNotEmpty(stmt.getResources())) //
                 .collect(Collectors.toList());
         policy.setStatements(nonEmptyStmts);
-    }
-
-
-    private void revokeDropBoxFromBucket(String dropBoxId, String accountId) {
-        String bucketPolicy = s3Service.getBucketPolicy(customersBucket);
-        if (StringUtils.isBlank(bucketPolicy)) {
-            return;
-        }
-        Policy policy = Policy.fromJson(bucketPolicy);
-        List<Statement> nonEmptyStmts = policy.getStatements().stream() //
-                .peek(stmt -> {
-                    List<Resource> resourceList = stmt.getResources().stream() //
-                            .filter(rsc -> !rsc.getId().contains(dropBoxId))//
-                            .collect(Collectors.toList());
-                    stmt.setResources(resourceList);
-                }) //
-                .filter(stmt -> {
-                    boolean keep = true;
-                    if (CollectionUtils.isEmpty(stmt.getResources())) {
-                        keep = false;
-                    } else if (stmt.getId().contains(dropBoxId)) {
-                        keep = false;
-                    }
-                    return keep;
-                }) //
-                .collect(Collectors.toList());
-        if (StringUtils.isNotBlank(accountId) && CollectionUtils.isNotEmpty(nonEmptyStmts) //
-                && !accountId.contains(customerAccountId)) {
-            boolean accountIsRedundant = nonEmptyStmts.stream() //
-                    .noneMatch(stmt -> accountId.equals(stmt.getId()));
-            if (accountIsRedundant) {
-                nonEmptyStmts = nonEmptyStmts.stream().peek(stmt -> {
-                    if (PUT_POLICY_ID.equals(stmt.getId())) {
-                        removeAccountFromPutStatement(stmt, accountId);
-                    }
-                }).collect(Collectors.toList());
-            }
-        }
-        policy.setStatements(nonEmptyStmts);
-        if (CollectionUtils.isEmpty(nonEmptyStmts)) {
-            s3Service.deleteBucketPolicy(customersBucket);
-        } else {
-            s3Service.setBucketPolicy(customersBucket, policy.toJson());
-        }
     }
 
     @Override
