@@ -4,7 +4,11 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 
 
-public class ProxyUtils {
+public final class ProxyUtils {
+
+    protected ProxyUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("unchecked")
     public static <T> T getTargetObject(Object proxy) throws Exception {

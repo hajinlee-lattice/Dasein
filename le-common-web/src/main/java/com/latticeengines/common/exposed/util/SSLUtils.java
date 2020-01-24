@@ -20,7 +20,11 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import reactor.netty.http.client.HttpClient;
 
-public class SSLUtils {
+public final class SSLUtils {
+
+    protected SSLUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(SSLUtils.class);
     private static ThreadLocal<Boolean> verifySSLHostName = new ThreadLocal<>();

@@ -6,7 +6,11 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
-public class TokenUtils {
+public final class TokenUtils {
+
+    protected TokenUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String joinAndEncrypt(String separator, String... args) {
         Joiner joiner = Joiner.on(separator).skipNulls();

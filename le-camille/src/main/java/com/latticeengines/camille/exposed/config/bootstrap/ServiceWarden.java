@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 /**
  * A high-level class responsible for service registration and bootstrap.
  */
-public class ServiceWarden {
+public final class ServiceWarden {
+
+    protected ServiceWarden() {
+        throw new UnsupportedOperationException();
+    }
     /**
      * To be invoked from code residing within the service itself.
      */

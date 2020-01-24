@@ -13,7 +13,11 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class DebugGatewayWatcher {
+public final class DebugGatewayWatcher {
+
+    protected DebugGatewayWatcher() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(DebugGatewayWatcher.class);
 

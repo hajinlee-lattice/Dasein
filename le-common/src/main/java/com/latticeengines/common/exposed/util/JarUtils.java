@@ -11,7 +11,11 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class JarUtils {
+public final class JarUtils {
+
+    protected JarUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("resource")
     public static String[] getResourceListing(Class<?> clazz, String path) throws URISyntaxException, IOException {

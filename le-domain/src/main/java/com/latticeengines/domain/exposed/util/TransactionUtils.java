@@ -23,7 +23,11 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
-public class TransactionUtils {
+public final class TransactionUtils {
+
+    protected TransactionUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(TransactionUtils.class);
 

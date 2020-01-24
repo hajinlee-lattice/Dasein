@@ -15,6 +15,10 @@ import com.latticeengines.common.exposed.util.AvroReflectionUtils;
 
 public final class FabricEntityFactory {
 
+    protected FabricEntityFactory() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(FabricEntityFactory.class);
 
     public static <T> Schema getFabricSchema(Class<T> clz, String recordType) {

@@ -2,7 +2,11 @@ package com.latticeengines.datacloud.match.exposed.datasource;
 
 import com.latticeengines.domain.exposed.datacloud.MatchClient;
 
-public class MatchClientContextHolder {
+public final class MatchClientContextHolder {
+
+    protected MatchClientContextHolder() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final ThreadLocal<MatchClient> clientInThread = new ThreadLocal<MatchClient>();
 

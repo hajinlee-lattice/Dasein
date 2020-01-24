@@ -12,7 +12,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmakercore.NonStandardRecColumnName;
 import com.latticeengines.domain.exposed.playmakercore.RecommendationColumnName;
 
-public class CampaignLaunchUtils {
+public final class CampaignLaunchUtils {
+
+    protected CampaignLaunchUtils() {
+        throw new UnsupportedOperationException();
+    }
     // ---- start of Facebook Account and Contact columns---
     public static List<String> facebookRecommendationAccountColumns() {
         return ImmutableList.<String> builder().addAll(generateAccountColsRecIncludedForFacebook())

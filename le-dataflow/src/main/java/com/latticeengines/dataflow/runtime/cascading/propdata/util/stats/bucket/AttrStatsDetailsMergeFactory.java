@@ -6,7 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.impl.AttrStatsDetailsAddMergeUtil;
 import com.latticeengines.dataflow.runtime.cascading.propdata.util.stats.bucket.impl.AttrStatsDetailsDedupMergeUtil;
 
-public class AttrStatsDetailsMergeFactory {
+public final class AttrStatsDetailsMergeFactory {
+
+    protected AttrStatsDetailsMergeFactory() {
+        throw new UnsupportedOperationException();
+    }
     private static Map<MergeType, AttrStatsDetailsMergeTool> utilMap = new ConcurrentHashMap<>();
 
     public static AttrStatsDetailsMergeTool getUtil(MergeType type) {

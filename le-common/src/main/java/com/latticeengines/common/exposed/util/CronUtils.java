@@ -14,6 +14,10 @@ import com.cronutils.parser.CronParser;
 
 public final class CronUtils {
 
+    protected CronUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final CronParser parser = new CronParser(CronDefinitionBuilder.instanceDefinitionFor(QUARTZ));
 
     public static DateTime getPreviousFireTime(String cron) {

@@ -16,7 +16,11 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.CDLService;
 
-public class SystemIdsUtils {
+public final class SystemIdsUtils {
+
+    protected SystemIdsUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(SystemIdsUtils.class);
 
     protected static final String UNIQUE_ID_SECTION = "Unique ID";

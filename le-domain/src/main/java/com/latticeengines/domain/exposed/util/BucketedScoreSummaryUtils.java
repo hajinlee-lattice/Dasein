@@ -17,7 +17,11 @@ import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 
-public class BucketedScoreSummaryUtils {
+public final class BucketedScoreSummaryUtils {
+
+    protected BucketedScoreSummaryUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(BucketedScoreSummaryUtils.class);
 
     public static final String TOTAL_EVENTS = "TotalEvents";

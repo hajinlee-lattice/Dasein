@@ -12,7 +12,11 @@ import com.onelogin.saml2.exception.Error;
 import com.onelogin.saml2.settings.Saml2Settings;
 import com.onelogin.saml2.settings.SettingsBuilder;
 
-public class OneLoginSAMLSettingUtils {
+public final class OneLoginSAMLSettingUtils {
+
+    protected OneLoginSAMLSettingUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(OneLoginSAMLSettingUtils.class);
 

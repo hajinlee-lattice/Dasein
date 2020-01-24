@@ -6,7 +6,11 @@ import org.kitesdk.shaded.com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 
-public class RuleBasedComparator {
+public final class RuleBasedComparator {
+
+    protected RuleBasedComparator() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String VAL_Y = DataCloudConstants.ATTR_VAL_Y;
     private static final String VAL_YES = DataCloudConstants.ATTR_VAL_YES;

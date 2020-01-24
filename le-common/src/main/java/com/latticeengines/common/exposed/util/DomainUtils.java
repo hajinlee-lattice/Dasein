@@ -6,7 +6,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
-public class DomainUtils {
+public final class DomainUtils {
+
+    protected DomainUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static Pattern pDomainNameOnly = Pattern.compile("((?!-)[A-Za-z0-9-]{1,63}(?<!-)\\.)+[A-Za-z]{2,}");
     private static EmailValidator emailValidator = EmailValidator.getInstance();

@@ -6,7 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.latticeengines.datacloud.etl.publication.service.PublishService;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 
-public class PublishServiceFactory {
+public final class PublishServiceFactory {
+
+    protected PublishServiceFactory() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("rawtypes")
     private static Map<Publication.PublicationType, PublishService> serviceMap = new ConcurrentHashMap<>();

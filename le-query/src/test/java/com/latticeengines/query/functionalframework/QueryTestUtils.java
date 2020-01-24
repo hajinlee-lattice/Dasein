@@ -9,7 +9,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 
-public class QueryTestUtils {
+public final class QueryTestUtils {
+
+    protected QueryTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static AttributeRepository attrRepo;
 

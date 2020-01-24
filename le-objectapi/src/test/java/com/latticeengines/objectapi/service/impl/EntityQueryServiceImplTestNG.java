@@ -45,11 +45,13 @@ import com.latticeengines.objectapi.service.EventQueryService;
 
 public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
+    @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
     private final class AccountAttr {
         static final String CompanyName = "CompanyName";
         static final String NumFamilyMembers = "NUMBER_OF_FAMILY_MEMBERS";
     }
 
+    @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
     private final class ContactAttr {
         static final String Occupation = "Occupation";
     }
@@ -70,11 +72,11 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         return new Object[][] { { SEGMENT_USER, "Redshift" } };
     }
 
-    protected EntityQueryService getEntityQueryService(String sqlUser) {
+    private EntityQueryService getEntityQueryService(String sqlUser) {
         return entityQueryService;
     }
 
-    protected Object[][] getTimeFilterDataProvider() {
+    private Object[][] getTimeFilterDataProvider() {
         TimeFilter currentMonth = new TimeFilter( //
                 ComparisonType.IN_CURRENT_PERIOD, //
                 PeriodStrategy.Template.Month.name(), //
@@ -371,7 +373,7 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
             Assert.assertNotNull(techIndicatorVal);
             if (enforceTranslation) {
                 String techIndicatorValue = (String) techIndicatorVal;
-                Assert.assertTrue(techIndicatorValue.equals("Yes") || techIndicatorValue.equals("No"),
+                Assert.assertTrue("Yes".equals(techIndicatorValue) || "No".equals(techIndicatorValue),
                         techIndicatorValue);
             } else {
                 Long techIndicatorValue = (Long) techIndicatorVal;

@@ -60,6 +60,7 @@
         <module name="StringLiteralEquality"/>
 
         <!-- Design -->
+        <module name="HideUtilityClassConstructor"/>
         <module name="OneTopLevelClass"/>
 
         <!-- Miscellaneous -->

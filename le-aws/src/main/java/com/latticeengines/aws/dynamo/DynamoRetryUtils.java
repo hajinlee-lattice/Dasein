@@ -5,7 +5,11 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-public class DynamoRetryUtils {
+public final class DynamoRetryUtils {
+
+    protected DynamoRetryUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /*
      * Retry templates that know which dynamo exception can/cannot retry

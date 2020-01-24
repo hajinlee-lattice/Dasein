@@ -22,7 +22,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 
 @SuppressWarnings("deprecation")
-public class BucketedScoreTestUtils {
+public final class BucketedScoreTestUtils {
+
+    protected BucketedScoreTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Double LIFT_1 = 3.4;
     private static final Double LIFT_2 = 2.4;

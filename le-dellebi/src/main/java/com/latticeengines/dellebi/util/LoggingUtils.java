@@ -8,6 +8,10 @@ import com.latticeengines.domain.exposed.dellebi.DellEbiExecutionLogStatus;
 
 public final class LoggingUtils {
 
+    protected LoggingUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static String durationSince(long startTime) {
         return DurationFormatUtils.formatDuration(System.currentTimeMillis() - startTime, "HH:mm:ss.SSS");
     }

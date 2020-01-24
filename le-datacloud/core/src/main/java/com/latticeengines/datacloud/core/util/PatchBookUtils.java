@@ -34,7 +34,11 @@ import com.latticeengines.domain.exposed.datacloud.match.patch.PatchLog;
 /**
  * Shared utilities for {@link PatchBook}
  */
-public class PatchBookUtils {
+public final class PatchBookUtils {
+
+    protected PatchBookUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String DUPLICATE_MATCH_KEY_ERROR = "Duplicate match key combination found : ";
     public static final String INVALID_EFFECTIVE_DATE_RANGE_ERROR =

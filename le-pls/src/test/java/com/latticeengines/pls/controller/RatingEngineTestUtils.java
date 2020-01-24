@@ -5,7 +5,11 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 
-public class RatingEngineTestUtils {
+public final class RatingEngineTestUtils {
+
+    protected RatingEngineTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static List<RatingEngine> createRatingEngineList() {
         List<RatingEngine> list = new ArrayList<>();

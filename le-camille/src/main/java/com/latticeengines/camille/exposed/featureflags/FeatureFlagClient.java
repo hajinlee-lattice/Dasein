@@ -6,7 +6,11 @@ import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinit
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagProvider;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 
-public class FeatureFlagClient {
+public final class FeatureFlagClient {
+
+    protected FeatureFlagClient() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void setProvider(FeatureFlagProvider provider) {
         if (provider == null) {

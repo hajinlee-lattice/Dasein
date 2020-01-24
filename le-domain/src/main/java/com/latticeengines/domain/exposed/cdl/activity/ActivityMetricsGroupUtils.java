@@ -20,7 +20,11 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
-public class ActivityMetricsGroupUtils {
+public final class ActivityMetricsGroupUtils {
+
+    protected ActivityMetricsGroupUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final int GROUPID_UPPER_BOUND = 6;
     private static final int GROUPID_LOWER_BOUND = 3;
     private static final Pattern ATTR_NAME_PATTERN = //

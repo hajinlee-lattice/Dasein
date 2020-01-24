@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 
 public final class BeanFactoryEnvironment {
 
+    protected BeanFactoryEnvironment() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(BeanFactoryEnvironment.class);
 
     private static Environment environment;

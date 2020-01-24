@@ -7,7 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
-public class WorkflowThrottlingUtils {
+public final class WorkflowThrottlingUtils {
+
+    protected WorkflowThrottlingUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String GLOBAL = "global";
     public static final String DEFAULT = "default";

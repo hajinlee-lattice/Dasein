@@ -13,6 +13,10 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 public final class PeriodBuilderFactory {
 
+    protected PeriodBuilderFactory() {
+        throw new UnsupportedOperationException();
+    }
+
     public static PeriodBuilder build(PeriodStrategy strategy) {
         switch (strategy.getTemplate()) {
             case Week:

@@ -38,7 +38,11 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
 import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 
-public class ScoringMapperTransformUtil {
+public final class ScoringMapperTransformUtil {
+
+    protected ScoringMapperTransformUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ScoringMapperTransformUtil.class);
 

@@ -10,6 +10,10 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 public final class ColumnMetadataUtils {
 
+    protected ColumnMetadataUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     // TODO: not completed before review, will keep adding overwriting methods
     static ColumnMetadata overwrite(ColumnMetadata overwriter, ColumnMetadata overwritee) {
         if (!overwriter.getAttrName().equals(overwritee.getAttrName())) {

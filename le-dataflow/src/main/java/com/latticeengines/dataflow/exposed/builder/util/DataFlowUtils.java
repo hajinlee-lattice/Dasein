@@ -30,7 +30,11 @@ import cascading.operation.aggregator.MinValue;
 import cascading.operation.aggregator.Sum;
 import cascading.tuple.Fields;
 
-public class DataFlowUtils {
+public final class DataFlowUtils {
+
+    protected DataFlowUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static List<FieldMetadata> getIntersection(List<String> partial, List<FieldMetadata> full) {
         Map<String, FieldMetadata> nameToFieldMetadataMap = getFieldMetadataMap(full);
         List<FieldMetadata> partialFieldMetadata = new ArrayList<>();

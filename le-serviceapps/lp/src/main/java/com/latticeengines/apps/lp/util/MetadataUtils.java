@@ -8,6 +8,10 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public final class MetadataUtils {
 
+    protected MetadataUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static Table getEventTableFromModelId(String modelId, //
                  ModelSummaryService modelSummaryService, //
                  MetadataProxy metadataProxy) {

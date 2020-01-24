@@ -32,7 +32,11 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
-public class HttpClientUtils {
+public final class HttpClientUtils {
+
+    protected HttpClientUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final PoolingHttpClientConnectionManager SSL_BLIND_CONNECTION_MGR = constructPoolingConnectionMgr(
             SSLUtils.SSL_BLIND_SOCKET_FACTORY);

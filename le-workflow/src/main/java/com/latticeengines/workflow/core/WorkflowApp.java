@@ -14,7 +14,11 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowProperty;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 
-public class WorkflowApp {
+public final class WorkflowApp {
+
+    protected WorkflowApp() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(WorkflowApp.class);
     
     private static final String[] contexts = { "workflow-context.xml", "common-properties-context.xml" };

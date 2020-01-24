@@ -23,7 +23,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 /**
  * Dynamodb specific utility functions for entity match
  */
-public class EntityMatchDynamoUtils {
+public final class EntityMatchDynamoUtils {
+
+    protected EntityMatchDynamoUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /* constants */
     private static final String LOOKUP_PREFIX = DataCloudConstants.ENTITY_PREFIX_LOOKUP;

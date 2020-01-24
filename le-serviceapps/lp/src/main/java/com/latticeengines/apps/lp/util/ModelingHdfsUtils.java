@@ -31,7 +31,11 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 
-public class ModelingHdfsUtils {
+public final class ModelingHdfsUtils {
+
+    protected ModelingHdfsUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ModelingHdfsUtils.class);
 

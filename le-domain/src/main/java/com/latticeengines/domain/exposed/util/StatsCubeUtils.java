@@ -68,7 +68,11 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @SuppressWarnings("deprecation")
-public class StatsCubeUtils {
+public final class StatsCubeUtils {
+
+    protected StatsCubeUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     static final String HASEVER_PURCHASED_SUFFIX = String.format("%s_%s", NamedPeriod.HASEVER.getName(), "Purchased");
     private static final Logger log = LoggerFactory.getLogger(StatsCubeUtils.class);

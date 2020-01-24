@@ -13,7 +13,11 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.AccessLevel;
 
-public class TestFrameworkUtils {
+public final class TestFrameworkUtils {
+
+    protected TestFrameworkUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static final String GENERAL_PASSWORD = "admin";
     public static final String GENERAL_PASSWORD_HASH = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 

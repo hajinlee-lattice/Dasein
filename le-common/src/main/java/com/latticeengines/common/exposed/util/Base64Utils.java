@@ -2,7 +2,11 @@ package com.latticeengines.common.exposed.util;
 
 import org.apache.commons.net.util.Base64;
 
-public class Base64Utils {
+public final class Base64Utils {
+
+    protected Base64Utils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static int DEFAULT_TRIM_LENGTH = 8;
 

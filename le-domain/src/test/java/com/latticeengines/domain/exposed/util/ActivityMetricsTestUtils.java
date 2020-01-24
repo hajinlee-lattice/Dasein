@@ -15,7 +15,11 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
  * Fake data to test activity metrics
  *
  */
-public class ActivityMetricsTestUtils {
+public final class ActivityMetricsTestUtils {
+
+    protected ActivityMetricsTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static List<ActivityMetrics> fakePurchaseMetrics(Tenant tenant) {
         ActivityMetrics margin = createFakedMetrics(tenant, ActivityType.PurchaseHistory);

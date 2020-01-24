@@ -10,7 +10,11 @@ import org.apache.commons.io.FileUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.modeling.Classifier;
 
-public class PythonMRTestUtils {
+public final class PythonMRTestUtils {
+
+    protected PythonMRTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Classifier setupDummyClassifier() {
         Classifier classifier = new Classifier();

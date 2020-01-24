@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DataRuleLists {
+public final class DataRuleLists {
+
+    protected DataRuleLists() {
+        throw new UnsupportedOperationException();
+    }
 
     public static List<DataRule> getDataRules(DataRuleListName listName) {
         switch (listName) {

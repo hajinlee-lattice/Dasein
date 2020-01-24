@@ -1,6 +1,10 @@
 package com.latticeengines.common.exposed.util;
 
-public class BitTransferUtils {
+public final class BitTransferUtils {
+
+    protected BitTransferUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String formatSize(long bytes) {
         int unit = 1024;

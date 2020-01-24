@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.modelquality.AlgorithmPropertyValue;
 import com.latticeengines.domain.exposed.modelquality.AlgorithmType;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
-public class AlgorithmFactory extends ModelFactory {
+public final class AlgorithmFactory extends ModelFactory {
+
+    protected AlgorithmFactory(){
+        throw new UnsupportedOperationException();
+    }
 
     public static final String ALGORITHM_NAME_RF = "RF";
     public static final String ALGORITHM_NAME_LR = "LR";

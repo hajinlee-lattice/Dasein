@@ -21,7 +21,11 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftUnloadParams;
 
-public class RedshiftUtils {
+public final class RedshiftUtils {
+
+    protected RedshiftUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static final String AVRO_STAGE = "redshift_avro_stage";
     public static final String CSV_STAGE = "redshift_csv_stage";
 

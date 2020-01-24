@@ -17,7 +17,11 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 
-public class AttrConfigTestUtils {
+public final class AttrConfigTestUtils {
+
+    protected AttrConfigTestUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static AttrConfig getLDCNonPremiumAttr(Category category, boolean enableThisAttr) {
         return getLDCNonPremiumAttr(category, enableThisAttr, false, false, false, false);
     }

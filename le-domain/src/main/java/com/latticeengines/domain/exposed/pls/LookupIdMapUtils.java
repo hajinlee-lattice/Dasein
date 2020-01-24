@@ -14,7 +14,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 
-public class LookupIdMapUtils {
+public final class LookupIdMapUtils {
+
+    protected LookupIdMapUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Pair<String, String> getEffectiveOrgInfo(Map<String, String> orgInfo) {
         Pair<String, String> effectiveOrgInfo = null;

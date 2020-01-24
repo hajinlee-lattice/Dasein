@@ -17,6 +17,10 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 public final class BusinessCalendarUtils {
 
+    protected BusinessCalendarUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static String STANDARD_MODE_NOTE = "Business calendar mode is STANDARD.";
 
     public static String validate(BusinessCalendar calendar) {

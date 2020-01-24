@@ -4,7 +4,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.VersionedDocument;
 
-public class DocumentUtils {
+public final class DocumentUtils {
+
+    protected DocumentUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static <T> Document toRawDocument(T typesafe) {
         if (typesafe instanceof VersionedDocument) {
             VersionedDocument casted = (VersionedDocument) typesafe;

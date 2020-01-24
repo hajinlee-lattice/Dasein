@@ -26,7 +26,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.latticeengines.common.exposed.operation.Operation;
 
-public class ThreadPoolUtils {
+public final class ThreadPoolUtils {
+
+    protected ThreadPoolUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ThreadPoolUtils.class);
     private static final String DEBUG_GATEWAY = "DebugGateway";

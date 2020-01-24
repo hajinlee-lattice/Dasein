@@ -16,7 +16,11 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
-public class GzipUtils {
+public final class GzipUtils {
+
+    protected GzipUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static byte[] compress(final String str) {
         if ((str == null) || (str.length() == 0)) {
             return null;

@@ -2,7 +2,11 @@ package com.latticeengines.actors.utils;
 
 import akka.actor.ActorRef;
 
-public class ActorUtils {
+public final class ActorUtils {
+
+    protected ActorUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String INJECTED_FAILURE_MSG = "Failure injected";
 

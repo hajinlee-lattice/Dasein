@@ -22,7 +22,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-public class JsonUtils {
+public final class JsonUtils {
+
+    protected JsonUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static <T> String serialize(T object) {
         if (object == null) {

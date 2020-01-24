@@ -9,7 +9,11 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 
-public class PeriodStrategyUtils {
+public final class PeriodStrategyUtils {
+
+    protected PeriodStrategyUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String STRATEGY = "Strategy";
 

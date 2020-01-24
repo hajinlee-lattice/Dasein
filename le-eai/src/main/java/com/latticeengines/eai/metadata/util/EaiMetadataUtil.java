@@ -3,7 +3,11 @@ package com.latticeengines.eai.metadata.util;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 
-public class EaiMetadataUtil {
+public final class EaiMetadataUtil {
+
+    protected EaiMetadataUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static PrimaryKey createPrimaryKey() {
         PrimaryKey pk = new PrimaryKey();

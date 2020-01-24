@@ -5,7 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
-public class PathUtils {
+public final class PathUtils {
+
+    protected PathUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String stripoutProtocol(String hdfsPath) {
         return hdfsPath.replaceFirst("[^:]*://[^/]*/", "/");

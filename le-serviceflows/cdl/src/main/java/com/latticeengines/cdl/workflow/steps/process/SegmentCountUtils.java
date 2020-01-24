@@ -16,6 +16,10 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 final class SegmentCountUtils {
 
+    protected SegmentCountUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(SegmentCountUtils.class);
 
     // to refresh cache

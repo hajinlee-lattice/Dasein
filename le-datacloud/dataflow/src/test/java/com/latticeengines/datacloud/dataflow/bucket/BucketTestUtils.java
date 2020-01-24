@@ -21,7 +21,11 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.DiscreteBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.DCEncodedAttr;
 
-public class BucketTestUtils {
+public final class BucketTestUtils {
+
+    protected BucketTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     static final String ATTR_INTERVAL_INT = "IntervalInt";
     static final String ATTR_INTERVAL_DBL = "IntervalDouble";

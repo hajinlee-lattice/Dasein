@@ -53,7 +53,11 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoreContext;
 import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 import com.latticeengines.yarn.exposed.mapreduce.MapReduceProperty;
 
-public class ScoringMapperPredictUtil {
+public final class ScoringMapperPredictUtil {
+
+    protected ScoringMapperPredictUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ScoringMapperPredictUtil.class);
 

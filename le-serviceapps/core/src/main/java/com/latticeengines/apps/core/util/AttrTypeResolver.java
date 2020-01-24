@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
-public class AttrTypeResolver {
+public final class AttrTypeResolver {
+
+    protected AttrTypeResolver() {
+        throw new UnsupportedOperationException();
+    }
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(AttrTypeResolver.class);
 

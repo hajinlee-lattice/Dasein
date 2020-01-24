@@ -6,7 +6,11 @@ import java.util.List;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 
-public class GraphUtils {
+public final class GraphUtils {
+
+    protected GraphUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static <T> List<T> getAllOfType(GraphNode root, Class<T> clazz) {
         DepthFirstSearch search = new DepthFirstSearch();

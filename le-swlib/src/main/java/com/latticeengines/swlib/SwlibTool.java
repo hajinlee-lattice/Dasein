@@ -15,7 +15,11 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 
-public class SwlibTool {
+public final class SwlibTool {
+
+    protected SwlibTool() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("resource")
     public static void main(String[] args) {

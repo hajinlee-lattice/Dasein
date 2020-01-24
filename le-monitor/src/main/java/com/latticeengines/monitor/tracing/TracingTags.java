@@ -3,7 +3,11 @@ package com.latticeengines.monitor.tracing;
 /**
  * Tag constants for distributed tracing
  */
-public class TracingTags {
+public final class TracingTags {
+
+    protected TracingTags() {
+        throw new UnsupportedOperationException();
+    }
     public static final String TENANT_ID = "tenant.id";
     public static final String ENTITY = "entity";
 

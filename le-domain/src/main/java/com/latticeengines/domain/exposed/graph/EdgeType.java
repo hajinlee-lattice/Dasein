@@ -3,7 +3,11 @@ package com.latticeengines.domain.exposed.graph;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EdgeType {
+public final class EdgeType {
+
+    protected EdgeType() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String TENANT = "Tenant";
     public static final String DEPENDS_ON = "DependsOn";

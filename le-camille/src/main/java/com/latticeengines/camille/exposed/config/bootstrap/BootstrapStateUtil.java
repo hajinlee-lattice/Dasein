@@ -13,7 +13,11 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 
-public class BootstrapStateUtil {
+public final class BootstrapStateUtil {
+
+    protected BootstrapStateUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void initializeState(Path serviceDirectory, CamilleTransaction transaction, BootstrapState state) {
         Path path = serviceDirectory.append(PathConstants.BOOTSTRAP_STATE_FILE);

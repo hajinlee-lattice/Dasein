@@ -4,7 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Deprecated
-public class DependencyType2 {
+public final class DependencyType2 {
+
+    protected DependencyType2() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String TYPE_TENANT = "Tenant";
 

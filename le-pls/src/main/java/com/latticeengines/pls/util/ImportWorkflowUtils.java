@@ -50,7 +50,11 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 
 
-public class ImportWorkflowUtils {
+public final class ImportWorkflowUtils {
+
+    protected ImportWorkflowUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowUtils.class);
 
     // TODO(jwinter): Reconsider if the Spec section for Custom Fields should be indicated in a different manner

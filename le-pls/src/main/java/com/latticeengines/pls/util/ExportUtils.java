@@ -9,6 +9,10 @@ import com.latticeengines.baton.exposed.service.BatonService;
 
 public final class ExportUtils {
 
+    protected ExportUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static void downloadS3ExportFile(String filePath, String fileName, String mediaType, HttpServletRequest request,
                                             HttpServletResponse response, ImportFromS3Service importFromS3Service, BatonService batonService) {
         String fileNameIndownloader = fileName;

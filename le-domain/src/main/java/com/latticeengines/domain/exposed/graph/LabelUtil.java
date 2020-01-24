@@ -6,7 +6,11 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-public class LabelUtil {
+public final class LabelUtil {
+
+    protected LabelUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String concatenateLabels(List<String> labelList) {
         String concatenatedLabel = null;

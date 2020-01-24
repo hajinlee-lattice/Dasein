@@ -15,7 +15,11 @@ import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.tuple.Fields;
 
-public class PipeFactory {
+public final class PipeFactory {
+
+    protected PipeFactory() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(PipeFactory.class);
 
