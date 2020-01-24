@@ -5,7 +5,11 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class MarketoExtractAndImportUtil {
+public final class MarketoExtractAndImportUtil {
+
+    protected MarketoExtractAndImportUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Table createMarketoActivity() {
         Table table = new Table();

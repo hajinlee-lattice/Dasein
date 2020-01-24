@@ -12,7 +12,11 @@ import org.kitesdk.shaded.com.google.common.collect.Lists;
 import com.latticeengines.query.exposed.translator.TranslatorCommon;
 import com.latticeengines.query.exposed.translator.TranslatorUtils;
 
-public class SparkSQLQueryUtils {
+public final class SparkSQLQueryUtils {
+
+    protected SparkSQLQueryUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String FINAL = "final";
 

@@ -6,6 +6,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public final class ImportConfigurationFactory {
 
+    protected ImportConfigurationFactory() {
+        throw new UnsupportedOperationException();
+    }
+
     public static ImportConfiguration getImportConfiguration(SourceType sourceType,
             String configStr) {
         switch (sourceType) {

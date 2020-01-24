@@ -6,7 +6,11 @@ import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NetworkUtils {
+public final class NetworkUtils {
+
+    protected NetworkUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(NetworkUtils.class);
 

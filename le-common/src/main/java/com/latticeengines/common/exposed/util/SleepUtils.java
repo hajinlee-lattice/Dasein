@@ -5,6 +5,10 @@ import org.slf4j.LoggerFactory;
 
 public final class SleepUtils {
 
+    protected SleepUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(SleepUtils.class);
 
     public static void sleep(long mills) {

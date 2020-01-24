@@ -10,7 +10,11 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-public class BitCodecUtils {
+public final class BitCodecUtils {
+
+    protected BitCodecUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String encode(int[] trueBits) throws IOException {
         BitSet bitSet = new BitSet();

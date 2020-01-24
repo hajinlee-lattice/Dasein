@@ -12,7 +12,11 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class MetaDataTableUtils {
+public final class MetaDataTableUtils {
+
+    protected MetaDataTableUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Table createTable(Configuration yarnConfiguration, String tableName,
             String avroPath) {

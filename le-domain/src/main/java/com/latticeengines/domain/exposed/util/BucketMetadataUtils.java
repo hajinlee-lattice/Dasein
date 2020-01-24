@@ -10,7 +10,11 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 
-public class BucketMetadataUtils {
+public final class BucketMetadataUtils {
+
+    protected BucketMetadataUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(BucketMetadataUtils.class);
 

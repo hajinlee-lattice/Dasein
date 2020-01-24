@@ -26,7 +26,11 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.Calculate
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.scoring.workflow.util.ScoreArtifactRetriever;
 
-public class ExpectedRevenueDataFlowUtil {
+public final class ExpectedRevenueDataFlowUtil {
+
+    protected ExpectedRevenueDataFlowUtil() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(ExpectedRevenueDataFlowUtil.class);
 
     public static Map<String, String> getEVFitFunctionParametersMap(CustomerSpace customerSpace,

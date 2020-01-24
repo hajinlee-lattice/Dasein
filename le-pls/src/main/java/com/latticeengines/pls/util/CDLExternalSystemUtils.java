@@ -16,7 +16,11 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionSectionName
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 
-public class CDLExternalSystemUtils {
+public final class CDLExternalSystemUtils {
+
+    protected CDLExternalSystemUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(CDLExternalSystemUtils.class);
 

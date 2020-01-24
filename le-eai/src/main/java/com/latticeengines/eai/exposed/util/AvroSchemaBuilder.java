@@ -15,7 +15,11 @@ import org.apache.commons.lang3.StringUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class AvroSchemaBuilder {
+public final class AvroSchemaBuilder {
+
+    protected AvroSchemaBuilder() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("deprecation")
     public static Schema mergeSchemas(Schema schema, Table table) {

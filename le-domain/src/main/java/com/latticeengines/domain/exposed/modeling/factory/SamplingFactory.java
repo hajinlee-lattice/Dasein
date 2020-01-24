@@ -14,7 +14,11 @@ import com.latticeengines.domain.exposed.modelquality.SamplingPropertyDef;
 import com.latticeengines.domain.exposed.modelquality.SamplingPropertyValue;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 
-public class SamplingFactory extends ModelFactory {
+public final class SamplingFactory extends ModelFactory {
+
+    protected SamplingFactory() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String MODEL_SAMPLING_SEED_KEY = "model.sampling.seed";
     public static final String MODEL_SAMPLING_RATE_KEY = "model.sampling.rate";

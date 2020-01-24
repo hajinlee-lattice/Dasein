@@ -8,6 +8,10 @@ import com.latticeengines.domain.exposed.query.EntityType;
 
 public final class S3PathBuilder {
 
+    protected S3PathBuilder() {
+        throw new UnsupportedOperationException();
+    }
+
     private static String uiDisplayS3Dir_old = "%s/dropfolder/%s/Templates/%s/";
 
     private static final String SPLIT_CHART = "_";

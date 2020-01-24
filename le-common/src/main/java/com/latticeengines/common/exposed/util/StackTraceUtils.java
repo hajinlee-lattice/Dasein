@@ -5,7 +5,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class StackTraceUtils {
+public final class StackTraceUtils {
+
+    protected StackTraceUtils() {
+        throw new UnsupportedOperationException();
+    }
     
     public static final String LE_PATTERN = "com.latticeengines";
     private static final String NEW_LINE_TAB = System.getProperty("line.separator") + "\t";

@@ -4,7 +4,11 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.actors.ActorType;
 
-public class MatchActorUtils {
+public final class MatchActorUtils {
+
+    protected MatchActorUtils() {
+        throw new UnsupportedOperationException();
+    }
     /**
      * Add suffix to actor name if needed: AnchorActor, MicroEngineActor,
      * JunctionActor

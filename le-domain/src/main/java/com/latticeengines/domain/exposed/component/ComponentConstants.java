@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.component;
 
-public class ComponentConstants {
+public final class ComponentConstants {
+
+    protected ComponentConstants() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String CDL = "CDL";
     public static final String METADATA = "METADATA";

@@ -4,7 +4,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public class EnableSQLServerSnapshotIsolation {
+public final class EnableSQLServerSnapshotIsolation {
+
+    protected EnableSQLServerSnapshotIsolation() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void main(String[] args) throws Exception {
         String dbPropertiesFilepath = args[0];

@@ -7,6 +7,10 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 public final class S3PathBuilder {
 
+    protected S3PathBuilder() {
+        throw new UnsupportedOperationException();
+    }
+
     public static final String SUCCESS_FILE = "_SUCCESS";
     private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss_z";
     public static final String UTC = "UTC";

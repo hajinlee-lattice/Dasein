@@ -13,7 +13,11 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
-public class MRJobUtil {
+public final class MRJobUtil {
+
+    protected MRJobUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String comma = ",";
 

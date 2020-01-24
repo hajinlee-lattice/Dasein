@@ -9,7 +9,11 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class ConsulUtils {
+public final class ConsulUtils {
+
+    protected ConsulUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String getValueFromConsul(String consulUrl, String key) {
         String kvUrl = consulUrl + "/v1/kv/" + key;

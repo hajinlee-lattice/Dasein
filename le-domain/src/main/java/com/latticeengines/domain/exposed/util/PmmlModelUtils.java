@@ -31,7 +31,11 @@ import com.latticeengines.domain.exposed.pmml.LEImportFilter;
 import com.latticeengines.domain.exposed.pmml.PmmlField;
 import com.latticeengines.domain.exposed.pmml.SkipFilter;
 
-public class PmmlModelUtils {
+public final class PmmlModelUtils {
+
+    protected PmmlModelUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final Map<DataType, Object> dataTypeValueMap = new HashMap<>();
 

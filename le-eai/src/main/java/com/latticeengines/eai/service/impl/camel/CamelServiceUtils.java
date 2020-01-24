@@ -6,7 +6,11 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
-public class CamelServiceUtils {
+public final class CamelServiceUtils {
+
+    protected CamelServiceUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     static Long checkHdfsFileSize(Configuration yarnConfiguration, String hdfsDir, String fileName, String openSuffix) {
         try {

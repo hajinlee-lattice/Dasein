@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.query.frontend;
 
-public class FrontEndQueryConstants {
+public final class FrontEndQueryConstants {
+
+    protected FrontEndQueryConstants() {
+        throw new UnsupportedOperationException();
+    }
     public static final String PREEXISTING_SEGMENT_NAME = "preexisting_segment_name";
 
     public static final String SEGMENT_QUERY = "segment_query";

@@ -15,7 +15,11 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
-public class NodeWatcher {
+public final class NodeWatcher {
+
+    protected NodeWatcher() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final ConcurrentMap<String, NodeCache> watchers = new ConcurrentHashMap<>();
     private static final Logger log = LoggerFactory.getLogger(NodeWatcher.class);

@@ -11,7 +11,11 @@ import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.common.exposed.validator.BeanValidationService;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
-public class ValidationUtils {
+public final class ValidationUtils {
+
+    protected ValidationUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final String DEFAULT_OBJECT_NAME = "Object";
     private static final int MATCH_FIELD_VALUE_LENGTH_LIMIT = 500;
     // # and : is recommended not to use by dynamo, || is our internal delimiter

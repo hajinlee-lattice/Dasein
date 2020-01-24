@@ -16,7 +16,11 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 
-public class PlayUtils {
+public final class PlayUtils {
+
+    protected PlayUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String ADDED_ACCOUNTS_DELTA_TABLE = "added-accounts-delta-table";
     public static final String COMPLETE_CONTACTS_TABLE = "complete-contacts-table";

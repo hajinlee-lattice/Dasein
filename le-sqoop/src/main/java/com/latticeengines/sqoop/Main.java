@@ -21,7 +21,11 @@ import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.sqoop.exposed.service.SqoopJobService;
 
-public class Main {
+public final class Main {
+
+    protected Main() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 

@@ -15,7 +15,11 @@ import com.google.common.base.Strings;
  * Pack/unpack uses pipe | as delimiter.
  *
  */
-public class UuidUtils {
+public final class UuidUtils {
+
+    protected UuidUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String DELIMITER = "|";
 

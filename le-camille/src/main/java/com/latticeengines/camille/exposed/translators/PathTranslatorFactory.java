@@ -9,7 +9,11 @@ import com.latticeengines.domain.exposed.camille.scopes.PodScope;
 import com.latticeengines.domain.exposed.camille.scopes.ServiceScope;
 import com.latticeengines.domain.exposed.camille.scopes.TenantScope;
 
-public class PathTranslatorFactory {
+public final class PathTranslatorFactory {
+
+    protected PathTranslatorFactory() {
+        throw new UnsupportedOperationException();
+    }
     public static PathTranslator getTranslator(ConfigurationScope scope) {
         switch (scope.getType()) {
         case POD:

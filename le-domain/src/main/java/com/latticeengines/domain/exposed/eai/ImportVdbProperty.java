@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.eai;
 
-public class ImportVdbProperty extends ImportProperty {
+public final class ImportVdbProperty extends ImportProperty {
+
+    protected ImportVdbProperty() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String QUERY_DATA_ENDPOINT = "queryDataEndpoint";
     public static final String DATA_CATEGORY = "dataCategory";

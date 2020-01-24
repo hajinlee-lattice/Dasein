@@ -12,7 +12,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 
-public class BitCodeBookUtils {
+public final class BitCodeBookUtils {
+
+    protected BitCodeBookUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(BitCodeBookUtils.class);
 

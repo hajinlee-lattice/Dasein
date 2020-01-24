@@ -6,7 +6,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
-public class DSUtils {
+public final class DSUtils {
+
+    protected DSUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     @SuppressWarnings("deprecation")
     public static Boolean hasUnUsualChar(String s) {

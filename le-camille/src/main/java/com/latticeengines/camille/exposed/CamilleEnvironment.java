@@ -15,7 +15,11 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodProperties;
 
-public class CamilleEnvironment {
+public final class CamilleEnvironment {
+
+    protected CamilleEnvironment() {
+        throw new UnsupportedOperationException();
+    }
     public enum Mode {
         BOOTSTRAP, RUNTIME
     };

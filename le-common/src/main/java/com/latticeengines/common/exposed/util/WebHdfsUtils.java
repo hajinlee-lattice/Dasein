@@ -11,7 +11,11 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.web.WebHdfsFileSystem;
 import org.springframework.util.StreamUtils;
 
-public class WebHdfsUtils {
+public final class WebHdfsUtils {
+
+    protected WebHdfsUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final void mkdir(String uri, Configuration configuration, String dir) throws IOException {
         try (WebHdfsFileSystem fs = new WebHdfsFileSystem()) {

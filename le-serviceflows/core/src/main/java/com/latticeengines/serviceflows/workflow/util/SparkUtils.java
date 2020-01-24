@@ -35,6 +35,10 @@ import com.latticeengines.spark.exposed.service.SparkJobService;
 
 public final class SparkUtils {
 
+    protected SparkUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(SparkUtils.class);
 
     public static Table hdfsUnitToTable(String tableName, String primaryKey, HdfsDataUnit hdfsDataUnit, //

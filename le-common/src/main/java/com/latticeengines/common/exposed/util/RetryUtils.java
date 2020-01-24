@@ -11,7 +11,11 @@ import org.springframework.retry.backoff.ExponentialRandomBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-public class RetryUtils {
+public final class RetryUtils {
+
+    protected RetryUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final long INITIAL_WAIT_INTERVAL = 100L;
     private static final long DEFAULT_MAX_WAIT_TIME = 30000L; // 30s

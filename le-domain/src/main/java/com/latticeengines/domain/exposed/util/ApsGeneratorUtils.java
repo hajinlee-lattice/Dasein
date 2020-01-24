@@ -22,7 +22,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
-public class ApsGeneratorUtils {
+public final class ApsGeneratorUtils {
+
+    protected ApsGeneratorUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ApsGeneratorUtils.class);
 

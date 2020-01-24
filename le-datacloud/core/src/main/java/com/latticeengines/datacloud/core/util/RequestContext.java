@@ -3,7 +3,11 @@ package com.latticeengines.datacloud.core.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RequestContext {
+public final class RequestContext {
+
+    protected RequestContext() {
+        throw new UnsupportedOperationException();
+    }
 
     private static ThreadLocal<List<String>> errors = new ThreadLocal<>();
 

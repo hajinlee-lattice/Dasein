@@ -10,7 +10,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 
-public class EntityMatchGAConverterUtils {
+public final class EntityMatchGAConverterUtils {
+
+    protected EntityMatchGAConverterUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void convertGuessingMappings(boolean enableEntityMatch, boolean enableEntityMatchGA,
                                                FieldMappingDocument fieldMappingDocument) {

@@ -34,7 +34,11 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
-public class VdbMetadataUtils {
+public final class VdbMetadataUtils {
+
+    protected VdbMetadataUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(VdbMetadataUtils.class);
 

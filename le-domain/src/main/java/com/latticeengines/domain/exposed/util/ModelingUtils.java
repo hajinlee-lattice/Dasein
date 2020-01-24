@@ -27,7 +27,11 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMeta
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.KV;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 
-public class ModelingUtils {
+public final class ModelingUtils {
+
+    protected ModelingUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final PivotValuesLookup getPivotValues(Configuration yarnConfiguration,
             String pivotArtifactPath) throws Exception {

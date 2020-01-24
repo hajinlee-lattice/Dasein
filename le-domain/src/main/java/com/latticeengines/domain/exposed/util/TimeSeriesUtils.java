@@ -38,7 +38,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
-public class TimeSeriesUtils {
+public final class TimeSeriesUtils {
+
+    protected TimeSeriesUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(TimeSeriesUtils.class);
     private static final String TIMESERIES_FILENAME_PREFIX = "Period-";

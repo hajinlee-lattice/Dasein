@@ -4,7 +4,11 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-public class PrecisionUtils {
+public final class PrecisionUtils {
+
+    protected PrecisionUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final int standardPrecision = 10;
 

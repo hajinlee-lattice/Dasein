@@ -10,7 +10,11 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 
-public class MatchUtils {
+public final class MatchUtils {
+
+    protected MatchUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(MatchUtils.class);
     private static final String DEFAULT_VERSION_FOR_DERIVED_COLUMN_CACHE_BASED_MATCHING = "1.";

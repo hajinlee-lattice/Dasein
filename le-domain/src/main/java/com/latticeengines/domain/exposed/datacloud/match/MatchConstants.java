@@ -7,6 +7,10 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 public final class MatchConstants {
+
+    protected MatchConstants() {
+        throw new UnsupportedOperationException();
+    }
     public static final String CACHE_TABLE = "DerivedColumnsCache";
     public static final String IS_PUBLIC_DOMAIN = "IsPublicDomain";
     public static final String DISPOSABLE_EMAIL = "DisposableEmail";

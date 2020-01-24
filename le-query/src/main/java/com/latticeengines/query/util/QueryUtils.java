@@ -18,6 +18,10 @@ import com.querydsl.core.types.dsl.StringPath;
 
 public final class QueryUtils {
 
+    protected QueryUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static StringPath getAttributePath(String attrName) {
         return Expressions.stringPath(attrName);
     }

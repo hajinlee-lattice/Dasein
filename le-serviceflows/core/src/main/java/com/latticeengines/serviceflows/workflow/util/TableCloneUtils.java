@@ -18,7 +18,11 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 
-public class TableCloneUtils {
+public final class TableCloneUtils {
+
+    protected TableCloneUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(TableCloneUtils.class);
 

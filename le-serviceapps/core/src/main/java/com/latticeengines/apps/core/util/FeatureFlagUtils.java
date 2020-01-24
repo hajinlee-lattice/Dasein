@@ -9,7 +9,11 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
-public class FeatureFlagUtils {
+public final class FeatureFlagUtils {
+
+    protected FeatureFlagUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(FeatureFlagUtils.class);
 

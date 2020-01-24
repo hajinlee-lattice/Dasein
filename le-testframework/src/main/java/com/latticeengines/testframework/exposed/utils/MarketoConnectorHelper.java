@@ -2,7 +2,11 @@ package com.latticeengines.testframework.exposed.utils;
 
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 
-public class MarketoConnectorHelper {
+public final class MarketoConnectorHelper {
+
+    protected MarketoConnectorHelper() {
+        throw new UnsupportedOperationException();
+    }
 
     /*
      * Using the Configuration from Marketo Soaktest Environment

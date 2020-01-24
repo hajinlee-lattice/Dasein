@@ -1,6 +1,10 @@
 package com.latticeengines.dataflow.exposed.builder.common;
 
-public class DataFlowProperty {
+public final class DataFlowProperty {
+
+    protected DataFlowProperty() {
+        throw new UnsupportedOperationException();
+    }
     public static final String RECORDNAME = "RECORDNAME";
     public static final String APPLYMETADATAPRUNING = "APPLYMETADATAPRUNING";
     public static final String APPLYTABLEPROPERTIES = "APPLYTABLEPROPERTIES";

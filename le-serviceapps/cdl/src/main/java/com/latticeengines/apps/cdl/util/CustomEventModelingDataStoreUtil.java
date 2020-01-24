@@ -9,7 +9,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 
-public class CustomEventModelingDataStoreUtil {
+public final class CustomEventModelingDataStoreUtil {
+
+    protected CustomEventModelingDataStoreUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Set<Category> getCategoriesByDataStores(List<CustomEventModelingConfig.DataStore> dataStores) {
         Set<Category> selectedCategories = new HashSet<>();

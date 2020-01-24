@@ -6,7 +6,11 @@ import org.w3c.dom.Document;
 
 import com.onelogin.saml2.util.Util;
 
-public class SAMLParsingUtils {
+public final class SAMLParsingUtils {
+
+    protected SAMLParsingUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(SAMLParsingUtils.class);
 

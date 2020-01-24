@@ -11,7 +11,11 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.core.types.dsl.StringPath;
 
-public class TranslatorUtils {
+public final class TranslatorUtils {
+
+    protected TranslatorUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static String generateAlias(String prefix) {
         return prefix + RandomStringUtils.randomAlphanumeric(8);
     }

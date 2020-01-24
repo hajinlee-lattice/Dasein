@@ -8,7 +8,11 @@ import org.apache.commons.collections4.MapUtils;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 
-public class DataCollectionStatusUtils {
+public final class DataCollectionStatusUtils {
+
+    protected DataCollectionStatusUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static DataCollectionStatus initDateMap(DataCollectionStatus status, Long timestamp) {
         Map<String, Long> dateMap = new HashMap<>();
         dateMap.put(Category.FIRMOGRAPHICS.getName(), timestamp);

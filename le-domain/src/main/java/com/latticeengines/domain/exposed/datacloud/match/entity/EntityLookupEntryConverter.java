@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 /**
  * Class to convert to and from other classes to {@link EntityLookupEntry}
  */
-public class EntityLookupEntryConverter {
+public final class EntityLookupEntryConverter {
+
+    protected EntityLookupEntryConverter() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Create a list of {@link EntityLookupEntry} from {@link MatchKeyTuple}

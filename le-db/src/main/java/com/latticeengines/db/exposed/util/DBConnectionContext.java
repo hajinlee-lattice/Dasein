@@ -5,6 +5,10 @@ import org.slf4j.LoggerFactory;
 
 public final class DBConnectionContext {
 
+    protected DBConnectionContext() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(DBConnectionContext.class);
 
     private static DBConnectionStrategy strategy = new ThreadLocalDBConnectionStrategy();

@@ -15,6 +15,10 @@ import org.apache.avro.reflect.ReflectDatumReader;
 import org.apache.avro.reflect.ReflectDatumWriter;
 
 public final class AvroReflectionUtils {
+
+    protected AvroReflectionUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static <T> GenericRecord toGenericRecord(T entity, Class<T> clazz) {
         return toGenericRecord(entity, ReflectData.get().getSchema(clazz));
     }

@@ -1,6 +1,10 @@
 package com.latticeengines.camille.exposed.paths;
 
 public final class PathConstants {
+
+    protected PathConstants() {
+        throw new UnsupportedOperationException();
+    }
     public static final String PODS = "Pods";
     public static final String INTERFACES = "Interfaces";
     public static final String DATA = "Data";

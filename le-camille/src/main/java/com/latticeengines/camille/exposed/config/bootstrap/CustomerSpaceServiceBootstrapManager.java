@@ -30,7 +30,11 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceU
 import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceServiceScope;
 
-public class CustomerSpaceServiceBootstrapManager {
+public final class CustomerSpaceServiceBootstrapManager {
+
+    protected CustomerSpaceServiceBootstrapManager() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());
 

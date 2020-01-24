@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
-public class DataFlowUtils {
+public final class DataFlowUtils {
+
+    protected DataFlowUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(DataFlowUtils.class);
 
     public static Node extractDomain(Node last, String columnName) {

@@ -6,7 +6,11 @@ import java.util.EnumSet;
  * Exposes different combination of FieldInterpretation collections and its
  * validation configurations without modifying the source enum.
  */
-public class FieldInterpretationCollections {
+public final class FieldInterpretationCollections {
+
+    protected FieldInterpretationCollections() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Matching Field Validation Expression if Fuzzy Matching feature is enabled

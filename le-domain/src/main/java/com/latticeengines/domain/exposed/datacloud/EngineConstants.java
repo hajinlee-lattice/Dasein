@@ -4,6 +4,10 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public final class EngineConstants {
 
+    protected EngineConstants() {
+        throw new UnsupportedOperationException();
+    }
+
     public static final CustomerSpace PRODATA_CUSTOMERSPACE = CustomerSpace
             .parse("PropDataService");
     public static final String SQOOP_CUSTOMER_PATTERN = "PropData~[%s]";

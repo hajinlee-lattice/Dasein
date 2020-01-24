@@ -5,6 +5,10 @@ import com.latticeengines.domain.exposed.BaseProperty;
 
 public class ImportProperty extends BaseProperty {
 
+    protected ImportProperty() {
+        throw new UnsupportedOperationException();
+    }
+
     public static final String TABLE = "table";
     public static final String EAICONFIG = "eaiConfig";
     public static final String IMPORTCTX = "importContext";

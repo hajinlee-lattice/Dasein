@@ -9,6 +9,10 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public final class CategoryUtils {
 
+    protected CategoryUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static List<BusinessEntity> getEntity(Category category) {
         switch (category) {
         case CONTACT_ATTRIBUTES:

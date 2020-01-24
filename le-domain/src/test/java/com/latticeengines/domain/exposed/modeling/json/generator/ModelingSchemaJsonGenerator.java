@@ -17,7 +17,11 @@ import com.latticeengines.domain.exposed.modeling.SamplingConfiguration;
 import com.latticeengines.domain.exposed.modeling.SamplingElement;
 import com.latticeengines.domain.exposed.modeling.algorithm.AlgorithmBase;
 
-public class ModelingSchemaJsonGenerator {
+public final class ModelingSchemaJsonGenerator {
+
+    protected ModelingSchemaJsonGenerator() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void main(String[] args) throws IOException {
         List<Class<?>> classList = Arrays.asList(//

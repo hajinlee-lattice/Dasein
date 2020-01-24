@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.graph;
 
-public class GraphConstants {
+public final class GraphConstants {
+
+    protected GraphConstants() {
+        throw new UnsupportedOperationException();
+    }
     public static final String LABEL_SEP = "::";
     public static final String TENANT = "TENANT";
     public static final String SEGMENT = "Segment";

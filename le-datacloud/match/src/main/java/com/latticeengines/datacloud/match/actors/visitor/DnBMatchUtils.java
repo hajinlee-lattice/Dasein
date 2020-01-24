@@ -10,7 +10,11 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
  * NOTE: Requires knowledge of actors, therefore put in the actor package and not outside, should only be used
  * by actors
  */
-public class DnBMatchUtils {
+public final class DnBMatchUtils {
+
+    protected DnBMatchUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * check whether DnB match result attached in the traveler is from cache

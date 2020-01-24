@@ -7,7 +7,11 @@ import java.util.UUID;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
 
-public class ScoringTestUtils {
+public final class ScoringTestUtils {
+
+    protected ScoringTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Double LIFT_1 = 3.4;
     private static final Double LIFT_2 = 2.4;

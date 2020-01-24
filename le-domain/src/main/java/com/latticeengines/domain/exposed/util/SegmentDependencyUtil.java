@@ -10,7 +10,11 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 
-public class SegmentDependencyUtil {
+public final class SegmentDependencyUtil {
+
+    protected SegmentDependencyUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void findSegmentDependingAttributes(MetadataSegment metadataSegment) {
         Set<AttributeLookup> segmentAttributes = new HashSet<>();

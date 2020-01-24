@@ -8,7 +8,11 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.util.SamlIntegrationRole;
 
-public class IntegrationUserUtils {
+public final class IntegrationUserUtils {
+
+    protected IntegrationUserUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static User buildUserFrom(LoginValidationResponse samlResponse) {
         User user = new User();

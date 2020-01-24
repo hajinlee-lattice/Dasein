@@ -8,7 +8,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 
-public class AvroParquetUtils {
+public final class AvroParquetUtils {
+
+    protected AvroParquetUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final String PARQUET_EXTENSION = ".parquet";
     private static final String AVRO_EXTENSION = ".avro";
     private static final HdfsUtils.HdfsFileFilter AVRO_PARQUET_FILTER = file -> {

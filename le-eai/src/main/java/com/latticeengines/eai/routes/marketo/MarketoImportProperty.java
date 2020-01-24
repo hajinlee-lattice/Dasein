@@ -1,6 +1,10 @@
 package com.latticeengines.eai.routes.marketo;
 
-public class MarketoImportProperty {
+public final class MarketoImportProperty {
+
+    protected MarketoImportProperty() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String CLIENTID = "clientId";
     public static final String CLIENTSECRET = "clientSecret";

@@ -16,7 +16,11 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
-public class ModelSummaryUtils {
+public final class ModelSummaryUtils {
+
+    protected ModelSummaryUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static ModelSummary generateModelSummary(Tenant tenant, String modelSummaryJsonLocalResourcePath)
             throws IOException {

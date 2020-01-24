@@ -48,11 +48,13 @@ public class RatingQueryServiceImplSparkSQLTestNG extends QueryServiceImplTestNG
 
     private static final Logger log = LoggerFactory.getLogger(RatingQueryServiceImplSparkSQLTestNG.class);
 
+    @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
     private final class AccountAttr {
         static final String CompanyName = "CompanyName";
         static final String Intent = "BmbrSurge_AccountOverdrafts_Intent";
     }
 
+    @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
     private final class ContactAttr {
         static final String Occupation = "Occupation";
     }

@@ -26,7 +26,11 @@ import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails.AttrValidation;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 
-public class AttrConfigServiceImplTestUtils {
+public final class AttrConfigServiceImplTestUtils {
+
+    protected AttrConfigServiceImplTestUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImplTestUtils.class);
 
     public static final String[] select = { "attr1", "attr2", "attr3" };

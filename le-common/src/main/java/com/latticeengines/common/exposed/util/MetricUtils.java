@@ -26,7 +26,11 @@ import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 
-public class MetricUtils {
+public final class MetricUtils {
+
+    protected MetricUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(MetricUtils.class);
     public static final String TAG_ENVIRONMENT = "Environment";

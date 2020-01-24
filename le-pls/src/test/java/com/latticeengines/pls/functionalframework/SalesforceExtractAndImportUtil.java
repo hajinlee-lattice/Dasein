@@ -5,7 +5,11 @@ import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class SalesforceExtractAndImportUtil {
+public final class SalesforceExtractAndImportUtil {
+
+    protected SalesforceExtractAndImportUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Table createLead() {
         Table table = new Table();

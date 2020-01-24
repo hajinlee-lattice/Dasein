@@ -11,7 +11,11 @@ import com.latticeengines.domain.exposed.cdl.scheduling.event.Event;
 import com.latticeengines.domain.exposed.cdl.scheduling.event.VerifyEvent;
 import com.latticeengines.domain.exposed.security.TenantType;
 
-public class SchedulingPASummaryUtil {
+public final class SchedulingPASummaryUtil {
+
+    protected SchedulingPASummaryUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(SchedulingPASummaryUtil.class);
 

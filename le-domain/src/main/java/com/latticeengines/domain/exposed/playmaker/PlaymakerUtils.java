@@ -17,7 +17,11 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
-public class PlaymakerUtils {
+public final class PlaymakerUtils {
+
+    protected PlaymakerUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(PlaymakerUtils.class);
 

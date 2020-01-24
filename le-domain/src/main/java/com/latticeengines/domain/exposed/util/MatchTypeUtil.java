@@ -2,7 +2,11 @@ package com.latticeengines.domain.exposed.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class MatchTypeUtil {
+public final class MatchTypeUtil {
+
+    protected MatchTypeUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING = "2.";
 

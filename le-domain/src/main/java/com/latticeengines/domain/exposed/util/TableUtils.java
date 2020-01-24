@@ -16,7 +16,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class TableUtils {
+public final class TableUtils {
+
+    protected TableUtils() {
+        throw new UnsupportedOperationException();
+    }
     public static Table clone(Table source, String name) {
         return clone(source, name, false);
     }

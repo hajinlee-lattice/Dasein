@@ -33,7 +33,11 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.DateBucket;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.DCEncodedAttr;
 import com.latticeengines.domain.exposed.metadata.Extract;
 
-public class BucketEncodeUtils {
+public final class BucketEncodeUtils {
+
+    protected BucketEncodeUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static List<Pair<String, Class<?>>> profileCols() {
         return Arrays.asList( //

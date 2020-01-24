@@ -11,7 +11,11 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.core.types.dsl.StringPath;
 
-public class AttrRepoUtils {
+public final class AttrRepoUtils {
+
+    protected AttrRepoUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static ColumnMetadata getAttribute(AttributeRepository attrRepo, AttributeLookup attributeLookup) {
         ColumnMetadata cm = attrRepo.getColumnMetadata(attributeLookup);

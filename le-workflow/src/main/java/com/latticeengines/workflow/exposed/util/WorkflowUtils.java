@@ -10,7 +10,11 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-public class WorkflowUtils {
+public final class WorkflowUtils {
+
+    protected WorkflowUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowUtils.class);
 
