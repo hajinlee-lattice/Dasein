@@ -1,10 +1,14 @@
 package com.latticeengines.apps.cdl.end2end;
 
+import static com.latticeengines.common.exposed.metric.MetricTags.Test.TAG_TEST_CLASS;
+import static com.latticeengines.common.exposed.metric.MetricTags.Test.TAG_TEST_GROUP;
+import static com.latticeengines.common.exposed.metric.MetricTags.Test.TAG_TEST_METHOD;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +41,9 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -145,6 +151,11 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProx
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
@@ -442,6 +453,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     protected RatingEngine ratingEngine;
 
+    private ThreadLocal<Span> testSpanHolder = new ThreadLocal<>();
+    private ThreadLocal<Scope> testScopeHolder = new ThreadLocal<>();
+
     @BeforeClass(groups = { "end2end", "manual", "precheckin", "deployment", "end2end_with_import" })
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
@@ -461,6 +475,39 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     @AfterClass(groups = { "end2end", "precheckin" })
     protected void cleanup() throws Exception {
         checkpointService.cleanup();
+    }
+
+    @BeforeMethod(groups = "end2end")
+    protected void startTrace(@NotNull Method method) {
+        Tracer tracer = GlobalTracer.get();
+        Class<?> clz = method.getDeclaringClass();
+        log.info("Starting trace for test {}#{}", clz.getSimpleName(), method.getName());
+        Span testSpan = tracer.buildSpan(String.format("e2e-%s#%s", clz.getSimpleName(), method.getName()))
+                .withTag(TAG_TEST_GROUP, "end2end") //
+                .withTag(TAG_TEST_CLASS, clz.getSimpleName()) //
+                .withTag(TAG_TEST_METHOD, method.getName()) //
+                .start();
+        // testing baggage item
+        testSpan.setBaggageItem("testTenant", mainCustomerSpace);
+        testSpanHolder.set(testSpan);
+
+        // activate so that it will be propagated
+        Scope testScope = tracer.activateSpan(testSpan);
+        testScopeHolder.set(testScope);
+    }
+
+    @AfterMethod(groups = "end2end")
+    protected void endTrace(@NotNull Method method) {
+        Class<?> clz = method.getDeclaringClass();
+        log.info("Finishing trace for test {}#{}", clz.getSimpleName(), method.getName());
+        if (testScopeHolder.get() != null) {
+            testScopeHolder.get().close();
+            testScopeHolder.remove();
+        }
+        if (testSpanHolder.get() != null) {
+            testSpanHolder.get().finish();
+            testSpanHolder.remove();
+        }
     }
 
     protected void setupEnd2EndTestEnvironment() throws Exception {

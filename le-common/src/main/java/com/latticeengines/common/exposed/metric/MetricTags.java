@@ -52,6 +52,4 @@ public final class MetricTags {
         // generic tags, add more as needed
         public static final String TAG_GENERIC = "Tag%02d";
     }
-
-
 }
