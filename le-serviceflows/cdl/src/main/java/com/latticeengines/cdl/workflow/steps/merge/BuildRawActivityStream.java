@@ -2,14 +2,11 @@ package com.latticeengines.cdl.workflow.steps.merge;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -17,10 +14,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
-import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(BuildRawActivityStream.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -37,9 +36,10 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
     // streamId -> matched raw stream import table (in rematch, this means new
     // import + batch store)
     private Map<String, String> matchedStreamImportTables;
-    // streamId -> table prefix of raw streams processed by transformation request
-    private final Map<String, String> rawStreamTablePrefixes = new HashMap<>();
+
     private long paTimestamp;
+
+    private Map<String, String> updatedRawStreamTables;
 
     @Override
     protected void initializeConfiguration() {
@@ -50,6 +50,10 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
 
         matchedStreamImportTables = getMatchedStreamImportTables();
         log.info("Matched raw stream import tables = {}", matchedStreamImportTables);
+        if (softDeleteEntities.containsKey(entity)) {
+            log.info("Soft delete performed for Activity Stream");
+            updatedRawStreamTables = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
+        }
     }
 
     @Override
@@ -105,23 +109,17 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         return getMapObjectFromContext(ENTITY_MATCH_STREAM_TARGETTABLE, String.class, String.class);
     }
 
-    private Map<String, String> buildRawStreamBatchStore() {
-        // tables in current active version will be processed since we need to drop old
-        // data even if no import, so all tables will be included in prefix
-        if (MapUtils.isEmpty(rawStreamTablePrefixes)) {
-            // no import and no existing batch store
-            return Collections.emptyMap();
+    @Override
+    protected String getRawStreamActiveTable(@NotNull String streamId, @NotNull AtlasStream stream) {
+        if (MapUtils.isEmpty(updatedRawStreamTables) || !updatedRawStreamTables.containsKey(streamId)) {
+            return super.getRawStreamActiveTable(streamId, stream);
+        } else {
+            DataFeedTask.IngestionBehavior behavior = stream.getDataFeedTaskIngestionBehavior();
+            String activeTable = updatedRawStreamTables.get(streamId);
+            if (shouldReturnEmpty(streamId, behavior, activeTable)) {
+                return null;
+            }
+            return activeTable;
         }
-        Map<String, String> rawStreamTableNames = rawStreamTablePrefixes.entrySet() //
-                .stream() //
-                .map(entry -> Pair.of(entry.getKey(), TableUtils.getFullTableName(entry.getValue(), pipelineVersion))) //
-                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
-
-        log.info("Building raw stream tables, tables={}, pipelineVersion={}", rawStreamTableNames, pipelineVersion);
-
-        // link all tables and use streamId as signature
-        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), rawStreamTableNames, batchStore,
-                inactive);
-        return rawStreamTableNames;
     }
 }

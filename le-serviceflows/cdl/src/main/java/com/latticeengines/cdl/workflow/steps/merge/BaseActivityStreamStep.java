@@ -3,10 +3,14 @@ package com.latticeengines.cdl.workflow.steps.merge;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_APPEND_RAWSTREAM;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -20,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
+import com.latticeengines.domain.exposed.util.TableUtils;
 
 /**
  * Base class for {@link AtlasStream} processing
@@ -30,24 +35,34 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
     private static final Logger log = LoggerFactory.getLogger(BaseActivityStreamStep.class);
     private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
 
+    // streamId -> table prefix of raw streams processed by transformation request
+    protected final Map<String, String> rawStreamTablePrefixes = new HashMap<>();
+
     /*
      * Retrieve effective activity stream batch store in active version, based on
      * stream setting and PA mode
      */
-    String getRawStreamActiveTable(@NotNull String streamId, @NotNull AtlasStream stream) {
+    protected String getRawStreamActiveTable(@NotNull String streamId, @NotNull AtlasStream stream) {
         DataFeedTask.IngestionBehavior behavior = stream.getDataFeedTaskIngestionBehavior();
         String activeTable = configuration.getActiveRawStreamTables().get(streamId);
         // ignore active table in replace mode or stream has replace ingestion behavior
-        if (configuration.isReplaceMode()) {
+        if (shouldReturnEmpty(streamId, behavior, activeTable)) {
             return null;
+        }
+        return activeTable;
+    }
+
+    protected boolean shouldReturnEmpty(@NotNull String streamId, DataFeedTask.IngestionBehavior behavior, String activeTable) {
+        if (configuration.isReplaceMode()) {
+            return true;
         } else if (behavior == DataFeedTask.IngestionBehavior.Replace) {
             log.info("Stream {} has ingestion behavior replace, ignore active table {}", streamId, activeTable);
-            return null;
+            return true;
         } else if (behavior != DataFeedTask.IngestionBehavior.Append) {
             String msg = String.format("Ingestion behavior %s for stream %s is not supported", behavior, streamId);
             throw new UnsupportedOperationException(msg);
         }
-        return activeTable;
+        return false;
     }
 
     /**
@@ -171,6 +186,26 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
             }
             return null;
         };
+    }
+
+    protected Map<String, String> buildRawStreamBatchStore() {
+        // tables in current active version will be processed since we need to drop old
+        // data even if no import, so all tables will be included in prefix
+        if (MapUtils.isEmpty(rawStreamTablePrefixes)) {
+            // no import and no existing batch store
+            return Collections.emptyMap();
+        }
+        Map<String, String> rawStreamTableNames = rawStreamTablePrefixes.entrySet() //
+                .stream() //
+                .map(entry -> Pair.of(entry.getKey(), TableUtils.getFullTableName(entry.getValue(), pipelineVersion))) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+
+        log.info("Building raw stream tables, tables={}, pipelineVersion={}", rawStreamTableNames, pipelineVersion);
+
+        // link all tables and use streamId as signature
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), rawStreamTableNames, batchStore,
+                inactive);
+        return rawStreamTableNames;
     }
 
     /*-
