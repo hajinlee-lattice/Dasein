@@ -56,12 +56,12 @@ public class SoftDeleteActivityStoreDeploymentTestNG extends ProcessActivityStor
         super.test();
         registerDeleteData();
 
-//        if (isLocalEnvironment()) {
+        if (isLocalEnvironment()) {
             // run PA with fake current time
             processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
-//        } else {
-//            runTestWithRetry(getCandidateFailingSteps(), CURRENT_PA_TIME.toEpochMilli());
-//        }
+        } else {
+            runTestWithRetry(getCandidateFailingSteps(), CURRENT_PA_TIME.toEpochMilli());
+        }
 
         verifyAfterPA();
     }
