@@ -3,7 +3,9 @@ package com.latticeengines.cdl.workflow.steps.play;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -17,7 +19,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.dynamodbv2.document.Item;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -30,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.ExternalSystemAuthentication;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportFilesToS3Configuration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataIntegrationMonitoringProxy;
@@ -46,11 +51,22 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     private String CSV = "csv";
 
+    private static final String CDL_DATA_INTEGRATION_END_POINT = "/cdl/dataintegration";
+
     @Value("${cdl.atlas.export.dropfolder.tag}")
     private String expire30dTag;
 
     @Value("${cdl.atlas.export.dropfolder.tag.value}")
     private String expire30dTagValue;
+
+    @Value("${common.microservice.url}")
+    private String microserviceHostPort;
+
+    @Value("cdl.campaign.integration.session.context.dynamo.table")
+    private String integrationSessionContextTable;
+
+    @Value("cdl.campaign.integration.session.context.ttl")
+    private Long sessionContextTTL;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -60,6 +76,9 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private DynamoItemService dynamoItemService;
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
@@ -99,7 +118,7 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
 
     }
 
-    public void registerAndPublishExportRequest() {
+    private void registerAndPublishExportRequest() {
         PlayLaunchExportFilesToS3Configuration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
         String playLaunchId = config.getPlayLaunchId();
@@ -137,6 +156,24 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
         super.execute();
         tagCreatedS3Objects();
         registerAndPublishExportRequest();
+        publishSessionContext();
+    }
+
+    private void publishSessionContext() {
+        String workflowRequestId = getStringValueFromContext(
+                DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID);
+        log.info(String.format("Publish to DynamoDB %s with workflowRequestId %s and Url %s",
+                integrationSessionContextTable, workflowRequestId,
+                microserviceHostPort + CDL_DATA_INTEGRATION_END_POINT));
+        dynamoItemService.putItem(integrationSessionContextTable, getItem(workflowRequestId));
+    }
+
+    private Item getItem(String workflowRequestId) {
+        Map<String, Object> session = new HashMap<String, Object>();
+        session.put("Url", microserviceHostPort + CDL_DATA_INTEGRATION_END_POINT);
+        session.put("Mapping", "");
+        return new Item().withPrimaryKey("WorkflowId", workflowRequestId)
+                .withLong("TTL", System.currentTimeMillis() + sessionContextTTL).withMap("Session", session);
     }
 
     private void tagCreatedS3Objects() {
