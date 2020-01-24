@@ -312,4 +312,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace)));
         return get("get all attribute quota limit", url, AttributeLimit.class);
     }
+
+    public List<String> getTemplatesBySystemPriority(String customerSpace, String entity) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/tasks/{entity}/getTemplatesBySystemPriority",
+                shortenCustomerSpace(customerSpace), entity);
+        List<?> res = get("getTemplatesBySystemPriority", url, List.class);
+        return JsonUtils.convertList(res, String.class);
+    }
 }
