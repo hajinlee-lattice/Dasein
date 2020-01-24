@@ -19,7 +19,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.dynamodbv2.document.Item;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -49,11 +51,22 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     private static final String CSV = "csv";
 
+    private static final String CDL_DATA_INTEGRATION_END_POINT = "/cdl/dataintegration";
+
     @Value("${cdl.atlas.export.dropfolder.tag}")
     private String expire30dTag;
 
     @Value("${cdl.atlas.export.dropfolder.tag.value}")
     private String expire30dTagValue;
+
+    @Value("${common.microservice.url}")
+    private String microserviceHostPort;
+
+    @Value("cdl.campaign.integration.session.context.dynamo.table")
+    private String integrationSessionContextTable;
+
+    @Value("cdl.campaign.integration.session.context.ttl")
+    private long sessionContextTTL;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -63,6 +76,9 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     @Inject
     private S3Service s3Service;
+
+    @Inject
+    private DynamoItemService dynamoItemService;
 
     private boolean createAddCsvDataFrame;
 
@@ -132,7 +148,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     }
 
-    public void registerAndPublishExportRequest() {
+    private void registerAndPublishExportRequest() {
         DeltaCampaignLaunchExportFilesToS3Configuration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
         String playLaunchId = config.getPlayLaunchId();
@@ -179,6 +195,25 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         super.execute();
         tagCreatedS3Objects();
         registerAndPublishExportRequest();
+        publishSessionContext();
+    }
+
+    private void publishSessionContext() {
+        String workflowRequestId = getStringValueFromContext(
+                DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID);
+        log.info(String.format("Publish to DynamoDB %s with workflowRequestId %s and Url %s",
+                integrationSessionContextTable, workflowRequestId,
+                microserviceHostPort + CDL_DATA_INTEGRATION_END_POINT));
+        dynamoItemService.putItem(integrationSessionContextTable, getItem(workflowRequestId));
+    }
+
+    private Item getItem(String workflowRequestId) {
+        Map<String, Object> session = new HashMap<String, Object>();
+        session.put("Url", microserviceHostPort + CDL_DATA_INTEGRATION_END_POINT);
+        session.put("Mapping", "");
+        return new Item().withPrimaryKey("WorkflowId", workflowRequestId)
+                .withLong("TTL", System.currentTimeMillis() + sessionContextTTL)
+                .withString("Session", JsonUtils.serialize(session));
     }
 
     private void tagCreatedS3Objects() {
