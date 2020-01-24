@@ -7,7 +7,11 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
  * it. But it could be used in any dataflow. So put in the package not specific
  * to DataCloud
  */
-public class OperationMessage {
+public final class OperationMessage {
+
+    protected OperationMessage() {
+        throw new UnsupportedOperationException();
+    }
     // Commonly shared message
     public static final String HAS_DUNS = "Has Duns";
     public static final String HAS_DU_DUNS = "Has DuDuns";

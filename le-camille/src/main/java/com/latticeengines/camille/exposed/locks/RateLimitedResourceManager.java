@@ -18,7 +18,11 @@ import com.latticeengines.domain.exposed.camille.locks.RateLimitDefinition;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitingStatus;
 
-public class RateLimitedResourceManager {
+public final class RateLimitedResourceManager {
+
+    protected RateLimitedResourceManager() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String LOCK_NAME_PREFIX = "Resource_";
     private static final Logger log = LoggerFactory.getLogger(RateLimitedResourceManager.class);

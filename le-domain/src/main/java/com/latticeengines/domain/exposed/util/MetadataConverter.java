@@ -31,7 +31,11 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
-public class MetadataConverter {
+public final class MetadataConverter {
+
+    protected MetadataConverter() {
+        throw new UnsupportedOperationException();
+    }
     private static Set<Schema.Type> supportedAvroTypes = new HashSet<Schema.Type>();
 
     static {

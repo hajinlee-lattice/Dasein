@@ -8,7 +8,11 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
-public class PhoneNumberUtils {
+public final class PhoneNumberUtils {
+
+    protected PhoneNumberUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(PhoneNumberUtils.class);
     public static String getStandardPhoneNumber(String phoneNumber, String countryCode) {
         phoneNumber = LocationStringStandardizationUtils.getStandardString(phoneNumber);

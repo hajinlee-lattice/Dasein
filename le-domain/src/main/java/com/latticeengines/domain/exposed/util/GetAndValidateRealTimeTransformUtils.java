@@ -8,7 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
-public class GetAndValidateRealTimeTransformUtils {
+public final class GetAndValidateRealTimeTransformUtils {
+
+    protected GetAndValidateRealTimeTransformUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory
             .getLogger(GetAndValidateRealTimeTransformUtils.class);

@@ -1,6 +1,10 @@
 package com.latticeengines.datacloud.match.service.impl;
 
-class MatchOutputStandardizer {
+final class MatchOutputStandardizer {
+
+    protected MatchOutputStandardizer() {
+        throw new UnsupportedOperationException();
+    }
     static Object cleanNewlineCharacters(Object value) {
         Object result;
 

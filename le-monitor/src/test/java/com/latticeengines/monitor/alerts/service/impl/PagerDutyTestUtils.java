@@ -5,7 +5,11 @@ import static org.testng.Assert.assertEquals;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-class PagerDutyTestUtils {
+final class PagerDutyTestUtils {
+
+    protected PagerDutyTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     static void confirmPagerDutyIncident(String result) {
         try {

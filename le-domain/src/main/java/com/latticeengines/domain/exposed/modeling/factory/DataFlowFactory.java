@@ -13,7 +13,11 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardAttributesParameters;
 
-public class DataFlowFactory {
+public final class DataFlowFactory {
+
+    protected DataFlowFactory() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String DATAFLOW_NAME_KEY = "dataflow.name";
     public static final String DATAFLOW_MATCH_KEY = "dataflow.match";

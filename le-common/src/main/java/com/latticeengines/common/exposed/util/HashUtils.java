@@ -6,6 +6,10 @@ import java.security.NoSuchAlgorithmException;
 
 public final class HashUtils {
 
+    protected HashUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static String getShortHash(String str) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

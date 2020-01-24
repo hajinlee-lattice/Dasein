@@ -10,7 +10,11 @@ import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
-public class QueryServiceUtils {
+public final class QueryServiceUtils {
+
+    protected QueryServiceUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static boolean localAttrRepoMode = false;
     private static AttributeRepository attrRepo;

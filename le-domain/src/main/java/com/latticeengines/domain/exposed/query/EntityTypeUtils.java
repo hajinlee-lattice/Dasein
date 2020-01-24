@@ -10,7 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 
-public class EntityTypeUtils {
+public final class EntityTypeUtils {
+
+    protected EntityTypeUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String FEEDTYPE_PATTERN = "([A-Za-z0-9_()\\[\\]]+)_(%s)";
     private static final String FULL_FEEDTYPE = "%s_%s";

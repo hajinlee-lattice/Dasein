@@ -5,6 +5,10 @@ import java.util.Map;
 
 public final class JobStepDisplayInfoMapping {
 
+    protected JobStepDisplayInfoMapping() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final String[] FIT_MODEL_STEPS = { //
             "load_data", //
             "load_data", //

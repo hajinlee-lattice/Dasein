@@ -8,7 +8,11 @@ package com.latticeengines.datacloud.core.source;
  * IMPORTANT NOTE: New constants could be added but values should not be
  * changed once created
  */
-public class IngestionNames {
+public final class IngestionNames {
+
+    protected IngestionNames() {
+        throw new UnsupportedOperationException();
+    }
     public static final String BOMBORA_FIREHOSE = "BomboraFirehose";
     public static final String CACHESEED_CSVGZ = "CacheSeedCsvGz";
     public static final String DNB_CASHESEED = "DnBCacheSeed";

@@ -30,7 +30,12 @@ import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.dataflow.BooleanType;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-public class PivotUtils {
+public final class PivotUtils {
+
+    protected PivotUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final String ESCAPED_COMMA = "{{COMMA}}";
     private static ObjectMapper objectMapper = new ObjectMapper();
 

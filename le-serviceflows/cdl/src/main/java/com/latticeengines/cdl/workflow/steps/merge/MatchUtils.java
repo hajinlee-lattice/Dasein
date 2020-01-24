@@ -29,6 +29,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public final class MatchUtils {
 
+    protected MatchUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(MatchUtils.class);
 
     static String getLegacyMatchConfigForAccount(String customer, MatchInput baseMatchInput, Set<String> columnNames) {

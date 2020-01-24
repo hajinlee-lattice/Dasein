@@ -28,7 +28,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 import reactor.core.publisher.Flux;
 
-public class SegmentExportUtil {
+public final class SegmentExportUtil {
+
+    protected SegmentExportUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportUtil.class);
 

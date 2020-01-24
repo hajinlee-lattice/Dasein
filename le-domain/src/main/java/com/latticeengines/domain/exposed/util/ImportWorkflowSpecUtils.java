@@ -18,7 +18,11 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 
-public class ImportWorkflowSpecUtils {
+public final class ImportWorkflowSpecUtils {
+
+    protected ImportWorkflowSpecUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowSpecUtils.class);
 
     protected static final String AVRO_FIELD_NAME_PREFIX = "avro_";

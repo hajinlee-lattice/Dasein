@@ -10,6 +10,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 public final class MultiTenantContext {
 
+    protected MultiTenantContext() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(MultiTenantContext.class);
 
     private static MultiTenantContextStrategy strategy = new ThreadLocalMultiTenantContextStrategy();

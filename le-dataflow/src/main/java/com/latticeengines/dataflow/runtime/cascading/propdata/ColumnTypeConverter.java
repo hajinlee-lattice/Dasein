@@ -6,7 +6,11 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import cascading.tuple.coerce.Coercions;
 import cascading.tuple.coerce.Coercions.Coerce;
 
-public class ColumnTypeConverter {
+public final class ColumnTypeConverter {
+
+    protected ColumnTypeConverter() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final String MAX = "MAX";
     private static final String FLOAT = "FLOAT";

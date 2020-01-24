@@ -4,7 +4,11 @@ import java.util.function.Predicate;
 
 import springfox.documentation.RequestHandler;
 
-public class SwaggerUtils {
+public final class SwaggerUtils {
+
+    protected SwaggerUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Predicate<RequestHandler> getApiSelector(final String ... classCanonicalNameRegex) {
         return requestHandler -> {

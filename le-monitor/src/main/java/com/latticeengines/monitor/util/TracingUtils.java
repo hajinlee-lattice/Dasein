@@ -18,7 +18,11 @@ import io.opentracing.util.GlobalTracer;
 /**
  * Util functions for distributed tracing
  */
-public class TracingUtils {
+public final class TracingUtils {
+
+    protected TracingUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void finish(Span span) {
         if (span != null) {

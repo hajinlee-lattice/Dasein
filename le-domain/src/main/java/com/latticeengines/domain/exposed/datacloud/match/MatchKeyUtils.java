@@ -23,7 +23,11 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
-public class MatchKeyUtils {
+public final class MatchKeyUtils {
+
+    protected MatchKeyUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Map MatchKey to field names in AccountMaster

@@ -16,7 +16,11 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
-public class DiagnoseTable {
+public final class DiagnoseTable {
+
+    protected DiagnoseTable() {
+        throw new UnsupportedOperationException();
+    }
 
     public static ImportTemplateDiagnostic diagnostic(String customerSpaceStr, Table table, BusinessEntity businessEntity,
                                                       BatonService batonService) {

@@ -12,7 +12,11 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 
-public class TestDataGenerator {
+public final class TestDataGenerator {
+
+    protected TestDataGenerator() {
+        throw new UnsupportedOperationException();
+    }
     public static final String TEST_SUB_CATEGORY = "TestSubCateghory";
     private static final String INTERNAL_ATTR_PREFIX = "InternalAttr_";
     public static final String EXTERNAL_ATTR_PREFIX = "ExternalAttr_";

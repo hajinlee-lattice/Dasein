@@ -22,11 +22,13 @@ import com.latticeengines.objectapi.service.EntityQueryService;
  */
 public class DateAttrsQueryTestNG extends QueryServiceImplTestNGBase {
 
+    @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
     private final class AccountAttr {
         static final String TestDate1 = "user_TestDate_DD_MMM_YYYY_00_00_0024H__8H";
         static final String TestDate2 = "user_TestDate_Column_dd_mmm_yyyy_withoutDate";
     }
 
+    @SuppressWarnings("checkstyle:HideUtilityClassConstructor")
     private final class ContactAttr {
         static final String TestDate1 = "user_TestDate_Column_dd_mmm_yyyy_withoutDate";
         static final String TestDate2 = "user_Created_Date_mm_dd_yyyy_hh_mm_ss_12h";

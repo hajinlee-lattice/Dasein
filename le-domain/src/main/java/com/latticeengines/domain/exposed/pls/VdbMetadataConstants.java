@@ -6,6 +6,10 @@ import java.util.Map;
 
 public final class VdbMetadataConstants {
 
+    protected VdbMetadataConstants() {
+        throw new UnsupportedOperationException();
+    }
+
     public static final String MODELING_QUERY_NAME = "Q_PLS_Modeling";
     public static final String CUSTOM_QUERY_NAME = "Q_Metadata_Custom";
 

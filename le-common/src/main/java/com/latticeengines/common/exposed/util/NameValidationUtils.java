@@ -3,7 +3,11 @@ package com.latticeengines.common.exposed.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NameValidationUtils {
+public final class NameValidationUtils {
+
+    protected NameValidationUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static boolean validateModelName(String modelName) {
         Pattern pattern = Pattern.compile("[\\w-]+");

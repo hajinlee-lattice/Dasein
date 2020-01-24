@@ -28,7 +28,11 @@ import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceI
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceUpgrader;
 import com.latticeengines.domain.exposed.camille.bootstrap.ServiceInstaller;
 
-public class BootstrapUtil {
+public final class BootstrapUtil {
+
+    protected BootstrapUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static String hostname = "unknown";
 

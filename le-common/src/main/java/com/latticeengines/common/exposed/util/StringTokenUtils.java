@@ -7,7 +7,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-public class StringTokenUtils {
+public final class StringTokenUtils {
+
+    protected StringTokenUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * convert a List to String with comma-separated values

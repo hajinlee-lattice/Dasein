@@ -31,9 +31,13 @@ import com.latticeengines.domain.exposed.pmml.LEImportFilter;
 import com.latticeengines.domain.exposed.pmml.PmmlField;
 import com.latticeengines.domain.exposed.pmml.SkipFilter;
 
-public class PmmlModelUtils {
+public final class PmmlModelUtils {
 
-    public static final Map<DataType, Object> dataTypeValueMap = new HashMap<>();
+    protected PmmlModelUtils() {
+        throw new UnsupportedOperationException();
+    }
+
+    private static final Map<DataType, Object> dataTypeValueMap = new HashMap<>();
 
     static {
         for (DataType dataType : DataType.values()) {
@@ -96,7 +100,7 @@ public class PmmlModelUtils {
 
     }
 
-    public static final List<PmmlField> getPmmlFields(PMML pmml) {
+    public static List<PmmlField> getPmmlFields(PMML pmml) {
         Map<String, DataField> dataFields = getDataFields(pmml);
         Model model = pmml.getModels().get(0);
         List<MiningField> miningFields = model.getMiningSchema().getMiningFields();
@@ -115,7 +119,7 @@ public class PmmlModelUtils {
         return pmmlFields;
     }
 
-    public static final List<PmmlField> getPmmlFields(InputStream pmmlStream) throws Exception {
+    public static List<PmmlField> getPmmlFields(InputStream pmmlStream) throws Exception {
         PMML pmml = getPMML(pmmlStream);
         return getPmmlFields(pmml);
     }
@@ -135,7 +139,7 @@ public class PmmlModelUtils {
         return pmml;
     }
 
-    public static PMML getPMML(InputStream pmmlStream) throws Exception {
+    private static PMML getPMML(InputStream pmmlStream) throws Exception {
         return getPMML(pmmlStream, true);
     }
 
@@ -166,7 +170,7 @@ public class PmmlModelUtils {
         return map;
     }
 
-    public static List<MiningField> getMiningFields(Model model) {
+    private static List<MiningField> getMiningFields(Model model) {
         MiningSchema miningSchema = model.getMiningSchema();
         return miningSchema.getMiningFields();
     }
@@ -233,7 +237,7 @@ public class PmmlModelUtils {
         }
     }
 
-    public static Map<FieldName, DataField> getFieldNameDataFieldMap(
+    private static Map<FieldName, DataField> getFieldNameDataFieldMap(
             DataDictionary dataDictionary) {
         Map<FieldName, DataField> map = new HashMap<>();
         for (DataField dataField : dataDictionary.getDataFields()) {

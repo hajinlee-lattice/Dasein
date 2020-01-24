@@ -9,7 +9,11 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 
-public class TransformationPipeline {
+public final class TransformationPipeline {
+
+    protected TransformationPipeline() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String PACKAGE_NAME = "com.latticeengines.transform.v2_0_25.functions";
 

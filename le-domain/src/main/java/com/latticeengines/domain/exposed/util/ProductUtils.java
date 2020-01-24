@@ -32,7 +32,11 @@ import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class ProductUtils {
+public final class ProductUtils {
+
+    protected ProductUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(ProductUtils.class);
     private static String FILE_NAME = "Products.avro";
 

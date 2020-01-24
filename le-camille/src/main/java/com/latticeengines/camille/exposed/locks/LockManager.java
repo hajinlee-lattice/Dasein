@@ -16,7 +16,11 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 
-public class LockManager {
+public final class LockManager {
+
+    protected LockManager() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final ConcurrentMap<String, InterProcessReadWriteLock> locks = new ConcurrentHashMap<>();
     private static final Logger log = LoggerFactory.getLogger(LockManager.class);

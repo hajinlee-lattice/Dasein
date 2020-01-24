@@ -7,7 +7,11 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 
-public class EaiJobUtil {
+public final class EaiJobUtil {
+
+    protected EaiJobUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static List<String> getCacheFiles(Configuration yarnConfiguration, String currentVersionInStack)
             throws IOException {

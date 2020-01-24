@@ -12,6 +12,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 public final class NamingUtils {
 
+    protected NamingUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("_yyyy_MM_dd_HH_mm_ss_z");
     private static final SimpleDateFormat DATE_FORMAT_MILLS = new SimpleDateFormat("_yyyy_MM_dd_HH_mm_ss_SSS_z");
 

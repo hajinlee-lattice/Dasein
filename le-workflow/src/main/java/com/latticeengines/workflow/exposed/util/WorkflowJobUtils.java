@@ -44,7 +44,11 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 
-public class WorkflowJobUtils {
+public final class WorkflowJobUtils {
+
+    protected WorkflowJobUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobUtils.class);
 

@@ -2,7 +2,11 @@ package com.latticeengines.apps.cdl.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class S3ImportMessageUtils {
+public final class S3ImportMessageUtils {
+
+    protected S3ImportMessageUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static String FEED_TYPE_PATTERN = "%s_%s";
 

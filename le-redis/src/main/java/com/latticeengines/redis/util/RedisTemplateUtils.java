@@ -18,7 +18,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.lettuce.core.RedisURI;
 
-public class RedisTemplateUtils {
+public final class RedisTemplateUtils {
+
+    protected RedisTemplateUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static RedisTemplate<String, Object> createRedisTemplate(boolean localRedis, int timeout,
                                                                     String redisEndpoint) {

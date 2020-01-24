@@ -37,7 +37,11 @@ import org.slf4j.LoggerFactory;
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
 
-public class TimeStampConvertUtils {
+public final class TimeStampConvertUtils {
+
+    protected TimeStampConvertUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(TimeStampConvertUtils.class);
 
     // Boolean flag to disable debug logging in this class.  log.isDebugEnabled() was not working properly when tested

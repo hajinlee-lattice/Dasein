@@ -2,7 +2,11 @@ package com.latticeengines.domain.exposed.eai;
 
 import com.latticeengines.domain.exposed.BaseProperty;
 
-public class ExportProperty extends BaseProperty {
+public final class ExportProperty extends BaseProperty {
+
+    protected ExportProperty() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String TARGET_FILE_NAME = "targetFileName";
 

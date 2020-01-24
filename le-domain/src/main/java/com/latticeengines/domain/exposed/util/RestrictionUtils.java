@@ -43,7 +43,11 @@ import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
-public class RestrictionUtils {
+public final class RestrictionUtils {
+
+    protected RestrictionUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(RestrictionUtils.class);
 

@@ -8,7 +8,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HadoopConfigurationUtils {
+public final class HadoopConfigurationUtils {
+
+    protected HadoopConfigurationUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(HadoopConfigurationUtils.class);
 

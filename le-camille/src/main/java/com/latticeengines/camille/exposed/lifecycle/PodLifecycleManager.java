@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.PodProperties;
 
-public class PodLifecycleManager {
+public final class PodLifecycleManager {
+
+    protected PodLifecycleManager() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(new Object() {
     }.getClass().getEnclosingClass());

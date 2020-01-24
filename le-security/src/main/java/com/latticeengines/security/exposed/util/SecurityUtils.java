@@ -14,6 +14,10 @@ import com.latticeengines.security.exposed.service.UserService;
 
 public final class SecurityUtils {
 
+    protected SecurityUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static Tenant getTenantFromRequest(HttpServletRequest request,
                                               SessionService sessionService) {
         Session session = getSessionFromRequest(request, sessionService);

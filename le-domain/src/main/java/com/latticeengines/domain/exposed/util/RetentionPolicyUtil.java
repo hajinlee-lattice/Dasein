@@ -7,7 +7,11 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
 import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 
-public class RetentionPolicyUtil {
+public final class RetentionPolicyUtil {
+
+    protected RetentionPolicyUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static String NEVER_EXPIRE_POLICY = "KEEP_FOREVER";
 

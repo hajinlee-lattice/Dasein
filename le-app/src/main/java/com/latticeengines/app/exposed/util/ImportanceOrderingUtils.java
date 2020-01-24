@@ -10,7 +10,11 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 
 import reactor.core.publisher.Flux;
 
-public class ImportanceOrderingUtils {
+public final class ImportanceOrderingUtils {
+
+    protected ImportanceOrderingUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Map<String, Integer> FIRMOGRAPHIC_ORDERING = new ImmutableMap.Builder<String, Integer>()
             .put("LDC_PrimaryIndustry", 100) //

@@ -10,6 +10,10 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public final class DataCloudConstants {
 
+    protected DataCloudConstants() {
+        throw new UnsupportedOperationException();
+    }
+
     public static final String SERVICE_TENANT = "DataCloudService";
     public static final String SERVICE_CUSTOMERSPACE = CustomerSpace.parse(SERVICE_TENANT)
             .toString();

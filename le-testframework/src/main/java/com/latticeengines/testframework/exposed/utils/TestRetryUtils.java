@@ -7,7 +7,11 @@ import org.springframework.retry.support.RetryTemplate;
 
 import com.latticeengines.common.exposed.util.RetryUtils;
 
-public class TestRetryUtils {
+public final class TestRetryUtils {
+
+    protected TestRetryUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static <T> T retryForAssertionError(Callable<T> callable) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(5, //

@@ -14,7 +14,11 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class ExtractUtils {
+public final class ExtractUtils {
+
+    protected ExtractUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(ExtractUtils.class);
 
     /*-

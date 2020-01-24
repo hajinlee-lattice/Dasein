@@ -18,7 +18,11 @@ import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 
-public class MetricTranslator {
+public final class MetricTranslator {
+
+    protected MetricTranslator() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Restriction convert(BucketRestriction bucketRestriction, boolean useDepivotedTable) {
         if (bucketRestriction.getBkt().getChange() != null) {

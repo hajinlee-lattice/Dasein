@@ -20,7 +20,11 @@ import com.latticeengines.domain.exposed.datafabric.DynamoRangeKey;
 import com.latticeengines.domain.exposed.datafabric.DynamoStampKey;
 import com.latticeengines.domain.exposed.datafabric.TimeSeriesFabricEntity;
 
-public class DynamoUtil {
+public final class DynamoUtil {
+
+    protected DynamoUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String KEYS = "DYNAMOKEYS";
     public static final String ATTRIBUTES = "DYNAMOATTRIBUTES";

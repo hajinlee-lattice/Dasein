@@ -11,7 +11,11 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
-public class EntityExportUtils {
+public final class EntityExportUtils {
+
+    protected EntityExportUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void checkExportAttribute(AtlasExportType exportType, String customerSpace,
                                             DataCollection.Version version, ServingStoreService servingStoreService) {

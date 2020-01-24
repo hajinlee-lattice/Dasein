@@ -32,7 +32,11 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntr
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class TestEntityMatchUtils {
+public final class TestEntityMatchUtils {
+
+    protected TestEntityMatchUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /*
      * default testing variables

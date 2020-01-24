@@ -15,6 +15,10 @@ import freemarker.template.Version;
 
 public final class TemplateUtils {
 
+    protected TemplateUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static Configuration cfg;
 
     public static String renderByJson(String template, JsonNode params) {

@@ -22,7 +22,11 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class MatchHistoryUtils {
+public final class MatchHistoryUtils {
+
+    protected MatchHistoryUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(MatchHistoryUtils.class);
 
     private enum PreferredIdOutcome {

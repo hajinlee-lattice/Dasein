@@ -19,7 +19,11 @@ import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelComma
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandParameter;
 import com.latticeengines.domain.exposed.dataplatform.dlorchestration.ModelCommandStatus;
 
-public class ModelingServiceTestUtils {
+public final class ModelingServiceTestUtils {
+
+    protected ModelingServiceTestUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final int NUM_SAMPLES = 1;
 

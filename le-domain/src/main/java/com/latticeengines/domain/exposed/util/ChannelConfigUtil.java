@@ -10,7 +10,11 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 
-public class ChannelConfigUtil {
+public final class ChannelConfigUtil {
+
+    protected ChannelConfigUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ChannelConfigUtil.class);
 

@@ -15,7 +15,11 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 
-public class ErrorUtils {
+public final class ErrorUtils {
+
+    protected ErrorUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ErrorUtils.class);
 

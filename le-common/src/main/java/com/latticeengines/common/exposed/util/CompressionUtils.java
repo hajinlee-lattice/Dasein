@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory;
 
 public final class CompressionUtils {
 
+    protected CompressionUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Logger log = LoggerFactory.getLogger(CompressionUtils.class);
 
     public static byte[] decompressByteArray(final byte[] input) {

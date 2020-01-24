@@ -5,7 +5,11 @@ import java.io.StringWriter;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JsonUtils {
+public final class JsonUtils {
+
+    protected JsonUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static <T> String serialize(T object) {
         if (object == null) {

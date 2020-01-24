@@ -28,7 +28,11 @@ import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
-public class AttributeUtils {
+public final class AttributeUtils {
+
+    protected AttributeUtils() {
+        throw new UnsupportedOperationException();
+    }
     private static final Logger log = LoggerFactory.getLogger(AttributeUtils.class);
 
     public static void copyPropertiesFromAttribute(Attribute source, Attribute dest) {

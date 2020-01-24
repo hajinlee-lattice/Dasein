@@ -24,7 +24,11 @@ import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.util.PivotMappingFileUtils;
 
-public class ArtifactUtils {
+public final class ArtifactUtils {
+
+    protected ArtifactUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     private static final Logger log = LoggerFactory.getLogger(ArtifactUtils.class);
 

@@ -4,7 +4,11 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
 
-public class VdbExtractAndImportUtil {
+public final class VdbExtractAndImportUtil {
+
+    protected VdbExtractAndImportUtil() {
+        throw new UnsupportedOperationException();
+    }
 
     public static Table createVdbActivity() {
         Table table = new Table();

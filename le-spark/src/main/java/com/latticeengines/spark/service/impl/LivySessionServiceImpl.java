@@ -177,7 +177,7 @@ public class LivySessionServiceImpl implements LivySessionService {
         LivySession current = getSession(session);
         long start = System.currentTimeMillis();
         while (!LivySession.TERMINAL_STATES.contains(current.getState()) &&
-                (System.currentTimeMillis() - start > SESSION_CREATION_TIMEOUT)) {
+                (System.currentTimeMillis() - start < SESSION_CREATION_TIMEOUT)) {
             try {
                 Thread.sleep(10000L);
             } catch (InterruptedException e) {

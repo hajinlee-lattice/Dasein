@@ -13,6 +13,10 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.AttrDimension;
 
 public final class DimensionUtils {
 
+    protected DimensionUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     public static List<List<AttrDimension>> getRollupPaths(List<AttrDimension> tree) {
         TopologicalTraverse traverse = new TopologicalTraverse();
         List<List<AttrDimension>> paths = new ArrayList<>();

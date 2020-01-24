@@ -1,6 +1,10 @@
 package com.latticeengines.domain.exposed.modeling.factory;
 
-public class DataSetFactory {
+public final class DataSetFactory {
+
+    protected DataSetFactory() {
+        throw new UnsupportedOperationException();
+    }
 
     public static final String DATASET_NAME_KEY = "dataset.name";
     public static final String DATASET_INDUSTRY_KEY = "dataset.industry";

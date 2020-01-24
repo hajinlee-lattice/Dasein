@@ -8,7 +8,11 @@ import java.util.stream.Collectors;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory.Node;
 
-public class NodesSort {
+public final class NodesSort {
+
+    protected NodesSort() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void sortByServiceName(SerializableDocumentDirectory dir, String serviceName) {
         List<Node> sortedNodes = new ArrayList<>();
