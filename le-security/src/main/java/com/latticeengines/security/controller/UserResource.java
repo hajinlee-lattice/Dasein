@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserFilter;
@@ -97,7 +99,7 @@ public class UserResource {
     @ResponseBody
     @ApiOperation(value = "Register or validate a new user in the current tenant")
     @PreAuthorize("hasRole('Edit_PLS_Users')")
-    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg,
+    public ResponseDocument<RegistrationResult> register(@RequestBody UserRegistration userReg, @RequestHeader(value = Constants.SET_TEMP_PASS, required = false) Boolean setTempPass,
                                                          HttpServletRequest request, HttpServletResponse httpResponse) {
         ResponseDocument<RegistrationResult> response = new ResponseDocument<>();
         response.setSuccess(false);
@@ -127,6 +129,10 @@ public class UserResource {
         }
 
         RegistrationResult result = userService.registerUserToTenant(loginUsername, uRegTenant);
+        String tempPass = result.getPassword();
+        if (!Boolean.TRUE.equals(setTempPass)) {
+            result.setPassword(null);
+        }
         response.setResult(result);
         if (!result.isValid()) {
             if (!result.isValidEmail()) {
@@ -135,11 +141,8 @@ public class UserResource {
             }
             return response;
         }
-
         LOGGER.info(String.format("%s registered %s as a new user in tenant %s", loginUsername, user.getUsername(),
                 tenant.getId()));
-
-        String tempPass = result.getPassword();
         if (targetLevel.equals(AccessLevel.EXTERNAL_ADMIN) || targetLevel.equals(AccessLevel.EXTERNAL_USER)) {
             emailService.sendNewUserEmail(user, tempPass, apiPublicUrl,
                     !tenantService.getTenantEmailFlag(tenant.getId()));
@@ -147,7 +150,6 @@ public class UserResource {
         } else {
             emailService.sendNewUserEmail(user, tempPass, apiPublicUrl, false);
         }
-
         response.setSuccess(true);
         return response;
     }

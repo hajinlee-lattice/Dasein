@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
@@ -115,7 +116,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 RegistrationResult.class);
         assertNotNull(response);
         assertTrue(response.isSuccess(), JsonUtils.serialize(response));
-        assertNotNull(response.getResult().getPassword());
+        assertNull(response.getResult().getPassword());
 
         deleteUserByRestCall(testUsername);
     }
