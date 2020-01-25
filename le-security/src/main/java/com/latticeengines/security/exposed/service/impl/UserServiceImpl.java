@@ -2,7 +2,7 @@ package com.latticeengines.security.exposed.service.impl;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -95,7 +95,8 @@ public class UserServiceImpl implements UserService {
                     userByEmail));
         } else {
             try {
-                globalUserManagementService.registerUser(null, userRegistration.getUser(), userRegistration.getCredentials());
+                globalUserManagementService.registerUser(null, userRegistration.getUser(),
+                        userRegistration.getCredentials());
             } catch (Exception e) {
                 LOGGER.warn("Error creating admin user.");
             }
@@ -138,7 +139,8 @@ public class UserServiceImpl implements UserService {
                     userByEmail));
         } else {
             try {
-                globalUserManagementService.registerUser(createdByUser, userRegistration.getUser(), userRegistration.getCredentials());
+                globalUserManagementService.registerUser(createdByUser, userRegistration.getUser(),
+                        userRegistration.getCredentials());
             } catch (Exception e) {
                 LOGGER.warn("Error creating admin user.");
             }
@@ -191,7 +193,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean upsertSamlIntegrationUser(String userName, LoginValidationResponse samlLoginResp, String tenantDeploymentId) {
+    public boolean upsertSamlIntegrationUser(String userName, LoginValidationResponse samlLoginResp,
+            String tenantDeploymentId) {
         GlobalAuthUser globalAuthUser = globalUserManagementService.findByEmailNoJoin(samlLoginResp.getUserId());
         User userInfoFromSaml = IntegrationUserUtils.buildUserFrom(samlLoginResp);
         if (globalAuthUser == null) {
@@ -211,7 +214,7 @@ public class UserServiceImpl implements UserService {
             // attempts, update the access level
             AccessLevel existingAccessLevel = AccessLevel.findAccessLevel(gaUserRights);
             AccessLevel samlResponseAccessLevel = AccessLevel
-                    .findAccessLevel(Arrays.asList((String) userInfoFromSaml.getAccessLevel()));
+                    .findAccessLevel(Collections.singletonList(userInfoFromSaml.getAccessLevel()));
 
             if (samlResponseAccessLevel != existingAccessLevel) {
                 assignAccessLevel(samlResponseAccessLevel, tenantDeploymentId, userInfoFromSaml.getEmail());
@@ -238,7 +241,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-                                     Long expirationDate, boolean createUser, boolean clearSession) {
+            Long expirationDate, boolean createUser, boolean clearSession) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
@@ -254,11 +257,13 @@ public class UserServiceImpl implements UserService {
 
         List<String> rights = globalUserManagementService.getRights(createdByUser, tenantId);
         if (!rights.contains(AccessLevel.SUPER_ADMIN.name())) {
-            // only super admin user can add expire after data when creating user, other wise expire after data should be null
+            // only super admin user can add expire after data when creating user, other
+            // wise expire after data should be null
             if (createUser) {
                 expirationDate = null;
             } else {
-                if (globalUserManagementService.existExpireDateChanged(username, tenantId, accessLevel.name(), expirationDate)) {
+                if (globalUserManagementService.existExpireDateChanged(username, tenantId, accessLevel.name(),
+                        expirationDate)) {
                     throw new AccessDeniedException("Access denied.");
                 }
             }
@@ -286,8 +291,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-                                     Long expirationDate, boolean createUser) {
-        return assignAccessLevel( accessLevel,  tenantId,  username,  createdByUser, expirationDate,  createUser, false);
+            Long expirationDate, boolean createUser) {
+        return assignAccessLevel(accessLevel, tenantId, username, createdByUser, expirationDate, createUser, false);
     }
 
     private boolean resignAccessLevel(String tenantId, String username, List<String> rights) {
@@ -410,7 +415,7 @@ public class UserServiceImpl implements UserService {
         }
 
         if (result.isValid()) {
-            Boolean flag = createUser(null, userReg);
+            boolean flag = createUser(null, userReg);
             result.setValid(flag);
         }
 
@@ -423,7 +428,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public RegistrationResult registerUserToTenant(String userName, UserRegistrationWithTenant userRegistrationWithTenant) {
+    public RegistrationResult registerUserToTenant(String userName,
+            UserRegistrationWithTenant userRegistrationWithTenant) {
         UserRegistration userRegistration = userRegistrationWithTenant.getUserRegistration();
         userRegistration.toLowerCase();
         User user = userRegistration.getUser();
@@ -443,6 +449,10 @@ public class UserServiceImpl implements UserService {
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
                     user.getExpirationDate(), true);
         }
+
+        String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
+        result.setPassword(tempPass);
+
         return result;
     }
 
@@ -457,8 +467,8 @@ public class UserServiceImpl implements UserService {
     }
 
     /*
-     * if isCredentialsClearText is true => password in UserUpdateData is clear
-     * text false => password in UserUpdateData is SHA256 hashed
+     * if isCredentialsClearText is true => password in UserUpdateData is clear text
+     * false => password in UserUpdateData is SHA256 hashed
      */
     private boolean updateCredentials(User user, UserUpdateData data, boolean isCredentialsClearText) {
         // change password
@@ -602,9 +612,10 @@ public class UserServiceImpl implements UserService {
         if (userId != null) {
             clearSessionService.submit(() -> {
                 GlobalAuthTenant tenantData = globalTenantManagementService.findByTenantId(tenantId);
-                List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService.findTicketsByUserIdAndTenant(userId, tenantData);
+                List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService
+                        .findTicketsByUserIdAndTenant(userId, tenantData);
                 LOGGER.info(String.format("Ticket ids in %s will be deleted.",
-                        globalAuthTickets.stream().map(ticket -> ticket.getPid()).collect(Collectors.toList())));
+                        globalAuthTickets.stream().map(GlobalAuthTicket::getPid).collect(Collectors.toList())));
                 for (GlobalAuthTicket globalAuthTicket : globalAuthTickets) {
                     globalAuthenticationService.discard(new Ticket(globalAuthTicket.getTicket()));
                 }
