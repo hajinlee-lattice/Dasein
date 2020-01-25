@@ -65,7 +65,7 @@
         <spring.data.hdp.version>2.5.0.RELEASE</spring.data.hdp.version>
         <tez.version>0.9.1</tez.version>
         <netty.version>3.6.2.Final</netty.version> <!-- for hadoop 2.8.5 -->
-        <hdp.guava.version>28.2-jre</hdp.guava.version>
+        <hdp.guava.version>20.0</hdp.guava.version>
         <tez.guava.version>11.0.2</tez.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
         <parquet.version>1.10.1</parquet.version>

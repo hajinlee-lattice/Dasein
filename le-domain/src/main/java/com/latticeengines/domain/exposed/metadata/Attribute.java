@@ -250,10 +250,12 @@ public class Attribute
 
     public void setLogicalDataType(String logicalDataTypeString) {
         LogicalDataType logicalDataType = null;
-        try {
-            logicalDataType = LogicalDataType.valueOf(logicalDataTypeString);
-        } catch (Exception e) {
-            log.warn("Cannot parse {} to a LogicalDataType", logicalDataTypeString);
+        if (StringUtils.isNotBlank(logicalDataTypeString)) {
+            try {
+                logicalDataType = LogicalDataType.valueOf(logicalDataTypeString);
+            } catch (Exception e) {
+                log.warn("Cannot parse {} to a LogicalDataType", logicalDataTypeString);
+            }
         }
         if (logicalDataType != null) {
             setLogicalDataType(logicalDataType);
