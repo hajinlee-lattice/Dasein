@@ -62,10 +62,10 @@ public class PlayLaunchExportFilesToS3Step extends BaseImportExportS3<PlayLaunch
     @Value("${common.microservice.url}")
     private String microserviceHostPort;
 
-    @Value("cdl.campaign.integration.session.context.dynamo.table")
+    @Value("${cdl.campaign.integration.session.context.dynamo.table}")
     private String integrationSessionContextTable;
 
-    @Value("cdl.campaign.integration.session.context.ttl")
+    @Value("${cdl.campaign.integration.session.context.ttl}")
     private long sessionContextTTL;
 
     @Inject
