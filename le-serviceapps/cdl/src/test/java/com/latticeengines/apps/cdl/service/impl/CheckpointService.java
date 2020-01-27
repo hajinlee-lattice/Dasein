@@ -832,6 +832,8 @@ public class CheckpointService {
 
     private void copyEntitySeedTables(String checkpoint, String checkpointVersion) {
         if (!isEntityMatchEnabled()) {
+            log.info("Tenant {} is not an entity match tenant, skip copying entity seed/lookup tables",
+                    mainTestTenant.getId());
             return;
         }
         ThreadPoolUtils.doInParallel(Arrays.asList( //
@@ -840,7 +842,7 @@ public class CheckpointService {
         ), entity -> copyEntitySeedTable(checkpoint, checkpointVersion, entity));
     }
 
-    private Runnable copyEntitySeedTable(String checkpoint, String checkpointVersion, String entity) {
+    private void copyEntitySeedTable(String checkpoint, String checkpointVersion, String entity) {
         EntityPublishRequest request = new EntityPublishRequest();
         request.setEntity(entity);
         String srcTenantId = getCheckPointTenantId(checkpoint, checkpointVersion, entity);
@@ -850,18 +852,15 @@ public class CheckpointService {
         request.setDestEnv(EntityMatchEnvironment.SERVING);
         request.setDestTTLEnabled(true);
         request.setBumpupVersion(false);
-        return () -> {
-            log.info("Start copying entity match table for " + entity + " using request: "
-                    + JsonUtils.serialize(request));
-            EntityPublishStatistics stats = matchProxy.publishEntity(request);
-            log.info("Copied {} {} seeds and {} {} lookup entries from tenant {} to tenant {}", stats.getSeedCount(),
-                    entity, //
-                    stats.getLookupCount(), entity, //
-                    CustomerSpace.shortenCustomerSpace(srcTenant.getId()), //
-                    CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
-            Assert.assertTrue(stats.getSeedCount() > 0);
-            Assert.assertTrue(stats.getLookupCount() > 0);
-        };
+        log.info("Start copying entity match table for " + entity + " using request: " + JsonUtils.serialize(request));
+        EntityPublishStatistics stats = matchProxy.publishEntity(request);
+        log.info("Copied {} {} seeds and {} {} lookup entries from tenant {} to tenant {}", stats.getSeedCount(),
+                entity, //
+                stats.getLookupCount(), entity, //
+                CustomerSpace.shortenCustomerSpace(srcTenant.getId()), //
+                CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
+        Assert.assertTrue(stats.getSeedCount() > 0);
+        Assert.assertTrue(stats.getLookupCount() > 0);
     }
 
     public static String getCheckPointTenantId(String checkpoint, String checkpointVersion, String entity) {
@@ -871,6 +870,8 @@ public class CheckpointService {
     @VisibleForTesting
     boolean isEntityMatchEnabled() {
         FeatureFlagValueMap flags = batonService.getFeatureFlags(CustomerSpace.parse(mainTestTenant.getId()));
-        return FeatureFlagUtils.isEntityMatchEnabled(flags);
+        boolean emEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
+        log.info("Feature flags = {}, isEntityMatch={}", flags, emEnabled);
+        return emEnabled;
     }
 }
