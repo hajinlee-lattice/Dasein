@@ -28,7 +28,7 @@ public class AMStatsResource {
     @RequestMapping(value = "/cubes", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get account master statistics cube", response = AccountMasterCube.class)
-    private AccountMasterCube getCube(@RequestBody AccountMasterFactQuery query,
+    public AccountMasterCube getCube(@RequestBody AccountMasterFactQuery query,
             @RequestParam(value = "considerOnlyEnrichments", required = false, //
                     defaultValue = "true") boolean considerOnlyEnrichments) {
         return accountMasterStatisticsService.query(query, considerOnlyEnrichments);
@@ -37,7 +37,7 @@ public class AMStatsResource {
     @RequestMapping(value = "/topattrs", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get categorical attribute tree", response = TopNAttributeTree.class)
-    private TopNAttributeTree getTopAttrTree() {
+    public TopNAttributeTree getTopAttrTree() {
         return accountMasterStatisticsService.getTopAttrTree();
     }
 

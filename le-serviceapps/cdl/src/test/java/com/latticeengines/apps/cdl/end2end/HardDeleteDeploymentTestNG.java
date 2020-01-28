@@ -38,21 +38,13 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(HardDeleteDeploymentTestNG.class);
 
-    private final String DeleteJoinId = "AccountId";
-
-    @Inject
-    private ActionProxy actionProxy;
-
-    @Inject
-    private MetadataProxy metadataProxy;
+    private static final String DeleteJoinId = "AccountId";
 
     @Inject
     private MatchProxy matchProxy;
@@ -74,7 +66,7 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     @Test(groups = "end2end")
-    public void runTest() throws Exception {
+    public void runTest() {
 //        importData();
         registerDeleteData();
         EntityMatchVersion entityMatchVersion = matchProxy.getEntityMatchVersion(customerSpace,
