@@ -172,7 +172,7 @@ public class EmailServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
                 Message[] messages = folder.getMessages();
                 log.info("There are " + messages.length + " messages in the INBOX.");
                 for (Message message : messages) {
-                    if (message.getSubject().equalsIgnoreCase(EmailSettings.PLS_NEW_USER_SUBJECT)) {
+                    if (message.getSubject().equalsIgnoreCase(EmailSettings.NEW_USER_SUBJECT)) {
                         Date receivedDate = message.getReceivedDate();
                         if (receivedDate.getTime() > registrationTimestamp) {
                             MimeMessage m = (MimeMessage) message;
