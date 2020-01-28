@@ -125,6 +125,9 @@
                                 <copy file="${project.basedir}/../le-microservice/lp/target/le-lp-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/lp.war"
                                       overwrite="true" />
+                                <copy file="${project.basedir}/../le-microservice/dcp/target/le-dcp-microservice-${project.version}.war"
+                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/dcp.war"
+                                      overwrite="true" />
                                 <copy file="${project.basedir}/../le-playmaker/target/le-playmaker-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/playmaker.war"
                                       overwrite="true" />
