@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.migrate.ConvertActivityStreamToActivityImportWrapper;
 import com.latticeengines.cdl.workflow.steps.rematch.ConvertAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.rematch.ConvertContactWorkflow;
 import com.latticeengines.cdl.workflow.steps.rematch.ConvertTransactionWorkflow;
@@ -29,12 +30,16 @@ public class ConvertBatchStoreToDataTableWorkflow extends AbstractWorkflow<Conve
     @Inject
     private ConvertTransactionWorkflow convertTransactionWorkflow;
 
+    @Inject
+    private ConvertActivityStreamToActivityImportWrapper convertActivityStreamToActivityImportWrapper;
+
     @Override
     public Workflow defineWorkflow(ConvertBatchStoreToDataTableWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(convertAccountWorkflow)
                 .next(convertContactWorkflow)
                 .next(convertTransactionWorkflow)
+                .next(convertActivityStreamToActivityImportWrapper)
                 .build();
     }
 }

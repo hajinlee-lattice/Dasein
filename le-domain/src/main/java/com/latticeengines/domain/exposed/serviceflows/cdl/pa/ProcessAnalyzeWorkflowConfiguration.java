@@ -267,23 +267,27 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder activeRawStreamTables(Map<String, String> rawStreamTables) {
             processActivityStreamWorkflowBuilder.activeRawStreamTables(rawStreamTables);
+            convertBatchStoreToDataTableWorkflowBuilder.activeRawStreamTables(rawStreamTables);
             matchEntityWorkflowBuilder.activeRawStreamTables(rawStreamTables);
             return this;
         }
 
         public Builder activityStreams(Map<String, AtlasStream> streams) {
             processActivityStreamWorkflowBuilder.activityStreams(streams);
+            convertBatchStoreToDataTableWorkflowBuilder.activityStreams(streams);
             matchEntityWorkflowBuilder.activityStreams(streams);
             return this;
         }
 
         public Builder activityMetricsGroups(Map<String, ActivityMetricsGroup> groups) {
             processActivityStreamWorkflowBuilder.activityMetricsGroups(groups);
+            convertBatchStoreToDataTableWorkflowBuilder.activityMetricsGroups(groups);
             return this;
         }
 
         public Builder activityStreamImports(Map<String, List<ActivityImport>> activityStreamImports) {
             processActivityStreamWorkflowBuilder.activityStreamImports(activityStreamImports);
+            convertBatchStoreToDataTableWorkflowBuilder.activityStreamImports(activityStreamImports);
             matchEntityWorkflowBuilder.activityStreamImports(activityStreamImports);
             return this;
         }
@@ -306,6 +310,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processTransactionWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processCatalogWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             processActivityStreamWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
+            convertBatchStoreToDataTableWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             commitEntityWorkflowBuilder.entityMatchEnabled(entityMatchEnabled);
             return this;
         }
@@ -313,6 +318,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder entityMatchGAOnly(boolean gaOnly) {
             matchEntityWorkflowBuilder.entityMatchGAOnly(gaOnly);
             processActivityStreamWorkflowBuilder.entityMatchGAOnly(gaOnly);
+            convertBatchStoreToDataTableWorkflowBuilder.entityMatchGAOnly(gaOnly);
             return this;
         }
 
@@ -333,6 +339,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder fullRematch(boolean fullRematch) {
             processStepConfiguration.setFullRematch(fullRematch);
             processActivityStreamWorkflowBuilder.setRematchMode(fullRematch);
+            convertBatchStoreToDataTableWorkflowBuilder.setRematchMode(fullRematch);
             matchEntityWorkflowBuilder.setRematchMode(fullRematch);
             return this;
         }
@@ -352,6 +359,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Contact));
             processProductWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Product));
             processActivityStreamWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
+            convertBatchStoreToDataTableWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             matchEntityWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             processTransactionWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Transaction));
             return this;

@@ -88,7 +88,7 @@ public class SoftDeleteActivityStream extends BaseActivityStreamStep<ProcessActi
         softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);
     }
 
-    private TransformationWorkflowConfiguration generateWorkflowConf() {
+    protected TransformationWorkflowConfiguration generateWorkflowConf() {
         PipelineTransformationRequest request = getConsolidateRequest();
         if (request == null) {
             return null;
