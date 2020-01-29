@@ -160,13 +160,15 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         log.debug(String.format("Current build number is : %s.", currentBuildNumber));
 
         Map<Long, ActionStat> actionStats = getActionStats();
+        Set<String> largeTenantExemptionList = getLargeTenantExemptionSet();
+        Map<String, Long> paFailedMap = getPASubmitFailedRedisMap();
         Set<Long> migrationTenantPids = getMigrationTenantPids();
+
         Set<String> skippedTestTenants = new HashSet<>();
         Set<String> skippedMigrationTenants = new HashSet<>();
         log.info("Number of tenant with new actions after last PA = {}", actionStats.size());
-        log.debug("Action stats = {}", actionStats);
+        log.debug("Action stats = {}, large tenant exemption list = {}", actionStats, largeTenantExemptionList);
 
-        Map<String, Long> paFailedMap = getPASubmitFailedRedisMap();
 
         for (DataFeed simpleDataFeed : allDataFeeds) {
             if (simpleDataFeed.getTenant() == null) {
@@ -203,7 +205,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 if (simpleDataFeed.isScheduleNow()) {
                     runningScheduleNowCount++;
                 }
-                if (isLarge(dcStatus)) {
+                if (isLarge(tenantId, largeTenantExemptionList, dcStatus)) {
                     runningLargeJobCount++;
                 }
             } else if (!DataFeed.Status.RUNNING_STATUS.contains(simpleDataFeed.getStatus())) {
@@ -213,7 +215,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 TenantActivity tenantActivity = new TenantActivity();
                 tenantActivity.setTenantId(tenantId);
                 tenantActivity.setTenantType(tenant.getTenantType());
-                tenantActivity.setLarge(isLarge(dcStatus));
+                tenantActivity.setLarge(isLarge(tenantId, largeTenantExemptionList, dcStatus));
                 if (tenantActivity.isLarge()) {
                     largeJobTenantId.add(tenantId);
                 }
@@ -345,8 +347,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 retryProcessAnalyze(execution, customerSpace));
     }
 
-    private boolean isLarge(DataCollectionStatus status) {
+    private boolean isLarge(@NotNull String tenantId, @NotNull Set<String> largeTenantExemptionList,
+            DataCollectionStatus status) {
         if (status == null || status.getDetail() == null) {
+            return false;
+        }
+        if (largeTenantExemptionList.contains(CustomerSpace.shortenCustomerSpace(tenantId))) {
             return false;
         }
         DataCollectionStatusDetail detail = status.getDetail();
@@ -545,9 +551,35 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
             Map<String, String> jsonMap = JsonUtils.convertMap(om.readValue(content, HashMap.class), String.class,
                     String.class);
             return filterDetail(schedulerName, jsonMap);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Failed to retrieve scheduling group for scheduler {}", schedulerName, e);
             throw new RuntimeException(e);
+        }
+    }
+
+    /*-
+     * list of tenants that will NOT be considered as large tenants.
+     * this is added to make important tenants' queue time faster
+     */
+    private Set<String> getLargeTenantExemptionSet() {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            String tenantsStr = c
+                    .get(PathBuilder.buildSchedulingLargeTenantExemptionListPath(CamilleEnvironment.getPodId()))
+                    .getData();
+            if (StringUtils.isEmpty(tenantsStr)) {
+                return Collections.emptySet();
+            }
+            String[] tenants = tenantsStr.split(",");
+            log.debug("Retrieving large tenant exemption list. tenants = {}", tenantsStr);
+            return Arrays.stream(tenants) //
+                    .filter(StringUtils::isNotBlank) //
+                    .map(CustomerSpace::shortenCustomerSpace) //
+                    .filter(StringUtils::isNotBlank) //
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            log.error("Failed to retrieve large tenant exemption list", e);
+            return Collections.emptySet();
         }
     }
 

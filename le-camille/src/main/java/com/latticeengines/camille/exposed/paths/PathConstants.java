@@ -48,8 +48,9 @@ public final class PathConstants {
     public static final String ERROR_CATEGORY_FILE = "error-category.json";
 
     public static final String SCHEDULING_GROUP_FILE = "schedulingGroup.json";
-
     public static final String SCHEDULING_PA_FLAG_FILE = "schedulingPAFlag.json";
+    // list of tenants will NOT be considered as large tenant (faster queue time)
+    public static final String SCHEDULING_LARGE_TENANT_EXEMPTION_LIST = "schedulingLargeTenantExemptionList";
 
     public static final String WORKFLOW_THROTTLING_CONFIG_FILE = "workflowThrottlingConfig";
 
