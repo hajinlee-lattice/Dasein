@@ -45,6 +45,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
 
     private String diffTableNameInContext;
     private String batchStoreNameInContext;
+    private String systemBatchStoreNameInContext;
 
     private boolean shortCutMode;
 
@@ -65,13 +66,14 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             shortCutMode = true;
             diffTableNameInContext = tablesInCtx.get(0).getName();
             batchStoreNameInContext = tablesInCtx.get(1).getName();
+            systemBatchStoreNameInContext = tablesInCtx.size() > 2 ? tablesInCtx.get(2).getName() : null;
             diffTableName = diffTableNameInContext;
         } else {
             matchedAccountTable = getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
             newAccountTableFromContactMatch = getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE);
             newAccountTableFromTxnMatch = getStringValueFromContext(ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE);
             double newTableSize = 0.0D;
-            for (String key: Arrays.asList( //
+            for (String key : Arrays.asList( //
                     ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
                     ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, //
                     ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE)) {
@@ -197,7 +199,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
     }
 
-
     private List<TransformationStepConfig> legacySteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
 
@@ -251,6 +252,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
         exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
         exportToDynamo(batchStoreTableName, InterfaceName.AccountId.name(), null);
+    }
+
+    @Override
+    protected String getSystemBatchStoreName() {
+        return systemBatchStoreNameInContext != null ? systemBatchStoreNameInContext
+                : TableUtils.getFullTableName(systemBatchStoreTablePrefix, pipelineVersion);
     }
 
     @Override
