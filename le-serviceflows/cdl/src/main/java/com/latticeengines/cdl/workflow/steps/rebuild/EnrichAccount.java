@@ -1,8 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,8 +20,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -37,6 +43,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
@@ -55,6 +62,7 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     private String fullAccountTablePrefix = "FullAccount";
     private String masterTableName;
+    private boolean shouldExcludeDataCloudAttrs;
 
     @Override
     protected BusinessEntity getEntity() {
@@ -84,6 +92,8 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
                 throw new IllegalStateException("Cannot find the master table in default collection");
             }
 
+            shouldExcludeDataCloudAttrs = shouldExcludeDataCloudAttrs();
+
             double sizeInGb = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
             int multiplier = ScalingUtils.getMultiplier(sizeInGb);
             log.info("Set scalingMultiplier=" + multiplier + " base on master table size=" + sizeInGb + " gb.");
@@ -109,7 +119,12 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         request.setKeepTemp(false);
         request.setEnableSlack(false);
 
-        TransformationStepConfig match = match(customerSpace, masterTableName);
+        TransformationStepConfig match;
+        if (shouldExcludeDataCloudAttrs) {
+            match = copy(customerSpace, masterTableName);
+        } else {
+            match = match(customerSpace, masterTableName);
+        }
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(match);
@@ -169,6 +184,24 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
         return step;
     }
 
+    private TransformationStepConfig copy(CustomerSpace customerSpace, String sourceTableName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+
+        addBaseTables(step, sourceTableName);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(fullAccountTablePrefix);
+        step.setTargetTable(targetTable);
+
+        CopyConfig conf = new CopyConfig();
+        String confStr = appendEngineConf(conf, lightEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
+
     private Map<MatchKey, List<String>> getKeyMap() {
         Map<MatchKey, List<String>> keyMap = new TreeMap<>();
         keyMap.put(MatchKey.LatticeAccountID, Collections.singletonList(InterfaceName.LatticeAccountId.name()));
@@ -186,6 +219,30 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
     private boolean canBeUsedInModelOrSegment(ColumnMetadata columnMetadata) {
         return columnMetadata.isEnabledFor(ColumnSelection.Predefined.Model) ||
                 columnMetadata.isEnabledFor(ColumnSelection.Predefined.Segment);
+    }
+
+    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
+    private boolean shouldExcludeDataCloudAttrs() {
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        Path node = PathBuilder.buildPodPath(podId).append("M34HotFixTargets");
+        boolean shouldExclude = false;
+        try {
+            if (camille.exists(node)) {
+                List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
+                String tenantId = configuration.getCustomerSpace().getTenantId();
+                if (targets.contains(tenantId)) {
+                    log.info("{} is a hotfix target.", tenantId);
+                    shouldExclude = true;
+                } else {
+                    log.info("{} is not a hotfix target", tenantId);
+                    shouldExclude = false;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve hotfix targets from ZK.", e);
+        }
+        return shouldExclude;
     }
 
 }

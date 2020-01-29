@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.datacloud.match.RefreshFrequency;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -65,6 +66,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     private String masterTableName;
     private String statsTableName;
     private String statsTablePrefix = "Stats";
+    private String profileTablePrefix = "FullProfile";
+    private String encodedTablePrefix = "FullEncoded";
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
@@ -125,6 +128,15 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
         finishing();
         exportToS3AndAddToContext(statsTableName, ACCOUNT_STATS_TABLE_NAME);
+
+        // no need to make them work for retry, as retry can regenerate them in bucket account step
+        String profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
+        putStringValueInContext(FULL_ACCOUNT_PROFILE_TABLE_NAME, profileTableName);
+        addToListInContext(TEMPORARY_CDL_TABLES, profileTableName, String.class);
+
+        String encodedTableName = TableUtils.getFullTableName(encodedTablePrefix, pipelineVersion);
+        putStringValueInContext(FULL_ACCOUNT_ENCODED_TABLE_NAME, encodedTableName);
+        addToListInContext(TEMPORARY_CDL_TABLES, encodedTableName, String.class);
     }
 
     private PipelineTransformationRequest getTransformRequest() {
@@ -198,6 +210,11 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
         step.setTransformer(TRANSFORMER_PROFILER);
 
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(profileTablePrefix);
+        step.setTargetTable(targetTable);
+
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
         // Pass current timestamp as a configuration parameter to the profile
@@ -217,6 +234,13 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             step.setInputSteps(Collections.singletonList(profileStep));
         }
         step.setTransformer(TRANSFORMER_BUCKETER);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(encodedTablePrefix);
+        targetTable.setExpandBucketedAttrs(true);
+        step.setTargetTable(targetTable);
+
         step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
         return step;
     }

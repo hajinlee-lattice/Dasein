@@ -207,6 +207,15 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         putObjectInContext(key, list);
     }
 
+    protected  <V> void removeFromListInContext(String key, V object, Class<V> clz) {
+        List<V> list = getListObjectFromContext(key, clz);
+        if (CollectionUtils.isNotEmpty(list)) {
+            List<V> newList = new ArrayList<>(list);
+            newList.remove(object);
+            putObjectInContext(key, newList);
+        }
+    }
+
     protected void clearExecutionContext(Set<String> retryableKeys) {
         Map<String, Object> retryableContext = new HashMap<>();
         if (CollectionUtils.isNotEmpty(retryableKeys)) {
