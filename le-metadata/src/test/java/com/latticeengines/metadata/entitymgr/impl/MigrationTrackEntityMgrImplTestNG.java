@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -107,9 +107,9 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         Assert.assertEquals(VERSION, created.getVersion());
         Assert.assertNotNull(created.getCurActiveTable());
         Assert.assertNotNull(created.getCurActiveTable().get(ROLE));
-        Assert.assertArrayEquals(ACTIVETABLE.get(ROLE), created.getCurActiveTable().get(ROLE));
+        Assert.assertEquals(ACTIVETABLE.get(ROLE), created.getCurActiveTable().get(ROLE));
         Assert.assertEquals(DETAIL.getEvaluationDate(), created.getCollectionStatusDetail().getEvaluationDate());
-        Assert.assertArrayEquals(CUBESDATA, created.getStatsCubesData());
+        Assert.assertEquals(CUBESDATA, created.getStatsCubesData());
         Assert.assertEquals(STATSNAME, created.getStatsName());
         Assert.assertEquals(tenant.getPid(), created.getTenant().getPid());
     }
@@ -124,11 +124,11 @@ public class MigrationTrackEntityMgrImplTestNG extends MetadataFunctionalTestNGB
         actualCompleted.add(tenant2.getPid());
         found = migrationTrackEntityMgr.getTenantPidsByStatus(MigrationTrack.Status.STARTED);
         Assert.assertNotNull(found);
-        Assert.assertArrayEquals(actualStarted.toArray(), found.toArray());
+        Assert.assertEquals(actualStarted.toArray(), found.toArray());
 
         found = migrationTrackEntityMgr.getTenantPidsByStatus(MigrationTrack.Status.COMPLETED);
         Assert.assertNotNull(found);
-        Assert.assertArrayEquals(actualCompleted.toArray(), found.toArray());
+        Assert.assertEquals(actualCompleted.toArray(), found.toArray());
     }
 
     @Test(groups = "functional", dataProvider = "entityProvider", dependsOnMethods = {"testCreate"})

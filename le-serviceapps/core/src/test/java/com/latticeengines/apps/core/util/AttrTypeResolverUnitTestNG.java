@@ -1,12 +1,9 @@
 package com.latticeengines.apps.core.util;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -78,71 +75,71 @@ public class AttrTypeResolverUnitTestNG {
 
     @Test(groups = "unit")
     public void testType() {
-        assertEquals(AttrTypeResolver.resolveType(internal1, false), AttrType.Internal);
-        assertEquals(AttrTypeResolver.resolveType(internal1, true), AttrType.Internal);
-        assertEquals(AttrTypeResolver.resolveType(internal2, false), AttrType.Custom);
-        assertEquals(AttrTypeResolver.resolveType(internal2, true), AttrType.Custom);
-        assertEquals(AttrTypeResolver.resolveType(internal3, false), AttrType.Internal);
-        assertEquals(AttrTypeResolver.resolveType(internal3, true), AttrType.Internal);
-        assertEquals(AttrTypeResolver.resolveType(internal4, false), AttrType.Custom);
-        assertEquals(AttrTypeResolver.resolveType(internal4, true), AttrType.Custom);
-        assertEquals(AttrTypeResolver.resolveType(internal5, true), AttrType.Internal);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal1, false), AttrType.Internal);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal1, true), AttrType.Internal);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal2, false), AttrType.Custom);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal2, true), AttrType.Custom);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal3, false), AttrType.Internal);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal3, true), AttrType.Internal);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal4, false), AttrType.Custom);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal4, true), AttrType.Custom);
+        Assert.assertEquals(AttrTypeResolver.resolveType(internal5, true), AttrType.Internal);
 
 
-        assertEquals(AttrTypeResolver.resolveType(dataCloud, false), AttrType.DataCloud);
+        Assert.assertEquals(AttrTypeResolver.resolveType(dataCloud, false), AttrType.DataCloud);
         dataCloud.setCategory(Category.ACCOUNT_ATTRIBUTES);
-        assertNotEquals(AttrTypeResolver.resolveType(dataCloud, false), AttrType.DataCloud);
+        Assert.assertNotEquals(AttrTypeResolver.resolveType(dataCloud, false), AttrType.DataCloud);
         dataCloud.setEntity(BusinessEntity.LatticeAccount);
-        assertNotEquals(AttrTypeResolver.resolveType(dataCloud, false), AttrType.DataCloud);
+        Assert.assertNotEquals(AttrTypeResolver.resolveType(dataCloud, false), AttrType.DataCloud);
         dataCloud.setCategory(Category.ACCOUNT_INFORMATION);
-        assertEquals(AttrTypeResolver.resolveType(dataCloud, false), AttrType.DataCloud);
+        Assert.assertEquals(AttrTypeResolver.resolveType(dataCloud, false), AttrType.DataCloud);
 
-        assertEquals(AttrTypeResolver.resolveType(curated, false), AttrType.Curated);
+        Assert.assertEquals(AttrTypeResolver.resolveType(curated, false), AttrType.Curated);
         curated.setEntity(BusinessEntity.Rating);
-        assertEquals(AttrTypeResolver.resolveType(curated, false), AttrType.Curated);
+        Assert.assertEquals(AttrTypeResolver.resolveType(curated, false), AttrType.Curated);
 
-        assertEquals(AttrTypeResolver.resolveType(custom1, false), AttrType.Custom);
-        assertEquals(AttrTypeResolver.resolveType(custom2, false), AttrType.Custom);
-        assertEquals(AttrTypeResolver.resolveType(custom3, false), AttrType.Custom);
+        Assert.assertEquals(AttrTypeResolver.resolveType(custom1, false), AttrType.Custom);
+        Assert.assertEquals(AttrTypeResolver.resolveType(custom2, false), AttrType.Custom);
+        Assert.assertEquals(AttrTypeResolver.resolveType(custom3, false), AttrType.Custom);
     }
 
     @Test(groups = "unit", dependsOnMethods = { "testType" })
     public void testSubType() {
-        assertNull(AttrTypeResolver.resolveSubType(internal1, false));
-        assertNull(AttrTypeResolver.resolveSubType(internal1, true));
-        assertEquals(AttrTypeResolver.resolveSubType(internal2, false), AttrSubType.Standard);
-        assertEquals(AttrTypeResolver.resolveSubType(internal2, true), AttrSubType.Standard);
-        assertNull(AttrTypeResolver.resolveSubType(internal3, false));
-        assertNull(AttrTypeResolver.resolveSubType(internal3, true));
-        assertEquals(AttrTypeResolver.resolveSubType(internal4, false), AttrSubType.Standard);
-        assertEquals(AttrTypeResolver.resolveSubType(internal4, true), AttrSubType.Standard);
-        assertNull(AttrTypeResolver.resolveSubType(internal5, true));
+        Assert.assertNull(AttrTypeResolver.resolveSubType(internal1, false));
+        Assert.assertNull(AttrTypeResolver.resolveSubType(internal1, true));
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(internal2, false), AttrSubType.Standard);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(internal2, true), AttrSubType.Standard);
+        Assert.assertNull(AttrTypeResolver.resolveSubType(internal3, false));
+        Assert.assertNull(AttrTypeResolver.resolveSubType(internal3, true));
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(internal4, false), AttrSubType.Standard);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(internal4, true), AttrSubType.Standard);
+        Assert.assertNull(AttrTypeResolver.resolveSubType(internal5, true));
 
         dataCloud.setCanInternalEnrich(Boolean.TRUE);
-        assertEquals(AttrTypeResolver.resolveSubType(dataCloud, false), AttrSubType.InternalEnrich);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(dataCloud, false), AttrSubType.InternalEnrich);
         dataCloud.setDataLicense("HG");
-        assertEquals(AttrTypeResolver.resolveSubType(dataCloud, false), AttrSubType.Premium);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(dataCloud, false), AttrSubType.Premium);
         dataCloud.setCanInternalEnrich(Boolean.FALSE);
         dataCloud.setDataLicense("");
-        assertEquals(AttrTypeResolver.resolveSubType(dataCloud, false), AttrSubType.Normal);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(dataCloud, false), AttrSubType.Normal);
 
         curated.setEntity(BusinessEntity.Rating);
-        assertEquals(AttrTypeResolver.resolveSubType(curated, false), AttrSubType.Rating);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(curated, false), AttrSubType.Rating);
         curated.setEntity(BusinessEntity.PurchaseHistory);
-        assertEquals(AttrTypeResolver.resolveSubType(curated, false), AttrSubType.ProductBundle);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(curated, false), AttrSubType.ProductBundle);
 
         custom1.setAttrName("Website");
         custom1.setEntity(BusinessEntity.Account);
         custom1.setCategory(Category.ACCOUNT_ATTRIBUTES);
-        assertEquals(AttrTypeResolver.resolveSubType(custom1, false), AttrSubType.Standard);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(custom1, false), AttrSubType.Standard);
         custom1.setAttrName("123");
-        assertEquals(AttrTypeResolver.resolveSubType(custom1, false), AttrSubType.Extension);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(custom1, false), AttrSubType.Extension);
         Map<ColumnSelection.Predefined, Boolean> groups = new HashMap<>();
         groups.put(ColumnSelection.Predefined.LookupId, Boolean.TRUE);
         custom1.setGroups(groups);
-        assertEquals(AttrTypeResolver.resolveSubType(custom1, false), AttrSubType.LookupId);
-        assertEquals(AttrTypeResolver.resolveSubType(custom2, true), AttrSubType.Standard);
-        assertEquals(AttrTypeResolver.resolveSubType(custom3, true), AttrSubType.Standard);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(custom1, false), AttrSubType.LookupId);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(custom2, true), AttrSubType.Standard);
+        Assert.assertEquals(AttrTypeResolver.resolveSubType(custom3, true), AttrSubType.Standard);
 
     }
 }

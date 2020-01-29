@@ -1,7 +1,5 @@
 package com.latticeengines.apps.core.service.impl;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +52,7 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
             attrConfigs.add(config);
         }
         usageLimitValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
-        assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), 0);
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), 0);
 
         AttrConfig activeConfig = new AttrConfig();
         activeConfig.setAttrName("Attr_enrich1");
@@ -62,7 +60,7 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
         activeConfig.putProperty(ColumnSelection.Predefined.Enrichment.name(), enrichProp);
         attrConfigs.add(activeConfig);
         usageLimitValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
-        assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size());
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size());
 
         attrConfigs.forEach(e -> e.setValidationErrors(null));
         AttrConfig inactiveConfig = new AttrConfig();
@@ -76,14 +74,14 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
         attrConfigs.add(inactiveConfig);
         usageLimitValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         // the new config should not have error message
-        assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
 
         attrConfigs.forEach(e -> e.setValidationErrors(null));
         usageLimitValidator.validate(
                 AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, true, false, false, false, false),
                 attrConfigs, new AttrValidation());
         // expect have error message in user provide list
-        assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
 
         attrConfigs.forEach(e -> e.setValidationErrors(null));
         // the static list returned by AttrConfigTestUtils.generatePropertyList
@@ -92,13 +90,13 @@ public class UsageLimitValidatorTestNG extends ServiceAppsFunctionalTestNGBase {
         usageLimitValidator.validate(
                 AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, true, false, false, false, false),
                 subList, new AttrValidation());
-        assertEquals(AttrConfigTestUtils.getErrorNumber(subList), 0);
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(subList), 0);
 
         subList.add(activeConfig);
         usageLimitValidator.validate(
                 AttrConfigTestUtils.generatePropertyList(Category.FIRMOGRAPHICS, true, false, false, false, false),
                 subList, new AttrValidation());
-        assertEquals(AttrConfigTestUtils.getErrorNumber(subList), subList.size());
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(subList), subList.size());
     }
 
 }

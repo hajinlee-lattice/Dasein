@@ -5,7 +5,7 @@ import java.io.IOException;
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

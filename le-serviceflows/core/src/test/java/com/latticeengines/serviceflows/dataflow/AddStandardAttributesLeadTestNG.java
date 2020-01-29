@@ -1,15 +1,11 @@
 package com.latticeengines.serviceflows.dataflow;
 
-import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertTrue;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.springframework.test.context.ContextConfiguration;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -34,31 +30,31 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
         Table table = executeDataFlow(parameters);
         System.out.println(JsonUtils.serialize(table));
         Attribute attribute = table.getAttribute("Industry_Group");
-        assertNotEquals(attribute.getDisplayName(), attribute.getName());
-        assertNotNull(attribute.getName());
-        assertNotNull(attribute.getRTSArguments());
-        assertNotNull(attribute.getRTSModuleName());
-        assertNotNull(attribute.getApprovedUsage());
-        assertNotNull(attribute.getRTSAttribute());
-        assertNotNull(attribute.getCategory());
-        assertNotNull(attribute.getDisplayName());
+        Assert.assertNotEquals(attribute.getDisplayName(), attribute.getName());
+        Assert.assertNotNull(attribute.getName());
+        Assert.assertNotNull(attribute.getRTSArguments());
+        Assert.assertNotNull(attribute.getRTSModuleName());
+        Assert.assertNotNull(attribute.getApprovedUsage());
+        Assert.assertNotNull(attribute.getRTSAttribute());
+        Assert.assertNotNull(attribute.getCategory());
+        Assert.assertNotNull(attribute.getDisplayName());
 
         attribute = table.getAttribute("ModelAction1");
-        assertNotEquals(attribute.getDisplayName(), attribute.getName());
-        assertNotNull(attribute.getName());
-        assertNotNull(attribute.getRTSArguments());
-        assertNotNull(attribute.getRTSModuleName());
-        assertNotNull(attribute.getApprovedUsage());
-        assertNotNull(attribute.getRTSAttribute());
-        assertNotNull(attribute.getCategory());
-        assertNotNull(attribute.getDisplayName());
+        Assert.assertNotEquals(attribute.getDisplayName(), attribute.getName());
+        Assert.assertNotNull(attribute.getName());
+        Assert.assertNotNull(attribute.getRTSArguments());
+        Assert.assertNotNull(attribute.getRTSModuleName());
+        Assert.assertNotNull(attribute.getApprovedUsage());
+        Assert.assertNotNull(attribute.getRTSAttribute());
+        Assert.assertNotNull(attribute.getCategory());
+        Assert.assertNotNull(attribute.getDisplayName());
 
         Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> datacomposition = table
                 .getRealTimeTransformationMetadata();
         Set<String> fields = datacomposition.getKey().keySet();
-        assertTrue(fields.contains("ModelAction1"));
-        assertTrue(fields.contains("Industry_Group"));
-        assertFalse(fields.contains("TitleRole"));
+        Assert.assertTrue(fields.contains("ModelAction1"));
+        Assert.assertTrue(fields.contains("Industry_Group"));
+        Assert.assertFalse(fields.contains("TitleRole"));
     }
 
     @Test(groups = "functional")
@@ -68,30 +64,30 @@ public class AddStandardAttributesLeadTestNG extends ServiceFlowsDataFlowFunctio
         Table table = executeDataFlow(parameters);
         System.out.println(JsonUtils.serialize(table));
         Attribute attribute = table.getAttribute("Industry_Group");
-        assertNotEquals(attribute.getDisplayName(), attribute.getName());
-        assertNotNull(attribute.getName());
-        assertNotNull(attribute.getRTSArguments());
-        assertNotNull(attribute.getRTSModuleName());
-        assertNotNull(attribute.getApprovedUsage());
-        assertNotNull(attribute.getRTSAttribute());
-        assertNotNull(attribute.getCategory());
-        assertNotNull(attribute.getDisplayName());
+        Assert.assertNotEquals(attribute.getDisplayName(), attribute.getName());
+        Assert.assertNotNull(attribute.getName());
+        Assert.assertNotNull(attribute.getRTSArguments());
+        Assert.assertNotNull(attribute.getRTSModuleName());
+        Assert.assertNotNull(attribute.getApprovedUsage());
+        Assert.assertNotNull(attribute.getRTSAttribute());
+        Assert.assertNotNull(attribute.getCategory());
+        Assert.assertNotNull(attribute.getDisplayName());
 
         attribute = table.getAttribute("TitleRole");
-        assertNotEquals(attribute.getDisplayName(), attribute.getName());
-        assertNotNull(attribute.getName());
-        assertNotNull(attribute.getRTSArguments());
-        assertNotNull(attribute.getRTSModuleName());
-        assertNotNull(attribute.getApprovedUsage());
-        assertNotNull(attribute.getRTSAttribute());
-        assertNotNull(attribute.getCategory());
-        assertNotNull(attribute.getDisplayName());
+        Assert.assertNotEquals(attribute.getDisplayName(), attribute.getName());
+        Assert.assertNotNull(attribute.getName());
+        Assert.assertNotNull(attribute.getRTSArguments());
+        Assert.assertNotNull(attribute.getRTSModuleName());
+        Assert.assertNotNull(attribute.getApprovedUsage());
+        Assert.assertNotNull(attribute.getRTSAttribute());
+        Assert.assertNotNull(attribute.getCategory());
+        Assert.assertNotNull(attribute.getDisplayName());
 
         Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> datacomposition = table
                 .getRealTimeTransformationMetadata();
         Set<String> fields = datacomposition.getKey().keySet();
-        assertTrue(fields.contains("TitleRole"));
-        assertTrue(fields.contains("Industry_Group"));
+        Assert.assertTrue(fields.contains("TitleRole"));
+        Assert.assertTrue(fields.contains("Industry_Group"));
     }
 
     @Override

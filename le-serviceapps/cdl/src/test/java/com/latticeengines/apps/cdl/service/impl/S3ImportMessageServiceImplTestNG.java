@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

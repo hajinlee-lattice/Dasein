@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.operationflow.service.impl;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -8,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -56,7 +56,7 @@ public class CleanupAllServiceUnitTestNG {
         try {
             cleanupAllService.invoke(configuration);
         } catch (Exception e) {
-            assertTrue(e instanceof RuntimeException);
+            Assert.assertTrue(e instanceof RuntimeException);
         }
     }
 }

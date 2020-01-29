@@ -1,6 +1,5 @@
 package com.latticeengines.apps.core.service.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import java.io.IOException;
@@ -12,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -57,7 +57,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
             attrConfigs.add(config);
         }
         limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
-        assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), 0);
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), 0);
 
         AttrConfig attrConfig = new AttrConfig();
         attrConfig.setAttrName("Attr_active");
@@ -65,7 +65,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
         attrConfig.putProperty(ColumnMetadataKey.State, prop);
         attrConfigs.add(attrConfig);
         limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
-        assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size());
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size());
 
         attrConfigs.forEach(e -> e.setValidationErrors(null));
         // set state equal to inactive
@@ -79,7 +79,7 @@ public class ActivationLimitValidatorFunctionalTestNG extends ServiceAppsFunctio
         attrConfigs.add(inactiveConfig);
         limitationValidator.validate(new ArrayList<>(), attrConfigs, new AttrValidation());
         // the inactive config should not have error message
-        assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
+        Assert.assertEquals(AttrConfigTestUtils.getErrorNumber(attrConfigs), attrConfigs.size() - 1);
     }
 
 }

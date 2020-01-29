@@ -10,9 +10,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.junit.Assert;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;

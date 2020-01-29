@@ -1,8 +1,8 @@
 package com.latticeengines.datacloud.workflow.match.steps;
 
-import org.junit.Assert;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -17,7 +17,7 @@ public class PrepareBulkMatchInputUnitTestNG {
             Integer[] expectedBlockSizes) {
         PrepareBulkMatchInput step = mockPrepareBulkMatchInput(version, entity, fetchOnly);
         Integer[] blockSizes = step.determineBlockSizes(count);
-        Assert.assertArrayEquals(expectedBlockSizes, blockSizes);
+        Assert.assertEquals(expectedBlockSizes, blockSizes);
     }
 
     @DataProvider(name = "getMatchInputInfo")

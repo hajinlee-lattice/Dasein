@@ -1,8 +1,5 @@
 package com.latticeengines.apps.cdl.end2end;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,9 +11,9 @@ import java.util.Set;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.junit.Assert;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
@@ -91,9 +88,9 @@ public class CleanupByUploadTransactionDeploymentTestNG extends CDLEnd2EndDeploy
         ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, cleanupTemplate,
                 BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_ACPD, MultiTenantContext.getEmailAddress());
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
-        assertEquals(status, JobStatus.COMPLETED);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
         List<GenericRecord> records = getRecords(masterTable);
-        assertTrue(records.size() + templateSize <= originalRecordsCount);
+        Assert.assertTrue(records.size() + templateSize <= originalRecordsCount);
         originalRecordsCount = records.size();
     }
 
@@ -101,9 +98,9 @@ public class CleanupByUploadTransactionDeploymentTestNG extends CDLEnd2EndDeploy
         ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, cleanupTemplate,
                 BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_MINDATEANDACCOUNT, MultiTenantContext.getEmailAddress());
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
-        assertEquals(status, JobStatus.COMPLETED);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
         List<GenericRecord> records = getRecords(masterTable);
-        assertTrue(records.size() < originalRecordsCount);
+        Assert.assertTrue(records.size() < originalRecordsCount);
         originalRecordsCount = records.size();
     }
 
@@ -111,9 +108,9 @@ public class CleanupByUploadTransactionDeploymentTestNG extends CDLEnd2EndDeploy
         ApplicationId appId = cdlProxy.cleanupByUpload(customerSpace, cleanupTemplate,
                 BusinessEntity.Transaction, CleanupOperationType.BYUPLOAD_MINDATE, MultiTenantContext.getEmailAddress());
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
-        assertEquals(status, JobStatus.COMPLETED);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
         List<GenericRecord> records = getRecords(masterTable);
-        assertTrue(records.size() > 0);
+        Assert.assertTrue(records.size() > 0);
         boolean allEarlier = true;
         for (GenericRecord record : records) {
             int period = Integer.parseInt(record.get("TransactionDayPeriod").toString());
@@ -122,7 +119,7 @@ public class CleanupByUploadTransactionDeploymentTestNG extends CDLEnd2EndDeploy
                 break;
             }
         }
-        assertTrue(allEarlier);
+        Assert.assertTrue(allEarlier);
     }
 
     private List<GenericRecord> getRecords(Table table) {
