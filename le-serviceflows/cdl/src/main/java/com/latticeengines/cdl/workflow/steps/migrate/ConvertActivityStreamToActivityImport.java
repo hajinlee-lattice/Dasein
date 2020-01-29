@@ -1,8 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.migrate;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
@@ -33,15 +31,15 @@ public class ConvertActivityStreamToActivityImport extends SoftDeleteActivityStr
         Map<String, String> rawStreamTables = buildRawStreamBatchStore();
         updateEntityValueMapInContext(PERFORM_HARD_DELETE, Boolean.TRUE, Boolean.class);
         if (MapUtils.isNotEmpty(rawStreamTables)) {
-            Map<String, List<ActivityImport>> streamImports = new HashMap<>();
+            Map<String, ActivityImport> streamImports = new HashMap<>();
             Map<String, AtlasStream> streamMap = configuration.getActivityStreamMap();
             if (MapUtils.isNotEmpty(streamMap)) {
                 rawStreamTables.forEach((streamId, tableName) -> {
                     AtlasStream atlasStream = streamMap.get(streamId);
                     if (atlasStream != null) {
                         streamImports.put(streamId,
-                                Collections.singletonList(new ActivityImport(BusinessEntity.getByName(atlasStream.getDataFeedTask().getEntity()),
-                                        atlasStream.getStreamId(), tableName, "HardDeleteFile")));
+                                new ActivityImport(BusinessEntity.getByName(atlasStream.getDataFeedTask().getEntity()),
+                                        atlasStream.getStreamId(), tableName, "HardDeleteFile"));
                     }
                 });
             }

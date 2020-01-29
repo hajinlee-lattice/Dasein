@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow.steps.merge;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_APPEND_RAWSTREAM;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -218,5 +220,19 @@ public abstract class BaseActivityStreamStep<T extends ProcessActivityStreamStep
 
     private boolean needAppendRawStream(String matchedImportTable, String activeBatchTable) {
         return StringUtils.isNotBlank(matchedImportTable) || StringUtils.isNotBlank(activeBatchTable);
+    }
+
+    protected Map<String, List<ActivityImport>> getStreamImports(Map<String, ActivityImport> activityImportFromHardDelete) {
+        if (MapUtils.isEmpty(activityImportFromHardDelete)) {
+            return configuration.getStreamImports();
+        } else {
+            Map<String, List<ActivityImport>> activityImportMap = MapUtils.isEmpty(configuration.getStreamImports()) ?
+                    new HashMap<>() : configuration.getStreamImports();
+            activityImportFromHardDelete.forEach((streamId, activityImport) -> {
+                activityImportMap.putIfAbsent(streamId, new ArrayList<>());
+                activityImportMap.get(streamId).add(activityImport);
+            });
+            return activityImportMap;
+        }
     }
 }
