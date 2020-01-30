@@ -37,8 +37,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
-@Component(ProcessAccountDiff.BEAN_NAME)
 @Lazy
+@Component(ProcessAccountDiff.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessAccountStepConfiguration> {
 
