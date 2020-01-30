@@ -82,8 +82,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
 
-        List<LatticeProduct> products = getProducts(customerSpace);
-        if (!products.contains(LatticeProduct.DCP)) {
+        if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
             s3ImportSystemService.createDefaultImportSystem(space.toString());
             dropBoxService.createTenantDefaultFolder(space.toString());
             if (configDir.get("/ExportCronExpression") != null) {
@@ -107,24 +106,4 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         log.info("Created dropbox " + dropBox.getDropBox() + " for " + customerSpace.getTenantId());
     }
 
-    private List<LatticeProduct> getProducts(String customerSpace) {
-        try {
-            SpaceConfiguration spaceConfiguration = getSpaceConfiguration(customerSpace);
-            return spaceConfiguration.getProducts();
-        } catch (Exception e) {
-            log.error("Failed to get product list of tenant " + customerSpace, e);
-            return new ArrayList<>();
-        }
-    }
-
-    private SpaceConfiguration getSpaceConfiguration(String tenantId) {
-        try {
-            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            TenantDocument tenantDocument = batonService.getTenant(customerSpace.getContractId(),
-                    customerSpace.getTenantId());
-            return tenantDocument.getSpaceConfig();
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_18086, e, new String[] { tenantId });
-        }
-    }
 }
