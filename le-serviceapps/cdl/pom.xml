@@ -126,6 +126,11 @@
             <artifactId>quartz</artifactId>
             <version>${quartz.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-app</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

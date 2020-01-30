@@ -1,11 +1,14 @@
 package com.latticeengines.apps.cdl.provision.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.app.exposed.service.CommonTenantConfigService;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
@@ -16,6 +19,7 @@ import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.cdl.DropBox;
@@ -55,6 +59,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     @Inject
     private AtlasSchedulingService atlasSchedulingService;
 
+    @Inject
+    private CommonTenantConfigService commonTenantConfigService;
+
     @Override
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
@@ -69,12 +76,16 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
-        s3ImportSystemService.createDefaultImportSystem(space.toString());
-        dropBoxService.createTenantDefaultFolder(space.toString());
-        if (configDir.get("/ExportCronExpression") != null) {
-            String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
-            log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
-            atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
+
+        List<LatticeProduct> products = commonTenantConfigService.getProducts(customerSpace);
+        if (!products.contains(LatticeProduct.DCP)) {
+            s3ImportSystemService.createDefaultImportSystem(space.toString());
+            dropBoxService.createTenantDefaultFolder(space.toString());
+            if (configDir.get("/ExportCronExpression") != null) {
+                String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
+                log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
+                atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
+            }
         }
     }
 
