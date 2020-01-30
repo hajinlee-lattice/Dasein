@@ -57,9 +57,12 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
     protected DataCollection.Version inactive;
 
     protected Table masterTable;
+    private Table systemMasterTable;
     protected BusinessEntity entity;
     protected TableRoleInCollection batchStore;
-    protected String batchStoreTablePrefix;
+    private TableRoleInCollection systemBatchStore;
+    private String batchStoreTablePrefix;
+    private String systemBatchStoreTablePrefix;
     List<Action> softDeleteActions;
 
     protected abstract PipelineTransformationRequest getConsolidateRequest();
@@ -74,6 +77,20 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
                 entity.getBatchStore();
         batchStoreTablePrefix = entity.name();
         masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
+        if (processSystemBatchStore()) {
+            switch (entity) {
+                case Account:
+                    systemBatchStore = TableRoleInCollection.SystemAccount;
+                    break;
+                case Contact:
+                    systemBatchStore = TableRoleInCollection.SystemContact;
+                    break;
+                default:
+                    throw new UnsupportedOperationException("No system batch store for " + entity.name());
+            }
+            systemMasterTable = dataCollectionProxy.getTable(customerSpace.toString(), systemBatchStore, active);
+            systemBatchStoreTablePrefix = systemBatchStore.name();
+        }
     }
 
     @Override
@@ -114,7 +131,7 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         putObjectInContext(key, entityValueMap);
     }
 
-    protected void registerBatchStore() {
+    private void registerBatchStore() {
         Table table = metadataProxy.getTable(customerSpace.toString(), getBatchStoreName());
         if (entity.getBatchStore() != null) {
             if (table == null) {
@@ -124,10 +141,23 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
                 dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
             }
         }
+        if (processSystemBatchStore()) {
+            table = metadataProxy.getTable(customerSpace.toString(), getSystemBatchStoreName());
+            if (table == null) {
+                log.warn("Did not generate new table for " + systemBatchStore);
+                dataCollectionProxy.unlinkTables(customerSpace.toString(), systemBatchStore, inactive);
+            } else {
+                dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), systemBatchStore, inactive);
+            }
+        }
     }
 
     protected String getBatchStoreName() {
         return TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion);
+    }
+
+    private String getSystemBatchStoreName() {
+        return TableUtils.getFullTableName(systemBatchStoreTablePrefix, pipelineVersion);
     }
 
     TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions) {
@@ -146,6 +176,14 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
     }
 
     TransformationStepConfig softDelete(int mergeSoftDeleteStep) {
+        return softDelete(mergeSoftDeleteStep, masterTable);
+    }
+
+    TransformationStepConfig softDeleteSystemBatchStore(int mergeSoftDeleteStep) {
+        return softDelete(mergeSoftDeleteStep, systemMasterTable);
+    }
+
+    private TransformationStepConfig softDelete(int mergeSoftDeleteStep, Table masterTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
@@ -179,6 +217,10 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         Long result = SparkUtils.countRecordsInGlobs(sessionService, sparkJobService, yarnConfiguration, hdfsPath);
         log.info(String.format("Table role %s version %s has %d entities.", tableRole.name(), version.name(), result));
         return result;
+    }
+
+    protected boolean processSystemBatchStore() {
+        return false;
     }
 
 }
