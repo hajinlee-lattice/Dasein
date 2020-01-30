@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.migrate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
@@ -8,22 +9,32 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteActivityStream;
+import com.latticeengines.cdl.workflow.steps.maintenance.BaseDeleteActivityStream;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 
 @Component(ConvertActivityStreamToActivityImport.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ConvertActivityStreamToActivityImport extends SoftDeleteActivityStream {
+public class ConvertActivityStreamToActivityImport extends BaseDeleteActivityStream<ProcessActivityStreamStepConfiguration> {
 
     static final String BEAN_NAME = "convertActivityStreamToActivityImport";
+
+    List<Action> hardDeleteActions;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         initializeConfiguration();
         return generateWorkflowConf();
+    }
+
+    @Override
+    protected void initializeConfiguration() {
+        super.initializeConfiguration();
+        hardDeleteActions = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
     }
 
     @Override
@@ -45,5 +56,15 @@ public class ConvertActivityStreamToActivityImport extends SoftDeleteActivityStr
             }
             putObjectInContext(ACTIVITY_IMPORT_AFTER_HARD_DELETE, streamImports);
         }
+    }
+
+    @Override
+    protected List<Action> deleteActions() {
+        return hardDeleteActions;
+    }
+
+    @Override
+    protected String getBeanName() {
+        return BEAN_NAME;
     }
 }
