@@ -585,7 +585,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void processAnalyzeSkipPublishToS3(Long currentPATimestamp) {
-        processAnalyze(getProcessRequest(currentPATimestamp));
+        processAnalyzeSkipPublishToS3(currentPATimestamp, false);
+    }
+
+    void processAnalyzeSkipPublishToS3(Long currentPATimestamp, boolean fullRematch) {
+        processAnalyze(getProcessRequest(currentPATimestamp, fullRematch));
     }
 
     void processAnalyze() {
@@ -1837,9 +1841,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private ProcessAnalyzeRequest getProcessRequest(Long currentPATimestamp) {
+        return getProcessRequest(currentPATimestamp, false);
+    }
+
+    private ProcessAnalyzeRequest getProcessRequest(Long currentPATimestamp, boolean fullRematch) {
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(isLocalEnvironment());
         request.setSkipDynamoExport(true);
+        request.setFullRematch(fullRematch);
         request.setCurrentPATimestamp(currentPATimestamp);
         return request;
     }

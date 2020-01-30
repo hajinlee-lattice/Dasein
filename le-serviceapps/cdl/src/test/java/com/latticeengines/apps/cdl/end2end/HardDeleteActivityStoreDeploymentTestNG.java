@@ -24,7 +24,7 @@ public class HardDeleteActivityStoreDeploymentTestNG extends DeleteActivityStore
 
 //        if (isLocalEnvironment()) {
             // run PA with fake current time
-            processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
+            processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli(), true);
 //        } else {
 //            runTestWithRetry(getCandidateFailingSteps(), CURRENT_PA_TIME.toEpochMilli());
 //        }
