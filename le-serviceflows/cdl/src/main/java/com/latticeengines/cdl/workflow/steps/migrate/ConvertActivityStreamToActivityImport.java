@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -12,10 +15,12 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.maintenance.BaseDeleteActivityStream;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 @Component(ConvertActivityStreamToActivityImport.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -24,6 +29,9 @@ public class ConvertActivityStreamToActivityImport extends BaseDeleteActivityStr
     static final String BEAN_NAME = "convertActivityStreamToActivityImport";
 
     List<Action> hardDeleteActions;
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
 
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
@@ -49,13 +57,25 @@ public class ConvertActivityStreamToActivityImport extends BaseDeleteActivityStr
                     AtlasStream atlasStream = streamMap.get(streamId);
                     if (atlasStream != null) {
                         streamImports.put(streamId,
-                                new ActivityImport(BusinessEntity.getByName(atlasStream.getDataFeedTask().getEntity()),
+                                new ActivityImport(getEntityFromStream(atlasStream),
                                         atlasStream.getStreamId(), tableName, "HardDeleteFile"));
                     }
                 });
             }
             putObjectInContext(ACTIVITY_IMPORT_AFTER_HARD_DELETE, streamImports);
         }
+    }
+
+    private BusinessEntity getEntityFromStream(AtlasStream atlasStream) {
+        if (atlasStream.getDataFeedTask() == null) {
+            return null;
+        }
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
+                atlasStream.getDataFeedTaskUniqueId());
+        if (dataFeedTask != null && StringUtils.isNotEmpty(dataFeedTask.getEntity())) {
+            return BusinessEntity.getByName(dataFeedTask.getEntity());
+        }
+        return null;
     }
 
     @Override
