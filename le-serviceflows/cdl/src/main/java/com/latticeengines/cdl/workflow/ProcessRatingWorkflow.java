@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
-import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.PostIterationInitialization;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.rating.ProfileRatingWrapper;
@@ -37,9 +36,6 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
 
     @Inject
     private ResetRating resetRating;
-
-    @Inject
-    private CloneInactiveServingStores cloneInactiveServingStores;
 
     @Inject
     private StartIteration startIteration;
@@ -72,7 +68,6 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
     public Workflow defineWorkflow(ProcessRatingWorkflowConfiguration config) {
         WorkflowBuilder builder = new WorkflowBuilder(name(), config) //
                 .next(prepareForRating) //
-                .next(cloneInactiveServingStores) //
                 .next(importGeneratingRatingFromS3) //
                 .next(splitRatingEngines) //
                 .next(resetRating); //

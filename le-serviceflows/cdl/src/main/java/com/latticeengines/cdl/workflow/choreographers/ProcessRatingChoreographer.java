@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.GenerateAIRatingWorkflow;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
-import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.ExtractRuleBasedRatings;
 import com.latticeengines.cdl.workflow.steps.rating.PostIterationInitialization;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
@@ -52,9 +51,6 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     @Inject
     private PrepareForRating prepareForRating;
-
-    @Inject
-    private CloneInactiveServingStores cloneInactiveServingStores;
 
     @Inject
     private ImportGeneratingRatingFromS3 importGeneratingRatingFromS3;
@@ -126,7 +122,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             return false;
         }
 
-        if (isCloneServingStoresStep(step)) {
+        if (isImportGeneratingRatingFromS3(step)) {
             initialize(step);
         }
 
@@ -142,7 +138,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
                 skip = true;
             } else if (isResetRatingStep(step) || iterationFinished) {
                 skip = true;
-            } else if (isStartIterationStep(step) || isCloneServingStoresStep(step)
+            } else if (isStartIterationStep(step)
                     || isImportGeneratingRatingFromS3(step) || isSplitRatingStep(step)) {
                 // always run these steps in rebuild mode
                 skip = false;
@@ -246,10 +242,6 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean isSplitRatingStep(AbstractStep<? extends BaseStepConfiguration> step) {
         return step.name().equals(splitRatingEngines.name());
-    }
-
-    private boolean isCloneServingStoresStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().equals(cloneInactiveServingStores.name());
     }
 
     private boolean isImportGeneratingRatingFromS3(AbstractStep<? extends BaseStepConfiguration> step) {
