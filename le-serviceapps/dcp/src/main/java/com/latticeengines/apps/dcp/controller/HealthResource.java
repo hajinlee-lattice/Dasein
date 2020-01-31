@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,6 +23,7 @@ public class HealthResource {
     @ApiOperation(value = "Health check")
     @NoMetricsLog
     @NoCustomerSpace
+    @IgnoreGlobalApiMeter
     public StatusDocument healthCheck() {
         return StatusDocument.online();
     }
