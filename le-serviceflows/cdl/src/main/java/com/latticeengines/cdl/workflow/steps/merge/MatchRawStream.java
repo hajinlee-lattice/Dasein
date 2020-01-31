@@ -60,7 +60,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     private final Map<String, String> newAccountTables = new HashMap<>();
     private long paTimestamp;
 
-    private Map<String, ActivityImport> activityImportsFromHardDelete;
+    private Map<String, String> activityImportsFromHardDelete;
 
     @Override
     protected void initializeConfiguration() {
@@ -71,7 +71,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
         if (hardDeleteEntities.containsKey(configuration.getMainEntity())) {
             log.info("Hard delete performed for Activity Stream");
             activityImportsFromHardDelete = getMapObjectFromContext(ACTIVITY_IMPORT_AFTER_HARD_DELETE, String.class,
-                    ActivityImport.class);
+                    String.class);
         }
         buildStreamImportColumnNames();
         bumpEntityMatchStagingVersion();
@@ -108,7 +108,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
          * 1. merge imports
          * 2. match against current universe
          */
-        Map<String, Integer> matchedImportTableIdx = getStreamImports(activityImportsFromHardDelete).entrySet() //
+        Map<String, Integer> matchedImportTableIdx = configuration.getStreamImports().entrySet() //
                 .stream() //
                 .map(entry -> {
                     String streamId = entry.getKey();
@@ -228,6 +228,9 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     @Override
     protected String getRawStreamActiveTable(@NotNull String streamId, @NotNull AtlasStream stream) {
         if (hardDeleteEntities.containsKey(entity)) {
+            if (MapUtils.isNotEmpty(activityImportsFromHardDelete)) {
+                return activityImportsFromHardDelete.get(streamId);
+            }
             return null;
         } else {
             return super.getRawStreamActiveTable(streamId, stream);
@@ -235,7 +238,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     }
 
     private void buildStreamImportColumnNames() {
-        Map<String, List<ActivityImport>> streamImports = getStreamImports(activityImportsFromHardDelete);
+        Map<String, List<ActivityImport>> streamImports = configuration.getStreamImports();;
         if (MapUtils.isEmpty(streamImports)) {
             return;
         }
