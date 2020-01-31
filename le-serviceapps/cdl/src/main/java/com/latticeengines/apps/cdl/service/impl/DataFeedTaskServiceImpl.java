@@ -85,6 +85,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
                 dataFeedTask.setImportTemplate(metaData);
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask, false);
+                mdService.updateImportTableUpdatedBy(CustomerSpace.parse(customerSpace), dataFeedTask.getImportTemplate());
             }
         }
     }
@@ -151,6 +152,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         DatabaseUtils.retry("Update DataFeedTask", 10,
                 RollbackException.class, "RollbackException detected when", null,
                 input -> dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask, updateTaskOnly));
+        mdService.updateImportTableUpdatedBy(CustomerSpace.parse(customerSpace), dataFeedTask.getImportTemplate());
     }
 
     @Override

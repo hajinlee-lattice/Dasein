@@ -60,4 +60,6 @@ public interface MetadataService {
     List<Table> findAllWithExpiredRetentionPolicy(int index, int max);
 
     void updateTableRetentionPolicies(CustomerSpace customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail);
+
+    void updateImportTableUpdatedBy(CustomerSpace space, Table table);
 }

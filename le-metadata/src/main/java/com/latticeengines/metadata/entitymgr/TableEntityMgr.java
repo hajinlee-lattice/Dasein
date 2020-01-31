@@ -62,6 +62,8 @@ public interface TableEntityMgr {
 
     void fixAttributes(String name, List<AttributeFixer> attributeFixerList);
 
+    void updateUpdatedBy(Table table);
+
     void updateTableRetentionPolicy(String tableName, RetentionPolicy retentionPolicy);
 
     List<Table> findAllWithExpiredRetentionPolicy(int index, int max);

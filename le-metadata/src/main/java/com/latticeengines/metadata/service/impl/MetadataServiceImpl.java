@@ -255,6 +255,16 @@ public class MetadataServiceImpl implements MetadataService {
         tableEntityMgr.updateTableRetentionPolicies(retentionPolicyUpdateDetail);
     }
 
+    @Override
+    public void updateImportTableUpdatedBy(CustomerSpace customerSpace, Table table) {
+        tableTypeHolder.setTableType(TableType.IMPORTTABLE);
+        try {
+            tableEntityMgr.updateUpdatedBy(table);
+        } finally {
+            tableTypeHolder.setTableType(TableType.DATATABLE);
+        }
+    }
+
     @NoCustomSpaceAndType
     @Override
     public List<Table> findAllWithExpiredRetentionPolicy(int index, int max) {
