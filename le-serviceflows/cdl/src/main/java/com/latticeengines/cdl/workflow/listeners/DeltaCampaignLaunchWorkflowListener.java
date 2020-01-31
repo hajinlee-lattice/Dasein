@@ -74,8 +74,8 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
                 DeltaCampaignLaunchWorkflowConfiguration.CREATE_DELETE_CSV_DATA_FRAME));
 
         List<String> hdfsIntermediateFiles = new ArrayList<>();
-        List<String> s3UploadFiles = getListObjectFromContext(jobExecution,
-                DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, String.class);
+        List<String> hdfsUploadFiles = getListObjectFromContext(jobExecution,
+                DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_HDFS_EXPORT_FILE_PATHS, String.class);
 
         if (createRecommendationDataFrame) {
             hdfsIntermediateFiles.add(getStringValueFromContext(jobExecution,
@@ -89,8 +89,8 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
             hdfsIntermediateFiles.add(getStringValueFromContext(jobExecution,
                     DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH));
         }
-        if (s3UploadFiles != null) {
-            hdfsIntermediateFiles.addAll(s3UploadFiles);
+        if (hdfsUploadFiles != null) {
+            hdfsIntermediateFiles.addAll(hdfsUploadFiles);
         }
 
         log.info("Deleting files: " + Arrays.toString(hdfsIntermediateFiles.toArray()));

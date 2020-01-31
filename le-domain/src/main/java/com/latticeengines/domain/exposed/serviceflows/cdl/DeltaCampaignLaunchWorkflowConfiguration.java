@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.ImportDeltaCalcul
 public class DeltaCampaignLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static final String RECOMMENDATION_WORKFLOW_REQUEST_ID = "RECOMMENDATION_WORKFLOW_REQUEST_ID";
+    public static final String RECOMMENDATION_HDFS_EXPORT_FILE_PATHS = "RECOMMENDATION_HDFS_EXPORT_FILE_PATHS";
     public static final String RECOMMENDATION_S3_EXPORT_FILE_PATHS = "RECOMMENDATION_S3_EXPORT_FILE_PATHS";
 
     public static final String ADD = "add";

@@ -49,6 +49,8 @@ public class DeltaCampaignLaunchExportFilesToS3Step
 
     private List<String> s3ExportFilePaths = new ArrayList<>();
 
+    private List<String> hdfsExportFilePaths = new ArrayList<>();
+
     private static final String CSV = "csv";
 
     private static final String CDL_DATA_INTEGRATION_END_POINT = "/cdl/dataintegration";
@@ -121,6 +123,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
                             exportS3Bucket);
                     requests.add(request);
                     targetPaths.add(request.tgtPath);
+                    hdfsExportFilePaths.add(request.srcPath);
                     s3ExportFilePaths.add(request.tgtPath);
                 });
                 exportFiles.put(k, targetPaths);
@@ -137,6 +140,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
                             getConfiguration().getPlayDisplayName());
                     requests.add(request);
                     targetPaths.add(request.tgtPath);
+                    hdfsExportFilePaths.add(request.srcPath);
                     s3ExportFilePaths.add(request.tgtPath);
                 });
                 exportFiles.put(k, targetPaths);
@@ -144,6 +148,7 @@ public class DeltaCampaignLaunchExportFilesToS3Step
         }
         log.info("After processing, Uploading all HDFS files to S3. {}", exportFiles);
         putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.ADD_AND_DELETE_S3_EXPORT_FILES, exportFiles);
+        log.info("Source Hdfs Files. {}", hdfsExportFilePaths);
         log.info("Uploaded S3 Files. {}", s3ExportFilePaths);
 
     }
@@ -187,6 +192,8 @@ public class DeltaCampaignLaunchExportFilesToS3Step
                 workflowRequestId);
         putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS,
                 s3ExportFilePaths);
+        putObjectInContext(DeltaCampaignLaunchWorkflowConfiguration.RECOMMENDATION_HDFS_EXPORT_FILE_PATHS,
+                hdfsExportFilePaths);
         log.info(JsonUtils.serialize(message));
     }
 
