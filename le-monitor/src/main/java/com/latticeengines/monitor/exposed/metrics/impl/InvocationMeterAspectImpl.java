@@ -93,7 +93,7 @@ public class InvocationMeterAspectImpl implements InvocationMeterAspect {
         try {
             String fullName = joinPoint.getTarget().getClass().getCanonicalName();
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-            fullName += signature.getName();
+            fullName += "#" + signature.getName();
             boolean canIgnore = signature.getMethod().getAnnotation(IgnoreGlobalApiMeter.class) != null;
             incrementGlobalInvocationMeter(fullName, duration, t != null, canIgnore);
         } catch (Exception e) {
