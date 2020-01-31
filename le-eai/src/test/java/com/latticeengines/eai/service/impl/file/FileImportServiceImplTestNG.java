@@ -1,8 +1,5 @@
 package com.latticeengines.eai.service.impl.file;
 
-import static org.junit.Assert.assertNotNull;
-import static org.testng.Assert.assertEquals;
-
 import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -17,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -92,7 +90,7 @@ public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGB
 
         Job mrJob = createMRJob(CSVImportJob.class, fileEventTableImportStrategyBase.getProperties(ctx, tables.get(0)));
         JobID jobID = JobService.runMRJob(mrJob, "jobName", true);
-        assertNotNull(jobID);
+        Assert.assertNotNull(jobID);
         fileEventTableImportStrategyBase.updateContextProperties(ctx, tables.get(0));
         eaiMetadataService.updateTableSchema(tables, ctx);
 
@@ -100,11 +98,11 @@ public class FileImportServiceImplTestNG extends EaiMiniClusterFunctionalTestNGB
                 tables.get(0), //
                 8);
         Counters counters = mrJob.getCounters();
-        assertEquals(counters.findCounter(RecordImportCounter.IMPORTED_RECORDS).getValue(), 8);
-        assertEquals(counters.findCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 11);
-        assertEquals(counters.findCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
-        assertEquals(counters.findCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 6);
-        assertEquals(counters.findCounter(RecordImportCounter.ROW_ERROR).getValue(), 0);
+        Assert.assertEquals(counters.findCounter(RecordImportCounter.IMPORTED_RECORDS).getValue(), 8);
+        Assert.assertEquals(counters.findCounter(RecordImportCounter.IGNORED_RECORDS).getValue(), 11);
+        Assert.assertEquals(counters.findCounter(RecordImportCounter.REQUIRED_FIELD_MISSING).getValue(), 5);
+        Assert.assertEquals(counters.findCounter(RecordImportCounter.FIELD_MALFORMED).getValue(), 6);
+        Assert.assertEquals(counters.findCounter(RecordImportCounter.ROW_ERROR).getValue(), 0);
     }
 
     @DataProvider

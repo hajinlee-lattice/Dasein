@@ -8,9 +8,9 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -332,7 +332,7 @@ public class AMSeedCleanByDomainOwnerTestNG extends PipelineTransformationTestNG
             amSeedExpectedValues.remove(domain + duns);
             rowCount++;
         }
-        Assert.assertTrue(amSeedExpectedValues.size() == 0);
+        Assert.assertEquals(amSeedExpectedValues.size(), 0);
         Assert.assertEquals(rowCount, amSeedCleanedUpValues.length);
     }
 

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.joda.time.DateTime;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

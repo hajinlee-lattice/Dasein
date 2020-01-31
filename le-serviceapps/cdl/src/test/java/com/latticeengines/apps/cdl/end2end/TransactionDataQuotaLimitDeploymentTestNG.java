@@ -5,10 +5,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

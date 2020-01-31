@@ -1,9 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -103,11 +99,11 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     @Test(groups = "deployment-app")
     public void testVerifyGetTable() {
         List<Table> tables = metadataProxy.getTables(mainTestTenant.getId());
-        assertNotNull(tables);
+        Assert.assertNotNull(tables);
         tables.forEach(table -> {
-            assertNotNull(table);
+            Assert.assertNotNull(table);
             Long attributeCount = metadataProxy.getTableAttributeCount(mainTestTenant.getId(), table.getName());
-            assertEquals(attributeCount.intValue(), table.getAttributes().size());
+            Assert.assertEquals(attributeCount.intValue(), table.getAttributes().size());
         });
     }
 
@@ -126,7 +122,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
         List<AttrConfig> customerConfigs = request.getAttrConfigs();
-        assertEquals(customerConfigs.size(), 1);
+        Assert.assertEquals(customerConfigs.size(), 1);
 
         AttrConfig config2 = new AttrConfig();
         config2.setAttrName("LastModifiedDate");
@@ -140,10 +136,10 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
         customerConfigs = request.getAttrConfigs();
-        assertEquals(customerConfigs.size(), 1);
+        Assert.assertEquals(customerConfigs.size(), 1);
         AttrConfig dateConfig = customerConfigs.get(0);
-        assertEquals(dateConfig.getAttrName(), "LastModifiedDate");
-        assertEquals(dateConfig.getAttrProps().size(), 2);
+        Assert.assertEquals(dateConfig.getAttrName(), "LastModifiedDate");
+        Assert.assertEquals(dateConfig.getAttrProps().size(), 2);
 
         // transfer null, make sure the prop removed
         segmentProp = new AttrConfigProp<>();
@@ -155,11 +151,11 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
         customerConfigs = request.getAttrConfigs();
-        assertEquals(customerConfigs.size(), 1);
+        Assert.assertEquals(customerConfigs.size(), 1);
         dateConfig = customerConfigs.get(0);
-        assertEquals(dateConfig.getAttrName(), "LastModifiedDate");
-        assertEquals(dateConfig.getAttrProps().size(), 1);
-        assertFalse(dateConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Segment.name()));
+        Assert.assertEquals(dateConfig.getAttrName(), "LastModifiedDate");
+        Assert.assertEquals(dateConfig.getAttrProps().size(), 1);
+        Assert.assertFalse(dateConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Segment.name()));
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testPartialUpdate" })
@@ -184,9 +180,9 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
-        assertEquals(request.getAttrConfigs().size(), 2);
+        Assert.assertEquals(request.getAttrConfigs().size(), 2);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, false);
-        assertEquals(request.getAttrConfigs().size(), 1);
+        Assert.assertEquals(request.getAttrConfigs().size(), 1);
 
         // db only has one rating object for the tenant, save one config with
         // entity Rating and TalkingPoint customer value null , at last verify
@@ -198,7 +194,7 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request, AttrConfigUpdateMode.Usage);
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, false);
-        assertEquals(request.getAttrConfigs().size(), 0);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
 
     }
 
@@ -208,21 +204,21 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Thread.sleep(500L);
         AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
                 BusinessEntity.Account, false);
-        assertEquals(request.getAttrConfigs().size(), 0);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
 
         cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(mainTestTenant.getId(), null);
         Thread.sleep(500L);
 
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Account, false);
-        assertEquals(request.getAttrConfigs().size(), 0);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
 
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
-        assertEquals(request.getAttrConfigs().size(), 0);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, false);
-        assertEquals(request.getAttrConfigs().size(), 0);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.PurchaseHistory,
                 false);
-        assertEquals(request.getAttrConfigs().size(), 0);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
     }
 
     private void createRatingEngine(RatingEngine re) {

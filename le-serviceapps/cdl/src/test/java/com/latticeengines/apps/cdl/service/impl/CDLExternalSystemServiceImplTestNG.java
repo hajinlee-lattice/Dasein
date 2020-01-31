@@ -7,7 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

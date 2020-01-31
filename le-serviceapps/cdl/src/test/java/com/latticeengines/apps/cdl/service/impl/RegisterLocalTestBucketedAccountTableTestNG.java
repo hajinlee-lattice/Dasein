@@ -9,10 +9,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
