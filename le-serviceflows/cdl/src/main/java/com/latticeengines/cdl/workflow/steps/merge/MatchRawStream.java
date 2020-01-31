@@ -60,7 +60,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     private final Map<String, String> newAccountTables = new HashMap<>();
     private long paTimestamp;
 
-    private Map<String, String> activityImportsFromHardDelete;
+    private Map<String, String> rawActivityStreamFromHardDelete;
 
     @Override
     protected void initializeConfiguration() {
@@ -70,7 +70,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
         log.info("IsRematch={}, isReplace={}", configuration.isRematchMode(), configuration.isReplaceMode());
         if (hardDeleteEntities.containsKey(configuration.getMainEntity())) {
             log.info("Hard delete performed for Activity Stream");
-            activityImportsFromHardDelete = getMapObjectFromContext(ACTIVITY_IMPORT_AFTER_HARD_DELETE, String.class,
+            rawActivityStreamFromHardDelete = getMapObjectFromContext(ACTIVITY_IMPORT_AFTER_HARD_DELETE, String.class,
                     String.class);
         }
         buildStreamImportColumnNames();
@@ -228,8 +228,8 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     @Override
     protected String getRawStreamActiveTable(@NotNull String streamId, @NotNull AtlasStream stream) {
         if (hardDeleteEntities.containsKey(entity)) {
-            if (MapUtils.isNotEmpty(activityImportsFromHardDelete)) {
-                return activityImportsFromHardDelete.get(streamId);
+            if (MapUtils.isNotEmpty(rawActivityStreamFromHardDelete)) {
+                return rawActivityStreamFromHardDelete.get(streamId);
             }
             return null;
         } else {
