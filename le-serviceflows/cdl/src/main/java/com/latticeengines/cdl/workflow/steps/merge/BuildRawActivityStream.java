@@ -111,6 +111,9 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
 
     @Override
     protected String getRawStreamActiveTable(@NotNull String streamId, @NotNull AtlasStream stream) {
+        if (hardDeleteEntities.containsKey(entity)) {
+            return null;
+        }
         if (MapUtils.isEmpty(updatedRawStreamTables) || !updatedRawStreamTables.containsKey(streamId)) {
             return super.getRawStreamActiveTable(streamId, stream);
         } else {

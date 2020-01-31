@@ -102,6 +102,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected List<String> inputTableNames = new ArrayList<>();
     protected Table masterTable;
     Map<BusinessEntity, Boolean> softDeleteEntities;
+    Map<BusinessEntity, Boolean> hardDeleteEntities;
     protected Map<String, String> tableTemplateMap;
     protected List<String> templatesInOrder;
 
@@ -143,6 +144,12 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             softDeleteEntities = getMapObjectFromContext(PERFORM_SOFT_DELETE, BusinessEntity.class, Boolean.class);
         } else {
             softDeleteEntities = Collections.emptyMap();
+        }
+
+        if (hasKeyInContext(PERFORM_HARD_DELETE)) {
+            hardDeleteEntities = getMapObjectFromContext(PERFORM_HARD_DELETE, BusinessEntity.class, Boolean.class);
+        } else {
+            hardDeleteEntities = Collections.emptyMap();
         }
 
         Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
