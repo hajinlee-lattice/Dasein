@@ -58,6 +58,11 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
     }
 
     @Override
+    protected Boolean needPartition() {
+        return Boolean.TRUE;
+    }
+
+    @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
         softDeleteActions = getListObjectFromContext(SOFT_DEELETE_ACTIONS, Action.class);

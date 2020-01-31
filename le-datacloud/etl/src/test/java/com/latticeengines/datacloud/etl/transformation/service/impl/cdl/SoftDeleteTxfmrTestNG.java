@@ -84,6 +84,7 @@ public class SoftDeleteTxfmrTestNG extends PipelineTransformationTestNGBase {
         jobConfig.setIdColumn(DeleteJoinId);
         jobConfig.setDeleteSourceIdx(0);
         jobConfig.setPartitionKeys(ImmutableList.of("Company"));
+        jobConfig.setNeedPartitionOutput(Boolean.TRUE);
         step1.setConfiguration(JsonUtils.serialize(jobConfig));
 
         // -----------

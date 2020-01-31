@@ -87,4 +87,9 @@ public class ConvertActivityStreamToActivityImport extends BaseDeleteActivityStr
     protected String getBeanName() {
         return BEAN_NAME;
     }
+
+    @Override
+    protected Boolean needPartition() {
+        return Boolean.FALSE;
+    }
 }

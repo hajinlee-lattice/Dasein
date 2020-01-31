@@ -48,6 +48,7 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
 
     protected abstract List<Action> deleteActions();
     protected abstract String getBeanName();
+    protected abstract Boolean needPartition();
 
 
     @Override
@@ -125,6 +126,7 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
         softDeleteConfig.setDeleteSourceIdx(0);
         softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
         softDeleteConfig.setPartitionKeys(RAWSTREAM_PARTITION_KEYS);
+        softDeleteConfig.setNeedPartitionOutput(needPartition());
         step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);
         step.setConfiguration(appendEngineConf(softDeleteConfig, lightEngineConfig()));
         return step;

@@ -19,6 +19,9 @@ public class SoftDeleteConfig extends SparkJobConfig {
     @JsonProperty("PartitionKeys")
     private List<String> partitionKeys;
 
+    @JsonProperty("NeedPartitionOutput")
+    private Boolean needPartitionOutput;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -47,5 +50,13 @@ public class SoftDeleteConfig extends SparkJobConfig {
 
     public void setPartitionKeys(List<String> partitionKeys) {
         this.partitionKeys = partitionKeys;
+    }
+
+    public Boolean getNeedPartitionOutput() {
+        return needPartitionOutput;
+    }
+
+    public void setNeedPartitionOutput(Boolean needPartitionOutput) {
+        this.needPartitionOutput = needPartitionOutput;
     }
 }
