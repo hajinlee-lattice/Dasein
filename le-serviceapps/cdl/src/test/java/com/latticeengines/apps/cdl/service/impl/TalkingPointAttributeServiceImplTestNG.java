@@ -91,8 +91,8 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
-            public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity,
-                    DataCollection.Version version, Boolean allCustomerAttrs) {
+            public Flux<ColumnMetadata> getAttrsCanBeEnabledForModeling(String customerSpace, BusinessEntity entity,
+                                                                        DataCollection.Version version, Boolean allCustomerAttrs) {
                 return null;
             }
 
@@ -103,8 +103,8 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
-            public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity,
-                    DataCollection.Version version) {
+            public Flux<ColumnMetadata> getAttrsEnabledForModeling(String customerSpace, BusinessEntity entity,
+                                                                   DataCollection.Version version) {
                 return null;
             }
 
