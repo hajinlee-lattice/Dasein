@@ -25,6 +25,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
@@ -118,22 +122,32 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         request.setKeepTemp(false);
         request.setEnableSlack(false);
 
-        int step = 0;
-        filterStep = step++;
-        profileStep = step;
-
-        // -----------
-        TransformationStepConfig filter = filter();
-        TransformationStepConfig profile = profile();
-        TransformationStepConfig encode = bucketEncode();
-        TransformationStepConfig sortProfile = sortProfile(profileTablePrefix);
-
-        // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(filter);
-        steps.add(profile);
-        steps.add(encode);
-        steps.add(sortProfile);
+
+        if (shouldExcludeDataCloudAttrs() && hasFullProfleAndEncoded()) {
+            String fullProfile = getStringValueFromContext(FULL_ACCOUNT_PROFILE_TABLE_NAME);
+            TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, fullProfile);
+            steps.add(sortProfile);
+
+            servingStoreTableName = getStringValueFromContext(FULL_ACCOUNT_ENCODED_TABLE_NAME);
+            removeFromListInContext(TEMPORARY_CDL_TABLES, servingStoreTableName, String.class);
+        } else {
+            int step = 0;
+            filterStep = step++;
+            profileStep = step;
+
+            // -----------
+            TransformationStepConfig filter = filter();
+            TransformationStepConfig profile = profile();
+            TransformationStepConfig encode = bucketEncode();
+            TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, null);
+
+            // -----------
+            steps.add(filter);
+            steps.add(profile);
+            steps.add(encode);
+            steps.add(sortProfile);
+        }
 
         request.setSteps(steps);
         return request;
@@ -180,10 +194,14 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         return step;
     }
 
-    private TransformationStepConfig sortProfile(String profileTablePrefix) {
+    private TransformationStepConfig sortProfile(String profileTablePrefix, String fullAccountProfileTableName) {
         TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(profileStep);
-        step.setInputSteps(inputSteps);
+        if (StringUtils.isNotBlank(fullAccountProfileTableName)) {
+            addBaseTables(step, fullAccountProfileTableName);
+        } else {
+            List<Integer> inputSteps = Collections.singletonList(profileStep);
+            step.setInputSteps(inputSteps);
+        }
         step.setTransformer(TRANSFORMER_SORTER);
 
         SorterConfig conf = new SorterConfig();
@@ -295,6 +313,36 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         } else {
             return str;
         }
+    }
+
+    private boolean hasFullProfleAndEncoded() {
+        String profileTableName = getStringValueFromContext(FULL_ACCOUNT_PROFILE_TABLE_NAME);
+        String encodedTableName = getStringValueFromContext(FULL_ACCOUNT_ENCODED_TABLE_NAME);
+        return StringUtils.isNotBlank(profileTableName) & StringUtils.isNotBlank(encodedTableName);
+    }
+
+    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
+    private boolean shouldExcludeDataCloudAttrs() {
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        Path node = PathBuilder.buildPodPath(podId).append("M34HotFixTargets");
+        boolean shouldExclude = false;
+        try {
+            if (camille.exists(node)) {
+                List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
+                String tenantId = configuration.getCustomerSpace().getTenantId();
+                if (targets.contains(tenantId)) {
+                    log.info("{} is a hotfix target.", tenantId);
+                    shouldExclude = true;
+                } else {
+                    log.info("{} is not a hotfix target", tenantId);
+                    shouldExclude = false;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve hotfix targets from ZK.", e);
+        }
+        return shouldExclude;
     }
 
 }

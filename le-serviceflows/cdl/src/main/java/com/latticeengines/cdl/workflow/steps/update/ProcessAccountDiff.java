@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.update;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -76,15 +81,24 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
 
     private List<TransformationStepConfig> regularSteps() {
         int step = 0;
-        int matchStep = step++;
-        int bucketStep = step++;
-        TransformationStepConfig matchDiff = match();
-        TransformationStepConfig bucket = bucket(matchStep, true);
-        TransformationStepConfig retainFields = retainFields(bucketStep);
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(matchDiff);
-        steps.add(bucket);
-        steps.add(retainFields);
+        if (shouldExcludeDataCloudAttrs()) {
+            enrichedDiffTable = metadataProxy.getTable(customerSpace.toString(), diffTableName);
+            int bucketStep = step++;
+            TransformationStepConfig bucket = bucket(-1, true);
+            TransformationStepConfig retainFields = retainFields(bucketStep);
+            steps.add(bucket);
+            steps.add(retainFields);
+        } else {
+            int matchStep = step++;
+            int bucketStep = step++;
+            TransformationStepConfig matchDiff = match();
+            TransformationStepConfig bucket = bucket(matchStep, true);
+            TransformationStepConfig retainFields = retainFields(bucketStep);
+            steps.add(matchDiff);
+            steps.add(bucket);
+            steps.add(retainFields);
+        }
         return steps;
     }
 
@@ -112,11 +126,15 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         if (shortCutMode) {
             enrichedDiffTableName = enrichedDiffTable.getName();
         } else {
-            enrichedDiffTableName = TableUtils.getFullTableName(enrichedTablePrefix, pipelineVersion);
-            enrichedDiffTable = metadataProxy.getTable(customerSpace.toString(), enrichedDiffTableName);
             if (enrichedDiffTable == null) {
-                throw new RuntimeException(
-                        "Failed to find enriched account diff table " + enrichedDiffTableName + " in customer " + customerSpace);
+                enrichedDiffTableName = TableUtils.getFullTableName(enrichedTablePrefix, pipelineVersion);
+                enrichedDiffTable = metadataProxy.getTable(customerSpace.toString(), enrichedDiffTableName);
+                if (enrichedDiffTable == null) {
+                    throw new RuntimeException(
+                            "Failed to find enriched account diff table " + enrichedDiffTableName + " in customer " + customerSpace);
+                }
+            } else {
+                enrichedDiffTableName = enrichedDiffTable.getName();
             }
             exportToS3AndAddToContext(enrichedDiffTableName, ENRICHED_ACCOUNT_DIFF_TABLE_NAME);
         }
@@ -167,4 +185,30 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }
+
+
+    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
+    private boolean shouldExcludeDataCloudAttrs() {
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        Path node = PathBuilder.buildPodPath(podId).append("M34HotFixTargets");
+        boolean shouldExclude = false;
+        try {
+            if (camille.exists(node)) {
+                List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
+                String tenantId = configuration.getCustomerSpace().getTenantId();
+                if (targets.contains(tenantId)) {
+                    log.info("{} is a hotfix target.", tenantId);
+                    shouldExclude = true;
+                } else {
+                    log.info("{} is not a hotfix target", tenantId);
+                    shouldExclude = false;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve hotfix targets from ZK.", e);
+        }
+        return shouldExclude;
+    }
+
 }

@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.merge;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -74,10 +79,17 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
             steps.add(merge);
         }
-        TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
-                convertBatchStoreTableName);
 
-        steps.add(match);
+        if (shouldExcludeDataCloudAttrs()) {
+            // use latest step as output, no need to match
+            TransformationStepConfig lastStep = steps.get(steps.size() - 1);
+            setTargetTable(lastStep, matchTargetTablePrefix);
+        } else {
+            TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
+                    convertBatchStoreTableName);
+            steps.add(match);
+        }
+
         log.info("steps are {}.", steps);
         request.setSteps(steps);
         return request;
@@ -149,6 +161,32 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             Set<String> columnNames = getInputTableColumnNames(0);
             return MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
         }
+    }
+
+
+
+    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
+    private boolean shouldExcludeDataCloudAttrs() {
+        Camille camille = CamilleEnvironment.getCamille();
+        String podId = CamilleEnvironment.getPodId();
+        Path node = PathBuilder.buildPodPath(podId).append("M34HotFixTargets");
+        boolean shouldExclude = false;
+        try {
+            if (camille.exists(node)) {
+                List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
+                String tenantId = configuration.getCustomerSpace().getTenantId();
+                if (targets.contains(tenantId)) {
+                    log.info("{} is a hotfix target.", tenantId);
+                    shouldExclude = true;
+                } else {
+                    log.info("{} is not a hotfix target", tenantId);
+                    shouldExclude = false;
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve hotfix targets from ZK.", e);
+        }
+        return shouldExclude;
     }
 
 }

@@ -63,7 +63,9 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
     @Override
     protected void onPostTransformationCompleted() {
         profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
-        servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
+        if (StringUtils.isBlank(servingStoreTableName)){
+            servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
+        }
 
         if (profileTableRole() != null) {
             upsertProfileTable(profileTableName, profileTableRole());
