@@ -238,7 +238,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     }
 
     private void buildStreamImportColumnNames() {
-        Map<String, List<ActivityImport>> streamImports = configuration.getStreamImports();;
+        Map<String, List<ActivityImport>> streamImports = configuration.getStreamImports();
         if (MapUtils.isEmpty(streamImports)) {
             return;
         }
