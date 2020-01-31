@@ -69,12 +69,12 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
 
-//        if (isLocalEnvironment()) {
+        if (isLocalEnvironment()) {
             // run PA with fake current time
             processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
-//        } else {
-//            runTestWithRetry(getCandidateFailingSteps(), CURRENT_PA_TIME.toEpochMilli());
-//        }
+        } else {
+            runTestWithRetry(getCandidateFailingSteps(), CURRENT_PA_TIME.toEpochMilli());
+        }
 
     }
 
