@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,6 +42,7 @@ import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 public abstract class BaseFrontEndEntityResource {
@@ -57,6 +61,9 @@ public abstract class BaseFrontEndEntityResource {
 
     @Inject
     private CommonTenantConfigService tenantConfigService;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy,
             DataCollectionProxy dataCollectionProxy, GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
@@ -359,8 +366,19 @@ public abstract class BaseFrontEndEntityResource {
             return null;
         }
 
+        ConcurrentMap<BusinessEntity, Set<String>> servingStoreAttrs = new ConcurrentHashMap<>();
+        String tenantId = MultiTenantContext.getShortTenantId();
+
         List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs(queryEntity).stream() //
                 .filter(attributeLookup -> searchEntity.equals(attributeLookup.getEntity())) //
+                .filter(attributeLookup -> {
+                    BusinessEntity entity = attributeLookup.getEntity();
+                    if (!servingStoreAttrs.containsKey(entity)) {
+                        servingStoreAttrs.put(entity,
+                                servingStoreProxy.getServingStoreColumnsFromCache(tenantId, entity));
+                    }
+                    return servingStoreAttrs.get(entity).contains(attributeLookup.getAttribute());
+                }) //
                 .collect(Collectors.toList());
 
         List<Restriction> searchRestrictions = searchAttrs.stream().map(attributeLookup -> {
