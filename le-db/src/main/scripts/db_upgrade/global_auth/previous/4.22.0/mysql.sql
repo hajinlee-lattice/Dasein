@@ -6,7 +6,7 @@ DELIMITER //
 CREATE PROCEDURE `UpdateGlobalTicket`()
   BEGIN
       ALTER TABLE `GlobalAuthentication`.`GlobalTicket` ADD COLUMN `External_Session` JSON DEFAULT NULL;
-      ALTER TABLE `GlobalAuthentication`.`GlobalTicket` ADD COLUMN `Issuer` VARCHAR(255) GENERATED ALWAYS AS (`External_Session` ->> '$.Issuer');
+      ALTER TABLE `GlobalAuthentication`.`GlobalTicket` ADD COLUMN `Issuer` VARCHAR(255) GENERATED ALWAYS AS (json_unquote(json_extract(`External_Session`,'$.Issuer'))) VIRTUAL;
       CREATE INDEX IX_User_Issuer ON `GlobalAuthentication`.`GlobalTicket` (`User_ID`, `Issuer`);
   END;
 //
