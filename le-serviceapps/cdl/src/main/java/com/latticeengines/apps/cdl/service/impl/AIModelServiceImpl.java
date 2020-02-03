@@ -279,7 +279,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     }
 
     @Override
-    public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
+    public void updateModelingJobStatus(String customerSpace, String ratingEngineId, String aiModelId,
+            JobStatus newStatus) {
         AIModel aiModel = getRatingModelById(aiModelId);
         if (aiModel.getModelingJobStatus().isTerminated()) {
             throw new LedpException(LedpCode.LEDP_40028, new String[] { aiModelId });

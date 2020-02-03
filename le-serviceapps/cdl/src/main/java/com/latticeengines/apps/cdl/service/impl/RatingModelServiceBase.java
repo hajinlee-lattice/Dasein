@@ -16,7 +16,7 @@ public abstract class RatingModelServiceBase<RatingModel> implements RatingModel
     private static Map<RatingEngineType, RatingModelService> registry = new HashMap<>();
 
     protected RatingModelServiceBase(List<RatingEngineType> ratingEngineTypes) {
-        ratingEngineTypes.stream().forEach(type -> registry.put(type, this));
+        ratingEngineTypes.forEach(type -> registry.put(type, this));
     }
 
     protected RatingModelServiceBase(RatingEngineType ratingEngineType) {

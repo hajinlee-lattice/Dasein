@@ -1067,7 +1067,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus) {
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
         RatingModelService<AIModel> aiModelService = getRatingModelService(ratingEngine.getType());
-        ((AIModelService) aiModelService).updateModelingJobStatus(ratingEngineId, aiModelId, newStatus);
+        ((AIModelService) aiModelService).updateModelingJobStatus(MultiTenantContext.getCustomerSpace().toString(),
+                ratingEngineId, aiModelId, newStatus);
     }
 
     @SuppressWarnings({ "unchecked", "unused" })
