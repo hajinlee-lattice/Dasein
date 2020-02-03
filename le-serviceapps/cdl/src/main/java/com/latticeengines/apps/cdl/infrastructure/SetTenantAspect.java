@@ -49,10 +49,9 @@ public class SetTenantAspect {
         String customerSpace = (String) joinPoint.getArgs()[0];
         try {
             setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
-        } catch (NullPointerException e) {
-            log.warn("Failed to set tenant in the Multitenant aspect for: " + joinPoint.toLongString());
         } catch (RuntimeException e) {
-            log.warn("Failed to set tenant for the Multitenant aspect for: " + joinPoint.toLongString());
+            log.warn("Unable to find customerspace to set tenant in the Multitenant aspect for: "
+                    + joinPoint.toLongString());
         }
     }
 
@@ -61,10 +60,8 @@ public class SetTenantAspect {
         String customerSpace = (String) joinPoint.getArgs()[0];
         try {
             setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
-        } catch (NullPointerException e) {
-            log.warn("Failed to set tenant in the Multitenant aspect for: " + joinPoint.toLongString());
         } catch (RuntimeException e) {
-            log.warn("Failed to set tenant for the Multitenant aspect for: " + joinPoint.toLongString());
+            log.warn("Failed to parse customerspace in multitenant aspect for: " + joinPoint.toLongString());
         }
     }
 
