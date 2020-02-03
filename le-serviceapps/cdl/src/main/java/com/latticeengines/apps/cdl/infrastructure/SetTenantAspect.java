@@ -44,6 +44,30 @@ public class SetTenantAspect {
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
 
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.RatingEngineServiceImpl.*(..))")
+    public void allRatingEngineService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        try {
+            setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
+        } catch (NullPointerException e) {
+            log.warn("Failed to set tenant in the Multitenant aspect for: " + joinPoint.toLongString());
+        } catch (RuntimeException e) {
+            log.warn("Failed to set tenant for the Multitenant aspect for: " + joinPoint.toLongString());
+        }
+    }
+
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.AIModelServiceImpl.*(..))")
+    public void allAIModelService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        try {
+            setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
+        } catch (NullPointerException e) {
+            log.warn("Failed to set tenant in the Multitenant aspect for: " + joinPoint.toLongString());
+        } catch (RuntimeException e) {
+            log.warn("Failed to set tenant for the Multitenant aspect for: " + joinPoint.toLongString());
+        }
+    }
+
     @Before("execution(* com.latticeengines.apps.cdl.service.impl.ConvertBatchStoreInfoServiceImpl.*(..))")
     public void allConvertBatchStoreInfoService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
@@ -67,6 +91,7 @@ public class SetTenantAspect {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
+
     // ===================================
     // BEGIN: legacy aspects to be removed
     // ===================================

@@ -16,20 +16,20 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public interface AIModelService extends RatingModelService<AIModel> {
 
-    EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel, ModelingQueryType modelingQueryType, DataCollection.Version version);
+    EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
+            ModelingQueryType modelingQueryType, DataCollection.Version version);
 
-    void updateModelingJobStatus(String ratingEngineId, String aiModelId, JobStatus newStatus);
+    void updateModelingJobStatus(String customerSpace, String ratingEngineId, String aiModelId, JobStatus newStatus);
 
     AIModel createNewIteration(AIModel aiModel, RatingEngine ratingEngine);
 
-    List<ColumnMetadata> getIterationMetadata(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores);
+    List<ColumnMetadata> getIterationMetadata(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
+            List<CustomEventModelingConfig.DataStore> dataStores);
 
-    Map<String, StatsCube> getIterationMetadataCube(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores);
+    Map<String, StatsCube> getIterationMetadataCube(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
+            List<CustomEventModelingConfig.DataStore> dataStores);
 
-    TopNTree getIterationMetadataTopN(String customerSpace, RatingEngine ratingEngine,
-            AIModel aiModel, List<CustomEventModelingConfig.DataStore> dataStores);
+    TopNTree getIterationMetadataTopN(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
+            List<CustomEventModelingConfig.DataStore> dataStores);
 
 }
