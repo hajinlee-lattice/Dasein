@@ -141,6 +141,11 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
                 entityType.getSchemaInterpretation(), entityType.getEntity().name(), csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
 
+        S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), systemName);
+        if(s3ImportSystem == null) {
+            cdlService.createS3ImportSystem(mainTestTenant.getId(), systemName, S3ImportSystem.SystemType.valueOf(systemType),
+                    false);
+        }
         String fileName = sourceFile.getName();
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse =
                 modelingFileMetadataService.fetchFieldDefinitions(systemName, systemType, entityType.getDisplayName(),

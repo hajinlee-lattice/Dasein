@@ -79,7 +79,7 @@ public class CSVFileImportValidationDeploymentTestNGV2 extends CSVFileImportDepl
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testInvalidFile() throws Exception {
         // account
         SourceFile accountFile = uploadSourceFile(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE, EntityType.Accounts,
@@ -154,7 +154,7 @@ public class CSVFileImportValidationDeploymentTestNGV2 extends CSVFileImportDepl
         verifyReport(pathPatternReport, 0L,29L, 0L);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testProductNameMissing() throws Exception {
         SourceFile sourceFile = uploadSourceFile(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE, EntityType.ProductBundles,
                 PRODUCT_SOURCE_FILE);

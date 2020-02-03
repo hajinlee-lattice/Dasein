@@ -2,7 +2,6 @@ package com.latticeengines.pls.end2end2;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -95,10 +94,6 @@ public class CSVFileImportForS3DeploymentTestNGV2 extends CSVFileImportDeploymen
         // verify that the tenant has 5 template display by default
         Assert.assertNotNull(templates);
         Assert.assertEquals(templates.size(), 5);
-        List<String> feedTypes = Arrays.asList(
-                EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.Accounts),
-                EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.Contacts),
-                EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.ProductPurchases));
         // S3ImportTemplateDisplay display = templates.get(0);
         // Assert.assertEquals(display.getPath(), "N/A");
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
