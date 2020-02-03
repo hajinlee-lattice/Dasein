@@ -1,4 +1,4 @@
-package com.latticeengines.pls.provisioning;
+package com.latticeengines.apps.lp.provision.impl;
 
 import java.util.Map;
 

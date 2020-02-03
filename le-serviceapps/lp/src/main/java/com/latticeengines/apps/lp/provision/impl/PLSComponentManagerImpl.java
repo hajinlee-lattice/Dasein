@@ -13,13 +13,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.lp.provision.LPComponentManager;
+import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.lp.provision.PLSComponentManager;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.DocumentDirectory;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -31,18 +38,17 @@ import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
+import com.latticeengines.domain.exposed.util.ValidateEnrichAttributesUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
 @Component("lpComponentManager")
-public class LPComponentManagerImpl implements LPComponentManager {
+public class PLSComponentManagerImpl implements PLSComponentManager {
 
-    private static final Logger log = LoggerFactory.getLogger(LPComponentManagerImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PLSComponentManagerImpl.class);
 
-    private static final int MIN_PREMIUM_ENRICHMENT_ATTRIBUTES = 0;
-
-    private static final String DEFAUTL_PASSWORD = "admin";
+    private static final String DEFAULT_PASSWORD = "admin";
 
     private static final String DEFAULT_PASSWORD_HASH = "EETAlfvFzCdm6/t3Ro8g89vzZo6EDCbucJMTPhYgWiE=";
 
@@ -52,12 +58,12 @@ public class LPComponentManagerImpl implements LPComponentManager {
     @Inject
     private UserService userService;
 
+    @Inject
+    private BatonService batonService;
+
     @Override
     public void provisionTenant(CustomerSpace space, InstallDocument installDocument) {
         // get tenant information
-        String camilleTenantId = space.getTenantId();
-        String camilleContractId = space.getContractId();
-
         String PLSTenantId = space.toString();
         log.info(String.format("Provisioning tenant %s", PLSTenantId));
 
@@ -67,7 +73,7 @@ public class LPComponentManagerImpl implements LPComponentManager {
         String maxPremiumEnrichAttributesStr = installDocument.getProperty(ComponentConstants.Install.EA_MAX);
 
         log.info("maxPremiumEnrichAttributesStr is " + maxPremiumEnrichAttributesStr);
-        validateEnrichAttributes(maxPremiumEnrichAttributesStr);
+        ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumEnrichAttributesStr);
 
         String emailListInJson = installDocument.getProperty(ComponentConstants.Install.SUPER_ADMIN);
         List<String> superAdminEmails = StringUtils.isEmpty(emailListInJson) ? new ArrayList<>() : EmailUtils.parseEmails(emailListInJson);
@@ -89,11 +95,26 @@ public class LPComponentManagerImpl implements LPComponentManager {
         }
         tenant.setId(PLSTenantId);
         tenant.setName(tenantDisplayName);
-
         String productsJson = installDocument.getProperty(ComponentConstants.Install.PRODUCTS);
         List<String> productList = JsonUtils.convertList(JsonUtils.deserialize(productsJson, List.class), String.class);
-
         List<LatticeProduct> products = productList.stream().map(LatticeProduct::fromName).collect(Collectors.toList());
+        setTenantInfo(tenant, products);
+        String tenantStatus = installDocument.getProperty(ComponentConstants.Install.TENANT_STATUS);
+        String tenantType = installDocument.getProperty(ComponentConstants.Install.TENANT_TYPE);
+        String contract = installDocument.getProperty(ComponentConstants.Install.CONTRACT);
+        if (StringUtils.isNotBlank(tenantStatus)) {
+            tenant.setStatus(TenantStatus.valueOf(tenantStatus));
+        }
+        if (StringUtils.isNotBlank(tenantType)) {
+            tenant.setTenantType(TenantType.valueOf(tenantType));
+        }
+        tenant.setContract(contract);
+        log.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is " + tenant.getTenantType());
+
+        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails, userName);
+    }
+
+    private void setTenantInfo(Tenant tenant, List<LatticeProduct> products) {
         if (products.contains(LatticeProduct.LPA3) && products.contains(LatticeProduct.CG)) {
             tenant.setUiVersion("4.0");
         } else if (products.contains(LatticeProduct.LPA3) && products.contains(LatticeProduct.DCP)) {
@@ -111,24 +132,11 @@ public class LPComponentManagerImpl implements LPComponentManager {
         } else {
             tenant.setEntitledApps("Lattice");
         }
-
-        String tenantStatus = installDocument.getProperty(ComponentConstants.Install.TENANT_STATUS);
-        String tenantType = installDocument.getProperty(ComponentConstants.Install.TENANT_TYPE);
-        String contract = installDocument.getProperty(ComponentConstants.Install.CONTRACT);
-        if (StringUtils.isNotBlank(tenantStatus)) {
-            tenant.setStatus(TenantStatus.valueOf(tenantStatus));
-        }
-        if (StringUtils.isNotBlank(tenantType)) {
-            tenant.setTenantType(TenantType.valueOf(tenantType));
-        }
-        tenant.setContract(contract);
-        log.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is " + tenant.getTenantType());
-
-        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails, userName);
     }
 
-    private void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,
-                                 List<String> externalAdminEmails, List<String> thirdPartyEmails, String userName) {
+    @VisibleForTesting
+    void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,
+                         List<String> externalAdminEmails, List<String> thirdPartyEmails, String userName) {
         if (tenantService.hasTenantId(tenant.getId())) {
             log.info(String.format("Update instead of register during the provision of %s .", tenant.getId()));
             try {
@@ -145,10 +153,8 @@ public class LPComponentManagerImpl implements LPComponentManager {
                         + "Tenant name possibly already exists.", tenant.getId()), e);
             }
         }
-
         // wait for replication lag
         SleepUtils.sleep(500);
-
         assignAccessLevelByEmails(userName, internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
         assignAccessLevelByEmails(userName, superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
         assignAccessLevelByEmails(userName, externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());
@@ -219,21 +225,12 @@ public class LPComponentManagerImpl implements LPComponentManager {
         }
         UserUpdateData userUpdateData = new UserUpdateData();
         userUpdateData.setAccessLevel(user.getAccessLevel());
-        userUpdateData.setOldPassword(DigestUtils.sha256Hex(DEFAUTL_PASSWORD));
+        userUpdateData.setOldPassword(DigestUtils.sha256Hex(DEFAULT_PASSWORD));
         // le-pls and le-admin uses the same encoding schema to be in synch
         log.info("The username is " + user.getUsername());
         String newPassword = Base64Utils.encodeBase64WithDefaultTrim(user.getUsername());
         userUpdateData.setNewPassword(DigestUtils.sha256Hex(newPassword));
         userService.updateCredentials(user, userUpdateData);
-    }
-
-    private void validateEnrichAttributes(String maxPremiumEnrichAttributesStr) {
-        maxPremiumEnrichAttributesStr = maxPremiumEnrichAttributesStr.replaceAll("\"", "");
-        int premiumEnrichAttributes = Integer.parseInt(maxPremiumEnrichAttributesStr);
-        if (premiumEnrichAttributes < MIN_PREMIUM_ENRICHMENT_ATTRIBUTES) {
-            throw new RuntimeException(String.format("PremiumEnrichAttributes: %d is less than %d.",
-                    premiumEnrichAttributes, MIN_PREMIUM_ENRICHMENT_ATTRIBUTES));
-        }
     }
 
     @Override
@@ -244,6 +241,109 @@ public class LPComponentManagerImpl implements LPComponentManager {
         }
     }
 
+    private List<LatticeProduct> getProducts(CustomerSpace customerSpace) {
+        try {
+            TenantDocument tenantDocument = batonService.getTenant(customerSpace.getContractId(), customerSpace.getTenantId());
+            SpaceConfiguration spaceConfiguration = tenantDocument.getSpaceConfig();
+            return spaceConfiguration.getProducts();
+        } catch (Exception e) {
+            log.error("Failed to get product list of tenant " + customerSpace.toString(), e);
+            return new ArrayList<>();
+        }
+    }
+
+    private TenantDocument getTenantDocument(CustomerSpace customerSpace) {
+        try {
+            return batonService.getTenant(customerSpace.getContractId(), customerSpace.getTenantId());
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18034, e);
+        }
+    }
+
+    @Override
+    public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
+        // get tenant information
+        String camilleTenantId = space.getTenantId();
+        String camilleContractId = space.getContractId();
+        String camilleSpaceId = space.getSpaceId();
+        String PLSTenantId = String.format("%s.%s.%s", camilleContractId, camilleTenantId, camilleSpaceId);
+        log.info(String.format("Provisioning tenant %s", PLSTenantId));
+
+        TenantDocument tenantDocument;
+        try {
+            tenantDocument = getTenantDocument(space);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18028, String.format("Getting tenant document error."), e);
+        }
+        String tenantName = tenantDocument.getTenantInfo().properties.displayName;
+        String userName = tenantDocument.getTenantInfo().properties.userName;
+
+        String maxPremiumEnrichAttributesStr;
+        try {
+            maxPremiumEnrichAttributesStr = configDir.get("/EnrichAttributesMaxNumber").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
+        }
+        log.info("maxPremiumEnrichAttributesStr is " + maxPremiumEnrichAttributesStr);
+        ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumEnrichAttributesStr);
+        String emailListInJson;
+        try {
+            emailListInJson = configDir.get("/SuperAdminEmails").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
+        }
+        List<String> superAdminEmails = EmailUtils.parseEmails(emailListInJson);
+
+        try {
+            emailListInJson = configDir.get("/LatticeAdminEmails").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
+        }
+        List<String> internalAdminEmails = EmailUtils.parseEmails(emailListInJson);
+        // add get external Admin Emails
+        try {
+            emailListInJson = configDir.get("/ExternalAdminEmails").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
+        }
+        List<String> externalAdminEmails = EmailUtils.parseEmails(emailListInJson);
+
+        try {
+            emailListInJson = configDir.get("/ThirdPartyUserEmails").getDocument().getData();
+        } catch (NullPointerException e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
+        }
+        List<String> thirdPartyEmails = EmailUtils.parseEmails(emailListInJson);
+
+        Tenant tenant;
+        if (tenantService.hasTenantId(PLSTenantId)) {
+            tenant = tenantService.findByTenantId(PLSTenantId);
+        } else {
+            tenant = new Tenant();
+        }
+        tenant.setId(PLSTenantId);
+        tenant.setName(tenantName);
+        List<LatticeProduct> products = getProducts(space);
+        setTenantInfo(tenant, products);
+        try {
+            TenantInfo info = TenantLifecycleManager.getInfo(camilleContractId, camilleTenantId);
+            if (StringUtils.isNotBlank(info.properties.status)) {
+                // change to inactive to avoid user visit tenant eagerly
+                tenant.setStatus(TenantStatus.INACTIVE);
+            }
+            if (StringUtils.isNotBlank(info.properties.tenantType)) {
+                tenant.setTenantType(TenantType.valueOf(info.properties.tenantType));
+            }
+            tenant.setContract(info.properties.contract);
+            log.info("registered tenant's status is " + tenant.getStatus() + ", tenant type is "
+                    + tenant.getTenantType());
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18028, "Failed to retrieve tenants properties", e);
+        }
+        provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails, userName);
+    }
+
+
     private void discardTenant(Tenant tenant) {
         List<User> users = userService.getUsers(tenant.getId());
         if (users != null) {
@@ -251,7 +351,6 @@ public class LPComponentManagerImpl implements LPComponentManager {
                 userService.deleteUser(tenant.getId(), user.getUsername());
             }
         }
-
         if (tenantService.hasTenantId(tenant.getId())) {
             tenantService.discardTenant(tenant);
         }

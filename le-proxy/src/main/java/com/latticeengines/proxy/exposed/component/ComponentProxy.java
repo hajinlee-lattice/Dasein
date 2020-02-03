@@ -59,7 +59,6 @@ public class ComponentProxy extends MicroserviceRestApiProxy implements ProxyInt
                 return "cdl";
             case ComponentConstants.METADATA:
                 return "metadata";
-            case ComponentConstants.LP:
             case ComponentConstants.PLS:
                 return "lp";
             default:

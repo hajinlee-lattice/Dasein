@@ -1,10 +1,11 @@
-package com.latticeengines.pls.provisioning;
+package com.latticeengines.apps.lp.provision.impl;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.lp.provision.PLSComponentManager;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;

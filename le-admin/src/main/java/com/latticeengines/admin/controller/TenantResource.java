@@ -64,13 +64,7 @@ public class TenantResource {
     public boolean createTenant(@PathVariable String tenantId, //
             @RequestParam(value = "contractId") String contractId, //
             @RequestBody TenantRegistration registration, HttpServletRequest request) {
-        String ticket = request.getHeader(Constants.AUTHORIZATION);
-        String userName = "_defaultUser";
-        if (!StringUtils.isEmpty(ticket)) {
-            String decrypted = CipherUtils.decrypt(ticket);
-            String[] tokens = decrypted.split("\\|");
-            userName = tokens[0];
-        }
+        String userName = getUserName(request);
         return tenantService.createTenant(contractId.trim(), tenantId.trim(), registration, userName);
     }
 
@@ -80,6 +74,12 @@ public class TenantResource {
     public boolean createTenantV2(@PathVariable String tenantId, //
             @RequestParam(value = "contractId") String contractId, //
             @RequestBody TenantRegistration registration, HttpServletRequest request) {
+        getUserName(request);
+        String userName = getUserName(request);
+        return tenantService.createTenantV2(contractId.trim(), tenantId.trim(), registration, userName);
+    }
+
+    private String getUserName(HttpServletRequest request) {
         String ticket = request.getHeader(Constants.AUTHORIZATION);
         String userName = "_defaultUser";
         if (!StringUtils.isEmpty(ticket)) {
@@ -87,7 +87,7 @@ public class TenantResource {
             String[] tokens = decrypted.split("\\|");
             userName = tokens[0];
         }
-        return tenantService.createTenantV2(contractId.trim(), tenantId.trim(), registration, userName);
+        return userName;
     }
 
     @PutMapping("/{tenantId}/services/{serviceName}")
@@ -125,13 +125,7 @@ public class TenantResource {
     public boolean deleteTenant(@RequestParam(value = "contractId") String contractId,
             @RequestParam(value = "deleteZookeeper", required = false, defaultValue = "true") Boolean deleteZookeeper,
             @PathVariable String tenantId, HttpServletRequest request) {
-        String ticket = request.getHeader(Constants.AUTHORIZATION);
-        String userName = "_defaultUser";
-        if (!StringUtils.isEmpty(ticket)) {
-            String decrypted = CipherUtils.decrypt(ticket);
-            String[] tokens = decrypted.split("\\|");
-            userName = tokens[0];
-        }
+        String userName = getUserName(request);
         return tenantService.deleteTenant(userName, contractId, tenantId, deleteZookeeper);
     }
 
@@ -224,7 +218,7 @@ public class TenantResource {
     @ApiOperation(value = "Reset tenant")
     public boolean resetTenant(@PathVariable String tenantId) {
         boolean result_cdl = componentProxy.reset(tenantId, ComponentConstants.CDL);
-        boolean result_lp = componentProxy.reset(tenantId, ComponentConstants.LP);
+        boolean result_lp = componentProxy.reset(tenantId, ComponentConstants.PLS);
         boolean result_metadata = componentProxy.reset(tenantId, ComponentConstants.METADATA);
 
         return result_cdl && result_lp && result_metadata;

@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.lp.provision.LPComponentManager;
+import com.latticeengines.apps.lp.provision.PLSComponentManager;
 import com.latticeengines.apps.lp.service.SourceFileService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -23,13 +23,13 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.metadata.service.MetadataService;
 
-@Component("lpComponentService")
-public class LPComponentServiceImpl extends ComponentServiceBase {
+@Component("plsComponentService")
+public class PLSComponentServiceImpl extends ComponentServiceBase {
 
-    private static final Logger log = LoggerFactory.getLogger(LPComponentServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(PLSComponentServiceImpl.class);
 
     @Inject
-    private LPComponentManager lpComponentManager;
+    private PLSComponentManager plsComponentManager;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -40,8 +40,8 @@ public class LPComponentServiceImpl extends ComponentServiceBase {
     @Inject
     private SourceFileService sourceFileService;
 
-    public LPComponentServiceImpl() {
-        super(ComponentConstants.LP);
+    public PLSComponentServiceImpl() {
+        super(ComponentConstants.PLS);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class LPComponentServiceImpl extends ComponentServiceBase {
         log.info("Start install LP component: " + customerSpace);
         try {
             CustomerSpace cs = CustomerSpace.parse(customerSpace);
-            lpComponentManager.provisionTenant(cs, installDocument);
+            plsComponentManager.provisionTenant(cs, installDocument);
         } catch (Exception e) {
             log.error("Provision LP service failed!", e);
             return false;
@@ -68,7 +68,7 @@ public class LPComponentServiceImpl extends ComponentServiceBase {
         log.info("Start uninstall LP component for: " + customerSpace);
         try {
             CustomerSpace cs = CustomerSpace.parse(customerSpace);
-            lpComponentManager.discardTenant(cs.toString());
+            plsComponentManager.discardTenant(cs.toString());
         } catch (Exception e) {
             log.error(String.format("Uninstall component LP for: %s failed. %s", customerSpace, e.toString()));
             return false;

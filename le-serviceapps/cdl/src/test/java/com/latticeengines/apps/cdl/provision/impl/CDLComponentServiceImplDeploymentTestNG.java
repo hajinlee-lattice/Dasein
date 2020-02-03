@@ -49,7 +49,7 @@ public class CDLComponentServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertTrue(files.size() > 0);
 
         Assert.assertTrue(componentProxy.reset(mainCustomerSpace, ComponentConstants.CDL));
-        Assert.assertTrue(componentProxy.reset(mainCustomerSpace, ComponentConstants.LP));
+        Assert.assertTrue(componentProxy.reset(mainCustomerSpace, ComponentConstants.PLS));
         Assert.assertTrue(componentProxy.reset(mainCustomerSpace, ComponentConstants.METADATA));
 
         dataUnits = dataUnitProxy.getByStorageType(mainCustomerSpace, DataUnit.StorageType.Redshift);

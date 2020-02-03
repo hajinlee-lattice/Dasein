@@ -17,7 +17,7 @@ public class ResetTenantServiceImpl implements ResetTenantService {
     @Override
     public void resetTenant(String tenantId) {
         componentProxy.reset(tenantId, ComponentConstants.CDL);
-        componentProxy.reset(tenantId, ComponentConstants.LP);
+        componentProxy.reset(tenantId, ComponentConstants.PLS);
         componentProxy.reset(tenantId, ComponentConstants.METADATA);
     }
 }

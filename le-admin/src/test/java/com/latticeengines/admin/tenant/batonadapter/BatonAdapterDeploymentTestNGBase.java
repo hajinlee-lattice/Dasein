@@ -3,7 +3,11 @@ package com.latticeengines.admin.tenant.batonadapter;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
@@ -24,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 
 /**
  * besides the same setup and teardown as AdminFunctionalTestNGBase, we also
@@ -32,6 +37,8 @@ import com.latticeengines.security.exposed.Constants;
  */
 public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(BatonAdapterDeploymentTestNGBase.class);
+
     protected static final String testAdminUsername = "pls-installer-tester@lattice-engines.com";
     protected static final String testAdminPassword = Base64Utils.encodeBase64WithDefaultTrim(testAdminUsername);
 
@@ -39,10 +46,22 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
     private static final long TIMEOUT = 180000L;
     private static final long WAIT_INTERVAL = 3000L;
 
+    @Inject
+    protected GlobalUserManagementService globalUserManagementService;
+
     @Value("${common.test.pls.url}")
     private String plsHostPort;
 
     protected RestTemplate plsRestTemplate = HttpClientUtils.newRestTemplate();
+
+    private void deleteTestTenant() {
+        try {
+            loginAD();
+            deleteTenant(contractId, tenantId);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
 
     @BeforeClass(groups = { "deployment", "functional", "lp2" })
     public void setup() throws Exception {
@@ -60,11 +79,7 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
 
     @AfterClass(groups = { "deployment", "functional", "lp2" }, alwaysRun = true)
     public void tearDown() throws Exception {
-        try {
-            deleteTenant(contractId, tenantId);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+        deleteTestTenant();
     }
 
     @Test(groups = { "deployment", "functional", "lp2" })

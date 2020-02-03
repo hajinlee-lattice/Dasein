@@ -426,14 +426,8 @@ public class TenantServiceImpl implements TenantService {
             props.put(component.getName(), properties);
         }
         final Map<String, Map<String, String>> orchestratorProps = props;
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                orchestrator.orchestrateForUninstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
-                        orchestratorProps, prodAndExternalAminInfo, deleteZookeeper);
-            }
-        });
-
+        executorService.submit(() -> orchestrator.orchestrateForUninstall(contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID,
+                orchestratorProps, prodAndExternalAminInfo, deleteZookeeper));
         // delete oauth2 keys
         try {
             oauthProxy.deleteTenant(space.toString());

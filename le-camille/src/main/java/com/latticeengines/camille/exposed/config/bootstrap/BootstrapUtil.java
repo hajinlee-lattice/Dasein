@@ -319,25 +319,20 @@ public final class BootstrapUtil {
 
     public static CustomerSpaceServiceInstaller sandbox(final CustomerSpaceServiceInstaller installer,
             final Path serviceDirectoryPath) {
-        return new CustomerSpaceServiceInstaller() {
-
-            @Override
-            public DocumentDirectory install(CustomerSpace space, String serviceName, int dataVersion,
-                    Map<String, String> properties) {
-                DocumentDirectory toReturn;
-                if (installer == null) {
-                    toReturn = new DocumentDirectory();
-                } else {
-                    toReturn = installer.install(space, serviceName, dataVersion, properties);
-                }
-                if (toReturn == null) {
-                    toReturn = new DocumentDirectory();
-                }
-
-                BootstrapUtil.removeSystemFiles(toReturn);
-                toReturn.makePathsAbsolute(serviceDirectoryPath);
-                return toReturn;
+        return (space, serviceName, dataVersion, properties) -> {
+            DocumentDirectory toReturn;
+            if (installer == null) {
+                toReturn = new DocumentDirectory();
+            } else {
+                toReturn = installer.install(space, serviceName, dataVersion, properties);
             }
+            if (toReturn == null) {
+                toReturn = new DocumentDirectory();
+            }
+
+            BootstrapUtil.removeSystemFiles(toReturn);
+            toReturn.makePathsAbsolute(serviceDirectoryPath);
+            return toReturn;
         };
     }
 
