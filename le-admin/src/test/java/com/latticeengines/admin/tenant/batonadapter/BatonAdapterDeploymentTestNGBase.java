@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
@@ -58,6 +59,23 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
         try {
             loginAD();
             deleteTenant(contractId, tenantId);
+            deletePLSAdminUser();
+            deletePLSTestTenant();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private void deletePLSAdminUser() {
+        if (globalUserManagementService.getUserByUsername(testAdminUsername) != null) {
+            globalUserManagementService.deleteUser(testAdminUsername);
+        }
+    }
+
+    public void deletePLSTestTenant() {
+        try {
+            String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+            magicRestTemplate.delete(getPlsHostPort() + String.format("/pls/admin/tenants/%s", PLSTenantId));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
