@@ -141,6 +141,7 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
         case Facebook:
         case LinkedIn:
         case Outreach:
+        case GoogleAds:
             return MapUtils.isNotEmpty(counts) && //
                     (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L
                             || counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) > 0L);
