@@ -13,6 +13,7 @@ class SoftDeleteJob extends AbstractSparkJob[SoftDeleteConfig] {
     val deleteSrcIdx: Int = if (config.getDeleteSourceIdx == null) 1 else config.getDeleteSourceIdx.toInt
     val originalSrcIdx: Int = (deleteSrcIdx + 1) % 2
     val joinColumn = config.getIdColumn
+    val sourceIdColumn = config.getSourceIdColumn
     val hasPartitionKey = config.getPartitionKeys != null && config.getPartitionKeys.size() > 0
     val needPartitionOutput: Boolean = config.getNeedPartitionOutput == true
 
@@ -25,14 +26,23 @@ class SoftDeleteJob extends AbstractSparkJob[SoftDeleteConfig] {
 
     var dropFields : ListBuffer[String] = ListBuffer()
     if (!needPartitionOutput && hasPartitionKey) {
-      dropFields ++= asScalaBufferConverter(config.getPartitionKeys).asScala;
+      dropFields ++= asScalaBufferConverter(config.getPartitionKeys).asScala
     }
 
     // calculation
-    var result = original.alias("original")
-      .join(delete, Seq(joinColumn), "left")
-      .where(delete.col(joinColumn).isNull)
-      .select("original.*")
+    var result: DataFrame = null
+    if (joinColumn.equals(sourceIdColumn)) {
+      result = original.alias("original")
+        .join(delete, Seq(joinColumn), "left")
+        .where(delete.col(joinColumn).isNull)
+        .select("original.*")
+    } else {
+      result = original.alias("original")
+        .withColumn(joinColumn, original.col(sourceIdColumn))
+        .join(delete, Seq(joinColumn), "left")
+        .where(delete.col(joinColumn).isNull)
+        .select("original.*")
+    }
 
     if (dropFields.nonEmpty) {
       result = result.drop(dropFields:_*)
