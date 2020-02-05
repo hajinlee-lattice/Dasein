@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit.StorageType
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.{SparkJobConfig, SparkJobResult}
 import org.apache.commons.collections4.CollectionUtils
+import org.apache.commons.lang3.StringUtils
 import org.apache.livy.scalaapi.ScalaJobContext
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
@@ -86,6 +87,14 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     (spark, latticeCtx)
   }
 
+  def getFilePath(suffix: String, filePrefix: String): String = {
+    if (StringUtils.isNotEmpty(filePrefix)) {
+      filePrefix + "*" + suffix
+    } else {
+      "*" + suffix
+    }
+  }
+
   def loadHdfsUnit(spark: SparkSession, unit: HdfsDataUnit): DataFrame = {
     var path = unit.getPath
     val fmt: String = if (unit.getDataFormat != null) unit.getDataFormat.name.toLowerCase else "avro"
@@ -94,9 +103,9 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       val suffix = "." + fmt
       if (!path.endsWith(suffix)) {
         if (path.endsWith("/")) {
-          path += "*" + suffix
+          path += getFilePath(suffix, unit.getFilePrefix)
         } else {
-          path += "/*" + suffix
+          path += "/" + getFilePath(suffix, unit.getFilePrefix)
         }
       }
     }

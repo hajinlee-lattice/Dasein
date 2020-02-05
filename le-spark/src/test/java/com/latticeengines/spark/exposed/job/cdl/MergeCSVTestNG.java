@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-
 public class MergeCSVTestNG extends SparkJobFunctionalTestNGBase {
 
     private final long now = System.currentTimeMillis();
