@@ -140,14 +140,15 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
             String dstPath = keepMergedFileName ? pathToLookFor : mergeToPath;
             log.info("PathToLookFor={}", pathToLookFor);
             log.info("FilePrefix={}", filePrefix);
-            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, pathToLookFor, filePrefix + "_.*.csv$");
+            filePrefix = filePrefix + "_";
+            List<String> csvFiles = HdfsUtils.getFilesForDir(yarnConfiguration, pathToLookFor, filePrefix + ".*.csv$");
             log.info("CSV files={}", JsonUtils.serialize(csvFiles));
             for (String file : csvFiles) {
                 if (!keepMergedFileName) {
                     HdfsUtils.moveFile(yarnConfiguration, file, mergeToPath);
                 }
             }
-            MergeCSVConfig mergeCSVConfig = getMergeCSVConfig(dstPath);
+            MergeCSVConfig mergeCSVConfig = getMergeCSVConfig(dstPath, filePrefix);
             SparkJobResult result = SparkUtils.runJob(customerSpace, yarnConfiguration, sparkJobService,
                     livySessionManager, MergeCSVJob.class, mergeCSVConfig);
             HdfsDataUnit hdfsDataUnit = result.getTargets().get(0);
@@ -176,9 +177,10 @@ public abstract class BaseExportData<T extends ExportStepConfiguration> extends 
         }
     }
 
-    private MergeCSVConfig getMergeCSVConfig(String path) {
+    private MergeCSVConfig getMergeCSVConfig(String path, String filePrefix) {
         MergeCSVConfig mergeCSVConfig = new MergeCSVConfig();
         HdfsDataUnit hdfsDataUnit = HdfsDataUnit.fromPath(path);
+        hdfsDataUnit.setFilePrefix(filePrefix);
         hdfsDataUnit.setDataFormat(DataUnit.DataFormat.CSV);
         mergeCSVConfig.setInput(Collections.singletonList(hdfsDataUnit));
         mergeCSVConfig.setWorkspace(PathBuilder.buildRandomWorkspacePath(podId, customerSpace).toString());

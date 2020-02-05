@@ -18,6 +18,9 @@ public class HdfsDataUnit extends DataUnit {
     @JsonProperty("Path")
     private String path;
 
+    @JsonProperty("filePrefix")
+    private String filePrefix;
+
     public static HdfsDataUnit fromPath(String path) {
         HdfsDataUnit dataUnit = new HdfsDataUnit();
         dataUnit.setPath(path);
@@ -36,5 +39,13 @@ public class HdfsDataUnit extends DataUnit {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getFilePrefix() {
+        return filePrefix;
+    }
+
+    public void setFilePrefix(String filePrefix) {
+        this.filePrefix = filePrefix;
     }
 }
