@@ -22,6 +22,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -36,6 +38,8 @@ import com.latticeengines.scoring.runtime.mapreduce.ScoringProperty;
 
 public class ScoringMapperPredictUtilTestNG {
 
+    private static final Logger log = LoggerFactory.getLogger(ScoringMapperPredictUtilTestNG.class);
+
     private static final String MODEL_ID = ScoringTestUtils.generateRandomModelId();
 
     @Test(groups = "unit")
@@ -48,8 +52,7 @@ public class ScoringMapperPredictUtilTestNG {
         try {
             FileUtils.copyURLToFile(scoreUrl, dest);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Failed to copy file", e);
         }
 
         // parseModelFile
@@ -165,8 +168,7 @@ public class ScoringMapperPredictUtilTestNG {
                 HdfsUtils.rmdir(new Configuration(), tempOutputPath);
             }
         } catch (Exception e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+            log.error("Failed to remove dir.", e1);
         }
 
         Configuration config = new Configuration();
@@ -180,7 +182,7 @@ public class ScoringMapperPredictUtilTestNG {
         try {
             fileList = HdfsUtils.getFilesForDir(new Configuration(), tempOutputPath);
         } catch (Exception e1) {
-            e1.printStackTrace();
+            log.error("Failed to get files.", e1);
         }
         assertTrue(fileList.size() == 1, "The fileList should only have one element.");
         InputStream is = fs.open(new Path(fileList.get(0)));

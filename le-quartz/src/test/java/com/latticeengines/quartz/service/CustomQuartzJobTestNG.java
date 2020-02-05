@@ -11,12 +11,15 @@ import javax.inject.Inject;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.quartz.JobConfig;
 import com.latticeengines.domain.exposed.quartz.JobHistory;
 import com.latticeengines.domain.exposed.quartz.JobInfo;
@@ -26,6 +29,8 @@ import com.latticeengines.quartzclient.entitymanager.JobHistoryEntityMgr;
 
 @ContextConfiguration(locations = { "classpath:test-quartz-context.xml" })
 public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
+
+    private static final Logger log = LoggerFactory.getLogger(CustomQuartzJobTestNG.class);
 
     public static final String JOB_NAME = "testCustomQuartzJob";
     public static final String JOB_GROUP = "CustomQuartzJobs";
@@ -78,25 +83,21 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
     public void getJobList() {
         List<JobInfo> jobInfos = schedulerEntityMgr.listJobs(JOB_GROUP);
         assertTrue(jobInfos.size() >= 1);
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        SleepUtils.sleep(10000);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "addJob" })
-    public void triggerJob() throws InterruptedException {
+    public void triggerJob() {
         JobKey jobKey = new JobKey(JOB_NAME, JOB_GROUP);
         try {
             scheduler.triggerJob(jobKey);
         } catch (SchedulerException e) {
-            e.printStackTrace();
+            log.error(String.format("Failed to trigger job %s.", jobKey), e);
         }
         List<TriggerJobThread> jobList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             jobList.add(new TriggerJobThread(jobKey));
-            Thread.sleep(100);
+            SleepUtils.sleep(100);
         }
         JobInfoDetail jobDetail = schedulerEntityMgr.getJobDetail(JOB_GROUP, JOB_NAME);
         List<JobHistory> jobHistories = jobDetail.getHistoryJobs();
@@ -105,11 +106,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
                 assertNull(jobHistory.getErrorMessage());
             }
         }
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        SleepUtils.sleep(5000);
         jobHistories = jobDetail.getHistoryJobs();
         if (jobHistories != null) {
             for (JobHistory jobHistory : jobHistories) {
@@ -120,11 +117,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "functional", dependsOnMethods = { "triggerJob", "addJob" })
     public void deleteJob() {
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        SleepUtils.sleep(10000);
         Boolean deleted = schedulerEntityMgr.deleteJob(JOB_GROUP, JOB_NAME);
         assertTrue(deleted);
     }
@@ -143,10 +136,8 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
             try {
                 Thread.sleep(1000);
                 scheduler.triggerJob(jobKey);
-            } catch (SchedulerException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                log.error(String.format("Failed to trigger job %s.", jobKey), e);
             }
         }
     }

@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -78,11 +79,7 @@ public class RatingEngineLoadTestingTestNG extends CDLFunctionalTestNGBase {
     @AfterClass(groups = "functional")
     public void cleanupActionContext() {
         // Stop the DSStatus thread.
-        try {
-            Thread.sleep(1000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        SleepUtils.sleep(1000l);
         dsStatusThread.interrupted = true;
         log.info("Marked interrupted to true ");
         ActionContext.remove();

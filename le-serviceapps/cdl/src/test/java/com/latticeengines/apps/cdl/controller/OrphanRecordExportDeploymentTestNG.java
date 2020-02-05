@@ -279,7 +279,7 @@ public class OrphanRecordExportDeploymentTestNG extends CDLDeploymentTestNGBase 
             }
             Assert.assertEquals(totalRecordNum, ((Integer) expectedResults.get(NUM_RECORDS)).intValue());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to parse csv file", e);
         }
     }
 

@@ -12,14 +12,9 @@ public class TestPrintMessageJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) {
-        try {
-            JobDataMap data = context.getJobDetail().getJobDataMap();
-            String message = data.getString(MESSAGE);
-            System.out.println(message + new Date());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JobDataMap data = context.getJobDetail().getJobDataMap();
+        String message = data.getString(MESSAGE);
+        System.out.println(message + new Date());
     }
 
 }

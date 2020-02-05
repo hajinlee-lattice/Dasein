@@ -237,7 +237,7 @@ public final class CipherUtils {
                 System.out.println("The generated key is : " + key);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to parse command line.", e);
         }
     }
 }

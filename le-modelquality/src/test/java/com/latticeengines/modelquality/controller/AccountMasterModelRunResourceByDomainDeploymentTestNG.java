@@ -87,7 +87,7 @@ public class AccountMasterModelRunResourceByDomainDeploymentTestNG extends BaseA
             Assert.assertEquals(aModelRunEntityNames.getName(), modelName);
             waitAndCheckModelRun(modelName);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to run runModelDerivedColumn.", ex);
             Assert.fail("Failed", ex);
         }
     }

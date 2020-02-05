@@ -290,16 +290,15 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
                     Double scoreFast = (double) evaluationFast.get(ScoreType.PROBABILITY_OR_VALUE);
 
                     if (Math.abs(expectedScore - scoreFast) > 0.000001) {
-                        System.out.println(String.format("Record id %f has value %f, expected is %f", //
+                        log.info(String.format("Record id %f has value %f, expected is %f", //
                                 key, scoreFast, expectedScore));
-                        System.out.println("Difference," + Math.abs(expectedScore - scoreFast));
-
+                        log.info("Difference," + Math.abs(expectedScore - scoreFast));
                         errorQueue.put(new QueueEntry<Double, Double>(key, Math.abs(expectedScore - scoreFast)));
                     } else {
                         outputQueue.put(new QueueEntry<Double, Double>(key, scoreFast));
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Failed to put entry into queue.", e);
                     errorQueue.put(new QueueEntry<Double, Double>(key, -1.0));
                 }
             }

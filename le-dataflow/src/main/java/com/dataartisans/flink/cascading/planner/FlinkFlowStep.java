@@ -868,9 +868,8 @@ public class FlinkFlowStep extends BaseFlowStep<Configuration> {
                 joinerField.setAccessible(true);
                 joiner = (Joiner) joinerField.get(joiner);
             } catch (NoSuchFieldException | IllegalAccessException nsfe) {
-                nsfe.printStackTrace();
-                LOG.warn("Could not extract joiner from Scalding's WrappedJoiner. "
-                        + "Will continue without extracting joiner.");
+                LOG.error("Could not extract joiner from Scalding's WrappedJoiner. "
+                        + "Will continue without extracting joiner.", nsfe);
             }
         }
 

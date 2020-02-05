@@ -17,6 +17,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.entitymgr.TransformationProgressEntityMgr;
@@ -80,13 +81,8 @@ public abstract class TransformationDeploymentTestNGBase<T extends Transformatio
             if (progressInDb.getStatus().equals(ProgressStatus.FINISHED)) {
                 break;
             }
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            SleepUtils.sleep(3000);
         }
-
         Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
 
         return progressInDb;

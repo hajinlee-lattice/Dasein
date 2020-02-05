@@ -1,13 +1,12 @@
 package com.latticeengines.scoringapi.exposed.exception;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +122,7 @@ public class ScoringApiExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionHandlerErrors handleException(IOException ex) {
-        String trace = getStackTraceAsString(ex);
+        String trace = ExceptionUtils.getStackTrace(ex);
         if (trace.contains("org.apache.catalina.connector.ClientAbortException")) {
             return generateExceptionResponseNoAlert("client_abort", ex);
         } else {
@@ -167,7 +166,7 @@ public class ScoringApiExceptionHandler {
 
         String trace = "";
         if (includeTrace) {
-            trace = getStackTraceAsString(ex);
+            trace = ExceptionUtils.getStackTrace(ex);
         }
 
         String exceptionHandlerErrorsMsg = JsonUtils.serialize(exceptionHandlerErrors);
@@ -204,11 +203,5 @@ public class ScoringApiExceptionHandler {
         requestInfo.logSummary(requestInfo.getStopWatchSplits());
 
         return exceptionHandlerErrors;
-    }
-
-    private String getStackTraceAsString(Exception ex) {
-        StringWriter sw = new StringWriter();
-        ex.printStackTrace(new PrintWriter(sw));
-        return sw.toString();
     }
 }

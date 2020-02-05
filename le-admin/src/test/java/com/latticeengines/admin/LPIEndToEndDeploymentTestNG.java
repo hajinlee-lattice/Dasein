@@ -331,8 +331,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, modelingHdfsPoint), "modeling path not exist!");
             Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, podHdfsPoint), "Pod path not exist!");
         } catch (IOException e) {
-            log.warn("Error when verify the existence of hdfs paths", e);
-            e.printStackTrace();
+            log.error("Error when verify the existence of hdfs paths", e);
         }
     }
 

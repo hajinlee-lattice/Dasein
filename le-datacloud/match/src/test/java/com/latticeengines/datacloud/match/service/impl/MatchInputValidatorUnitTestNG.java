@@ -435,8 +435,7 @@ public class MatchInputValidatorUnitTestNG {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
-            System.out.println("Match Input Validation failed unexpectedly with exception: " +  e.getMessage());
-            e.printStackTrace();
+            log.error("Match Input Validation failed unexpectedly with exception: ", e);
         }
         Assert.assertFalse(failed, "Match Input Validation should have passed.");
     }

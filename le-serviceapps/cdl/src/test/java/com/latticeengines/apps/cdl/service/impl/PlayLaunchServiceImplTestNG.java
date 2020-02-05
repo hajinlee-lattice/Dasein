@@ -34,6 +34,7 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
@@ -465,11 +466,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         playLaunchService.deleteByLaunchId(playLaunch2.getLaunchId(), false);
-        try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(2L));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        SleepUtils.sleep(2000l);
         PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch1.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
         retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch2.getLaunchId(), false);
@@ -496,11 +493,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(retreivedPlayLaunch);
 
         playService.deleteByName(play.getName(), false);
-        try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(2L));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        SleepUtils.sleep(TimeUnit.SECONDS.toMillis(2L));
         retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch3.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
     }

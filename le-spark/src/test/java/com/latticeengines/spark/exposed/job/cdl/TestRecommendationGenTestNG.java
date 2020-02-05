@@ -125,8 +125,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
                             }
                         }
                     } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        log.error("Failed to parse contact data.", e);
                     }
                 }
             }

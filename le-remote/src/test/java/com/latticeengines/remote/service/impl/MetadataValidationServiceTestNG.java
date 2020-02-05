@@ -12,6 +12,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -23,6 +25,8 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMeta
 import com.latticeengines.remote.exposed.exception.MetadataValidationException;
 import com.latticeengines.remote.exposed.service.MetadataValidationResult;
 public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(MetadataValidationServiceTestNG.class);
 
     @Inject
     private MetadataValidationServiceImpl metadataValidationService;
@@ -75,7 +79,7 @@ public class MetadataValidationServiceTestNG extends RemoteFunctionalTestNGBase 
         try {
             metadataValidationService.validate(metadataContents);
         } catch (MetadataValidationException e) {
-            e.printStackTrace();
+            log.error("Failed to validate metadata.", e);
         }
         assertTrue(true, "Should not catch any exception");
     }

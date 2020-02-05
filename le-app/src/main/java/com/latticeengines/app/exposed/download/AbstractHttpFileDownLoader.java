@@ -343,8 +343,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                 }
             }
         } catch (IOException e) {
-            log.error("Error reading the input stream.");
-            e.printStackTrace();
+            log.error("Error reading the input stream.", e);
             return inputStream;
         }
 
@@ -422,8 +421,7 @@ public abstract class AbstractHttpFileDownLoader implements HttpFileDownLoader {
                 }
             }
         } catch (IOException e) {
-            log.error("Error reading the input stream.");
-            e.printStackTrace();
+            log.error("Error reading the input stream.", e);
             return inputStream;
         }
 

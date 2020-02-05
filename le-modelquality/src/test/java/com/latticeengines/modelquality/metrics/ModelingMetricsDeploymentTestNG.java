@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.modelquality.ModelRunEntityNames;
 import com.latticeengines.domain.exposed.modelquality.SelectedConfig;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
@@ -40,11 +41,6 @@ public class ModelingMetricsDeploymentTestNG extends ModelQualityTestNGBase {
         ModelQualityMetrics metrics = new ModelQualityMetrics(m, s, n);
         ModelingMeasurement measurement = new ModelingMeasurement(metrics);
         metricService.write(MetricDB.MODEL_QUALITY, measurement);
-
-        try {
-            Thread.sleep(5000L);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        SleepUtils.sleep(5000l);
     }
 }

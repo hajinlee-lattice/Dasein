@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.HttpClient;
 import org.apache.http.config.Registry;
@@ -204,7 +205,7 @@ public final class HttpClientUtils {
             System.out.println("Successfully connected");
 
         } catch (Exception exception) {
-            exception.printStackTrace();
+            System.out.println(ExceptionUtils.getStackTrace(exception));
         }
     }
 

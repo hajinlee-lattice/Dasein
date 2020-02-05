@@ -6,6 +6,8 @@ import javax.inject.Inject;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -15,6 +17,8 @@ import com.latticeengines.apps.lp.testframework.LPDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
 public class ModelSummaryResourceTestNG extends LPDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryResourceTestNG.class);
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
@@ -30,9 +34,8 @@ public class ModelSummaryResourceTestNG extends LPDeploymentTestNGBase {
         try {
             when(callable.call()).thenReturn(true);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to run model download job.", e);
         }
-
         boolean result = modelSummaryProxy.downloadModelSummary("LocalTest");
         Assert.assertTrue(result);
     }

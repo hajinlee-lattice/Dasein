@@ -72,8 +72,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
                 sourceTables.put(source.getSourceName(), hdfsSourceEntityMgr.getTableAtVersion(source, currentVersion));
                 log.info("Select source " + source.getSourceName() + "@versions " + currentVersion);
             } catch (Exception e) {
-                log.info("Source " + source.getSourceName() + " is not initiated in HDFS");
-                e.printStackTrace();
+                log.error("Source " + source.getSourceName() + " is not initiated in HDFS", e);
             }
         }
 
@@ -113,8 +112,7 @@ public class SimpleTransformationDataFlowService extends AbstractTransformationD
             }
             log.info("Select source " + sourceName + "@versions " + StringUtils.join(versions, ","));
         } catch (Exception e) {
-            log.info("Source " + sourceName + " is not initiated in HDFS");
-            e.printStackTrace();
+            log.error("Source " + sourceName + " is not initiated in HDFS", e);
             return false;
         }
         sourceTables.put(sourceName, sourceTable);

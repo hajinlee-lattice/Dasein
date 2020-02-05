@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -15,12 +17,13 @@ import com.latticeengines.security.exposed.jwt.handler.impl.ZendeskJwtHandler;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtManagerTestNG.class);
+
     @Inject
     private JwtManager jwtManager;
 
     @Test(groups = "functional")
     public void generateJwtTokenWithFunction() {
-
         GlobalAuthUser user = new GlobalAuthUser();
         user.setFirstName("Tim");
         user.setLastName("Gates");
@@ -34,8 +37,7 @@ public class JwtManagerTestNG extends SecurityFunctionalTestNGBase {
         try {
             reply = jwtManager.handleJwtRequest(user, reqParameters);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            log.error("Failed to handle Jwt request", e);
         }
         Assert.assertNotNull(reply);
         Assert.assertNotNull(reply.getType());

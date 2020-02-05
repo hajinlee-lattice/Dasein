@@ -29,7 +29,7 @@ public final class NodeWatcher {
             try {
                 cache.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Failed to close cache.", e);
             }
         })));
     }

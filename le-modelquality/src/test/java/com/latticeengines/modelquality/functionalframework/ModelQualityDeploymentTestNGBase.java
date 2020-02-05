@@ -29,6 +29,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.modelquality.Algorithm;
 import com.latticeengines.domain.exposed.modelquality.AnalyticPipeline;
@@ -288,7 +289,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             modelRunEntityNames.add(modelRunEntityNames1);
             modelRunEntityNames.add(modelRunEntityNames2);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to setup environment.", e);
             Assert.fail("Failed to setup environment.");
         }
     }
@@ -315,7 +316,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
             log.info(String.format("Attempting to delete DataFlow \"%s\"", dataflow.getName()));
             dataFlowEntityMgr.delete(dataflow);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to tear down environment.", e);
             Assert.fail("Failed to tear down environment.");
         }
     }
@@ -491,11 +492,7 @@ public class ModelQualityDeploymentTestNGBase extends ModelQualityTestNGBase {
                     throw new RuntimeException(msg);
                 }
             }
-            try {
-                Thread.sleep(300_000); // 5 mins
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            SleepUtils.sleep(300_000);
         }
     }
 

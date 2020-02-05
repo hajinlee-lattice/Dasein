@@ -3,6 +3,8 @@ package com.latticeengines.modelquality.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -20,6 +22,7 @@ import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(ModelRunResourceDeploymentTestNG.class);
     private String user = TestFrameworkUtils.usernameForAccessLevel(AccessLevel.SUPER_ADMIN);
     private String password = TestFrameworkUtils.GENERAL_PASSWORD;
     private List<String> namedModelRunEntityNames = new ArrayList<>();
@@ -75,7 +78,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             Assert.assertEquals(aModelRunEntityNames.getName(), modelName);
             waitAndCheckModelRun(modelName);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception happened in runModelNGINX", ex);
             Assert.fail("Failed", ex);
         }
     }
@@ -102,7 +105,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             Assert.assertEquals(aModelRunEntityNames.getName(), modelName);
             waitAndCheckModelRun(modelName);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception happened in runModelNGINXNewPipeline", ex);
             Assert.fail("Failed", ex);
         }
     }
@@ -130,7 +133,7 @@ public class ModelRunResourceDeploymentTestNG extends ModelQualityDeploymentTest
             Assert.assertEquals(aModelRunEntityNames.getName(), modelName);
             waitAndCheckModelRun(modelName);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception happened in runModelHosting", ex);
             Assert.fail("Failed", ex);
         }
     }
