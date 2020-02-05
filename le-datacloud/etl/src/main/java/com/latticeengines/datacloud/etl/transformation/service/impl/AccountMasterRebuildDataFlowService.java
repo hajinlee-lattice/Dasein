@@ -98,7 +98,7 @@ public class AccountMasterRebuildDataFlowService extends AbstractTransformationD
         }
         columnMap.put(sourceName, columnSet);
 
-        Table sourceTable = null;
+        Table sourceTable;
         try {
             String version = hdfsSourceEntityMgr.getCurrentVersion(source);
             sourceTable = hdfsSourceEntityMgr.getTableAtVersion(source, version);
@@ -106,8 +106,7 @@ public class AccountMasterRebuildDataFlowService extends AbstractTransformationD
 
 
         } catch (Exception e) {
-            log.info("Source " + sourceName + " is not initiated in HDFS");
-            e.printStackTrace();
+            log.error("Source " + sourceName + " is not initiated in HDFS", e);
             return false;
         }
 

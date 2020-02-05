@@ -2,6 +2,7 @@ package com.latticeengines.pls.end2end.oneoff;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.codehaus.plexus.util.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -30,6 +33,8 @@ import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public class FixProdDataComposition extends PlsFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(FixProdDataComposition.class);
 
     @Inject
     private Configuration conf;
@@ -58,18 +63,17 @@ public class FixProdDataComposition extends PlsFunctionalTestNGBase {
                             try {
                                 if (HdfsUtils.fileExists(conf, file.getPath() + ".bak")) {
                                     FileUtils.writeStringToFile(new File(fileName), "Skip path:" + file.getPath()
-                                            + "\n", true);
+                                            + "\n", Charset.defaultCharset(), true);
                                     return false;
                                 }
                                 return file.getPath().getName().equals("datacomposition.json")
-                                        && file.getPath().getParent().getName()
-                                                .matches(".*With_UserRefinedAttributes-.*-Metadata");
+                                        && file.getPath().getParent().getName().matches(".*With_UserRefinedAttributes-.*-Metadata");
                             } catch (IOException e) {
                                 try {
                                     FileUtils.writeStringToFile(new File(fileName), ExceptionUtils.getFullStackTrace(e)
-                                            + "\n", true);
+                                            + "\n", Charset.defaultCharset(), true);
                                 } catch (IOException e1) {
-                                    e1.printStackTrace();
+                                    log.error("Failed to write string to file.", e);
                                 }
                             }
                             return false;
@@ -79,7 +83,7 @@ public class FixProdDataComposition extends PlsFunctionalTestNGBase {
 
             for (int i = 0; i < paths.size(); i++) {
                 String path = paths.get(i);
-                System.out.println(path);
+                log.info(path);
                 String eventTableName = StringUtils.substringBeforeLast(new Path(path).getParent().getName(),
                         "UserRefinedAttributes") + "UserRefinedAttributes";
                 String customerSpace = new Path(path).getParent().getParent().getParent().getName();
@@ -95,13 +99,12 @@ public class FixProdDataComposition extends PlsFunctionalTestNGBase {
                 dataComposition.transforms = transforms.getValue();
 
                 FileUtils.writeStringToFile(new File(fileName),
-                        "->>>>>>>>>>>>>>>>>>>>>>>Starting to update datacomposition.json file at " + path + "\n", true);
+                        "->>>>>>>>>>>>>>>>>>>>>>>Starting to update datacomposition.json file at " + path + "\n", Charset.defaultCharset(), true);
                 String dc = JsonUtils.serialize(dataComposition);
                 HdfsUtils.moveFile(conf, path, path + ".bak");
                 HdfsUtils.writeToFile(conf, path, dc);
                 FileUtils.writeStringToFile(new File(fileName),
-                        "->>>>>>>>>>>>>>>>>>>>>>>Successfully updated datacomposition.json file at " + path + "\n",
-                        true);
+                        "->>>>>>>>>>>>>>>>>>>>>>>Successfully updated datacomposition.json file at " + path + "\n", Charset.defaultCharset(), true);
             }
         }
     }

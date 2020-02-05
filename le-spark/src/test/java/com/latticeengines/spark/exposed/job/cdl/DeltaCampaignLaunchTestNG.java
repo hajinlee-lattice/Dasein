@@ -158,7 +158,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 Assert.assertTrue(jsonObject.isArray());
                 Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Failed to get record from avro file.", e);
             }
 
             // external Id assertion
@@ -190,8 +190,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                 Assert.assertTrue(jsonObject.isArray());
                 Assert.assertEquals(jsonObject.size(), addOrDeleteContactPerAccount);
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error("Failed to read json data.", e);
             }
         }
 

@@ -69,7 +69,7 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
                     PathBuilder.buildServicePath(podId, PROPDATA_SERVICE, leStack).append(RELAX_PUBLIC_DOMAIN_CHECK),
                     new Document("true"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to setup zk.", e);
         }
     }
 

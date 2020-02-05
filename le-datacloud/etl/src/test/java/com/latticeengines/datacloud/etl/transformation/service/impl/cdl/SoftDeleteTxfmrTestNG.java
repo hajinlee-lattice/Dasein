@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -27,6 +29,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 
 public class SoftDeleteTxfmrTestNG extends PipelineTransformationTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(SoftDeleteTxfmrTestNG.class);
 
     private final GeneralSource DeleteSrc = new GeneralSource("Delete");
     private final GeneralSource BaseSrc = new GeneralSource("Base");
@@ -56,7 +60,7 @@ public class SoftDeleteTxfmrTestNG extends PipelineTransformationTestNGBase {
             try {
                 return HdfsUtils.isDirectory(yarnConfiguration, file);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Failed to get file info from HDFS.", e);
             }
             return false;
         }).collect(Collectors.toList());

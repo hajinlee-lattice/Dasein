@@ -263,7 +263,7 @@ public class ModelingFileUploadResource {
         }  catch (LedpException ledp) {
             UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
-            ledp.printStackTrace();
+            log.error("Failed to upload cleanup file template.", ledp);
             throw new UIActionException(action, ledp.getCode());
         } catch (RuntimeException e) {
             LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { e.getMessage() });

@@ -210,7 +210,7 @@ public class ScoringMapperPredictUtilTestNG {
             HdfsUtils.rmdir(new Configuration(), tempOutputPath);
             file.delete();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to delete file.", e);
         }
     }
 
@@ -286,8 +286,7 @@ public class ScoringMapperPredictUtilTestNG {
         try {
             FileUtils.copyURLToFile(scoreUrl, dest);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Failed to copy file.", e);
         }
 
         // make up models

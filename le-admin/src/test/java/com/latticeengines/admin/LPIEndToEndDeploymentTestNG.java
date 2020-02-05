@@ -344,8 +344,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
                     "modeling path not deleted!");
             Assert.assertFalse(HdfsUtils.fileExists(yarnConfiguration, podHdfsPoint), "Pod path not deleted!");
         } catch (IOException e) {
-            log.warn("Error when verify the existence of hdfs paths", e);
-            e.printStackTrace();
+            log.error("Error when verify the existence of hdfs paths", e);
         }
     }
 

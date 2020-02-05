@@ -478,9 +478,7 @@ public class MatchInputValidatorUnitTestNG {
             MatchInputValidator.validateEntityMatchColumnSelection(input);
         } catch (Exception e) {
             failed = true;
-            System.out.println("Entity Match Column Selection Validation failed unexpectedly with exception: "
-                    +  e.getMessage());
-            e.printStackTrace();
+            log.error("Entity Match Column Selection Validation failed unexpectedly with exception: ", e);
         }
         Assert.assertFalse(failed, "Entity Match Column Selection Validation should have passed.");
     }

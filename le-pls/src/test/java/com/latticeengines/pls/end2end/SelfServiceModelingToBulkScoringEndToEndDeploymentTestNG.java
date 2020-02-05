@@ -405,7 +405,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
             }
             assertEquals(line, totalRowNumber);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to parse csv file.", e);
         } finally {
             parser.close();
         }

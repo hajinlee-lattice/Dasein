@@ -309,7 +309,7 @@ public class RecordTransformerTestNG extends ScoringApiFunctionalTestNGBase {
             try {
                 call();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Failed to transform.", e);
             }
         }
 

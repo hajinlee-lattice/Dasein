@@ -115,7 +115,7 @@ public abstract class DeleteActivityStoreDeploymentTestNG extends ProcessActivit
                 try {
                     return HdfsUtils.isDirectory(yarnConfiguration, file);
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    log.error("Failed to get file info from hdfs.", ex);
                 }
                 return false;
             }).map(s -> s = s + "/*.avro").collect(Collectors.toList());

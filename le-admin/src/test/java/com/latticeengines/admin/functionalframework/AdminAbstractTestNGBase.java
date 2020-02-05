@@ -130,7 +130,7 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         try {
             info = TenantLifecycleManager.getInfo(contractId, tenantId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("Failed to get tenant info.", e);
         }
         info.properties.status = "ACTIVE";
         String url = String.format("%s/admin/tenants/%s/%s", getRestHostPort(), tenantId, contractId);
