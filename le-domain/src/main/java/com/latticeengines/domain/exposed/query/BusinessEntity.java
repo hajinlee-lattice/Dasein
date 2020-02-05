@@ -86,6 +86,8 @@ public enum BusinessEntity implements GraphNode {
     public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME= //
             ImmutableSet.of(PurchaseHistory, WebVisitProfile);
     public static final Set<BusinessEntity> ACTIVITY_METRIC_SERVING_ENTITIES= ImmutableSet.of(WebVisitProfile);
+    public static final Set<BusinessEntity> CAN_REPALCE_ENTITIES = ImmutableSet.of(Account, Contact, Product,
+            Transaction, ActivityStream);
 
     static {
         // Storage

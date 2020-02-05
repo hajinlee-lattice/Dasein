@@ -68,6 +68,7 @@ public class ConvertBatchStoreToDataTableWorkflowConfiguration extends BaseCDLWo
             convertAccountWorkflowBuilder.setSkipStep(!CollectionUtils.isEmpty(entityList) && entityList.contains(BusinessEntity.Account));
             convertContactWorkflowBuilder.setSkipStep(!CollectionUtils.isEmpty(entityList) && entityList.contains(BusinessEntity.Contact));
             convertTransactionWorkflowBuilder.setSkipStep(!CollectionUtils.isEmpty(entityList) && entityList.contains(BusinessEntity.Transaction));
+            processActivityStreamStepConfiguration.setSkipStep(!CollectionUtils.isEmpty(entityList) && entityList.contains(BusinessEntity.ActivityStream));
             return this;
         }
 
