@@ -17,6 +17,8 @@ public interface PlayLaunchChannelEntityMgr extends BaseEntityMgrRepository<Play
 
     PlayLaunchChannel findById(String channelId);
 
+    PlayLaunchChannel findById(String channelId, boolean useWriterRepo);
+
     PlayLaunchChannel updatePlayLaunchChannel(PlayLaunchChannel existingPlayLaunchChannel,
             PlayLaunchChannel playLaunchChannel);
 

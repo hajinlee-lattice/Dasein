@@ -313,7 +313,7 @@ public class PlayResource {
             throw new LedpException(LedpCode.LEDP_18151, new String[] { playName });
         }
 
-        PlayLaunchChannel channel = playLaunchChannelService.findById(channelId);
+        PlayLaunchChannel channel = playLaunchChannelService.findById(channelId, true);
         if (channel == null) {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[] { "No channel found by channel id: " + channelId });

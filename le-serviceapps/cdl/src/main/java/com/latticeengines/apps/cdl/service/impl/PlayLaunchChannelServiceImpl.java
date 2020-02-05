@@ -190,6 +190,11 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
     }
 
     @Override
+    public PlayLaunchChannel findById(String channelId, boolean useWriterRepo) {
+        return playLaunchChannelEntityMgr.findById(channelId, useWriterRepo);
+    }
+
+    @Override
     public List<PlayLaunchChannel> getPlayLaunchChannels(String playName, Boolean includeUnlaunchedChannels) {
         List<PlayLaunchChannel> channels = playLaunchChannelEntityMgr.findByPlayName(playName);
         for (PlayLaunchChannel playLaunchChannel : channels) {
