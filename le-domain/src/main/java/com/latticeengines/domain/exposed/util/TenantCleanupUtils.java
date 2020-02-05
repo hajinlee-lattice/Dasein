@@ -10,6 +10,10 @@ import com.latticeengines.domain.exposed.camille.Path;
 
 public final class TenantCleanupUtils {
 
+    protected TenantCleanupUtils() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final String customerBase = "/user/s-analytics/customers";
 
     public static void cleanupTenantInHdfs(Configuration yarnConfiguration, String contractId, String contractPath) throws IOException {
