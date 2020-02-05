@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.Hibernate;
 import org.springframework.data.jpa.repository.Modifying;
@@ -54,114 +52,7 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
     @Transactional(propagation = Propagation.REQUIRED)
     public void update(PlayLaunch playLaunch) {
         PlayLaunch existingPlayLaunch = findByLaunchId(playLaunch.getId(), false);
-        if (playLaunch.getLaunchState() != null) {
-            existingPlayLaunch.setLaunchState(playLaunch.getLaunchState());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getApplicationId())) {
-            existingPlayLaunch.setApplicationId(playLaunch.getApplicationId());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getTableName())) {
-            existingPlayLaunch.setTableName(playLaunch.getTableName());
-        }
-        if (playLaunch.getParentDeltaWorkflowId() != null) {
-            existingPlayLaunch.setParentDeltaWorkflowId(playLaunch.getParentDeltaWorkflowId());
-        }
-        if (playLaunch.getLaunchWorkflowId() != null) {
-            existingPlayLaunch.setLaunchWorkflowId(playLaunch.getLaunchWorkflowId());
-        }
-
-        // Account stats
-        if (playLaunch.getAccountsSelected() != null) {
-            existingPlayLaunch.setAccountsSelected(playLaunch.getAccountsSelected());
-        }
-        if (playLaunch.getAccountsLaunched() != null) {
-            existingPlayLaunch.setAccountsLaunched(playLaunch.getAccountsLaunched());
-        }
-        if (playLaunch.getAccountsSuppressed() != null) {
-            existingPlayLaunch.setAccountsSuppressed(playLaunch.getAccountsSuppressed());
-        }
-        if (playLaunch.getAccountsErrored() != null) {
-            existingPlayLaunch.setAccountsErrored(playLaunch.getAccountsErrored());
-        }
-        if (playLaunch.getAccountsDuplicated() != null) {
-            existingPlayLaunch.setAccountsDuplicated(playLaunch.getAccountsDuplicated());
-        }
-
-        existingPlayLaunch.setLaunchCompletionPercent(playLaunch.getLaunchCompletionPercent());
-
-        // Contact stats
-        if (playLaunch.getContactsSelected() != null) {
-            existingPlayLaunch.setContactsSelected(playLaunch.getContactsSelected());
-        }
-        if (playLaunch.getContactsLaunched() != null) {
-            existingPlayLaunch.setContactsLaunched(playLaunch.getContactsLaunched());
-        }
-        if (playLaunch.getContactsSuppressed() != null) {
-            existingPlayLaunch.setContactsSuppressed(playLaunch.getContactsSuppressed());
-        }
-        if (playLaunch.getContactsErrored() != null) {
-            existingPlayLaunch.setContactsErrored(playLaunch.getContactsErrored());
-        }
-        if (playLaunch.getContactsDuplicated() != null) {
-            existingPlayLaunch.setContactsDuplicated(playLaunch.getContactsDuplicated());
-        }
-
-        // Tray System properties
-        if (StringUtils.isNotBlank(playLaunch.getAudienceId())) {
-            existingPlayLaunch.setAudienceId(playLaunch.getAudienceId());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getAudienceName())) {
-            existingPlayLaunch.setAudienceName(playLaunch.getAudienceName());
-        }
-        if (playLaunch.getAudienceSize() != null) {
-            existingPlayLaunch.setAudienceSize(playLaunch.getAudienceSize());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getFolderName())) {
-            existingPlayLaunch.setFolderName(playLaunch.getFolderName());
-        }
-        if (playLaunch.getMatchedCount() != null) {
-            existingPlayLaunch.setMatchedCount(playLaunch.getMatchedCount());
-        }
-
-        // Delta Launch Tables
-        if (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())) {
-            existingPlayLaunch.setAddAccountsTable(playLaunch.getAddAccountsTable());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getCompleteContactsTable())) {
-            existingPlayLaunch.setCompleteContactsTable(playLaunch.getCompleteContactsTable());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable())) {
-            existingPlayLaunch.setRemoveAccountsTable(playLaunch.getRemoveAccountsTable());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getAddContactsTable())) {
-            existingPlayLaunch.setAddContactsTable(playLaunch.getAddContactsTable());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())) {
-            existingPlayLaunch.setRemoveContactsTable(playLaunch.getRemoveContactsTable());
-        }
-
-        // Launch Configuration
-        if (CollectionUtils.isNotEmpty(playLaunch.getBucketsToLaunch())) {
-            existingPlayLaunch.setBucketsToLaunch(playLaunch.getBucketsToLaunch());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
-            existingPlayLaunch.setDestinationAccountId(playLaunch.getDestinationAccountId());
-        }
-        if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
-            existingPlayLaunch.setDestinationOrgId(playLaunch.getDestinationOrgId());
-        }
-        if (playLaunch.getDestinationSysType() != null) {
-            existingPlayLaunch.setDestinationSysType(playLaunch.getDestinationSysType());
-        }
-        if (playLaunch.getDestinationOrgName() != null) {
-            existingPlayLaunch.setDestinationOrgName(playLaunch.getDestinationOrgName());
-        }
-        if (playLaunch.getExcludeItemsWithoutSalesforceId() != null) {
-            existingPlayLaunch.setExcludeItemsWithoutSalesforceId(playLaunch.getExcludeItemsWithoutSalesforceId());
-        }
-        existingPlayLaunch.setLaunchUnscored(playLaunch.isLaunchUnscored());
-
-        existingPlayLaunch.setUpdatedBy(playLaunch.getUpdatedBy());
+        existingPlayLaunch.merge(playLaunch);
         playLaunchDao.update(existingPlayLaunch);
     }
 
