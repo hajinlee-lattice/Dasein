@@ -35,7 +35,6 @@ import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.graph.traversal.impl.ReverseTopologicalTraverse;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -47,6 +46,7 @@ import com.latticeengines.domain.exposed.component.ComponentStatus;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.util.TenantCleanupUtils;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.proxy.exposed.component.ComponentProxy;
 import com.latticeengines.security.exposed.Constants;
@@ -183,7 +183,7 @@ public class ComponentOrchestrator {
         // delete tenant on HDFS with path /Pods/Default/Contracts/{tenantid}
         String contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId).toString();
         try {
-            HdfsUtils.rmdir(yarnConfiguration, contractPath);
+            TenantCleanupUtils.cleanupTenantInHdfs(yarnConfiguration, contractId, contractPath);
             log.info(String.format("Deleting tenant %s with contract %s on HDFS path %s", tenantId, contractId, contractPath));
         } catch (IOException e) {
             log.error(String.format("Can't delete tenant in Hdfs path %s.", contractPath), e);

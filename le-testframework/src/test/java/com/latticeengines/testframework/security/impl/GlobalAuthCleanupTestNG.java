@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.TenantCleanupUtils;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
@@ -73,9 +74,8 @@ import reactor.core.scheduler.Schedulers;
 public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthCleanupTestNG.class);
-    private static final Long cleanupThreshold = TimeUnit.DAYS.toMillis(7);
-    private static final Long redshiftCleanupThreshold = TimeUnit.DAYS.toMillis(1);
-    private static final String customerBase = "/user/s-analytics/customers";
+    private static final Long cleanupThreshold = TimeUnit.SECONDS.toMillis(7);
+    private static final Long redshiftCleanupThreshold = TimeUnit.SECONDS.toMillis(1);
 
     @Inject
     private TenantService tenantService;
@@ -254,19 +254,8 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     private void cleanupTenantInHdfs(String contractId) throws Exception {
         if (TestFrameworkUtils.isTestTenant(contractId)) {
             log.info("Clean up contract in HDFS: " + contractId);
-            String customerSpace = CustomerSpace.parse(contractId).toString();
             String contractPath = PathBuilder.buildContractPath(podId, contractId).toString();
-            if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, contractPath);
-            }
-            String customerPath = new Path(customerBase).append(customerSpace).toString();
-            if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, customerPath);
-            }
-            contractPath = new Path(customerBase).append(contractId).toString();
-            if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, contractPath);
-            }
+            TenantCleanupUtils.cleanupTenantInHdfs(yarnConfiguration, contractId, contractPath);
         }
     }
 
