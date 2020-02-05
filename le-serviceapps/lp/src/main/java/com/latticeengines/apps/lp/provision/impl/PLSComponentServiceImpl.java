@@ -51,7 +51,7 @@ public class PLSComponentServiceImpl extends ComponentServiceBase {
             CustomerSpace cs = CustomerSpace.parse(customerSpace);
             plsComponentManager.provisionTenant(cs, installDocument);
         } catch (Exception e) {
-            log.error("Provision LP service failed!", e);
+            log.error("Provision LP service failed! ", e);
             return false;
         }
         log.info(String.format("Install LP component: %s succeeded!", customerSpace));
