@@ -30,6 +30,13 @@ public class ServingStoreServiceImplEntityMatchDeploymentTestNG extends ServingS
         Assert.assertFalse(accountId.isEnabledFor(ColumnSelection.Predefined.Enrichment),
                 JsonUtils.serialize(accountId));
         Assert.assertEquals(accountId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(accountId));
+        ColumnMetadata customerAccountId = cms.stream() //
+                .filter(cm -> InterfaceName.CustomerAccountId.name().equals(cm.getAttrName())) //
+                .findFirst().orElse(null);
+        Assert.assertNotNull(customerAccountId);
+        Assert.assertTrue(customerAccountId.isEnabledFor(ColumnSelection.Predefined.Enrichment),
+                JsonUtils.serialize(accountId));
+        Assert.assertEquals(customerAccountId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(accountId));
     }
 
     @Override
