@@ -231,14 +231,12 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         runValidations(MultiTenantContext.getTenant().getId(), play, playLaunchChannel);
         PlayLaunch newLaunch = createDefaultLaunchFromPlayAndChannel(play, playLaunchChannel, LaunchState.Queued,
                 autoLaunch);
-        playLaunchService.create(newLaunch);
 
         if (launch != null) {
-            launch.setLaunchId(newLaunch.getLaunchId());
-            launch.setUpdatedBy(newLaunch.getUpdatedBy());
-            playLaunchService.update(launch);
+            newLaunch.merge(launch);
         }
-        playLaunchChannel.setLastLaunch(newLaunch);
+
+        playLaunchService.create(newLaunch);
         return newLaunch;
     }
 

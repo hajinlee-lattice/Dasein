@@ -78,6 +78,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Override
     public void create(PlayLaunch playLaunch) {
+        verifyTablesInLaunch(playLaunch);
         playLaunchEntityMgr.create(playLaunch);
     }
 
@@ -142,37 +143,32 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Override
     public PlayLaunch update(PlayLaunch playLaunch) {
-        handleTablesInLaunch(playLaunch);
+        verifyTablesInLaunch(playLaunch);
         playLaunchEntityMgr.update(playLaunch);
         return playLaunchEntityMgr.findByKey(playLaunch);
     }
 
-    private void handleTablesInLaunch(PlayLaunch playLaunch) {
+    private void verifyTablesInLaunch(PlayLaunch playLaunch) {
         if (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())) {
-            playLaunch.setAddAccountsTable(
-                    handleTable(playLaunch.getAddAccountsTable(), playLaunch.getLaunchId(), "AddAccounts"));
+            verifyTableExists(playLaunch.getAddAccountsTable(), playLaunch.getLaunchId(), "AddAccounts");
         }
         if (StringUtils.isNotBlank(playLaunch.getCompleteContactsTable())) {
-            playLaunch.setCompleteContactsTable(
-                    handleTable(playLaunch.getCompleteContactsTable(), playLaunch.getLaunchId(), "CompleteContacts"));
+            verifyTableExists(playLaunch.getCompleteContactsTable(), playLaunch.getLaunchId(), "CompleteContacts");
         }
         if (StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable())) {
-            playLaunch.setRemoveAccountsTable(
-                    handleTable(playLaunch.getRemoveAccountsTable(), playLaunch.getLaunchId(), "RemoveAccounts"));
+            verifyTableExists(playLaunch.getRemoveAccountsTable(), playLaunch.getLaunchId(), "RemoveAccounts");
         }
         if (StringUtils.isNotBlank(playLaunch.getAddContactsTable())) {
-            playLaunch.setAddContactsTable(
-                    handleTable(playLaunch.getAddContactsTable(), playLaunch.getLaunchId(), "AddContacts"));
+            verifyTableExists(playLaunch.getAddContactsTable(), playLaunch.getLaunchId(), "AddContacts");
         }
         if (StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())) {
-            playLaunch.setRemoveContactsTable(
-                    handleTable(playLaunch.getRemoveContactsTable(), playLaunch.getLaunchId(), "RemoveContacts"));
+            verifyTableExists(playLaunch.getRemoveContactsTable(), playLaunch.getLaunchId(), "RemoveContacts");
         }
 
     }
 
-    private String handleTable(String tableName, String launchId, String tag) {
-        Table table = tableEntityMgr.findByName(tableName, true, true);
+    private String verifyTableExists(String tableName, String launchId, String tag) {
+        Table table = tableEntityMgr.findByName(tableName, false, false);
         if (table != null) {
             return table.getName();
         } else {

@@ -26,6 +26,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
@@ -317,51 +318,85 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     }
 
     @Override
-    public void setId(String launchId) { this.launchId = launchId; }
+    public void setId(String launchId) {
+        this.launchId = launchId;
+    }
 
     @Override
-    public Date getCreated() { return created; }
+    public Date getCreated() {
+        return created;
+    }
 
     @Override
-    public void setCreated(Date created) { this.created = created; }
+    public void setCreated(Date created) {
+        this.created = created;
+    }
 
     @Override
-    public Date getUpdated() { return updated; }
+    public Date getUpdated() {
+        return updated;
+    }
 
     @Override
-    public void setUpdated(Date updated) { this.updated = updated; }
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
 
-    public String getCreatedBy() { return createdBy; }
+    public String getCreatedBy() {
+        return createdBy;
+    }
 
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
 
-    public String getUpdatedBy() { return updatedBy; }
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
 
-    public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
 
-    public LaunchState getLaunchState() { return launchState; }
+    public LaunchState getLaunchState() {
+        return launchState;
+    }
 
-    public void setLaunchState(LaunchState launchState) { this.launchState = launchState; }
+    public void setLaunchState(LaunchState launchState) {
+        this.launchState = launchState;
+    }
 
-    public Play getPlay() { return play; }
+    public Play getPlay() {
+        return play;
+    }
 
-    public void setPlay(Play play) { this.play = play; }
+    public void setPlay(Play play) {
+        this.play = play;
+    }
 
-    public PlayLaunchChannel getPlayLaunchChannel() { return playLaunchChannel; }
+    public PlayLaunchChannel getPlayLaunchChannel() {
+        return playLaunchChannel;
+    }
 
     public void setPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
         this.playLaunchChannel = playLaunchChannel;
     }
 
-    public Long getParentDeltaWorkflowId() { return parentDeltaWorkflowId; }
+    public Long getParentDeltaWorkflowId() {
+        return parentDeltaWorkflowId;
+    }
 
     public void setParentDeltaWorkflowId(Long parentDeltaWorkflowId) {
         this.parentDeltaWorkflowId = parentDeltaWorkflowId;
     }
 
-    public Long getLaunchWorkflowId() { return launchWorkflowId; }
+    public Long getLaunchWorkflowId() {
+        return launchWorkflowId;
+    }
 
-    public void setLaunchWorkflowId(Long launchWorkflowId) { this.launchWorkflowId = launchWorkflowId; }
+    public void setLaunchWorkflowId(Long launchWorkflowId) {
+        this.launchWorkflowId = launchWorkflowId;
+    }
 
     public String getApplicationId() {
         return applicationId;
@@ -371,9 +406,13 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.applicationId = applicationId;
     }
 
-    public boolean isScheduledLaunch() { return isScheduledLaunch; }
+    public boolean isScheduledLaunch() {
+        return isScheduledLaunch;
+    }
 
-    public void setScheduledLaunch(boolean scheduledLaunch) { isScheduledLaunch = scheduledLaunch; }
+    public void setScheduledLaunch(boolean scheduledLaunch) {
+        isScheduledLaunch = scheduledLaunch;
+    }
 
     @JsonIgnore
     public Tenant getTenant() {
@@ -694,5 +733,116 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public Long getMatchedRate() {
         return matchedRate;
+    }
+
+    public void merge(PlayLaunch playLaunch) {
+        if (playLaunch.getLaunchState() != null) {
+            this.setLaunchState(playLaunch.getLaunchState());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getApplicationId())) {
+            this.setApplicationId(playLaunch.getApplicationId());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getTableName())) {
+            this.setTableName(playLaunch.getTableName());
+        }
+        if (playLaunch.getParentDeltaWorkflowId() != null) {
+            this.setParentDeltaWorkflowId(playLaunch.getParentDeltaWorkflowId());
+        }
+        if (playLaunch.getLaunchWorkflowId() != null) {
+            this.setLaunchWorkflowId(playLaunch.getLaunchWorkflowId());
+        }
+
+        // Account stats
+        if (playLaunch.getAccountsSelected() != null) {
+            this.setAccountsSelected(playLaunch.getAccountsSelected());
+        }
+        if (playLaunch.getAccountsLaunched() != null) {
+            this.setAccountsLaunched(playLaunch.getAccountsLaunched());
+        }
+        if (playLaunch.getAccountsSuppressed() != null) {
+            this.setAccountsSuppressed(playLaunch.getAccountsSuppressed());
+        }
+        if (playLaunch.getAccountsErrored() != null) {
+            this.setAccountsErrored(playLaunch.getAccountsErrored());
+        }
+        if (playLaunch.getAccountsDuplicated() != null) {
+            this.setAccountsDuplicated(playLaunch.getAccountsDuplicated());
+        }
+
+        this.setLaunchCompletionPercent(playLaunch.getLaunchCompletionPercent());
+
+        // Contact stats
+        if (playLaunch.getContactsSelected() != null) {
+            this.setContactsSelected(playLaunch.getContactsSelected());
+        }
+        if (playLaunch.getContactsLaunched() != null) {
+            this.setContactsLaunched(playLaunch.getContactsLaunched());
+        }
+        if (playLaunch.getContactsSuppressed() != null) {
+            this.setContactsSuppressed(playLaunch.getContactsSuppressed());
+        }
+        if (playLaunch.getContactsErrored() != null) {
+            this.setContactsErrored(playLaunch.getContactsErrored());
+        }
+        if (playLaunch.getContactsDuplicated() != null) {
+            this.setContactsDuplicated(playLaunch.getContactsDuplicated());
+        }
+
+        // Tray System properties
+        if (StringUtils.isNotBlank(playLaunch.getAudienceId())) {
+            this.setAudienceId(playLaunch.getAudienceId());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getAudienceName())) {
+            this.setAudienceName(playLaunch.getAudienceName());
+        }
+        if (playLaunch.getAudienceSize() != null) {
+            this.setAudienceSize(playLaunch.getAudienceSize());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getFolderName())) {
+            this.setFolderName(playLaunch.getFolderName());
+        }
+        if (playLaunch.getMatchedCount() != null) {
+            this.setMatchedCount(playLaunch.getMatchedCount());
+        }
+
+        // Delta Launch Tables
+        if (StringUtils.isNotBlank(playLaunch.getAddAccountsTable())) {
+            this.setAddAccountsTable(playLaunch.getAddAccountsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getCompleteContactsTable())) {
+            this.setCompleteContactsTable(playLaunch.getCompleteContactsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getRemoveAccountsTable())) {
+            this.setRemoveAccountsTable(playLaunch.getRemoveAccountsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getAddContactsTable())) {
+            this.setAddContactsTable(playLaunch.getAddContactsTable());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getRemoveContactsTable())) {
+            this.setRemoveContactsTable(playLaunch.getRemoveContactsTable());
+        }
+
+        // Launch Configuration
+        if (CollectionUtils.isNotEmpty(playLaunch.getBucketsToLaunch())) {
+            this.setBucketsToLaunch(playLaunch.getBucketsToLaunch());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
+            this.setDestinationAccountId(playLaunch.getDestinationAccountId());
+        }
+        if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
+            this.setDestinationOrgId(playLaunch.getDestinationOrgId());
+        }
+        if (playLaunch.getDestinationSysType() != null) {
+            this.setDestinationSysType(playLaunch.getDestinationSysType());
+        }
+        if (playLaunch.getDestinationOrgName() != null) {
+            this.setDestinationOrgName(playLaunch.getDestinationOrgName());
+        }
+        if (playLaunch.getExcludeItemsWithoutSalesforceId() != null) {
+            this.setExcludeItemsWithoutSalesforceId(playLaunch.getExcludeItemsWithoutSalesforceId());
+        }
+        this.setLaunchUnscored(playLaunch.isLaunchUnscored());
+
+        this.setUpdatedBy(playLaunch.getUpdatedBy());
     }
 }
