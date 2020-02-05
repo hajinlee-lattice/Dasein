@@ -1,5 +1,6 @@
 package com.latticeengines.admin.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +35,7 @@ import com.latticeengines.camille.exposed.config.bootstrap.BootstrapStateUtil;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.graph.traversal.impl.ReverseTopologicalTraverse;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.visitor.Visitor;
 import com.latticeengines.common.exposed.visitor.VisitorContext;
@@ -65,6 +68,9 @@ public class ComponentOrchestrator {
 
     @Inject
     private TenantService tenantService;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Value("${security.app.public.url:http://localhost:8081}")
     private String appPublicUrl;
@@ -173,6 +179,14 @@ public class ComponentOrchestrator {
             boolean success = batonService.deleteContract(contractId);
             log.info(String.format("Deleting tenant %s with contract %s, success = %s", tenantId, contractId,
                     String.valueOf(success)));
+        }
+        // delete tenant on HDFS with path /Pods/Default/Contracts/{tenantid}
+        String contractPath = PathBuilder.buildContractPath(CamilleEnvironment.getPodId(), contractId).toString();
+        try {
+            HdfsUtils.rmdir(yarnConfiguration, contractPath);
+            log.info(String.format("Deleting tenant %s with contract %s on HDFS path %s", tenantId, contractId, contractPath));
+        } catch (IOException e) {
+            log.error(String.format("Can't delete tenant in Hdfs path %s.", contractPath), e);
         }
     }
 
