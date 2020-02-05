@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.pls.frontend.OtherTemplateData;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
+import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 
 
@@ -945,7 +946,7 @@ public final class ImportWorkflowUtils {
                     checkMultipleCustomFieldMappedToLatticeField(validations, mappedLatticeField,
                             fieldName, columnName);
                     checkInExistingAndOtherTemplate(definition, existingFieldDefinitionMap, otherTemplateDataMap,
-                            validations, fieldNameInExistingAndCurrentTemplate);
+                            validations, fieldNameInExistingAndCurrentTemplate, sectionName);
                     checkIDFields(definition, sectionName, validations);
                 }
             } else {
@@ -1069,7 +1070,7 @@ public final class ImportWorkflowUtils {
                     // check multiple custom field mapped to the same lattice field(standard)
                     checkMultipleCustomFieldMappedToLatticeField(validations, mappedLatticeField, fieldName, columnName);
                     checkInExistingAndOtherTemplate(definition, existingFieldDefinitionMap, otherTemplateDataMap,
-                            validations, fieldNameInExistingAndCurrentTemplate);
+                            validations, fieldNameInExistingAndCurrentTemplate, sectionName);
                     checkIDFields(definition, sectionName, validations);
 
                 }
@@ -1292,10 +1293,13 @@ public final class ImportWorkflowUtils {
                                                 Map<String, FieldDefinition> existingFieldDefinitionMap,
                                                 Map<String, OtherTemplateData> otherTemplateDataMap,
                                                 List<FieldValidationMessage> validations,
-                                                Set<String> fieldNameInExistingAndCurrentTemplate) {
+                                                Set<String> fieldNameInExistingAndCurrentTemplate, String sectionName) {
         String fieldName = definition.getFieldName();
         String columnName = definition.getColumnName();
         UserDefinedType type = definition.getFieldType();
+        if (FieldDefinitionSectionName.Custom_Fields.getName().equals(sectionName) && StringUtils.isBlank(fieldName)) {
+            fieldName = ImportWorkflowSpecUtils.USER_PREFIX + columnName;
+        }
         OtherTemplateData otherTemplateData = otherTemplateDataMap.get(fieldName);
         if (otherTemplateData != null) {
             UserDefinedType typeInOtherTemplate = otherTemplateData.getFieldType();

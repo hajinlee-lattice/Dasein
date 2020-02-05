@@ -26,7 +26,7 @@ public final class ImportWorkflowSpecUtils {
     private static final Logger log = LoggerFactory.getLogger(ImportWorkflowSpecUtils.class);
 
     protected static final String AVRO_FIELD_NAME_PREFIX = "avro_";
-    protected static final String USER_PREFIX = "user_";
+    public static final String USER_PREFIX = "user_";
 
     // Generate a table from a FieldDefinitionsRecord.  The writeAllDefinitions flag defines whether FieldDefinitions
     // that haven't ever matched an import file column should be written back.  The typical usage of this flag is to

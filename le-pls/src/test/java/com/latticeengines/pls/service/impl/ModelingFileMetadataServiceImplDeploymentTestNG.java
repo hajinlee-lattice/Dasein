@@ -482,14 +482,10 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
         FetchFieldDefinitionsResponse fetchResponse = modelingFileMetadataService.fetchFieldDefinitions(
                 otherSystemName, systemType, systemObject, sourceFile.getName());
 
-        modelingFileMetadataService.commitFieldDefinitions(otherSystemName, systemType, systemObject,
-                sourceFile.getName(), false, fetchResponse.getCurrentFieldDefinitionsRecord());
-
-        // validate type after having other template data in request
-        fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions(
-                defaultSystemName, systemType, systemObject, fileName);
+        // verify the other template was not set up, field name was empty for user fields, but can predict the field
+        // name user_X will have conflict with structure OtherTemplateDataMap
+        // change field type of Country from text to number
         setValidateRequestFromFetchResponse(fetchResponse);
-
         FieldDefinitionsRecord currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
         Map<String, List<FieldDefinition>> fieldDefinitionMap =
                 currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
@@ -497,12 +493,38 @@ public class ModelingFileMetadataServiceImplDeploymentTestNG extends PlsDeployme
                 fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Custom_Fields.getName(),
                         new ArrayList<>()).stream().collect(
                         Collectors.toMap(FieldDefinition::getColumnName, field -> field));
-
         FieldDefinition countryDefinition = customNameToCustomFieldDefinition.get("Country");
+        Assert.assertNotNull(countryDefinition);
+        countryDefinition.setFieldType(UserDefinedType.NUMBER);
+        ValidateFieldDefinitionsResponse validateResponse =
+                modelingFileMetadataService.validateFieldDefinitions(defaultSystemName, systemType, systemObject,
+                        fileName, validateRequest);
+        ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
+                FieldDefinitionSectionName.Custom_Fields.getName(), "Country", FieldValidationMessage.MessageLevel.ERROR,
+                "Field Type NUMBER is not consistent with field type TEXT in batch store or other template for user_Country.");
+        countryDefinition.setFieldType(UserDefinedType.TEXT);
+
+        modelingFileMetadataService.commitFieldDefinitions(otherSystemName, systemType, systemObject,
+                sourceFile.getName(), false, fetchResponse.getCurrentFieldDefinitionsRecord());
+
+        // validate type after having other template data in request, then field name has been user_X
+        fetchResponse =  modelingFileMetadataService.fetchFieldDefinitions(
+                defaultSystemName, systemType, systemObject, fileName);
+        setValidateRequestFromFetchResponse(fetchResponse);
+
+        currentFieldDefinitionRecord = validateRequest.getCurrentFieldDefinitionsRecord();
+        fieldDefinitionMap =
+                currentFieldDefinitionRecord.getFieldDefinitionsRecordsMap();
+        customNameToCustomFieldDefinition =
+                fieldDefinitionMap.getOrDefault(FieldDefinitionSectionName.Custom_Fields.getName(),
+                        new ArrayList<>()).stream().collect(
+                        Collectors.toMap(FieldDefinition::getColumnName, field -> field));
+
+        countryDefinition = customNameToCustomFieldDefinition.get("Country");
         Assert.assertNotNull(countryDefinition);
         // change field type of Country from text to number
         countryDefinition.setFieldType(UserDefinedType.NUMBER);
-        ValidateFieldDefinitionsResponse validateResponse =
+        validateResponse =
                 modelingFileMetadataService.validateFieldDefinitions(defaultSystemName, systemType, systemObject,
                 fileName, validateRequest);
         ImportWorkflowUtilsTestNG.checkGeneratedResult(validateResponse,
