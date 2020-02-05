@@ -56,9 +56,10 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
             Long recordsFailed = eventDetail.getFailed();
             Long totalRecords = eventDetail.getTotalRecordsSubmitted();
             Long duplicatedRecords = eventDetail.getDuplicates();
+            Long processedAndFailed = recordsFailed + duplicatedRecords;
             if (recordsProcessed.equals(totalRecords)) {
                 playLaunch.setLaunchState(LaunchState.Synced);
-            } else if (recordsFailed.equals(totalRecords)) {
+            } else if (recordsFailed.equals(totalRecords) || processedAndFailed.equals(totalRecords)) {
                 playLaunch.setLaunchState(LaunchState.SyncFailed);
             } else {
                 playLaunch.setLaunchState(LaunchState.PartialSync);
