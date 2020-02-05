@@ -374,6 +374,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         case Facebook:
         case LinkedIn:
         case Outreach:
+        case GoogleAds:
             return MapUtils.isEmpty(counts) || //
                     (counts.getOrDefault(getAddDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L && //
                             counts.getOrDefault(getRemoveDeltaTableContextKeyByAudienceType(audienceType), 0L) <= 0L);
