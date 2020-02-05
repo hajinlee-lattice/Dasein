@@ -74,8 +74,8 @@ import reactor.core.scheduler.Schedulers;
 public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalAuthCleanupTestNG.class);
-    private static final Long cleanupThreshold = TimeUnit.SECONDS.toMillis(7);
-    private static final Long redshiftCleanupThreshold = TimeUnit.SECONDS.toMillis(1);
+    private static final Long cleanupThreshold = TimeUnit.DAYS.toMillis(7);
+    private static final Long redshiftCleanupThreshold = TimeUnit.DAYS.toMillis(1);
 
     @Inject
     private TenantService tenantService;
