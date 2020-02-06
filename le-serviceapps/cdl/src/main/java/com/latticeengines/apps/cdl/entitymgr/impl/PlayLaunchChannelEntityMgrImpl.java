@@ -126,6 +126,15 @@ public class PlayLaunchChannelEntityMgrImpl
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public PlayLaunchChannel findById(String channelId, boolean useWriterRepo) {
+        if (useWriterRepo) {
+            return writerRepository.findById(channelId);
+        }
+        return readerRepository.findById(channelId);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public PlayLaunchChannel createPlayLaunchChannel(PlayLaunchChannel playLaunchChannel) {
         if (playLaunchChannel.getLookupIdMap() == null) {

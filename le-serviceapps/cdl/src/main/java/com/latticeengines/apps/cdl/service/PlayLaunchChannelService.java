@@ -26,6 +26,8 @@ public interface PlayLaunchChannelService {
 
     PlayLaunchChannel findById(String channelId);
 
+    PlayLaunchChannel findById(String channelId, boolean useWriterRepo);
+
     PlayLaunch createNewLaunchByPlayAndChannel(Play play, PlayLaunchChannel playLaunchChannel, PlayLaunch launch,
                                                boolean autoLaunch);
 
