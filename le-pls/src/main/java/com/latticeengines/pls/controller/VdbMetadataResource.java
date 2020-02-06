@@ -3,28 +3,22 @@ package com.latticeengines.pls.controller;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.pls.VdbMetadataConstants;
-import com.latticeengines.security.exposed.service.SessionService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "metadata", description = "REST resource for metadata in VisiDB")
+@Api(value = "vdb-metadata")
 @RestController
 @RequestMapping(value = "/vdbmetadata")
 public class VdbMetadataResource {
-
-    private static final Logger log = LoggerFactory.getLogger(VdbMetadataResource.class);
-
-    @Inject
-    private SessionService sessionService;
 
     @GetMapping("/options")
     @ResponseBody
