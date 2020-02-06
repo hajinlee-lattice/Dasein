@@ -229,6 +229,7 @@ public class PlayResource {
         playLaunchChannel = playLaunchChannelService.create(playName, playLaunchChannel);
         if (launchNow) {
             createLaunchByChannelAndKickoffWorkflow(customerSpace, playName, playLaunchChannel.getId(), false);
+            playLaunchChannel.setLastLaunch(playLaunchService.findLatestByChannel(playLaunchChannel.getPid()));
         }
         return playLaunchChannel;
     }
@@ -254,6 +255,7 @@ public class PlayResource {
         playLaunchChannel = playLaunchChannelService.update(playName, playLaunchChannel);
         if (launchNow) {
             createLaunchByChannelAndKickoffWorkflow(customerSpace, playName, channelId, false);
+            playLaunchChannel.setLastLaunch(playLaunchService.findLatestByChannel(playLaunchChannel.getPid()));
         }
         return playLaunchChannel;
     }
