@@ -6,12 +6,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
@@ -37,14 +40,21 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
 
     private static final Logger log = LoggerFactory.getLogger(ServingStoreCacheServiceImpl.class);
 
-    private LocalCacheManager<String, List<ColumnMetadata>> metadataCache = new LocalCacheManager<>(
-            CacheName.ServingMetadataLocalCache, this::loadServingColumnMetadata, 20, 5);
+    // FIXME remove temp capacity increase for matchapi
+    private static final String MATCHAPI_SVC = "matchapi";
+    private static final int SERVING_STORE_CACHE_LIMIT = 20;
+
+    private LocalCacheManager<String, List<ColumnMetadata>> metadataCache;
 
     private final DataCollectionProxy dataCollectionProxy;
 
     private final MetadataProxy metadataProxy;
 
     private ServingStoreCacheServiceImpl _service;
+
+    // FIXME remove temp capacity increase for matchapi
+    @Value("${proxy.serving.store.matchapi.cache.limit}")
+    private int servingStoreMatchapiLimit;
 
     @Inject
     protected ServingStoreCacheServiceImpl(DataCollectionProxy dataCollectionProxy, //
@@ -126,4 +136,15 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
         return _service.getDecoratedMetadataFromDistributedCache(tenant, entity);
     }
 
+    @PostConstruct
+    private void initCache() {
+        int cacheLimit = SERVING_STORE_CACHE_LIMIT;
+        if (MATCHAPI_SVC.equals(BeanFactoryEnvironment.getService())) {
+            log.info("Overriding serving store cache limit to {} for matchapi", servingStoreMatchapiLimit);
+            cacheLimit = servingStoreMatchapiLimit;
+        }
+        log.info("Instantiating serving metadata local cache, capacity = {}", cacheLimit);
+        metadataCache = new LocalCacheManager<>(CacheName.ServingMetadataLocalCache, this::loadServingColumnMetadata,
+                cacheLimit, 5);
+    }
 }
