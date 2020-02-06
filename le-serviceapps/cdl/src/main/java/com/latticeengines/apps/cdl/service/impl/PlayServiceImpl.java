@@ -506,31 +506,7 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public List<Play> findDependingPalys(List<String> attributes) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        Set<Play> dependingPlays = new HashSet<>();
-        if (attributes != null) {
-            log.info("getting play " + tenant.getId());
-            List<Play> plays = getAllPlays();
-            if (plays != null) {
-                for (Play play : plays) {
-                    List<AttributeLookup> playAttributes = talkingPointService
-                            .getAttributesInTalkingPointOfPlay(play.getName());
-                    for (AttributeLookup attributeLookup : playAttributes) {
-                        if (attributes.contains(sanitize(attributeLookup.toString()))) {
-                            dependingPlays.add(play);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        return new ArrayList<>(dependingPlays);
-    }
-
-    @Override
-    public List<Play> findDependantPlays(List<String> attributes) {
+    public List<String> findDependantPlayDisplayNames(List<String> attributes) {
         String customerSpace = MultiTenantContext.getTenant().getId();
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -544,8 +520,8 @@ public class PlayServiceImpl implements PlayService {
 
         stopWatch.reset();
         stopWatch.start();
-        List<Play> plays = playEntityMgr.findAll().stream().filter(play -> playIds.contains(play.getName()))
-                .collect(Collectors.toList());
+        List<String> plays =
+                playEntityMgr.findDisplayNamesCorrespondToPlayNames(new ArrayList<>(playIds));
         stopWatch.stop();
         log.info(String.format("Time to get %d plays from PlayIds for Tenant: %s: %s ms", plays.size(), customerSpace,
                 stopWatch.getTime(TimeUnit.MILLISECONDS)));

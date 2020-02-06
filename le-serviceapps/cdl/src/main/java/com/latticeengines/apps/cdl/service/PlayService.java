@@ -25,9 +25,7 @@ public interface PlayService {
 
     List<AttributeLookup> findDependingAttributes(List<Play> plays);
 
-    List<Play> findDependingPalys(List<String> attributes);
-
-    List<Play> findDependantPlays(List<String> attributes);
+    List<String> findDependantPlayDisplayNames(List<String> attributes);
 
     List<String> getAllDeletedPlayIds(boolean forCleanupOnly);
 }

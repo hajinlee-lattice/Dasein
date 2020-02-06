@@ -240,6 +240,12 @@ public class PlayEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayReposi
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<String> findDisplayNamesCorrespondToPlayNames(List<String> playNames) {
+        return playDao.findDisplayNamesCorrespondToPlayNames(playNames);
+    }
+
+    @Override
     public Set<Triple<String, String, String>> extractDependencies(Play play) {
         Set<Triple<String, String, String>> attrDepSet = null;
         if (play != null) {

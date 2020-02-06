@@ -13,4 +13,6 @@ public interface PlayDao extends BaseDao<Play> {
 
     List<String> findAllDeletedPlayIds(boolean forCleanupOnly);
 
+    List<String> findDisplayNamesCorrespondToPlayNames(List<String> playNames);
+
 }

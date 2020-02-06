@@ -15,7 +15,6 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 
@@ -63,8 +62,8 @@ public class CDLDependenciesResource {
     @RequestMapping(value = "/plays", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Find Plays using the given attributes")
-    public List<Play> findDependantPlays(@PathVariable String customerSpace, @RequestBody List<String> attributes) {
-        return playService.findDependantPlays(attributes);
+    public List<String> findDependantPlays(@PathVariable String customerSpace, @RequestBody List<String> attributes) {
+        return playService.findDependantPlayDisplayNames(attributes);
     }
 
 }
