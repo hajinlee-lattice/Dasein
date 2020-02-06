@@ -708,10 +708,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         }
         Set<BusinessEntity> needSkipConvertEntities = new HashSet<>();
         HashMap<TableRoleInCollection, Table> needConvertBatchStoreMap = new HashMap<>();
-        if (skipReMatchFlag) {
+        if (skipReMatchFlag) {//if skip rematch flag, skip hard delete step
             needSkipConvertEntities.add(BusinessEntity.Account);
             needSkipConvertEntities.add(BusinessEntity.Contact);
             needSkipConvertEntities.add(BusinessEntity.Transaction);
+            needSkipConvertEntities.add(ActivityStream);
         } else {
             if (CollectionUtils.isNotEmpty(replaceEntities)) {
                 needSkipConvertEntities.addAll(replaceEntities);
@@ -1063,13 +1064,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             return needDeletedEntity;
         }
         for (Action action : actions) {
-            if (needDeletedEntity.size() >= 4) {
+            if (needDeletedEntity.size() >= BusinessEntity.CAN_REPALCE_ENTITIES.size()) {
                 break;
             }
             if (!ActionType.DATA_REPLACE.equals(action.getType())) {
                 continue;
             }
-            if (action.getActionConfiguration() instanceof CleanupActionConfiguration && needDeletedEntity.size() < 4) {
+            if (action.getActionConfiguration() instanceof CleanupActionConfiguration && needDeletedEntity.size() < BusinessEntity.CAN_REPALCE_ENTITIES.size()) {
                 CleanupActionConfiguration cleanupActionConfiguration = (CleanupActionConfiguration) action.getActionConfiguration();
                 //configuration just has one entity.
                 needDeletedEntity.addAll(cleanupActionConfiguration.getImpactEntities());
@@ -1120,6 +1121,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         getBatchStoreTable(customerSpace, BusinessEntity.Account, nonBatchStoreEntities, needConvertBatchStoreMap);
         getBatchStoreTable(customerSpace, BusinessEntity.Contact, nonBatchStoreEntities, needConvertBatchStoreMap);
         getBatchStoreTable(customerSpace, BusinessEntity.Transaction, nonBatchStoreEntities, needConvertBatchStoreMap);
+        getBatchStoreTable(customerSpace, ActivityStream, nonBatchStoreEntities, needConvertBatchStoreMap);
         return nonBatchStoreEntities;
     }
 
