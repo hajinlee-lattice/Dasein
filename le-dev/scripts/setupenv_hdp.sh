@@ -98,18 +98,4 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     hdfs dfs -put -f $ARTIFACT_DIR/tez-${TEZ_VERSION}.tar.gz /apps/tez/tez-${TEZ_VERSION}.tar.gz
 
     bash ${WSHOME}/le-dev/scripts/stop-cluster.sh || true
-
-    echo "Bootstrapping sqoop ..."
-    ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
-    SQOOP_VERSION="1.4.6.2.4.3.0-227"
-
-    if [[ ! -f "$ARTIFACT_DIR/sqoop-${SQOOP_VERSION}.tar.gz" ]]; then
-        wget https://s3.amazonaws.com/latticeengines-dev/sqoop-${SQOOP_VERSION}.tar.gz -O $ARTIFACT_DIR/sqoop-${SQOOP_VERSION}.tar.gz
-    fi
-    if [[ -d "${SQOOP_HOME}" ]]; then
-        sudo rm -rf ${SQOOP_HOME}/*
-    fi
-    sudo mkdir -p ${SQOOP_HOME}
-    sudo chown -R ${USER} ${SQOOP_HOME}
-    tar xzf $ARTIFACT_DIR/sqoop-${SQOOP_VERSION}.tar.gz -C ${SQOOP_HOME}
 fi

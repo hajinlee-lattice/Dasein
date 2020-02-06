@@ -36,7 +36,9 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     popd
     sudo chown -R ${USER} ${ANACONDA_HOME}
 
+    ${ANACONDA_HOME}/bin/conda config --set ssl_verify false
     ${ANACONDA_HOME}/bin/conda config --add channels conda-forge
+    ${ANACONDA_HOME}/bin/conda config --add channels anaconda
 
     ${ANACONDA_HOME}/bin/pip install --upgrade pip
     ${ANACONDA_HOME}/bin/pip install -r $WSHOME/le-dev/scripts/requirements3.txt

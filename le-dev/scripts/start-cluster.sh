@@ -17,12 +17,21 @@ if [[ -f "/opt/java/default" ]]; then
     export JAVA_HOME="/opt/java/default"
 fi
 
+HACK_LINE="127.0.0.1    ${HOSTNAME}"
+sudo -u root bash -c 'echo "${HACK_LINE}" >> /etc/hosts'
 "${HADOOP_HOME}/sbin/hadoop-daemon.sh" start namenode
 "${HADOOP_HOME}/sbin/hadoop-daemon.sh" start datanode
 "${HADOOP_HOME}/sbin/yarn-daemon.sh" start resourcemanager
 "${HADOOP_HOME}/sbin/yarn-daemon.sh" start nodemanager
 "${HADOOP_HOME}/sbin/yarn-daemon.sh" start timelineserver
 "${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh" start historyserver
+UNAME=`uname`
+if [[ "${UNAME}" == 'Darwin' ]]; then
+    sudo sed -i '' '/'${HACK_LINE}'/d' /etc/hosts
+
+else
+    sudo sed -i '/'${HACK_LINE}'/d' /etc/hosts
+fi
 
 "${SPARK_HOME}"/sbin/start-history-server.sh
 if [[ -n "${J8_HOME}" ]]; then
