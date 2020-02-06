@@ -52,6 +52,9 @@ public class SetTenantAspect {
         } catch (RuntimeException e) {
             log.warn("Unable to find customerspace to set tenant in the Multitenant aspect for: "
                     + joinPoint.toLongString());
+        } catch (Exception e) {
+            log.warn("Unable to find customerspace to set tenant in the Multitenant aspect for: "
+                    + joinPoint.toLongString() + " due to generic error");
         }
     }
 
@@ -62,6 +65,9 @@ public class SetTenantAspect {
             setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
         } catch (RuntimeException e) {
             log.warn("Failed to parse customerspace in multitenant aspect for: " + joinPoint.toLongString());
+        } catch (Exception e) {
+            log.warn("Unable to find customerspace to set tenant in the Multitenant aspect for: "
+                    + joinPoint.toLongString() + " due to generic error");
         }
     }
 
