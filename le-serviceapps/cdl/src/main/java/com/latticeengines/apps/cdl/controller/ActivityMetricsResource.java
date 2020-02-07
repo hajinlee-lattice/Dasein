@@ -69,4 +69,15 @@ public class ActivityMetricsResource {
         }
         return true;
     }
+
+    public Boolean setupDefaultOpportunityProfile(@PathVariable String customerSpace, @RequestBody String streamName) {
+        ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(customerSpace,
+                streamName);
+        if (defaultGroup == null) {
+            throw new IllegalStateException(String.format("Failed to setup default Opportunity metric groups for " +
+                            "tenant %s",
+                    customerSpace));
+        }
+        return true;
+    }
 }

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -63,9 +64,11 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.AtlasStreamUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -347,6 +350,26 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 null);
         DataFeedTask stageDataFeedTask = createOpportunityTemplate(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
+        String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).getTenantId());
+        log.info("customerspace is {}, tenant is {}.", customerSpace, JsonUtils.serialize(tenant));
+        AtlasStream opportunityAltasStream = AtlasStreamUtils.newAtlasStream(tenant, opportunityDataFeedTask,
+                opportunityAtlasStreamName, Collections.singletonList(BusinessEntity.Account.name()),
+                Collections.singletonList(BusinessEntity.Account.name()), InterfaceName.LastModifiedDate.name(), null
+                , null);
+        opportunityAltasStream.setStreamId(AtlasStream.generateId());
+        streamEntityMgr.create(opportunityAltasStream);
+        Catalog stageCatalog = AtlasStreamUtils.createCatalog(tenant, opportunityAtlasStreamName, stageDataFeedTask);
+        catalogEntityMgr.create(stageCatalog);
+        StreamDimension dimension = AtlasStreamUtils.createHashDimension(opportunityAltasStream, stageCatalog,
+                InterfaceName.StageNameId.name(), StreamDimension.Usage.Pivot, InterfaceName.StageName.name());
+        dimensionEntityMgr.create(dimension);
+        ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(tenant.getId(),
+                opportunityAltasStream.getName());
+        if (defaultGroup == null) {
+            throw new IllegalStateException(String.format(
+                "Failed to setup default web visit metric groups for tenant %s", customerSpace));
+        }                          
         return true;
     }
 

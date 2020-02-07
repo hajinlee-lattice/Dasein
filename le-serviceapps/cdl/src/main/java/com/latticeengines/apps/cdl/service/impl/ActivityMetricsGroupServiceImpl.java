@@ -38,8 +38,10 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
 
     private static final String TOTAL_VISIT_GROUPNAME = "Total Web Visits";
     private static final String SOURCE_MEDIUM_GROUPNAME = "Web Visits By Source Medium";
+    private static final String OPPORTUNITY_STAGE_GROUPNAME = "Opportunity By Stage";
     private static final String DIM_NAME_PATH_PATTERN = InterfaceName.PathPatternId.name();
     private static final String DIM_NAME_SOURCEMEDIUM = InterfaceName.SourceMediumId.name();
+    private static final String DIM_NAME_STAGE = InterfaceName.StageNameId.name();
 
     private static Map<String, StringTemplate> templateCache = new HashMap<>();
 
@@ -74,6 +76,16 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     @WithCustomerSpace
     public List<ActivityMetricsGroup> findByStream(String customerSpace, AtlasStream stream) {
         return activityMetricsGroupEntityMgr.findByStream(stream);
+    }
+
+    @Override
+    @WithCustomerSpace
+    public ActivityMetricsGroup setUpDefaultOpportunityProfile(String customerSpace, String streamName) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
+        ActivityMetricsGroup stage = setupDefaultStageGroup(tenant, stream);
+        activityMetricsGroupEntityMgr.create(stage);
+        return stage;
     }
 
     private ActivityMetricsGroup setupDefaultTotalVisitGroup(Tenant tenant, AtlasStream stream) {
@@ -126,6 +138,31 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         sourceMedium.setDescriptionTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION));
         sourceMedium.setNullImputation(NullMetricsImputation.ZERO);
         return sourceMedium;
+    }
+
+    private ActivityMetricsGroup setupDefaultStageGroup(Tenant tenant, AtlasStream atlasStream) {
+        ActivityMetricsGroup stage = new ActivityMetricsGroup();
+        stage.setTenant(tenant);
+        stage.setStream(atlasStream);
+        stage.setGroupId(getGroupId(OPPORTUNITY_STAGE_GROUPNAME));
+        stage.setGroupName(OPPORTUNITY_STAGE_GROUPNAME);
+        stage.setJavaClass(Long.class.getSimpleName());
+        stage.setEntity(BusinessEntity.Account);
+        Set<List<Integer>> paramSet = new HashSet<>();
+        paramSet.add(Collections.singletonList(2));
+        paramSet.add(Collections.singletonList(4));
+        paramSet.add(Collections.singletonList(8));
+        paramSet.add(Collections.singletonList(12));
+        stage.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
+                Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
+        stage.setRollupDimensions(DIM_NAME_STAGE);
+        stage.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
+                InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
+        stage.setCategory(Category.OPPORTUNITY_PROFILE);
+        stage.setDisplayNameTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_STAGENAME_DISPLAYNAME));
+        stage.setDescriptionTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_STAGENAME_DESCRIPTION));
+        stage.setNullImputation(NullMetricsImputation.ZERO);
+        return stage;
     }
 
     private String getGroupId(String groupName) {

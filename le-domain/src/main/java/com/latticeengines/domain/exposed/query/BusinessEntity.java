@@ -12,7 +12,6 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.C
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedCatalog;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedDailyTransaction;
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedOpportunity;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedPeriodTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedProduct;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.PivotedRating;
@@ -113,8 +112,6 @@ public enum BusinessEntity implements GraphNode {
         Catalog.setBatchStore(ConsolidatedCatalog);
         ActivityStream.setBatchStore(ConsolidatedActivityStream);
 
-        Opportunity.setBatchStore(ConsolidatedOpportunity);
-
         PeriodTransaction.setBatchStore(ConsolidatedPeriodTransaction);
         PeriodTransaction.setServingStore(AggregatedPeriodTransaction);
 
@@ -135,6 +132,8 @@ public enum BusinessEntity implements GraphNode {
 
         WebVisitProfile.setBatchStore(TableRoleInCollection.WebVisitProfile);
         WebVisitProfile.setServingStore(TableRoleInCollection.WebVisitProfile);
+
+        Opportunity.setServingStore(TableRoleInCollection.OpportunityProfile);
 
         // Relationships
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
