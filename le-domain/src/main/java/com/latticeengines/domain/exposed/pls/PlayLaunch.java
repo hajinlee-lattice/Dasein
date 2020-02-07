@@ -841,8 +841,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         if (playLaunch.getExcludeItemsWithoutSalesforceId() != null) {
             this.setExcludeItemsWithoutSalesforceId(playLaunch.getExcludeItemsWithoutSalesforceId());
         }
-        this.setLaunchUnscored(playLaunch.isLaunchUnscored());
 
-        this.setUpdatedBy(playLaunch.getUpdatedBy());
+        if (StringUtils.isNotBlank(playLaunch.getUpdatedBy())) {
+            this.setUpdatedBy(playLaunch.getUpdatedBy());
+        }
     }
 }

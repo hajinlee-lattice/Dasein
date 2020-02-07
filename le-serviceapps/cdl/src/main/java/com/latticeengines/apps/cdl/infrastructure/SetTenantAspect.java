@@ -44,33 +44,6 @@ public class SetTenantAspect {
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.RatingEngineServiceImpl.*(..))")
-    public void allRatingEngineService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        try {
-            setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
-        } catch (RuntimeException e) {
-            log.warn("Unable to find customerspace to set tenant in the Multitenant aspect for: "
-                    + joinPoint.toLongString());
-        } catch (Exception e) {
-            log.warn("Unable to find customerspace to set tenant in the Multitenant aspect for: "
-                    + joinPoint.toLongString() + " due to generic error");
-        }
-    }
-
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.AIModelServiceImpl.*(..))")
-    public void allAIModelService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        try {
-            setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
-        } catch (RuntimeException e) {
-            log.warn("Failed to parse customerspace in multitenant aspect for: " + joinPoint.toLongString());
-        } catch (Exception e) {
-            log.warn("Unable to find customerspace to set tenant in the Multitenant aspect for: "
-                    + joinPoint.toLongString() + " due to generic error");
-        }
-    }
-
     @Before("execution(* com.latticeengines.apps.cdl.service.impl.ConvertBatchStoreInfoServiceImpl.*(..))")
     public void allConvertBatchStoreInfoService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
