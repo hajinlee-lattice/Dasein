@@ -12,6 +12,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -29,6 +34,7 @@ import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.UserResourceTestNGBase;
@@ -215,9 +221,11 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         UserRegistration userReg = createUserRegistration();
         userReg.getUser().setAccessLevel(accessLevel.name());
         makeSureUserDoesNotExist(userReg.getCredentials().getUsername());
-
-        String json = restTemplate.postForObject(usersApi, userReg, String.class);
-        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add(Constants.SET_TEMP_PASS, String.valueOf(Boolean.TRUE));
+        HttpEntity<UserRegistration> httpEntity = new HttpEntity<>(userReg, headers);
+        ResponseEntity<String> json = restTemplate.exchange(usersApi, HttpMethod.POST, httpEntity, String.class);
+        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json.getBody(),
                 RegistrationResult.class);
         assertNotNull(response);
         assertTrue(response.isSuccess());
