@@ -14,8 +14,10 @@ import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.cdl.DropBox;
@@ -55,6 +57,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     @Inject
     private AtlasSchedulingService atlasSchedulingService;
 
+    @Inject
+    private BatonService batonService;
+
     @Override
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
@@ -69,12 +74,15 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
-        s3ImportSystemService.createDefaultImportSystem(space.toString());
-        dropBoxService.createTenantDefaultFolder(space.toString());
-        if (configDir.get("/ExportCronExpression") != null) {
-            String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
-            log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
-            atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
+
+        if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
+            s3ImportSystemService.createDefaultImportSystem(space.toString());
+            dropBoxService.createTenantDefaultFolder(space.toString());
+            if (configDir.get("/ExportCronExpression") != null) {
+                String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
+                log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
+                atlasSchedulingService.createOrUpdateExportScheduling(customerSpace, exportCron);
+            }
         }
     }
 
@@ -90,4 +98,5 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         DropBox dropBox = dropBoxService.create();
         log.info("Created dropbox " + dropBox.getDropBox() + " for " + customerSpace.getTenantId());
     }
+
 }
