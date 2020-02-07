@@ -95,7 +95,7 @@ private[spark] object MergeUtils {
       val expandedRhs = expand(rhs, outputSchema)
       expandedLhs.union(expandedRhs)
     } else {
-      lhs.union(rhs)
+      lhs.unionByName(rhs)
     }
   }
 
