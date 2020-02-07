@@ -375,12 +375,12 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         stopWatch.resume();
         splitter.start();
-        Map<String, ColumnMetadata> modelingAttributes = servingStoreService
-                .getAttrsEnabledForModeling(customerSpace, BusinessEntity.Account,
-                        dataCollectionService.getActiveVersion(customerSpace))
-                .concatWith(
-                        servingStoreService.getAttrsEnabledForModeling(customerSpace, BusinessEntity.AnalyticPurchaseState,
-                                dataCollectionService.getActiveVersion(customerSpace)))
+        List<ColumnMetadata> acctAttrs = servingStoreService.getAttrsEnabledForModeling(customerSpace,
+                BusinessEntity.Account, dataCollectionService.getActiveVersion(customerSpace)).collectList().block();
+
+        Map<String, ColumnMetadata> modelingAttributes = Flux.fromIterable(acctAttrs)
+                .concatWith(servingStoreService.getAttrsEnabledForModeling(customerSpace,
+                        BusinessEntity.AnalyticPurchaseState, dataCollectionService.getActiveVersion(customerSpace)))
                 .filter(cm -> selectedCategories.contains(cm.getCategory()))
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {
