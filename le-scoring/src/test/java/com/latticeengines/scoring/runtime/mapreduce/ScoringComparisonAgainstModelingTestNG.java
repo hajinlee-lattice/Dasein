@@ -359,8 +359,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
         try {
             files = HdfsUtils.getFilesForDir(configuration, hdfsDir, filter);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Failed to get files.", e);
         }
         if (files.size() == 0) {
             throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
@@ -370,8 +369,7 @@ public class ScoringComparisonAgainstModelingTestNG extends ScoringFunctionalTes
                 List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
                 newlist.addAll(list);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error("Failed to get avro data.", e);
             }
         }
         return newlist;

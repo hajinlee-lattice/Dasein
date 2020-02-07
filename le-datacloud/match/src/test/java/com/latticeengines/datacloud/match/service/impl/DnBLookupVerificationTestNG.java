@@ -231,7 +231,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             csvFileParser.close();
             log.info("Submitted {} rows from Fortune1000 to DnB api", contextsRealtime.size());
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to parse csv file.", e);
         }
     }
 }

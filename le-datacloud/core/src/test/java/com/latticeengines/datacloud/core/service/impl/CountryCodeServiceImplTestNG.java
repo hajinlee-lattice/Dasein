@@ -48,7 +48,7 @@ public class CountryCodeServiceImplTestNG extends DataCloudCoreFunctionalTestNGB
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to get country code.", e);
         }
         Assert.assertTrue(res);
     }
@@ -74,7 +74,7 @@ public class CountryCodeServiceImplTestNG extends DataCloudCoreFunctionalTestNGB
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to get country name.", e);
         }
         Assert.assertTrue(res);
     }

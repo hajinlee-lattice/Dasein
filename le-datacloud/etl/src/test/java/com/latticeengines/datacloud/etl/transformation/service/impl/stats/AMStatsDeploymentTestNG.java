@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.AMStatsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
@@ -217,13 +218,7 @@ public class AMStatsDeploymentTestNG extends PipelineTransformationTestNGBase {
         configuration.setSteps(steps);
 
         configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
-
-        try {
-            System.out.println(om.writeValueAsString(configuration));
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        log.info(JsonUtils.serialize(configuration));
         return configuration;
     }
 

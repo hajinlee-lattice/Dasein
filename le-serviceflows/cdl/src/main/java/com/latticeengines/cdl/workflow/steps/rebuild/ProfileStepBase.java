@@ -6,8 +6,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -303,11 +301,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
                 evaluationDate = LocalDate.parse(evaluationDateStr, DateTimeFormatter.ISO_DATE);
             } catch (DateTimeParseException e) {
                 log.error("Could not parse evaluation date string \"" + evaluationDateStr
-                        + "\" from Period Proxy as an ISO formatted date");
-                log.error("Error is: " + e.getLocalizedMessage());
-                StringWriter sw = new StringWriter();
-                e.printStackTrace(new PrintWriter(sw));
-                log.error(sw.toString());
+                        + "\" from Period Proxy as an ISO formatted date", e);
                 evaluationDate = LocalDate.now();
                 evaluationDateStr = evaluationDate.format(REFRESH_DATE_FORMATTER);
             }

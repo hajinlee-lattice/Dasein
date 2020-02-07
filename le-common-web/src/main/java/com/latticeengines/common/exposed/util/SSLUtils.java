@@ -9,6 +9,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +101,7 @@ public final class SSLUtils {
             System.out.println("Successfully connected");
 
         } catch (Exception exception) {
-            exception.printStackTrace();
+            System.out.println(ExceptionUtils.getStackTrace(exception));
         }
     }
 

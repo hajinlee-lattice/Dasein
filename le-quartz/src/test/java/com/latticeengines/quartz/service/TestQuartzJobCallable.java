@@ -2,10 +2,15 @@ package com.latticeengines.quartz.service;
 
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestQuartzJobCallable implements Callable<Boolean> {
+
+    private static final Logger log = LoggerFactory.getLogger(TestQuartzJobCallable.class);
 
     private String outputMsg;
 
@@ -28,11 +33,10 @@ public class TestQuartzJobCallable implements Callable<Boolean> {
                     printArg = jsonNode.get("printMsg").textValue();
                 }
             }
-            System.out.println(String.format("%s, print argument: %s, concurrent num: %d", outputMsg, printArg,
-                    concurrentNum));
+            log.info(String.format("%s, print argument: %s, concurrent num: %d", outputMsg, printArg, concurrentNum));
             Thread.sleep(1000);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to print job info.", e);
         } finally {
             concurrentNum--;
         }

@@ -133,7 +133,7 @@ public class SoftDeleteActivityStoreDeploymentTestNG extends ProcessActivityStor
                 try {
                     return HdfsUtils.isDirectory(yarnConfiguration, file);
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    log.info("Failed to get file info from hdfs.", ex);
                 }
                 return false;
             }).map(s -> s = s + "/*.avro").collect(Collectors.toList());

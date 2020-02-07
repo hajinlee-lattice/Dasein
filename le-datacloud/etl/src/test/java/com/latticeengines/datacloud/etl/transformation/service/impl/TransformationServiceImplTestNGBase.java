@@ -28,6 +28,7 @@ import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -260,15 +261,9 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
             if (progressInDb.getStatus().equals(ProgressStatus.FINISHED)) {
                 break;
             }
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            SleepUtils.sleep(3000);
         }
-
         Assert.assertEquals(progressInDb.getStatus(), ProgressStatus.FINISHED);
-
         return progressInDb;
     }
 

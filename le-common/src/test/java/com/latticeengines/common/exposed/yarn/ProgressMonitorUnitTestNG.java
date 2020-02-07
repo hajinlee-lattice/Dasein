@@ -6,12 +6,16 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.yarn.am.allocate.ContainerAllocator;
 import org.springframework.yarn.am.allocate.DefaultContainerAllocator;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class ProgressMonitorUnitTestNG {
+
+    private static final Logger log = LoggerFactory.getLogger(ProgressMonitorUnitTestNG.class);
 
     private ProgressMonitor monitor;
 
@@ -35,13 +39,13 @@ public class ProgressMonitorUnitTestNG {
 
                 Socket clientSocket = new Socket(monitor.getHost(), monitor.getPort());
                 DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-                outToServer.writeBytes(Float.toString(progress) + "\n");
+                outToServer.writeBytes(progress + "\n");
                 outToServer.flush();
                 clientSocket.close();
                 Thread.sleep(1000);
                 assertTrue(progress == monitor.getProgress());
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Failed to write process to server.", e);
             }
         }
     }

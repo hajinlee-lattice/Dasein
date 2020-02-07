@@ -1,8 +1,6 @@
 package com.latticeengines.scoringapi.controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriTemplate;
@@ -38,6 +39,9 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiControllerDeploymentTestNGBase;
 public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ScoringResourceDeploymentTestNGBase.class);
+
     protected static final String TEST_MODEL_NAME_PREFIX = "TestInternal3MulesoftAllRows";
     protected static final String SALESFORCE = "SALESFORCE";
     protected static final String MISSING_FIELD_COUNTRY = "Country";
@@ -119,16 +123,6 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             records.add(record);
         }
         return records;
-    }
-
-    protected String getExceptionTrace(Throwable exception2) {
-        StringWriter writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        exception.printStackTrace(printWriter);
-        printWriter.flush();
-
-        String stackTrace = writer.toString();
-        return stackTrace.toString();
     }
 
     protected long testScore(String url, int n, long maxTime,
@@ -373,7 +367,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                     // testScore(url, 200, upperBoundForBulkScoring, modelList,
                     // isInternalScoring, isPmmlModel);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Failed to test score.", e);
                 }
             }
         };
@@ -453,7 +447,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
         }
 
         if (exception != null) {
-            Assert.assertNull(exception, "Got exception in one of the thread: " + getExceptionTrace(exception));
+            Assert.assertNull(exception, "Got exception in one of the thread: " + ExceptionUtils.getStackTrace(exception));
         }
     }
 

@@ -283,12 +283,9 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
     }
 
     public AttrConfig cloneAttrConfig() {
-        AttrConfig obj = null;
-        try {
-            obj = (AttrConfig) super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
+        AttrConfig obj = JsonUtils.clone(this);
+        obj.setAttrType(this.attrType);
+        obj.setAttrSubType(this.attrSubType);
         HashMap<String, AttrConfigProp<?>> map = null;
         if (this.attrProps instanceof HashMap) {
             map = (HashMap<String, AttrConfigProp<?>>) this.attrProps;

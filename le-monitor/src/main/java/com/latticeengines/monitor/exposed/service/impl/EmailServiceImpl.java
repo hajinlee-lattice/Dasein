@@ -598,9 +598,8 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("Failed to send tenant access change notice email to " + user.getEmail() + " on "
-                    + tenant.getName() + " " + e.getMessage());
+                    + tenant.getName(), e);
         }
     }
 
@@ -629,9 +628,8 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("Failed to send tenant access change notice email to " + user.getEmail() + " on "
-                    + tenant.getName() + " " + e.getMessage());
+                    + tenant.getName(), e);
         }
     }
 

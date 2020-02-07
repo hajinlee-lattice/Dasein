@@ -156,8 +156,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
                     writeToHdfsWithQuoteProtection(inputStream, hdfsDir + "/qp_" + filePrefix);
                     pathsWithQuote = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsDir, "qp_" + filePrefix + ".*");
                 } catch (Exception e) {
-                    log.error("Error writing the input stream to hdfs.");
-                    e.printStackTrace();
+                    log.error("Error writing the input stream to hdfs.", e);
                     return inputStream;
                 }
             }

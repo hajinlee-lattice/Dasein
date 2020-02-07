@@ -79,7 +79,7 @@ public class DataUnitCrossTenantServiceImplTestNG extends MetadataFunctionalTest
         try {
             fileExisted = HdfsUtils.fileExists(yarnConfiguration, hdfsPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to get file info from hdfs.", e);
         }
         Assert.assertFalse(fileExisted);
     }
@@ -119,7 +119,7 @@ public class DataUnitCrossTenantServiceImplTestNG extends MetadataFunctionalTest
             hdfsDataUnit.setName("testHdfs");
             dataUnitCrossTenantService.createOrUpdateByNameAndStorageType(customerSpace, hdfsDataUnit);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to copy file for local to hdfs.", e);
         }
     }
 

@@ -24,6 +24,7 @@ import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
@@ -464,11 +465,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testDelete" })
     public void testPostDelete() {
-        try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(10L));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        SleepUtils.sleep(TimeUnit.SECONDS.toMillis(10L));
         checkNonExistance();
     }
 

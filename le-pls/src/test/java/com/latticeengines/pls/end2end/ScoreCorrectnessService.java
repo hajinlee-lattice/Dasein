@@ -433,7 +433,7 @@ public class ScoreCorrectnessService {
                             initialInputQueueSize)));
                     responses.put(id, response);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(String.format("Failed to score model %s.", modelId), e);
                     problemScores.add(id);
                 }
             }

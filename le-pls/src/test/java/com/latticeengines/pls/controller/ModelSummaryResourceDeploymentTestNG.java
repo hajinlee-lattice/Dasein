@@ -136,7 +136,7 @@ public class ModelSummaryResourceDeploymentTestNG extends PlsDeploymentTestNGBas
             response = restTemplate.getForObject(getRestAPIHostPort() + "/pls/modelsummaries/alerts/" + eloquaModelId,
                     String.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to call /pls/modelsummaries/alerts.", e);
             Assert.fail("Should NOT have thrown an exception.");
         }
         assertNotNull(response);

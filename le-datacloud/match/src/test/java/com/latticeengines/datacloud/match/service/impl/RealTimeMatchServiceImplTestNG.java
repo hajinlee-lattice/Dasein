@@ -319,7 +319,7 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
                     PathBuilder.buildServicePath(podId, PROPDATA_SERVICE, leStack).append(RELAX_PUBLIC_DOMAIN_CHECK),
                     new Document("true"), ZooDefs.Ids.OPEN_ACL_UNSAFE);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to setup zk path.", e);
         }
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);

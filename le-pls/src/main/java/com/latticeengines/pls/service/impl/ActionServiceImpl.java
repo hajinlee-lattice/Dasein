@@ -103,8 +103,7 @@ public class ActionServiceImpl implements ActionService {
                     }
                 }
             } catch (Exception e) {
-                log.error("email send failed!");
-                e.printStackTrace();
+                log.error("email send failed!", e);
             }
         }
     }

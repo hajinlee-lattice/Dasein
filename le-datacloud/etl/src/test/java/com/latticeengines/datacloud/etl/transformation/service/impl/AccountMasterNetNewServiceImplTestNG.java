@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.PipelineSource;
@@ -109,13 +110,7 @@ public class AccountMasterNetNewServiceImplTestNG
         configuration.setSteps(steps);
 
         configuration.setVersion(HdfsPathBuilder.dateFormat.format(new Date()));
-
-        try {
-            System.out.println(om.writeValueAsString(configuration));
-        } catch (JsonProcessingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        log.info(JsonUtils.serialize(configuration));
         return configuration;
     }
 

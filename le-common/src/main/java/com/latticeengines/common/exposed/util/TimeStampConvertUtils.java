@@ -425,12 +425,7 @@ public final class TimeStampConvertUtils {
             }
 
             if (ENABLE_DEBUG_LOG) {
-                log.debug("Joda Time date/time formatter failed to parse the requested date/time and threw exception:");
-                log.debug(e.toString());
-                // Uncomment the three lines below if needed for debugging.
-                //StringWriter sw = new StringWriter();
-                //e.printStackTrace(new PrintWriter(sw));
-                //log.debug("Stack Trace is:\n" + sw.toString());
+                log.debug("Joda Time date/time formatter failed to parse the requested date/time and threw exception:", e);
                 log.debug("Attempting to use Natty Date Parser to process the date/time.");
             }
 
@@ -722,11 +717,7 @@ public final class TimeStampConvertUtils {
              */
 
             if (ENABLE_DEBUG_LOG) {
-                log.debug("Caught Exception thrown: " + e.toString());
-                // Uncomment the three lines below if needed for debugging.
-                //StringWriter sw = new StringWriter();
-                //e.printStackTrace(new PrintWriter(sw));
-                //log.debug("Stack Trace is:\n" + sw.toString());
+                log.debug("Caught Exception thrown: ", e);
             }
             throw e;
         }

@@ -8,6 +8,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -91,7 +92,7 @@ public final class SwlibTool {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(ExceptionUtils.getStackTrace(e));
         }
     }
 

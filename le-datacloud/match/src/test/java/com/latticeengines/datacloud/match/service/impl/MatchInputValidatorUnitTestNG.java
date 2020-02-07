@@ -435,8 +435,7 @@ public class MatchInputValidatorUnitTestNG {
             MatchInputValidator.validateRealTimeInput(input, maxRealTimeInput);
         } catch (Exception e) {
             failed = true;
-            System.out.println("Match Input Validation failed unexpectedly with exception: " +  e.getMessage());
-            e.printStackTrace();
+            log.error("Match Input Validation failed unexpectedly with exception: ", e);
         }
         Assert.assertFalse(failed, "Match Input Validation should have passed.");
     }
@@ -479,9 +478,7 @@ public class MatchInputValidatorUnitTestNG {
             MatchInputValidator.validateEntityMatchColumnSelection(input);
         } catch (Exception e) {
             failed = true;
-            System.out.println("Entity Match Column Selection Validation failed unexpectedly with exception: "
-                    +  e.getMessage());
-            e.printStackTrace();
+            log.error("Entity Match Column Selection Validation failed unexpectedly with exception: ", e);
         }
         Assert.assertFalse(failed, "Entity Match Column Selection Validation should have passed.");
     }

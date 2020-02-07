@@ -345,7 +345,7 @@ public class PMMLModelingToScoringEndToEndDeploymentTestNG extends PlsDeployment
             }
             assertEquals(line, TOTAL_QUALIFIED_LINES);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to parse csv file.", e);
         } finally {
             parser.close();
         }

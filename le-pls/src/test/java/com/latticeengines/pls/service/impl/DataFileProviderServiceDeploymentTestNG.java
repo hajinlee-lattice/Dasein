@@ -25,6 +25,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -47,6 +49,8 @@ import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFileProviderServiceDeploymentTestNG.class);
 
     @Mock
     private SourceFileProxy sourceFileProxy;
@@ -136,9 +140,8 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
         HdfsUtils.rmdir(yarnConfiguration, modelingServiceHdfsBaseDir + "/" + TENANT_ID);
     }
 
-    @Test(groups = { "deployment" }, dataProvider = "dataFileProvider", enabled = true)
+    @Test(groups = { "deployment" }, dataProvider = "dataFileProvider")
     public void downloadFile(final String mimeType, final String filter) {
-
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
         ServletOutputStream os = mock(ServletOutputStream.class);
@@ -147,9 +150,8 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
             dataFileProviderService.downloadFile(request, response, modelId, mimeType, filter);
             verify(response, atMost(2)).setHeader(eq("Content-Disposition"), anyString());
             verify(response).setContentType(mimeType);
-
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to download file.", ex);
             Assert.fail(ex.getMessage());
         }
     }
@@ -169,7 +171,7 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
             verify(response).setContentType(mimeType);
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to download file.", ex);
             Assert.fail(ex.getMessage());
         }
     }
@@ -184,9 +186,8 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
             dataFileProviderService.downloadFileByPath(request, response, mimeType, filePath);
             verify(response).setHeader(eq("Content-Disposition"), anyString());
             verify(response).setContentType(mimeType);
-
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to download file.", ex);
             Assert.fail(ex.getMessage());
         }
     }
@@ -199,12 +200,10 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
         try {
             when(response.getOutputStream()).thenReturn(os);
             dataFileProviderService.downloadFileByPath(request, response, mimeType, filePath);
-
         } catch (Exception ex) {
             Assert.assertTrue(ex instanceof LedpException);
             return;
         }
-
         Assert.fail("Should not find file to download.");
     }
 
@@ -214,7 +213,7 @@ public class DataFileProviderServiceDeploymentTestNG extends PlsDeploymentTestNG
             String contents = dataFileProviderService.getFileContents(modelId, mimeType, filter);
             assertEquals(contents, fileContents);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to get file content.", ex);
             Assert.fail(ex.getMessage());
         }
     }

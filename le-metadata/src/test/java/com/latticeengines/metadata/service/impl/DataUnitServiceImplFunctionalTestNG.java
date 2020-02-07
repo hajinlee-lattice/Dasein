@@ -81,7 +81,7 @@ public class DataUnitServiceImplFunctionalTestNG extends MetadataFunctionalTestN
         try {
             fileExisted = HdfsUtils.fileExists(yarnConfiguration, hdfsPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to get file info from HDFS.", e);
         }
         Assert.assertFalse(fileExisted);
     }
@@ -130,7 +130,7 @@ public class DataUnitServiceImplFunctionalTestNG extends MetadataFunctionalTestN
             hdfsDataUnit.setName("testHdfs");
             dataUnitService.createOrUpdateByNameAndStorageType(hdfsDataUnit);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to copy file to hdfs.", e);
         }
     }
 

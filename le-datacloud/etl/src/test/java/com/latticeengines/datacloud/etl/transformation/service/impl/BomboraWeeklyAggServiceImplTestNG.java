@@ -12,6 +12,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,6 +26,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.BasicTransformationConfiguration;
 public class BomboraWeeklyAggServiceImplTestNG
         extends TransformationServiceImplTestNGBase<BasicTransformationConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(BomboraWeeklyAggServiceImplTestNG.class);
     private String baseSourceVersion = "2016-10-07_00-00-00_UTC";
     private String targetVersion = "2016-10-08_00-00-00_UTC";
 
@@ -170,7 +174,7 @@ public class BomboraWeeklyAggServiceImplTestNG
             }
             Assert.assertEquals(rowNum, 4);
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Failed to parse avro file.", e);
         }
     }
 }

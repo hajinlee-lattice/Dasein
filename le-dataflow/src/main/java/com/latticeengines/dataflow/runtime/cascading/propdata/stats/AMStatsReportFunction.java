@@ -135,7 +135,7 @@ public class AMStatsReportFunction extends BaseOperation implements Function {
 
             functionCall.getOutputCollector().add(result);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to compress and encode cube.", e);
         }
     }
 

@@ -80,8 +80,7 @@ public class AccountMasterReduceDataFlowService extends AbstractTransformationDa
 
 
         } catch (Exception e) {
-            log.info("Source " + sourceName + " is not initiated in HDFS");
-            e.printStackTrace();
+            log.error("Source " + sourceName + " is not initiated in HDFS", e);
             return false;
         }
 

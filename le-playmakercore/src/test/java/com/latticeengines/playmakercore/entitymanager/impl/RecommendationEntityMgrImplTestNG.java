@@ -23,6 +23,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
@@ -343,12 +344,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     private void testGetRecommendationById(Recommendation originalRec) {
         MultiTenantContext.setTenant(tenant);
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        SleepUtils.sleep(500);
         // wait for replication lag
         Recommendation recommendation = recommendationEntityMgr
                 .findByRecommendationId(originalRec.getRecommendationId());

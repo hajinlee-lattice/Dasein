@@ -38,8 +38,7 @@ public class Oauth2ApiDeploymentTestNG extends AbstractTestNGSpringContextTests 
             isVaild = oauthProxy.isValidOauthToken(TenantName, token.getValue());
         } catch (Exception e) {
             isVaild = false;
-            log.info("This error is expected! Because token has been removed.");
-            e.printStackTrace();
+            log.error("This error is expected! Because token has been removed.", e);
         }
     }
 }

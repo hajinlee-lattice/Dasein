@@ -184,8 +184,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
         try {
             files = HdfsUtils.getFilesForDir(configuration, hdfsDir, filter);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Failed to get files.", e);
         }
         if (files.size() == 0) {
             throw new LedpException(LedpCode.LEDP_15003, new String[] { "avro" });
@@ -195,8 +194,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
                 List<GenericRecord> list = AvroUtils.getData(configuration, new Path(file));
                 newlist.addAll(list);
             } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                log.error("Failed to get avro data.", e);
             }
         }
         return newlist;
@@ -213,7 +211,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
                 newlist.add(datum);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Failed to get avro data.", e);
         }
         return newlist;
     }
@@ -222,9 +220,9 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
 
         boolean resultsAreSame = true;
         if (newResults.size() != oldResults.size()) {
-            System.out.println("size not the same");
-            System.out.println("newResults.size() is " + newResults.size());
-            System.out.println("oldResults.size() is " + oldResults.size());
+            log.info("size not the same");
+            log.info("newResults.size() is " + newResults.size());
+            log.info("oldResults.size() is " + oldResults.size());
             resultsAreSame = false;
         } else {
             HashMap<String, GenericRecord> resultMap = new HashMap<String, GenericRecord>();

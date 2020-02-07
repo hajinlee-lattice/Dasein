@@ -24,7 +24,6 @@ public class FileModelRunServiceImplDeploymentTestNG extends ModelQualityDeploym
             ModelRun modelRun = modelRunEntityMgr.findByName(modelRunEntityNames.get(0).getName());
             modelRunEntityMgr.delete(modelRun);
         } catch (Exception ex) {
-            ex.printStackTrace();
             Assert.fail(ex.getMessage());
         }
     }
