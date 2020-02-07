@@ -20,15 +20,6 @@ public class CrossSellModelingParameters extends ModelingParameters {
     private String tableName;
 
     @JsonProperty
-    private String trainFilterTableName;
-
-    @JsonProperty
-    private String eventFilterTableName;
-
-    @JsonProperty
-    private String targetFilterTableName;
-
-    @JsonProperty
     private boolean expectedValue;
 
     @JsonProperty
@@ -43,30 +34,6 @@ public class CrossSellModelingParameters extends ModelingParameters {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
-    }
-
-    public String getTrainFilterTableName() {
-        return trainFilterTableName;
-    }
-
-    public void setTrainFilterTableName(String trainFilterTableName) {
-        this.trainFilterTableName = trainFilterTableName;
-    }
-
-    public String getEventFilterTableName() {
-        return eventFilterTableName;
-    }
-
-    public void setEventFilterTableName(String eventFilterTableName) {
-        this.eventFilterTableName = eventFilterTableName;
-    }
-
-    public String getTargetFilterTableName() {
-        return targetFilterTableName;
-    }
-
-    public void setTargetFilterTableName(String targetFilterTableName) {
-        this.targetFilterTableName = targetFilterTableName;
     }
 
     public EventFrontEndQuery getTrainFilterQuery() {

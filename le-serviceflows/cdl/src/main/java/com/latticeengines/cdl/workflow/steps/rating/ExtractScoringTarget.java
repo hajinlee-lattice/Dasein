@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
@@ -83,7 +84,7 @@ public class ExtractScoringTarget extends BaseExtractRatingsStep<GenerateRatingS
             result = getEntityQueryData(frontEndQuery);
         } else if (RatingEngineType.CROSS_SELL.equals(engineType)) {
             EventFrontEndQuery frontEndQuery = crossSellQuery(engineSummary.getId(), container.getModel().getId());
-            result = getEventScoringTarget(frontEndQuery);
+            result = getEventQueryData(frontEndQuery, EventType.Scoring);
         }
         return result;
     }
