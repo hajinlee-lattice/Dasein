@@ -70,14 +70,14 @@ public class PatchResource {
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Batch update a list of lookup entries", response = LookupUpdateResponse.class)
-    private LookupUpdateResponse patch(@RequestBody List<LookupUpdateRequest> requests) {
+    public LookupUpdateResponse patch(@RequestBody List<LookupUpdateRequest> requests) {
         return patchService.patch(requests);
     }
 
     @RequestMapping(value = "/validate/{patchBookType}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Validate patch book entries with the given type with pagination and sort by field", response = PatchValidationResponse.class)
-    private PatchValidationResponse validatePatchBook(@PathVariable String patchBookType,
+    public PatchValidationResponse validatePatchBook(@PathVariable String patchBookType,
             @RequestBody PatchRequest request) {
         checkRequired(request);
         checkAndSetDataCloudVersion(request);
@@ -91,7 +91,7 @@ public class PatchResource {
     @RequestMapping(value = "/validatePagination/{patchBookType}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Validate patch book entries with the given type with pagination and no sort", response = PatchValidationResponse.class)
-    private PatchValidationResponse validatePatchBookWithPagin(@PathVariable String patchBookType,
+    public PatchValidationResponse validatePatchBookWithPagin(@PathVariable String patchBookType,
             @RequestBody PatchRequest request) {
         checkRequired(request);
         checkAndSetDataCloudVersion(request);
@@ -105,7 +105,7 @@ public class PatchResource {
     @RequestMapping(value = "/findMinMaxPid/{patchBookType}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Find min and max pid in the patch book table", response = PatchValidationResponse.class)
-    private PatchValidationResponse findMinMaxPid(@PathVariable String patchBookType,
+    public PatchValidationResponse findMinMaxPid(@PathVariable String patchBookType,
             @RequestParam(value = "dataCloudVersion", required = false) String dataCloudVersion,
             @RequestParam(value = "mode", required = false) PatchMode mode) {
         Preconditions.checkArgument(StringUtils.isNotBlank(dataCloudVersion), "DataCloudVersion should not be blank");
@@ -124,7 +124,7 @@ public class PatchResource {
     @RequestMapping(value = "/lookup", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Patch all patch book entries with lookup type", response = LookupPatchResponse.class)
-    private LookupPatchResponse lookupPatch(@RequestBody LookupPatchRequest request) {
+    public LookupPatchResponse lookupPatch(@RequestBody LookupPatchRequest request) {
         checkRequired(request);
         checkAndSetDataCloudVersion(request);
 
