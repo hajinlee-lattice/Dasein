@@ -1,15 +1,16 @@
 package com.latticeengines.db.exposed.schemagen.postprocess;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 public abstract class PostProcessor {
@@ -28,33 +29,44 @@ public abstract class PostProcessor {
 
     public void process(File file) {
         if (file.exists()) {
-            try (InputStream stream = new FileInputStream(file)) {
-                List<String> lines = IOUtils.readLines(stream, Charset.defaultCharset());
-                process(lines);
-                try (OutputStream ostream = new FileOutputStream(file)) {
-                    IOUtils.writeLines(lines, "\n", ostream, Charset.defaultCharset());
+            Iterable<String> it = () -> {
+                try {
+                    return FileUtils.lineIterator(file, Charset.defaultCharset().name());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            };
+            File fout = new File(file.getAbsolutePath() + ".new");
+            try (OutputStream ostream = new FileOutputStream(fout)) {
+                for (String ln: it) {
+                    List<String> lns = processLine(ln);
+                    if (CollectionUtils.isNotEmpty(lns)) {
+                        for (String ln2: lns) {
+                            IOUtils.write(ln2 + "\n", ostream, Charset.defaultCharset());
+                        }
+                    }
                 }
             } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            FileUtils.deleteQuietly(file);
+            try {
+                FileUtils.moveFile(fout, file);
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public void process(List<String> input) {
-        ListIterator<String> iter = input.listIterator();
-        while (iter.hasNext()) {
-            String next = iter.next();
-            for (LineProcessor processor : lineProcessors) {
-                List<String> output = processor.processLine(next);
-                if (output.size() == 0) {
-                    iter.remove();
-                } else {
-                    iter.set(output.get(0));
-                }
-                for (int i = 1; i < output.size(); ++i) {
-                    iter.add(output.get(i));
-                }
+    private List<String> processLine(String ln) {
+        List<String> lst = Collections.singletonList(ln);
+        for (LineProcessor processor : lineProcessors) {
+            List<String> lst2 = new ArrayList<>();
+            for (String next: lst) {
+                lst2.addAll(processor.processLine(next));
             }
+            lst = lst2;
         }
+        return lst;
     }
 }

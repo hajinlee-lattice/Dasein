@@ -261,11 +261,11 @@ public class SchemaGenerator {
 
                     // deal with filesystem with classes case
                     String[] files = directory.list();
-                    for (int i = 0; i < files.length; i++) {
-                        if (files[i].endsWith(".class")) {
+                    for (String file : files) {
+                        if (file.endsWith(".class")) {
                             // removes the .class extension
                             String className = packageName + '.'
-                                    + files[i].substring(0, files[i].length() - 6);
+                                    + file.substring(0, file.length() - 6);
                             classes.add(Class.forName(className));
                             log.debug("adding class:" + className);
                         }
@@ -279,10 +279,8 @@ public class SchemaGenerator {
                     String[] paths = directory.getPath().split("!");
                     // strip off file:
                     File jarFilepath = new File(paths[0].substring(5));
-                    JarFile jarFile = null;
 
-                    try {
-                        jarFile = new JarFile(jarFilepath, false, JarFile.OPEN_READ);
+                    try (JarFile jarFile = new JarFile(jarFilepath, false, JarFile.OPEN_READ)) {
                         Enumeration<JarEntry> jarEntries = jarFile.entries();
                         while (jarEntries.hasMoreElements()) {
                             JarEntry jarEntry = jarEntries.nextElement();
@@ -308,8 +306,6 @@ public class SchemaGenerator {
 
                             }
                         }
-                    } finally {
-                        jarFile.close();
                     }
                 }
             }
