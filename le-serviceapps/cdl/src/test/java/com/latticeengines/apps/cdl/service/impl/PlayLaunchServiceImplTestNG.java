@@ -424,6 +424,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         eventDetail.setFailed(0L);
         eventDetail.setProcessed(1L);
         eventDetail.setTotalRecordsSubmitted(1L);
+        eventDetail.setDuplicates(0L);
         statusMessage2.setEventDetail(eventDetail);
         statusMessage2.setMessage("Workflow marked as Complete");
         dataIntegrationStatusMonitoringService.createOrUpdateStatuses(generateListMessages(statusMessage2));
