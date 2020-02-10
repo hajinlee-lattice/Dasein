@@ -12,16 +12,15 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.TenantCleanupUtils;
 
 public class AdminCleanupErrorTenantJobCallable implements Callable<Boolean> {
     private static final Logger log = LoggerFactory.getLogger(AdminCleanupErrorTenantJobCallable.class);
-    private static final String customerBase = "/user/s-analytics/customers";
 
     @SuppressWarnings("unused")
     private String jobArguments;
@@ -91,19 +90,8 @@ public class AdminCleanupErrorTenantJobCallable implements Callable<Boolean> {
     private void cleanupTenantInHdfs(String contractId) {
         try {
             log.info("Clean up contract in HDFS: " + contractId);
-            String customerSpace = CustomerSpace.parse(contractId).toString();
             String contractPath = PathBuilder.buildContractPath(podId, contractId).toString();
-            if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, contractPath);
-            }
-            String customerPath = new Path(customerBase).append(customerSpace).toString();
-            if (HdfsUtils.fileExists(yarnConfiguration, customerPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, customerPath);
-            }
-            contractPath = new Path(customerBase).append(contractId).toString();
-            if (HdfsUtils.fileExists(yarnConfiguration, contractPath)) {
-                HdfsUtils.rmdir(yarnConfiguration, contractPath);
-            }
+            TenantCleanupUtils.cleanupTenantInHdfs(yarnConfiguration, contractId, contractPath);
         } catch (Exception e) {
             log.error("Failed to clean up contract in HDFS: " + contractId, e);
         }

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNGBase;
@@ -40,14 +39,6 @@ public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     @PostConstruct
     public void postConstruct() {
         cdlUrl = microserviceUrl + "/cdl";
-    }
-
-    @AfterClass(groups = "deployment")
-    public void tearDown() throws Exception {
-        log.info(
-                "Start tearing down public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase");
-        super.tearDown();
-        plsComponentDeploymentTestNG.tearDown();
     }
 
     @SuppressWarnings("rawtypes")

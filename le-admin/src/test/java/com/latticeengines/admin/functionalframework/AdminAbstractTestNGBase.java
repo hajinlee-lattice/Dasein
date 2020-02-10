@@ -42,7 +42,6 @@ import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;
@@ -101,27 +100,15 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
     protected abstract String getRestHostPort();
 
     protected void bootstrap(String contractId, String tenantId, String serviceName) {
-        CustomerSpace space = new CustomerSpace();
-        space.setContractId(contractId);
-        space.setTenantId(tenantId);
-        space.setSpaceId(CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-
         DocumentDirectory defaultConfig = batonService.getDefaultConfiguration(serviceName);
         bootstrap(contractId, tenantId, serviceName, defaultConfig);
     }
 
     protected void bootstrap(String contractId, String tenantId, String serviceName, DocumentDirectory configDir) {
-        CustomerSpace space = new CustomerSpace();
-        space.setContractId(contractId);
-        space.setTenantId(tenantId);
-        space.setSpaceId(CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-
         SerializableDocumentDirectory sDir = new SerializableDocumentDirectory(configDir);
         Map<String, String> bootstrapProperties = sDir.flatten();
-
         loginAD();
-        String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s", getRestHostPort(), tenantId,
-                serviceName, contractId);
+        String url = String.format("%s/admin/tenants/%s/services/%s?contractId=%s", getRestHostPort(), tenantId, serviceName, contractId);
         restTemplate.put(url, bootstrapProperties, new HashMap<>());
     }
 

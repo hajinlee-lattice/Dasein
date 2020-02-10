@@ -9,7 +9,6 @@ public final class ComponentConstants {
     public static final String CDL = "CDL";
     public static final String METADATA = "METADATA";
     public static final String PLS = "PLS";
-    public static final String LP = "LP";
 
     public static class Install {
         public static final String TENANT_DISPLAY_NAME = "TENANT_DISPLAY_NAME";

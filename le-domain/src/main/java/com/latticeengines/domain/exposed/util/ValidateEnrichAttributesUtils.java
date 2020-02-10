@@ -1,4 +1,4 @@
-package com.latticeengines.app.exposed.util;
+package com.latticeengines.domain.exposed.util;
 
 public final class ValidateEnrichAttributesUtils {
 
@@ -7,7 +7,6 @@ public final class ValidateEnrichAttributesUtils {
     }
 
     public static final int MIN_PREMIUM_ENRICHMENT_ATTRIBUTES = 0;
-    public static final int DEFAULT_PREMIUM_ENRICHMENT_ATTRIBUTES = 32;
 
     public static int validateEnrichAttributes(String maxPremiumEnrichAttributesStr) {
         maxPremiumEnrichAttributesStr = maxPremiumEnrichAttributesStr.replaceAll("\"", "");

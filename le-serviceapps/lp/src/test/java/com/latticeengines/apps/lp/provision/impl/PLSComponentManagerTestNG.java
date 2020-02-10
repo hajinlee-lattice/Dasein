@@ -1,4 +1,4 @@
-package com.latticeengines.pls.provisioning;
+package com.latticeengines.apps.lp.provision.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,17 +8,18 @@ import javax.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.lp.testframework.LPDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
+
+public class PLSComponentManagerTestNG extends LPDeploymentTestNGBase {
 
     @Inject
-    private PLSComponentManager componentManager;
+    private PLSComponentManagerImpl componentManager;
 
     @Inject
     private TenantService tenantService;
@@ -26,7 +27,7 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
     @Inject
     private UserService userService;
 
-    @Test(groups = { "functional" })
+    @Test(groups = {"functional"})
     public void testProvisionTenant() {
         Tenant tenant = createTestTenant();
         List<String> superAdmins = Collections.singletonList(
@@ -73,7 +74,7 @@ public class PLSComponentManagerTestNG extends PlsFunctionalTestNGBase {
         newTenant = tenantService.findByTenantId(tenant.getId());
         Assert.assertEquals(newTenant.getName(), "new name");
 
-        componentManager.discardTenant(tenant);
+        componentManager.discardTenant(tenant.getId());
         Assert.assertFalse(tenantService.hasTenantId(tenant.getId()));
 
         for (String email : superAdmins) {

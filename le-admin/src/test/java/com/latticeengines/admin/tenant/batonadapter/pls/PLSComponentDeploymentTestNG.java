@@ -12,7 +12,6 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
@@ -21,6 +20,9 @@ import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
+import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -37,8 +39,7 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
-import com.latticeengines.security.exposed.Constants;
-import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.AccessLevel;
 
 @Component
 public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
@@ -46,26 +47,9 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     private static final Logger log = LoggerFactory.getLogger(PLSComponentDeploymentTestNG.class);
 
     @Inject
-    private GlobalUserManagementService globalUserManagementService;
-
-    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
     public RestTemplate plsRestTemplate = HttpClientUtils.newRestTemplate();
-
-    @AfterClass(groups = "deployment")
-    public void tearDown() throws Exception {
-        log.info("Start tearing down public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase");
-        super.tearDown();
-        tearDown(contractId, tenantId);
-    }
-
-    public void tearDown(String contractId, String tenantId) throws Exception {
-        String PLSTenantId = String.format("%s.%s.%s", contractId, tenantId,
-                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
-        deletePLSAdminUser(testAdminUsername);
-        deletePLSTestTenant(PLSTenantId);
-    }
 
     public DocumentDirectory getPLSDocumentDirectory() {
         DocumentDirectory confDir = batonService.getDefaultConfiguration(getServiceName());
@@ -108,9 +92,17 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         // wait a while, then test your installation
         BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
+
+        TenantDocument tenantDocument = tenantEntityMgr.getTenant(contractId, tenantId);
+        Assert.assertEquals(tenantDocument.getTenantInfo().properties.displayName, tenantId);
+        SpaceConfiguration spaceConfiguration = tenantDocument.getSpaceConfig();
+        List<LatticeProduct> products = spaceConfiguration.getProducts();
+        Assert.assertTrue(products.contains(LatticeProduct.LPA));
+        List<String> rights = globalUserManagementService.getRights(testAdminUsername, PLSTenantId);
+        Assert.assertEquals(AccessLevel.findAccessLevel(rights), AccessLevel.SUPER_ADMIN);
+
         changeStatus(contractId, tenantId);
         Assert.assertNotNull(loginAndAttach(testAdminUsername, testAdminPassword, PLSTenantId));
-
         // idempotent test
         Path servicePath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), contractId,
                 tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID, PLSComponent.componentName);
@@ -134,28 +126,11 @@ public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         } catch (AssertionError e) {
             Assert.fail("Idempotent test failed.", e);
         }
-
     }
 
     @Override
     protected String getServiceName() {
         return PLSComponent.componentName;
-    }
-
-    private void deletePLSAdminUser(String username) {
-        if (globalUserManagementService.getUserByUsername(username) != null) {
-            globalUserManagementService.deleteUser(username);
-        }
-    }
-
-    public void deletePLSTestTenant(String tenantId) {
-        try {
-            addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-            magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-            magicRestTemplate.delete(getPlsHostPort() + String.format("/pls/admin/tenants/%s", tenantId));
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
     }
 
     public UserDocument loginAndAttach(String username, String password, String tenantId) {

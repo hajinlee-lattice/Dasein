@@ -1,8 +1,9 @@
-package com.latticeengines.pls.provisioning;
+package com.latticeengines.apps.lp.provision.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.apps.lp.provision.PLSComponentManager;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
 
