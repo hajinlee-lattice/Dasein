@@ -1,5 +1,7 @@
 package com.latticeengines.apps.dcp.entitymgr.impl;
 
+import java.util.List;
+
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
@@ -58,5 +60,11 @@ public class DCPProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<DCPP
         } else {
             return dcpProjectWriterRepository.findByProjectId(projectId);
         }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<DCPProject> findAll() {
+        return super.findAll();
     }
 }

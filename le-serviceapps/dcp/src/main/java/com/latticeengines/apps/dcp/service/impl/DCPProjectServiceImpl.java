@@ -64,17 +64,26 @@ public class DCPProjectServiceImpl implements DCPProjectService {
 
     @Override
     public List<DCPProject> getAllDCPProject(String customerSpace) {
-        return null;
+        return dcpProjectEntityMgr.findAll();
     }
 
     @Override
     public DCPProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
-        return null;
+        DCPProject dcpProject = getDCPProjectByProjectIdWithRetry(projectId);
+        if (dcpProject == null) {
+            throw new RuntimeException(String.format("Get DCP Project %s failed!", projectId));
+        }
+        return getProjectDetails(customerSpace, dcpProject);
     }
 
     @Override
     public Boolean deleteProject(String customerSpace, String projectId) {
-        return null;
+        DCPProject dcpProject = getDCPProjectByProjectIdWithRetry(projectId);
+        if (dcpProject == null) {
+            return false;
+        }
+        dcpProjectEntityMgr.delete(dcpProject);
+        return true;
     }
 
     private void validateProjectId(String projectId) {
