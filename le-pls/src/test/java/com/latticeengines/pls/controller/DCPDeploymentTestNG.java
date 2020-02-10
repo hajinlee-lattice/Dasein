@@ -6,7 +6,6 @@ import static org.testng.Assert.assertNotNull;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.json.JSONObject;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
