@@ -73,7 +73,7 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     private DataCollection.Version version;
 
     @Type(type = "json")
-    @Column(name = "Detail", columnDefinition = "'JSON'")
+    @Column(name = "DETAIL", columnDefinition = "'JSON'")
     private DataCollectionStatusDetail detail = new DataCollectionStatusDetail();
 
     @Column(name = "CREATION_TIME", nullable = false)
