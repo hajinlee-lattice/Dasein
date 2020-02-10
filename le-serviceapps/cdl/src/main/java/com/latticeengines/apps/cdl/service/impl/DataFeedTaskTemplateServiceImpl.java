@@ -42,11 +42,14 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -68,7 +71,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.AtlasStreamUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -351,21 +353,24 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask stageDataFeedTask = createOpportunityTemplate(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
         String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
-        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).getTenantId());
-        log.info("customerspace is {}, tenant is {}.", customerSpace, JsonUtils.serialize(tenant));
-        AtlasStream opportunityAltasStream = AtlasStreamUtils.newAtlasStream(tenant, opportunityDataFeedTask,
-                opportunityAtlasStreamName, Collections.singletonList(BusinessEntity.Account.name()),
-                Collections.singletonList(BusinessEntity.Account.name()), InterfaceName.LastModifiedDate.name(), null
-                , null);
-        opportunityAltasStream.setStreamId(AtlasStream.generateId());
-        streamEntityMgr.create(opportunityAltasStream);
-        Catalog stageCatalog = AtlasStreamUtils.createCatalog(tenant, opportunityAtlasStreamName, stageDataFeedTask);
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        AtlasStream opportunityAtlasStream =
+                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(opportunityDataFeedTask)
+                .withName(opportunityAtlasStreamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
+                .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
+                .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).build();
+        opportunityAtlasStream.setStreamId(AtlasStream.generateId());
+        streamEntityMgr.create(opportunityAtlasStream);
+        log.info("opportunityAtlasStream is {}.", JsonUtils.serialize(opportunityAtlasStream));
+        Catalog stageCatalog = createCatalog(tenant, opportunityAtlasStreamName, stageDataFeedTask);
         catalogEntityMgr.create(stageCatalog);
-        StreamDimension dimension = AtlasStreamUtils.createHashDimension(opportunityAltasStream, stageCatalog,
+        log.info("stageCatalog is {}.", JsonUtils.serialize(stageCatalog));
+        StreamDimension dimension = createHashDimension(opportunityAtlasStream, stageCatalog,
                 InterfaceName.StageNameId.name(), StreamDimension.Usage.Pivot, InterfaceName.StageName.name());
         dimensionEntityMgr.create(dimension);
+        log.info("dimension is {}.", JsonUtils.serialize(dimension));
         ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(tenant.getId(),
-                opportunityAltasStream.getName());
+                opportunityAtlasStream.getName());
         if (defaultGroup == null) {
             throw new IllegalStateException(String.format(
                 "Failed to setup default web visit metric groups for tenant %s", customerSpace));
@@ -617,5 +622,39 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             updateLatticeId(importSystem.isMapToLatticeAccount(), InterfaceName.CustomerAccountId.name(),
                     matchIdDefinition.getColumnName(), record);
         }
+    }
+
+    private Catalog createCatalog(Tenant tenant, String catalogName, DataFeedTask dataFeedTask) {
+        Catalog catalog = new Catalog();
+        catalog.setTenant(tenant);
+        catalog.setName(catalogName);
+        catalog.setCatalogId(Catalog.generateId());
+        catalog.setDataFeedTask(dataFeedTask);
+        return catalog;
+    }
+
+    private StreamDimension createHashDimension(@NotNull AtlasStream stream, Catalog catalog,
+                                                      String dimensionName, StreamDimension.Usage usage,
+                                                      String attributeName) {
+        StreamDimension dim = new StreamDimension();
+        dim.setName(dimensionName);
+        dim.setDisplayName(dim.getName());
+        dim.setTenant(stream.getTenant());
+        dim.setStream(stream);
+        dim.addUsages(usage);
+        dim.setCatalog(catalog);
+
+        // hash
+        DimensionGenerator generator = new DimensionGenerator();
+        generator.setAttribute(attributeName);
+        generator.setFromCatalog(true);
+        generator.setOption(DimensionGenerator.DimensionGeneratorOption.HASH);
+        dim.setGenerator(generator);
+
+        DimensionCalculator calculator = new DimensionCalculator();
+        calculator.setName(attributeName);
+        calculator.setAttribute(attributeName);
+        dim.setCalculator(calculator);
+        return dim;
     }
 }

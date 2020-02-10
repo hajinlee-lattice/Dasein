@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -40,7 +39,7 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
-        customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        customerSpace = mainTestTenant.getId();
     }
 
     @Test(groups = "deployment-app")
@@ -48,7 +47,7 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
         cdlService.createS3ImportSystem(customerSpace, TEST_SYSTEM_NAME, Salesforce, true);
         createAccountTemplateAndVerify();
         importSystem = cdlService.getS3ImportSystem(customerSpace, TEST_SYSTEM_NAME);
-        boolean result = cdlService.createDefaultOpportunityTemplate(customerSpace, TEST_SYSTEM_NAME);
+        boolean result =  cdlService.createDefaultOpportunityTemplate(customerSpace, TEST_SYSTEM_NAME);
         Assert.assertTrue(result);
         List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(customerSpace);
         S3ImportSystem opportunity = allSystems.stream() //
@@ -121,6 +120,5 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
                 opportunityDataFeedTask.getUniqueId(), sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
-
     }
 }

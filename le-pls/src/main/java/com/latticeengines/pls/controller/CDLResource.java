@@ -533,6 +533,9 @@ public class CDLResource {
         }
     }
 
+    @PostMapping(value = "/s3import/template/create/opportunity")
+    @ResponseBody
+    @ApiOperation("Create Opportunity template")
     public boolean createDefaultOpportunity(@RequestParam("systemName") String systemName) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {

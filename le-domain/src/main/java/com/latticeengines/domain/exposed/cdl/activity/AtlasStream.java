@@ -289,4 +289,56 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         } while (uuid.startsWith(STREAM_ID_PREFIX));
         return STREAM_ID_PREFIX + uuid;
     }
+
+    public static final class Builder {
+        private AtlasStream atlasStream;
+
+        public Builder() {
+            atlasStream = new AtlasStream();
+        }
+
+        public Builder withTenant(Tenant tenant) {
+            atlasStream.setTenant(tenant);
+            return this;
+        }
+
+        public Builder withDataFeedTask(DataFeedTask dataFeedTask) {
+            atlasStream.setDataFeedTask(dataFeedTask);
+            return this;
+        }
+
+        public Builder withName(String name) {
+            atlasStream.setName(name);
+            return this;
+        }
+
+        public Builder withMatchEntities(List<String> matchEntities) {
+            atlasStream.setMatchEntities(matchEntities);
+            return this;
+        }
+
+        public Builder withAggrEntities(List<String> aggrEntities) {
+            atlasStream.setAggrEntities(aggrEntities);
+            return this;
+        }
+
+        public Builder withDateAttribute(String dateAttribute) {
+            atlasStream.setDateAttribute(dateAttribute);
+            return this;
+        }
+
+        public Builder withPeriods(List<String> periods) {
+            atlasStream.setPeriods(periods);
+            return this;
+        }
+
+        public Builder withRetentionDays(Integer retentionDays) {
+            atlasStream.setRetentionDays(retentionDays);
+            return this;
+        }
+
+        public AtlasStream build() {
+            return atlasStream;
+        }
+    }
 }
