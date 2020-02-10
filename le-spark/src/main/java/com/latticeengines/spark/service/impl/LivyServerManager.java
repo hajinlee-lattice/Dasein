@@ -138,8 +138,15 @@ public class LivyServerManager {
             while (iter.hasNext()) {
                 JsonNode json = iter.next();
                 String state = json.get("state").asText();
-                // For non-active state, delete those sessions to save resource
-                if (state.equalsIgnoreCase("error") || state.equalsIgnoreCase("dead")
+                // Based on our current test results,
+                // once livy server has a session in error state, that server is pretty much
+                // dead. Skip that server for now
+                if (state.equalsIgnoreCase("error")) {
+                    log.info(serverUrl + " has session in error state, skip it for now");
+                    return false;
+                }
+                // For other non-active states, try to delete those sessions to save resource
+                if (state.equalsIgnoreCase("killed") || state.equalsIgnoreCase("dead")
                         || state.equalsIgnoreCase("success")) {
                     int sessionId = json.get("id").asInt();
                     restTemplate.delete(url + sessionId);
