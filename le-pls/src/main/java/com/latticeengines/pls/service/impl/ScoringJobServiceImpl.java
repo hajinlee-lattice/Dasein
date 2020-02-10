@@ -83,7 +83,7 @@ public class ScoringJobServiceImpl implements ScoringJobService {
         Tenant tenantWithPid = getTenant();
         log.debug("Finding jobs for " + tenantWithPid.toString() + " with pid " + tenantWithPid.getPid() + " and model "
                 + modelId);
-        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid);
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(tenantWithPid, false);
         List<Job> ret = new ArrayList<>();
         ModelSummary modelSummary = modelSummaryProxy.findByModelId(MultiTenantContext.getTenant().getId(), modelId,
                 false, false, true);

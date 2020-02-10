@@ -37,9 +37,9 @@ public interface WorkflowJobService {
 
     Job getJobByApplicationId(String customerSpace, String applicationId, Boolean includeDetails);
 
-    List<Job> getJobsByCustomerSpace(String customerSpace, Boolean includeDetails);
+    List<Job> getJobsByCustomerSpace(String customerSpace, Boolean includeDetails, boolean limitMaxRow);
 
-    List<Job> getJobsByCustomerSpaceFromCache(String customerSpace, Boolean includeDetails);
+    List<Job> getJobsByCustomerSpaceFromCache(String customerSpace, Boolean includeDetails, boolean limitMaxRow);
 
     List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
                                    Boolean includeDetails, Boolean hasParentId, Long parentJobId);

@@ -202,6 +202,16 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         assertEquals(jobs.size(), 1);
 
         MultiTenantContext.setTenant(tenant1);
+        jobs = workflowJobEntityMgr.findAll(1);
+        assertEquals(jobs.size(), 1);
+        WorkflowJob firstJob1 = jobs.get(0);
+        jobs = workflowJobEntityMgr.findAll(5);
+        assertEquals(jobs.size(), 3);
+        WorkflowJob firstJob2 = jobs.get(0);
+        assertEquals(firstJob1, firstJob2);
+        assertTrue(jobs.get(2).getPid() < jobs.get(1).getPid());
+        assertTrue(jobs.get(1).getPid() < firstJob2.getPid());
+
         jobs = workflowJobEntityMgr.findAll();
         assertEquals(jobs.size(), 3);
         List<String> applicationIds = jobs.stream().map(WorkflowJob::getApplicationId).collect(Collectors.toList());

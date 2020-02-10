@@ -85,10 +85,9 @@ public class JobCacheServiceImpl implements JobCacheService {
     private ExecutorService service = ThreadPoolUtils.getFixedSizeThreadPool("job-cache-service", NUM_THREADS);
 
     @Override
-    public List<Job> getByTenant(Tenant tenant, boolean includeDetails) {
+    public List<Job> getByTenant(Tenant tenant, boolean includeDetails, boolean limitMaxRow) {
         Preconditions.checkNotNull(tenant);
         Preconditions.checkNotNull(tenant.getPid());
-
         JobListCache jobListCache = jobIdListCacheWriter.get(tenant);
         boolean cacheValid = true;
         if (jobListCache == null) {
@@ -100,15 +99,13 @@ public class JobCacheServiceImpl implements JobCacheService {
             log.info("JobIdListCache expired for tenant (PID={})", tenant.getPid());
             cacheValid = false;
         }
-
         Tenant prevTenant = MultiTenantContext.getTenant();
         try {
             MultiTenantContext.setTenant(tenant);
             if (!cacheValid) {
                 jobListCache = new JobListCache();
                 // TODO optimize to only get workflowId & pid
-                List<Job> jobs = workflowJobEntityMgr.findAll()
-                        .stream()
+                List<Job> jobs = workflowJobEntityMgr.findAll().stream()
                         .map(workflowJob -> {
                             Job job = new Job();
                             job.setId(workflowJob.getWorkflowId());
@@ -122,6 +119,14 @@ public class JobCacheServiceImpl implements JobCacheService {
                 }
                 // refresh id list cache
                 service.execute(() -> jobIdListCacheWriter.set(tenant, jobs));
+            }
+            if (limitMaxRow) {
+                // cut job list
+                int workflowJobQuotaLimit = WorkflowJobUtils.getWorkflowJobQuotaLimit(MultiTenantContext.getCustomerSpace());
+                int jobSize = jobListCache.getJobs().size();
+                if (jobSize > workflowJobQuotaLimit) {
+                    jobListCache.setJobs(jobListCache.getJobs().subList(jobSize - workflowJobQuotaLimit, jobSize));
+                }
             }
             return getTenantJobsInCache(jobListCache, includeDetails);
         } finally {

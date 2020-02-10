@@ -31,8 +31,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -55,6 +57,8 @@ public final class WorkflowJobUtils {
     private static final String CUSTOMER_SPACE = "CustomerSpace";
     private static final String DEFAULT_ERROR_CATEGORY = "UNKNOWN";
     private static final Date MIGRATE_THRESHOLD = getMigrateThreshold();
+    private static final int DEFAULT_WORKFLOW_JOB_QUOTA_LIMIT = 1000;
+    private static final String WORKFLOW_JOB_QUOTA_LIMIT = "WorkflowJobQuotaLimit";
     private static ObjectMapper om = new ObjectMapper();
 
     private static Date getMigrateThreshold() {
@@ -285,11 +289,28 @@ public final class WorkflowJobUtils {
         try {
             Camille c = CamilleEnvironment.getCamille();
             String content = c.get(PathBuilder.buildErrorCategoryPath(CamilleEnvironment.getPodId())).getData();
-
             return om.readTree(content);
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Get json node from zk failed.");
             return null;
         }
     }
+
+    public static int getWorkflowJobQuotaLimit(CustomerSpace customerSpace) {
+        int dataQuotaLimit = DEFAULT_WORKFLOW_JOB_QUOTA_LIMIT;
+        try {
+            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace, PathConstants.PLS).append(WORKFLOW_JOB_QUOTA_LIMIT);
+            Camille camille = CamilleEnvironment.getCamille();
+            if (camille.exists(path)) {
+                String workflowJobQuotaLimit = camille.get(path).getData();
+                if (StringUtils.isNotEmpty(workflowJobQuotaLimit)) {
+                    dataQuotaLimit = Integer.valueOf(workflowJobQuotaLimit);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get count of workflow job quota limit from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return dataQuotaLimit;
+    }
+
 }
