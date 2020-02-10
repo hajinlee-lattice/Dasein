@@ -118,7 +118,7 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<AttrConfig> findAllHaveCustomDisplayNameByTenantId(String tenantId) {
-        List<AttrConfigEntity> attrConfigEntities = repository.findAllHaveCustomDisplayNameByTenantId(tenantId);
+        List<AttrConfigEntity> attrConfigEntities = readerRepository.findAllHaveCustomDisplayNameByTenantId(tenantId);
         return attrConfigEntities.stream() //
                 .map(AttrConfigEntity::getDocument) //
                 .collect(Collectors.toList());
