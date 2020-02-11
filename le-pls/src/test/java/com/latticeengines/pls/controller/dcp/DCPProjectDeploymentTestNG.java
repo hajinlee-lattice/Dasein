@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.pls.controller.dcp;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -20,21 +20,21 @@ import com.latticeengines.domain.exposed.dcp.DCPProject;
 import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 
-public class DCPDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class DCPProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final String BASE_URL_PREFIX = "/pls/dcp";
+    private static final String BASE_URL_PREFIX = "/pls/dcp/dcpproject";
     private static final String DISPLAY_NAME = "testProject";
     private static final String PROJECT_ID = "testProject";
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.DCP);
         MultiTenantContext.setTenant(mainTestTenant);
     }
 
     @Test(groups = "deployment")
     public void testCreateDCPProjectWithProjectId() throws Exception {
-        String url = String.format(BASE_URL_PREFIX + "/dcpproject?displayName=%s&projectId=%s&projectType=%s", DISPLAY_NAME, PROJECT_ID, DCPProject.ProjectType.Type1.name());
+        String url = String.format(BASE_URL_PREFIX + "?displayName=%s&projectId=%s&projectType=%s", DISPLAY_NAME, PROJECT_ID, DCPProject.ProjectType.Type1.name());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
         HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
@@ -43,13 +43,13 @@ public class DCPDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertNotNull(responseEntity);
         DCPProjectDetails responseBody = responseEntity.getBody();
         assertEquals(responseBody.getProjectId(), PROJECT_ID);
-        url = String.format(BASE_URL_PREFIX + "/dcpproject?projectId=%s", PROJECT_ID);
+        url = String.format(BASE_URL_PREFIX + "?projectId=%s", PROJECT_ID);
         restTemplate.delete(getRestAPIHostPort() + url);
     }
 
     @Test(groups = "deployment")
     public void testCreateDCPProjectWithOutProjectId() throws Exception {
-        String url = String.format(BASE_URL_PREFIX + "/dcpproject?displayName=%s&projectType=%s", DISPLAY_NAME, DCPProject.ProjectType.Type1.name());
+        String url = String.format(BASE_URL_PREFIX + "?displayName=%s&projectType=%s", DISPLAY_NAME, DCPProject.ProjectType.Type1.name());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
         HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
@@ -59,30 +59,30 @@ public class DCPDeploymentTestNG extends PlsDeploymentTestNGBase {
         DCPProjectDetails responseBody = responseEntity.getBody();
         assertEquals(responseBody.getProjectDisplayName(), DISPLAY_NAME);
 
-        url = String.format(BASE_URL_PREFIX + "/dcpproject?projectId=%s", responseBody.getProjectId());
+        url = String.format(BASE_URL_PREFIX + "?projectId=%s", responseBody.getProjectId());
         restTemplate.delete(getRestAPIHostPort() + url);
     }
 
     @Test(groups = "deployment")
     public void testGetAllDCPProject() throws Exception {
-        String url = String.format(BASE_URL_PREFIX + "/dcpproject?displayName=%s&projectType=%s", DISPLAY_NAME, DCPProject.ProjectType.Type1.name());
+        String url = String.format(BASE_URL_PREFIX + "?displayName=%s&projectType=%s", DISPLAY_NAME, DCPProject.ProjectType.Type1.name());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
         HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
         ResponseEntity<DCPProjectDetails> project1 = restTemplate.postForEntity(getRestAPIHostPort() + url, requestEntity, DCPProjectDetails.class);
 
-        url = String.format(BASE_URL_PREFIX + "/dcpproject?displayName=%s&projectType=%s", DISPLAY_NAME, DCPProject.ProjectType.Type1.name());
+        url = String.format(BASE_URL_PREFIX + "?displayName=%s&projectType=%s", DISPLAY_NAME, DCPProject.ProjectType.Type1.name());
         ResponseEntity<DCPProjectDetails> project2 = restTemplate.postForEntity(getRestAPIHostPort() + url, requestEntity, DCPProjectDetails.class);
 
-        url = BASE_URL_PREFIX + "/dcpproject/list";
+        url = BASE_URL_PREFIX + "/list";
         List<?> projectList = restTemplate.getForObject(getRestAPIHostPort() + url, List.class);
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         Assert.assertEquals(projectList.size(), 2);
 
-        url = String.format(BASE_URL_PREFIX + "/dcpproject?projectId=%s", project1.getBody().getProjectId());
+        url = String.format(BASE_URL_PREFIX + "?projectId=%s", project1.getBody().getProjectId());
         restTemplate.delete(getRestAPIHostPort() + url);
 
-        url = String.format(BASE_URL_PREFIX + "/dcpproject?projectId=%s", project2.getBody().getProjectId());
+        url = String.format(BASE_URL_PREFIX + "?projectId=%s", project2.getBody().getProjectId());
         restTemplate.delete(getRestAPIHostPort() + url);
     }
 }

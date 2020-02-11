@@ -5,7 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.dcp.DCPProject;
 import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
 
-public interface DCPService {
+public interface DCPProjectService {
 
     DCPProjectDetails createDCPProject(String customerSpace, String projectId, String displayName, DCPProject.ProjectType projectType, String user);
 

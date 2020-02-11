@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.pls.controller.dcp;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,7 @@ import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
-import com.latticeengines.pls.service.DCPService;
+import com.latticeengines.pls.service.DCPProjectService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
@@ -32,20 +33,21 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "dcp resource", description = "REST resource for dcp")
 @RestController
-@RequestMapping("/dcp")
-public class DCPResource {
+@RequestMapping("/dcp/dcpproject")
+public class ProjectResource {
 
-    private static final Logger log = LoggerFactory.getLogger(DCPResource.class);
+    private static final Logger log = LoggerFactory.getLogger(ProjectResource.class);
 
     @Inject
-    private DCPService dcpService;
+    private DCPProjectService dcpProjectService;
 
     @Inject
     private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
-    @PostMapping(value = "/dcpproject")
+    @PostMapping(value = "")
     @ResponseBody
     @ApiOperation("create new DCP project")
+    @PreAuthorize("hasRole('Edit_DCP_Projects')")
     public DCPProjectDetails createDCPProject(@RequestParam String displayName,
                                                   @RequestParam(required = false) String projectId,
                                                   @RequestParam DCPProject.ProjectType projectType) {
@@ -55,7 +57,7 @@ public class DCPResource {
         }
 
         try {
-            return dcpService.createDCPProject(customerSpace.toString(), projectId, displayName, projectType, MultiTenantContext.getEmailAddress());
+            return dcpProjectService.createDCPProject(customerSpace.toString(), projectId, displayName, projectType, MultiTenantContext.getEmailAddress());
         } catch (LedpException e) {
             log.error("Failed to create DCP project: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -64,9 +66,10 @@ public class DCPResource {
         }
     }
 
-    @GetMapping(value = "/dcpproject/list")
+    @GetMapping(value = "/list")
     @ResponseBody
     @ApiOperation("get all DCP project")
+    @PreAuthorize("hasRole('View_DCP_Projects')")
     List<DCPProject> getAllDCPProject() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
@@ -74,7 +77,7 @@ public class DCPResource {
         }
 
         try {
-            return dcpService.getAllDCPProject(customerSpace.toString());
+            return dcpProjectService.getAllDCPProject(customerSpace.toString());
         } catch (LedpException e) {
             log.error("Failed to get all DCP project: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -83,9 +86,10 @@ public class DCPResource {
         }
     }
 
-    @GetMapping(value = "/dcpproject")
+    @GetMapping(value = "")
     @ResponseBody
     @ApiOperation("get DCP project by projectId")
+    @PreAuthorize("hasRole('View_DCP_Projects')")
     DCPProjectDetails getDCPProjectByProjectId(@RequestParam String projectId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
@@ -93,7 +97,7 @@ public class DCPResource {
         }
 
         try {
-            return dcpService.getDCPProjectByProjectId(customerSpace.toString(), projectId);
+            return dcpProjectService.getDCPProjectByProjectId(customerSpace.toString(), projectId);
         } catch (LedpException e) {
             log.error("Failed to get DCP project by projectId: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -102,9 +106,10 @@ public class DCPResource {
         }
     }
 
-    @DeleteMapping(value = "/dcpproject")
+    @DeleteMapping(value = "")
     @ResponseBody
     @ApiOperation("delete DCP project by projectId")
+    @PreAuthorize("hasRole('Edit_DCP_Projects')")
     void deleteProject(@RequestParam String projectId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
@@ -112,7 +117,7 @@ public class DCPResource {
         }
 
         try {
-            dcpService.deleteProject(customerSpace.toString(), projectId);
+            dcpProjectService.deleteProject(customerSpace.toString(), projectId);
         } catch (LedpException e) {
             log.error("Failed to delete DCP project by projectId: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,

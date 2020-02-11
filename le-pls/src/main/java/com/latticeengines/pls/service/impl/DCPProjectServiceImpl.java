@@ -10,36 +10,36 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dcp.DCPProject;
 import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
-import com.latticeengines.pls.service.DCPService;
-import com.latticeengines.proxy.exposed.cdl.DCPProxy;
+import com.latticeengines.pls.service.DCPProjectService;
+import com.latticeengines.proxy.exposed.cdl.DCPProjectProxy;
 
 
 @Component("dcpService")
-public class DCPServiceImpl implements DCPService {
+public class DCPProjectServiceImpl implements DCPProjectService {
 
-    private static final Logger log = LoggerFactory.getLogger(DCPServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(DCPProjectServiceImpl.class);
 
     @Inject
-    private DCPProxy dcpProxy;
+    private DCPProjectProxy dcpProjectProxy;
 
     @Override
     public DCPProjectDetails createDCPProject(String customerSpace, String projectId, String displayName, DCPProject.ProjectType projectType, String user) {
-        return dcpProxy.createDCPProject(customerSpace, projectId, displayName, projectType, user);
+        return dcpProjectProxy.createDCPProject(customerSpace, projectId, displayName, projectType, user);
     }
 
     @Override
     public List<DCPProject> getAllDCPProject(String customerSpace) {
-        return dcpProxy.getAllDCPProject(customerSpace);
+        return dcpProjectProxy.getAllDCPProject(customerSpace);
     }
 
     @Override
     public DCPProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
-        return dcpProxy.getDCPProjectByProjectId(customerSpace, projectId);
+        return dcpProjectProxy.getDCPProjectByProjectId(customerSpace, projectId);
     }
 
     @Override
     public void deleteProject(String customerSpace, String projectId) {
-        dcpProxy.deleteProject(customerSpace, projectId);
+        dcpProjectProxy.deleteProject(customerSpace, projectId);
     }
 
 

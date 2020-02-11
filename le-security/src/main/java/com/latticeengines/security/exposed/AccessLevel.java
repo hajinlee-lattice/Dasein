@@ -38,7 +38,10 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
-            GrantedRight.VIEW_S3_CREDENTIAL //
+            GrantedRight.VIEW_S3_CREDENTIAL, //
+            GrantedRight.VIEW_DCP_PROJECTS, //
+            GrantedRight.EDIT_DCP_PROJECTS //
+
     ) //
     ), //
     EXTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -77,7 +80,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.EDIT_PLS_SSO_CONFIG, //
-            GrantedRight.VIEW_PLS_SSO_CONFIG //
+            GrantedRight.VIEW_PLS_SSO_CONFIG, //
+            GrantedRight.VIEW_DCP_PROJECTS, //
+            GrantedRight.EDIT_DCP_PROJECTS //
     ) //
     ), //
     INTERNAL_USER(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -109,7 +114,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.EDIT_PLS_RATING_ENGINES, //
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
-            GrantedRight.VIEW_PLS_SPEC //
+            GrantedRight.VIEW_PLS_SPEC, //
+            GrantedRight.VIEW_DCP_PROJECTS, //
+            GrantedRight.EDIT_DCP_PROJECTS //
     ) //
     ), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -152,7 +159,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_SSO_CONFIG, //
             GrantedRight.VIEW_PLS_SSO_CONFIG, //
-            GrantedRight.VIEW_PLS_SPEC //
+            GrantedRight.VIEW_PLS_SPEC, //
+            GrantedRight.VIEW_DCP_PROJECTS, //
+            GrantedRight.EDIT_DCP_PROJECTS //
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
             GrantedRight.EDIT_PLS_REPORTS, //
@@ -196,7 +205,9 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_SSO_CONFIG, //
             GrantedRight.VIEW_PLS_SSO_CONFIG, //
-            GrantedRight.VIEW_PLS_SPEC //
+            GrantedRight.VIEW_PLS_SPEC, //
+            GrantedRight.VIEW_DCP_PROJECTS, //
+            GrantedRight.EDIT_DCP_PROJECTS //
     )); //
 
     private List<GrantedRight> grantedRights;
