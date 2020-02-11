@@ -36,13 +36,13 @@ public interface ServingStoreService {
     // ========== END: Get Metadata From Cache ==========
 
     // ========== BEGIN: Modeling Attributes ==========
-    Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity,
-            DataCollection.Version version, Boolean allCustomerAttrs);
+    Flux<ColumnMetadata> getAttrsCanBeEnabledForModeling(String customerSpace, BusinessEntity entity,
+                                                         DataCollection.Version version, Boolean allCustomerAttrs);
 
     Flux<ColumnMetadata> getSystemMetadataAttrFlux(String customerSpace, BusinessEntity entity,
             DataCollection.Version version);
 
-    Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity,
-            DataCollection.Version version);
+    Flux<ColumnMetadata> getAttrsEnabledForModeling(String customerSpace, BusinessEntity entity,
+                                                    DataCollection.Version version);
     // ========== END: Modeling Attributes ==========
 }

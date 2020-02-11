@@ -161,7 +161,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public Flux<ColumnMetadata> getAllowedModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version, Boolean allCustomerAttrs) {
+    public Flux<ColumnMetadata> getAttrsCanBeEnabledForModeling(String customerSpace, BusinessEntity entity, DataCollection.Version version, Boolean allCustomerAttrs) {
         if (!BusinessEntity.MODELING_ENTITIES.contains(entity)) {
             throw new UnsupportedOperationException(String.format("%s is not supported for modeling.", entity));
         }
@@ -249,7 +249,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public Flux<ColumnMetadata> getNewModelingAttrs(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
+    public Flux<ColumnMetadata> getAttrsEnabledForModeling(String customerSpace, BusinessEntity entity, DataCollection.Version version) {
         Flux<ColumnMetadata> flux = getDecoratedMetadata(customerSpace, entity, version,
                 Collections.singletonList(ColumnSelection.Predefined.Model));
         flux = flux.map(cm -> {

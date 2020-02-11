@@ -66,7 +66,7 @@ public class ServingStoreResource {
         if (!BusinessEntity.MODELING_ENTITIES.contains(entity)) {
             throw new UnsupportedOperationException(String.format("%s is not supported for modeling.", entity));
         }
-        return servingStoreService.getNewModelingAttrs(customerSpace, entity, version);
+        return servingStoreService.getAttrsEnabledForModeling(customerSpace, entity, version);
     }
 
     @GetMapping(value = "/allow-modeling")
@@ -78,7 +78,7 @@ public class ServingStoreResource {
             @RequestParam(name = "version", required = false) DataCollection.Version version, //
             @RequestParam(name = "all-customer-attrs", required = false) Boolean allCustomerAttrs) {
         log.info(String.format("Get allow modeling attributes for %s with entity %s", customerSpace, entity));
-        return servingStoreService.getAllowedModelingAttrs(customerSpace, entity, version,
+        return servingStoreService.getAttrsCanBeEnabledForModeling(customerSpace, entity, version,
                 allCustomerAttrs);
     }
 

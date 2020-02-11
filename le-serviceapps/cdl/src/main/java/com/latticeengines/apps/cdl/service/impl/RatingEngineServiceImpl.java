@@ -662,7 +662,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (aiModel.getIteration() == 1) {
                 Set<Category> selectedCategories = CustomEventModelingDataStoreUtil
                         .getCategoriesByDataStores(dataStores);
-                Flux<ColumnMetadata> flux = servingStoreService.getNewModelingAttrs(customerSpace,
+                Flux<ColumnMetadata> flux = servingStoreService.getAttrsEnabledForModeling(customerSpace,
                         BusinessEntity.Account, null);
                 List<ColumnMetadata> userSelectedAttributesForModeling = flux
                         .filter(cm -> selectedCategories.contains(cm.getCategory())).collectList().block();

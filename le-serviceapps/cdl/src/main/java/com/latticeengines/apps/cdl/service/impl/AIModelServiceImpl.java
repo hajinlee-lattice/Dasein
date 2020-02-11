@@ -364,7 +364,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         splitter.start();
         Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy
                 .getMetadata(MetadataStoreName.Table, CustomerSpace.shortenCustomerSpace(customerSpace),
-                        table.getName())
+                        table.getName()) //
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey).block();
         log.info(
@@ -375,12 +375,12 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         stopWatch.resume();
         splitter.start();
-        Map<String, ColumnMetadata> modelingAttributes = servingStoreService
-                .getAllowedModelingAttrs(customerSpace, BusinessEntity.Account,
-                        dataCollectionService.getActiveVersion(customerSpace), false)
-                .concatWith(
-                        servingStoreService.getAllowedModelingAttrs(customerSpace, BusinessEntity.AnalyticPurchaseState,
-                                dataCollectionService.getActiveVersion(customerSpace), false))
+        List<ColumnMetadata> acctAttrs = servingStoreService.getAttrsEnabledForModeling(customerSpace,
+                BusinessEntity.Account, dataCollectionService.getActiveVersion(customerSpace)).collectList().block();
+
+        Map<String, ColumnMetadata> modelingAttributes = Flux.fromIterable(acctAttrs)
+                .concatWith(servingStoreService.getAttrsEnabledForModeling(customerSpace,
+                        BusinessEntity.AnalyticPurchaseState, dataCollectionService.getActiveVersion(customerSpace)))
                 .filter(cm -> selectedCategories.contains(cm.getCategory()))
                 .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
                 .collectMap(this::getKey, cm -> {
