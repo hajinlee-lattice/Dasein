@@ -107,7 +107,6 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
             if (CollectionUtils.isNotEmpty(registeredTableNames)) {
                 String customerSpace = workflowJob.getTenant().getId();
                 try {
-                    System.out.println("ddddd" + customerSpace + "sssdfsadf" + registeredTableNames.stream().collect(Collectors.toList()));
                     metadataProxy.keepTablesForever(customerSpace, registeredTableNames.stream().collect(Collectors.toList()));
                 } catch (Exception e) {
                     log.error(String.format("Failed to update table retention policy when workflow %d finished.", workflowJob.getPid()), e);
