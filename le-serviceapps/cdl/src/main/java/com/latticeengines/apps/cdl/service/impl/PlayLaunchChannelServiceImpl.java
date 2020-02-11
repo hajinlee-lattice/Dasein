@@ -125,7 +125,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         if (play == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playId });
         }
-        PlayLaunchChannel channel = findById(channelId);
+        PlayLaunchChannel channel = findById(channelId, true);
         if (channel == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Channel found with id: " + channelId });
         }
@@ -163,7 +163,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Play found with id: " + playId });
         }
 
-        PlayLaunchChannel channel = findById(channelId);
+        PlayLaunchChannel channel = findById(channelId, true);
         if (channel == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No Channel found with id: " + channelId });
         }
