@@ -23,7 +23,7 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     val templates = config.getTemplates
     hasSystem = config.isHasSystem
     var processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
-        config.getRenameSrcFields, config.getCloneSrcFields) }
+        config.getRenameSrcFields, config.getCloneSrcFields, hasSystem) }
     println("----- BEGIN SCRIPT OUTPUT -----")
     println(s"templates is: $templates")
     println("----- END SCRIPT OUTPUT -----")
@@ -84,7 +84,7 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
   }
 
   private def processSrc(src: DataFrame, srcId: String, joinKey: String, deduplicate: Boolean,
-      renameFlds: Array[Array[String]], cloneFlds: Array[Array[String]]): DataFrame = {
+      renameFlds: Array[Array[String]], cloneFlds: Array[Array[String]], hasSystem: Boolean): DataFrame = {
     var fldUpd =  cloneSrcFlds(src, cloneFlds)
     fldUpd = renameSrcFlds(fldUpd, renameFlds)
 
@@ -99,10 +99,14 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
         fldUpd
       }
 
+    var joinKeys = Seq(joinKey)
+    if (hasSystem) {
+      joinKeys = joinKeys :+ templateColumn
+    }
     val dedup =
       if (deduplicate) {
         val mergeInGrp = new MergeInGroup(renamed.schema, false)
-        renamed.groupBy(joinKey).
+        renamed.groupBy(joinKeys map col: _*).
           agg(mergeInGrp(renamed.columns map col: _*).as("ColumnStruct")).
           select(col("ColumnStruct.*"))
       } else {
