@@ -244,10 +244,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public List<Job> getJobsByCustomerSpace(String customerSpace, Boolean includeDetails, boolean limitMaxRow) {
         List<WorkflowJob> workflowJobs;
         if (limitMaxRow) {
-            workflowJobs = workflowJobEntityMgr.findAll();
-        } else {
             int workflowJobQuotaLimit = WorkflowJobUtils.getWorkflowJobQuotaLimit(MultiTenantContext.getCustomerSpace());
             workflowJobs = workflowJobEntityMgr.findAll(workflowJobQuotaLimit);
+        } else {
+            workflowJobs = workflowJobEntityMgr.findAll();
         }
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkExecutionId(workflowJobs);
@@ -342,7 +342,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
         List<WorkflowJob> workflowJobs;
 
-        if (hasParentId != null && hasParentId) {
+        if (BooleanUtils.isTrue(hasParentId)) {
             workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(
                     optionalWorkflowPids.orElse(null), optionalTypes.orElse(null), parentJobId);
         } else {
@@ -727,7 +727,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (workflowJob != null) {
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.deleteByWorkflowPid(workflowJob.getPid());
             if (jobUpdate == null) {
-                log.warn("Workfl    owJobUpdate is missing for workflowJob pid=" + workflowJob.getPid());
+                log.warn("WorkflowJobUpdate is missing for workflowJob pid=" + workflowJob.getPid());
             }
 
             jobCacheService.evict(MultiTenantContext.getTenant());
