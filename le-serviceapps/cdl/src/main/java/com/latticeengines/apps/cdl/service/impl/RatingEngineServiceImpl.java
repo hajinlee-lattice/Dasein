@@ -726,13 +726,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             crossSellModelingParameters.setAiModelId(aiModel.getId());
             crossSellModelingParameters.setTargetFilterQuery(
                     getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET, activeVersion));
-            crossSellModelingParameters.setTargetFilterTableName(aiModel.getId() + "_target");
             crossSellModelingParameters.setTrainFilterQuery(
                     getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING, activeVersion));
-            crossSellModelingParameters.setTrainFilterTableName(aiModel.getId() + "_train");
             crossSellModelingParameters.setEventFilterQuery(
                     getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT, activeVersion));
-            crossSellModelingParameters.setEventFilterTableName(aiModel.getId() + "_event");
             crossSellModelingParameters.setUserRefinedAttributes(userRefinedAttributes);
             crossSellModelingParameters.setModelIteration(aiModel.getIteration());
             crossSellModelingParameters.setDataCloudVersion(aiModel.getAdvancedModelingConfig().getDataCloudVersion());

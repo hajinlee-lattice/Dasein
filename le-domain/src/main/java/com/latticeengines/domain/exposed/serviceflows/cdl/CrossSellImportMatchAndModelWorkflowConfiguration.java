@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
@@ -60,7 +59,6 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
         private MergeUserRefinedAttributesConfiguration mergeUserRefinedAttributes = new MergeUserRefinedAttributesConfiguration();
 
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
-        private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
 
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
@@ -72,11 +70,9 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
         public Builder microServiceHostPort(String microServiceHostPort) {
             cdlModelWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
-            cdlEventTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             exportScoreTrainingFile.setMicroServiceHostPort(microServiceHostPort);
             exportBucketTool.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
-            cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             mergeUserRefinedAttributes.setMicroServiceHostPort(microServiceHostPort);
             generateAIRating.microServiceHostPort(microServiceHostPort);
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
@@ -94,7 +90,6 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             exportScoreTrainingFile.setCustomerSpace(customerSpace);
             exportBucketTool.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
-            cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
             mergeUserRefinedAttributes.setCustomerSpace(customerSpace);
             generateAIRating.customer(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
@@ -112,7 +107,6 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             cdlEventTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
-            cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             generateAIRating.internalResourceHostPort(internalResourceHostPort);
@@ -121,19 +115,10 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             return this;
         }
 
-        public Builder filterTableNames(String trainFilterTableName, String eventFilterTableName,
-                String targetFilterTableName) {
-            cdlEventTableTupleFilter.setTrainFilterTableName(trainFilterTableName);
-            cdlEventTableTupleFilter.setEventFilterTableName(eventFilterTableName);
-            cdlTargetTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
-            return this;
-        }
-
         public Builder filterQueries(EventFrontEndQuery trainQuery, EventFrontEndQuery eventQuery,
                 EventFrontEndQuery targetQuery) {
             cdlEventTableTupleFilter.setTrainQuery(trainQuery);
             cdlEventTableTupleFilter.setEventQuery(eventQuery);
-            cdlTargetTableTupleFilter.setTargetQuery(targetQuery);
             return this;
         }
 
@@ -334,6 +319,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             generateAIRating.dataCollectionVersion(version);
             useConfiguredModelingAttributesBuilder.dataCollectionVersion(version);
             modelImportExportToS3.setVersion(version);
+            cdlEventTableTupleFilter.setDataCollectionVersion(version);
             return this;
         }
 
@@ -349,6 +335,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
         }
 
         public Builder apsRollupPeriod(String apsRollupPeriod) {
+            cdlEventTableTupleFilter.setApsRollupPeriod(apsRollupPeriod);
             generateAIRating.apsRollupPeriod(apsRollupPeriod);
             return this;
         }
@@ -444,7 +431,6 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             configuration.add(setConfigForScoring);
             configuration.add(exportBucketTool);
             configuration.add(exportScoreTrainingFile);
-            configuration.add(cdlTargetTableTupleFilter);
             configuration.add(generateAIRating.build());
             configuration.add(mergeUserRefinedAttributes);
             configuration.add(modelImportExportToS3);

@@ -248,6 +248,10 @@ public class CreateCdlEventTableStep
             putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, eventTable.getName());
         }
         addToListInContext(TEMPORARY_CDL_TABLES, eventTable.getName(), String.class);
+        Table filterTable = getObjectFromContext(FILTER_EVENT_TABLE, Table.class);
+        if (filterTable != null) {
+            metadataProxy.deleteTable(customerSpace.toString(), filterTable.getName());
+        }
     }
 
     private void overlayMetadata(Table targetTable) {

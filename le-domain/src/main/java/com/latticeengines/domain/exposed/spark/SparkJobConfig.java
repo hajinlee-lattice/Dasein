@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CountOrphanTransactionsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
+import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DailyStoreToPeriodStoresJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobConfig;
@@ -77,6 +78,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = ScoreAggregateJobConfig.class, name = ScoreAggregateJobConfig.NAME), //
         @JsonSubTypes.Type(value = CombineInputTableWithScoreJobConfig.class, name = CombineInputTableWithScoreJobConfig.NAME), //
         @JsonSubTypes.Type(value = CreateCdlEventTableJobConfig.class, name = CreateCdlEventTableJobConfig.NAME), //
+        @JsonSubTypes.Type(value = CreateEventTableFilterJobConfig.class, name = CreateEventTableFilterJobConfig.NAME), //
         @JsonSubTypes.Type(value = MergeSystemBatchConfig.class, name = MergeSystemBatchConfig.NAME), //
         @JsonSubTypes.Type(value = PivotScoreAndEventJobConfig.class, name = PivotScoreAndEventJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountAvroGlobsConfig.class, name = CountAvroGlobsConfig.NAME), //

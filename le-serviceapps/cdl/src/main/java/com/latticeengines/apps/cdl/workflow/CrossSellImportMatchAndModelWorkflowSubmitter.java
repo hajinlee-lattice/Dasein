@@ -112,8 +112,6 @@ public class CrossSellImportMatchAndModelWorkflowSubmitter extends AbstractModel
         CrossSellImportMatchAndModelWorkflowConfiguration.Builder builder = new CrossSellImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
-                .filterTableNames(parameters.getTrainFilterTableName(), parameters.getEventFilterTableName(),
-                        parameters.getTargetFilterTableName()) //
                 .filterQueries(parameters.getTrainFilterQuery(), parameters.getEventFilterQuery(),
                         parameters.getTargetFilterQuery()) //
                 .internalResourceHostPort(internalResourceHostPort) //

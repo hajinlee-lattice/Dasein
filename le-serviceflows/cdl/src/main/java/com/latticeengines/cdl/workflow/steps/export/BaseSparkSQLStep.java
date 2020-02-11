@@ -148,12 +148,12 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         });
     }
 
-    protected HdfsDataUnit getEventScoringTarget(EventFrontEndQuery frontEndQuery) {
+    protected HdfsDataUnit getEventQueryData(EventFrontEndQuery frontEndQuery, EventType eventType) {
         setCustomerSpace();
         frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
         frontEndQuery.setPageFilter(null);
         DataCollection.Version version = parseDataCollectionVersion(configuration);
-        String sql = eventQueryService.getQueryStr(frontEndQuery, EventType.Scoring, version);
+        String sql = eventQueryService.getQueryStr(frontEndQuery, eventType, version);
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
