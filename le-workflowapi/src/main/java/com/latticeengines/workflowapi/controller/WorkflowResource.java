@@ -161,29 +161,29 @@ public class WorkflowResource {
     @GetMapping(value = "/jobs", headers = "Accept=application/json")
     @ApiOperation(value = "Get list of workflow jobs by given list of job Ids or job types.")
     public List<Job> getJobs(@RequestParam(value = "jobId", required = false) List<String> jobIds,
-            @RequestParam(value = "type", required = false) List<String> types,
-            @RequestParam(value = "status", required = false) List<String> statuses,
-            @RequestParam(value = "includeDetails", required = false) Boolean includeDetails,
-            @RequestParam(required = false) String customerSpace) {
+                             @RequestParam(value = "type", required = false) List<String> types,
+                             @RequestParam(value = "status", required = false) List<String> statuses,
+                             @RequestParam(value = "includeDetails", required = false) Boolean includeDetails,
+                             @RequestParam(value = "limitMaxRow", required = false) Boolean limitMaxRow,
+                             @RequestParam(required = false) String customerSpace) {
         Optional<List<String>> optionalJobIds = Optional.ofNullable(jobIds);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
         Optional<List<String>> optionalStatuses = Optional.ofNullable(statuses);
         Optional<Boolean> optionalIncludeDetails = Optional.ofNullable(includeDetails);
-
+        Optional<Boolean> optionalLimitMaxRow = Optional.ofNullable(limitMaxRow);
         List<Long> workflowIds = null;
         if (optionalJobIds.isPresent() && !jobIds.isEmpty()) {
             workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
         }
         if (CollectionUtils.isNotEmpty(workflowIds) && !optionalTypes.isPresent() && !optionalStatuses.isPresent()) {
             // from cache
-            return workflowJobService.getJobsByWorkflowIdsFromCache(customerSpace, workflowIds,
-                    optionalIncludeDetails.orElse(true));
+            return workflowJobService.getJobsByWorkflowIdsFromCache(customerSpace, workflowIds, optionalIncludeDetails.orElse(true));
         } else if (optionalTypes.isPresent() || optionalStatuses.isPresent()) {
             return workflowJobService.getJobsByWorkflowIds(customerSpace, workflowIds, optionalTypes.orElse(null),
                     optionalStatuses.orElse(null), optionalIncludeDetails.orElse(true), false, -1L);
         } else {
             return workflowJobService.getJobsByCustomerSpaceFromCache(customerSpace,
-                    optionalIncludeDetails.orElse(true));
+                    optionalIncludeDetails.orElse(true), optionalLimitMaxRow.orElse(false));
         }
     }
 
@@ -201,7 +201,6 @@ public class WorkflowResource {
         Optional<List<String>> optionalJobIds = Optional.ofNullable(request.getJobIds());
         Optional<List<String>> optionalTypes = Optional.ofNullable(request.getTypes());
         Optional<Boolean> optionalIncludeDetails = Optional.ofNullable(request.getIncludeDetails());
-
         if (optionalJobIds.isPresent()) {
             List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
             return workflowJobService.getJobsByWorkflowPids(request.getCustomerSpace(), workflowIds,
@@ -210,8 +209,8 @@ public class WorkflowResource {
             return workflowJobService.getJobsByWorkflowPids(request.getCustomerSpace(), null, optionalTypes.get(),
                     optionalIncludeDetails.orElse(true), false, -1L);
         } else {
-            return workflowJobService.getJobsByCustomerSpace(request.getCustomerSpace(),
-                    optionalIncludeDetails.orElse(true));
+            return workflowJobService.getJobsByCustomerSpaceFromCache(request.getCustomerSpace(),
+                    optionalIncludeDetails.orElse(true), false);
         }
     }
 

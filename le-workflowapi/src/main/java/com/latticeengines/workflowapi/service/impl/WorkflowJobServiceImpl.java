@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -240,8 +241,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
-    public List<Job> getJobsByCustomerSpace(String customerSpace, Boolean includeDetails) {
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
+    public List<Job> getJobsByCustomerSpace(String customerSpace, Boolean includeDetails, boolean limitMaxRow) {
+        List<WorkflowJob> workflowJobs;
+        if (limitMaxRow) {
+            int workflowJobQuotaLimit = WorkflowJobUtils.getWorkflowJobQuotaLimit(MultiTenantContext.getCustomerSpace());
+            workflowJobs = workflowJobEntityMgr.findAll(workflowJobQuotaLimit);
+        } else {
+            workflowJobs = workflowJobEntityMgr.findAll();
+        }
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkExecutionId(workflowJobs);
         workflowJobs = checkLastUpdateTime(workflowJobs);
@@ -253,12 +260,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
-    public List<Job> getJobsByCustomerSpaceFromCache(String customerSpace, Boolean includeDetails) {
+    public List<Job> getJobsByCustomerSpaceFromCache(String customerSpace, Boolean includeDetails, boolean limitMaxRow) {
         if (disableCache) {
-            return getJobsByCustomerSpace(customerSpace, includeDetails);
+            return getJobsByCustomerSpace(customerSpace, includeDetails, limitMaxRow);
         }
         try {
-            List<Job> jobs = jobCacheService.getByTenant(MultiTenantContext.getTenant(), includeDetails);
+            List<Job> jobs = jobCacheService.getByTenant(MultiTenantContext.getTenant(), includeDetails, limitMaxRow);
             checkExecutionId(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
             checkLastUpdateTime(jobs.stream().map(this::toWorkflowJob).collect(Collectors.toList()));
             jobs.forEach(this::removeTenantInfo);
@@ -267,7 +274,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             log.error(String.format("Failed to retrieve jobs from cache for customer space %s, fallback to database",
                     customerSpace), e);
             // fallback
-            return getJobsByCustomerSpace(customerSpace, includeDetails);
+            return getJobsByCustomerSpace(customerSpace, includeDetails, limitMaxRow);
         }
     }
 
@@ -290,7 +297,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
         List<WorkflowJob> workflowJobs;
 
-        if (hasParentId != null && hasParentId) {
+        if (BooleanUtils.isTrue(hasParentId)) {
             workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(optionalWorkflowIds.orElse(null),
                     optionalTypes.orElse(null), parentJobId);
         } else {
@@ -335,7 +342,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
         List<WorkflowJob> workflowJobs;
 
-        if (hasParentId != null && hasParentId) {
+        if (BooleanUtils.isTrue(hasParentId)) {
             workflowJobs = workflowJobEntityMgr.findByWorkflowPidsOrTypesOrParentJobId(
                     optionalWorkflowPids.orElse(null), optionalTypes.orElse(null), parentJobId);
         } else {

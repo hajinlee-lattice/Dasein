@@ -274,15 +274,13 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(post("getJobsByPid", url, request, List.class), Job.class);
     }
 
-    public List<Job> getWorkflowExecutionsForTenant(Tenant tenant, String... params) {
+    public List<Job> getWorkflowExecutionsForTenant(Tenant tenant, boolean limitMaxRow) {
         String customerSpace = shortenCustomerSpace(CustomerSpace.parse(tenant.getId()).toString());
         checkCustomerSpace(customerSpace);
         String baseUrl = "/jobs";
         StringBuilder urlBuilder = new StringBuilder(baseUrl);
         urlBuilder.append("?customerSpace=").append(customerSpace);
-        if (params != null && params.length > 0) {
-            urlBuilder.append("&type=").append(params[0]);
-        }
+        urlBuilder.append("&limitMaxRow=").append(limitMaxRow);
         String url = constructUrl(urlBuilder.toString());
         return JsonUtils.convertList(get("getWorkflowExecutionsForTenant", url, List.class), Job.class);
     }

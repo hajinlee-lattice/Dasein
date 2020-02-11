@@ -15,9 +15,10 @@ public interface JobCacheService {
      *
      * @param tenant target tenant, should not be {@literal null} and has non-null {@link Tenant#getPid()}
      * @param includeDetails flag to include job details in the returned object
+     * @param limitMaxRow flag to limit job result size
      * @return list of transformed {@link Job} (no {@literal null} in the list)
      */
-    List<Job> getByTenant(@NotNull Tenant tenant, boolean includeDetails);
+    List<Job> getByTenant(@NotNull Tenant tenant, boolean includeDetails, boolean limitMaxRow);
 
     /**
      * Try to retrieve {@link WorkflowJob} with specified workflow ID from cache first. If the cache entry does not

@@ -102,7 +102,7 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
                     }
                 }
             }
-
+            // TODO: we need to remove importAndRTSBulkScoreWorkflow jobs when model cleanup, correct?
             modelSummaryService.deleteByModelId(modelId);
             log.info(String.format("Cleanup modelSummary succeed. modelId: %s", modelId));
         }

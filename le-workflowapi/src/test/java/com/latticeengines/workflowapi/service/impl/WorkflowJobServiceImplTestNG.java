@@ -423,7 +423,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         mockWorkflowService();
         setupLEJobExecutionRetriever();
 
-        List<Job> jobs = workflowJobService.getJobsByCustomerSpace(WFAPITEST_CUSTOMERSPACE.toString(), false);
+        List<Job> jobs = workflowJobService.getJobsByCustomerSpace(WFAPITEST_CUSTOMERSPACE.toString(), false, false);
         Assert.assertEquals(jobs.size(), 6);
         List<String> applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
         Assert.assertTrue(applicationIds.contains("application_1549391605495_10000"));
@@ -432,7 +432,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertTrue(applicationIds.contains("application_1549391605495_10003"));
         Assert.assertTrue(applicationIds.contains("application_1549391605495_20000"));
 
-        jobs = workflowJobService.getJobsByCustomerSpace(customerSpace3.toString(), false);
+        jobs = workflowJobService.getJobsByCustomerSpace(customerSpace3.toString(), false, false);
         Assert.assertEquals(jobs.size(), 2);
         applicationIds = jobs.stream().map(Job::getApplicationId).collect(Collectors.toList());
         Assert.assertTrue(applicationIds.contains("application_1549391605495_30000"));
@@ -742,7 +742,7 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     @Test(groups = "functional", dependsOnMethods = "testGetJobStatus")
     public void testWorkflowJobNoWorkflowId() {
         try {
-            List<Job> jobs = workflowJobService.getJobsByCustomerSpace(WFAPITEST_CUSTOMERSPACE.toString(), false);
+            List<Job> jobs = workflowJobService.getJobsByCustomerSpace(WFAPITEST_CUSTOMERSPACE.toString(), false, false);
             Assert.assertEquals(jobs.size(), 6);
         } catch (Exception exc) {
             Assert.fail("Shoud not throw exception.");

@@ -189,9 +189,9 @@ public class CDLJobServiceImpl implements CDLJobService {
         initTrackingSets();
     }
 
-    private List<String> types = Collections.singletonList("processAnalyzeWorkflow");
-    private List<String> exportTypes = Collections.singletonList("entityExportWorkflow");
-    private List<String> jobStatuses = Collections.singletonList(JobStatus.RUNNING.getName());
+    private static final List<String> types = Collections.singletonList("processAnalyzeWorkflow");
+    private static final List<String> exportTypes = Collections.singletonList("entityExportWorkflow");
+    private static final List<String> jobStatuses = Collections.singletonList(JobStatus.RUNNING.getName());
 
     @PostConstruct
     public void initialize() {

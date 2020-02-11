@@ -78,4 +78,6 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
     void deleteByTenantPid(Long tenantPid);
 
     void updateInput(WorkflowJob workflowJob);
+
+    List<WorkflowJob> findAll(int workflowJobQuotaLimit);
 }

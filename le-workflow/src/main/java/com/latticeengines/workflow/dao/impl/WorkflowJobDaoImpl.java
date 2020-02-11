@@ -445,4 +445,16 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }
+
+    @Override
+    public List<WorkflowJob> findAll(int workflowJobQuotaLimit) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("from %s order by PID desc", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setFirstResult(0);
+        query.setMaxResults(workflowJobQuotaLimit);
+        List list = query.list();
+        return list;
+    }
 }

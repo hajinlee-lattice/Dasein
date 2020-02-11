@@ -130,7 +130,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<Job> findAllWithType(String type) {
-        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(MultiTenantContext.getTenant(), type);
+        List<Job> jobs = workflowProxy.getJobs(null, Arrays.asList(type), null, MultiTenantContext.getShortTenantId());
         if (jobs == null) {
             jobs = Collections.emptyList();
         }
@@ -241,7 +241,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public List<Job> findAll(Boolean filterNonUiJobs, Boolean generateEmptyPAJob) {
-        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(MultiTenantContext.getTenant());
+        List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(MultiTenantContext.getTenant(), true);
         if (jobs == null) {
             return Collections.emptyList();
         }
@@ -719,7 +719,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             });
         }
         Map<String, Job> jobMap = getJobMap(actionIdMap);
-
 
         for (Job job : jobs) {
             updateStepDisplayNameAndNumSteps(job);

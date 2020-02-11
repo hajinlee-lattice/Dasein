@@ -150,7 +150,7 @@ public class AccountMasterModelRunResourceByLocationDeploymentTestNG extends Bas
      */
     private String getLogLinkForLastJob() {
         try {
-            List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(mainTestTenant);
+            List<Job> jobs = workflowProxy.getWorkflowExecutionsForTenant(mainTestTenant, false);
             Optional<Job> lastJob = jobs.stream() //
                     .filter(Objects::nonNull) //
                     .filter(job -> job.getPid() != null) //
