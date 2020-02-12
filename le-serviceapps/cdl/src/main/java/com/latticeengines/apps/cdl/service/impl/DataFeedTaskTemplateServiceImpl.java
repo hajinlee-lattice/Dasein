@@ -347,11 +347,14 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     @Override
     public boolean createDefaultOpportunityTemplate(String customerSpace, String systemName) {
+        log.info("setup opportunity data for tenant {}, systemName {}.", customerSpace, systemName);
         DataFeedTask opportunityDataFeedTask = createOpportunityTemplate(customerSpace, systemName,
                 EntityType.Opportunity,
                 null);
+        log.info("opportunity dataFeedTask unique id is {}.", opportunityDataFeedTask.getUniqueId());
         DataFeedTask stageDataFeedTask = createOpportunityTemplate(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
+        log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
         String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         AtlasStream opportunityAtlasStream =
