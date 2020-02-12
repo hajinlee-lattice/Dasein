@@ -176,18 +176,20 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
     }
 
     TransformationStepConfig softDelete(int mergeSoftDeleteStep) {
-        return softDelete(mergeSoftDeleteStep, masterTable, null);
+        return softDelete(mergeSoftDeleteStep, masterTable, null, batchStoreTablePrefix);
     }
 
     TransformationStepConfig softDeleteSystemBatchStore(int mergeSoftDeleteStep) {
-        return softDelete(mergeSoftDeleteStep, systemMasterTable, InterfaceName.EntityId.name());
+        return softDelete(mergeSoftDeleteStep, systemMasterTable, InterfaceName.EntityId.name(),
+                systemBatchStoreTablePrefix);
     }
 
-    private TransformationStepConfig softDelete(int mergeSoftDeleteStep, Table masterTable, String sourceIdColumn) {
+    private TransformationStepConfig softDelete(int mergeSoftDeleteStep, Table masterTable, String sourceIdColumn,
+            String tgtTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
-        setTargetTable(step, batchStoreTablePrefix);
+        setTargetTable(step, tgtTablePrefix);
         if (masterTable != null) {
             log.info("Add masterTable=" + masterTable.getName());
             addBaseTables(step, masterTable.getName());
