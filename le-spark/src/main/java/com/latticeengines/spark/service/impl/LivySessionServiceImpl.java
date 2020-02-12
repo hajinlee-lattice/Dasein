@@ -1,6 +1,7 @@
 package com.latticeengines.spark.service.impl;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -110,7 +112,15 @@ public class LivySessionServiceImpl implements LivySessionService {
         Integer sessionId = session.getSessionId();
         if (sessionId != null && sessionExists(session)) {
             String url = session.getSessionUrl();
-            restTemplate.delete(url);
+            try {
+                restTemplate.delete(url);
+            } catch (ResourceAccessException e) {
+                if (e.getCause() instanceof SocketTimeoutException) {
+                    log.warn("Encountered socket time out error when killing a livy session", e);
+                } else {
+                    throw e;
+                }
+            }
             log.info("Stopped livy session " + session.getAppId() + " : " + session.getSessionUrl());
         }
     }

@@ -53,9 +53,10 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
             jobConfig.setWorkspace(getRandomWorkspace());
             log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + JsonUtils.serialize(jobConfig));
             computeScalingMultiplier(jobConfig.getInput(), jobConfig.getNumTargets());
+            SparkJobResult result;
             try {
                 RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-                SparkJobResult result = retry.execute(context -> {
+                result = retry.execute(context -> {
                     if (context.getRetryCount() > 0) {
                         log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
                                 + getJobClz().getSimpleName());
@@ -66,10 +67,10 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
                     LivySession session = createLivySession(jobName);
                     return runSparkJob(session);
                 });
-                postJobExecution(result);
             } finally {
                 killLivySession();
             }
+            postJobExecution(result);
         } else {
             log.info("Spark job config is null, skip submitting spark job.");
         }
