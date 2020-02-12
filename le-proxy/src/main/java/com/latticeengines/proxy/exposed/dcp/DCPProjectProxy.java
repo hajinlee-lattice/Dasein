@@ -1,4 +1,4 @@
-package com.latticeengines.proxy.exposed.cdl;
+package com.latticeengines.proxy.exposed.dcp;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 

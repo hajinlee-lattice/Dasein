@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.dcp.DCPProject;
 import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
 import com.latticeengines.pls.service.DCPProjectService;
-import com.latticeengines.proxy.exposed.cdl.DCPProjectProxy;
+import com.latticeengines.proxy.exposed.dcp.DCPProjectProxy;
 
 
 @Component("dcpService")

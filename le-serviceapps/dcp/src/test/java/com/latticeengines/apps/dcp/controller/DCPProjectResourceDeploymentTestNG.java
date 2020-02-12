@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.dcp.DCPProject;
 import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
-import com.latticeengines.proxy.exposed.cdl.DCPProjectProxy;
+import com.latticeengines.proxy.exposed.dcp.DCPProjectProxy;
 
 public class DCPProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
