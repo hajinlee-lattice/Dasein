@@ -18,13 +18,13 @@ import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
 @Component("dcpProxy")
-public class DCPProjectProxy extends MicroserviceRestApiProxy implements ProxyInterface {
+public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
-    protected DCPProjectProxy() {
+    protected ProjectProxy() {
         super("dcp");
     }
 
-    public DCPProjectProxy(String hostPort) {
+    public ProjectProxy(String hostPort) {
         super(hostPort, "dcp");
     }
 

@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
-import com.latticeengines.pls.service.DCPProjectService;
+import com.latticeengines.pls.service.dcp.ProjectService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
@@ -39,7 +39,7 @@ public class ProjectResource {
     private static final Logger log = LoggerFactory.getLogger(ProjectResource.class);
 
     @Inject
-    private DCPProjectService dcpProjectService;
+    private ProjectService projectService;
 
     @Inject
     private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
@@ -57,7 +57,7 @@ public class ProjectResource {
         }
 
         try {
-            return dcpProjectService.createDCPProject(customerSpace.toString(), projectId, displayName, projectType, MultiTenantContext.getEmailAddress());
+            return projectService.createDCPProject(customerSpace.toString(), projectId, displayName, projectType, MultiTenantContext.getEmailAddress());
         } catch (LedpException e) {
             log.error("Failed to create DCP project: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -77,7 +77,7 @@ public class ProjectResource {
         }
 
         try {
-            return dcpProjectService.getAllDCPProject(customerSpace.toString());
+            return projectService.getAllDCPProject(customerSpace.toString());
         } catch (LedpException e) {
             log.error("Failed to get all DCP project: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -97,7 +97,7 @@ public class ProjectResource {
         }
 
         try {
-            return dcpProjectService.getDCPProjectByProjectId(customerSpace.toString(), projectId);
+            return projectService.getDCPProjectByProjectId(customerSpace.toString(), projectId);
         } catch (LedpException e) {
             log.error("Failed to get DCP project by projectId: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -117,7 +117,7 @@ public class ProjectResource {
         }
 
         try {
-            dcpProjectService.deleteProject(customerSpace.toString(), projectId);
+            projectService.deleteProject(customerSpace.toString(), projectId);
         } catch (LedpException e) {
             log.error("Failed to delete DCP project by projectId: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,

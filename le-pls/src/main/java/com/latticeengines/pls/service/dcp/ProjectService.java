@@ -1,11 +1,11 @@
-package com.latticeengines.pls.service;
+package com.latticeengines.pls.service.dcp;
 
 import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.DCPProject;
 import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
 
-public interface DCPProjectService {
+public interface ProjectService {
 
     DCPProjectDetails createDCPProject(String customerSpace, String projectId, String displayName, DCPProject.ProjectType projectType, String user);
 

@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.pls.service.impl.dcp;
 
 import java.util.List;
 
@@ -10,36 +10,36 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dcp.DCPProject;
 import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
-import com.latticeengines.pls.service.DCPProjectService;
-import com.latticeengines.proxy.exposed.dcp.DCPProjectProxy;
+import com.latticeengines.pls.service.dcp.ProjectService;
+import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 
 
 @Component("dcpService")
-public class DCPProjectServiceImpl implements DCPProjectService {
+public class ProjectServiceImpl implements ProjectService {
 
-    private static final Logger log = LoggerFactory.getLogger(DCPProjectServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
     @Inject
-    private DCPProjectProxy dcpProjectProxy;
+    private ProjectProxy projectProxy;
 
     @Override
     public DCPProjectDetails createDCPProject(String customerSpace, String projectId, String displayName, DCPProject.ProjectType projectType, String user) {
-        return dcpProjectProxy.createDCPProject(customerSpace, projectId, displayName, projectType, user);
+        return projectProxy.createDCPProject(customerSpace, projectId, displayName, projectType, user);
     }
 
     @Override
     public List<DCPProject> getAllDCPProject(String customerSpace) {
-        return dcpProjectProxy.getAllDCPProject(customerSpace);
+        return projectProxy.getAllDCPProject(customerSpace);
     }
 
     @Override
     public DCPProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
-        return dcpProjectProxy.getDCPProjectByProjectId(customerSpace, projectId);
+        return projectProxy.getDCPProjectByProjectId(customerSpace, projectId);
     }
 
     @Override
     public void deleteProject(String customerSpace, String projectId) {
-        dcpProjectProxy.deleteProject(customerSpace, projectId);
+        projectProxy.deleteProject(customerSpace, projectId);
     }
 
 
