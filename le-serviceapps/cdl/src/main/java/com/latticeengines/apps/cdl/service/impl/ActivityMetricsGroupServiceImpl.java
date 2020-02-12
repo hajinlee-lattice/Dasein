@@ -148,13 +148,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         stage.setGroupName(OPPORTUNITY_STAGE_GROUPNAME);
         stage.setJavaClass(Long.class.getSimpleName());
         stage.setEntity(BusinessEntity.Account);
-        Set<List<Integer>> paramSet = new HashSet<>();
-        paramSet.add(Collections.singletonList(2));
-        paramSet.add(Collections.singletonList(4));
-        paramSet.add(Collections.singletonList(8));
-        paramSet.add(Collections.singletonList(12));
-        stage.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
-                Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
+        stage.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER, null, null));
         stage.setRollupDimensions(DIM_NAME_STAGE);
         stage.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
