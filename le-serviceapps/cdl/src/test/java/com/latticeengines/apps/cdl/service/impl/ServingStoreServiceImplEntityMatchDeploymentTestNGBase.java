@@ -49,8 +49,7 @@ abstract class ServingStoreServiceImplEntityMatchDeploymentTestNGBase extends Se
                 .withAttrName(InterfaceName.CustomerContactId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory(Category.SUB_CAT_OTHER) //
-                .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
-                        ColumnSelection.Predefined.Segment) //
+                .withGroups(ColumnSelection.Predefined.Enrichment) //
                 .build());
         cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.CustomerAccountId.name()) //

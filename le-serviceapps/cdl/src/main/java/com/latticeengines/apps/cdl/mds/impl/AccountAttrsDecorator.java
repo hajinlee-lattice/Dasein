@@ -114,7 +114,6 @@ public class AccountAttrsDecorator implements Decorator {
             cm.setCanSegment(false);
             cm.setCanModel(false);
             cm.setCanEnrich(true);
-            cm.setAttrState(AttrState.Active);
             return cm;
         }
 
