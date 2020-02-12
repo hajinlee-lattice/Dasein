@@ -37,7 +37,7 @@ public enum Category {
     DEFAULT("Default", 14), //
     AI_INSIGHTS("AI Insights", 15), //
     WEB_VISIT_PROFILE("My Website Profile", 16), //
-    OPPORTUNITY_PROFILE("My Opportunity Profile", 17); //
+    OPPORTUNITY_PROFILE("My Opportunities", 17); //
 
 
     public static final String SUB_CAT_OTHER = "Other";
