@@ -1,0 +1,147 @@
+{
+    "systemType": "DCP",
+    "systemObject": "Accounts",
+    "fieldDefinitionsRecordsMap": {
+        "Unique ID": [
+            {
+                "fieldName": "CustomerAccountId",
+                "fieldType": "TEXT",
+                "screenName": "Customer Account ID",
+                "matchingColumnNames": [
+                    "ID",
+                    "ACCOUNT",
+                    "ACCOUNT ID",
+                    "ACCOUNT NUMBER",
+                    "CUSTOMER ID",
+                    "CUSTOMER ACCOUNT ID",
+                    "EXTERNAL ID"
+                ],
+                "required": false
+            }
+        ],
+        "Matching Fields": [
+            {
+                "fieldName": "CompanyName",
+                "fieldType": "TEXT",
+                "screenName": "Company Name",
+                "matchingColumnNames": [
+                    "NAME",
+                    "COMPANY",
+                    "COMPANY NAME",
+                    "ACCOUNT NAME",
+                    "DISPLAY NAME"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "StreetAddress",
+                "fieldType": "TEXT",
+                "screenName": "Street Address",
+                "matchingColumnNames": [
+                    "ADDRESS",
+                    "BILLING ADDRESS",
+                    "STREET ADDRESS",
+                    "BILLING STREET ADDRESS",
+                    "FULL ADDRESS"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "City",
+                "fieldType": "TEXT",
+                "screenName": "City",
+                "matchingColumnNames": [
+                    "CITY",
+                    "BILLING CITY"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "State",
+                "fieldType": "TEXT",
+                "screenName": "State",
+                "matchingColumnNames": [
+                    "STATE",
+                    "PROVINCE",
+                    "STATE PROVINCE",
+                    "PROVINCE STATE",
+                    "BILLING STATE",
+                    "BILLING PROVINCE"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "PostalCode",
+                "fieldType": "TEXT",
+                "screenName": "Postal Code",
+                "matchingColumnNames": [
+                    "ZIP",
+                    "ZIP CODE",
+                    "POSTAL CODE",
+                    "BILLING ZIP",
+                    "BILLING ZIP CODE",
+                    "BILLING POSTAL CODE"
+                ],
+                "required": false
+            },
+
+            {
+                "fieldName": "Country",
+                "fieldType": "TEXT",
+                "screenName": "Country",
+                "matchingColumnNames": [
+                    "COUNTRY",
+                    "COUNTRY CODE",
+                    "BILLING COUNTRY",
+                    "BILLING COUNTRY CODE"
+                ],
+                "required": true
+            },
+            {
+                "fieldName": "PhoneNumber",
+                "fieldType": "TEXT",
+                "screenName": "Phone Number",
+                "matchingColumnNames": [
+                    "PHONE",
+                    "PHONE NUMBER"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "Website",
+                "fieldType": "TEXT",
+                "screenName": "Website",
+                "matchingColumnNames": [
+                    "WEBSITE",
+                    "DOMAIN"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "DUNS",
+                "fieldType": "TEXT",
+                "screenName": "D-U-N-S",
+                "matchingColumnNames": [
+                    "DUNS",
+                    "D-U-N-S",
+                    "DUNS NUMBER"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "NationalId",
+                "fieldType": "TEXT",
+                "screenName": "National ID",
+                "matchingColumnNames": [
+                    "NATIONAL ID",
+                    "FEDERAL ID",
+                    "TAX ID",
+                    "FEDERAL TAX ID"
+                ],
+                "required": false
+            }
+        ],
+        "Standard Fields": [],
+        "Custom Fields": []
+    }
+}
