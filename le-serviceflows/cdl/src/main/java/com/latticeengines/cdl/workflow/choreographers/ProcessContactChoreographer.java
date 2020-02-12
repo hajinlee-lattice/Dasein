@@ -114,20 +114,27 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
             log.info("Should not rebuild, since no accounts and no need to replace.");
             return false;
         } else {
-            boolean commonRebuild = super.shouldRebuild(step);
-            if (!commonRebuild && !reset) {
-                if (accountChoreographer.hasNonTrivialChange()) {
-                    log.info("Should rebuild, since account has non-trivial change");
-                    return true;
-                } else if (hasAttrLifeCycleChange) {
-                    log.info("Should rebuild, since has attr life cycle change");
-                    return true;
-                } else if (hasAccounts && !hasActiveServingStore) {
-                    log.info("Should rebuild, since has account, and not reset");
-                    return true;
+            boolean shouldRebuild;
+            ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                    ChoreographerContext.class);
+            if (grapherContext.isAlwaysRebuildServingStores()) {
+                shouldRebuild = true;
+            } else {
+                shouldRebuild = super.shouldRebuild(step);
+                if (!shouldRebuild && !reset) {
+                    if (accountChoreographer.hasNonTrivialChange()) {
+                        log.info("Should rebuild, since account has non-trivial change");
+                        shouldRebuild = true;
+                    } else if (hasAttrLifeCycleChange) {
+                        log.info("Should rebuild, since has attr life cycle change");
+                        shouldRebuild = true;
+                    } else if (hasAccounts && !hasActiveServingStore) {
+                        log.info("Should rebuild, since has account, and not reset");
+                        shouldRebuild = true;
+                    }
                 }
             }
-            return commonRebuild;
+            return shouldRebuild;
         }
     }
 

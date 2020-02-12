@@ -19,13 +19,13 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
@@ -95,8 +95,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @Inject
     private MatchProxy matchProxy;
 
-    @Value("${yarn.pls.url}")
-    private String internalResourceHostPort;
+    @Inject
+    private BatonService batonService;
 
     private CustomerSpace customerSpace;
     private DataCollection.Version activeVersion;
@@ -290,6 +290,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         grapherContext.setHasAccountBatchStore(hasAccountBatchStore());
         grapherContext.setHasContactBatchStore(hasContactBatchStore());
         grapherContext.setHasTransactionRawStore(hasTransactionRawStore());
+
+        String tenantId = customerSpace.getTenantId();
+        grapherContext.setAlwaysRebuildServingStores(batonService.shouldExcludeDataCloudAttrs(tenantId));
 
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }

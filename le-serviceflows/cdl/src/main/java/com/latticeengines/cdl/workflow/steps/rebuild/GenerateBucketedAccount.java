@@ -25,10 +25,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
@@ -72,6 +69,9 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Override
     protected TableRoleInCollection profileTableRole() {
@@ -321,28 +321,9 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         return StringUtils.isNotBlank(profileTableName) & StringUtils.isNotBlank(encodedTableName);
     }
 
-    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
     private boolean shouldExcludeDataCloudAttrs() {
-        Camille camille = CamilleEnvironment.getCamille();
-        String podId = CamilleEnvironment.getPodId();
-        Path node = PathBuilder.buildPodPath(podId).append("M34HotFixTargets");
-        boolean shouldExclude = false;
-        try {
-            if (camille.exists(node)) {
-                List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
-                String tenantId = configuration.getCustomerSpace().getTenantId();
-                if (targets.contains(tenantId)) {
-                    log.info("{} is a hotfix target.", tenantId);
-                    shouldExclude = true;
-                } else {
-                    log.info("{} is not a hotfix target", tenantId);
-                    shouldExclude = false;
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to retrieve hotfix targets from ZK.", e);
-        }
-        return shouldExclude;
+        String tenantId = configuration.getCustomerSpace().getTenantId();
+        return batonService.shouldExcludeDataCloudAttrs(tenantId);
     }
 
 }

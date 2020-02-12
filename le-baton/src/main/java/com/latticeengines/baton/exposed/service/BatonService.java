@@ -76,4 +76,7 @@ public interface BatonService {
 
     FeatureFlagValueMap getFeatureFlags(CustomerSpace customerSpace);
 
+    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
+    boolean shouldExcludeDataCloudAttrs(String tenantId);
+
 }

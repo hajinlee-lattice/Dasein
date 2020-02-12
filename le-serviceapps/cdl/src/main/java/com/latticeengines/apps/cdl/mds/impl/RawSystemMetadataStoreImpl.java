@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,12 +18,8 @@ import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.mds.AMMetadataStore;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -139,7 +134,7 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
         }
         ThreadLocal<AtomicLong> amCounter = new ThreadLocal<>();
         if (BusinessEntity.Account.equals(entity) && !StoreFilter.NON_LDC.equals(namespace.getCoord3()) //
-                && !shouldExcludeDataCloudAttrs(tenantId)) {
+                && !batonService.shouldExcludeDataCloudAttrs(tenantId)) {
             // merge serving store and AM, for Account
             ParallelFlux<ColumnMetadata> amFlux = getLDCMetadataInParallel(version, amCounter);
             return ParallelFlux.from(servingStore, amFlux);
@@ -168,29 +163,6 @@ public class RawSystemMetadataStoreImpl implements RawSystemMetadataStore {
                     }
                     log.info("Inserted " + count + " AM attributes.");
                 });
-    }
-
-    //FIXME: a temp hotfix for M34. to be replaced by data-block implementation.
-    private boolean shouldExcludeDataCloudAttrs(String tenantId) {
-        Camille camille = CamilleEnvironment.getCamille();
-        String podId = CamilleEnvironment.getPodId();
-        Path node = PathBuilder.buildPodPath(podId).append("M34HotFixTargets");
-        boolean shouldExclude = false;
-        try {
-            if (camille.exists(node)) {
-                List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
-                if (targets.contains(tenantId)) {
-                    log.info("{} is a hotfix target.", tenantId);
-                    shouldExclude = true;
-                } else {
-                    log.info("{} is not a hotfix target", tenantId);
-                    shouldExclude = false;
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to retrieve hotfix targets from ZK.", e);
-        }
-        return shouldExclude;
     }
 
     @Override
