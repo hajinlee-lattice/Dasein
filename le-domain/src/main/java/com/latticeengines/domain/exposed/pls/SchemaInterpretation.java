@@ -20,7 +20,8 @@ public enum SchemaInterpretation {
     TransactionPeriodAggregation, DeleteAccountTemplate, DeleteContactTemplate, DeleteTransactionTemplate,
     RegisterDeleteDataTemplate,
     ContactEntityMatch,
-    WebVisit, WebVisitPathPattern, WebVisitSourceMedium;
+    WebVisit, WebVisitPathPattern, WebVisitSourceMedium,
+    Opportunity, OpportunityStageName;
 
     public static SchemaInterpretation getByName(String interpretationName) {
         for (SchemaInterpretation interpretation : values()) {

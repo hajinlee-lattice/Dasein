@@ -1,0 +1,24 @@
+{
+  "systemType": "Salesforce",
+  "systemObject": "Opportunity Stage",
+  "fieldDefinitionsRecordsMap": {
+    "General": [
+      {
+        "fieldName": "StageName",
+        "fieldType": "TEXT",
+        "columnName": "StageName",
+        "matchingColumnNames": [
+          "StageName",
+          "STAGE",
+          "STAGE NAME"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ],
+    "Custom Fields": []
+  }
+}

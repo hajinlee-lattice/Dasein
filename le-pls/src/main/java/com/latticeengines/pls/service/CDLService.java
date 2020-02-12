@@ -76,6 +76,8 @@ public interface CDLService {
 
     boolean checkBundleUpload(String customerSpace);
 
+    boolean createDefaultOpportunityTemplate(String customerSpace, String systemName);
+
     /**
      *
      * @param customerSpace Identify current tenant

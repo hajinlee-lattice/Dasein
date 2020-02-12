@@ -21,7 +21,10 @@ public enum EntityType {
     WebVisitPathPattern(BusinessEntity.Catalog, null, "Website Path", "WebVisitPathPattern",
             SchemaInterpretation.WebVisitPathPattern), //
     WebVisitSourceMedium(BusinessEntity.Catalog, SubType.SourceMedium, "Visit Source", "WebVisitSourceMedium",
-            SchemaInterpretation.WebVisitSourceMedium);
+            SchemaInterpretation.WebVisitSourceMedium),
+    Opportunity(BusinessEntity.Opportunity, null, "Opportunity", "OpportunityData", SchemaInterpretation.Opportunity),
+    OpportunityStageName(BusinessEntity.Catalog, SubType.StageName, "Opportunity Stage", "OpportunityStageName",
+            SchemaInterpretation.OpportunityStageName);
 
     private static final Set<EntityType> STANDARD_ENTITY_TYPES =
             ImmutableSet.of(Accounts, Contacts, Leads, ProductPurchases, ProductBundles, ProductHierarchy);

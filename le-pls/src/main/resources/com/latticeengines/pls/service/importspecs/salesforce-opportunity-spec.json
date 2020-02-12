@@ -1,0 +1,384 @@
+{
+  "systemType": "Salesforce",
+  "systemObject": "Opportunity",
+  "fieldDefinitionsRecordsMap": {
+    "General": [
+      {
+        "fieldName": "Id",
+        "fieldType": "TEXT",
+        "columnName": "Id",
+        "matchingColumnNames": [
+          "ID"
+        ],
+        "required": true,
+        "logicalDataType": "Id",
+        "fundamentalType": "ALPHA",
+        "approvedUsage": [
+          "None"
+        ]
+      },
+      {
+        "fieldName": "LastModifiedDate",
+        "fieldType": "TEXT",
+        "columnName": "LastModifiedDate",
+        "matchingColumnNames": [
+          "Last Modified Date",
+          "Last_Modified_Date",
+          "LastModifiedDate",
+          "LAST MODIFIED DATE"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "StageName",
+        "fieldType": "TEXT",
+        "columnName": "StageName",
+        "matchingColumnNames": [
+          "StageName",
+          "STAGE",
+          "STAGE NAME"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Amount",
+        "fieldType": "NUMBER",
+        "columnName": "Amount",
+        "matchingColumnNames": [
+          "AMOUNT"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "CampaignId",
+        "fieldType": "TEXT",
+        "columnName": "CampaignId",
+        "matchingColumnNames": [
+          "CampaignId",
+          "CAMPAIGN ID"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "CloseDate",
+        "fieldType": "TEXT",
+        "columnName": "CloseDate",
+        "matchingColumnNames": [
+          "CloseDate",
+          "CLOSE DATE"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "ContractId",
+        "fieldType": "TEXT",
+        "columnName": "Contract",
+        "matchingColumnNames": [
+          "CONTRACT",
+          "CONTRACT ID"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "CreatedDate",
+        "fieldType": "TEXT",
+        "columnName": "CreatedDate",
+        "matchingColumnNames": [
+          "CreatedDate",
+          "CREATE DATE"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "CurrencyCode",
+        "fieldType": "TEXT",
+        "columnName": "CurrencyIsoCode",
+        "matchingColumnNames": [
+          "CurrencyCode",
+          "CURRENCY CODE",
+          "CurrencyIsoCode"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "ExpectedRevenue",
+        "fieldType": "NUMBER",
+        "columnName": "ExpectedRevenue",
+        "matchingColumnNames": [
+          "ExpectedRevenue",
+          "EXPECTED REVENUE"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Deleted",
+        "fieldType": "BOOLEAN",
+        "columnName": "IsDeleted",
+        "matchingColumnNames": [
+          "DELETED",
+          "IsDeleted"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Won",
+        "fieldType": "BOOLEAN",
+        "columnName": "IsWon",
+        "matchingColumnNames": [
+          "WON",
+          "IsWon"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Closed",
+        "fieldType": "BOOLEAN",
+        "columnName": "IsClosed",
+        "matchingColumnNames": [
+          "CLOSED",
+          "IsClosed"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "LastActivity",
+        "fieldType": "TEXT",
+        "columnName": "LastActivityDate",
+        "matchingColumnNames": [
+          "LastActivityDate",
+          "Last_Activity_Date",
+          "LAST ACTIVITY DATE"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "LeadSource",
+        "fieldType": "TEXT",
+        "columnName": "LeadSource",
+        "matchingColumnNames": [
+          "LeadSource",
+          "LEAD SOURCE"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Name",
+        "fieldType": "TEXT",
+        "columnName": "Name",
+        "matchingColumnNames": [
+          "Name",
+          "NAME"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Probability",
+        "fieldType": "NUMBER",
+        "columnName": "Probability",
+        "matchingColumnNames": [
+          "Probability",
+          "PROBABILITY"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Quantity",
+        "fieldType": "NUMBER",
+        "columnName": "TotalOpportunityQuantity",
+        "matchingColumnNames": [
+          "TotalOpportunityQuantity",
+          "Quantity"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "CreatedBy",
+        "fieldType": "TEXT",
+        "columnName": "CreatedById",
+        "matchingColumnNames": [
+          "CreatedById",
+          "CreatedBy",
+          "CREATED BY"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Division",
+        "fieldType": "TEXT",
+        "columnName": "Division",
+        "matchingColumnNames": [
+          "Division",
+          "DIVISION"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "ForecastCategory",
+        "fieldType": "TEXT",
+        "columnName": "ForecastCategory",
+        "matchingColumnNames": [
+          "ForecastCategory",
+          "FORECAST CATEGORY"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "OwnedBy",
+        "fieldType": "TEXT",
+        "columnName": "OwnerId",
+        "matchingColumnNames": [
+          "Owned By",
+          "OWNED BY",
+          "OwnerId",
+          "OWNER ID"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "TerritoryID",
+        "fieldType": "TEXT",
+        "columnName": "TerritoryId",
+        "matchingColumnNames": [
+          "TerritoryID",
+          "TERRITORY ID",
+          "TerritoryId"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Type",
+        "fieldType": "TEXT",
+        "columnName": "Type",
+        "matchingColumnNames": [
+          "Type",
+          "TYPE"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "LastModifiedBy",
+        "fieldType": "TEXT",
+        "columnName": "LastModifiedById",
+        "matchingColumnNames": [
+          "LastModifiedBy",
+          "LastModifiedById",
+          "LAST MODIFIED BY ID",
+          "Last_Modified_By_id"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ],
+    "Custom Fields": [],
+    "Match to Accounts - ID": [
+      {
+        "fieldType": "TEXT",
+        "columnName": "AccountId",
+        "matchingColumnNames": [
+          "AccountId",
+          "ACCOUNT ID"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ]
+  }
+}

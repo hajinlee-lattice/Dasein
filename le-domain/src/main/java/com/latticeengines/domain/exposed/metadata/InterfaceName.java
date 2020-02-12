@@ -73,6 +73,7 @@ public enum InterfaceName {
     LeadSource, //
     IsClosed, //
     StageName, //
+    StageNameId,//
     AnnualRevenue, //
     NumberOfEmployees, //
     YearStarted, //

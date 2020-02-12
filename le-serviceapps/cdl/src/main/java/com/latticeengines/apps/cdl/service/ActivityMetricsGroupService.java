@@ -12,4 +12,6 @@ public interface ActivityMetricsGroupService {
     List<ActivityMetricsGroup> findByStream(String customerSpace, AtlasStream stream);
 
     List<ActivityMetricsGroup> setupDefaultWebVisitProfile(String customerSpace, String streamName);
+
+    ActivityMetricsGroup setUpDefaultOpportunityProfile(String customerSpace, String streamName);
 }

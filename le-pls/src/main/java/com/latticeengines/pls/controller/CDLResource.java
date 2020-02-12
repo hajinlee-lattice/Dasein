@@ -533,6 +533,18 @@ public class CDLResource {
         }
     }
 
+    @PostMapping(value = "/s3import/template/create/opportunity")
+    @ResponseBody
+    @ApiOperation("Create Opportunity template")
+    public boolean createDefaultOpportunity(@RequestParam("systemName") String systemName) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+
+        return cdlService.createDefaultOpportunityTemplate(customerSpace.toString(), systemName);
+    }
+
     @GetMapping(value = "/bundle/upload")
     @ResponseBody
     @ApiOperation("")

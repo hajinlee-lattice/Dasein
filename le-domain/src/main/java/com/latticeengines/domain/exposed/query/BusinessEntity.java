@@ -69,23 +69,27 @@ public enum BusinessEntity implements GraphNode {
     // WebActivity
     ActivityStream, //
     Catalog, //
-    WebVisitProfile;
+    WebVisitProfile,
+
+    //Opportunity Data Stream
+    Opportunity;
+
 
     public static final Set<BusinessEntity> SEGMENT_ENTITIES = //
-            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
+            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity);
     public static final Set<BusinessEntity> EXPORT_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity);
     public static final Set<BusinessEntity> TALKING_POINT_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity);
     public static final Set<BusinessEntity> COMPANY_PROFILE_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity);
     public static final Set<BusinessEntity> ACCOUNT_MATCH_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile);
+            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity);
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
     public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, AnalyticPurchaseState);
     public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME= //
             ImmutableSet.of(PurchaseHistory, WebVisitProfile);
-    public static final Set<BusinessEntity> ACTIVITY_METRIC_SERVING_ENTITIES= ImmutableSet.of(WebVisitProfile);
+    public static final Set<BusinessEntity> ACTIVITY_METRIC_SERVING_ENTITIES= ImmutableSet.of(WebVisitProfile, Opportunity);
     public static final Set<BusinessEntity> CAN_REPALCE_ENTITIES = ImmutableSet.of(Account, Contact, Product,
             Transaction, ActivityStream);
 
@@ -129,6 +133,8 @@ public enum BusinessEntity implements GraphNode {
         WebVisitProfile.setBatchStore(TableRoleInCollection.WebVisitProfile);
         WebVisitProfile.setServingStore(TableRoleInCollection.WebVisitProfile);
 
+        Opportunity.setServingStore(TableRoleInCollection.OpportunityProfile);
+
         // Relationships
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
@@ -138,6 +144,8 @@ public enum BusinessEntity implements GraphNode {
         Account.addRelationship(CuratedAccount, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
 
         Account.addRelationship(WebVisitProfile, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
+
+        Account.addRelationship(Opportunity, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
 
         Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
 

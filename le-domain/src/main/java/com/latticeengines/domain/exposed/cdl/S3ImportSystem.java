@@ -288,7 +288,11 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
             @Override
             public Collection<EntityType> getEntityTypes() {
                 return Arrays.asList(EntityType.Accounts, EntityType.Contacts,
-                        EntityType.Leads);
+                        EntityType.Leads, EntityType.Opportunity, EntityType.OpportunityStageName);
+            }
+            @Override
+            public String getDefaultSystemName() {
+                return "Default_Salesforce_System";
             }
         },
         Marketo {
@@ -301,6 +305,10 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
             public EntityType getPrimaryContact() {
                 return EntityType.Leads;
             }
+            @Override
+            public String getDefaultSystemName() {
+                return "Default_Marketo_System";
+            }
         },
         Eloqua {
             @Override
@@ -312,17 +320,29 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
             public EntityType getPrimaryContact() {
                 return EntityType.Leads;
             }
+            @Override
+            public String getDefaultSystemName() {
+                return "Default_Eloqua_System";
+            }
         },
         GoogleAnalytics {
             @Override
             public Collection<EntityType> getEntityTypes() {
                 return Arrays.asList(EntityType.Accounts, EntityType.Contacts);
             }
+            @Override
+            public String getDefaultSystemName() {
+                return "Default_GoogleAnalytics_System";
+            }
         },
         Website {
             @Override
             public Collection<EntityType> getEntityTypes() {
                 return Arrays.asList(EntityType.WebVisit, EntityType.WebVisitPathPattern, EntityType.WebVisitSourceMedium);
+            }
+            @Override
+            public String getDefaultSystemName() {
+                return "Default_Website_System";
             }
         },
         Other;
@@ -339,5 +359,7 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
         public EntityType getPrimaryContact() {
             return EntityType.Contacts;
         }
+
+        public String getDefaultSystemName() { return "Default_System"; }
     }
 }

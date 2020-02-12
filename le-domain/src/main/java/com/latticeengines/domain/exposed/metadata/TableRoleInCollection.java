@@ -47,6 +47,7 @@ public enum TableRoleInCollection {
     AccountLookup, //
 
     WebVisitProfile, //
+    OpportunityProfile, //
     PeriodStores, //
     MetricsGroup, //
 
@@ -113,6 +114,9 @@ public enum TableRoleInCollection {
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
 
         WebVisitProfile.primaryKey = InterfaceName.AccountId;
+
+        OpportunityProfile.primaryKey = InterfaceName.AccountId;
+        OpportunityProfile.hasSignature = true;
         WebVisitProfile.hasSignature = true;
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;
