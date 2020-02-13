@@ -74,6 +74,7 @@ public class StartProcessingUnitTestNG {
         doReturn(Collections.emptyList()).when(spy).getActions();
         doReturn(null).when(spy).getActionImpactedSegmentNames(any());
         doReturn(null).when(spy).getActionImpactedEngineIds(any());
+        doReturn(false).when(spy).shouldAlwaysRebuildServingStore(any());
         spy.putObjectInContext("CDL_COLLECTION_STATUS", dataCollectionStatus);
         spy.setGrapherContext();
         ChoreographerContext context = spy.getObjectFromContext(BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY,
