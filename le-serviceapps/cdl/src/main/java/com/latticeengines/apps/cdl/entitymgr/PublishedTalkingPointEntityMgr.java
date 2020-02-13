@@ -13,5 +13,5 @@ public interface PublishedTalkingPointEntityMgr extends BaseEntityMgrRepository<
 
     List<TalkingPointDTO> findAllByTenantPid(Long tenantPid);
 
-    List<String> findPlaysUsingGivenAttributes(List<String> attributes);
+    List<String> findPlayDisplayNamesUsingGivenAttributes(List<String> attributes);
 }

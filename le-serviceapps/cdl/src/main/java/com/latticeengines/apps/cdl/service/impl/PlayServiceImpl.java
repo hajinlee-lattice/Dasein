@@ -510,23 +510,16 @@ public class PlayServiceImpl implements PlayService {
         String customerSpace = MultiTenantContext.getTenant().getId();
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        Set<String> playIds = talkingPointService.findDependantPlayIds(attributes);
+        Set<String> playIds = talkingPointService.findDependantPlayDisplayNames(attributes);
         stopWatch.stop();
-        log.info(String.format("Time to get %d playIds from talking points for Tenant %s: %s ms", playIds.size(),
+        log.info(String.format("Time to get %d play display names from talking points for Tenant %s: %s ms",
+                playIds.size(),
                 customerSpace, stopWatch.getTime(TimeUnit.MILLISECONDS)));
         if (CollectionUtils.isEmpty(playIds)) {
             return new ArrayList<>();
         }
 
-        stopWatch.reset();
-        stopWatch.start();
-        List<String> plays =
-                playEntityMgr.findDisplayNamesCorrespondToPlayNames(new ArrayList<>(playIds));
-        stopWatch.stop();
-        log.info(String.format("Time to get %d plays from PlayIds for Tenant: %s: %s ms", plays.size(), customerSpace,
-                stopWatch.getTime(TimeUnit.MILLISECONDS)));
-
-        return plays;
+        return new ArrayList<>(playIds);
     }
 
     private String sanitize(String attribute) {

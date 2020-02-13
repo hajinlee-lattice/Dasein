@@ -26,6 +26,4 @@ public interface PlayEntityMgr extends BaseEntityMgrRepository<Play, Long> {
     Play updatePlay(Play play, Play existingPlay);
 
     Long countByPlayTypePid(Long pid);
-
-    List<String> findDisplayNamesCorrespondToPlayNames(List<String> playNames);
 }

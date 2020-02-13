@@ -30,5 +30,5 @@ public interface TalkingPointService {
 
     List<TalkingPointDTO> findAllPublishedByTenant(String customerSpace);
 
-    Set<String> findDependantPlayIds(List<String> attributes);
+    Set<String> findDependantPlayDisplayNames(List<String> attributes);
 }

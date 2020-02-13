@@ -71,8 +71,8 @@ public class PublishedTalkingPointEntityMgrImpl
     }
 
     @Transactional(readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
-    public List<String> findPlaysUsingGivenAttributes(List<String> attributes) {
-        return publishedTalkingPointDao.findPlaysUsingGivenAttributes(attributes);
+    public List<String> findPlayDisplayNamesUsingGivenAttributes(List<String> attributes) {
+        return publishedTalkingPointDao.findPlayDisplayNamesUsingGivenAttributes(attributes);
     }
 
 }

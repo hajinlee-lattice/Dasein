@@ -47,23 +47,6 @@ public class PlayDaoImpl extends BaseDaoImpl<Play> implements PlayDao {
     }
 
     @Override
-    public List<String> findDisplayNamesCorrespondToPlayNames(List<String> playNames) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<Play> entityClz = getEntityClass();
-        String selectQueryStr = String.format("select displayName "
-                + "FROM %s " //
-                + "WHERE name in :names ", entityClz.getSimpleName());
-        Query query = session.createQuery(selectQueryStr);
-        query.setParameterList("names", playNames);
-
-        List<?> rawResult = query.getResultList();
-        if (CollectionUtils.isEmpty(rawResult)) {
-            return new ArrayList<>();
-        }
-        return JsonUtils.convertList(rawResult, String.class);
-    }
-
-    @Override
     public List<Play> findAllByRatingEnginePid(long pid) {
         return super.findAllByField("FK_RATING_ENGINE_ID", pid);
     }
