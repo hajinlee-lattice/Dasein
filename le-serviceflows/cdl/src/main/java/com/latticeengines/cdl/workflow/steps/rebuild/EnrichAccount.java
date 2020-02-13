@@ -4,7 +4,6 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +19,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -59,6 +55,9 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private BatonService batonService;
 
     private String fullAccountTablePrefix = "FullAccount";
     private String masterTableName;
@@ -221,28 +220,9 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
                 columnMetadata.isEnabledFor(ColumnSelection.Predefined.Segment);
     }
 
-    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
     private boolean shouldExcludeDataCloudAttrs() {
-        Camille camille = CamilleEnvironment.getCamille();
-        String podId = CamilleEnvironment.getPodId();
-        Path node = PathBuilder.buildPodPath(podId).append("M34HotFixTargets");
-        boolean shouldExclude = false;
-        try {
-            if (camille.exists(node)) {
-                List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
-                String tenantId = configuration.getCustomerSpace().getTenantId();
-                if (targets.contains(tenantId)) {
-                    log.info("{} is a hotfix target.", tenantId);
-                    shouldExclude = true;
-                } else {
-                    log.info("{} is not a hotfix target", tenantId);
-                    shouldExclude = false;
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to retrieve hotfix targets from ZK.", e);
-        }
-        return shouldExclude;
+        String tenantId = configuration.getCustomerSpace().getTenantId();
+        return batonService.shouldExcludeDataCloudAttrs(tenantId);
     }
 
 }

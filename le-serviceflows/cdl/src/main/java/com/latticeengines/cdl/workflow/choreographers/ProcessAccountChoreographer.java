@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.RebuildAccountWorkflow;
 import com.latticeengines.cdl.workflow.UpdateAccountWorkflow;
 import com.latticeengines.cdl.workflow.steps.maintenance.SoftDeleteAccount;
@@ -59,6 +60,9 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private ProfileAccount profileAccount;
+
+    @Inject
+    private BatonService batonService;
 
     protected boolean rebuildNotForDataCloudChange = false;
     protected boolean dataCloudChanged = false;
@@ -118,7 +122,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);
         dataCloudChanged = grapherContext.isDataCloudChanged();
-        log.info("Data cloud verision changed=" + dataCloudChanged + " for " + mainEntity());
+        log.info("Data cloud version changed=" + dataCloudChanged + " for " + mainEntity());
     }
 
     private void checkAttrLifeCycleChange(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -136,21 +140,31 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
     @Override
     protected boolean shouldRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
-        rebuildNotForDataCloudChange = super.shouldRebuild(step);
-        if (!rebuildNotForDataCloudChange) {
-            if (shouldRematch) {
-                log.info("Should rebuild, because fully re-matched");
-                rebuildNotForDataCloudChange = true;
-            } else if (hasAttrLifeCycleChange && !reset) {
-                log.info("Should rebuild, because detected attr life cycle change.");
-                rebuildNotForDataCloudChange = true;
+        boolean shoulRebuild;
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        if (grapherContext.isAlwaysRebuildServingStores()) {
+            log.info("This tenant is marked to always rebuild Account serving store.");
+            shoulRebuild = true;
+        } else {
+            rebuildNotForDataCloudChange = super.shouldRebuild(step);
+            if (!rebuildNotForDataCloudChange) {
+                if (shouldRematch) {
+                    log.info("Should rebuild, because fully re-matched");
+                    rebuildNotForDataCloudChange = true;
+                } else if (hasAttrLifeCycleChange && !reset) {
+                    log.info("Should rebuild, because detected attr life cycle change.");
+                    rebuildNotForDataCloudChange = true;
+                }
+            }
+            if (!rebuildNotForDataCloudChange && (dataCloudChanged && !reset)) {
+                log.info("Should rebuild, because there were data cloud changes.");
+                shoulRebuild = true;
+            } else {
+                shoulRebuild = rebuildNotForDataCloudChange;
             }
         }
-        if (!rebuildNotForDataCloudChange && (dataCloudChanged && !reset)) {
-            log.info("Should rebuild, because there were data cloud changes.");
-            return true;
-        }
-        return rebuildNotForDataCloudChange;
+        return shoulRebuild;
     }
 
     @Override

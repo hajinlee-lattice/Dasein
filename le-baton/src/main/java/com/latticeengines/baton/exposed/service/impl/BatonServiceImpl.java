@@ -17,6 +17,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
@@ -653,6 +654,31 @@ public class BatonServiceImpl implements BatonService {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public boolean shouldExcludeDataCloudAttrs(String tenantId) {
+        boolean shouldExclude = false;
+        if (StringUtils.isNotBlank(tenantId)) {
+            Camille camille = CamilleEnvironment.getCamille();
+            String podId = CamilleEnvironment.getPodId();
+            Path node = PathBuilder.buildPodPath(podId).append("SprintHotFixTargets");
+            try {
+                if (camille.exists(node)) {
+                    List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
+                    if (targets.contains(tenantId)) {
+                        log.info("{} is a hotfix target.", tenantId);
+                        shouldExclude = true;
+                    } else {
+                        log.info("{} is not a hotfix target", tenantId);
+                        shouldExclude = false;
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("Failed to retrieve hotfix targets from ZK.", e);
+            }
+        }
+        return shouldExclude;
     }
 
     /**

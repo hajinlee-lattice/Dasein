@@ -3,10 +3,11 @@ package com.latticeengines.cdl.workflow.steps.merge;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,10 +18,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.camille.Path;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -37,6 +35,9 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     static final String BEAN_NAME = "matchAccount";
 
     private String matchTargetTablePrefix = null;
+
+    @Inject
+    private BatonService batonService;
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -163,30 +164,9 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
     }
 
-
-
-    //FIXME: a temp hotfix for M34. to be replaced by datablock implementation.
     private boolean shouldExcludeDataCloudAttrs() {
-        Camille camille = CamilleEnvironment.getCamille();
-        String podId = CamilleEnvironment.getPodId();
-        Path node = PathBuilder.buildPodPath(podId).append("M34HotFixTargets");
-        boolean shouldExclude = false;
-        try {
-            if (camille.exists(node)) {
-                List<String> targets = Arrays.asList(camille.get(node).getData().split(","));
-                String tenantId = configuration.getCustomerSpace().getTenantId();
-                if (targets.contains(tenantId)) {
-                    log.info("{} is a hotfix target.", tenantId);
-                    shouldExclude = true;
-                } else {
-                    log.info("{} is not a hotfix target", tenantId);
-                    shouldExclude = false;
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to retrieve hotfix targets from ZK.", e);
-        }
-        return shouldExclude;
+        String tenantId = configuration.getCustomerSpace().getTenantId();
+        return batonService.shouldExcludeDataCloudAttrs(tenantId);
     }
 
 }

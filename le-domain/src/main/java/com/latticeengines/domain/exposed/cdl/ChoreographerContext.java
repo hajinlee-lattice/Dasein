@@ -59,6 +59,9 @@ public class ChoreographerContext {
     @JsonProperty
     private boolean hasTransactionRawStore;
 
+    @JsonProperty
+    private boolean alwaysRebuildServingStores;
+
     public Set<BusinessEntity> getEntitiesRebuildDueToActions() {
         return entitiesRebuildDueToActions;
     }
@@ -177,5 +180,13 @@ public class ChoreographerContext {
 
     public void setHasTransactionRawStore(boolean hasTransactionRawStore) {
         this.hasTransactionRawStore = hasTransactionRawStore;
+    }
+
+    public boolean isAlwaysRebuildServingStores() {
+        return alwaysRebuildServingStores;
+    }
+
+    public void setAlwaysRebuildServingStores(boolean alwaysRebuildServingStores) {
+        this.alwaysRebuildServingStores = alwaysRebuildServingStores;
     }
 }
