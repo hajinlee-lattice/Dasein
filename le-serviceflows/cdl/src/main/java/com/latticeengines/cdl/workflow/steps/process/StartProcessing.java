@@ -292,7 +292,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         grapherContext.setHasTransactionRawStore(hasTransactionRawStore());
 
         String tenantId = customerSpace.getTenantId();
-        grapherContext.setAlwaysRebuildServingStores(batonService.shouldExcludeDataCloudAttrs(tenantId));
+        grapherContext.setAlwaysRebuildServingStores(shouldAlwaysRebuildServingStore(tenantId));
 
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }
@@ -721,6 +721,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         log.info("Tenant's migration status is {}.", status);
         migrationMode = MigrationTrack.Status.STARTED.equals(status);
         log.info("Migration mode is {}", migrationMode ? "on" : "off");
+    }
+
+    protected boolean shouldAlwaysRebuildServingStore(String tenantId) {
+        return batonService.shouldExcludeDataCloudAttrs(tenantId);
     }
 
     private void verifyActiveDataCollectionVersion() {
