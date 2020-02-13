@@ -103,7 +103,7 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
         log.info("Updated work flow status=" + status + " workflow Id=" + executionId);
         if (!BatchStatus.FAILED.equals(jobExecution.getStatus())) {
-            Set<String> registeredTableNames = getObjectFromContext(jobExecution, BaseWorkflowStep.REGISTERED_TABLE_NAME, Set.class);
+            Set<String> registeredTableNames = getObjectFromContext(jobExecution, BaseWorkflowStep.REGISTERED_TABLE_NAMES, Set.class);
             if (CollectionUtils.isNotEmpty(registeredTableNames)) {
                 String customerSpace = workflowJob.getTenant().getId();
                 try {
