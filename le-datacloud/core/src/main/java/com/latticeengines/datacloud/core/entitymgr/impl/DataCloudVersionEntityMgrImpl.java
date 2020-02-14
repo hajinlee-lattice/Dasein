@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,21 +28,34 @@ public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr 
     @Value("${datacloud.match.latest.data.cloud.major.version}")
     private String latestMajorVersion;
 
+    @Value("${datacloud.match.current.data.cloud.version}")
+    private String currentVersion;
+
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public DataCloudVersion currentApprovedVersion() {
+        if (StringUtils.isNotBlank(currentVersion)) {
+            return findVersion(currentVersion);
+        }
         return latestApprovedForMajorVersion(latestMajorVersion);
     }
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public String currentApprovedVersionAsString() {
+        if (StringUtils.isNotBlank(currentVersion)) {
+            return findVersion(currentVersion).getVersion();
+        }
         return latestApprovedForMajorVersion(latestMajorVersion).getVersion();
     }
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true, isolation = Isolation.READ_UNCOMMITTED)
     public DataCloudVersion latestApprovedForMajorVersion(String version) {
+
+        if (StringUtils.isNotBlank(currentVersion)) {
+            return findVersion(currentVersion);
+        }
         String majorVersion = parseMajorVersion(version);
         DataCloudVersion dataCloudVersion = dataCloudVersionDao
                 .latestApprovedForMajorVersion(majorVersion);
