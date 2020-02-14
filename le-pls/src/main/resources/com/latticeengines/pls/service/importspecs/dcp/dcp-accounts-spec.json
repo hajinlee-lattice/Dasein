@@ -34,15 +34,26 @@
                 "required": false
             },
             {
-                "fieldName": "StreetAddress",
+                "fieldName": "Address_Street_1",
                 "fieldType": "TEXT",
-                "screenName": "Street Address",
+                "screenName": "Street Address Line 1",
                 "matchingColumnNames": [
-                    "ADDRESS",
-                    "BILLING ADDRESS",
-                    "STREET ADDRESS",
-                    "BILLING STREET ADDRESS",
-                    "FULL ADDRESS"
+                    "ADDRESS LINE 1",
+                    "BILLING ADDRESS LINE 1",
+                    "STREET ADDRESS LINE 1",
+                    "BILLING STREET ADDRESS LINE 1"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "Address_Street_2",
+                "fieldType": "TEXT",
+                "screenName": "Street Address Line 2",
+                "matchingColumnNames": [
+                    "ADDRESS LINE 2",
+                    "BILLING ADDRESS LINE 2",
+                    "STREET ADDRESS LINE 2",
+                    "BILLING STREET ADDRESS LINE 2"
                 ],
                 "required": false
             },
