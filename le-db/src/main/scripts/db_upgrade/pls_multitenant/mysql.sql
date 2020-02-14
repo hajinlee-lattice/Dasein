@@ -32,7 +32,8 @@ CREATE PROCEDURE `CreateDCPProjectTable`()
 
 CREATE PROCEDURE `UpdatePLSTables`()
   BEGIN
-    ALTER TABLE `PLS_MultiTenant`.`DANTE_PUBLISHEDTALKINGPOINT` add column `PLAY_ID` bigint not null
+    ALTER TABLE `PLS_MultiTenant`.`DANTE_PUBLISHEDTALKINGPOINT` add column `PLAY_ID` bigint not null;
+    update `PLS_MultiTenant`.`DANTE_PUBLISHEDTALKINGPOINT` T1 inner join `PLS_MultiTenant`.`PLAY` T2 on T1.PLAY_NAME = T2.NAME set T1.`PLAY_ID` = T2.`PID`;
     ALTER TABLE `DANTE_PUBLISHEDTALKINGPOINT` add constraint `FK_DANTEPUBLISHEDTALKINGPOINT_PLAYID_PLAY` foreign key (`PLAY_ID`) references `PLAY` (`PID`) on delete cascade;
 
 END;

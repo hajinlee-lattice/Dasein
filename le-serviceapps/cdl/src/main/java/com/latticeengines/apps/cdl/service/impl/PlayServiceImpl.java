@@ -515,11 +515,8 @@ public class PlayServiceImpl implements PlayService {
         log.info(String.format("Time to get %d play display names from talking points for Tenant %s: %s ms",
                 playIds.size(),
                 customerSpace, stopWatch.getTime(TimeUnit.MILLISECONDS)));
-        if (CollectionUtils.isEmpty(playIds)) {
-            return new ArrayList<>();
-        }
 
-        return new ArrayList<>(playIds);
+        return CollectionUtils.isEmpty(playIds) ? new ArrayList<>() : new ArrayList<>(playIds);
     }
 
     private String sanitize(String attribute) {
