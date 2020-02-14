@@ -17,7 +17,7 @@ public class SetTenantAspect {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.apps.dcp.service.impl.DCPProjectServiceImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.dcp.service.impl.ProjectServiceImpl.*(..))")
     public void allDCPProjectService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());

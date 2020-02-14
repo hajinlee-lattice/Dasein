@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.dcp.DCPProject;
-import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
+import com.latticeengines.domain.exposed.dcp.Project;
+import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -28,8 +28,8 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         super(hostPort, "dcp");
     }
 
-    public DCPProjectDetails createDCPProject(String customerSpace, String projectId, String displayName, DCPProject.ProjectType projectType, String user) {
-        String baseUrl = "/customerspaces/{customerSpace}/dcpproject?displayName={displayName}&user={user}";
+    public ProjectDetails createDCPProject(String customerSpace, String projectId, String displayName, Project.ProjectType projectType, String user) {
+        String baseUrl = "/customerspaces/{customerSpace}/project?displayName={displayName}&user={user}";
         List<String> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
         args.add(displayName);
@@ -41,7 +41,7 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
 
         String url = constructUrl(baseUrl, args.toArray());
         String json =  post("create dcp project", url, projectType, String.class);
-        ResponseDocument<DCPProjectDetails> responseDoc = ResponseDocument.generateFromJSON(json, DCPProjectDetails.class);
+        ResponseDocument<ProjectDetails> responseDoc = ResponseDocument.generateFromJSON(json, ProjectDetails.class);
         if (responseDoc == null) {
             throw new RuntimeException("Failed to create DCP project!");
         }
@@ -51,21 +51,21 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         return responseDoc.getResult();
     }
 
-    public List<DCPProject> getAllDCPProject(String customerSpace) {
-        String url = "/customerspaces/{customerSpace}/dcpproject/list";
+    public List<Project> getAllDCPProject(String customerSpace) {
+        String url = "/customerspaces/{customerSpace}/project/list";
         url = constructUrl(url, customerSpace);
         List<?> results = get("get all dcp project", url, List.class);
-        return JsonUtils.convertList(results, DCPProject.class);
+        return JsonUtils.convertList(results, Project.class);
     }
 
-    public DCPProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
-        String url = "/customerspaces/{customerSpace}/dcpproject?projectId={projectId}";
+    public ProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
+        String url = "/customerspaces/{customerSpace}/project?projectId={projectId}";
         url = constructUrl(url, customerSpace, projectId);
-        return get("get dcp project by projectId", url, DCPProjectDetails.class);
+        return get("get dcp project by projectId", url, ProjectDetails.class);
     }
 
     public void deleteProject(String customerSpace, String projectId) {
-        String url = "/customerspaces/{customerSpace}/dcpproject?projectId={projectId}";
+        String url = "/customerspaces/{customerSpace}/project?projectId={projectId}";
         url = constructUrl(url, customerSpace, projectId);
         delete("delete dcp project by projectId", url);
     }

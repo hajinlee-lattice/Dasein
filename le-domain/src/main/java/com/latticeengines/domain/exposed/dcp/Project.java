@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
         indexes = { @Index(name = "IX_PROJECT_ID", columnList = "PROJECT_ID") },
         uniqueConstraints = {@UniqueConstraint(name = "UX_PROJECT_ID", columnNames = { "FK_TENANT_ID", "PROJECT_ID" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-public class DCPProject implements HasPid, HasTenant, HasAuditingFields, SoftDeletable {
+public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeletable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

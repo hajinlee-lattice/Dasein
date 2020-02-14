@@ -2,16 +2,16 @@ package com.latticeengines.pls.service.dcp;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.dcp.DCPProject;
-import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
+import com.latticeengines.domain.exposed.dcp.Project;
+import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 
 public interface ProjectService {
 
-    DCPProjectDetails createDCPProject(String customerSpace, String projectId, String displayName, DCPProject.ProjectType projectType, String user);
+    ProjectDetails createProject(String customerSpace, String projectId, String displayName, Project.ProjectType projectType, String user);
 
-    List<DCPProject> getAllDCPProject(String customerSpace);
+    List<Project> getAllProjects(String customerSpace);
 
-    DCPProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId);
+    ProjectDetails getProjectByProjectId(String customerSpace, String projectId);
 
     void deleteProject(String customerSpace, String projectId);
 }
