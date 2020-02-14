@@ -63,6 +63,8 @@ public class HealthCheckResource {
     @GetMapping(value = "/stackinfo")
     @ResponseBody
     @ApiOperation(value = "Get current active stack")
+    @NoMetricsLog
+    @IgnoreGlobalApiMeter
     public Map<String, String> getStackInfo() {
         Map<String, String> response = new HashMap<>();
         response.put("CurrentStack", currentStack);

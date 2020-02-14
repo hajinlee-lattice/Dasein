@@ -17,6 +17,7 @@
     <import resource="classpath:common-webapp-env-context.xml"/>
     <import resource="classpath:pls-context.xml"/>
     <import resource="classpath:pls-security-context.xml"/>
+    <import resource="classpath:monitor-aspects-context.xml"/>
     <import resource="classpath:security-aspect-context.xml"/>
     <import resource="classpath:quartzclient-context.xml"/>
 
