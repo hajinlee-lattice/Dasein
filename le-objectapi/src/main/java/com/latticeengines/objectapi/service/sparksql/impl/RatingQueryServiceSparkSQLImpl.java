@@ -47,17 +47,18 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
 
     private static final Logger log = LoggerFactory.getLogger(RatingQueryServiceSparkSQLImpl.class);
 
-
     @Inject
-    public RatingQueryServiceSparkSQLImpl(@Named("queryEvaluatorServiceSparkSQL") QueryEvaluatorService queryEvaluatorService,
-                                          TransactionService transactionService) {
+    public RatingQueryServiceSparkSQLImpl(
+            @Named("queryEvaluatorServiceSparkSQL") QueryEvaluatorService queryEvaluatorService,
+            TransactionService transactionService) {
         super(queryEvaluatorService, transactionService);
     }
 
     /**
      * @param livySession
      *
-     * This is added for Testing Purpose. In real world, this session will be created at runtime
+     *            This is added for Testing Purpose. In real world, this session
+     *            will be created at runtime
      */
     public void setLivySession(LivySession livySession) {
         ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).setLivySession(livySession);
@@ -65,7 +66,7 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
 
     @Override
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version,
-                                            String sqlUser) {
+            String sqlUser) {
         HdfsDataUnit sparkResult = getRatingData(frontEndQuery, version);
         String avroPath = sparkResult.getPath();
         Configuration yarnConfiguration = //
@@ -94,7 +95,7 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
         List<Pair<String, String>> ruleSqls = getRuleQueries(frontEndQuery, model, version);
         List<Pair<String, String>> nonEmptyRuleSqls = new ArrayList<>();
         List<String> viewList = new ArrayList<>();
-        for (Pair<String, String> pair: ruleSqls) {
+        for (Pair<String, String> pair : ruleSqls) {
             String alias = pair.getLeft();
             String sql = pair.getRight();
             if (StringUtils.isNotBlank(sql)) {
@@ -108,7 +109,7 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
     }
 
     private List<Pair<String, String>> getRuleQueries(FrontEndQuery frontEndQuery, RuleBasedModel model, //
-                                                     DataCollection.Version version) {
+            DataCollection.Version version) {
         frontEndQuery.setRatingModels(null);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(null);
@@ -117,7 +118,7 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
         FrontEndQuery defaultQuery = setRatingLookup(frontEndQuery.getDeepCopy(), "Z");
         String defaultRatingSql = getQueryStr(defaultQuery, version, SparkQueryProvider.SPARK_BATCH_USER);
         sqls.add(Pair.of("DefaultBucket", defaultRatingSql));
-        for (RatingBucketName bucketName: RatingBucketName.values()) {
+        for (RatingBucketName bucketName : RatingBucketName.values()) {
             // in natural order of the enum
             Map<String, Restriction> rules = model.getRatingRule().getRuleForBucket(bucketName);
             FrontEndQuery ruleQuery = mergeRules(frontEndQuery, rules);

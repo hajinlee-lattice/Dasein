@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.util;
 
+import static com.latticeengines.domain.exposed.query.ComparisonType.IN_COLLECTION;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_EMPTY;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NOT_NULL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
+import static com.latticeengines.domain.exposed.query.ComparisonType.NOT_IN_COLLECTION;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -102,11 +105,20 @@ public final class RestrictionUtils {
         if (isValueFreeOperator(bkt.getComparisonType())) {
             bkt.setValues(Collections.emptyList());
         }
+        if (isMultiValueOperator(bkt.getComparisonType())) {
+            List<Object> vals = bkt.getValues();
+            List<Object> distinctVals = vals.stream().distinct().collect(Collectors.toList());
+            bkt.setValues(distinctVals);
+        }
         bucketRestriction.setBkt(bkt);
     }
 
     private static boolean isValueFreeOperator(ComparisonType operator) {
         return IS_NULL.equals(operator) || IS_NOT_NULL.equals(operator) || IS_EMPTY.equals(operator);
+    }
+
+    public static boolean isMultiValueOperator(ComparisonType operator) {
+        return IN_COLLECTION.equals(operator) || NOT_IN_COLLECTION.equals(operator);
     }
 
     public static List<BucketRestriction> validateBktsInRestriction(Restriction restriction) {
@@ -139,24 +151,27 @@ public final class RestrictionUtils {
     private static void validateBucket(BucketRestriction bucketRestriction) {
         Bucket bkt = bucketRestriction.getBkt();
         AttributeLookup attr = bucketRestriction.getAttr();
+        boolean needToFurtherValidate = true;
         if (BusinessEntity.PurchaseHistory.equals(attr.getEntity())) {
             // PH buckets
-            return;
+            needToFurtherValidate = false;
         }
-        if (bkt.getTransaction() != null) {
+        if (needToFurtherValidate && bkt.getTransaction() != null) {
             // special buckets
-            return;
+            needToFurtherValidate = false;
         }
-        if (bkt.getDateFilter() != null) {
+        if (needToFurtherValidate && bkt.getDateFilter() != null) {
             // special buckets
-            return;
+            needToFurtherValidate = false;
         }
-        if (bkt.getChange() != null) {
+        if (needToFurtherValidate && bkt.getChange() != null) {
             // special buckets
-            return;
+            needToFurtherValidate = false;
         }
-        ComparisonType comparisonType = bkt.getComparisonType();
-        validateComparatorAndValues(comparisonType, bkt.getValues());
+        if (needToFurtherValidate) {
+            ComparisonType comparisonType = bkt.getComparisonType();
+            validateComparatorAndValues(comparisonType, bkt.getValues());
+        }
     }
 
     private static void validateComparatorAndValues(ComparisonType comparator, List<Object> values) {
@@ -361,7 +376,7 @@ public final class RestrictionUtils {
             throw new RuntimeException("Prior only time filter should only have one value, but found "
                     + transaction.getTimeFilter().getValues());
         }
-        int val = Integer.valueOf(String.valueOf(transaction.getTimeFilter().getValues().get(0)));
+        int val = Integer.parseInt(String.valueOf(transaction.getTimeFilter().getValues().get(0)));
         TimeFilter prior = TimeFilter.prior(val, period);
         TimeFilter within = TimeFilter.withinInclude(val, period);
         Bucket.Transaction priorTxn, withinTxn;

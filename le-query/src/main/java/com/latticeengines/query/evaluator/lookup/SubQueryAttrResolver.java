@@ -44,14 +44,20 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
     public ComparableExpression<String> resolveForSubselect(SubQueryAttrLookup lookup) {
         SubQuery subQuery = lookup.getSubQuery();
         SQLQuery<?> sqlSubQuery;
-        if (subQuery.getSubQueryExpression() == null) {
-            sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery(), sqlUser);
-        } else {
-            sqlSubQuery = (SQLQuery<?>) subQuery.getSubQueryExpression();
-        }
         String alias = subQuery.getAlias();
-        StringPath subQueryPath = QueryUtils.getAttributePath(lookup.getSubQuery(), lookup.getAttribute());
-        return Expressions.asComparable(SQLExpressions.select(subQueryPath).from(sqlSubQuery.as(alias)));
+        if (subQuery.getSubQueryExpression() == null && subQuery.getQuery() == null) {
+            StringPath attrPath = Expressions.stringPath(lookup.getAttribute());
+            StringPath aliasPath = Expressions.stringPath(alias);
+            return Expressions.asComparable(SQLExpressions.select(attrPath).from(aliasPath));
+        } else {
+            if (subQuery.getSubQueryExpression() == null) {
+                sqlSubQuery = queryProcessor.process(repository, subQuery.getQuery(), sqlUser);
+            } else {
+                sqlSubQuery = (SQLQuery<?>) subQuery.getSubQueryExpression();
+            }
+            StringPath subQueryPath = QueryUtils.getAttributePath(lookup.getSubQuery(), lookup.getAttribute());
+            return Expressions.asComparable(SQLExpressions.select(subQueryPath).from(sqlSubQuery.as(alias)));
+        }
     }
 
     @SuppressWarnings("unchecked")

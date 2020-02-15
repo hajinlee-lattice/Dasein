@@ -10,6 +10,9 @@
     <!-- use javax.inject.Inject -->
     <disallow class="org.springframework.beans.factory.annotation.Autowired"/>
 
+    <!-- org.apache.commons.lang3.tuple.Pair -->
+    <disallow class="^((?!org\.apache\.commons\.lang3\.tuple).)*\.Pair" regex="true"/>
+
     <!-- org.apache.commons.lang3.StringUtils -->
     <disallow class="^((?!org\.apache\.commons\.lang3).)*\.StringUtils$" regex="true"/>
     <disallow class="^.*\.StringUtil$" regex="true"/>
