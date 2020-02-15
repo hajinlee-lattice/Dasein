@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
@@ -263,7 +264,7 @@ public class S3ServiceImpl implements S3Service {
             log.info(upload.getDescription());
             upload.waitForCompletion();
             log.info("Uploaded " + uploadedObjects.incrementAndGet() + " out of " + numFiles + " files.");
-        } catch (InterruptedException e) {
+        } catch (AmazonClientException | InterruptedException e) {
             UploadImpl uploadImpl = (UploadImpl) upload;
             UploadMonitor uploadMonitor = (UploadMonitor) uploadImpl.getMonitor();
             try {
