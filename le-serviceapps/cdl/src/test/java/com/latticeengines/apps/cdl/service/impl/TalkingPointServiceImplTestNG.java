@@ -101,9 +101,10 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         tp2 = tps.get(1);
 
-        List<Play> plays = playService.findDependantPlays(Arrays.asList("Account.CompanyName", "Account.Website"));
-        Assert.assertEquals(plays.size(), 1);
-        Assert.assertEquals(plays.get(0).getDisplayName(), testPlay.getDisplayName());
+        List<String> playDisplayNames = playService.findDependantPlayDisplayNames(Arrays.asList("Account.CompanyName", "Account" +
+                ".Website"));
+        Assert.assertEquals(playDisplayNames.size(), 1);
+        Assert.assertEquals(playDisplayNames.get(0), testPlay.getDisplayName());
 
         // TODO: Turn On after fixing tenancy part of
         // talkingPointService.findDependantPlayIds
@@ -140,9 +141,10 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         // Assert.assertEquals(playIds.size(), 1);
         // Assert.assertEquals(new ArrayList<>(playIds).get(0), testPlay.getName());
 
-        plays = playService.findDependantPlays(Arrays.asList("Account.CompanyName", "Account.Website"));
-        Assert.assertEquals(plays.size(), 1);
-        Assert.assertEquals(plays.get(0).getDisplayName(), testPlay.getDisplayName());
+        playDisplayNames = playService.findDependantPlayDisplayNames(Arrays.asList("Account.CompanyName", "Account" +
+                ".Website"));
+        Assert.assertEquals(playDisplayNames.size(), 1);
+        Assert.assertEquals(playDisplayNames.get(0), testPlay.getDisplayName());
 
         tps = talkingPointService.findAllByPlayName(testPlay.getName(), false);
         Assert.assertNotNull(tps);

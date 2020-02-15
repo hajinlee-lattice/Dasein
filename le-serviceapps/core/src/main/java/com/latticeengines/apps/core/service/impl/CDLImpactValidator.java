@@ -99,10 +99,11 @@ public class CDLImpactValidator extends AttrValidator {
         }
         if (isToBeDisabledForTalkingPoint(attrConfig)) {
             Runnable playRunnable = () -> {
-                List<Play> impactPlays = cdlDependenciesProxy.getDependantPlays(customerSpace, attributes);
-                if (CollectionUtils.isNotEmpty(impactPlays)) {
-                    impactPlays.forEach(play -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS,
-                            play.getDisplayName(), attrConfig));
+                List<String> impactPlayDisplayNames = cdlDependenciesProxy.getDependantPlayDisplayNames(customerSpace,
+                        attributes);
+                if (CollectionUtils.isNotEmpty(impactPlayDisplayNames)) {
+                    impactPlayDisplayNames.forEach(name -> addWarningMsg(ImpactWarnings.Type.IMPACTED_PLAYS,
+                            name, attrConfig));
                 }
             };
             threads.add(playRunnable);

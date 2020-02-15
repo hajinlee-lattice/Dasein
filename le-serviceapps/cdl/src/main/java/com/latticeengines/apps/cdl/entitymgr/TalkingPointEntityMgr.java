@@ -10,5 +10,5 @@ public interface TalkingPointEntityMgr extends BaseEntityMgrRepository<TalkingPo
 
     TalkingPoint findByName(String name);
 
-    List<String> findPlaysUsingGivenAttributes(List<String> attributes);
+    List<String> findPlayDisplayNamesUsingGivenAttributes(List<String> attributes);
 }

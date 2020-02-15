@@ -8,10 +8,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -19,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.pls.Play;
 
 @Entity
 @Table(name = "DANTE_PUBLISHEDTALKINGPOINT")
@@ -38,6 +43,12 @@ public class PublishedTalkingPoint implements HasPid, HasName, HasAuditingFields
     @JsonProperty("playName")
     @Column(name = "PLAY_NAME", nullable = false)
     private String playName;
+
+    @JsonProperty("play")
+    @ManyToOne
+    @JoinColumn(name = "PLAY_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Play play;
 
     @JsonProperty("title")
     @Column(name = "TITLE", nullable = true)
@@ -88,6 +99,14 @@ public class PublishedTalkingPoint implements HasPid, HasName, HasAuditingFields
 
     public void setPlayName(String playName) {
         this.playName = playName;
+    }
+
+    public Play getPlay() {
+        return play;
+    }
+
+    public void setPlay(Play play) {
+        this.play = play;
     }
 
     public String getTitle() {

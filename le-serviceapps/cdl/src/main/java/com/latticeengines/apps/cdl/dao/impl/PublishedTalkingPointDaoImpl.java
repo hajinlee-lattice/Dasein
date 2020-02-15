@@ -36,9 +36,9 @@ public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPo
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<String> findPlaysUsingGivenAttributes(List<String> attributes) {
+    public List<String> findPlayDisplayNamesUsingGivenAttributes(List<String> attributes) {
         Session session = getSessionFactory().getCurrentSession();
-        String queryStr = String.format("select distinct tp.playName from %s tp where ( ",
+        String queryStr = String.format("select distinct tp.play.displayName from %s tp where ( ",
                 getEntityClass().getSimpleName())
                 + attributes.stream().map(attr -> "content like '%{!" + attr + "}%'")
                         .collect(Collectors.joining(" or "))

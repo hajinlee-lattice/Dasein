@@ -241,12 +241,13 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     @Override
-    public Set<String> findDependantPlayIds(List<String> attributes) {
+    public Set<String> findDependantPlayDisplayNames(List<String> attributes) {
         if (CollectionUtils.isEmpty(attributes)) {
             return new HashSet<>();
         }
-        List<String> playNames = talkingPointEntityMgr.findPlaysUsingGivenAttributes(attributes);
-        List<String> publishedPlayNames = publishedTalkingPointEntityMgr.findPlaysUsingGivenAttributes(attributes);
+        List<String> playNames = talkingPointEntityMgr.findPlayDisplayNamesUsingGivenAttributes(attributes);
+        List<String> publishedPlayNames =
+                publishedTalkingPointEntityMgr.findPlayDisplayNamesUsingGivenAttributes(attributes);
         playNames.addAll(publishedPlayNames);
         return new HashSet<>(playNames);
     }
@@ -286,6 +287,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         ptp.setCreated(tp.getCreated());
         ptp.setName(tp.getName());
         ptp.setUpdated(tp.getUpdated());
+        ptp.setPlay(tp.getPlay());
         ptp.setPlayName(tp.getPlay().getName());
         ptp.setTitle(tp.getTitle());
         ptp.setContent(tp.getContent());

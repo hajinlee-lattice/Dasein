@@ -19,7 +19,6 @@ import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBas
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -40,10 +39,9 @@ public class CDLImpactValidatorFunctionalTestNG extends ServiceAppsFunctionalTes
         tenant.setName(this.getClass().getSimpleName());
         MultiTenantContext.setTenant(tenant);
         CDLDependenciesProxy cdlDependenciesProxy = Mockito.mock(CDLDependenciesProxy.class);
-        Play play = new Play();
-        play.setName("play1");
-        List<Play> playList = Collections.singletonList(play);
-        when(cdlDependenciesProxy.getDependantPlays(anyString(), anyList())).thenReturn(playList);
+        List<String> playDisplayNames = new ArrayList<>();
+        playDisplayNames.add("play1");
+        when(cdlDependenciesProxy.getDependantPlayDisplayNames(anyString(), anyList())).thenReturn(playDisplayNames);
         MetadataSegment seg = new MetadataSegment();
         List<MetadataSegment> segList = Collections.singletonList(seg);
         when(cdlDependenciesProxy.getDependingSegments(anyString(), anyList())).thenReturn(segList);

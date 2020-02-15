@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -42,18 +41,11 @@ public class CDLDependenciesProxy extends MicroserviceRestApiProxy implements Pr
         return JsonUtils.convertList(rawSegments, RatingEngine.class);
     }
 
-    public List<Play> getDependingPlays(String customerSpace, List<String> attributes) {
-        String url = constructUrl("/customerspaces/{customerSpace}/dependencies/plays",
-                shortenCustomerSpace(customerSpace));
-        List<?> rawSegments = post("get depending plays", url, attributes, List.class);
-        return JsonUtils.convertList(rawSegments, Play.class);
-    }
-
-    public List<Play> getDependantPlays(String customerSpace, List<String> attributes) {
+    public List<String> getDependantPlayDisplayNames(String customerSpace, List<String> attributes) {
         String url = constructUrl("/customerspaces/{customerSpace}/dependencies/plays",
                 shortenCustomerSpace(customerSpace));
         List<?> rawSegments = post("Get dependant play display names", url, attributes, List.class);
-        return JsonUtils.convertList(rawSegments, Play.class);
+        return JsonUtils.convertList(rawSegments, String.class);
     }
 
 }

@@ -506,51 +506,17 @@ public class PlayServiceImpl implements PlayService {
     }
 
     @Override
-    public List<Play> findDependingPalys(List<String> attributes) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        Set<Play> dependingPlays = new HashSet<>();
-        if (attributes != null) {
-            log.info("getting play " + tenant.getId());
-            List<Play> plays = getAllPlays();
-            if (plays != null) {
-                for (Play play : plays) {
-                    List<AttributeLookup> playAttributes = talkingPointService
-                            .getAttributesInTalkingPointOfPlay(play.getName());
-                    for (AttributeLookup attributeLookup : playAttributes) {
-                        if (attributes.contains(sanitize(attributeLookup.toString()))) {
-                            dependingPlays.add(play);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        return new ArrayList<>(dependingPlays);
-    }
-
-    @Override
-    public List<Play> findDependantPlays(List<String> attributes) {
+    public List<String> findDependantPlayDisplayNames(List<String> attributes) {
         String customerSpace = MultiTenantContext.getTenant().getId();
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        Set<String> playIds = talkingPointService.findDependantPlayIds(attributes);
+        Set<String> playIds = talkingPointService.findDependantPlayDisplayNames(attributes);
         stopWatch.stop();
-        log.info(String.format("Time to get %d playIds from talking points for Tenant %s: %s ms", playIds.size(),
+        log.info(String.format("Time to get %d play display names from talking points for Tenant %s: %s ms",
+                playIds.size(),
                 customerSpace, stopWatch.getTime(TimeUnit.MILLISECONDS)));
-        if (CollectionUtils.isEmpty(playIds)) {
-            return new ArrayList<>();
-        }
 
-        stopWatch.reset();
-        stopWatch.start();
-        List<Play> plays = playEntityMgr.findAll().stream().filter(play -> playIds.contains(play.getName()))
-                .collect(Collectors.toList());
-        stopWatch.stop();
-        log.info(String.format("Time to get %d plays from PlayIds for Tenant: %s: %s ms", plays.size(), customerSpace,
-                stopWatch.getTime(TimeUnit.MILLISECONDS)));
-
-        return plays;
+        return CollectionUtils.isEmpty(playIds) ? new ArrayList<>() : new ArrayList<>(playIds);
     }
 
     private String sanitize(String attribute) {

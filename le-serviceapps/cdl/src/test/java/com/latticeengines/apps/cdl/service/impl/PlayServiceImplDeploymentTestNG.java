@@ -126,11 +126,10 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     public void testFindDependingPlays() {
         List<String> attributes = new ArrayList<>();
         attributes.add("Account.DUNS");
-        List<Play> plays = playService.findDependingPalys(attributes);
+        List<String> plays = playService.findDependantPlayDisplayNames(attributes);
 
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 1);
-        assertPlay(plays.get(0));
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testFindDependingPlays" })
