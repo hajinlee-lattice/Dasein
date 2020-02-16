@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -15,8 +14,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -39,11 +42,12 @@ public class EntityQueryServiceImplBigListTestNG extends QueryServiceImplTestNGB
 
     @Test(groups = "functional")
     public void testBigList() {
-        Collection<Object> bigList = getCompanyNamesList();
+        List<Object> bigList = getCompanyNamesList();
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
-        Restriction accRes = Restriction.builder().let(BusinessEntity.Account, AccountAttr.CompanyName)
-                .inCollection(bigList).build();
+        Bucket bkt = Bucket.valueBkt(ComparisonType.IN_COLLECTION, bigList);
+        AttributeLookup attr = new AttributeLookup(BusinessEntity.Account, AccountAttr.CompanyName);
+        Restriction accRes = new BucketRestriction(attr, bkt);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         frontEndRestriction.setRestriction(accRes);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
@@ -59,7 +63,7 @@ public class EntityQueryServiceImplBigListTestNG extends QueryServiceImplTestNGB
         Assert.assertTrue(duration2 < duration1, "Second run should be faster");
     }
 
-    private Collection<Object> getCompanyNamesList() {
+    private List<Object> getCompanyNamesList() {
         List<Object> candidates = new ArrayList<>();
         final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("CompanyNameBigList");
         Assert.assertNotNull(is);
