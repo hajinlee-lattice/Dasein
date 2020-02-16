@@ -16,9 +16,9 @@ import com.latticeengines.apps.lp.service.impl.ModelDownloaderCallable;
 import com.latticeengines.apps.lp.testframework.LPDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 
-public class ModelSummaryResourceTestNG extends LPDeploymentTestNGBase {
+public class ModelSummaryResourceDeploymentTestNG extends LPDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(ModelSummaryResourceTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelSummaryResourceDeploymentTestNG.class);
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;

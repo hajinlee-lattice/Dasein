@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.lp.testframework.LPDeploymentTestNGBase;
+import com.latticeengines.apps.lp.testframework.LPFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -16,7 +16,7 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 
-public class PLSComponentManagerTestNG extends LPDeploymentTestNGBase {
+public class PLSComponentManagerTestNG extends LPFunctionalTestNGBase {
 
     @Inject
     private PLSComponentManagerImpl componentManager;
