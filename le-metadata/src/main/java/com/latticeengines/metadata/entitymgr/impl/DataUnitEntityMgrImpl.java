@@ -74,7 +74,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     @Override
     public List<DataUnit> findByStorageType(DataUnit.StorageType storageType) {
-        List<DataUnitEntity> entities = dataUnitCrossTenantReaderRepository.findByStorageType(storageType);
+        List<DataUnitEntity> entities = dataUnitCrossTenantReaderRepository.findByStorageTypeOrderByTenantId(storageType);
         return convertList(entities, false);
     }
 

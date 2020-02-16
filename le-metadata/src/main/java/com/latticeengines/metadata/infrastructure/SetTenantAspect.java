@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Aspect
-public class SetTenantAspect {
+public class    SetTenantAspect {
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;

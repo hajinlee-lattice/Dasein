@@ -70,7 +70,8 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             "redshiftPublishWorkflow", //
             "publishWorkflow", //
             "rtsBulkScoreWorkflow", //
-            "scoreWorkflow");
+            "scoreWorkflow",
+            "migrateDynamoWorkflow");
 
     private static Set<ReportPurpose> reportsPurposes = Sets.newHashSet( //
             ReportPurpose.IMPORT_DATA_SUMMARY, //

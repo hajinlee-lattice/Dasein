@@ -108,4 +108,9 @@ public class DataUnitServiceImpl implements DataUnitService {
         return true;
     }
 
+    @Override
+    public List<DataUnit> findByStorageType(DataUnit.StorageType storageType) {
+        return entityMgr.findByStorageType(storageType);
+    }
+
 }

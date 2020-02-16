@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
+import com.latticeengines.domain.exposed.cdl.MigrateDynamoRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -184,7 +185,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
         } else {
             throw new LedpException(LedpCode.LEDP_40056,
-                    new String[] { StringUtils.join(responseDoc.getErrors(), ",") });
+                    new String[]{StringUtils.join(responseDoc.getErrors(), ",")});
         }
     }
 
@@ -351,7 +352,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime,
-            BusinessEntity entity, String initiator) throws ParseException {
+                                            BusinessEntity entity, String initiator) throws ParseException {
         String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date start = dateFormat.parse(startTime);
@@ -380,7 +381,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public ApplicationId cleanupByUpload(String customerSpace, SourceFile sourceFile, BusinessEntity entity,
-            CleanupOperationType operationType, String initiator) {
+                                         CleanupOperationType operationType, String initiator) {
         CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
         configuration.setTableName(sourceFile.getTableName());
         configuration.setFilePath(sourceFile.getPath());
@@ -406,7 +407,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public ApplicationId cleanupByUpload(String customerSpace, String tableName, BusinessEntity entity,
-            CleanupOperationType operationType, String initiator) {
+                                         CleanupOperationType operationType, String initiator) {
         CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
         configuration.setTableName(tableName);
         configuration.setUseDLData(true);
@@ -481,7 +482,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     public List<S3ImportSystem> getS3ImportSystemList(String customerSpace) {
         String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/list",
-                    shortenCustomerSpace(customerSpace));
+                shortenCustomerSpace(customerSpace));
         List<?> rawlist = get("get s3 import system list", url, List.class);
         return JsonUtils.convertList(rawlist, S3ImportSystem.class);
     }
@@ -547,7 +548,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createWebVisitTemplate2(String customerSpace,
-                                          List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+                                           List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup/webvisit2",
                 shortenCustomerSpace(customerSpace));
         ResponseDocument<Boolean> responseDoc = post("create webvisit template with IW 2.0", url,
@@ -562,7 +563,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     @SuppressWarnings("unchecked")
     public boolean createDefaultOpportunityTemplate(String customerSpace, String systemName) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup" +
-                "/defaultOpportunity?systemName={systemName}",
+                        "/defaultOpportunity?systemName={systemName}",
                 shortenCustomerSpace(customerSpace), systemName);
         ResponseDocument<Boolean> responseDoc = post("create Default Opportunity template with IW 2.0", url,
                 null, ResponseDocument.class);
@@ -575,7 +576,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     @SuppressWarnings("unchecked")
     public boolean createOpportunityTemplate(String customerSpace, String systemName,
-                                          List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+                                             List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
         String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datafeed/tasks/setup/opportunity?systemName={systemName}",
                 shortenCustomerSpace(customerSpace), systemName);
         ResponseDocument<Boolean> responseDoc = post("create webvisit template", url, simpleTemplateMetadataList,
@@ -629,5 +630,18 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     public SchedulingStatus getSchedulingStatus(String customerSpace) {
         String url = constructUrl("/schedulingPAQueue/status/{customerSpace}", shortenCustomerSpace(customerSpace));
         return get("get schedulingStatus for tenant", url, SchedulingStatus.class);
+    }
+
+    public ApplicationId submitMigrateDynamoJob(String customerSpace, MigrateDynamoRequest migrateDynamoRequest) {
+        String url = constructUrl("/customerspaces/{customerSpace}/migratetable/dynamo", customerSpace);
+        ResponseDocument<String> responseDoc = post("migrateDynamo", url, migrateDynamoRequest, ResponseDocument.class);
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
+        } else {
+            throw new RuntimeException("Failed to submit migrate dynamo job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 }

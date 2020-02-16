@@ -21,4 +21,6 @@ public interface DataUnitService {
     boolean renameTableName(DataUnit dataUnit, String tableName);
 
     boolean cleanupByTenant();
+
+    List<DataUnit> findByStorageType(DataUnit.StorageType storageType);
 }

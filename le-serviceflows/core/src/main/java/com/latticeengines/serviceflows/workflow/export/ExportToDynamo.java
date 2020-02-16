@@ -75,7 +75,6 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
     public void execute() {
         List<DynamoExportConfig> configs = getExportConfigs();
         log.info("Going to export tables to dynamo: " + configs);
-
         List<Exporter> exporters = new ArrayList<>();
         configs.forEach(config -> {
             if (!Boolean.TRUE.equals(config.getRelink()) || !relinkDynamo(config)) {
@@ -83,7 +82,9 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
                 exporters.add(exporter);
             }
         });
-
+        if (CollectionUtils.isEmpty(exporters)) {
+            log.warn("No tables need to export, skip execution.");
+        }
         int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
         ThreadPoolUtils.runInParallel(executors, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
@@ -124,7 +125,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
         public void run() {
             try (PerformanceTimer timer = new PerformanceTimer("Upload table " + config + " to dynamo.")) {
                 log.info("Uploading table " + config.getTableName() + " to dynamo.");
-                HdfsToDynamoConfiguration eaiConfig = generateEaiConfig(config);
+                HdfsToDynamoConfiguration eaiConfig = generateEaiConfig();
                 RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(3, 5000, 2.0, null);
                 AppSubmission appSubmission = retry.execute(context -> {
                     if (context.getRetryCount() > 0) {
@@ -142,7 +143,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             }
         }
 
-        private HdfsToDynamoConfiguration generateEaiConfig(DynamoExportConfig config) {
+        private HdfsToDynamoConfiguration generateEaiConfig() {
             String tableName = config.getTableName();
             String inputPath = getInputPath(config);
             log.info("Found input path for table " + tableName + ": " + inputPath);
