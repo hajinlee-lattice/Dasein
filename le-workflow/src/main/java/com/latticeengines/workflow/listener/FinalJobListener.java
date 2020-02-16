@@ -1,12 +1,16 @@
 package com.latticeengines.workflow.listener;
 
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +18,8 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.service.JobCacheService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -36,6 +42,9 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     @Inject
     private JobCacheService jobCacheService;
 
+    @Inject
+    private MetadataProxy metadataProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
     }
@@ -47,7 +56,6 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
             if (!updateStatus(executionId, jobExecution)) {
                 throw new RuntimeException("Can not update workflow job status, Id=" + executionId);
             }
-
             clearJobCache(executionId);
         } finally {
             if (waitForCaller) {
@@ -94,6 +102,18 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
         log.info("Updated work flow status=" + status + " workflow Id=" + executionId);
+        if (!BatchStatus.FAILED.equals(jobExecution.getStatus())) {
+            Set<String> registeredTableNames = getObjectFromContext(jobExecution, BaseWorkflowStep.REGISTERED_TABLE_NAMES, Set.class);
+            if (CollectionUtils.isNotEmpty(registeredTableNames)) {
+                String customerSpace = workflowJob.getTenant().getId();
+                try {
+                    metadataProxy.keepTablesForever(customerSpace, registeredTableNames.stream().collect(Collectors.toList()));
+                } catch (Exception e) {
+                    log.error(String.format("Failed to update table retention policy when workflow %d finished.", workflowJob.getPid()), e);
+                }
+
+            }
+        }
         return true;
     }
 

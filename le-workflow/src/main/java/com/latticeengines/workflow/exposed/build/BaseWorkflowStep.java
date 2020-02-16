@@ -281,6 +281,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     public static final String TRACING_CONTEXT = "TRACING_CONTEXT";
 
+    public static final String REGISTERED_TABLE_NAMES = "REGISTERED_TABLE_NAMES";
+
     // tables to be carried over in restarted PA
     protected static final Set<String> TABLE_NAMES_FOR_PA_RETRY = Sets.newHashSet( //
             ENTITY_MATCH_ACCOUNT_TARGETTABLE, //
@@ -666,4 +668,12 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return renewableKeys;
     }
 
+    protected void registerTable(String tableName) {
+        Set<String> registeredTableNames = getObjectFromContext(REGISTERED_TABLE_NAMES, Set.class);
+        if (CollectionUtils.isEmpty(registeredTableNames)) {
+            registeredTableNames = new HashSet<>();
+        }
+        registeredTableNames.add(tableName);
+        putObjectInContext(REGISTERED_TABLE_NAMES, registeredTableNames);
+    }
 }
