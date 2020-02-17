@@ -1,11 +1,7 @@
 package com.latticeengines.eai.service.impl.file;
 
-import static com.latticeengines.eai.util.HdfsUriGenerator.EXTRACT_DATE_FORMAT;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +25,6 @@ import com.latticeengines.domain.exposed.eai.ImportContext;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
-import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.mapreduce.counters.Counters;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordImportCounter;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -83,6 +78,7 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
         context.setProperty(ImportProperty.METADATA, JsonUtils.serialize(template.getModelingMetadata()));
 
         String targetPath = createTargetPath(config.getCustomerSpace());
+        log.info("targetPath is {}.", targetPath);
         List<Table> tableMetadata = new ArrayList<>();
         SourceImportConfiguration sourceImportConfig = sourceImportConfigs.get(0);
         log.info("Importing for " + sourceImportConfig.getSourceType());
@@ -111,6 +107,7 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
         log.info("Application id is : " + appId.toString());
         waitForAppId(appId.toString());
 
+        Map<String, String> targetPathsMap = context.getProperty(ImportProperty.EXTRACT_PATH, Map.class);
         Counters counters = jobProxy.getMRJobCounters(appId.toString());
         long processedRecords = counters.getCounter(RecordImportCounter.IMPORTED_RECORDS).getValue();
         long ignoredRecords = counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
@@ -122,17 +119,17 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
         eaiMetadataService.updateTableSchema(metadata, context);
         eaiMetadataService.registerTables(metadata, context);
 
-        setEaiJobDetailInfo(jobDetailId, (int)processedRecords, ignoredRecords, duplicatedRecords, totalRecords);
+        setEaiJobDetailInfo(jobDetailId, Arrays.asList(targetPathsMap.get(template.getName())), (int)processedRecords, ignoredRecords, duplicatedRecords, totalRecords);
     }
 
     private String createTargetPath(CustomerSpace customerSpace) {
-        String targetPath = String.format("%s/%s/DeleteFile/Extracts/%s",
-                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                SourceType.FILE.getName(), new SimpleDateFormat(EXTRACT_DATE_FORMAT).format(new Date()));
+        String targetPath = String.format("%s/DeleteFile",
+                PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString());
         return targetPath;
     }
 
-    private void setEaiJobDetailInfo(Long jobDetailId, int processedRecords, long ignoredRecords,
+    private void setEaiJobDetailInfo(Long jobDetailId, List<String> pathList, int processedRecords,
+                                     long ignoredRecords,
                                      long duplicatedRecords, long totalRecords) {
         EaiImportJobDetail jobDetail = eaiImportJobDetailService
                 .getImportJobDetailById(jobDetailId);
@@ -141,6 +138,8 @@ public class DeleteFileToHdfsService extends EaiRuntimeService<DeleteFileToHdfsC
             jobDetail.setTotalRows(totalRecords);
             jobDetail.setIgnoredRows(ignoredRecords);
             jobDetail.setDedupedRows(duplicatedRecords);
+            jobDetail.setPathDetail(pathList);
+            log.info("pathList is {}.", JsonUtils.serialize(pathList));
             //when extract has processed records info means the import completed, waiting for register.
             jobDetail.setStatus(ImportStatus.SUCCESS);
             eaiImportJobDetailService.updateImportJobDetail(jobDetail);

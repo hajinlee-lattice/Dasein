@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.DeleteFileUploadStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
@@ -47,6 +48,7 @@ public class DeleteFileUploadStep extends BaseReportStep<DeleteFileUploadStepCon
     public void execute() {
         AppSubmission submission = eaiProxy.submitEaiJob(generateImportConfiguration());
         String applicationId = submission.getApplicationIds().get(0);
+        saveOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID, applicationId);
         waitForAppId(applicationId);
         EaiImportJobDetail jobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         if (jobDetail != null) {

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.listeners.RegisterDeleteDataListener;
 import com.latticeengines.cdl.workflow.steps.maintenance.DeleteFileUploadStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RegisterDeleteDataWorkflowConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportDataFeedImportToS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -23,6 +24,9 @@ public class RegisterDeleteDataWorkflow extends AbstractWorkflow<RegisterDeleteD
     private DeleteFileUploadStep deleteFileUploadStep;
 
     @Inject
+    private ExportDataFeedImportToS3 exportDataFeedImportToS3;
+
+    @Inject
     private RegisterDeleteDataListener registerDeleteDataListener;
 
     @Override
@@ -30,6 +34,7 @@ public class RegisterDeleteDataWorkflow extends AbstractWorkflow<RegisterDeleteD
 
         return new WorkflowBuilder(name(), workflowConfig) //
                 .next(deleteFileUploadStep) //
+                .next(exportDataFeedImportToS3)
                 .listener(registerDeleteDataListener) //
                 .build();//
 
