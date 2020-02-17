@@ -14,18 +14,20 @@ import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 public class EntityQueryServiceSparkSQLImpl extends EntityQueryServiceImpl {
 
     @Inject
-    public EntityQueryServiceSparkSQLImpl(@Named("queryEvaluatorServiceSparkSQL") QueryEvaluatorService queryEvaluatorService,
+    public EntityQueryServiceSparkSQLImpl(
+            @Named("queryEvaluatorServiceSparkSQL") QueryEvaluatorService queryEvaluatorService,
             TransactionService transactionService) {
         super(queryEvaluatorService, transactionService);
     }
 
     /**
      * @param livySession
-     * 
-     * This is added for Testing Purpose. In real world, this session will be created at runtime
+     *
+     *            This is added for Testing Purpose. In real world, this session
+     *            will be created at runtime
      */
     public void setLivySession(LivySession livySession) {
-        ((QueryEvaluatorServiceSparkSQL)queryEvaluatorService).setLivySession(livySession);
+        ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).setLivySession(livySession);
     }
 
 }

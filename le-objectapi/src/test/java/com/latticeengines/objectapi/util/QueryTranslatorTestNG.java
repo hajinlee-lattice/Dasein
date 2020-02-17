@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
+import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.service.impl.QueryServiceImplTestNGBase;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -41,6 +42,9 @@ public class QueryTranslatorTestNG extends QueryServiceImplTestNGBase {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private TempListService tempListService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -58,10 +62,9 @@ public class QueryTranslatorTestNG extends QueryServiceImplTestNGBase {
                 Collections.singletonList(2));
         String prodId = "o13brsbfF10fllM6VUZRxMO7wfo5I7Ks";
         Bucket.Transaction txn = new Bucket.Transaction(prodId, prior2Months, null, null, false);
-        EntityQueryTranslator translator = new EntityQueryTranslator(queryFactory, attrRepo);
+        EntityQueryTranslator translator = new EntityQueryTranslator(queryFactory, attrRepo, SPARK_BATCH_USER, timeTranslator, tempListService);
         FrontEndQuery feQuery = toFrontEndQuery(txn);
-        Query query = translator.translateEntityQuery(feQuery, attrRepo, true, timeTranslator, //
-                "segment");
+        Query query = translator.translateEntityQuery(feQuery, true);
         Assert.assertTrue(query.getRestriction() instanceof LogicalRestriction);
         LogicalRestriction logical = (LogicalRestriction) query.getRestriction();
         Assert.assertEquals(logical.getRestrictions().size(), 2);
@@ -76,7 +79,6 @@ public class QueryTranslatorTestNG extends QueryServiceImplTestNGBase {
 
         MultiTenantContext.setTenant(tenant);
         QueryFactory queryFactory = queryEvaluatorService.getQueryFactory();
-        EntityQueryTranslator translator = new EntityQueryTranslator(queryFactory, attrRepo);
 
         TimeFilterTranslator timeTranslator = transactionService.getTimeFilterTranslator(maxTransactionDate);
 
@@ -96,12 +98,14 @@ public class QueryTranslatorTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
 
         String sqlUser = SPARK_BATCH_USER;
-        Query query = translator.translateEntityQuery(frontEndQuery, attrRepo, true, timeTranslator, sqlUser);
+        EntityQueryTranslator translator = new EntityQueryTranslator(queryFactory, attrRepo, sqlUser, timeTranslator, tempListService);
+        Query query = translator.translateEntityQuery(frontEndQuery, true);
 
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query, sqlUser);
         sqlQuery.setUseLiterals(true);
         String sql = sqlQuery.getSQL().getSQL();
-        Assert.assertTrue(sql.contains(String.format("Account.%s = true or Account.%s = false", fakeBoolean, fakeBoolean)));
+        Assert.assertTrue(
+                sql.contains(String.format("Account.%s = true or Account.%s = false", fakeBoolean, fakeBoolean)));
         Assert.assertFalse(sql.contains(String.format("lower('Account.%s') = lower('yes')", fakeBoolean)));
         Assert.assertFalse(sql.contains(String.format("lower('Account.%s') = lower('no')", fakeBoolean)));
     }

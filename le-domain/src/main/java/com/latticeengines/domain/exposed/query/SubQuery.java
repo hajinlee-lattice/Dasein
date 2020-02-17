@@ -30,6 +30,10 @@ public class SubQuery {
     public SubQuery() {
     }
 
+    public SubQuery(String alias) {
+        this.alias = alias;
+    }
+
     public SubQuery(Query query, String alias) {
         this.query = query;
         this.alias = alias;

@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
+import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.util.QueryDiagnostics;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
@@ -36,6 +37,9 @@ public abstract class BaseQueryServiceImpl {
 
     @Inject
     protected QueryDiagnostics queryDiagnostics;
+
+    @Inject
+    protected TempListService tempListService;
 
     BaseQueryServiceImpl(QueryEvaluatorService queryEvaluatorService) {
         this.queryEvaluatorService = queryEvaluatorService;

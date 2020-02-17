@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 
@@ -29,6 +31,7 @@ import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.EntityLookup;
 import com.latticeengines.domain.exposed.query.GroupBy;
@@ -74,8 +77,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
             Query query = getQuery(attrRepo, frontEndQuery, sqlUser, true);
             if (queryDiagnostics.getQueryLoggingConfig()) {
                 log.info("getData using query: {}",
-                        getQueryStr(frontEndQuery, version, sqlUser, true)
-                                .replaceAll("\\r\\n|\\r|\\n", " "));
+                        getQueryStr(frontEndQuery, version, sqlUser, true).replaceAll("\\r\\n|\\r|\\n", " "));
             }
             return queryEvaluatorService.getCount(attrRepo, query, sqlUser);
         } catch (Exception e) {
@@ -90,7 +92,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
     @Override
     public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser,
-                            boolean enforceTranslation) {
+            boolean enforceTranslation) {
         Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version, sqlUser, enforceTranslation);
         List<Map<String, Object>> data = flux.collectList().block();
         return new DataPage(data);
@@ -98,7 +100,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
     @Override
     public String getQueryStr(FrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser,
-                              boolean isCountQuery) {
+            boolean isCountQuery) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -117,17 +119,18 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
     @Override
     public Query getQuery(AttributeRepository attrRepo, FrontEndQuery frontEndQuery, String sqlUser,
-                          boolean isCountQuery) {
-        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                attrRepo);
+            boolean isCountQuery) {
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
+        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                attrRepo, sqlUser, timeTranslator, tempListService);
         if (timeTranslator == null) {
             log.warn("for tenant " + MultiTenantContext.getShortTenantId() + ", timeTranslator is null");
         }
-        Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+        Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery);
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, attrRepo, isCountQuery, timeTranslator, sqlUser);
+        ConcurrentMap<String, ConcreteRestriction> tempLists = new ConcurrentHashMap<>();
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, isCountQuery);
         if (isCountQuery && !Boolean.TRUE.equals(frontEndQuery.getDistinct())) {
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         } else {
@@ -139,7 +142,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
     }
 
     private Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version,
-                                                  String sqlUser, boolean enforceTranslation) {
+            String sqlUser, boolean enforceTranslation) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
@@ -147,8 +150,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
         try {
             if (queryDiagnostics.getQueryLoggingConfig()) {
                 log.info("getData using query: {}",
-                        getQueryStr(frontEndQuery, version, sqlUser, false)
-                                .replaceAll("\\r\\n|\\r|\\n", " "));
+                        getQueryStr(frontEndQuery, version, sqlUser, false).replaceAll("\\r\\n|\\r|\\n", " "));
             }
             if (enforceTranslation) {
                 Map<String, Map<Long, String>> translationMapping = getDecodeMapping(attrRepo, query.getLookups());
@@ -168,7 +170,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
     @Override
     public Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version,
-                                            String sqlUser) {
+            String sqlUser) {
         String ratingEngineId = frontEndQuery.getRatingEngineId();
         if (StringUtils.isNotBlank(ratingEngineId)) {
             try {
@@ -233,7 +235,7 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
     }
 
     private Query ratingCountQuery(CustomerSpace customerSpace, String ratingField,
-                                   RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
+            RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version, String sqlUser) {
         Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
                 : frontEndQuery.getAccountRestriction().getRestriction();
         Restriction restriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNotNull().build();
@@ -244,13 +246,14 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
 
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                attrRepo);
         TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(transactionService,
                 frontEndQuery);
-        Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery, timeTranslator);
+        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                attrRepo, sqlUser, timeTranslator, tempListService);
+        Map<ComparisonType, Set<AttributeLookup>> map = queryTranslator.needPreprocess(frontEndQuery);
         preprocess(map, attrRepo, timeTranslator);
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, attrRepo, true, timeTranslator, sqlUser);
+        ConcurrentMap<String, ConcreteRestriction> tempLists = new ConcurrentHashMap<>();
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, true);
         query.setPageFilter(null);
         query.setSort(null);
         AttributeLookup ratingLookup = new AttributeLookup(BusinessEntity.Rating, ratingField);

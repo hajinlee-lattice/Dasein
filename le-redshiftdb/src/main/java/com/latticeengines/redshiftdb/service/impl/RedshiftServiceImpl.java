@@ -41,9 +41,6 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Value("${aws.default.secret.key.encrypted}")
     private String awsSecretKey;
 
-    @Value("${aws.region}")
-    private String awsRegion;
-
     @Override
     public void createTable(RedshiftTableConfiguration redshiftTableConfig, Schema schema) {
         try {

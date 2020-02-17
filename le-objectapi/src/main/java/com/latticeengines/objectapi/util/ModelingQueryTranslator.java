@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
+import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 
@@ -35,12 +36,12 @@ public class ModelingQueryTranslator extends QueryTranslator {
 
     private static final Logger log = LoggerFactory.getLogger(ModelingQueryTranslator.class);
 
-    public ModelingQueryTranslator(QueryFactory queryFactory, AttributeRepository repository) {
-        super(queryFactory, repository);
+    public ModelingQueryTranslator(QueryFactory queryFactory, AttributeRepository repository, String sqlUser,
+            TimeFilterTranslator timeFilterTranslator, TempListService tempListService) {
+        super(queryFactory, repository, sqlUser, timeFilterTranslator, tempListService);
     }
 
-    public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, AttributeRepository attrRepo, //
-            EventType eventType, TimeFilterTranslator timeTranslator, String sqlUser) {
+    public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, EventType eventType) {
 
         if (restrictionNotSpecified(frontEndQuery) && restrictionNotSpecified(frontEndQuery.getSegmentQuery())) {
             throw new IllegalArgumentException("No restriction specified for event query");
@@ -52,8 +53,9 @@ public class ModelingQueryTranslator extends QueryTranslator {
         EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
         QueryBuilder queryBuilder = Query.builder();
         boolean useDepivotedPhTable = !SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
-        Restriction restriction = translateFrontEndRestriction(frontEndRestriction, attrRepo, false, useDepivotedPhTable);
-        restriction = translateInnerRestriction(frontEndQuery, attrRepo, BusinessEntity.Account, restriction, useDepivotedPhTable);
+        Restriction restriction = translateFrontEndRestriction(frontEndRestriction, false, useDepivotedPhTable);
+        restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction,
+                useDepivotedPhTable);
 
         setTargetProducts(restriction, frontEndQuery.getTargetProductIds());
 
@@ -61,8 +63,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
         case Scoring:
             if (frontEndQuery.getSegmentQuery() != null) {
                 Restriction segmentRestriction = RestrictionOptimizer.optimize( //
-                        translateEntityQueryRestriction(frontEndQuery.getSegmentQuery(), attrRepo, timeTranslator,
-                                sqlUser));
+                        translateEntityQueryRestriction(frontEndQuery.getSegmentQuery()));
                 QueryBuilder segmentQryBldr = Query.builder();
                 Query segmentQry = segmentQryBldr.from(BusinessEntity.Account) //
                         .select(new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name())) //
@@ -82,6 +83,8 @@ public class ModelingQueryTranslator extends QueryTranslator {
             queryBuilder = eventQueryTranslator.translateForEvent(queryFactory, repository, restriction, frontEndQuery,
                     queryBuilder, sqlUser);
             break;
+        default:
+            throw new UnsupportedOperationException("Unknown event type " + eventType);
         }
 
         PageFilter pageFilter = new PageFilter(0, 0);
