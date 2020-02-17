@@ -59,13 +59,13 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
     }
 
     public ProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
-        String url = "/customerspaces/{customerSpace}/project?projectId={projectId}";
+        String url = "/customerspaces/{customerSpace}/project/{projectId}";
         url = constructUrl(url, customerSpace, projectId);
         return get("get dcp project by projectId", url, ProjectDetails.class);
     }
 
     public void deleteProject(String customerSpace, String projectId) {
-        String url = "/customerspaces/{customerSpace}/project?projectId={projectId}";
+        String url = "/customerspaces/{customerSpace}/project/{projectId}";
         url = constructUrl(url, customerSpace, projectId);
         delete("delete dcp project by projectId", url);
     }

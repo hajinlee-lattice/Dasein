@@ -59,17 +59,17 @@ public class ProjectResource {
         return projectService.getAllProject(customerSpace);
     }
 
-    @GetMapping(value = "")
+    @GetMapping(value = "/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Get project by projectId")
-    public ProjectDetails getDCPProjectByProjectId(@PathVariable String customerSpace, @RequestParam String projectId) {
+    public ProjectDetails getProjectByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
         return projectService.getProjectByProjectId(customerSpace, projectId);
     }
 
-    @DeleteMapping(value = "")
+    @DeleteMapping(value = "/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Delete project by projectId")
-    public Boolean deleteProject(@PathVariable String customerSpace, @RequestParam String projectId) {
+    public Boolean deleteProject(@PathVariable String customerSpace, @PathVariable String projectId) {
         return projectService.deleteProject(customerSpace, projectId);
     }
 }
