@@ -11,6 +11,8 @@ public enum LatticeFeatureFlag {
     BETA_FEATURE("BetaFeature", "Allows beta features"), //
     PROTOTYPE_FEATURE("PrototypeFeature", "Allows prototype features"), //
 
+    TEAM_FEATURE("TeamFeature", "Allows team features"), //
+
     DANTE("Dante", "Dante"), //
     ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file"), //
     ENABLE_DATA_ENCRYPTION("EnableDataEncryption", "Enable data encryption"), //
