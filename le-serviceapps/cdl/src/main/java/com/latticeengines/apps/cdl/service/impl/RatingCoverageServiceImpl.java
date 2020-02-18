@@ -344,7 +344,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             Stream<String> stream) {
         stream.forEach(ratingEngineId -> {
             try {
-                CoverageInfo coverageInfo = processSingleRatingId(tenant, null, ratingEngineId, null,
+                CoverageInfo coverageInfo = processSingleRatingId(tenant, null, ratingEngineId,
                         request.isRestrictNotNullSalesforceId(), null, true, false, false);
                 result.getRatingEngineIdCoverageMap().put(ratingEngineId, coverageInfo);
             } catch (Exception ex) {
@@ -536,7 +536,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     private CoverageInfo processSingleRatingId(Tenant tenant, MetadataSegment targetSegment, String ratingEngineId,
-            Map<String, String> errorMap,
             boolean isRestrictNullLookupId, String lookupId, boolean loadContactCount,
             boolean loadContactsCountByBucket, boolean restrictContactsWithoutEmails) {
         try {
@@ -545,7 +544,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
 
             if (ratingEngine == null || ratingEngine.getSegment() == null) {
-                throw new RuntimeException("Invalid rating engine. Doesn't have segment association.");
+                throw new LedpException(LedpCode.LEDP_32000);
             }
 
             if (isRestrictNullLookupId && StringUtils.isBlank(lookupId)) {
@@ -674,11 +673,8 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             }
             return coverageInfo;
         } catch (Exception ex) {
-            log.info("Ignoring exception in getting coverage info for rating id: " + ratingEngineId, ex);
-            logInErrorMap(errorMap, ratingEngineId, ex.getMessage());
-            return new CoverageInfo(0L, 0L);
+            throw ex;
         }
-
     }
 
     private Restriction restrictContactsWithoutEmails(Restriction contactRestriction) {
@@ -1029,12 +1025,12 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         stream.forEach(ratingModelId -> {
             try {
                 CoverageInfo coverageInfo = processSingleRatingId(tenant, targetSegment, ratingModelId,
-                        response.getErrorMap(), request.isRestrictNullLookupId(), request.getLookupId(),
-                        request.isLoadContactsCount(),
+                        request.isRestrictNullLookupId(), request.getLookupId(), request.isLoadContactsCount(),
                         request.isLoadContactsCountByBucket(), request.isRestrictContactsWithoutEmails());
                 response.getRatingModelsCoverageMap().put(ratingModelId, coverageInfo);
             } catch (Exception ex) {
                 log.info("Ignoring exception in getting coverage info for rating id: " + ratingModelId, ex);
+                response.getRatingModelsCoverageMap().put(ratingModelId, new CoverageInfo(0L, 0L));
                 response.getErrorMap().put(ratingModelId,
                         StringUtils.isNotBlank(ex.getMessage()) ? ex.getMessage() : "null");
             }
