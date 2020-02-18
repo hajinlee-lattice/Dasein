@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.importdata;
 
-import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.MIGRATE_DYNAMO_DATA_UNITS;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +21,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.Impor
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.serviceflows.workflow.export.BaseImportExportS3;
 import com.latticeengines.serviceflows.workflow.util.ImportExportRequest;
-import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("importDynamoTableFromS3")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -63,9 +60,8 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
 
     private void updateDataUnit(DynamoDataUnit dynamoDataUnit) {
         log.info("Update signature to {} for dynamo data unit with name {} and tenant {}.",
-                configuration.getDynamoSignature(), dynamoDataUnit.getName(), dynamoDataUnit.getTenant());
-        dynamoDataUnit.setSignature(configuration.getDynamoSignature());
-        dataUnitProxy.create(customerSpace, dynamoDataUnit);
+                configuration.getDynamoSignature(), dynamoDataUnit.getName(), customerSpace);
+        dataUnitProxy.updateSignature(customerSpace, dynamoDataUnit, configuration.getDynamoSignature());
     }
 
     @Override
@@ -74,7 +70,6 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
         Map<String, DynamoDataUnit> dataUnitMap = dynamoDataUnits.stream()
                 .collect(Collectors.toMap(DataUnit::getName, DataUnit -> (DynamoDataUnit) DataUnit));
         List<String> tableNames = configuration.getTableNames();
-        Map<String, DynamoDataUnit> dataUnitsNeedToMigrate = new HashMap<>();
         for (String tableName : tableNames) {
             DynamoDataUnit dynamoDataUnit = dataUnitMap.get(tableName);
             if (dynamoDataUnit != null) {
@@ -84,7 +79,6 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
                     try {
                         if (HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
                             exportToDynamo(dynamoDataUnit, hdfsPath);
-                            dataUnitsNeedToMigrate.put(dynamoDataUnit.getName(), dynamoDataUnit);
                         } else {
                             // file still not in HDFS after import, so just update its signature
                             updateDataUnit(dynamoDataUnit);
@@ -97,7 +91,6 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
                 }
             }
         }
-        WorkflowStaticContext.putObject(MIGRATE_DYNAMO_DATA_UNITS, dataUnitsNeedToMigrate);
     }
 
     private void exportToDynamo(DynamoDataUnit dynamoDataUnit, String hdfsPath) {

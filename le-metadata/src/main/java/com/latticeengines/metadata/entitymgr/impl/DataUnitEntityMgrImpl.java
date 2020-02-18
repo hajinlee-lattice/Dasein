@@ -20,6 +20,7 @@ import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.documentdb.entity.DataUnitEntity;
 import com.latticeengines.documentdb.entitymgr.impl.BaseDocumentEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.repository.document.reader.DataUnitCrossTenantReaderRepository;
@@ -63,6 +64,20 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
             return createNewDataUnit(tenantId, dataUnit);
         } else {
             return updateExistingDataUnit(dataUnit, existing);
+        }
+    }
+
+    @Override
+    public void updateSignature(String tenantId, DataUnit dataUnit, String signature) {
+        if (DataUnit.StorageType.Dynamo.equals(dataUnit.getStorageType())) {
+            DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, dataUnit.getName(), dataUnit.getStorageType());
+            if (existing != null) {
+                DataUnit existingDataUnit = existing.getDocument();
+                if (existingDataUnit != null) {
+                    ((DynamoDataUnit) existingDataUnit).setSignature(signature);
+                    repository.save(existing);
+                }
+            }
         }
     }
 

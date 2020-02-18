@@ -23,4 +23,6 @@ public interface DataUnitService {
     boolean cleanupByTenant();
 
     List<DataUnit> findByStorageType(DataUnit.StorageType storageType);
+
+    void updateSignature(DataUnit dataUnit, String signature);
 }

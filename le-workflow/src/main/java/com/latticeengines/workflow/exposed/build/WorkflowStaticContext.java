@@ -18,7 +18,7 @@ public final class WorkflowStaticContext {
     public static final String EXPORT_SCHEMA_MAP = "EXPORT_SCHEMA_MAP";
     public static final String ATLAS_EXPORT = "ATLAS_EXPORT";
     public static final String ORIGINAL_BUCKET_METADATA = "ORIGINAL_BUCKET_METADATA";
-    public static final String MIGRATE_DYNAMO_DATA_UNITS = "MIGRATE_DYNAMO_DATA_UNITS";
+
 
     private static final ConcurrentMap<String, Object> contextMap = new ConcurrentHashMap<>();
 
