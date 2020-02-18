@@ -436,6 +436,10 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         if (!Boolean.TRUE.equals(configuration.getNeedReplace()) && !isEntityMatchRematch) {
             activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
         }
+        // in replace mode, delete the records in document db
+        if (Boolean.TRUE.equals(configuration.getNeedReplace())) {
+            cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(), configuration.getMainEntity());
+        }
         if (StringUtils.isNotBlank(activeTableName)) {
             log.info("Cloning {} from {} to {}.", role, active, inactive);
             clonePeriodStore(role);

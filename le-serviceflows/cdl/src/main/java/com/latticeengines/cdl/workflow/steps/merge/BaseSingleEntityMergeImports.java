@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +43,6 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 
 public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntityStepConfiguration>
         extends BaseMergeImports<T> {
@@ -57,10 +54,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     protected Table masterTable;
     protected Table systemBatchTable;
     protected String systemBatchTableName;
-
-    @Inject
-    private CDLAttrConfigProxy cdlAttrConfigProxy;
-
     private List<BusinessEntity> businessEntities = Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact,
             BusinessEntity.Product, BusinessEntity.Transaction);
 
@@ -232,6 +225,10 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         } else {
             if (!Boolean.TRUE.equals(configuration.getNeedReplace()) && !isEntityMatchRematch) {
                 masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
+            }
+            // in replace mode, delete the records in document db
+            if (Boolean.TRUE.equals(configuration.getNeedReplace())) {
+                cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(), configuration.getMainEntity());
             }
         }
         if (masterTable == null || masterTable.getExtracts().isEmpty()) {

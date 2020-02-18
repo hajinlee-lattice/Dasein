@@ -49,13 +49,13 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     public void runTest() throws Exception {
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        verifyCleanupAllAttrConfig();
         verifyCleanup();
         if (isLocalEnvironment()) {
             processAnalyzeSkipPublishToS3();
         } else {
             processAnalyze();
         }
+        verifyCleanupAllAttrConfig();
         Assert.assertEquals(1, verifyAction());
         verifyProcess();
         verifyCleanupAll();
@@ -84,10 +84,15 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void verifyCleanupAllAttrConfig() {
+        // verify in replace mode, pa will delete the attr config records
+        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace, BusinessEntity.Contact,
+                false);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
+
         ApplicationId appId = cdlProxy.cleanupAllAttrConfig(customerSpace, BusinessEntity.Contact,
                 MultiTenantContext.getEmailAddress());
         verifyStatus(appId);
-        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace, BusinessEntity.Contact,
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace, BusinessEntity.Contact,
                 false);
         Assert.assertEquals(request.getAttrConfigs().size(), 0);
 
