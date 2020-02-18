@@ -47,18 +47,16 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
                 Table table = metadataProxy.getTable(customerSpace, tableName);
                 if (table != null) {
                     addTableToRequestForImport(table, requests);
+                    tableMap.put(tableName, table);
                 }
-                tableMap.put(tableName, table);
             });
         } else {
             throw new RuntimeException("No table needs to migrate, just fail migrate workflow.");
         }
-        if (CollectionUtils.isEmpty(requests)) {
-            // means all data already on HDFS
-            handleImportResult();
-        }
     }
 
+    // update the data unit so that migrate job will not submit data unit to migrate again, may be we can use other
+    // job to delete this kind of data unit
     private void updateDataUnit(DynamoDataUnit dynamoDataUnit) {
         log.info("Update signature to {} for dynamo data unit with name {} and tenant {}.",
                 configuration.getDynamoSignature(), dynamoDataUnit.getName(), customerSpace);
@@ -81,13 +79,14 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
                         if (HdfsUtils.fileExists(distCpConfiguration, hdfsPath)) {
                             exportToDynamo(dynamoDataUnit, hdfsPath);
                         } else {
-                            // file still not in HDFS after import, so just update its signature
+                            // file still not on HDFS after import, so just update its signature
                             updateDataUnit(dynamoDataUnit);
                         }
                     } catch (IOException e) {
                         log.error("Can't get file info from HDFS with exception {}.", e.getMessage());
                     }
                 } else {
+                    // table info doesn't exist
                     updateDataUnit(dynamoDataUnit);
                 }
             }

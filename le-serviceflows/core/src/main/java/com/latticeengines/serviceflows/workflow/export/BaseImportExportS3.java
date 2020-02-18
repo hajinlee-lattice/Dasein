@@ -102,6 +102,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         buildRequests(requests);
         if (CollectionUtils.isEmpty(requests)) {
             log.info("There's no source dir found.");
+            handleImportResult();
             return;
         }
         log.info("Starting to export from hdfs to s3 or vice versa. size=" + requests.size());

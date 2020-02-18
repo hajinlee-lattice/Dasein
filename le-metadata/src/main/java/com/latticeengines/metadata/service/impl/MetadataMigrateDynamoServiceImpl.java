@@ -48,9 +48,6 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
     @Inject
     private WorkflowProxy workflowProxy;
 
-    @Value("${common.quartz.stack.flag:false}")
-    private boolean isQuartzStack;
-
     @Inject
     private DataUnitService dataUnitService;
 
@@ -67,6 +64,9 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
 
     @Value("${common.microservice.url}")
     private String microserviceHostPort;
+
+    @Value("${common.quartz.stack.flag:false}")
+    private boolean isQuartzStack;
 
     @Value("${metadata.dynamo.migrate.size}")
     private int migrateSize;
@@ -115,7 +115,7 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
         Map<String, List<String>> tableNamesNeedToMigrate = new HashMap<>();
         for (DataUnit dataUnit : dataUnits) {
             if (totalSize >= batchSize) {
-                log.info("Already found {} dynamo units in progress of migration.", migrateSize);
+                log.info("Already found {} dynamo data units in progress of migration.", migrateSize);
                 break;
             }
             DynamoDataUnit dynamoDataUnit = (DynamoDataUnit) dataUnit;
@@ -162,7 +162,7 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
             }
         }
         if (totalSize == 0) {
-            log.info("No dynamo data units need to migrate.");
+            log.info("No dynamo data unit needs to migrate.");
         } else {
             migrateTables(tableNamesNeedToMigrate);
         }
@@ -171,8 +171,7 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
 
     // just update data unit to make it safe
     private void updateDataUnit(DynamoDataUnit dynamoDataUnit) {
-        dynamoDataUnit.setSignature(signature);
-        dataUnitService.createOrUpdateByNameAndStorageType(dynamoDataUnit);
+        dataUnitService.updateSignature(dynamoDataUnit, signature);
     }
 
     private void handleTableNotFoundDataUnit(Tenant tenant, DynamoDataUnit dynamoDataUnit) {

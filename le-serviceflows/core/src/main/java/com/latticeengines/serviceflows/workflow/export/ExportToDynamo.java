@@ -201,12 +201,13 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
                 if (StringUtils.isNotBlank(config.getSortKey())) {
                     unit.setSortKey(config.getSortKey());
                 }
-                unit.setSignature(configuration.getDynamoSignature());
                 DataUnit created = dataUnitProxy.create(customerSpace, unit);
                 log.info("Registered DataUnit: " + JsonUtils.pprint(created));
             } else {
                 unit.setName(config.getTableName());
                 dataUnitProxy.updateSignature(customerSpace, unit, configuration.getDynamoSignature());
+                log.info("Update signature to {} for dynamo data unit with name {} and tenant {}.",
+                        configuration.getDynamoSignature(), unit.getName(), customerSpace);
             }
         }
     }

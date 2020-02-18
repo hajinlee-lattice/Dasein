@@ -28,7 +28,6 @@ public class MigrateDynamoWorkflowSubmitter extends WorkflowSubmitter {
                                 @NotNull WorkflowPidWrapper pidWrapper) {
         MigrateDynamoWorkflowConfiguration configuration = configure(customerSpace, request);
         Map<String, String> inputProperties = new HashMap<>();
-        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "migrateDynamoWorkflow");
         inputProperties.put(MigrateDynamoWorkflowConfiguration.IMPORT_TABLE_NAMES, JsonUtils.serialize(request.getTableNames()));
         configuration.setInputProperties(inputProperties);
         return workflowJobService.submit(configuration, pidWrapper.getPid());
