@@ -651,6 +651,7 @@ public class EmailServiceImpl implements EmailService {
             if (StringUtils.isNotEmpty(initiator)) {
                 builder.replaceToken("{{initiator}}", initiator);
             }
+            builder.replaceToken("{{helpcenterurl}}", helpCenterUrl);
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
             sendMultiPartEmail(EmailSettings.S3_CREDENTIALS_EMAIL_SUBJECT, mp, Collections.singleton(user.getEmail()));
             log.info("Sending s3 credentials email to " + user.getEmail() + " on " + tenant.getName() + " succeeded.");
