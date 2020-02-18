@@ -47,7 +47,7 @@ public class DataUnitResource {
 
     @PostMapping("/renameTableName")
     public Boolean renameTableName(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit,
-                                   @RequestParam(name="tableName") String tableName) {
+                                            @RequestParam(name="tableName") String tableName) {
         return dataUnitService.renameTableName(dataUnit, tableName);
     }
 
