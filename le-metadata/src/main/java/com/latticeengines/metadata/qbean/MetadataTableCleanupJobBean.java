@@ -12,7 +12,7 @@ public class MetadataTableCleanupJobBean extends MetadataAbstractJobBean impleme
 
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
-        super.setMetadataJobType(MetadataJobType.TABLE_CLEANUP);
+        setMetadataJobType(MetadataJobType.TABLE_CLEANUP);
         return super.getCallable(jobArguments);
     }
 }

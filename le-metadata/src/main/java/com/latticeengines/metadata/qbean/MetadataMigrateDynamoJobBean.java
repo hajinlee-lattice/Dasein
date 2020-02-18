@@ -16,7 +16,7 @@ public class MetadataMigrateDynamoJobBean extends MetadataAbstractJobBean implem
 
     @Override
     public Callable<Boolean> getCallable(String jobArguments) {
-        super.setMetadataJobType(MetadataJobType.MIGRATE_DYNAMO);
+        setMetadataJobType(MetadataJobType.MIGRATE_DYNAMO);
         return super.getCallable(jobArguments);
     }
 }
