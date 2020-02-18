@@ -40,7 +40,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
     private static final String SUCCESS_FILE = "_SUCCESS";
 
     @Inject
-    private DataUnitProxy dataUnitProxy;
+    protected DataUnitProxy dataUnitProxy;
 
     @Inject
     protected MetadataProxy metadataProxy;
@@ -92,6 +92,10 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         dropBoxSummary = dropBoxProxy.getDropBox(configuration.getCustomerSpace().toString());
     }
 
+    protected void handleImportResult() {
+
+    }
+
     @Override
     public void execute() {
         List<ImportExportRequest> requests = new ArrayList<>();
@@ -109,6 +113,7 @@ public abstract class BaseImportExportS3<T extends ImportExportS3StepConfigurati
         ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("s3-import-export", threadPoolSize);
         ThreadPoolUtils.runInParallel(executorService, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
         executorService.shutdown();
+        handleImportResult();
         log.info("Finished to export from hdfs to s3 or vice versa.");
     }
 

@@ -9,8 +9,8 @@ public class ExportToDynamoStepConfiguration extends MicroserviceStepConfigurati
     @JsonProperty("dynamoSignature")
     private String dynamoSignature;
 
-    @JsonProperty("dynamoSignature")
-    private Boolean onlyUpdateSignature;
+    @JsonProperty("migrateSignature")
+    private Boolean migrateSignature;
 
     public String getDynamoSignature() {
         return dynamoSignature;
@@ -20,11 +20,11 @@ public class ExportToDynamoStepConfiguration extends MicroserviceStepConfigurati
         this.dynamoSignature = dynamoSignature;
     }
 
-    public Boolean getOnlyUpdateSignature() {
-        return onlyUpdateSignature;
+    public Boolean getMigrateSignature() {
+        return migrateSignature;
     }
 
-    public void setOnlyUpdateSignature(Boolean onlyUpdateSignature) {
-        this.onlyUpdateSignature = onlyUpdateSignature;
+    public void setMigrateSignature(Boolean migrateSignature) {
+        this.migrateSignature = migrateSignature;
     }
 }

@@ -20,6 +20,7 @@ public class MigrateDynamoWorkflowConfiguration extends BaseCDLWorkflowConfigura
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("migrateDynamoWorkflow", customerSpace, configuration.getClass().getSimpleName());
             importDynamoTableFromS3.setCustomerSpace(customerSpace);
+            exportToDynamo.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -28,8 +29,14 @@ public class MigrateDynamoWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
-        public Builder onlyUpdateSignature(Boolean onlyUpdateSignature) {
-            exportToDynamo.setOnlyUpdateSignature(onlyUpdateSignature);
+        public Builder dynamoSignature(String signature) {
+            exportToDynamo.setDynamoSignature(signature);
+            importDynamoTableFromS3.setDynamoSignature(signature);
+            return this;
+        }
+
+        public Builder migrateSignature(Boolean migrateSignature) {
+            exportToDynamo.setMigrateSignature(migrateSignature);
             return this;
         }
 

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
@@ -19,9 +20,12 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 @Component
 public class MigrateDynamoWorkflowSubmitter extends WorkflowSubmitter {
 
+    @Value("${eai.export.dynamo.signature}")
+    private String signature;
+
     @WithWorkflowJobPid
-    public ApplicationId submit(@NotNull CustomerSpace customerSpace, @NotNull WorkflowPidWrapper pidWrapper,
-                                @NotNull MigrateDynamoRequest request) {
+    public ApplicationId submit(@NotNull CustomerSpace customerSpace, @NotNull MigrateDynamoRequest request,
+                                @NotNull WorkflowPidWrapper pidWrapper) {
         MigrateDynamoWorkflowConfiguration configuration = configure(customerSpace, request);
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "migrateDynamoWorkflow");
@@ -32,7 +36,6 @@ public class MigrateDynamoWorkflowSubmitter extends WorkflowSubmitter {
 
     private MigrateDynamoWorkflowConfiguration configure(CustomerSpace customerSpace, MigrateDynamoRequest request) {
         return new MigrateDynamoWorkflowConfiguration.Builder().customer(customerSpace).tableNames(request.getTableNames())
-                .onlyUpdateSignature(Boolean.TRUE).build();
+                .dynamoSignature(signature).migrateSignature(Boolean.TRUE).build();
     }
-
 }

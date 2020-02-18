@@ -32,7 +32,7 @@ public class MigrateTableResource {
     public ResponseDocument<String> migrateDynamo(@PathVariable String customerSpace, @RequestBody MigrateDynamoRequest migrateDynamoRequest) {
         try {
             ApplicationId appId;
-            appId = migrateDynamoWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), new WorkflowPidWrapper(-1L), migrateDynamoRequest);
+            appId = migrateDynamoWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), migrateDynamoRequest, new WorkflowPidWrapper(-1L));
             return ResponseDocument.successResponse(appId.toString());
         } catch (RuntimeException e) {
             return ResponseDocument.failedResponse(e);

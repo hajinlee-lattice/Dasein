@@ -8,11 +8,21 @@ public class ImportDynamoTableFromS3Configuration extends ImportExportS3StepConf
 
     private List<String> tableNames;
 
+    private String dynamoSignature;
+
     public List<String> getTableNames() {
         return tableNames;
     }
 
     public void setTableNames(List<String> tableNames) {
         this.tableNames = tableNames;
+    }
+
+    public String getDynamoSignature() {
+        return dynamoSignature;
+    }
+
+    public void setDynamoSignature(String dynamoSignature) {
+        this.dynamoSignature = dynamoSignature;
     }
 }

@@ -1,5 +1,7 @@
 package com.latticeengines.serviceflows.workflow.export;
 
+import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.MIGRATE_DYNAMO_DATA_UNITS;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
@@ -40,6 +43,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoS
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 import com.latticeengines.yarn.exposed.service.JobService;
 
 
@@ -71,9 +75,15 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
     @Value("${eai.export.dynamo.num.mappers}")
     private int numMappers;
 
+    private Map<String, DynamoDataUnit> dataUnitsNeedToMigrate;
+
     @Override
     public void execute() {
         List<DynamoExportConfig> configs = getExportConfigs();
+        if (configuration.getMigrateSignature()) {
+            dataUnitsNeedToMigrate = WorkflowStaticContext.getMapObject(MIGRATE_DYNAMO_DATA_UNITS, String.class,
+                    DynamoDataUnit.class);
+        }
         log.info("Going to export tables to dynamo: " + configs);
         List<Exporter> exporters = new ArrayList<>();
         configs.forEach(config -> {
@@ -84,6 +94,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
         });
         if (CollectionUtils.isEmpty(exporters)) {
             log.warn("No tables need to export, skip execution.");
+            return;
         }
         int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
@@ -187,24 +198,28 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
 
         private void registerDataUnit(DynamoExportConfig config) {
             String customerSpace = configuration.getCustomerSpace().toString();
-            DynamoDataUnit unit = new DynamoDataUnit();
-            unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
-            String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName() : config.getTableName();
-            unit.setName(srcTbl);
-            if (!unit.getName().equals(config.getTableName())) {
-                unit.setLinkedTable(config.getTableName());
+            DynamoDataUnit unit;
+            if (BooleanUtils.isFalse(configuration.getMigrateSignature())) {
+                unit = new DynamoDataUnit();
+                unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
+                String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName() : config.getTableName();
+                unit.setName(srcTbl);
+                if (!unit.getName().equals(config.getTableName())) {
+                    unit.setLinkedTable(config.getTableName());
+                }
+                unit.setPartitionKey(config.getPartitionKey());
+                if (StringUtils.isNotBlank(config.getSortKey())) {
+                    unit.setSortKey(config.getSortKey());
+                }
+                unit.setSignature(configuration.getDynamoSignature());
+            } else {
+                unit = dataUnitsNeedToMigrate.get(config.getTableName());
+                unit.setSignature(configuration.getDynamoSignature());
             }
-            unit.setPartitionKey(config.getPartitionKey());
-            if (StringUtils.isNotBlank(config.getSortKey())){
-                unit.setSortKey(config.getSortKey());
-            }
-            unit.setSignature(configuration.getDynamoSignature());
-
             DataUnit created = dataUnitProxy.create(customerSpace, unit);
             log.info("Registered DataUnit: " + JsonUtils.pprint(created));
         }
     }
-
 
 
 }
