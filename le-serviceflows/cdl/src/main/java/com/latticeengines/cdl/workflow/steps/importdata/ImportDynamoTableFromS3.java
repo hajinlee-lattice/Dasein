@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -98,6 +99,9 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
         config.setTableName(dynamoDataUnit.getName());
         config.setInputPath(hdfsPath);
         config.setPartitionKey(dynamoDataUnit.getPartitionKey());
+        if (StringUtils.isNotBlank(sortKey)) {
+            config.setSortKey(sortKey);
+        }
         config.setLinkTableName(dynamoDataUnit.getLinkedTable());
         addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
