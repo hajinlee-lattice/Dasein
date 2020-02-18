@@ -36,6 +36,6 @@ public class MigrateDynamoWorkflowSubmitter extends WorkflowSubmitter {
 
     private MigrateDynamoWorkflowConfiguration configure(CustomerSpace customerSpace, MigrateDynamoRequest request) {
         return new MigrateDynamoWorkflowConfiguration.Builder().customer(customerSpace).tableNames(request.getTableNames())
-                .dynamoSignature(signature).migrateSignature(Boolean.TRUE).build();
+                .dynamoSignature(signature).migrateTable(Boolean.TRUE).build();
     }
 }

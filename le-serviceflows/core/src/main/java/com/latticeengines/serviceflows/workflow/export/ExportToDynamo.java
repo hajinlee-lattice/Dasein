@@ -191,7 +191,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             String customerSpace = configuration.getCustomerSpace().toString();
             DynamoDataUnit unit = new DynamoDataUnit();
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
-            if (BooleanUtils.isFalse(configuration.getMigrateSignature())) {
+            if (BooleanUtils.isFalse(configuration.getMigrateTable())) {
                 String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName() : config.getTableName();
                 unit.setName(srcTbl);
                 if (!unit.getName().equals(config.getTableName())) {

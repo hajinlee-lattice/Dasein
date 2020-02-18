@@ -35,8 +35,8 @@ public class MigrateDynamoWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
-        public Builder migrateSignature(Boolean migrateSignature) {
-            exportToDynamo.setMigrateSignature(migrateSignature);
+        public Builder migrateTable(Boolean migrateTable) {
+            exportToDynamo.setMigrateTable(migrateTable);
             return this;
         }
 
