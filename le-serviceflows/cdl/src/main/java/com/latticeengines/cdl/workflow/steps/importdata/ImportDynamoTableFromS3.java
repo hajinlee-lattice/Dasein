@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,7 +42,6 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
 
     @SuppressWarnings("rawtypes")
     private void buildImportedRequests(List<ImportExportRequest> requests) {
-        Thread.sleep(TimeUnit.MINUTES.toMillis(15));
         List<String> tableNames = configuration.getTableNames();
         if (CollectionUtils.isNotEmpty(tableNames)) {
             customerSpace = configuration.getCustomerSpace().toString();
