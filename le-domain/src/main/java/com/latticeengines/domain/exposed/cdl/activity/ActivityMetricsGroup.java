@@ -114,10 +114,7 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     @JsonProperty("nullImputation")
     @Column(name = "NULL_IMP", nullable = false)
     @Enumerated(EnumType.STRING)
-    // for handling null values in metrics attributes
     private NullMetricsImputation nullImputation;
-
-    // TODO - define filter class
 
     @Override
     public Long getPid() {

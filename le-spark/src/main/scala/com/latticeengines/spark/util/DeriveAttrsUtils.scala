@@ -1,8 +1,10 @@
 package com.latticeengines.spark.util
 
 import com.latticeengines.common.exposed.util.AvroUtils
+import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer.Operator
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
-import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver}
+import com.latticeengines.domain.exposed.cdl.activity.{ActivityRowReducer, AtlasStream, StreamAttributeDeriver}
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId}
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import org.apache.avro.Schema.Type
@@ -11,21 +13,35 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.LongType
 import org.apache.spark.sql.{Column, DataFrame}
 
+import scala.collection.JavaConversions._
+
 private[spark] object DeriveAttrsUtils {
 
   val PARTITION_COL_PREFIX: String = "PK_"
 
+  val TIME_REDUCER_OPERATIONS: Seq[Operator] = Seq(Operator.Earliest, Operator.Latest)
+
   def getAggr(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
     val calculation: Calculation = deriver.getCalculation
     calculation match {
-      case Calculation.COUNT => throw new UnsupportedOperationException("COUNT is not implemented")
       case Calculation.SUM => getSum(df, deriver)
       case Calculation.MAX => getMax(df, deriver)
       case Calculation.MIN => getMin(df, deriver)
+      case Calculation.LAST => getLastCount(df, deriver)
+      case _ => throw new UnsupportedOperationException(s"$calculation is not implemented")
     }
   }
 
-  def checkSingleSource(deriver: StreamAttributeDeriver) = {
+  def applyReducer(df: DataFrame, reducer: ActivityRowReducer): DataFrame = {
+    if (isTimeReducingOperation(reducer.getOperator)) {
+      applyTimeActivityRowReducer(df, reducer)
+    } else {
+      throw new UnsupportedOperationException(s"${reducer.getOperator} is not implemented")
+    }
+
+  }
+
+  def checkSingleSource(deriver: StreamAttributeDeriver): Unit = {
     if (CollectionUtils.isEmpty(deriver.getSourceAttributes) && deriver.getSourceAttributes.size != 1) {
       throw new UnsupportedOperationException("Aggregation takes exactly 1 source attributes")
     }
@@ -37,14 +53,34 @@ private[spark] object DeriveAttrsUtils {
   }
 
   def getMax(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
+    checkSingleSource(deriver)
     max(df(deriver.getSourceAttributes.get(0))).alias(deriver.getTargetAttribute)
   }
 
   def getMin(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
+    checkSingleSource(deriver)
     min(df(deriver.getSourceAttributes.get(0))).alias(deriver.getTargetAttribute)
   }
 
-  def getMetricsGroupEntityIdColumnName(entity: BusinessEntity): String = {
+  def getLastCount(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
+    sum(df(deriver.getTargetAttribute)).alias(deriver.getTargetAttribute)
+  }
+
+  def applyTimeActivityRowReducer(df: DataFrame, reducer: ActivityRowReducer): DataFrame = {
+    val fields: Seq[String] = reducer.getGroupByFields.toSeq
+    val operator = reducer.getOperator
+    val argument: String = reducer.getArguments.head
+
+    df.groupBy(fields.head, fields: _*).agg(
+      (operator match {
+        case Operator.Earliest => min(argument)
+        case Operator.Latest => max(argument)
+        case _ => throw new UnsupportedOperationException(s"$operator is not supported for row reducing")
+      }).as(argument)
+    ).join(df, fields :+ argument, "inner")
+  }
+
+  def getEntityIdColumnNameFromEntity(entity: BusinessEntity): String = {
     entity match {
       case BusinessEntity.Account => AccountId.name
       case BusinessEntity.Contact => ContactId.name
@@ -52,7 +88,7 @@ private[spark] object DeriveAttrsUtils {
     }
   }
 
-  def getGroupByEntityColsFromStream(stream: AtlasStream): Seq[String] = {
+  def getEntityIdColsFromStream(stream: AtlasStream): Seq[String] = {
     if (stream.getAggrEntities.contains(BusinessEntity.Contact.name)) {
       Seq(AccountId.name, ContactId.name)
     } else {
@@ -86,5 +122,9 @@ private[spark] object DeriveAttrsUtils {
       case Type.LONG => df.withColumn(attrName, lit(null).cast(LongType))
       case _ => throw new UnsupportedOperationException(s"${colType.toString} is not supported for appending null columns")
     }
+  }
+
+  def isTimeReducingOperation(operator: Operator): Boolean = {
+    TIME_REDUCER_OPERATIONS.contains(operator)
   }
 }
