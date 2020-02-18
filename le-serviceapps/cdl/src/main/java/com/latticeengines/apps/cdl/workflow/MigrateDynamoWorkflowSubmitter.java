@@ -15,7 +15,6 @@ import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.MigrateDynamoRequest;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.MigrateDynamoWorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 
 @Component
 public class MigrateDynamoWorkflowSubmitter extends WorkflowSubmitter {
