@@ -1,6 +1,5 @@
 package com.latticeengines.pls.end2end;
 
-import static com.latticeengines.domain.exposed.cdl.S3ImportSystem.SystemType.Salesforce;
 import static org.testng.Assert.assertEquals;
 
 import java.util.List;
@@ -44,14 +43,14 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
 
     @Test(groups = "deployment-app")
     public void testCreateOpportunityTemplate() {
-        cdlService.createS3ImportSystem(customerSpace, TEST_SYSTEM_NAME, Salesforce, true);
+        cdlService.createS3ImportSystem(customerSpace, TEST_SYSTEM_NAME, S3ImportSystem.SystemType.Other, true);
         createAccountTemplateAndVerify();
         importSystem = cdlService.getS3ImportSystem(customerSpace, TEST_SYSTEM_NAME);
         boolean result =  cdlService.createDefaultOpportunityTemplate(customerSpace, TEST_SYSTEM_NAME);
         Assert.assertTrue(result);
         List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(customerSpace);
         S3ImportSystem opportunity = allSystems.stream() //
-                .filter(system -> Salesforce.equals(system.getSystemType())) //
+                .filter(system -> S3ImportSystem.SystemType.Other.equals(system.getSystemType())) //
                 .findAny() //
                 .orElse(null);
         Assert.assertNotNull(opportunity,

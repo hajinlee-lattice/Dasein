@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -666,7 +665,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     private ActivityRowReducer prepareReducer() {
         ActivityRowReducer reducer = new ActivityRowReducer();
-        reducer.setGroupByFields(Arrays.asList(InterfaceName.OpportunityId.name()));
+        reducer.setGroupByFields(Collections.singletonList(InterfaceName.OpportunityId.name()));
         reducer.setArguments(Collections.singletonList(InterfaceName.LastModifiedDate.name()));
         reducer.setOperator(ActivityRowReducer.Operator.Latest);
         return reducer;
