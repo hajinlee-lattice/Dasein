@@ -56,6 +56,11 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private BusinessEntity entity;
     @JsonProperty(ColumnMetadataKey.State)
     private AttrState attrState;
+    /**
+     * secondary display shown alongside subcategory
+     */
+    @JsonProperty(ColumnMetadataKey.SecondarySubCategoryDisplayName)
+    private String secondarySubCategoryDisplayName;
 
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
@@ -75,6 +80,12 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private String discretizationStrategy;
     @JsonProperty("Groups")
     private Map<ColumnSelection.Predefined, Boolean> groups;
+    /**
+     * list of tags used for client-side filtering (by matching user-selected
+     * dropdown values to one of the tag in list)
+     */
+    @JsonProperty("FilterTags")
+    private List<String> filterTags;
 
     @JsonProperty("BitOffset")
     private Integer bitOffset;
@@ -101,6 +112,11 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private String dataLicense;
     @JsonProperty("IsHiddenForRemodelingUI")
     private boolean isHiddenForRemodelingUI;
+    /**
+     * whether this attribute should be hidden in category tile in home page
+     */
+    @JsonProperty("IsHiddenInCategoryTile")
+    private Boolean IsHiddenInCategoryTile;
 
     @JsonProperty("IsCoveredByOptionalRule")
     private boolean isCoveredByOptionalRule;
@@ -209,6 +225,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setAttrState(AttrState attrState) {
         this.attrState = attrState;
+    }
+
+    public String getSecondarySubCategoryDisplayName() {
+        return secondarySubCategoryDisplayName;
+    }
+
+    public void setSecondarySubCategoryDisplayName(String secondarySubCategoryDisplayName) {
+        this.secondarySubCategoryDisplayName = secondarySubCategoryDisplayName;
     }
 
     public String getDisplayName() {
@@ -349,6 +373,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.isHiddenForRemodelingUI = isHiddenForRemodelingUI;
     }
 
+    public Boolean isHiddenInCategoryTile() {
+        return IsHiddenInCategoryTile;
+    }
+
+    public void setIsHiddenInCategoryTile(boolean hiddenInCategoryTile) {
+        IsHiddenInCategoryTile = hiddenInCategoryTile;
+    }
+
     @JsonProperty("FundamentalType")
     private String getFundamentalTypeAsString() {
         if (fundamentalType == null) {
@@ -466,6 +498,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         } else {
             this.groups = null;
         }
+    }
+
+    public List<String> getFilterTags() {
+        return filterTags;
+    }
+
+    public void setFilterTags(List<String> filterTags) {
+        this.filterTags = filterTags;
     }
 
     public void enableGroupIfNotPresent(ColumnSelection.Predefined group) {

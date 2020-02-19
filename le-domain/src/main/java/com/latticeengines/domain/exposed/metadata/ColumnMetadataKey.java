@@ -16,6 +16,7 @@ public final class ColumnMetadataKey {
 
     public static final String Category = "Category";
     public static final String Subcategory = "Subcategory";
+    public static final String SecondarySubCategoryDisplayName = "SubcategoryAltName";
 
     public static final String ApprovedUsage = "ApprovedUsage";
 
