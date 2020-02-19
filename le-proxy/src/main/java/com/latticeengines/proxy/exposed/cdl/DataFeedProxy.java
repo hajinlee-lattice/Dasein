@@ -315,7 +315,7 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
 
     public List<String> getTemplatesBySystemPriority(String customerSpace, String entity, boolean highestFirst) {
         String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/tasks/{entity}/{highestFirst}/getTemplatesBySystemPriority",
+                "/customerspaces/{customerSpace}/datafeed/tasks/{entity}/getTemplatesBySystemPriority&highestFirst={highestFirst}",
                 shortenCustomerSpace(customerSpace), entity, highestFirst);
         List<?> res = get("getTemplatesBySystemPriority", url, List.class);
         return JsonUtils.convertList(res, String.class);
