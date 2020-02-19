@@ -82,6 +82,11 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
         return request;
     }
 
+    @Override
+    protected boolean skipRegisterBatchStore() {
+        return true;
+    }
+
     private TransformationStepConfig partitionDaily(int dayPeriodStep, int softDeleteStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);

@@ -40,6 +40,11 @@ public class SoftDeleteContact extends BaseSingleEntitySoftDelete<ProcessContact
     }
 
     @Override
+    protected boolean skipRegisterBatchStore() {
+        return false;
+    }
+
+    @Override
     protected boolean processSystemBatchStore() {
         return true;
     }
