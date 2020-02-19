@@ -2,7 +2,6 @@ package com.latticeengines.pls.end2end;
 
 import static com.latticeengines.domain.exposed.cdl.S3ImportSystem.SystemType.Salesforce;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
@@ -121,6 +120,5 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
                 opportunityDataFeedTask.getUniqueId(), sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
-        assertTrue(false);
     }
 }
