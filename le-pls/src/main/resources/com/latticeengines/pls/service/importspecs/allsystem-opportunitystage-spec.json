@@ -1,5 +1,4 @@
 {
-  "systemType": "Salesforce",
   "systemObject": "Opportunity Stage",
   "fieldDefinitionsRecordsMap": {
     "General": [

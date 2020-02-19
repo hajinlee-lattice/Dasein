@@ -350,6 +350,11 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
             return this;
         }
 
+        public Builder withReducer(ActivityRowReducer reducer) {
+            atlasStream.setReducer(reducer);
+            return this;
+        }
+
         public AtlasStream build() {
             return atlasStream;
         }

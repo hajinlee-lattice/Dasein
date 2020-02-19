@@ -1,10 +1,9 @@
 {
-  "systemType": "Salesforce",
   "systemObject": "Opportunity",
   "fieldDefinitionsRecordsMap": {
     "General": [
       {
-        "fieldName": "Id",
+        "fieldName": "OpportunityId",
         "fieldType": "TEXT",
         "columnName": "Id",
         "matchingColumnNames": [
