@@ -614,11 +614,25 @@ public class UserServiceImpl implements UserService {
                 GlobalAuthTenant tenantData = globalTenantManagementService.findByTenantId(tenantId);
                 List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService
                         .findTicketsByUserIdAndTenant(userId, tenantData);
-                LOGGER.info(String.format("Ticket ids in %s will be deleted.",
-                        globalAuthTickets.stream().map(GlobalAuthTicket::getPid).collect(Collectors.toList())));
-                for (GlobalAuthTicket globalAuthTicket : globalAuthTickets) {
-                    globalAuthenticationService.discard(new Ticket(globalAuthTicket.getTicket()));
-                }
+                discardTickets(globalAuthTickets);
+            });
+        }
+    }
+
+    private void discardTickets(List<GlobalAuthTicket> globalAuthTickets) {
+        LOGGER.info(String.format("Ticket ids in %s will be deleted.",
+                globalAuthTickets.stream().map(GlobalAuthTicket::getPid).collect(Collectors.toList())));
+        for (GlobalAuthTicket globalAuthTicket : globalAuthTickets) {
+            globalAuthenticationService.discard(new Ticket(globalAuthTicket.getTicket()));
+        }
+    }
+
+    @Override
+    public void clearOldSessionForNewLogin(Long userId, String ticket) {
+        if (userId != null) {
+            clearSessionService.submit(() -> {
+                List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService.findByUserIdAndNotInTicket(userId, ticket);
+                discardTickets(globalAuthTickets);
             });
         }
     }

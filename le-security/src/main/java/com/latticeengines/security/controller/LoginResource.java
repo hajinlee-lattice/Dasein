@@ -94,6 +94,9 @@ public class LoginResource {
     @Inject
     private LogoutService logoutService;
 
+    @Value("${security.login.clear.oldsession:false}")
+    private boolean clearOldSession;
+
     @PostMapping("/login")
     @ResponseBody
     @ApiOperation(value = "Login to Lattice external application")
@@ -133,6 +136,9 @@ public class LoginResource {
                 result.setTenants(tenants);
             }
             doc.setResult(result);
+            if (clearOldSession) {
+                userService.clearOldSessionForNewLogin(userData.getPid(), ticketData.getTicket());
+            }
         } catch (LedpException e) {
             doc.setErrors(Collections.singletonList(e.getCode().getMessage()));
         }
@@ -223,7 +229,6 @@ public class LoginResource {
             user.setAvailableRights(RightsUtilities.translateRights(session.getRights()));
             user.setAccessLevel(session.getAccessLevel());
             result.setUser(user);
-
             doc.setResult(result);
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001 || e.getCode() == LedpCode.LEDP_18002

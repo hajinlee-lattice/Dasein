@@ -26,9 +26,9 @@ public class GlobalAuthTicketDaoImpl extends BaseDaoImpl<GlobalAuthTicket> imple
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTicket> entityClz = getEntityClass();
         Class<GlobalAuthSession> sessionClz = GlobalAuthSession.class;
-        long end = System.currentTimeMillis() - SessionUtils.TicketInactivityTimeoutInMinute;
-        String queryStr = String.format("from %s WHERE userId = %d AND UNIX_TIMESTAMP( lastAccessDate ) <= :lastAccessDate and " +
-                        "pid in (select ticketId from %s where tenantId=%d and userId=%d)",
+        long end = System.currentTimeMillis() / 1000 - SessionUtils.TicketInactivityTimeoutInMinute * 60;
+        String queryStr = String.format("from %s WHERE userId = %d AND UNIX_TIMESTAMP( lastAccessDate ) >= " +
+                        ":lastAccessDate and pid in (select ticketId from %s where tenantId=%d and userId=%d)",
                 entityClz.getSimpleName(), userId, sessionClz.getSimpleName(), tenantData.getPid(), userId);
         Query query = session.createQuery(queryStr);
         query.setParameter("lastAccessDate", end);
@@ -43,6 +43,20 @@ public class GlobalAuthTicketDaoImpl extends BaseDaoImpl<GlobalAuthTicket> imple
         Query query = session.createQuery(queryStr);
         query.setParameter("userId", userId);
         query.setParameter("issuer", issuer);
+        return query.list();
+    }
+
+    @Override
+    public List<GlobalAuthTicket> findByUserIdAndNotInTicketAndLastAccessDate(Long userId, String ticket) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthTicket> entityClz = getEntityClass();
+        long end = System.currentTimeMillis() / 1000 - SessionUtils.TicketInactivityTimeoutInMinute * 60;
+        String queryStr = String.format("from %s WHERE userId = :userId AND ticket != :ticket AND UNIX_TIMESTAMP( " +
+                "lastAccessDate ) >= :lastAccessDate", entityClz.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("userId", userId);
+        query.setParameter("ticket", ticket);
+        query.setParameter("lastAccessDate", end);
         return query.list();
     }
 
