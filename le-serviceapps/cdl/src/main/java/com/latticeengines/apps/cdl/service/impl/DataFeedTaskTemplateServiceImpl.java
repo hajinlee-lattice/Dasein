@@ -341,9 +341,6 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         if (importSystem == null) {
             return false;
         }
-        if (!importSystem.getSystemType().equals(S3ImportSystem.SystemType.Salesforce)) {
-            return false;
-        }
         return !StringUtils.isEmpty(importSystem.getAccountSystemId());
     }
 
