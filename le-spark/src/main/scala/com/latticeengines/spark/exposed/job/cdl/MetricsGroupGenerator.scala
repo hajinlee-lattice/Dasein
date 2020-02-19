@@ -27,8 +27,8 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   private val TMPLKEY_GROUPID = "GroupId"
   private val TMPLKEY_ROLLUP_DIM_IDs = "RollupDimIds"
   private val TMPLKEY_TIMERANGE = "TimeRange"
-  private val ACCOUNT_BATCH_STORE = "Account" // TODO - put "Account" in one place
-  private val CONTACT_BATCH_STORE = "Contact" // TODO - put "Contact" in one place
+  private val ACCOUNT_BATCH_STORE = BusinessEntity.Account.name
+  private val CONTACT_BATCH_STORE = BusinessEntity.Contact.name
 
   private var hasAccountBatchStore: Boolean = false
   private var hasContactBatchStore: Boolean = false

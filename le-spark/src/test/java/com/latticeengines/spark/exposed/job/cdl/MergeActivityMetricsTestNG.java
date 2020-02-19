@@ -3,8 +3,10 @@ package com.latticeengines.spark.exposed.job.cdl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
@@ -25,73 +27,93 @@ import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class MergeActivityMetricsTestNG extends SparkJobFunctionalTestNGBase {
     private static final String AccountId = InterfaceName.AccountId.name();
-    private static final String M1A1 = "M1A1"; // metrics 1 dimension 1
-    private static final String M1A2 = "M1A2"; // metrics 1 dimension 2
-    private static final String M2A1 = "M2A1"; // metrics 2 dimension 1
-    private static final String M2A2 = "M2A2"; // metrics 2 dimension 2
+    private static final String M1A1 = "M1A1"; // metrics 1 attribute 1
+    private static final String M1A2 = "M1A2"; // metrics 1 attribute 2
+    private static final String M2A1 = "M2A1"; // metrics 2 attribute 1
+    private static final String M2A2 = "M2A2"; // metrics 2 attribute 2
+    private static final String M3A3 = "M3A3"; // active metrics attr that needs to be deprecated
 
     private static final String ACCOUNT_ENTITY = BusinessEntity.Account.name();
     private static final String SERVING_ENTITY = TableRoleInCollection.WebVisitProfile.name();
 
     private static List<Pair<String, Class<?>>> FIELDS_M1;
     private static List<Pair<String, Class<?>>> FIELDS_M2;
+    private static List<Pair<String, Class<?>>> FIELDS_M3; // active metrics
 
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
-        createDataFramesToMerge();
+        setupData();
     }
 
     @Test(groups = "functional")
     public void test() {
         String mergedTableLabel = String.format("%s_%s", ACCOUNT_ENTITY, SERVING_ENTITY);
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
-        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
-        details.setStartIdx(0);
-        details.setLabels(Arrays.asList("someGroup1", "someGroup2"));
-        inputMetadata.setMetadata(Collections.singletonMap(mergedTableLabel, details));
+        ActivityStoreSparkIOMetadata.Details newMetricsDetails = new ActivityStoreSparkIOMetadata.Details();
+        newMetricsDetails.setStartIdx(0);
+        newMetricsDetails.setLabels(Arrays.asList("someGroup1", "someGroup2"));
+        ActivityStoreSparkIOMetadata.Details activeMetricsDetails = new ActivityStoreSparkIOMetadata.Details();
+        activeMetricsDetails.setStartIdx(2);
+        Map<String, ActivityStoreSparkIOMetadata.Details> metadata = new HashMap<>();
+        metadata.put(mergedTableLabel, newMetricsDetails);
+        metadata.put(SERVING_ENTITY, activeMetricsDetails);
+        inputMetadata.setMetadata(metadata);
 
         MergeActivityMetricsJobConfig config = new MergeActivityMetricsJobConfig();
         config.mergedTableLabels = Collections.singletonList(mergedTableLabel);
         config.inputMetadata = inputMetadata;
 
         SparkJobResult result = runSparkJob(MergeActivityMetrics.class, config);
-        System.out.println(result.getOutput());
         Assert.assertFalse(StringUtils.isEmpty(result.getOutput()));
         ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
         Assert.assertNotNull(outputMetadata.getMetadata());
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
+        Assert.assertEquals( // verify attributes to be deprecated
+                outputMetadata.getMetadata().get(mergedTableLabel).getLabels(),
+                Collections.singletonList(M3A3)
+        );
         verify(result, Collections.singletonList(this::verifyMerged));
     }
 
-    private void createDataFramesToMerge() {
-        FIELDS_M1 = Arrays.asList( //
-                Pair.of(AccountId, String.class), //
-                Pair.of(M1A1, String.class), //
-                Pair.of(M1A2, String.class)
+    private void setupData() {
+        FIELDS_M1 = Arrays.asList(
+                Pair.of(AccountId, String.class),
+                Pair.of(M1A1, Integer.class),
+                Pair.of(M1A2, Integer.class)
         );
-        Object[][] data1 = new Object[][]{ //
-                {"acc1", "m1a1row1", "m1A2row1"}, //
-                {"acc2", "m1a1row2", "m1A2row2"}
+        Object[][] import1 = new Object[][]{
+                {"acc1", 111, 121},
+                {"acc2", 112, 122}
         };
         FIELDS_M2 = Arrays.asList( //
-                Pair.of(AccountId, String.class), //
-                Pair.of(M2A1, String.class), //
-                Pair.of(M2A2, String.class) //
+                Pair.of(AccountId, String.class),
+                Pair.of(M2A1, Integer.class),
+                Pair.of(M2A2, Integer.class)
         );
-        Object[][] data2 = new Object[][]{ //
-                {"acc2", "m2a1row1", "m2A2row1"}, //
-                {"acc3", "m2a1row2", "m2A2row2"}
+        Object[][] import2 = new Object[][]{
+                {"acc2", 211, 221},
+                {"acc3", 212, 222}
         };
-        uploadHdfsDataUnit(data1, FIELDS_M1);
-        uploadHdfsDataUnit(data2, FIELDS_M2);
+        FIELDS_M3 = Arrays.asList(
+                Pair.of(AccountId, String.class),
+                Pair.of(M3A3, Integer.class)
+        );
+        Object[][] activeMetrics = new Object[][]{
+                {"acc1", 331},
+                {"acc2", 332},
+                {"acc3", 333}
+        };
+        uploadHdfsDataUnit(import1, FIELDS_M1);
+        uploadHdfsDataUnit(import2, FIELDS_M2);
+        uploadHdfsDataUnit(activeMetrics, FIELDS_M3);
     }
 
     private Boolean verifyMerged(HdfsDataUnit merged) {
         Iterator<GenericRecord> iterator = verifyAndReadTarget(merged);
         int rowCount = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iterator) {
-            Assert.assertEquals(record.getSchema().getFields().size(), FIELDS_M1.size() + FIELDS_M2.size() - 1);
+            Assert.assertEquals(record.getSchema().getFields().size(), FIELDS_M1.size() + FIELDS_M2.size() + FIELDS_M3.size() - 2);
             rowCount++;
         }
         Assert.assertEquals(rowCount, 3);

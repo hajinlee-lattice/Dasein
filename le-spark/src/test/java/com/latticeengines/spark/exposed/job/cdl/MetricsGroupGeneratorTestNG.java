@@ -328,7 +328,6 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> arr[0].toString(), Arrays::asList));
         Iterator<GenericRecord> iterator = verifyAndReadTarget(metrics);
-        int rowCount = 0;
         for (GenericRecord record : (Iterable<GenericRecord>) () -> iterator) {
             Assert.assertEquals(record.getSchema().getFields().size(), OPPORTUNITY_ATTR_COUNT.longValue());
             verifyTargetData(expectedMap, record);

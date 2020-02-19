@@ -375,7 +375,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         if (defaultGroup == null) {
             throw new IllegalStateException(String.format(
                 "Failed to setup default web visit metric groups for tenant %s", customerSpace));
-        }                          
+        }
         return true;
     }
 

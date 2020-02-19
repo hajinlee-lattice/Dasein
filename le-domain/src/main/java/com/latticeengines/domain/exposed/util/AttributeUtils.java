@@ -33,14 +33,17 @@ public final class AttributeUtils {
     protected AttributeUtils() {
         throw new UnsupportedOperationException();
     }
+
     private static final Logger log = LoggerFactory.getLogger(AttributeUtils.class);
+
+    public static final String PROP_SHOULD_DEPRECATE = "shouldDeprecate";
 
     public static void copyPropertiesFromAttribute(Attribute source, Attribute dest) {
         copyPropertiesFromAttribute(source, dest, true);
     }
 
     public static void copyPropertiesFromAttribute(Attribute source, Attribute dest,
-            boolean includeEmptySourceValues) {
+                                                   boolean includeEmptySourceValues) {
         PropertyDescriptor[] descriptors = getPropertyDescriptors();
 
         for (PropertyDescriptor descriptor : descriptors) {
@@ -106,7 +109,7 @@ public final class AttributeUtils {
     }
 
     public static void setFieldMetadataFromAttribute(Attribute source, FieldMetadata fm,
-            boolean includeEmptySourceValues) {
+                                                     boolean includeEmptySourceValues) {
         PropertyDescriptor[] descriptors = getPropertyDescriptors();
 
         for (PropertyDescriptor descriptor : descriptors) {
@@ -148,7 +151,7 @@ public final class AttributeUtils {
     }
 
     public static void setPropertyFromString(Attribute attribute, String propertyName,
-            String propertyValue) {
+                                             String propertyValue) {
         try {
             Class<?> attrClass = Class.forName(Attribute.class.getName());
             String methodName = "set" + propertyName;
@@ -179,7 +182,7 @@ public final class AttributeUtils {
     }
 
     public static void setPropertiesFromStrings(Attribute attribute,
-            Map<String, String> properties) {
+                                                Map<String, String> properties) {
         try {
             Class<?> attrClass = Class.forName(Attribute.class.getName());
             Map<String, Method> methodMap = new HashMap<>();
@@ -254,6 +257,7 @@ public final class AttributeUtils {
         metadata.setLogicalDataType(attr.getLogicalDataType());
         metadata.setIsHiddenForRemodelingUI(attr.isHiddenForRemodelingUI());
         metadata.setJavaClass(toJavaClass(attr.getPhysicalDataType(), attr.getDataType()));
+        metadata.setShouldDeprecate(Boolean.TRUE.equals(attr.getProperties().get(PROP_SHOULD_DEPRECATE)));
         if (StringUtils.isBlank(attr.getCategory())) {
             metadata.setCategory(Category.DEFAULT);
         } else {
@@ -314,7 +318,7 @@ public final class AttributeUtils {
 
     public static String toJavaClass(String... dataTypes) {
         String javaClass = null;
-        for (String dataType: dataTypes) {
+        for (String dataType : dataTypes) {
             if (StringUtils.isNotBlank(dataType)) {
                 switch (dataType.toLowerCase()) {
                     case "string":

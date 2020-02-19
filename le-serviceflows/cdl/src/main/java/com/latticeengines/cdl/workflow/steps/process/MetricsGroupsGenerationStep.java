@@ -126,7 +126,6 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             config.evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
             config.streamMetadataMap = streamMetadataCache;
             appendAccountBatchStore(inputs, inputMetadata);
-            // TODO - append contact table if contact-level activity data is required in the future
             config.setInput(inputs);
             config.inputMetadata = inputMetadata;
             return config;
@@ -136,10 +135,10 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
     private void appendAccountBatchStore(List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata) {
         Table batchStoreTable = getAccountBatchStore();
         if (batchStoreTable != null) {
-            inputs.add(batchStoreTable.toHdfsDataUnit("Account")); // TODO - put "Account" in one place
+            inputs.add(batchStoreTable.toHdfsDataUnit(BusinessEntity.Account.name()));
             Details accountBatchStoreDetails = new Details();
             accountBatchStoreDetails.setStartIdx(inputs.size() - 1);
-            inputMetadata.getMetadata().put("Account", accountBatchStoreDetails); // TODO - put "Account" in one place
+            inputMetadata.getMetadata().put(BusinessEntity.Account.name(), accountBatchStoreDetails);
         }
     }
 
