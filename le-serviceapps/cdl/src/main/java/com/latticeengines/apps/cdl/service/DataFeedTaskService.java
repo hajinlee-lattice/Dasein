@@ -54,7 +54,8 @@ public interface DataFeedTaskService {
     /**
      *
      * @param entity Account / Contact
+     * @param highestFirst: True - template with highest priority will be the first item. False - reverse
      * @return A list of template names ordered by priority.
      */
-    List<String> getTemplatesBySystemPriority(String customerSpace, String entity);
+    List<String> getTemplatesBySystemPriority(String customerSpace, String entity, boolean highestFirst);
 }

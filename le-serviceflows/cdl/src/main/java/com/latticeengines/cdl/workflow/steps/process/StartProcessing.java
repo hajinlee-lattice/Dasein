@@ -614,9 +614,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void setTemplatesInOrder() {
         List<String> templatesForAccount = dataFeedProxy.getTemplatesBySystemPriority(customerSpace.toString(),
-                BusinessEntity.Account.name());
+                BusinessEntity.Account.name(), false);
         List<String> templatesForContact = dataFeedProxy.getTemplatesBySystemPriority(customerSpace.toString(),
-                BusinessEntity.Contact.name());
+                BusinessEntity.Contact.name(), false);
         log.info("Account templates in order=" + String.join(",", templatesForAccount));
         log.info("Contact templates in order=" + String.join(",", templatesForContact));
         Map<BusinessEntity, List<String>> templatesInOrder = new HashMap<>();

@@ -259,15 +259,17 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
-    public List<String> getTemplatesBySystemPriority(String customerSpace, String entity) {
+    public List<String> getTemplatesBySystemPriority(String customerSpace, String entity, boolean highestFirst) {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         List<DataFeedTask> dataFeedTasks =
                 dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntity(entity, dataFeed);
+        Comparator<S3ImportSystem> comparing = highestFirst ? Comparator.comparing(S3ImportSystem::getPriority) :
+                Comparator.comparing(S3ImportSystem::getPriority).reversed();
         if (!CollectionUtils.isEmpty(dataFeedTasks)) {
             List<S3ImportSystem> allSystems = s3ImportSystemService.getAllS3ImportSystem(customerSpace);
             List<String> orderedSystem = allSystems.stream()
                     .filter(Objects::nonNull)
-                    .sorted(Comparator.comparing(S3ImportSystem::getPriority))
+                    .sorted(comparing)
                     .map(S3ImportSystem::getName)
                     .collect(Collectors.toList());
             List<Pair<String, String>> templatePair = new ArrayList<>();

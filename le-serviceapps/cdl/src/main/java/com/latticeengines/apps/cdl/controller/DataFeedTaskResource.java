@@ -192,8 +192,9 @@ public class DataFeedTaskResource {
     @GetMapping(value = "/{entity}/getTemplatesBySystemPriority")
     @ResponseBody
     @ApiOperation(value = "Get templates ordered by system priority")
-    public List<String> getTemplatesBySystemPriority(@PathVariable String customerSpace, @PathVariable String entity) {
+    public List<String> getTemplatesBySystemPriority(@PathVariable String customerSpace, @PathVariable String entity,
+                                                     @RequestParam(required = false) Boolean highestFirst) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataFeedTaskService.getTemplatesBySystemPriority(customerSpace, entity);
+        return dataFeedTaskService.getTemplatesBySystemPriority(customerSpace, entity, Boolean.TRUE.equals(highestFirst));
     }
 }

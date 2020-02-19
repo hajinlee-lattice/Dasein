@@ -176,9 +176,13 @@ public class DataFeedTaskServiceImplTestNG extends CDLFunctionalTestNGBase {
         createMoreDataFeedTask("SYSTEM2");
         createMoreDataFeedTask("SYSTEM3");
         List<String> templates = datafeedTaskService.getTemplatesBySystemPriority(customerSpace.toString(),
-                BusinessEntity.Account.name());
+                BusinessEntity.Account.name(), true);
         Assert.assertEquals(templates.size(), 3);
         Assert.assertEquals(templates.get(0), "SYSTEM3_importTable");
+        templates = datafeedTaskService.getTemplatesBySystemPriority(customerSpace.toString(),
+                BusinessEntity.Account.name(), false);
+        Assert.assertEquals(templates.size(), 3);
+        Assert.assertEquals(templates.get(0), "SYSTEM2_importTable");
     }
 }
 
