@@ -147,6 +147,8 @@ public enum InterfaceName {
     // Eloqua Activity
     ActivityType,
 
+    OpportunityId,
+
     // Internal
     __Row_Count__, // total row count in activity store aggregation
     __Composite_Key__; // primary key for internal use

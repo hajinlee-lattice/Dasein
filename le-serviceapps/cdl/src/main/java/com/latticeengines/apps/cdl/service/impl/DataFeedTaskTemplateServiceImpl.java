@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
@@ -361,7 +363,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(opportunityDataFeedTask)
                 .withName(opportunityAtlasStreamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
                 .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
-                .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).build();
+                .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).withReducer(prepareReducer()).build();
         opportunityAtlasStream.setStreamId(AtlasStream.generateId());
         streamEntityMgr.create(opportunityAtlasStream);
         log.info("opportunityAtlasStream is {}.", JsonUtils.serialize(opportunityAtlasStream));
@@ -384,13 +386,17 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     @Override
     public DataFeedTask createOpportunityTemplate(String customerSpace, String systemName, EntityType entityType,
                                                     SimpleTemplateMetadata simpleTemplateMetadata) {
-        S3ImportSystem importSystem = setupSystems(customerSpace, entityType, S3ImportSystem.SystemType.Salesforce,
+        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
                 systemName);
+        if (importSystem == null) {
+            throw new IllegalStateException(String.format("S3ImportSystem cannot be null, systemName is %s," +
+                    " tenant %s.", systemName, customerSpace));
+        }
 
         ImportWorkflowSpec spec;
         try {
-            spec = importWorkflowSpecService.loadSpecFromS3(importSystem.getSystemType().name(),
-                    entityType.getDisplayName());
+            String fileSystemType = "allsystem";
+            spec = importWorkflowSpecService.loadSpecFromS3(fileSystemType, entityType.getDisplayName());
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Could not create template for tenant %s, system type %s, and system object %s " +
@@ -597,7 +603,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     /*
-     * map to Saleforce system UniqueId
+     * map to system UniqueId
      */
     private void processMatchId(S3ImportSystem importSystem, FieldDefinitionsRecord record) {
         List<FieldDefinition> fieldDefinitionList = record.getFieldDefinitionsRecords(MATCH_TO_ACCOUNT_ID_SECTION);
@@ -659,5 +665,13 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         calculator.setAttribute(attributeName);
         dim.setCalculator(calculator);
         return dim;
+    }
+
+    private ActivityRowReducer prepareReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Arrays.asList(InterfaceName.OpportunityId.name()));
+        reducer.setArguments(Collections.singletonList(InterfaceName.LastModifiedDate.name()));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
     }
 }

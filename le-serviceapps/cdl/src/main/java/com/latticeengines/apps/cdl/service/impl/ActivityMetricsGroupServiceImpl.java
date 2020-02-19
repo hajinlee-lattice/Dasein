@@ -150,8 +150,8 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         stage.setEntity(BusinessEntity.Account);
         stage.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER, null, null));
         stage.setRollupDimensions(DIM_NAME_STAGE);
-        stage.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
-                InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
+        stage.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.OpportunityId.name()),
+                InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.LAST));
         stage.setCategory(Category.OPPORTUNITY_PROFILE);
         stage.setSubCategoryTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_SUBCATEGORY));
         stage.setDisplayNameTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_STAGENAME_DISPLAYNAME));
