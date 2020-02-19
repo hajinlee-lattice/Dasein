@@ -130,6 +130,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(id);
         if (existingLookupIdMap != null) {
             if (lookupIdMap != null) {
+                existingLookupIdMap.setOrgName(lookupIdMap.getOrgName());
                 existingLookupIdMap.setAccountId(lookupIdMap.getAccountId());
                 existingLookupIdMap.setProspectOwner(lookupIdMap.getProspectOwner());
                 existingLookupIdMap.setDescription(lookupIdMap.getDescription());
