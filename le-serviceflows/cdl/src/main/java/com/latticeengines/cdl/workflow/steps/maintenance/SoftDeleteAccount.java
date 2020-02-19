@@ -43,6 +43,11 @@ public class SoftDeleteAccount extends BaseSingleEntitySoftDelete<ProcessAccount
     }
 
     @Override
+    protected boolean skipRegisterBatchStore() {
+        return false;
+    }
+
+    @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
         String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);

@@ -66,6 +66,7 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
     List<Action> softDeleteActions;
 
     protected abstract PipelineTransformationRequest getConsolidateRequest();
+    protected abstract boolean skipRegisterBatchStore();
 
     protected void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
@@ -110,7 +111,9 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
 
     @Override
     protected void onPostTransformationCompleted() {
-        registerBatchStore();
+        if (!skipRegisterBatchStore()) {
+            registerBatchStore();
+        }
         updateEntityValueMapInContext(PERFORM_SOFT_DELETE, Boolean.TRUE, Boolean.class);
         long recordsBeforeSoftDelete = countRawEntitiesInHdfs(batchStore, active);
         long recordsAfterSoftDelete = countRawEntitiesInHdfs(batchStore, inactive);
