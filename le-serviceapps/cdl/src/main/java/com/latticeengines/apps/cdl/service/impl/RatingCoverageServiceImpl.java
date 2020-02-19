@@ -538,140 +538,141 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     private CoverageInfo processSingleRatingId(Tenant tenant, MetadataSegment targetSegment, String ratingEngineId,
             boolean isRestrictNullLookupId, String lookupId, boolean loadContactCount,
             boolean loadContactsCountByBucket, boolean restrictContactsWithoutEmails) {
-        try {
-            MultiTenantContext.setTenant(tenant);
 
-            RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
+        MultiTenantContext.setTenant(tenant);
 
-            if (ratingEngine == null || ratingEngine.getSegment() == null) {
-                throw new RuntimeException("Invalid rating engine. Doesn't have segment association.");
-            }
+        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
 
-            MetadataSegment querySegment = targetSegment != null ? targetSegment : ratingEngine.getSegment();
-
-            FrontEndQuery accountFrontEndQuery = //
-                    createEntityFrontEndQuery(BusinessEntity.Account, //
-                            isRestrictNullLookupId, querySegment, lookupId);
-
-            if (restrictContactsWithoutEmails) {
-                Restriction newContactRestriction = restrictContactsWithoutEmails(
-                        accountFrontEndQuery.getContactRestriction().getRestriction());
-                accountFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
-            }
-
-            RatingEngineFrontEndQuery ratingEngineAccountFrontEndQuery = RatingEngineFrontEndQuery
-                    .fromFrontEndQuery(accountFrontEndQuery);
-            ratingEngineAccountFrontEndQuery.setRatingEngineId(ratingEngineId);
-
-            log.info("Front end query for Account: " + JsonUtils.serialize(ratingEngineAccountFrontEndQuery));
-            Map<String, Long> countInfo = entityProxy.getRatingCount( //
-                    tenant.getId(), //
-                    ratingEngineAccountFrontEndQuery);
-
-            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(Map.Entry::getValue)
-                    .reduce((x, y) -> x + y);
-
-            CoverageInfo coverageInfo = new CoverageInfo();
-
-            Long accountCount = accountCountOption.orElse(0L);
-            coverageInfo.setAccountCount(accountCount);
-
-            List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
-            for (RatingBucketName bucket : RatingBucketName.values()) {
-                Long countInBucket = 0L;
-
-                if (countInfo.containsKey(bucket.getName())) {
-                    countInBucket = countInfo.get(bucket.name());
-                } else {
-                    // do not put bucket info for bucket which is not defined
-                    continue;
-                }
-
-                RatingBucketCoverage coveragePair = new RatingBucketCoverage();
-                coveragePair.setBucket(bucket.getName());
-                coveragePair.setCount(countInBucket);
-                bucketCoverageCounts.add(coveragePair);
-            }
-            coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
-
-            // Populate Unscored counts
-            // unscored accounts
-            String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
-            Restriction unscoredRestriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull()
-                    .build();
-            Restriction unscoredAccountsInSegmentRest = Restriction.builder()
-                    .and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestriction).build();
-            FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
-            unscoredFrontEndQuery.setMainEntity(BusinessEntity.Account);
-            unscoredFrontEndQuery.setAccountRestriction(new FrontEndRestriction(unscoredAccountsInSegmentRest));
-            unscoredFrontEndQuery.setContactRestriction(accountFrontEndQuery.getContactRestriction());
-            coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
-
-            boolean hasContactTable = hasContact(tenant.getId(), null);
-            // TODO: this is not working as expected. Though contact table
-            // exists, this api still returns false.
-            if (!hasContactTable) {
-                log.info("Contact Table is not available for Tenant: {}", tenant.getId());
-            }
-            if (hasContactTable && (loadContactCount || loadContactsCountByBucket)) {
-                try {
-                    // If user requests for ContactCount by bucket, we can
-                    // compute the total count.
-                    // Otherwise, total count should be fetched using single
-                    // query instead of looping every bucket.
-                    if (loadContactsCountByBucket) {
-                        coverageInfo.setContactCount(0L);
-                        coverageInfo.getBucketCoverageCounts().stream().forEach(bucketCoverage -> {
-                            try {
-                                FrontEndQuery contactFrontEndQuery = createEntityFrontEndQuery(BusinessEntity.Contact,
-                                        isRestrictNullLookupId, querySegment, lookupId, ratingEngineId,
-                                        bucketCoverage.getBucket());
-
-                                if (restrictContactsWithoutEmails) {
-                                    Restriction newContactRestriction = restrictContactsWithoutEmails(
-                                            contactFrontEndQuery.getContactRestriction().getRestriction());
-                                    contactFrontEndQuery
-                                            .setContactRestriction(new FrontEndRestriction(newContactRestriction));
-                                }
-
-                                Long bucketCount = getContactCount(tenant, contactFrontEndQuery);
-                                bucketCoverage.setContactCount(bucketCount);
-                                coverageInfo.setContactCount(bucketCount + coverageInfo.getContactCount());
-                            } catch (Exception ex) {
-                                // Ignore the exception
-                                log.info("Error while fetching contact count for Rating Bucket {}",
-                                        bucketCoverage.getBucket(), ex);
-                            }
-                        });
-
-                    } else {
-                        FrontEndQuery contactFrontEndQuery = createEntityFrontEndQuery(BusinessEntity.Contact,
-                                isRestrictNullLookupId, querySegment, lookupId, ratingEngineId, null);
-
-                        if (restrictContactsWithoutEmails) {
-                            Restriction newContactRestriction = restrictContactsWithoutEmails(
-                                    contactFrontEndQuery.getContactRestriction().getRestriction());
-                            contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
-                        }
-
-                        Long contactCount = getContactCount(tenant, contactFrontEndQuery);
-                        coverageInfo.setContactCount(contactCount);
-                    }
-
-                    // unscored contacts
-                    unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
-                    Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
-                    coverageInfo.setUnscoredContactCount(unscoredContactCount);
-
-                } catch (Exception ex) {
-                    log.info("Got error in fetching contact count", ex);
-                }
-            }
-            return coverageInfo;
-        } catch (Exception ex) {
-            throw ex;
+        if (ratingEngine == null || ratingEngine.getSegment() == null) {
+            throw new LedpException(LedpCode.LEDP_32000, new String[] {
+                    "Invalid rating engine: " + ratingEngineId + ". Doesn't have segment association." });
         }
 
+        if (isRestrictNullLookupId && StringUtils.isBlank(lookupId)) {
+            throw new LedpException(LedpCode.LEDP_40070);
+        }
+
+        MetadataSegment querySegment = targetSegment != null ? targetSegment : ratingEngine.getSegment();
+
+        FrontEndQuery accountFrontEndQuery = //
+                createEntityFrontEndQuery(BusinessEntity.Account, //
+                        isRestrictNullLookupId, querySegment, lookupId);
+
+        if (restrictContactsWithoutEmails) {
+            Restriction newContactRestriction = restrictContactsWithoutEmails(
+                    accountFrontEndQuery.getContactRestriction().getRestriction());
+            accountFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
+        }
+
+        RatingEngineFrontEndQuery ratingEngineAccountFrontEndQuery = RatingEngineFrontEndQuery
+                .fromFrontEndQuery(accountFrontEndQuery);
+        ratingEngineAccountFrontEndQuery.setRatingEngineId(ratingEngineId);
+
+        log.info("Front end query for Account: " + JsonUtils.serialize(ratingEngineAccountFrontEndQuery));
+        Map<String, Long> countInfo = entityProxy.getRatingCount( //
+                tenant.getId(), //
+                ratingEngineAccountFrontEndQuery);
+
+        Optional<Long> accountCountOption = countInfo.entrySet().stream().map(Map.Entry::getValue)
+                .reduce((x, y) -> x + y);
+
+        CoverageInfo coverageInfo = new CoverageInfo();
+
+        Long accountCount = accountCountOption.orElse(0L);
+        coverageInfo.setAccountCount(accountCount);
+
+        List<RatingBucketCoverage> bucketCoverageCounts = new ArrayList<>();
+        for (RatingBucketName bucket : RatingBucketName.values()) {
+            Long countInBucket = 0L;
+
+            if (countInfo.containsKey(bucket.getName())) {
+                countInBucket = countInfo.get(bucket.name());
+            } else {
+                // do not put bucket info for bucket which is not defined
+                continue;
+            }
+
+            RatingBucketCoverage coveragePair = new RatingBucketCoverage();
+            coveragePair.setBucket(bucket.getName());
+            coveragePair.setCount(countInBucket);
+            bucketCoverageCounts.add(coveragePair);
+        }
+        coverageInfo.setBucketCoverageCounts(bucketCoverageCounts);
+
+        // Populate Unscored counts
+        // unscored accounts
+        String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
+        Restriction unscoredRestriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNull()
+                .build();
+        Restriction unscoredAccountsInSegmentRest = Restriction.builder()
+                .and(accountFrontEndQuery.getAccountRestriction().getRestriction(), unscoredRestriction).build();
+        FrontEndQuery unscoredFrontEndQuery = new FrontEndQuery();
+        unscoredFrontEndQuery.setMainEntity(BusinessEntity.Account);
+        unscoredFrontEndQuery.setAccountRestriction(new FrontEndRestriction(unscoredAccountsInSegmentRest));
+        unscoredFrontEndQuery.setContactRestriction(accountFrontEndQuery.getContactRestriction());
+        coverageInfo.setUnscoredAccountCount(entityProxy.getCount(tenant.getId(), unscoredFrontEndQuery));
+
+        boolean hasContactTable = hasContact(tenant.getId(), null);
+        // TODO: this is not working as expected. Though contact table
+        // exists, this api still returns false.
+        if (!hasContactTable) {
+            log.info("Contact Table is not available for Tenant: {}", tenant.getId());
+        }
+        if (hasContactTable && (loadContactCount || loadContactsCountByBucket)) {
+            try {
+                // If user requests for ContactCount by bucket, we can
+                // compute the total count.
+                // Otherwise, total count should be fetched using single
+                // query instead of looping every bucket.
+                if (loadContactsCountByBucket) {
+                    coverageInfo.setContactCount(0L);
+                    coverageInfo.getBucketCoverageCounts().stream().forEach(bucketCoverage -> {
+                        try {
+                            FrontEndQuery contactFrontEndQuery = createEntityFrontEndQuery(BusinessEntity.Contact,
+                                    isRestrictNullLookupId, querySegment, lookupId, ratingEngineId,
+                                    bucketCoverage.getBucket());
+
+                            if (restrictContactsWithoutEmails) {
+                                Restriction newContactRestriction = restrictContactsWithoutEmails(
+                                        contactFrontEndQuery.getContactRestriction().getRestriction());
+                                contactFrontEndQuery
+                                        .setContactRestriction(new FrontEndRestriction(newContactRestriction));
+                            }
+
+                            Long bucketCount = getContactCount(tenant, contactFrontEndQuery);
+                            bucketCoverage.setContactCount(bucketCount);
+                            coverageInfo.setContactCount(bucketCount + coverageInfo.getContactCount());
+                        } catch (Exception ex) {
+                            // Ignore the exception
+                            log.info("Error while fetching contact count for Rating Bucket {}",
+                                    bucketCoverage.getBucket(), ex);
+                        }
+                    });
+
+                } else {
+                    FrontEndQuery contactFrontEndQuery = createEntityFrontEndQuery(BusinessEntity.Contact,
+                            isRestrictNullLookupId, querySegment, lookupId, ratingEngineId, null);
+
+                    if (restrictContactsWithoutEmails) {
+                        Restriction newContactRestriction = restrictContactsWithoutEmails(
+                                contactFrontEndQuery.getContactRestriction().getRestriction());
+                        contactFrontEndQuery.setContactRestriction(new FrontEndRestriction(newContactRestriction));
+                    }
+
+                    Long contactCount = getContactCount(tenant, contactFrontEndQuery);
+                    coverageInfo.setContactCount(contactCount);
+                }
+
+                // unscored contacts
+                unscoredFrontEndQuery.setMainEntity(BusinessEntity.Contact);
+                Long unscoredContactCount = getContactCount(tenant, unscoredFrontEndQuery);
+                coverageInfo.setUnscoredContactCount(unscoredContactCount);
+
+            } catch (Exception ex) {
+                log.info("Got error in fetching contact count", ex);
+            }
+        }
+        return coverageInfo;
     }
 
     private Restriction restrictContactsWithoutEmails(Restriction contactRestriction) {
@@ -995,10 +996,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         MetadataSegment targetSegment = segmentService.findByName(segmentName);
         if (targetSegment == null) {
             throw new LedpException(LedpCode.LEDP_40045, new String[] { segmentName });
-        }
-
-        if (request.isRestrictNullLookupId() && StringUtils.isBlank(request.getLookupId())) {
-            throw new LedpException(LedpCode.LEDP_40070);
         }
 
         if (request.getRatingEngineIds().size() < thresholdForParallelProcessing) {
