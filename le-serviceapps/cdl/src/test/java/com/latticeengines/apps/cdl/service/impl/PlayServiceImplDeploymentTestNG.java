@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.PlayType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.proxy.exposed.cdl.CDLDependenciesProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
 
@@ -53,6 +54,9 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Inject
     private TalkingPointProxy talkingPointProxy;
+
+    @Inject
+    private CDLDependenciesProxy cdlDependenciesProxy;
 
     @Inject
     private PlayTypeService playTypeService;
@@ -126,7 +130,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     public void testFindDependingPlays() {
         List<String> attributes = new ArrayList<>();
         attributes.add("Account.DUNS");
-        List<String> plays = playService.findDependantPlayDisplayNames(attributes);
+        List<String> plays = cdlDependenciesProxy.getDependantPlayDisplayNames(mainCustomerSpace, attributes);
 
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 1);
