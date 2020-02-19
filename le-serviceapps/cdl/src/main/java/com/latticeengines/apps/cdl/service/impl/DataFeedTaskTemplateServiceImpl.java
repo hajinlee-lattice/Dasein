@@ -573,7 +573,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         s3ImportSystem.setSystemType(systemType);
         s3ImportSystem.setName(systemName);
         s3ImportSystem.setDisplayName(systemName);
-        s3ImportSystem.setTenant(tenantEntityMgr.findByTenantId(customerSpace));
+        s3ImportSystem.setTenant(tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString()));
         s3ImportSystemService.createS3ImportSystem(customerSpace, s3ImportSystem);
         dropBoxService.createFolder(customerSpace, systemName, null, null);
         return s3ImportSystemService.getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -76,6 +78,33 @@ public final class ActivityMetricsGroupUtils {
         } else {
             throw new ParseException("Cannot parse attribute name " + attrName, 0);
         }
+    }
+
+    /**
+     * Expand {@link ActivityTimeRange} TODO maybe merge with
+     * MetricsGroupGenerator#createTimeFilters
+     *
+     * @param timeRange
+     *            target time range, nullable
+     * @return non-null list of time filters contained by given range
+     */
+    public static List<TimeFilter> toTimeFilters(ActivityTimeRange timeRange) {
+        if (timeRange == null || CollectionUtils.isEmpty(timeRange.getPeriods())
+                || CollectionUtils.isEmpty(timeRange.getParamSet())) {
+            return Collections.emptyList();
+        }
+        if (timeRange.getOperator() != ComparisonType.WITHIN) {
+            String msg = String.format("Comparison type %s is not supported", timeRange.getOperator());
+            throw new UnsupportedOperationException(msg);
+        }
+
+        List<TimeFilter> timeFilters = new ArrayList<>();
+        for (String period : timeRange.getPeriods()) {
+            for (List<Integer> params : timeRange.getParamSet()) {
+                timeFilters.add(TimeFilter.within(params.get(0), period));
+            }
+        }
+        return timeFilters;
     }
 
     public static String timeFilterToTimeRangeTmpl(TimeFilter timeFilter) {

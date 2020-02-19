@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -165,6 +166,24 @@ public class TimeFilter implements Serializable {
 
     public void setPeriod(String period) {
         this.period = period;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TimeFilter filter = (TimeFilter) o;
+        return relation == filter.relation && Objects.equal(values, filter.values)
+                && Objects.equal(period, filter.period);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(relation, values, period);
     }
 
     @Deprecated // use PeriodStrategy.Template instead

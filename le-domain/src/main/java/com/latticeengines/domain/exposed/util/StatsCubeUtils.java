@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BooleanBucket;
@@ -630,17 +631,8 @@ public final class StatsCubeUtils {
             ColumnMetadata cm = cmMap.get(name);
             AttributeStats statsInCube = attrStatsMap.get(name);
             Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
-            String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
-            // create map entries if not there
-            if (!topNTree.hasCategory(category)) {
-                topNTree.putCategory(category, new CategoryTopNTree());
-            }
-            CategoryTopNTree categoryTopNTree = topNTree.getCategory(category);
-            if (!categoryTopNTree.hasSubcategory(subCategory)) {
-                categoryTopNTree.putSubcategory(subCategory, new ArrayList<>());
-            }
             // update the corresponding map entry
-            List<TopAttribute> topAttributes = topNTree.getCategory(category).getSubcategory(subCategory);
+            List<TopAttribute> topAttributes = createAndGetTopAttributes(category, cm, topNTree);
             topAttributes.add(toTopAttr(category, entity, name, statsInCube, false));
         }
     }
@@ -667,17 +659,8 @@ public final class StatsCubeUtils {
                 continue;
             }
             Category category = cm.getCategory() == null ? Category.DEFAULT : cm.getCategory();
-            String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
-            // create map entries if not there
-            if (!topNTree.hasCategory(category)) {
-                topNTree.putCategory(category, new CategoryTopNTree());
-            }
-            CategoryTopNTree categoryTopNTree = topNTree.getCategory(category);
-            if (!categoryTopNTree.hasSubcategory(subCategory)) {
-                categoryTopNTree.putSubcategory(subCategory, new ArrayList<>());
-            }
             // update the corresponding map entry
-            List<TopAttribute> topAttributes = topNTree.getCategory(category).getSubcategory(subCategory);
+            List<TopAttribute> topAttributes = createAndGetTopAttributes(category, cm, topNTree);
             topAttributes.add(toTopAttr(category, entity, name, statsInCube, includeTopBkt));
         }
         if (includeTopBkt) {
@@ -687,6 +670,25 @@ public final class StatsCubeUtils {
                 topAttrs.sort(comparator);
             }));
         }
+    }
+
+    private static List<TopAttribute> createAndGetTopAttributes(@NotNull Category category, @NotNull ColumnMetadata cm,
+            @NotNull TopNTree topNTree) {
+        String subCategory = cm.getSubcategory() == null ? "Other" : cm.getSubcategory();
+        // create map entries if not there
+        if (!topNTree.hasCategory(category)) {
+            CategoryTopNTree categoryTopNTree = new CategoryTopNTree();
+            categoryTopNTree.setSecondaryCategoryDisplayName(category.getSecondaryDisplayName());
+            categoryTopNTree.setFilterOptions(category.getFilterOptions());
+            categoryTopNTree.setShouldShowSubCategoryInCategoryTile(category.shouldShowSubCategoryInCategoryTile());
+            topNTree.putCategory(category, categoryTopNTree);
+        }
+        CategoryTopNTree categoryTopNTree = topNTree.getCategory(category);
+        if (!categoryTopNTree.hasSubcategory(subCategory)) {
+            categoryTopNTree.putSubcategory(subCategory, new ArrayList<>());
+        }
+        // update the corresponding map entry
+        return topNTree.getCategory(category).getSubcategory(subCategory);
     }
 
     private static TopAttribute toTopAttr(Category category, BusinessEntity entity, String attrName,

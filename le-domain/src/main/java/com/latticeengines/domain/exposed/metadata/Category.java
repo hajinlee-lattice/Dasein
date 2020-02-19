@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.Sets;
+import com.latticeengines.domain.exposed.util.WebVisitUtils;
 
 public enum Category {
     RATING("Lattice Ratings", 0), //
@@ -36,7 +37,22 @@ public enum Category {
     LEAD_INFORMATION("Lead Information", 13), //
     DEFAULT("Default", 14), //
     AI_INSIGHTS("AI Insights", 15), //
-    WEB_VISIT_PROFILE("My Website Profile", 16), //
+    WEB_VISIT_PROFILE("My Website Profile", 16) {
+        @Override
+        public FilterOptions getFilterOptions() {
+            return WebVisitUtils.attrFilterOptions();
+        }
+
+        @Override
+        public boolean shouldShowSubCategoryInCategoryTile() {
+            return true;
+        }
+
+        @Override
+        public String getSecondaryDisplayName() {
+            return WebVisitUtils.defaultTimeFilterDisplayName();
+        }
+    }, //
     OPPORTUNITY_PROFILE("My Opportunities", 17); //
 
 
@@ -123,6 +139,23 @@ public enum Category {
 
     public boolean isLdcReservedCategory() {
         return ldcReservedCategories.contains(this);
+    }
+
+    // attribute filter drop down options for attributes in this category
+    public FilterOptions getFilterOptions() {
+        // default no attribute filtering
+        return null;
+    }
+
+    // label shown under category name in category tile
+    public String getSecondaryDisplayName() {
+        // default no secondary display name
+        return null;
+    }
+
+    // flag to show sub category (instead of attribute name) in category
+    public boolean shouldShowSubCategoryInCategoryTile() {
+        return false;
     }
 
     public static class CategoryKeyDeserializer extends KeyDeserializer {

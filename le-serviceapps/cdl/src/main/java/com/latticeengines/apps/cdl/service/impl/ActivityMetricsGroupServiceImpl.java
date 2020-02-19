@@ -1,9 +1,11 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.util.WebVisitUtils.SOURCE_MEDIUM_GROUPNAME;
+import static com.latticeengines.domain.exposed.util.WebVisitUtils.TOTAL_VISIT_GROUPNAME;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +21,6 @@ import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
@@ -32,12 +33,11 @@ import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputat
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.WebVisitUtils;
 
 @Service("activityMetricsGroupService")
 public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupService {
 
-    private static final String TOTAL_VISIT_GROUPNAME = "Total Web Visits";
-    private static final String SOURCE_MEDIUM_GROUPNAME = "Web Visits By Source Medium";
     private static final String OPPORTUNITY_STAGE_GROUPNAME = "Opportunity By Stage";
     private static final String DIM_NAME_PATH_PATTERN = InterfaceName.PathPatternId.name();
     private static final String DIM_NAME_SOURCEMEDIUM = InterfaceName.SourceMediumId.name();
@@ -96,13 +96,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         totalVisit.setGroupName(TOTAL_VISIT_GROUPNAME);
         totalVisit.setJavaClass(Long.class.getSimpleName());
         totalVisit.setEntity(BusinessEntity.Account);
-        Set<List<Integer>> paramSet = new HashSet<>();
-        paramSet.add(Collections.singletonList(2));
-        paramSet.add(Collections.singletonList(4));
-        paramSet.add(Collections.singletonList(8));
-        paramSet.add(Collections.singletonList(12));
-        totalVisit.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
-                Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
+        totalVisit.setActivityTimeRange(WebVisitUtils.defaultTimeRange());
         totalVisit.setRollupDimensions(DIM_NAME_PATH_PATTERN);
         totalVisit.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
@@ -122,13 +116,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         sourceMedium.setGroupName(SOURCE_MEDIUM_GROUPNAME);
         sourceMedium.setJavaClass(Long.class.getSimpleName());
         sourceMedium.setEntity(BusinessEntity.Account);
-        Set<List<Integer>> paramSet = new HashSet<>();
-        paramSet.add(Collections.singletonList(2));
-        paramSet.add(Collections.singletonList(4));
-        paramSet.add(Collections.singletonList(8));
-        paramSet.add(Collections.singletonList(12));
-        sourceMedium.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN,
-                Collections.singleton(PeriodStrategy.Template.Week.name()), paramSet));
+        sourceMedium.setActivityTimeRange(WebVisitUtils.defaultTimeRange());
         sourceMedium.setRollupDimensions(String.join(",", Arrays.asList(DIM_NAME_SOURCEMEDIUM, DIM_NAME_PATH_PATTERN)));
         sourceMedium.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
