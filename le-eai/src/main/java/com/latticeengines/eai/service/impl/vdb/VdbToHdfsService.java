@@ -190,7 +190,7 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
                 return;
             case REPLACE:
                 waitForDataFeed(customerSpace);
-                applicationId = cdlProxy.cleanupAllData(customerSpace, entity,
+                cdlProxy.cleanupAllByAction(customerSpace, entity,
                         CDLConstants.DEFAULT_VISIDB_USER);
                 break;
             case UPSERT_ID:
