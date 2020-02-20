@@ -9,7 +9,8 @@ public enum FieldDefinitionSectionName {
     Analysis_Fields("Analysis Fields"),
     Match_To_Accounts_Fields("Match to Accounts - Fields"),
     Match_IDs("Match IDs"),
-    Contact_Fields("Contact Fields");
+    Contact_Fields("Contact Fields"),
+    Account_Matching_Fields("Account Matching Fields");
 
     FieldDefinitionSectionName(String name) {
         this.name = name;
