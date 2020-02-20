@@ -120,7 +120,8 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc1", "opp1", "open", "Oct 21, 2018 18:37", "2018-10-21", 1},
                 {"acc1", "opp1", "dev", "Oct 22, 2018 19:37", "2018-10-22", 1},
                 {"acc1", "opp1", "won", "Oct 23, 2018 20:37", "2018-10-23", 1},
-                {"acc1", "opp1", "close", "Oct 29, 2018 20:37", "2018-10-29", 1}
+                {"acc2", "opp1", "close", "Oct 24, 2018 20:37", "2018-10-24", 1},
+                {"acc2", "opp2", "open", "Oct 29, 2018 20:37", "2018-10-29", 1}
         };
         setupStreamWithReducer();
         return uploadHdfsDataUnit(data, inputFields);
@@ -149,7 +150,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     private ActivityRowReducer prepareReducer() {
         ActivityRowReducer reducer = new ActivityRowReducer();
-        reducer.setGroupByFields(Arrays.asList(OpportunityId, AccountId));
+        reducer.setGroupByFields(Collections.singletonList(OpportunityId));
         reducer.setArguments(Collections.singletonList(DATE_ATTR));
         reducer.setOperator(ActivityRowReducer.Operator.Latest);
         return reducer;
@@ -187,8 +188,8 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private Boolean verifyReduced(HdfsDataUnit df) {
         OUTPUT_FIELDS_WITH_REDUCER = Arrays.asList(AccountId, OpportunityId, PeriodIdForPartition, Stage, Count);
         Object[][] expected = new Object[][]{
-                {"acc1", "opp1", 982, "won", 1}, //
-                {"acc1", "opp1", 983, "close", 1} //
+                {"acc2", "opp1", 982, "close", 1},
+                {"acc2", "opp2", 983, "open", 1}
         };
         verifyPeriodStore(expected, df, true);
         return false;

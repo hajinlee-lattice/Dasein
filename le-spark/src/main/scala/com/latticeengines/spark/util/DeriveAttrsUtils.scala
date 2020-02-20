@@ -27,7 +27,6 @@ private[spark] object DeriveAttrsUtils {
       case Calculation.SUM => getSum(df, deriver)
       case Calculation.MAX => getMax(df, deriver)
       case Calculation.MIN => getMin(df, deriver)
-      case Calculation.LAST => getLastCount(df, deriver)
       case _ => throw new UnsupportedOperationException(s"$calculation is not implemented")
     }
   }
@@ -60,10 +59,6 @@ private[spark] object DeriveAttrsUtils {
   def getMin(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
     checkSingleSource(deriver)
     min(df(deriver.getSourceAttributes.get(0))).alias(deriver.getTargetAttribute)
-  }
-
-  def getLastCount(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
-    sum(df(deriver.getTargetAttribute)).alias(deriver.getTargetAttribute)
   }
 
   def applyTimeActivityRowReducer(df: DataFrame, reducer: ActivityRowReducer): DataFrame = {
