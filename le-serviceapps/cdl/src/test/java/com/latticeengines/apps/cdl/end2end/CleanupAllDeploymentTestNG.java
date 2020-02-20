@@ -129,6 +129,11 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     }
 
     private void verifyProcess() {
+        // verify in replace mode, pa will delete the attr config records
+        AttrConfigRequest request = cdlAttrConfigProxy.getAttrConfigByEntity(customerSpace, BusinessEntity.Contact,
+                false);
+        Assert.assertEquals(request.getAttrConfigs().size(), 0);
+
         runCommonPAVerifications();
         verifyStats(false, BusinessEntity.Account);
 

@@ -63,6 +63,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -83,6 +84,10 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     @Inject
     private MatchProxy matchProxy;
+
+    @Inject
+    protected CDLAttrConfigProxy cdlAttrConfigProxy;
+
 
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;

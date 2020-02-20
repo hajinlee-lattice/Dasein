@@ -54,6 +54,10 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
             log.info("Soft delete performed for Activity Stream");
             updatedRawStreamTables = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
         }
+        // in replace mode, delete the records in document db
+        if (Boolean.TRUE.equals(configuration.isReplaceMode())) {
+            cdlAttrConfigProxy.removeAttrConfigByTenantAndEntity(customerSpace.toString(), configuration.getMainEntity());
+        }
     }
 
     @Override
