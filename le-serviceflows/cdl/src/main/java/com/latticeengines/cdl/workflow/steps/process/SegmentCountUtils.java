@@ -3,12 +3,9 @@ package com.latticeengines.cdl.workflow.steps.process;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -32,14 +29,12 @@ final class SegmentCountUtils {
         }
     }
 
-    static List<String> updateEntityCounts(final SegmentProxy segmentProxy, final String customerSpace) {
-        UpdateSegmentCountResponse response = segmentProxy.updateSegmentsCounts(customerSpace);
-        if (MapUtils.isNotEmpty(response.getUpdatedCounts())) {
-            log.info("Updated segment counts: " + JsonUtils.serialize(response.getUpdatedCounts()));
-        } else {
-            log.info("No updated segment counts.");
+    static void updateEntityCountsAsync(final SegmentProxy segmentProxy, final String customerSpace) {
+        try {
+            segmentProxy.updateSegmentsCountsAsync(customerSpace);
+        } catch (Exception e) {
+            log.warn("Failed to trigger update all-segments count.");
         }
-        return response.getFailedSegments();
     }
 
 }

@@ -35,6 +35,8 @@ public interface SegmentService {
 
     UpdateSegmentCountResponse updateSegmentsCounts();
 
+    void updateSegmentsCountsAsync();
+
     List<AttributeLookup> findDependingAttributes(List<MetadataSegment> metadataSegments);
 
     List<MetadataSegment> findDependingSegments(List<String> attributes);

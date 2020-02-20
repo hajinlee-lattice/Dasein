@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -126,14 +129,18 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @JsonProperty("contacts")
     private Long contacts;
 
-    @Column(name = "PRODUCTS")
-    @JsonProperty("products")
-    private Long products;
+    @Column(name = "COUNTS_OUTDATED")
+    @JsonProperty("counts_outdated")
+    private Boolean countsOutdated;
 
     @JsonProperty("segment_attributes")
     @Transient
     @ApiModelProperty("segment attributes")
     private Set<AttributeLookup> segmentAttributes;
+
+    @JsonIgnore
+    @Transient
+    private boolean skipAuditing;
 
     @Override
     public Long getPid() {
@@ -324,12 +331,20 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         this.contacts = contacts;
     }
 
-    public Long getProducts() {
-        return products;
+    public Boolean getCountsOutdated() {
+        return countsOutdated;
     }
 
-    public void setProducts(Long products) {
-        this.products = products;
+    public void setCountsOutdated(Boolean countsOutdated) {
+        this.countsOutdated = countsOutdated;
+    }
+
+    public boolean isSkipAuditing() {
+        return skipAuditing;
+    }
+
+    public void setSkipAuditing(boolean skipAuditing) {
+        this.skipAuditing = skipAuditing;
     }
 
     @Override
@@ -345,9 +360,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         case Contact:
             setContacts(count);
             break;
-        case Product:
-            setProducts(count);
-            break;
         default:
             throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
@@ -359,8 +371,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
             return getAccounts();
         case Contact:
             return getContacts();
-        case Product:
-            return getProducts();
         default:
             throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
@@ -426,6 +436,13 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         clone.setUpdated(new Date());
         clone.setMasterSegment(this.getMasterSegment());
         return clone;
+    }
+
+    public MetadataSegment getDeepCopy() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        KryoUtils.write(bos, this);
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        return KryoUtils.read(bis, MetadataSegment.class);
     }
 
 }
