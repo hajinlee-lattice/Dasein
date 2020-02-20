@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -39,6 +40,7 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConf
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.CreateDeltaRecommendationsJob;
+import com.latticeengines.workflow.exposed.util.WorkflowJobUtils;
 
 @Component("deltaCampaignLaunchInitStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -107,7 +109,7 @@ public class DeltaCampaignLaunchInitStep
         frontEndQueryCreator.processFieldMappingMetadataWithExistingRecommendationColumns(
                 playLaunchContext.getFieldMappingMetadata(), processedFieldMappingMetadata);
 
-        PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.getTenantId(), playName, playLaunchId);
+        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
         String addAccounts = playLaunch.getAddAccountsTable();
         String addContacts = playLaunch.getAddContactsTable();
         String delAccounts = playLaunch.getRemoveAccountsTable();
@@ -134,6 +136,7 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setDataDbDriver(dataDbDriver);
         deltaCampaignLaunchSparkContext.setDataDbUrl(dataDbUrl);
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
+        setPublishRecommendation(deltaCampaignLaunchSparkContext, playLaunch);
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();
@@ -153,6 +156,23 @@ public class DeltaCampaignLaunchInitStep
         sparkConfig.setDeltaCampaignLaunchSparkContext(deltaCampaignLaunchSparkContext);
 
         return sparkConfig;
+    }
+
+    private void setPublishRecommendation(DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext, PlayLaunch playLaunch) {
+        CDLExternalSystemName destinationSysName = playLaunch.getDestinationSysName();
+        if (destinationSysName != null) {
+            switch (destinationSysName) {
+                case Eloqua:
+                case Salesforce:
+                    deltaCampaignLaunchSparkContext.setPublishRecommendation(true);
+                    break;
+                case AWS_S3:
+                    deltaCampaignLaunchSparkContext.setPublishRecommendation(WorkflowJobUtils.getPublishRecommendation(customerSpace));
+                case Others:
+                default:
+                    break;
+            }
+        }
     }
 
     @VisibleForTesting

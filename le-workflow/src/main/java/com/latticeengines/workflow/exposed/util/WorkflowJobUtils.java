@@ -59,6 +59,8 @@ public final class WorkflowJobUtils {
     private static final Date MIGRATE_THRESHOLD = getMigrateThreshold();
     private static final int DEFAULT_WORKFLOW_JOB_QUOTA_LIMIT = 1000;
     private static final String WORKFLOW_JOB_QUOTA_LIMIT = "WorkflowJobQuotaLimit";
+    private static final String PUBLISH_RECOMMENDATION = "PublishRecommendation";
+    private static final String CDL = "CDL";
     private static ObjectMapper om = new ObjectMapper();
 
     private static Date getMigrateThreshold() {
@@ -299,18 +301,37 @@ public final class WorkflowJobUtils {
     public static int getWorkflowJobQuotaLimit(CustomerSpace customerSpace) {
         int dataQuotaLimit = DEFAULT_WORKFLOW_JOB_QUOTA_LIMIT;
         try {
-            Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace, PathConstants.PLS).append(WORKFLOW_JOB_QUOTA_LIMIT);
-            Camille camille = CamilleEnvironment.getCamille();
-            if (camille.exists(path)) {
-                String workflowJobQuotaLimit = camille.get(path).getData();
-                if (StringUtils.isNotEmpty(workflowJobQuotaLimit)) {
-                    dataQuotaLimit = Integer.valueOf(workflowJobQuotaLimit);
-                }
+            String workflowJobQuotaLimit = getValueFromZK(customerSpace, PathConstants.PLS, WORKFLOW_JOB_QUOTA_LIMIT);
+            if (StringUtils.isNotEmpty(workflowJobQuotaLimit)) {
+                dataQuotaLimit = Integer.valueOf(workflowJobQuotaLimit);
             }
         } catch (Exception e) {
             log.warn("Failed to get count of workflow job quota limit from ZK for " + customerSpace.getTenantId(), e);
         }
         return dataQuotaLimit;
+    }
+
+    private static String getValueFromZK(CustomerSpace customerSpace, String componentName, String pathToAppend) throws Exception {
+        String value = null;
+        Path path = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace, componentName).append(pathToAppend);
+        Camille camille = CamilleEnvironment.getCamille();
+        if (camille.exists(path)) {
+            value = camille.get(path).getData();
+        }
+        return value;
+    }
+
+    public static boolean getPublishRecommendation(CustomerSpace customerSpace) {
+        boolean publishRecommendation = false;
+        try {
+            String value = getValueFromZK(customerSpace, CDL, PUBLISH_RECOMMENDATION);
+            if (StringUtils.isNotEmpty(value)) {
+                publishRecommendation = Boolean.valueOf(value);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get publish recommendation from ZK for " + customerSpace.getTenantId(), e);
+        }
+        return publishRecommendation;
     }
 
 }

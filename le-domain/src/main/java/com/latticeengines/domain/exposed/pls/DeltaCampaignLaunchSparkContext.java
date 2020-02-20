@@ -129,6 +129,9 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("CreateDeleteCsvDataFrame")
     private boolean createDeleteCsvDataFrame;
 
+    @JsonProperty("publishRecommendation")
+    private boolean publishRecommendation;
+
     public DeltaCampaignLaunchSparkContext() {
     }
 
@@ -405,6 +408,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
         this.createDeleteCsvDataFrame = createDeleteCsvDataFrame;
     }
 
+    public boolean getPublishRecommendation() {
+        return publishRecommendation;
+    }
+
+    public void setPublishRecommendation(boolean publishRecommendation) {
+        this.publishRecommendation = publishRecommendation;
+    }
+
     private void setSyncDestination(PlayLaunch playLaunch) {
         String synchronizationDestination;
         String destinationSysType;
@@ -425,7 +436,6 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
             throw new RuntimeException(String.format("Destination type %s is not supported yet",
                     playLaunch.getDestinationSysType().name()));
         }
-
         this.synchronizationDestination = synchronizationDestination;
         if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
             this.destinationOrgId = playLaunch.getDestinationOrgId();

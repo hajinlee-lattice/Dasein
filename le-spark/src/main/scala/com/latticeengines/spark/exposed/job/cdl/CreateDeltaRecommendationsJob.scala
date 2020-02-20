@@ -3,7 +3,7 @@ package com.latticeengines.spark.exposed.job.cdl
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
-import com.latticeengines.common.exposed.util.{JsonUtils, KryoUtils, CipherUtils}
+import com.latticeengines.common.exposed.util.{CipherUtils, JsonUtils, KryoUtils}
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants
 import com.latticeengines.domain.exposed.playmakercore.{NonStandardRecColumnName, RecommendationColumnName}
@@ -11,10 +11,10 @@ import com.latticeengines.domain.exposed.pls.{DeltaCampaignLaunchSparkContext, R
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
-import org.apache.spark.sql.functions.{col, count, lit, sum, when, to_timestamp, from_unixtime}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions.asc
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
@@ -235,26 +235,27 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     var finalDfs = new ListBuffer[DataFrame]()
     var contactNums = new Array[Long](2)
     if (createRecommendationDataFrame) {
-        val recommendationDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable, completeContactTable)
-        val recContactCount = recommendationDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)
-        contactNums(0) = if (recContactCount != null) recContactCount.toString.toLong else 0L
-        val recommendationDf = recommendationDfWithContactNum.drop("CONTACT_NUM").checkpoint(eager = true)
-        
+      val recommendationDfWithContactNum: DataFrame = createRecommendationDf(spark, deltaCampaignLaunchSparkContext, addAccountTable, completeContactTable)
+      val recContactCount = recommendationDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)
+      contactNums(0) = if (recContactCount != null) recContactCount.toString.toLong else 0L
+      val recommendationDf = recommendationDfWithContactNum.drop("CONTACT_NUM").checkpoint(eager = true)
+      if (deltaCampaignLaunchSparkContext.getPublishRecommendation) {
         exportToRecommendationTable(deltaCampaignLaunchSparkContext, recommendationDf)
-        finalDfs += recommendationDf
-        if (createAddCsvDataFrame) {
-            var finalrecommendationDf: DataFrame = recommendationDf
-            if (!addContactTable.rdd.isEmpty) {
-                // replace contacts
-                val aggregatedContacts = aggregateContacts(addContactTable, contactCols, joinKey)
-                finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
-                val contactCount = finalrecommendationDf.agg(sum("CONTACT_NUM")).first.get(0)
-                contactNums(0) = if (contactCount != null) contactCount.toString.toLong else 0L
-            }
-            
-            val addCsvDataFrame: DataFrame = generateUserConfiguredDataFrame(finalrecommendationDf, addAccountTable, deltaCampaignLaunchSparkContext, joinKey)
-            finalDfs += addCsvDataFrame
+      }
+      finalDfs += recommendationDf
+      if (createAddCsvDataFrame) {
+        var finalrecommendationDf: DataFrame = recommendationDf
+        if (!addContactTable.rdd.isEmpty) {
+          // replace contacts
+          val aggregatedContacts = aggregateContacts(addContactTable, contactCols, joinKey)
+          finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
+          val contactCount = finalrecommendationDf.agg(sum("CONTACT_NUM")).first.get(0)
+          contactNums(0) = if (contactCount != null) contactCount.toString.toLong else 0L
         }
+
+        val addCsvDataFrame: DataFrame = generateUserConfiguredDataFrame(finalrecommendationDf, addAccountTable, deltaCampaignLaunchSparkContext, joinKey)
+        finalDfs += addCsvDataFrame
+      }
     }
     
     if (createDeleteCsvDataFrame) {

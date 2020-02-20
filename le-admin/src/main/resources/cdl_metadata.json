@@ -31,6 +31,13 @@
           { "Node": "QueryLogging", "Data": {"Type": "boolean", "Required": false}}
       ]
     },
-    {"Node": "CampaignLaunchEndPointUrl", "Data": {"Type": "string", "Required": false}}
+    {"Node": "CampaignLaunchEndPointUrl", "Data": {"Type": "string", "Required": false}},
+    {
+      "Node": "PublishRecommendation",
+      "Data": {
+        "Type": "boolean",
+        "Required": false
+      }
+    }
   ]
 }

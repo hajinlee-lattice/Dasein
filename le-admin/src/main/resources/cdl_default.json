@@ -54,6 +54,10 @@
     {
       "Node": "CampaignLaunchEndPointUrl",
       "Data": ""
+    },
+    {
+      "Node": "PublishRecommendation",
+      "Data": "false"
     }
   ]
 }

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -241,6 +240,7 @@ public class CampaignLaunchProcessor {
             fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
                     playLaunchChannel.getId());
             playLaunch.setDestinationOrgName(playLaunchChannel.getLookupIdMap().getOrgName());
+            playLaunch.setDestinationSysName(playLaunchChannel.getLookupIdMap().getExternalSystemName());
             if (fieldMappingMetadata != null) {
                 log.info("For tenant= " + tenant.getName() + ", playChannelId= " + playLaunchChannel.getId()
                         + ", the columnmetadata size is=" + fieldMappingMetadata.size());
@@ -324,31 +324,6 @@ public class CampaignLaunchProcessor {
         } catch (Exception e) {
             log.error("Unable to update launch progress.", e);
         }
-    }
-
-    @VisibleForTesting
-    void setFrontEndQueryCreator(FrontEndQueryCreator frontEndQueryCreator) {
-        this.frontEndQueryCreator = frontEndQueryCreator;
-    }
-
-    @VisibleForTesting
-    void setPlayProxy(PlayProxy playProxy) {
-        this.playProxy = playProxy;
-    }
-
-    @VisibleForTesting
-    void setLookupIdMappingProxy(LookupIdMappingProxy lookupIdMappingProxy) {
-        this.lookupIdMappingProxy = lookupIdMappingProxy;
-    }
-
-    @VisibleForTesting
-    void setMetadataProxy(MetadataProxy metadataProxy) {
-        this.metadataProxy = metadataProxy;
-    }
-
-    @VisibleForTesting
-    void setRatingEngineProxy(RatingEngineProxy ratingEngineProxy) {
-        this.ratingEngineProxy = ratingEngineProxy;
     }
 
     public static class ProcessedFieldMappingMetadata {
