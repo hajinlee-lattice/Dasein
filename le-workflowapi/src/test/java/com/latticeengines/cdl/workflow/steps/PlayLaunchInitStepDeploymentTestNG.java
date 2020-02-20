@@ -217,33 +217,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertEquals(recommendations.size(), 0);
     }
 
-    // @Test(groups = "deployment")
-    public void testCrossSellPlayLaunch() {
-        Assert.assertEquals(rulesBasedPlayLaunch.getLaunchState(), LaunchState.Launching);
-        Assert.assertNotNull(rulesBasedPlayLaunch.getAccountsSelected());
-        Assert.assertTrue(rulesBasedPlayLaunch.getAccountsSelected() > 0L);
-        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsLaunched().longValue(), 0L);
-        Assert.assertEquals(rulesBasedPlayLaunch.getContactsLaunched().longValue(), 0L);
-        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsErrored().longValue(), 0L);
-        Assert.assertEquals(rulesBasedPlayLaunch.getAccountsSuppressed().longValue(), 0L);
-        Assert.assertEquals(rulesBasedPlayLaunch.getLaunchCompletionPercent(), 0.0D);
-
-        List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
-        Assert.assertNotNull(recommendations);
-        Assert.assertEquals(recommendations.size(), 0);
-
-        playLaunchInitStep.execute();
-
-        PlayLaunch updatedPlayLaunch = playProxy.getPlayLaunch(customerSpace.toString(), rulesBasedPlay.getName(),
-                rulesBasedPlayLaunch.getId());
-
-        Assert.assertNotNull(updatedPlayLaunch);
-        Assert.assertEquals(updatedPlayLaunch.getLaunchState(), LaunchState.Launched);
-        Assert.assertTrue(updatedPlayLaunch.getAccountsLaunched() > 0);
-        Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
-    }
-
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testRuleBasedPlayLaunch() {
         Assert.assertEquals(rulesBasedPlayLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNotNull(rulesBasedPlayLaunch.getAccountsSelected());
