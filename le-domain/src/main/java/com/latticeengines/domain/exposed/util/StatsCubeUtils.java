@@ -477,6 +477,20 @@ public final class StatsCubeUtils {
         return dbl;
     }
 
+    // cast first value in bucket to double if possible, null if not
+    private static Double firstValObjToDouble(@NotNull Bucket bkt) {
+        if (CollectionUtils.isEmpty(bkt.getValues())) {
+            return null;
+        }
+
+        try {
+            Object obj = bkt.getValues().get(0);
+            return obj == null ? null : valObjToDouble(obj);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
     public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm, boolean entityMatchEnabled) {
         // Hide Date Attributes not in category Account Attributes (aka "My Attributes")
         // or Contact Attributes.
@@ -560,6 +574,9 @@ public final class StatsCubeUtils {
 
     private static Comparator<Bucket> getBktComparator(BusinessEntity entity, BucketType bucketType, String attrName) {
         switch (entity) {
+        case WebVisitProfile:
+        case Opportunity:
+            return firstNumValueTopBktComparator();
         case Rating:
         case PurchaseHistory:
             return null;
@@ -723,12 +740,43 @@ public final class StatsCubeUtils {
         case WEBSITE_PROFILE:
         case TECHNOLOGY_PROFILE:
             return techTopBktComparator();
+        case WEB_VISIT_PROFILE:
+        case OPPORTUNITY_PROFILE:
+            return firstNumValueTopBktComparator();
         case RATING:
             return ratingTopBktComparator();
         case PRODUCT_SPEND:
         default:
             return defaultTopBktComparator();
         }
+    }
+
+    /*-
+     * Order by bucket value in descending order, use first value to handle
+     * both discrete & disjoint intervals
+     *
+     * Order by:
+     * 1. numeric first value (cast to double), DESC
+     * 2. non-numeric first value
+     * 3. nulls
+     */
+    private static Comparator<Bucket> firstNumValueTopBktComparator() {
+        Comparator<Bucket> cmp = (b1, b2) -> {
+            if (b1 == b2) {
+                return 0;
+            }
+
+            Double d1 = firstValObjToDouble(b1);
+            Double d2 = firstValObjToDouble(b2);
+            if (d1 == null) {
+                return d2 == null ? 0 : 1;
+            } else if (d2 == null) {
+                return -1;
+            }
+
+            return d2.compareTo(d1);
+        };
+        return Comparator.nullsLast(cmp.thenComparing(defaultTopBktComparator()));
     }
 
     private static Comparator<Bucket> intentTopBktComparator() {
@@ -832,6 +880,9 @@ public final class StatsCubeUtils {
         case WEBSITE_PROFILE:
         case TECHNOLOGY_PROFILE:
             return techTopAttrComparator();
+        case WEB_VISIT_PROFILE:
+        case OPPORTUNITY_PROFILE:
+            return firstNumValueTopAttrComparator();
         case RATING:
             return ratingTopAttrComparator(techTopAttrComparator(), defaultTopAttrComparator());
         case PRODUCT_SPEND:
@@ -873,6 +924,12 @@ public final class StatsCubeUtils {
 
     private static Comparator<TopAttribute> intentTopAttrComparator() {
         return topAttrComparatorByIdAnyCnt(0);
+    }
+
+    private static Comparator<TopAttribute> firstNumValueTopAttrComparator() {
+        return Comparator.nullsLast(Comparator.comparing( //
+                TopAttribute::getTopBkt, firstNumValueTopBktComparator()) //
+                .thenComparing(defaultTopAttrComparator()));
     }
 
     private static Comparator<TopAttribute> techTopAttrComparator() {
