@@ -9,11 +9,22 @@ public class ExportToDynamoStepConfiguration extends MicroserviceStepConfigurati
     @JsonProperty("dynamoSignature")
     private String dynamoSignature;
 
+    @JsonProperty("migrateTable")
+    private Boolean migrateTable;
+
     public String getDynamoSignature() {
         return dynamoSignature;
     }
 
     public void setDynamoSignature(String dynamoSignature) {
         this.dynamoSignature = dynamoSignature;
+    }
+
+    public Boolean getMigrateTable() {
+        return migrateTable;
+    }
+
+    public void setMigrateTable(Boolean migrateTable) {
+        this.migrateTable = migrateTable;
     }
 }

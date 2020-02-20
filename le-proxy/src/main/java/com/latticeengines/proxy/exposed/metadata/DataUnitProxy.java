@@ -16,4 +16,6 @@ public interface DataUnitProxy {
 
     Boolean delete(String customerSpace, DataUnit dataUnit);
 
+    void updateSignature(String customerSpace, DataUnit dataUnit, String signature);
+
 }

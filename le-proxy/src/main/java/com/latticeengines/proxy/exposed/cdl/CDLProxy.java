@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
+import com.latticeengines.domain.exposed.cdl.MigrateDynamoRequest;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -630,4 +631,15 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         String url = constructUrl("/schedulingPAQueue/status/{customerSpace}", shortenCustomerSpace(customerSpace));
         return get("get schedulingStatus for tenant", url, SchedulingStatus.class);
     }
+
+    public ApplicationId submitMigrateDynamoJob(String customerSpace, MigrateDynamoRequest migrateDynamoRequest) {
+        String url = constructUrl("/customerspaces/{customerSpace}/migratetable/dynamo", customerSpace);
+        ResponseDocument<String> responseDoc = post("migrateDynamo", url, migrateDynamoRequest, ResponseDocument.class);
+        if (responseDoc.isSuccess()) {
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
+        } else {
+            throw new RuntimeException("Failed to submit migrate dynamo job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
 }
+

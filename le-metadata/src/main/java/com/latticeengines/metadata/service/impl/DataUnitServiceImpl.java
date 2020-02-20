@@ -108,4 +108,15 @@ public class DataUnitServiceImpl implements DataUnitService {
         return true;
     }
 
+    @Override
+    public List<DataUnit> findByStorageType(DataUnit.StorageType storageType) {
+        return entityMgr.findByStorageType(storageType);
+    }
+
+    @Override
+    public void updateSignature(DataUnit dataUnit, String signature) {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        entityMgr.updateSignature(tenantId, dataUnit, signature);
+    }
+
 }

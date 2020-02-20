@@ -22,7 +22,7 @@ public final class TestCDLMatchUtils {
         DynamoDataUnit dynamoDataUnit = new DynamoDataUnit();
         dynamoDataUnit.setName("localtest_account_4");
         dynamoDataUnit.setTenant("LocalTest");
-        dynamoDataUnit.setSignature("20180425");
+        dynamoDataUnit.setSignature("20190917");
         dynamoDataUnit.setLinkedTable("Account_2018-05-07_19-05-23_UTC");
         dynamoDataUnit.setLinkedTenant("LETest1525719796735");
         dynamoDataUnit.setPartitionKey("AccountId");
@@ -30,13 +30,14 @@ public final class TestCDLMatchUtils {
     }
 
     private static String[][] dynamoDataUnits = { //
-            { "Account_2018-06-22_23-04-26_UTC", "LocalTest", "20180425", "Account_2018-06-22_23-04-26_UTC",
+            { "Account_2018-06-22_23-04-26_UTC", "LocalTest", "20190917", "Account_2018-06-22_23-04-26_UTC",
                     "LETest1533755623454", "AccountId" }, //
-            { "LETest1533755623454_Rating_2018_08_08_22_06_57_UTC", "LocalTest", "20180425",
+            { "LETest1533755623454_Rating_2018_08_08_22_06_57_UTC", "LocalTest", "20190917",
                     "LETest1533755623454_Rating_2018_08_08_22_06_57_UTC", "LETest1533755623454", "AccountId" }, //
-            { "LETest1533755623454_PurchaseHistory_2018_08_08_21_21_59_UTC", "LocalTest", "20180425",
+            { "LETest1533755623454_PurchaseHistory_2018_08_08_21_21_59_UTC", "LocalTest", "20190917",
                     "LETest1533755623454_PurchaseHistory_2018_08_08_21_21_59_UTC", "LETest1533755623454", "AccountId" }, //
     };
+
 
     public static List<DynamoDataUnit> mockDynamoDataUnits() {
         List<DynamoDataUnit> toReturn = new ArrayList<>();

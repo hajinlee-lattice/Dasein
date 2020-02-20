@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
@@ -75,7 +76,6 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
     public void execute() {
         List<DynamoExportConfig> configs = getExportConfigs();
         log.info("Going to export tables to dynamo: " + configs);
-
         List<Exporter> exporters = new ArrayList<>();
         configs.forEach(config -> {
             if (!Boolean.TRUE.equals(config.getRelink()) || !relinkDynamo(config)) {
@@ -83,7 +83,10 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
                 exporters.add(exporter);
             }
         });
-
+        if (CollectionUtils.isEmpty(exporters)) {
+            log.warn("No tables need to export, skip execution.");
+            return;
+        }
         int threadPoolSize = Math.min(2, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
         ThreadPoolUtils.runInParallel(executors, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
@@ -124,7 +127,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
         public void run() {
             try (PerformanceTimer timer = new PerformanceTimer("Upload table " + config + " to dynamo.")) {
                 log.info("Uploading table " + config.getTableName() + " to dynamo.");
-                HdfsToDynamoConfiguration eaiConfig = generateEaiConfig(config);
+                HdfsToDynamoConfiguration eaiConfig = generateEaiConfig();
                 RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(3, 5000, 2.0, null);
                 AppSubmission appSubmission = retry.execute(context -> {
                     if (context.getRetryCount() > 0) {
@@ -138,13 +141,13 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
                     throw new RuntimeException("Yarn application " + appId + " did not finish in SUCCEEDED status, but " //
                             + jobStatus.getStatus() + " instead.");
                 }
-                registerDataUnit(config);
+                registerDataUnit();
             }
         }
 
-        private HdfsToDynamoConfiguration generateEaiConfig(DynamoExportConfig config) {
+        private HdfsToDynamoConfiguration generateEaiConfig() {
             String tableName = config.getTableName();
-            String inputPath = getInputPath(config);
+            String inputPath = getInputPath();
             log.info("Found input path for table " + tableName + ": " + inputPath);
 
             HdfsToDynamoConfiguration eaiConfig = new HdfsToDynamoConfiguration();
@@ -176,7 +179,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             return eaiConfig;
         }
 
-        private String getInputPath(DynamoExportConfig config) {
+        private String getInputPath() {
             String path = config.getInputPath();
             if (path.endsWith(".avro") || path.endsWith("/")) {
                 path = path.substring(0, path.lastIndexOf("/"));
@@ -184,26 +187,30 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             return path;
         }
 
-        private void registerDataUnit(DynamoExportConfig config) {
+        private void registerDataUnit() {
             String customerSpace = configuration.getCustomerSpace().toString();
             DynamoDataUnit unit = new DynamoDataUnit();
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
-            String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName() : config.getTableName();
-            unit.setName(srcTbl);
-            if (!unit.getName().equals(config.getTableName())) {
-                unit.setLinkedTable(config.getTableName());
+            if (BooleanUtils.isFalse(configuration.getMigrateTable())) {
+                String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName() : config.getTableName();
+                unit.setName(srcTbl);
+                if (!unit.getName().equals(config.getTableName())) {
+                    unit.setLinkedTable(config.getTableName());
+                }
+                unit.setPartitionKey(config.getPartitionKey());
+                if (StringUtils.isNotBlank(config.getSortKey())) {
+                    unit.setSortKey(config.getSortKey());
+                }
+                DataUnit created = dataUnitProxy.create(customerSpace, unit);
+                log.info("Registered DataUnit: " + JsonUtils.pprint(created));
+            } else {
+                unit.setName(config.getTableName());
+                dataUnitProxy.updateSignature(customerSpace, unit, configuration.getDynamoSignature());
+                log.info("Update signature to {} for dynamo data unit with name {} and tenant {}.",
+                        configuration.getDynamoSignature(), unit.getName(), customerSpace);
             }
-            unit.setPartitionKey(config.getPartitionKey());
-            if (StringUtils.isNotBlank(config.getSortKey())){
-                unit.setSortKey(config.getSortKey());
-            }
-            unit.setSignature(configuration.getDynamoSignature());
-
-            DataUnit created = dataUnitProxy.create(customerSpace, unit);
-            log.info("Registered DataUnit: " + JsonUtils.pprint(created));
         }
     }
-
 
 
 }

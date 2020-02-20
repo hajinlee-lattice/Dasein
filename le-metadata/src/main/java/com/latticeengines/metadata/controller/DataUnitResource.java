@@ -39,6 +39,12 @@ public class DataUnitResource {
         return dataUnitService.delete(dataUnit);
     }
 
+    @PostMapping("/updateSignature")
+    public void updateSignature(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit,
+                                @RequestParam(name = "signature") String signature) {
+        dataUnitService.updateSignature(dataUnit, signature);
+    }
+
     @PostMapping("/renameTableName")
     public Boolean renameTableName(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit,
                                             @RequestParam(name="tableName") String tableName) {

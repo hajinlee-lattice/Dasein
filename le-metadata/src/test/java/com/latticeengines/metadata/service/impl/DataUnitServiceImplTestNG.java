@@ -47,6 +47,11 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         Assert.assertTrue(CollectionUtils.isNotEmpty(found));
         Assert.assertTrue(found.get(0) instanceof DynamoDataUnit);
 
+        String signature = "0001";
+        dataUnitService.updateSignature(unit, signature);
+        DynamoDataUnit dynamoDataUnit = (DynamoDataUnit) dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo);
+        Assert.assertEquals(dynamoDataUnit.getSignature(), signature);
+
         dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
         Thread.sleep(500);
         Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));

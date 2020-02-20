@@ -26,4 +26,6 @@ public interface DataUnitEntityMgr {
 
     List<DataUnit> findByStorageType(DataUnit.StorageType storageType);
 
+    void updateSignature(String tenantId, DataUnit dataUnit, String signature);
+
 }

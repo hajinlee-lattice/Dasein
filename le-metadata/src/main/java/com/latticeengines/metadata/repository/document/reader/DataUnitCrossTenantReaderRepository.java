@@ -8,6 +8,6 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
 public interface DataUnitCrossTenantReaderRepository extends CrossTenantDocumentRepository<DataUnitEntity> {
 
-    List<DataUnitEntity> findByStorageType(DataUnit.StorageType storageType);
+    List<DataUnitEntity> findByStorageTypeOrderByTenantId(DataUnit.StorageType storageType);
 
 }

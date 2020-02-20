@@ -59,6 +59,13 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
         return put("delete DataUnit", url, dataUnit, Boolean.class);
     }
 
+    @Override
+    public void updateSignature(String customerSpace, DataUnit dataUnit, String signature) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit/updateSignature?signature={signature}",
+                shortenCustomerSpace(customerSpace), signature);
+        post("updateSignature", url, dataUnit, DataUnit.class);
+    }
+
     private List<DataUnit> getDataUnits(String customerSpace, String name, DataUnit.StorageType type) {
         String url = constructUrl("/customerspaces/{customerSpace}/dataunit/name/{name}", shortenCustomerSpace(customerSpace), name);
         if (type != null) {
