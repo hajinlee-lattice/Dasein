@@ -65,6 +65,11 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private void swapMissingTableRoles() {
         cloneTableService.setCustomerSpace(customerSpace);
         cloneTableService.setActiveVersion(active);
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus != null) {
+            cloneTableService.setRedshiftPartition(dcStatus.getRedshiftPartition());
+        }
+
         Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         if (resetEntities == null) {
             resetEntities = Collections.emptySet();

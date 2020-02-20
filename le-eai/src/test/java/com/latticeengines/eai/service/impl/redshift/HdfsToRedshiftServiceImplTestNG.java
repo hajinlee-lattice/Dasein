@@ -5,7 +5,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
@@ -29,6 +28,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.eai.exposed.service.EaiService;
 import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
 import com.latticeengines.eai.service.EaiYarnService;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTestNGBase {
 
@@ -54,10 +54,10 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
-    @Resource(name = "redshiftJdbcTemplate")
-    private JdbcTemplate redshiftJdbcTemplate;
-
     @Inject
+    private RedshiftPartitionService redshiftPartitionService;
+
+    private JdbcTemplate redshiftJdbcTemplate;
     private RedshiftService redshiftService;
 
     @SuppressWarnings("unused")
@@ -69,6 +69,10 @@ public class HdfsToRedshiftServiceImplTestNG extends EaiMiniClusterFunctionalTes
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         super.setup();
+
+        redshiftJdbcTemplate = redshiftPartitionService.getBatchUserJdbcTemplate(null);
+        redshiftService = redshiftPartitionService.getBatchUserService(null);
+
         testTable = leStack + "_" + TEST_TABLE;
         cleanup();
         URL url = ClassLoader.getSystemResource("com/latticeengines/eai/service/impl/camel/compressed.avro");

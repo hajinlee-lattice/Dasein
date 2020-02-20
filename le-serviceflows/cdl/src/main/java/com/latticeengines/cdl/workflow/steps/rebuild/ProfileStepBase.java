@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -223,11 +224,19 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
             sortKeys.add(tableRole.getPrimaryKey().name());
         }
+
+        String partition = null;
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus != null && dcStatus.getDetail() != null) {
+            partition = dcStatus.getRedshiftPartition();
+        }
+
         RedshiftExportConfig config = new RedshiftExportConfig();
         config.setTableName(tableName);
         config.setDistKey(distKey);
         config.setSortKeys(sortKeys);
         config.setInputPath(getInputPath(tableName) + "/*.avro");
+        config.setClusterPartition(partition);
         config.setUpdateMode(false);
 
         Table summary = metadataProxy.getTableSummary(customerSpace.toString(), tableName);
@@ -265,6 +274,10 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
                         tableName);
                 cloneTableService.setActiveVersion(active);
                 cloneTableService.setCustomerSpace(customerSpace);
+                DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+                if (dcStatus != null && dcStatus.getDetail() != null) {
+                    cloneTableService.setRedshiftPartition(dcStatus.getRedshiftPartition());
+                }
                 cloneTableService.linkInactiveTable(role);
             }
         } else {

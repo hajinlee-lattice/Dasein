@@ -21,11 +21,13 @@ import com.latticeengines.documentdb.entity.DataUnitEntity;
 import com.latticeengines.documentdb.entitymgr.impl.BaseDocumentEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.S3DataUnit;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.repository.document.reader.DataUnitCrossTenantReaderRepository;
 import com.latticeengines.metadata.repository.document.reader.DataUnitReaderRepository;
 import com.latticeengines.metadata.repository.document.writer.DataUnitWriterRepository;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 
 @Service("dataUnitEntityMgr")
 public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEntity> implements DataUnitEntityMgr {
@@ -40,6 +42,9 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     @Inject
     private DataUnitCrossTenantReaderRepository dataUnitCrossTenantReaderRepository;
+
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Override
     public BaseJpaRepository<DataUnitEntity, String> getRepository() {
@@ -136,14 +141,14 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         reformatS3DataUnit(dataUnit);
         newEntity.setDocument(dataUnit);
         DataUnitEntity saved = repository.save(newEntity);
-        return saved.getDocument();
+        return convertEntity(saved);
     }
 
     private DataUnit updateExistingDataUnit(DataUnit toUpdate, DataUnitEntity existing) {
         reformatS3DataUnit(toUpdate);
         existing.setDocument(toUpdate);
         DataUnitEntity saved = repository.save(existing);
-        return saved.getDocument();
+        return convertEntity(saved);
     }
 
     @Override
@@ -163,7 +168,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
         DataUnitEntity entity = readerRepository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (entity != null) {
             asycReformatS3DataUnit(Collections.singletonList(entity));
-            return entity.getDocument();
+            return convertEntity(entity);
         } else {
             return null;
         }
@@ -200,9 +205,17 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
             reformatS3DataUnit(dataUnit);
             existing.setDocument(dataUnit);
             DataUnitEntity saved = repository.save(existing);
-            return saved.getDocument();
+            return convertEntity(saved);
         }
         return null;
+    }
+
+    private DataUnit convertEntity(DataUnitEntity entity) {
+        DataUnit dataUnit = entity.getDocument();
+        if (dataUnit instanceof RedshiftDataUnit) {
+            setRedshiftPartition((RedshiftDataUnit) dataUnit);
+        }
+        return dataUnit;
     }
 
     private List<DataUnit> convertList(List<DataUnitEntity> entities, boolean reformat) {
@@ -211,9 +224,15 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
             if (reformat) {
                 asycReformatS3DataUnit(entities);
             }
-            entities.forEach(dataUnitEntity -> units.add(dataUnitEntity.getDocument()));
+            entities.forEach(dataUnitEntity -> units.add(convertEntity(dataUnitEntity)));
         }
         return units;
+    }
+
+    private void setRedshiftPartition(RedshiftDataUnit dataUnit) {
+        if (StringUtils.isBlank(dataUnit.getClusterPartition())) {
+            dataUnit.setClusterPartition(redshiftPartitionService.getLegacyPartition());
+        }
     }
 
 }

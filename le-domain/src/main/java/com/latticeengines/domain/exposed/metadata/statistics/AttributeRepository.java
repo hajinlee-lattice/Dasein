@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -39,6 +38,9 @@ public class AttributeRepository {
     @JsonProperty("DataCollection")
     private String collectionName;
 
+    @JsonProperty("RedshiftPartition")
+    private String redshiftPartition;
+
     @JsonProperty("AttrMap")
     @JsonSerialize(keyUsing = AttributeLookup.AttributeLookupSerializer.class)
     @JsonDeserialize(keyUsing = AttributeLookup.AttributeLookupKeyDeserializer.class)
@@ -47,24 +49,23 @@ public class AttributeRepository {
     @JsonProperty("TableNameMap")
     private Map<TableRoleInCollection, String> tableNameMap;
 
-    // used for creating repository for le-query tests
-    // in other cases, should always construct from data collection
-    @VisibleForTesting
-    public AttributeRepository(CustomerSpace customerSpace, String collectionName,
+    // for jackson
+    public AttributeRepository() {
+    }
+
+    private AttributeRepository(CustomerSpace customerSpace, String collectionName, String redshiftPartition,
             Map<AttributeLookup, ColumnMetadata> cmMap,
             Map<TableRoleInCollection, String> tableNameMap) {
         this.collectionName = collectionName;
         this.customerSpace = customerSpace;
+        this.redshiftPartition = redshiftPartition;
         this.cmMap = cmMap;
         this.tableNameMap = tableNameMap;
     }
 
-    public AttributeRepository() {
-    }
-
     public static AttributeRepository constructRepo(Map<String, StatsCube> statsCubes,
             Map<TableRoleInCollection, Table> tableMap, CustomerSpace customerSpace,
-            String collectionName) {
+            String collectionName, String redshiftPartition) {
         Map<TableRoleInCollection, String> tableNameMap = getTableNameMap(tableMap);
         Map<AttributeLookup, AttributeStats> statsMap = expandStats(statsCubes);
         Map<AttributeLookup, ColumnMetadata> cmMap = expandAttrs(statsMap.keySet(), tableMap);
@@ -72,7 +73,7 @@ public class AttributeRepository {
             AttributeStats stats = statsMap.get(lookup);
             cm.setStats(stats);
         });
-        return new AttributeRepository(customerSpace, collectionName, cmMap, tableNameMap);
+        return new AttributeRepository(customerSpace, collectionName, redshiftPartition, cmMap, tableNameMap);
     }
 
     private static Map<TableRoleInCollection, String> getTableNameMap(
@@ -195,4 +196,7 @@ public class AttributeRepository {
         tableNameMap.put(role, tableName);
     }
 
+    public String getRedshiftPartition() {
+        return redshiftPartition;
+    }
 }

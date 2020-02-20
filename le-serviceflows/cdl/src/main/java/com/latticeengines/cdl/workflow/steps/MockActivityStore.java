@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -367,12 +368,19 @@ public class MockActivityStore extends BaseWorkflowStep<MockActivityStoreConfigu
     }
 
     protected void exportTableRoleToRedshift(String tableName, String inputPath) {
+        String partition = null;
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus != null && dcStatus.getDetail() != null) {
+            partition = dcStatus.getRedshiftPartition();
+        }
+
         RedshiftExportConfig config = new RedshiftExportConfig();
         config.setTableName(tableName);
         config.setDistKey(InterfaceName.AccountId.name());
         config.setDistStyle(RedshiftTableConfiguration.DistStyle.All);
         config.setInputPath(inputPath + "/*.avro");
         config.setUpdateMode(false);
+        config.setClusterPartition(partition);
         addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
     }
 

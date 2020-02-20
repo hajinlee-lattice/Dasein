@@ -10,6 +10,10 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
     @NotNull
     private RedshiftTableConfiguration redshiftTableConfiguration;
 
+    // when empty, write to the default partition
+    @JsonProperty("redshift_partition")
+    private String partition;
+
     @JsonProperty("create_new")
     private boolean createNew;
 
@@ -75,6 +79,14 @@ public class HdfsToRedshiftConfiguration extends ExportConfiguration {
 
     public void setNoSplit(boolean noSplit) {
         this.noSplit = noSplit;
+    }
+
+    public String getPartition() {
+        return partition;
+    }
+
+    public void setPartition(String partition) {
+        this.partition = partition;
     }
 
     public Long getExpectedCount() {

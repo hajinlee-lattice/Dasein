@@ -23,6 +23,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("redShiftCleanupService")
@@ -31,7 +32,7 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
     private static final Logger log = LoggerFactory.getLogger(RedShiftCleanupServiceImpl.class);
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -55,6 +56,9 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
             log.warn("the cleanupFlag is " + cleanupFlag);
             return true;
         }
+        //FIXME: we don't need this cleanup in future
+        // only check default partition
+        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
         List<String> allRedshiftTable = redshiftService.getTables("");
         List<String> allTenantId = tenantEntityMgr.getAllTenantId();
         Set<String> allMissTenant = new HashSet<>();

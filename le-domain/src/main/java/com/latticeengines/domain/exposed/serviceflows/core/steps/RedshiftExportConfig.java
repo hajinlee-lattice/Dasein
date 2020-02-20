@@ -33,6 +33,9 @@ public class RedshiftExportConfig {
     @JsonProperty("update_mode")
     private boolean updateMode;
 
+    @JsonProperty("cluster_partition")
+    private String clusterPartition;
+
     @JsonProperty("expected_count")
     private Long expectedCount;
 
@@ -87,6 +90,14 @@ public class RedshiftExportConfig {
 
     public void setUpdateMode(boolean updateMode) {
         this.updateMode = updateMode;
+    }
+
+    public String getClusterPartition() {
+        return clusterPartition;
+    }
+
+    public void setClusterPartition(String clusterPartition) {
+        this.clusterPartition = clusterPartition;
     }
 
     public Long getExpectedCount() {

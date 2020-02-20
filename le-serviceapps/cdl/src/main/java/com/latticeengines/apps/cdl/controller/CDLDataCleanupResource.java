@@ -82,14 +82,16 @@ public class CDLDataCleanupResource {
 
     @RequestMapping(value = "/tenantcleanup", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "clean metadata and  redshift of tenant")
+    @ApiOperation(value = "clean metadata and redshift of tenant")
     public void tenantCleanup(@PathVariable String customerSpace) {
-        try {
-            tenantCleanupService.removeTenantTables(customerSpace);
-        } catch (Exception e) {
-            log.error("error:", e);
-            throw e;
-        }
+        // M35
+        throw new UnsupportedOperationException("This API reaches the end of life.");
+//        try {
+//            tenantCleanupService.removeTenantTables(customerSpace);
+//        } catch (Exception e) {
+//            log.error("error:", e);
+//            throw e;
+//        }
     }
 
 }

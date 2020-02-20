@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.dataloader.InstallResult;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.TenantCleanupUtils;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
@@ -87,7 +88,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     private DataLoaderService dataLoaderService;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private S3Service s3Service;
@@ -313,6 +314,8 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private void cleanupRedshift() {
         try {
+            //FIXME: some test tenant may not be on the default partition
+            RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
             List<String> tables = redshiftService.getTables(TestFrameworkUtils.TENANTID_PREFIX);
             if (tables != null && !tables.isEmpty()) {
                 log.info(String.format("Found %d test tenant tables in redshift.", tables.size()));

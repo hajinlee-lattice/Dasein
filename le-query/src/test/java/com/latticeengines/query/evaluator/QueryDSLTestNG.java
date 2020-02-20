@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.testng.Assert;
@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -33,11 +34,11 @@ import com.querydsl.sql.SQLTemplates;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
 
-    @Resource(name = "redshiftDataSource")
-    private DataSource redshiftDataSource;
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Test(groups = "functional")
-    public void testWindowFunctionComparison() throws SQLException {
+    public void testWindowFunctionComparison() {
         SQLQueryFactory factory = factory();
         StringPath tablePath = Expressions.stringPath("query_test");
         StringPath idPath = Expressions.stringPath(tablePath, "accountid");
@@ -126,7 +127,8 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
     private SQLQueryFactory factory() {
         SQLTemplates templates = new PostgreSQLTemplates();
         Configuration configuration = new Configuration(templates);
-        return new SQLQueryFactory(configuration, redshiftDataSource);
+        DataSource dataSource = redshiftPartitionService.getDataSource(null, "segment");
+        return new SQLQueryFactory(configuration, dataSource);
     }
 
     @Test(groups = "functional")

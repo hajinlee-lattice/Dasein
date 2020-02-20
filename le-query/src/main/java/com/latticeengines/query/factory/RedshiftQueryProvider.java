@@ -1,17 +1,15 @@
 package com.latticeengines.query.factory;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.query.factory.sqlquery.BaseSQLQueryFactory;
 import com.latticeengines.query.factory.sqlquery.RedshiftSQLQueryFactory;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLTemplates;
@@ -21,35 +19,33 @@ public class RedshiftQueryProvider extends QueryProvider {
     public static final String USER_SEGMENT = "segment";
     public static final String USER_BATCH = "batch";
 
-    private static final Map<String, DataSource> redshiftDataStores = new HashMap<>();
-
-    @PostConstruct
-    private void init() {
-        redshiftDataStores.put(
-                USER_BATCH, BeanFactoryAnnotationUtils.qualifiedBeanOfType(applicationContext, DataSource.class,
-                        "redshiftDataSource")
-        );
-        redshiftDataStores.put(
-                USER_SEGMENT, BeanFactoryAnnotationUtils.qualifiedBeanOfType(applicationContext, DataSource.class,
-                        "redshiftSegmentDataSource")
-        );
-    }
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Override
     public boolean providesQueryAgainst(AttributeRepository repository, String sqlUser) {
-        return redshiftDataStores.containsKey(sqlUser);
+        return getRedshiftDataSource(repository, sqlUser) != null;
     }
 
     @Override
-    protected BaseSQLQueryFactory getSQLQueryFactory() {
-        return getSQLQueryFactory(USER_SEGMENT);
-    }
-
-    @Override
-    protected BaseSQLQueryFactory getSQLQueryFactory(String sqlUser) {
+    protected BaseSQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser) {
         SQLTemplates templates = new PostgreSQLTemplates();
         Configuration configuration = new Configuration(templates);
-        return new RedshiftSQLQueryFactory(configuration, redshiftDataStores.get(sqlUser));
+        return new RedshiftSQLQueryFactory(configuration, getRedshiftDataSource(repository, sqlUser));
+    }
+
+    private DataSource getRedshiftDataSource(AttributeRepository attrRepo, String sqlUser) {
+        String partition = getRedshiftPartition(attrRepo);
+        return redshiftPartitionService.getDataSource(partition, sqlUser);
+    }
+
+    private String getRedshiftPartition(AttributeRepository attrRepo) {
+        String partition = attrRepo.getRedshiftPartition();
+        if (StringUtils.isBlank(partition)) {
+            return redshiftPartitionService.getLegacyPartition();
+        } else {
+            return partition;
+        }
     }
 
 }

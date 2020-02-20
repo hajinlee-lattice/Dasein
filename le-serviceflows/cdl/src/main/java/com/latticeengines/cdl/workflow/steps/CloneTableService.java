@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
@@ -42,7 +43,7 @@ public class CloneTableService {
     private MetadataProxy metadataProxy;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -53,10 +54,15 @@ public class CloneTableService {
     private CustomerSpace customerSpace;
     private DataCollection.Version active;
     private DataCollection.Version inactive;
+    private String redshiftPartition = null;
 
     public void setActiveVersion(DataCollection.Version active) {
         this.active = active;
         this.inactive = active.complement();
+    }
+
+    public void setRedshiftPartition(String redshiftPartition) {
+        this.redshiftPartition = redshiftPartition;
     }
 
     public void setCustomerSpace(CustomerSpace customerSpace) {
@@ -157,6 +163,7 @@ public class CloneTableService {
     }
 
     private void copyRedshiftTable(String original, String clone) {
+        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(redshiftPartition);
         redshiftService.dropTable(clone);
         if (redshiftService.hasTable(original)) {
             redshiftService.cloneTable(original, clone);

@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.DistStyle;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration.SortKeyType;
 import com.latticeengines.domain.exposed.redshift.RedshiftUnloadParams;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -43,8 +44,10 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
 
     private static final String TABLE_NAME = "RedshiftServiceImplTestNG_EventTable";
     private static final String STAGING_TABLE_NAME = TABLE_NAME + "_staging";
-    @Inject
     private RedshiftService redshiftService;
+
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private S3Service s3Service;
@@ -65,6 +68,7 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
 
     @BeforeClass(groups = "functional")
     public void setup() {
+        redshiftService = redshiftPartitionService.getBatchUserService(null);
         avroPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/eventTable/EventTable.avro";
         jsonPathPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/eventTable/EventTable.jsonpath";
         unloadPrefix = RedshiftUtils.CSV_STAGE + "/" + leStack + "/eventTable";

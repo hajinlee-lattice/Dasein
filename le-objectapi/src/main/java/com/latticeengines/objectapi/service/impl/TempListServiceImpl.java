@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.util.TempListUtils;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Service
@@ -44,14 +45,14 @@ public class TempListServiceImpl implements TempListService {
     private static final ConcurrentMap<String, String> CACHE_LOOKUP = new ConcurrentHashMap<>();
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public String createTempListIfNotExists(ConcreteRestriction restriction) {
-        String existingTempTable = getExistingTempTable(restriction);
+    public String createTempListIfNotExists(ConcreteRestriction restriction, String redshiftPartition) {
+        String existingTempTable = getExistingTempTable(restriction, redshiftPartition);
         if (StringUtils.isNotBlank(existingTempTable)) {
             log.info("The temp list has already been saved as {}} in redshift.", existingTempTable);
             return existingTempTable;
@@ -70,6 +71,8 @@ public class TempListServiceImpl implements TempListService {
 
             AttributeLookup attributeLookup = (AttributeLookup) restriction.getLhs();
             String attrName = attributeLookup.getAttribute();
+
+            RedshiftService redshiftService = getRedshiftService(redshiftPartition);
 
             String stagingTableName = "staging_" + tempTableName;
             redshiftService.dropTable(stagingTableName);
@@ -101,7 +104,7 @@ public class TempListServiceImpl implements TempListService {
             redshiftService.renameTable(stagingTableName, tempTableName);
 
             String checksum = TempListUtils.getCheckSum(restriction);
-            String cacheKey = toCacheKey(checksum);
+            String cacheKey = toCacheKey(checksum, redshiftPartition);
             redisTemplate.opsForValue().set(cacheKey, tempTableName, 1, TimeUnit.HOURS);
             CACHE_LOOKUP.put(tempTableName, cacheKey);
 
@@ -111,11 +114,14 @@ public class TempListServiceImpl implements TempListService {
 
     @Override
     public void dropTempList(String tempTableName) {
+        String partition = redshiftPartitionService.getDefaultPartition();
         if (CACHE_LOOKUP.containsKey(tempTableName)) {
-            redisTemplate.delete(CACHE_LOOKUP.get(tempTableName));
+            String cacheKey = CACHE_LOOKUP.get(tempTableName);
+            partition = cacheKey.split("\\|")[1];
+            redisTemplate.delete(cacheKey);
             CACHE_LOOKUP.remove(tempTableName);
         }
-        redshiftService.dropTable(tempTableName);
+        getRedshiftService(partition).dropTable(tempTableName);
     }
 
     @PreDestroy
@@ -128,12 +134,13 @@ public class TempListServiceImpl implements TempListService {
     }
 
     @VisibleForTesting
-    String getExistingTempTable(ConcreteRestriction restriction) {
+    String getExistingTempTable(ConcreteRestriction restriction, String redshiftPartition) {
         String checksum = TempListUtils.getCheckSum(restriction);
-        String cacheKey = toCacheKey(checksum);
+        String cacheKey = toCacheKey(checksum, redshiftPartition);
         Object obj = redisTemplate.opsForValue().get(cacheKey);
         if (obj != null) {
             String cacheTableName = (String) obj;
+            RedshiftService redshiftService = getRedshiftService(redshiftPartition);
             if (!CACHE_LOOKUP.containsKey(cacheTableName) && redshiftService.hasTable(cacheTableName)) {
                 CACHE_LOOKUP.put(cacheTableName, cacheKey);
             }
@@ -155,9 +162,12 @@ public class TempListServiceImpl implements TempListService {
         return AvroUtils.constructSchema(tableName, Collections.singletonList(Pair.of(attrName, fieldClz)));
     }
 
-    private String toCacheKey(String checksum) {
-        String redshiftCluster = "lpi"; // to be changed in future for tenant partition
-        return CACHE_PREFIX + "|" + redshiftCluster + "|" + checksum;
+    private String toCacheKey(String checksum, String partition) {
+        return CACHE_PREFIX + "|" + partition + "|" + checksum;
+    }
+
+    private RedshiftService getRedshiftService(String partition) {
+        return redshiftPartitionService.getBatchUserService(partition);
     }
 
 }

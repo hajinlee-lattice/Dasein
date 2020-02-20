@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +48,6 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.proxy.exposed.cdl.AtlasExportProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.common.ConvertToCSVJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -85,12 +82,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
 
     @Inject
     private AtlasExportProxy atlasExportProxy;
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
-
-    @Resource(name = "redshiftSegmentJdbcTemplate")
-    private JdbcTemplate redshiftJdbcTemplate;
 
     @Override
     protected CustomerSpace parseCustomerSpace(EntityExportStepConfiguration stepConfiguration) {
@@ -300,13 +291,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
             return cm1.getCategory().getOrder().compareTo(cm2.getCategory().getOrder());
         });
         return schema;
-    }
-
-    private String getProductNameFromRedshift(String tableName, String productId) {
-        String sql = String.format("SELECT %s FROM %s WHERE %s = '%s' LIMIT 1", InterfaceName.ProductName.name(), tableName, //
-                InterfaceName.ProductId.name(), productId);
-        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
-        return retry.execute(ctx -> redshiftJdbcTemplate.queryForObject(sql, String.class));
     }
 
     @Override

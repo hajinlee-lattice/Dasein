@@ -9,8 +9,6 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -39,7 +37,6 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
  * Process Account, Contact and Product for a new tenant
  */
 public class ProcessAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(ProcessAccountDeploymentTestNG.class);
 
     static final String CHECK_POINT = "process1";
     static final String UNDER_SCORE = "_";

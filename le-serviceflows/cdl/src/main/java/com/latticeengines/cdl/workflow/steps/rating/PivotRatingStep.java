@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -171,11 +172,19 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
         if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
             sortKeys.add(tableRole.getPrimaryKey().name());
         }
+
+        String partition = null;
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus != null && dcStatus.getDetail() != null) {
+            partition = dcStatus.getRedshiftPartition();
+        }
+
         RedshiftExportConfig config = new RedshiftExportConfig();
         config.setTableName(tableName);
         config.setDistKey(distKey);
         config.setSortKeys(sortKeys);
         config.setInputPath(avroGlob);
+        config.setClusterPartition(partition);
         config.setUpdateMode(false);
         addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
     }

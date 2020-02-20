@@ -1,7 +1,5 @@
 package com.latticeengines.query.factory;
 
-import javax.sql.DataSource;
-
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -21,15 +19,10 @@ public class SparkQueryProvider extends QueryProvider {
     }
 
     @Override
-    protected BaseSQLQueryFactory getSQLQueryFactory() {
-        return getSQLQueryFactory(SPARK_BATCH_USER);
-    }
-
-    @Override
-    protected BaseSQLQueryFactory getSQLQueryFactory(String sqlUser) {
+    protected BaseSQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser) {
         SQLTemplates templates = new SparkSQLTemplates();
         Configuration configuration = new Configuration(templates);
-        return new SparkSQLQueryFactory(configuration, (DataSource)null);
+        return new SparkSQLQueryFactory(configuration, null);
     }
 
 }

@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.eai.HdfsToS3Configuration;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.impl.s3.HdfsToS3ExportService;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 
@@ -32,7 +33,7 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
     private HdfsToS3ExportService hdfsToS3ExportService;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private S3Service s3Service;
@@ -104,17 +105,18 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
     private void createRedshiftTableIfNotExist(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, configuration.getExportInputPath());
-        redshiftService.createTable(redshiftTableConfig, schema);
+        getRedshiftServer(configuration).createTable(redshiftTableConfig, schema);
     }
 
     private void dropRedshiftTable(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
-        redshiftService.dropTable(redshiftTableConfig.getTableName());
+        getRedshiftServer(configuration).dropTable(redshiftTableConfig.getTableName());
     }
 
     private void copyToRedshift(HdfsToRedshiftConfiguration configuration) {
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         String tableName = redshiftTableConfig.getTableName();
+        RedshiftService redshiftService = getRedshiftServer(configuration);
         if (configuration.isCreateNew()) {
             String stagingTableName = tableName + "_staging";
             redshiftTableConfig.setTableName(stagingTableName);
@@ -143,6 +145,7 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         String tableName = redshiftTableConfig.getTableName();
         String stagingTableName = tableName + "_staging";
+        RedshiftService redshiftService = getRedshiftServer(configuration);
         redshiftService.createStagingTable(stagingTableName, tableName);
         redshiftService.loadTableFromAvroInS3(stagingTableName, redshiftTableConfig.getS3Bucket(), s3Prefix(tableName),
                 redshiftTableConfig.getJsonPathPrefix());
@@ -168,6 +171,11 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         String prefix = s3Prefix(redshiftTableConfig.getTableName());
         s3Service.cleanupPrefix(redshiftTableConfig.getS3Bucket(), prefix);
         s3Service.cleanupPrefix(redshiftTableConfig.getS3Bucket(), redshiftTableConfig.getJsonPathPrefix());
+    }
+
+    private RedshiftService getRedshiftServer(HdfsToRedshiftConfiguration configuration) {
+        String partition = configuration.getPartition();
+        return redshiftPartitionService.getBatchUserService(partition);
     }
 
     private String s3FileName(RedshiftTableConfiguration configuration) {

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
@@ -30,6 +31,10 @@ public class CloneInactiveServingStores extends BaseWorkflowStep<GenerateRatingS
         DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         cloneTableService.setActiveVersion(active);
         cloneTableService.setCustomerSpace(customerSpace);
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus != null && dcStatus.getDetail() != null) {
+            cloneTableService.setRedshiftPartition(dcStatus.getRedshiftPartition());
+        }
         Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         Arrays.stream(BusinessEntity.values()).forEach(entity -> {
             if (resetEntities == null || !resetEntities.contains(entity)) {
