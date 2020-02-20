@@ -56,7 +56,7 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
         Assert.assertEquals(allSystems.size(), 1);
         S3ImportSystem defaultSystem = allSystems.get(0);
-        Assert.assertTrue(defaultSystem.isPrimarySystem());
+        Assert.assertEquals(defaultSystem.getPriority(), 1);
         Assert.assertNull(defaultSystem.getAccountSystemId());
         // create 2 new systems
         allSystems = createImportSystem();
@@ -246,8 +246,8 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Attribute otherSystemAccountAttr = otherSystemAccountTable.getAttribute(otherSystem.getAccountSystemId());
 
         Assert.assertEquals(allSystems.size(), 3);
-        Assert.assertFalse(defaultSystem.isPrimarySystem());
-        Assert.assertTrue(sfSystem.isPrimarySystem());
+        Assert.assertNotEquals(defaultSystem.getPriority(), 1);
+        Assert.assertEquals(sfSystem.getPriority(), 1);
         Assert.assertNotNull(sfSystem.getAccountSystemId());
         Assert.assertTrue(sfSystem.isMapToLatticeAccount());
         Assert.assertNotNull(sfAccountTable);

@@ -176,9 +176,9 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
         this.priority = priority;
     }
 
-    @JsonIgnore
+    @JsonProperty("is_primary_system")
     public boolean isPrimarySystem() {
-        return priority == 1;
+        return (priority == 1) && (Boolean.TRUE.equals(mapToLatticeAccount));
     }
 
     public String getAccountSystemId() {

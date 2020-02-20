@@ -161,7 +161,7 @@ public class CDLServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         for (S3ImportSystem system : allSystem) {
             if (system.getDisplayName().equals("PRIMARY SYSTEM")) {
                 hasPrimary = true;
-                Assert.assertTrue(system.isPrimarySystem());
+                assertEquals(system.getPriority(), 1);
             }
         }
         Assert.assertTrue(hasPrimary);
