@@ -6,7 +6,7 @@ import com.latticeengines.apps.dcp.dao.ProjectDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.dcp.Project;
 
-@Component("dcpProjectDao")
+@Component("projectDao")
 public class ProjectDaoImpl extends BaseDaoImpl<Project> implements ProjectDao {
 
     @Override

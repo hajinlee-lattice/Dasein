@@ -57,8 +57,7 @@ public class ProjectResource {
         }
 
         try {
-            return projectService.createProject(customerSpace.toString(), projectRequest.getProjectId(),
-                    projectRequest.getDisplayName(), projectRequest.getProjectType(), MultiTenantContext.getEmailAddress());
+            return projectService.createProject(customerSpace.toString(), projectRequest, MultiTenantContext.getEmailAddress());
         } catch (LedpException e) {
             log.error("Failed to create project: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
@@ -87,7 +86,7 @@ public class ProjectResource {
         }
     }
 
-    @GetMapping(value = "/{projectId}")
+    @GetMapping(value = "/projectId/{projectId}")
     @ResponseBody
     @ApiOperation("Get project by projectId")
     @PreAuthorize("hasRole('View_DCP_Projects')")

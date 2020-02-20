@@ -4,10 +4,11 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 
 public interface ProjectService {
 
-    ProjectDetails createProject(String customerSpace, String projectId, String displayName, Project.ProjectType projectType, String user);
+    ProjectDetails createProject(String customerSpace, ProjectRequest projectRequest, String user);
 
     List<Project> getAllProjects(String customerSpace);
 

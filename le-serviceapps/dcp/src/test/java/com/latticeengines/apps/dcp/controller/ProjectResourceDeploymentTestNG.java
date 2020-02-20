@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 
 public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
@@ -28,8 +29,11 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = {"deployment"})
     public void testCreateDCPProject() throws IOException {
-        ProjectDetails result = projectProxy.createDCPProject(mainTestTenant.getId(), "createtest", "createtest",
-                Project.ProjectType.Type1, "test@lattice-engines.com");
+        ProjectRequest projectRequest = new ProjectRequest();
+        projectRequest.setDisplayName("createtest");
+        projectRequest.setProjectId("createtest");
+        projectRequest.setProjectType(Project.ProjectType.Type1);
+        ProjectDetails result = projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest,"test@lattice-engines.com");
         assertNotNull(result);
         assertEquals(result.getProjectId(), "createtest");
         projectProxy.deleteProject(mainTestTenant.getId(), "createtest");
@@ -37,10 +41,14 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = {"deployment"})
     public void testGetAllDCPProject() throws IOException {
-        projectProxy.createDCPProject(mainTestTenant.getId(), "getalltest1", "getalltest1",
-                Project.ProjectType.Type1, "test@lattice-engines.com");
-        projectProxy.createDCPProject(mainTestTenant.getId(), "getalltest2", "getalltest2",
-                Project.ProjectType.Type2, "test@lattice-engines.com");
+        ProjectRequest projectRequest = new ProjectRequest();
+        projectRequest.setDisplayName("getalltest1");
+        projectRequest.setProjectId("getalltest1");
+        projectRequest.setProjectType(Project.ProjectType.Type1);
+        projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest, "test@lattice-engines.com");
+        projectRequest.setDisplayName("getalltest2");
+        projectRequest.setProjectId("getalltest2");
+        projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest, "test@lattice-engines.com");
 
         List<Project> result = projectProxy.getAllDCPProject(mainTestTenant.getId());
         assertNotNull(result);

@@ -39,7 +39,7 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
     }
 
     public ProjectDetails getProjectByProjectId(String projectId) {
-        String urlPattern = "/{projectId}";
+        String urlPattern = "/projectId/{projectId}";
         String url = constructUrl(urlPattern, projectId);
         return get("getProjectByProjectId", url, null, ProjectDetails.class);
     }

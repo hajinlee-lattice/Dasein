@@ -18,6 +18,7 @@ import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
@@ -35,16 +36,16 @@ public class ProjectResource {
     @ResponseBody
     @ApiOperation(value = "Create an Project")
     public ResponseDocument<ProjectDetails> createProject(@PathVariable String customerSpace,
-                                                          @RequestParam(required = false) String projectId,
-                                                          @RequestParam String displayName,
                                                           @RequestParam String user,
-                                                          @RequestBody Project.ProjectType projectType) {
+                                                          @RequestBody ProjectRequest projectRequest) {
         try {
             ProjectDetails result;
-            if(projectId == null) {
-                result = projectService.createProject(customerSpace, displayName, projectType, user);
+            if(projectRequest.getProjectId() == null) {
+                result = projectService.createProject(customerSpace, projectRequest.getDisplayName(),
+                        projectRequest.getProjectType(), user);
             } else {
-                result = projectService.createProject(customerSpace, projectId, displayName, projectType, user);
+                result = projectService.createProject(customerSpace, projectRequest.getProjectId(),
+                        projectRequest.getDisplayName(), projectRequest.getProjectType(), user);
             }
             return ResponseDocument.successResponse(result);
         } catch (LedpException e) {
@@ -59,7 +60,7 @@ public class ProjectResource {
         return projectService.getAllProject(customerSpace);
     }
 
-    @GetMapping(value = "/{projectId}")
+    @GetMapping(value = "/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Get project by projectId")
     public ProjectDetails getProjectByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
