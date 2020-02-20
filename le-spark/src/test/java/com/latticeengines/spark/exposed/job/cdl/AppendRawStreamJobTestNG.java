@@ -128,8 +128,8 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
         Object[][] input = new Object[][]{ //
                 testDedupRow("0", "acc1", "opp1", "open", 0, 1),
                 testDedupRow("1", "acc1", "opp1", "dev", 0, 2),
-                testDedupRow(ID_DAY_1, "acc1", "opp1", "won", 0, 3),
-                testDedupRow(ID_DAY_2, "acc1", "opp1", "close", 1, 0)
+                testDedupRow(ID_DAY_1, "acc2", "opp1", "won", 0, 3),
+                testDedupRow(ID_DAY_2, "acc1", "opp2", "open", 1, 0)
         };
         AppendRawStreamConfig config = new AppendRawStreamConfig();
         config.currentEpochMilli = now;
@@ -198,7 +198,7 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
 
     private ActivityRowReducer prepareReducer() {
         ActivityRowReducer reducer = new ActivityRowReducer();
-        reducer.setGroupByFields(Arrays.asList(OPP_ID, AccountId.name()));
+        reducer.setGroupByFields(Collections.singletonList(OPP_ID));
         reducer.setArguments(Collections.singletonList(DATE_ATTR));
         reducer.setOperator(ActivityRowReducer.Operator.Latest);
         return reducer;
@@ -208,8 +208,8 @@ public class AppendRawStreamJobTestNG extends SparkJobFunctionalTestNGBase {
         String[] fields = {InternalId.name(), AccountId.name(), OPP_ID, Stage, __StreamDate.name()};
         long oneDayAfter = Instant.ofEpochMilli(now).plus(1, ChronoUnit.DAYS).toEpochMilli();
         Object[][] outputVals = new Object[][]{
-                {ID_DAY_1, "acc1", "opp1", "won", DateTimeUtils.toDateOnlyFromMillis(String.valueOf(now))},
-                {ID_DAY_2, "acc1", "opp1", "close", DateTimeUtils.toDateOnlyFromMillis(String.valueOf(oneDayAfter))},
+                {ID_DAY_1, "acc2", "opp1", "won", DateTimeUtils.toDateOnlyFromMillis(String.valueOf(now))},
+                {ID_DAY_2, "acc1", "opp2", "open", DateTimeUtils.toDateOnlyFromMillis(String.valueOf(oneDayAfter))},
         };
         String[] filteredRecordIds = {ID_DAY_1, ID_DAY_2};
         Map<String, Map<String, Object>> expectedMap = new HashMap<>();

@@ -221,7 +221,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         );
         Object[][] data = new Object[][]{
                 {"acc1", "opp1", TWO_WEEKS_AGO, "won", 1},
-                {"acc1", "opp1", ONE_WEEK_AGO, "close", 1},
+                {"acc2", "opp1", ONE_WEEK_AGO, "close", 1},
                 {"acc1", "opp4", TWO_WEEKS_AGO, "close", 1},
                 {"acc2", "opp2", TWO_WEEKS_AGO, "started", 1},
                 {"acc2", "opp3", ONE_WEEK_AGO, "lost", 1}
@@ -263,21 +263,17 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         group.setEntity(BusinessEntity.Account);
         group.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN, TIMEFILTER_PERIODS, TIMEFILTER_PARAMS));
         group.setRollupDimensions(Stage);
-        group.setAggregation(createAttributeDeriver(
-                Collections.singletonList(OpportunityId),
-                __Row_Count__,
-                StreamAttributeDeriver.Calculation.LAST)
-        );
+        group.setAggregation(createAttributeDeriver(Collections.singletonList(__Row_Count__), __Row_Count__, StreamAttributeDeriver.Calculation.SUM));
         group.setNullImputation(NullMetricsImputation.ZERO);
+        group.setReducer(prepareReducer());
         return group;
     }
 
     private ActivityRowReducer prepareReducer() {
         ActivityRowReducer reducer = new ActivityRowReducer();
-//        reducer.setGroupByFields(Collections.singletonList(OpportunityId));
-//        reducer.setArguments(PeriodId);
-//        reducer.setRestriction(ActivityRowReducer.Restriction.Latest);
-//        reducer.setOperator(ActivityRowReducer.Operator.Time);
+        reducer.setGroupByFields(Collections.singletonList(OpportunityId));
+        reducer.setArguments(Collections.singletonList(PeriodId));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
         return reducer;
     }
 
@@ -323,8 +319,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private Boolean verifyOpportunityMetrics(HdfsDataUnit metrics) {
         Object[][] expectedResult = new Object[][]{
                 // 4 for each week range (1, 2), + 1 entityId
-                {"acc1", 1, 0, 0, 0, 2, 0, 0, 0},
-                {"acc2", 0, 1, 0, 0, 0, 1, 1, 0},
+                {"acc1", 0, 0, 0, 0, 1, 0, 0, 0},
+                {"acc2", 1, 1, 0, 0, 1, 1, 1, 0},
                 {"missingAccount", 0, 0, 0, 0, 0, 0, 0, 0}
         };
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)

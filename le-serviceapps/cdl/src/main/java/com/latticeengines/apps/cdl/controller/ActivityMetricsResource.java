@@ -70,6 +70,8 @@ public class ActivityMetricsResource {
         return true;
     }
 
+    @PostMapping(value = "/setupDefaultOpportunityProfile")
+    @ApiOperation(value = "Setup default opportunity metric groups for opportunity by stage")
     public Boolean setupDefaultOpportunityProfile(@PathVariable String customerSpace, @RequestBody String streamName) {
         ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(customerSpace,
                 streamName);

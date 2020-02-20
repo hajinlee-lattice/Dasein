@@ -116,6 +116,11 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     @Enumerated(EnumType.STRING)
     private NullMetricsImputation nullImputation;
 
+    @JsonProperty("reducer")
+    @Type(type = "json")
+    @Column(name = "REDUCER", columnDefinition = "'JSON'")
+    private ActivityRowReducer reducer;
+
     @Override
     public Long getPid() {
         return pid;
@@ -238,5 +243,13 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
 
     public void setNullImputation(NullMetricsImputation nullImputation) {
         this.nullImputation = nullImputation;
+    }
+
+    public ActivityRowReducer getReducer() {
+        return reducer;
+    }
+
+    public void setReducer(ActivityRowReducer reducer) {
+        this.reducer = reducer;
     }
 }

@@ -23,6 +23,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver;
@@ -138,14 +139,23 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         stage.setEntity(BusinessEntity.Account);
         stage.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER, null, null));
         stage.setRollupDimensions(DIM_NAME_STAGE);
-        stage.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.OpportunityId.name()),
-                InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.LAST));
+        stage.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
+                InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
         stage.setCategory(Category.OPPORTUNITY_PROFILE);
         stage.setSubCategoryTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_SUBCATEGORY));
         stage.setDisplayNameTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_STAGENAME_DISPLAYNAME));
         stage.setDescriptionTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_STAGENAME_DESCRIPTION));
         stage.setNullImputation(NullMetricsImputation.ZERO);
+        stage.setReducer(prepareReducer());
         return stage;
+    }
+
+    private ActivityRowReducer prepareReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Collections.singletonList(InterfaceName.OpportunityId.name()));
+        reducer.setArguments(Collections.singletonList(InterfaceName.PeriodId.name()));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
     }
 
     private String getGroupId(String groupName) {

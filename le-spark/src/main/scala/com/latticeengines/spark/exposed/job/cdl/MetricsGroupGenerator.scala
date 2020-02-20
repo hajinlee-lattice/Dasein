@@ -6,8 +6,6 @@ import com.latticeengines.common.exposed.util.TemplateUtils
 import com.latticeengines.domain.exposed.StringTemplateConstants
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
-import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer.Operator
-import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
 import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO}
@@ -129,15 +127,11 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   def separateByTimeFilter(df: DataFrame, timeFilter: TimeFilter, translator: TimeFilterTranslator, group: ActivityMetricsGroup): (DataFrame, String) = {
     val periodIdColumnName: String = InterfaceName.PeriodId.name
     val bounds = translator.translateRange(timeFilter)
-    val aggregation = group.getAggregation
 
     val timeRangeStr: String = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter)
     var inRange: DataFrame = df.filter(df(periodIdColumnName).between(bounds.getLeft, bounds.getRight))
-    if (Calculation.LAST.equals(aggregation.getCalculation)) {
-      val reducer: ActivityRowReducer = new ActivityRowReducer
-      reducer.setGroupByFields(Seq(aggregation.getSourceAttributes.get(0), DeriveAttrsUtils.getEntityIdColumnNameFromEntity(group.getEntity)))
-      reducer.setArguments(Seq(InterfaceName.PeriodId.name)) // default periodId for metrics
-      reducer.setOperator(Operator.Latest)
+    if (Option(group.getReducer).isDefined) {
+      val reducer = Option(group.getReducer).get
       inRange = DeriveAttrsUtils.applyReducer(inRange, reducer)
     }
     (inRange, timeRangeStr)
