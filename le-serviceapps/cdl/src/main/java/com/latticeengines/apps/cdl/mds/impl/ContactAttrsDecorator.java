@@ -28,10 +28,12 @@ public class ContactAttrsDecorator implements Decorator {
 
     private final Set<String> exportAttrs;
 
+    private Set<String> attrNameInOtherIDAndMatchID;
+
     private final boolean entityMatchEnabled;
     private final boolean onlyEntityMatchGAEnabled;
 
-    ContactAttrsDecorator(boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
+    ContactAttrsDecorator(boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled, Set<String> attrNameInOtherIDAndMatchID) {
         this.entityMatchEnabled = entityMatchEnabled;
         this.onlyEntityMatchGAEnabled = onlyEntityMatchGAEnabled;
         this.stdAttrs = SchemaRepository //
@@ -43,6 +45,7 @@ public class ContactAttrsDecorator implements Decorator {
         this.exportAttrs = SchemaRepository //
                 .getDefaultExportAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
+        this.attrNameInOtherIDAndMatchID = attrNameInOtherIDAndMatchID;
     }
 
     @Override
@@ -87,6 +90,21 @@ public class ContactAttrsDecorator implements Decorator {
                 return cm;
             }
 
+            // setting for attributes corresponds to mappings in section Unique ID, Other IDs, Match IDs, only enable for
+            // usage export
+            if ((InterfaceName.CustomerAccountId.name().equals(cm.getAttrName()) ||
+                    InterfaceName.CustomerContactId.name().equals(cm.getAttrName()) ||
+                    attrNameInOtherIDAndMatchID.contains(cm.getAttrName())) && entityMatchEnabled) {
+                cm.disableGroup(Segment);
+                cm.enableGroup(Enrichment);
+                cm.disableGroup(TalkingPoint);
+                cm.disableGroup(CompanyProfile);
+                cm.disableGroup(Model);
+                cm.setCanSegment(false);
+                cm.setCanModel(false);
+                cm.setCanEnrich(true);
+                return cm;
+            }
             cm.enableGroup(Segment);
             // enable some attributes for Export
             if (exportAttrs.contains(cm.getAttrName())) {

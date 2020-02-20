@@ -30,6 +30,13 @@ public class ServingStoreServiceImplEntityMatchDeploymentTestNG extends ServingS
         Assert.assertFalse(accountId.isEnabledFor(ColumnSelection.Predefined.Enrichment),
                 JsonUtils.serialize(accountId));
         Assert.assertEquals(accountId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(accountId));
+        ColumnMetadata customerAccountId = cms.stream() //
+                .filter(cm -> InterfaceName.CustomerAccountId.name().equals(cm.getAttrName())) //
+                .findFirst().orElse(null);
+        Assert.assertNotNull(customerAccountId);
+        Assert.assertTrue(customerAccountId.isEnabledFor(ColumnSelection.Predefined.Enrichment),
+                JsonUtils.serialize(customerAccountId));
+        Assert.assertEquals(customerAccountId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(customerAccountId));
     }
 
     @Override
@@ -41,6 +48,13 @@ public class ServingStoreServiceImplEntityMatchDeploymentTestNG extends ServingS
         Assert.assertFalse(contactId.isEnabledFor(ColumnSelection.Predefined.Enrichment),
                 JsonUtils.serialize(contactId));
         Assert.assertEquals(contactId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(contactId));
+        ColumnMetadata customerContactId = cms.stream() //
+                .filter(cm -> InterfaceName.CustomerContactId.name().equals(cm.getAttrName())) //
+                .findFirst().orElse(null);
+        Assert.assertNotNull(customerContactId);
+        Assert.assertTrue(customerContactId.isEnabledFor(ColumnSelection.Predefined.Enrichment),
+                JsonUtils.serialize(customerContactId));
+        Assert.assertEquals(customerContactId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(customerContactId));
     }
 
 }
