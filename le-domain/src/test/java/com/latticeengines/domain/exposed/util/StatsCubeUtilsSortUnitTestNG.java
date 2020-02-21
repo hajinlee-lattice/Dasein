@@ -1,15 +1,20 @@
 package com.latticeengines.domain.exposed.util;
 
+import static com.latticeengines.domain.exposed.query.BusinessEntity.WebVisitProfile;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
@@ -17,13 +22,18 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
+import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
+import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 public class StatsCubeUtilsSortUnitTestNG {
 
+    private static final String TEST_SUB_CATEGORY = "test-subcategory";
     Map<String, Integer> idSeqMap = new HashMap<>();
 
     @Test(groups = "unit")
@@ -254,6 +264,131 @@ public class StatsCubeUtilsSortUnitTestNG {
                 Arrays.asList("LDC_PrimaryIndustry", "LE_NUMBER_OF_LOCATIONS", "Attr1", "Attr2", "Attr3", "Attr4"),
                 Arrays.asList(engineId4, engineId5, engineId2, engineId3, engineId1 + "_score")
         );
+    }
+
+    @Test(groups = "unit", dataProvider = "sortActivityMetrics")
+    private void testSortActivityMetrics(List<String> attrs, List<long[][]> valCntList, List<String> expectedOrder,
+            long[][] expectedTopBuckets) {
+        Assert.assertEquals(attrs.size(), valCntList.size());
+
+        // prepare input
+        StatsCube statsCube = new StatsCube();
+        Map<String, AttributeStats> stats = new HashMap<>();
+        statsCube.setStatistics(stats);
+        List<ColumnMetadata> cms = new ArrayList<>();
+        int N = attrs.size();
+        for (int i = 0; i < N; i++) {
+            ColumnMetadata cm = new ColumnMetadata();
+            cm.setCategory(Category.WEB_VISIT_PROFILE);
+            cm.setAttrName(attrs.get(i));
+            cm.setSubcategory(TEST_SUB_CATEGORY);
+            cms.add(cm);
+            stats.put(attrs.get(i), testStats(valCntList.get(i)));
+        }
+
+        // build top n tree
+        TopNTree topNTree = StatsCubeUtils.constructTopNTree(ImmutableMap.of(WebVisitProfile.name(), statsCube),
+                ImmutableMap.of(WebVisitProfile.name(), cms), true, ColumnSelection.Predefined.Segment, true);
+        Assert.assertNotNull(topNTree);
+        Assert.assertTrue(topNTree.hasCategory(Category.WEB_VISIT_PROFILE));
+
+        // verify attribute orders
+        CategoryTopNTree categoryTopNTree = topNTree.getCategory(Category.WEB_VISIT_PROFILE);
+        Assert.assertNotNull(categoryTopNTree);
+        List<TopAttribute> topAttrs = categoryTopNTree.getSubcategory(TEST_SUB_CATEGORY);
+        Assert.assertNotNull(topAttrs);
+        List<String> sortedAttrs = topAttrs.stream().map(TopAttribute::getAttribute).collect(Collectors.toList());
+        Assert.assertEquals(sortedAttrs.size(), attrs.size(),
+                "sorted attribute list should have the same size as original list");
+        Assert.assertEquals(sortedAttrs, expectedOrder);
+        // verify bucket value
+        for (int i = 0; i < N; i++) {
+            TopAttribute attr = topAttrs.get(i);
+            long[] expectedBucket = expectedTopBuckets[i];
+            String attrName = attr.getAttribute();
+            Assert.assertNotNull(attr, String.format("TopAttribute for attr %s should not be null", attrName));
+            Assert.assertNotNull(attr.getTopBkt());
+            Assert.assertNotNull(attr.getTopBkt().getValues());
+            Assert.assertFalse(attr.getTopBkt().getValues().isEmpty());
+            long cnt = attr.getTopBkt().getCount();
+            long val = Long.valueOf(attr.getTopBkt().getValues().get(0).toString());
+            Assert.assertEquals(val, expectedBucket[0],
+                    String.format("Value in top bucket for attr %s does not match the expected value", attrName));
+            Assert.assertEquals(cnt, expectedBucket[1],
+                    String.format("Cnt in top bucket for attr %s does not match the expected value", attrName));
+        }
+    }
+
+    @DataProvider(name = "sortActivityMetrics")
+    private Object[][] sortActivityMetricsTestData() {
+        return new Object[][] { //
+                { // only one bucket for each attr
+                        Arrays.asList("a1", "a2", "a3", "a4"), //
+                        Arrays.asList( //
+                                new long[][] { { 10, 5 } }, //
+                                new long[][] { { 90, 5 } }, //
+                                new long[][] { { 500, 5 } }, //
+                                new long[][] { { 20, 500 } } //
+                        ), //
+                        Arrays.asList("a3", "a2", "a4", "a1"), //
+                        new long[][] { { 500, 5 }, { 90, 5 }, { 20, 500 }, { 10, 5 } }, //
+                }, //
+                { // multiple bucket, sorted in attr first
+                        Arrays.asList("a1", "a2", "a3", "a4"), //
+                        Arrays.asList( //
+                                new long[][] { { 100, 3 }, { 90, 5 } }, //
+                                new long[][] { { 90, 5 }, { 90, 10 }, { 30, 100 } }, //
+                                new long[][] { { 90, 5 }, { 30, 100 } }, //
+                                new long[][] { { 30, 100 }, { 20, 500 } } //
+                        ), //
+                        Arrays.asList("a1", "a2", "a3", "a4"), //
+                        new long[][] { { 100, 3 }, { 90, 10 }, { 90, 5 }, { 30, 100 } }, //
+                }, //
+                { //
+                        Arrays.asList("a1", "a2", "a3", "a4"), //
+                        Arrays.asList( //
+                                new long[][] { { 150, 5 } }, //
+                                new long[][] { { 90, 5 }, { 90, 10 }, { 30, 100 } }, //
+                                new long[][] { { 30, 5 }, { 30, 100 }, { 10, 150 } }, //
+                                new long[][] { { 30, 90 }, { 20, 500 }, { 30, 120 } } //
+                        ), //
+                        Arrays.asList("a1", "a2", "a4", "a3"), //
+                        new long[][] { { 150, 5 }, { 90, 10 }, { 30, 120 }, { 30, 100 } }, //
+                }, //
+                { //
+                        Arrays.asList("a1", "a2", "a3", "a4", "a5"), //
+                        Arrays.asList( //
+                                new long[][] { { 30, 5 }, { 70, 100 }, { 70, 150 } }, //
+                                new long[][] { { 150, 5 } }, //
+                                new long[][] { { 30, 5 }, { 30, 10 } }, //
+                                new long[][] { { 30, 5 }, { 30, 100 }, { 10, 150 } }, //
+                                new long[][] { { 200, 90 } } //
+                        ), //
+                        Arrays.asList("a5", "a2", "a1", "a4", "a3"), //
+                        new long[][] { { 200, 90 }, { 150, 5 }, { 70, 150 }, { 30, 100 }, { 30, 10 } }, //
+                }, //
+        }; //
+    }
+
+    private AttributeStats testStats(long[][] valCnts) {
+        AttributeStats stats = new AttributeStats();
+        stats.setNonNullCount((long) valCnts.length);
+        Buckets bkts = new Buckets();
+        stats.setBuckets(bkts);
+        bkts.setType(BucketType.Numerical);
+        List<Bucket> bucketList = new ArrayList<>();
+        for (long[] vc : valCnts) {
+            bucketList.add(testBucket(vc[0], vc[1]));
+        }
+        bkts.setBucketList(bucketList);
+        return stats;
+    }
+
+    private Bucket testBucket(long value, long count) {
+        Bucket bkt = Bucket.valueBkt(String.valueOf(value));
+        bkt.setCount(count);
+        bkt.setId(0L);
+        return bkt;
     }
 
     private void verifyAttrSeq(Flux<ColumnMetadata> flux, Iterable<String> attrSeq1, Iterable<String> attrSeq2) {
