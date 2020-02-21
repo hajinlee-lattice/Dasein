@@ -79,6 +79,15 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         log.info("Switch data collection to version " + inactive);
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
+
+        try {
+            postSwitchOperations();
+        } catch (Exception e) {
+            log.warn("Encountered an error in post switch operations", e);
+        }
+    }
+
+    private void postSwitchOperations() {
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
         //bump version after entity match tenant rematch operation
@@ -100,12 +109,12 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         // update bucket metadata and bucketed score summary
         updateBucketMetadata();
+        setPublishedModels();
 
         // update segment and rating engine counts
         SegmentCountUtils.invokeMetadataApi(servingStoreProxy, customerSpace.toString());
         SegmentCountUtils.updateEntityCountsAsync(segmentProxy, customerSpace.toString());
         updateActiveRuleModelCounts();
-        setPublishedModels();
     }
 
     private void updateActiveRuleModelCounts() {
