@@ -278,6 +278,14 @@ public enum GrantedRight implements GrantedAuthority {
         public String getAuthority() {
             return "View_PLS_Spec";
         }
+    }, //
+    VIEW_DCP_PROJECTS {
+        @Override
+        public String getAuthority() { return "View_DCP_Projects"; }
+    }, //
+    EDIT_DCP_PROJECTS {
+        @Override
+        public String getAuthority() { return "Edit_DCP_Projects"; }
     }; //
 
     private static Map<String, GrantedRight> grantedRightsMap = new HashMap<>();

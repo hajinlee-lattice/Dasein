@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class DCPProjectDetails {
+public class ProjectDetails {
 
     @JsonProperty("project_id")
     private String projectId;

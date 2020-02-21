@@ -10,71 +10,80 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.apps.dcp.entitymgr.DCPProjectEntityMgr;
-import com.latticeengines.apps.dcp.service.DCPProjectService;
+import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
+import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
-import com.latticeengines.domain.exposed.dcp.DCPProject;
-import com.latticeengines.domain.exposed.dcp.DCPProjectDetails;
+import com.latticeengines.domain.exposed.dcp.Project;
+import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
-@Service("dcpProjectService")
-public class DCPProjectServiceImpl implements DCPProjectService {
+@Service("projectService")
+public class ProjectServiceImpl implements ProjectService {
 
-    private static final Logger log = LoggerFactory.getLogger(DCPProjectServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
     private static final String PROJECT_ROOT_PATH_PATTERN = "/%s/Projects/%s/";
     private static final String RANDOM_PROJECT_ID_PATTERN = "Project_%s";
     private static final int MAX_RETRY = 3;
 
     @Inject
-    private DCPProjectEntityMgr dcpProjectEntityMgr;
+    private ProjectEntityMgr projectEntityMgr;
 
     @Inject
     private DropBoxProxy dropBoxProxy;
 
     @Override
-    public DCPProjectDetails createDCPProject(String customerSpace, String displayName,
-                                              DCPProject.ProjectType projectType, String user) {
+    public ProjectDetails createProject(String customerSpace, String displayName,
+                                        Project.ProjectType projectType, String user) {
         String projectId = generateRandomProjectId();
         String rootPath = generateRootPath(customerSpace, projectId);
-        dcpProjectEntityMgr.create(generateDCPProjectObject(projectId, displayName, projectType, user, rootPath));
-        DCPProject dcpProject = getDCPProjectByProjectIdWithRetry(projectId);
-        if (dcpProject == null) {
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath));
+        Project project = getProjectByProjectIdWithRetry(projectId);
+        if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
-        return getProjectDetails(customerSpace, dcpProject);
+        return getProjectDetails(customerSpace, project);
     }
 
     @Override
-    public DCPProjectDetails createDCPProject(String customerSpace, String projectId, String displayName,
-                                              DCPProject.ProjectType projectType, String user) {
+    public ProjectDetails createProject(String customerSpace, String projectId, String displayName,
+                                        Project.ProjectType projectType, String user) {
         validateProjectId(projectId);
         String rootPath = generateRootPath(customerSpace, projectId);
-        dcpProjectEntityMgr.create(generateDCPProjectObject(projectId, displayName, projectType, user, rootPath));
-        DCPProject dcpProject = getDCPProjectByProjectIdWithRetry(projectId);
-        if (dcpProject == null) {
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath));
+        Project project = getProjectByProjectIdWithRetry(projectId);
+        if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
-        return getProjectDetails(customerSpace, dcpProject);
+        return getProjectDetails(customerSpace, project);
     }
 
     @Override
-    public List<DCPProject> getAllDCPProject(String customerSpace) {
-        return null;
+    public List<Project> getAllProject(String customerSpace) {
+        return projectEntityMgr.findAll();
     }
 
     @Override
-    public DCPProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
-        return null;
+    public ProjectDetails getProjectByProjectId(String customerSpace, String projectId) {
+        Project project = getProjectByProjectIdWithRetry(projectId);
+        if (project == null) {
+            throw new RuntimeException(String.format("Get DCP Project %s failed!", projectId));
+        }
+        return getProjectDetails(customerSpace, project);
     }
 
     @Override
     public Boolean deleteProject(String customerSpace, String projectId) {
-        return null;
+        Project project = getProjectByProjectIdWithRetry(projectId);
+        if (project == null) {
+            return false;
+        }
+        projectEntityMgr.delete(project);
+        return true;
     }
 
     private void validateProjectId(String projectId) {
@@ -84,7 +93,7 @@ public class DCPProjectServiceImpl implements DCPProjectService {
         if (!projectId.matches("[A-Za-z0-9_]*")) {
             throw new RuntimeException("Invalid characters in project id, only accept digits, alphabet & underline.");
         }
-        if (dcpProjectEntityMgr.findByProjectId(projectId) != null) {
+        if (projectEntityMgr.findByProjectId(projectId) != null) {
             throw new RuntimeException(String.format("ProjectId %s already exists.", projectId));
         }
     }
@@ -92,33 +101,33 @@ public class DCPProjectServiceImpl implements DCPProjectService {
     private String generateRandomProjectId() {
         String randomProjectId = String.format(RANDOM_PROJECT_ID_PATTERN,
                 RandomStringUtils.randomAlphanumeric(8).toLowerCase());
-        while (dcpProjectEntityMgr.findByProjectId(randomProjectId) != null) {
+        while (projectEntityMgr.findByProjectId(randomProjectId) != null) {
             randomProjectId = String.format(RANDOM_PROJECT_ID_PATTERN,
                     RandomStringUtils.randomAlphanumeric(8).toLowerCase());
         }
         return randomProjectId;
     }
 
-    private DCPProjectDetails getProjectDetails(String customerSpace, DCPProject dcpProject) {
-        DCPProjectDetails details = new DCPProjectDetails();
-        details.setProjectId(dcpProject.getProjectId());
-        details.setProjectDisplayName(dcpProject.getProjectDisplayName());
-        details.setProjectRootPath(dcpProject.getRootPath());
+    private ProjectDetails getProjectDetails(String customerSpace, Project project) {
+        ProjectDetails details = new ProjectDetails();
+        details.setProjectId(project.getProjectId());
+        details.setProjectDisplayName(project.getProjectDisplayName());
+        details.setProjectRootPath(project.getRootPath());
         details.setDropFolderAccess(getDropBoxAccess(customerSpace));
         return details;
     }
 
-    private DCPProject generateDCPProjectObject(String projectId, String displayName,
-                                                DCPProject.ProjectType projectType, String user, String rootPath) {
-        DCPProject dcpProject = new DCPProject();
-        dcpProject.setCreatedBy(user);
-        dcpProject.setProjectDisplayName(displayName);
-        dcpProject.setProjectId(projectId);
-        dcpProject.setTenant(MultiTenantContext.getTenant());
-        dcpProject.setDeleted(Boolean.FALSE);
-        dcpProject.setProjectType(projectType);
-        dcpProject.setRootPath(rootPath);
-        return dcpProject;
+    private Project generateProjectObject(String projectId, String displayName,
+                                          Project.ProjectType projectType, String user, String rootPath) {
+        Project project = new Project();
+        project.setCreatedBy(user);
+        project.setProjectDisplayName(displayName);
+        project.setProjectId(projectId);
+        project.setTenant(MultiTenantContext.getTenant());
+        project.setDeleted(Boolean.FALSE);
+        project.setProjectType(projectType);
+        project.setRootPath(rootPath);
+        return project;
     }
 
     private GrantDropBoxAccessResponse getDropBoxAccess(String customerSpace) {
@@ -137,19 +146,19 @@ public class DCPProjectServiceImpl implements DCPProjectService {
         return String.format(PROJECT_ROOT_PATH_PATTERN, dropBoxSummary.getDropBox(), projectId);
     }
 
-    private DCPProject getDCPProjectByProjectIdWithRetry(String projectId) {
+    private Project getProjectByProjectIdWithRetry(String projectId) {
         int retry = 0;
-        DCPProject dcpProject = dcpProjectEntityMgr.findByProjectId(projectId);
-        while (dcpProject == null && retry < MAX_RETRY) {
+        Project project = projectEntityMgr.findByProjectId(projectId);
+        while (project == null && retry < MAX_RETRY) {
             try {
                 Thread.sleep(1000L + retry * 1000L);
             } catch (InterruptedException e) {
                 return null;
             }
-            dcpProject = dcpProjectEntityMgr.findByProjectId(projectId);
+            project = projectEntityMgr.findByProjectId(projectId);
             retry++;
         }
-        return dcpProject;
+        return project;
     }
 
 }
