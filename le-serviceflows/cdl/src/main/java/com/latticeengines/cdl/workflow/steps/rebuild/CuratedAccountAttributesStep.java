@@ -302,7 +302,8 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
 
     private void finishing() {
         updateDCStatusForCuratedAccountAttributes();
-        exportToDynamo(servingStoreTableName, InterfaceName.AccountId.name(), null);
+        TableRoleInCollection role = TableRoleInCollection.CalculatedCuratedAccountAttribute;
+        exportToDynamo(servingStoreTableName, role.getPartitionKey(), role.getRangeKey());
     }
 
     @Override

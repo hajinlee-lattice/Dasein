@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,8 +23,8 @@ import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -48,8 +47,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private DataCollection.Version active;
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
-    private List<Action> actions;
-    private Map<TableRoleInCollection, String> tableNames = new HashMap<>();
 
     @Override
     public void execute() {

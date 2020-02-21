@@ -98,7 +98,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         profileTablePrefix = entity.name() + "Profile";
         statsTablePrefix = entity.name() + "Stats";
         servingStoreTablePrefix = servingStore.name();
-        servingStoreSortKey = servingStore.getPrimaryKey().name();
+        servingStoreSortKey = servingStore.getPrimaryKey();
 
         if (entity.getBatchStore() != null) {
             String masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getBatchStore(),

@@ -98,7 +98,7 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
     protected void postJobExecution(SparkJobResult result) {
         String tenantId = CustomerSpace.shortenCustomerSpace(parseCustomerSpace(configuration).toString());
         mergedTableName = NamingUtils.timestamp(getTableRole().name());
-        Table mergedTable = toTable(mergedTableName, getTableRole().getPrimaryKey().name(), result.getTargets().get(0));
+        Table mergedTable = toTable(mergedTableName, getTableRole().getPrimaryKey(), result.getTargets().get(0));
         overlayMetadata(mergedTable);
 
         if (publishToRedshift()) {
@@ -135,10 +135,10 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
 
     private void exportTableRoleToRedshift(String tableName) {
         TableRoleInCollection tableRole = getTableRole();
-        String distKey = tableRole.getPrimaryKey().name();
-        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
-        if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
-            sortKeys.add(tableRole.getPrimaryKey().name());
+        String distKey = tableRole.getDistKey();
+        List<String> sortKeys = new ArrayList<>(tableRole.getSortKeys());
+        if (!sortKeys.contains(distKey)) {
+            sortKeys.add(distKey);
         }
         String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
 
@@ -159,7 +159,7 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
     }
 
     protected String getJoinKey() {
-        return getTableRole().getPrimaryKey().name();
+        return getTableRole().getPrimaryKey();
     }
 
 }

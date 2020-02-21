@@ -26,7 +26,7 @@ public abstract class ConsolidateBaseFlow<T extends TransformerConfig> extends C
         String srcId = config.getSrcIdField();
         String masterId = config.getMasterIdField();
         if (masterId == null) {
-            masterId = TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name();
+            masterId = TableRoleInCollection.ConsolidatedAccount.getPrimaryKey();
         }
         for (int i = 0; i < parameters.getBaseTables().size(); i++) {
             String sourceName = parameters.getBaseTables().get(i);

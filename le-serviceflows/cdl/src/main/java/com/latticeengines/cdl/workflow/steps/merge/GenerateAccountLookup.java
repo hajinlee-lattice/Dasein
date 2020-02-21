@@ -132,7 +132,7 @@ public class GenerateAccountLookup extends RunSparkJob<ProcessAccountStepConfigu
         DynamoExportConfig config = new DynamoExportConfig();
         config.setTableName(tableName);
         config.setInputPath(PathUtils.toAvroGlob(inputPath));
-        config.setPartitionKey(TABLE_ROLE.getPrimaryKey().name());
+        config.setPartitionKey(TABLE_ROLE.getPartitionKey());
         addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 

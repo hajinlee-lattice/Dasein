@@ -1,8 +1,9 @@
 package com.latticeengines.domain.exposed.metadata;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableList;
 
@@ -55,99 +56,135 @@ public enum TableRoleInCollection {
 
     static {
         ConsolidatedAccount.primaryKey = InterfaceName.AccountId;
-        ConsolidatedAccount.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
-        BucketedAccount.primaryKey = ConsolidatedAccount.primaryKey;
-        BucketedAccount.foreignKeys = ConsolidatedAccount.foreignKeys;
+        ConsolidatedAccount.partitionKey = InterfaceName.AccountId;
+
+        BucketedAccount.primaryKey = InterfaceName.AccountId;
+        BucketedAccount.distKey = InterfaceName.AccountId;
 
         ConsolidatedContact.primaryKey = InterfaceName.ContactId;
-        ConsolidatedContact.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
+        ConsolidatedContact.sortKeys =  ImmutableList.of(InterfaceName.ContactId);
+
         SortedContact.primaryKey = ConsolidatedContact.primaryKey;
-        SortedContact.foreignKeys = ConsolidatedContact.foreignKeys;
+        SortedContact.distKey = BucketedAccount.distKey;
+        SortedContact.sortKeys = ImmutableList.of(InterfaceName.ContactId);
 
         ConsolidatedDailyTransaction.primaryKey = InterfaceName.__Composite_Key__;
-        ConsolidatedDailyTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
-
         ConsolidatedPeriodTransaction.primaryKey = InterfaceName.__Composite_Key__;
-        ConsolidatedPeriodTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
 
         ConsolidatedCatalog.primaryKey = InterfaceName.InternalId;
-        ConsolidatedCatalog.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
         ConsolidatedCatalog.hasSignature = true;
         ConsolidatedActivityStream.primaryKey = InterfaceName.InternalId;
-        ConsolidatedActivityStream.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
         ConsolidatedActivityStream.hasSignature = true;
         AggregatedActivityStream.primaryKey = InterfaceName.__Composite_Key__;
-        AggregatedActivityStream.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
         AggregatedActivityStream.hasSignature = true;
 
         AggregatedTransaction.primaryKey = InterfaceName.__Composite_Key__;
-        AggregatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
+        AggregatedTransaction.distKey = BucketedAccount.distKey;
+        AggregatedTransaction.sortKeys = ImmutableList.of(InterfaceName.TransactionDate);
 
         AggregatedPeriodTransaction.primaryKey = InterfaceName.__Composite_Key__;
-        AggregatedPeriodTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
+        AggregatedPeriodTransaction.distKey = BucketedAccount.distKey;
+        AggregatedPeriodTransaction.sortKeys = //
+                ImmutableList.of(InterfaceName.PeriodName, InterfaceName.ProductId, InterfaceName.PeriodId);
 
         ConsolidatedProduct.primaryKey = InterfaceName.ProductId;
-        ConsolidatedProduct.foreignKeys = ImmutableList.of(ConsolidatedProduct.primaryKey);
-        SortedProduct.primaryKey = ConsolidatedProduct.primaryKey;
-        SortedProduct.foreignKeys = ConsolidatedProduct.foreignKeys;
-        SortedProductHierarchy.primaryKey = ConsolidatedProduct.primaryKey;
-        SortedProductHierarchy.foreignKeys = ConsolidatedProduct.foreignKeys;
+        SortedProduct.primaryKey = InterfaceName.ProductId;
+        SortedProduct.distKey = InterfaceName.ProductId;
+        SortedProductHierarchy.primaryKey = InterfaceName.ProductId;
+        SortedProductHierarchy.distKey = InterfaceName.ProductId;
 
         CalculatedPurchaseHistory.primaryKey = InterfaceName.AccountId;
-        CalculatedPurchaseHistory.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        CalculatedPurchaseHistory.partitionKey = InterfaceName.AccountId;
 
         CalculatedDepivotedPurchaseHistory.primaryKey = InterfaceName.__Composite_Key__;
-        CalculatedDepivotedPurchaseHistory.foreignKeys = ImmutableList
-                .copyOf(Collections.emptyList());
+        CalculatedDepivotedPurchaseHistory.distKey = InterfaceName.AccountId;
+        CalculatedDepivotedPurchaseHistory.sortKeys = ImmutableList.of(InterfaceName.ProductId);
 
         CalculatedCuratedAccountAttribute.primaryKey = InterfaceName.AccountId;
-        CalculatedCuratedAccountAttribute.foreignKeys = ImmutableList
-                .copyOf(Collections.emptyList());
+        CalculatedCuratedAccountAttribute.distKey = InterfaceName.AccountId;
+        CalculatedCuratedAccountAttribute.partitionKey = InterfaceName.AccountId;
 
         PivotedRating.primaryKey = InterfaceName.AccountId;
-        PivotedRating.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+        PivotedRating.distKey = InterfaceName.AccountId;
+        PivotedRating.partitionKey = InterfaceName.AccountId;
 
         AccountFeatures.primaryKey = ConsolidatedAccount.primaryKey;
         AccountExport.primaryKey = ConsolidatedAccount.primaryKey;
+
         AccountLookup.primaryKey = InterfaceName.AtlasLookupKey;
+        AccountLookup.partitionKey = InterfaceName.AtlasLookupKey;
 
         AccountMaster.primaryKey = InterfaceName.LatticeAccountId;
 
         WebVisitProfile.primaryKey = InterfaceName.AccountId;
+        WebVisitProfile.distKey = InterfaceName.AccountId;
+        WebVisitProfile.partitionKey = InterfaceName.AccountId;
+        WebVisitProfile.hasSignature = true;
 
         OpportunityProfile.primaryKey = InterfaceName.AccountId;
+        OpportunityProfile.distKey = InterfaceName.AccountId;
+        OpportunityProfile.partitionKey = InterfaceName.AccountId;
         OpportunityProfile.hasSignature = true;
-        WebVisitProfile.hasSignature = true;
+
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;
     }
 
+    private static final Logger log = LoggerFactory.getLogger(TableRoleInCollection.class);
+
     private InterfaceName primaryKey;
-    private ImmutableList<InterfaceName> foreignKeys;
     private boolean hasSignature; // whether table of this role has signature
 
-    public InterfaceName getPrimaryKey() {
-        return primaryKey;
+    // for redshift tables
+    private InterfaceName distKey;
+    private ImmutableList<InterfaceName> sortKeys = ImmutableList.<InterfaceName>builder().build();
+
+    // for dynamo tables
+    private InterfaceName partitionKey;
+    private InterfaceName rangeKey;
+
+    public String getPrimaryKey() {
+        if (primaryKey == null) {
+            log.warn(this.name() + " does not have a primary key.");
+            return null;
+        } else {
+            return primaryKey.name();
+        }
     }
 
-    public void setPrimaryKey(InterfaceName primaryKey) {
-        this.primaryKey = primaryKey;
+    public String getDistKey() {
+        if (distKey == null) {
+            log.warn(this.name() + " does not have a dist key.");
+            return null;
+        } else {
+            return distKey.name();
+        }
     }
 
-    public ImmutableList<InterfaceName> getForeignKeys() {
-        return foreignKeys;
+    public ImmutableList<String> getSortKeys() {
+        return ImmutableList.copyOf(sortKeys.stream().map(InterfaceName::name).collect(Collectors.toList()));
     }
 
-    public List<String> getForeignKeysAsStringList() {
-        return foreignKeys.stream().map(InterfaceName::name).collect(Collectors.toList());
+    public String getPartitionKey() {
+        if (partitionKey == null) {
+            log.warn(this.name() + " does not have a partition key.");
+            return null;
+        } else {
+            return partitionKey.name();
+        }
+    }
+
+    public String getRangeKey() {
+        if (rangeKey == null) {
+            log.warn(this.name() + " does not have a range key.");
+            return null;
+        } else {
+            return rangeKey.name();
+        }
     }
 
     public boolean isHasSignature() {
         return hasSignature;
-    }
-
-    public void setHasSignature(boolean hasSignature) {
-        this.hasSignature = hasSignature;
     }
 
     public static TableRoleInCollection getByName(String role) {

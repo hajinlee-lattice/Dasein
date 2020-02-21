@@ -63,8 +63,8 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         entity = configuration.getMainEntity();
         servingStore = entity.getServingStore();
         if (servingStore != null) {
-            servingStorePrimaryKey = servingStore.getPrimaryKey().name();
-            servingStoreSortKeys = servingStore.getForeignKeysAsStringList();
+            servingStorePrimaryKey = servingStore.getPrimaryKey();
+            servingStoreSortKeys = servingStore.getSortKeys();
         }
 
         Map<BusinessEntity, String> diffTableNames = getMapObjectFromContext(ENTITY_DIFF_TABLES, BusinessEntity.class,

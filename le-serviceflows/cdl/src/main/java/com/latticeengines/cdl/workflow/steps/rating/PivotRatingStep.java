@@ -167,10 +167,10 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
 
     private void exportTableRoleToRedshift(String tableName, String avroGlob) {
         TableRoleInCollection tableRole = TableRoleInCollection.PivotedRating;
-        String distKey = tableRole.getPrimaryKey().name();
-        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
-        if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
-            sortKeys.add(tableRole.getPrimaryKey().name());
+        String distKey = tableRole.getDistKey();
+        List<String> sortKeys = new ArrayList<>(tableRole.getSortKeys());
+        if (!sortKeys.contains(distKey)) {
+            sortKeys.add(distKey);
         }
 
         String partition = null;

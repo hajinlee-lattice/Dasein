@@ -236,7 +236,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField("ID");
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey());
         config.setDedupeSource(true);
         return JsonUtils.serialize(config);
     }
@@ -244,7 +244,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     private String getConsolidateDataMasterConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField("ID");
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey());
         config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(new HashSet<String>(Arrays.asList("CREATION_DATE")));
         return JsonUtils.serialize(config);
@@ -253,7 +253,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
     private String getConsolidateDeltaConfig(Table masterTable) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField("ID");
-        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name());
+        config.setMasterIdField(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey());
         return JsonUtils.serialize(config);
     }
 
@@ -297,7 +297,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         Integer rowCount = 0;
         Map<String, GenericRecord> recordMap = new HashMap<>();
         for (GenericRecord record : records) {
-            String id = String.valueOf(record.get(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name()));
+            String id = String.valueOf(record.get(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey()));
             recordMap.put(id, record);
             rowCount++;
         }
@@ -336,7 +336,7 @@ public class PipelineConsolidateDeploymentTestNG extends PipelineTransformationD
         Map<String, GenericRecord> recordMap = new HashMap<>();
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            String id = String.valueOf(record.get(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey().name()));
+            String id = String.valueOf(record.get(TableRoleInCollection.ConsolidatedAccount.getPrimaryKey()));
             recordMap.put(id, record);
             rowCount++;
         }
