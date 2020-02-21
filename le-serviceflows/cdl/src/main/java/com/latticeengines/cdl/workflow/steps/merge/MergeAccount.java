@@ -54,6 +54,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private String newAccountTableFromContactMatch;
     private String newAccountTableFromTxnMatch;
 
+    private boolean noImports;
+
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
@@ -139,7 +141,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         List<TransformationStepConfig> steps = new ArrayList<>(extracts);
 
         int mergeStep = extractSteps.size();
-        boolean noImports = CollectionUtils.isEmpty(extractSteps) && StringUtils.isBlank(matchedAccountTable);
+        noImports = CollectionUtils.isEmpty(extractSteps) && StringUtils.isBlank(matchedAccountTable);
         if (!noImports) {
             TransformationStepConfig merge = dedupAndMerge(InterfaceName.EntityId.name(), //
                     CollectionUtils.isEmpty(extractSteps) ? null : extractSteps, //
@@ -147,12 +149,23 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                     Collections.singletonList(InterfaceName.CustomerAccountId.name()));
             steps.add(merge);
         } else {
-            throw new IllegalArgumentException("No input to be merged, and no soft delete needed!");
+            if (!hasSystemBatch) {
+                throw new IllegalArgumentException("No input to be merged, and no soft delete needed!");
+            } else {
+                log.warn("There's no import!");
+            }
         }
 
         TransformationStepConfig upsertSystem = null;
         TransformationStepConfig upsert;
         if (hasSystemBatch) {
+            if (noImports) {
+                upsertSystem = upsertSystemBatch(-1, true);
+                upsert = mergeSystemBatch(0, true);
+                steps.add(upsertSystem);
+                steps.add(upsert);
+                return steps;
+            }
             upsertSystem = upsertSystemBatch(mergeStep, true);
             upsert = mergeSystemBatch(mergeStep + 1, true);
             upsertStep = mergeStep + 2;
@@ -250,7 +263,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
-        exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
+        if (!noImports) {
+            exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
+        }
         exportToDynamo(batchStoreTableName, InterfaceName.AccountId.name(), null);
     }
 

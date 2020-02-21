@@ -295,7 +295,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     TransformationStepConfig upsertSystemBatch(int mergeStep, boolean setTarget) {
         TransformationStepConfig step = new TransformationStepConfig();
         String batchTemplateName = setupSystemBatchTable(step);
-        step.setInputSteps(Collections.singletonList(mergeStep));
+        if (mergeStep != -1) {
+            step.setInputSteps(Collections.singletonList(mergeStep));
+        }
         step.setTransformer(TRANSFORMER_UPSERT_TXMFR);
         if (setTarget) {
             setTargetTable(step, systemBatchStoreTablePrefix);

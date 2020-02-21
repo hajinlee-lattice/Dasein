@@ -24,7 +24,11 @@ class UpsertJob extends AbstractSparkJob[UpsertConfig] {
         if (!config.isAddInputSystemBatch) {
             lattice.input
           } else {
-            addTemplatePrefixForInput(lattice.input.head, Seq(config.getJoinKey)) :: Nil
+            if (config.getBatchTemplateName == null) {
+              addTemplatePrefixForInput(lattice.input.head, Seq(config.getJoinKey)) :: Nil
+            } else {
+              addTemplatePrefix(lattice.input.head, config.getBatchTemplateName,  Seq(config.getJoinKey)) :: Nil
+            }
           }
     } else {
       val switchSide = config.getSwitchSides != null && config.getSwitchSides
