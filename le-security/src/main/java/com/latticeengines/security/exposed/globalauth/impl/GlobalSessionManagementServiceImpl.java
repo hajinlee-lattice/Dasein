@@ -305,4 +305,9 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             return tenant;
         }
     }
+
+    @Override
+    public List<GlobalAuthTicket> findByUserIdAndNotInTicket(Long userId, String ticket) {
+        return gaTicketEntityMgr.findByUserIdAndNotInTicketAndLastAccessDate(userId, ticket);
+    }
 }

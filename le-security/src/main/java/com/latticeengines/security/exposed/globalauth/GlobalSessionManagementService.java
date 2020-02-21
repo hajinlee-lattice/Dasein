@@ -18,4 +18,6 @@ public interface GlobalSessionManagementService {
     List<GlobalAuthTicket> findTicketsByEmailAndExternalIssuer(String email, String issuer);
 
     GlobalAuthExternalSession retrieveExternalSession(Ticket ticket);
+
+    List<GlobalAuthTicket> findByUserIdAndNotInTicket(Long userId, String ticket);
 }
