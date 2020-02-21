@@ -240,7 +240,6 @@ public class CampaignLaunchProcessor {
             fieldMappingMetadata = exportFieldMetadataProxy.getExportFields(customerSpace.toString(),
                     playLaunchChannel.getId());
             playLaunch.setDestinationOrgName(playLaunchChannel.getLookupIdMap().getOrgName());
-            playLaunch.setDestinationSysName(playLaunchChannel.getLookupIdMap().getExternalSystemName());
             if (fieldMappingMetadata != null) {
                 log.info("For tenant= " + tenant.getName() + ", playChannelId= " + playLaunchChannel.getId()
                         + ", the columnmetadata size is=" + fieldMappingMetadata.size());
