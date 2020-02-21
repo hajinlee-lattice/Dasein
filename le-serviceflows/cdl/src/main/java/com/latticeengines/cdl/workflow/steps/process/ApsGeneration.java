@@ -60,6 +60,9 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
     @Value("${cdl.aps.generation.partition.multiplier}")
     private int apsPartitionMultiplier;
 
+    @Value("${cdl.aps.generation.spark.driver.maxResultSize}")
+    private String apsSparkMaxResultSize;
+
     private DataCollection.Version active;
     private DataCollection.Version inactive;
     private Table periodTable;
@@ -94,6 +97,8 @@ public class ApsGeneration extends RunSparkScript<ApsGenerationStepConfiguration
         }
 
         setPartitionMultiplier(apsPartitionMultiplier);
+
+        setSparkMaxResultSize(apsSparkMaxResultSize);
     }
 
     @Override

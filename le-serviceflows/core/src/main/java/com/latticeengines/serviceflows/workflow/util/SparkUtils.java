@@ -165,7 +165,7 @@ public final class SparkUtils {
                     livySessionManager.killSession();
                 }
                 String jobName = customerSpace.getTenantId() + "~" + jobClz.getSimpleName();
-                LivySession session = livySessionManager.createLivySession(jobName, new LivyScalingConfig(scalingMultiplier, 1));
+                LivySession session = livySessionManager.createLivySession(jobName, new LivyScalingConfig(scalingMultiplier, 1), null);
                 return sparkJobService.runJob(session, jobClz, jobConfig);
             });
             return sparkJobResult;
