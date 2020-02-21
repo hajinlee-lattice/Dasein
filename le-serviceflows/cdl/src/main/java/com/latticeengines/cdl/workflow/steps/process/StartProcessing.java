@@ -606,9 +606,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 }
             }
             putObjectInContext(CONSOLIDATE_INPUT_TEMPLATES, tableTemplateMap);
-            if (MapUtils.isNotEmpty(tableTemplateMap)) {
-                setTemplatesInOrder();
-            }
+        }
+        if (configuration.isEntityMatchEnabled()) {
+            setTemplatesInOrder();
         }
     }
 

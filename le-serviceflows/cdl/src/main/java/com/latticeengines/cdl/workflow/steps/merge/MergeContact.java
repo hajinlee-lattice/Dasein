@@ -42,7 +42,11 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         super.initializeConfiguration();
         matchedContactTable = getStringValueFromContext(ENTITY_MATCH_CONTACT_TARGETTABLE);
         if (StringUtils.isBlank(matchedContactTable)) { //&& skipSoftDelete) {
-            throw new RuntimeException("There's no matched table found, and no soft delete action!");
+            if (configuration.isEntityMatchEnabled()) {
+                log.warn("There's no matched table found, and no soft delete action!");
+            } else {
+                throw new RuntimeException("There's no matched table found, and no soft delete action!");
+            }
         }
 
         double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
@@ -72,29 +76,41 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         if (configuration.isEntityMatchEnabled()) {
             boolean noImports = StringUtils.isEmpty(matchedTable);
             if (noImports) {
-                throw new IllegalArgumentException("There's no merge or soft delete!");
+                if (!hasSystemBatch) {
+                    throw new IllegalArgumentException("There's no merge or soft delete!");
+                } else {
+                    log.warn("There's no import!");
+                }
             } else {
-                int dedupStep = 0;
-                upsertMasterStep = 1;
-                TransformationStepConfig upsertSystem = null;
                 TransformationStepConfig dedup = dedupAndMerge(InterfaceName.ContactId.name(), null,
                         Collections.singletonList(matchedTable), //
                         Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
-                if (hasSystemBatch) {
-                    upsertSystem = upsertSystemBatch(dedupStep, true);
-                    upsert = mergeSystemBatch(upsertMasterStep, true);
-                    upsertMasterStep++;
-                } else {
-                    upsert = upsertMaster(true, dedupStep, true);
-                }
-                diffStep = upsertMasterStep + 1;
-                diff = diff(matchedTable, upsertMasterStep);
                 steps.add(dedup);
-                if (upsertSystem != null) {
-                    steps.add(upsertSystem);
-                }
-                steps.add(upsert);
             }
+            int dedupStep = 0;
+            upsertMasterStep = 1;
+            TransformationStepConfig upsertSystem = null;
+            if (hasSystemBatch) {
+                if (noImports) {
+                    upsertSystem = upsertSystemBatch(-1, true);
+                    upsert = mergeSystemBatch(0, true);
+                    steps.add(upsertSystem);
+                    steps.add(upsert);
+                    request.setSteps(steps);
+                    return request;
+                }
+                upsertSystem = upsertSystemBatch(dedupStep, true);
+                upsert = mergeSystemBatch(upsertMasterStep, true);
+                upsertMasterStep++;
+            } else {
+                upsert = upsertMaster(true, dedupStep, true);
+            }
+            diffStep = upsertMasterStep + 1;
+            diff = diff(matchedTable, upsertMasterStep);
+            if (upsertSystem != null) {
+                steps.add(upsertSystem);
+            }
+            steps.add(upsert);
         } else {
             upsertMasterStep = 0;
             diffStep = 1;

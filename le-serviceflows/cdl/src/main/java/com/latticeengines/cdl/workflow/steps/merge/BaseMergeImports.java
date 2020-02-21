@@ -109,7 +109,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     Map<BusinessEntity, Boolean> softDeleteEntities;
     Map<BusinessEntity, Boolean> hardDeleteEntities;
     protected Map<String, String> tableTemplateMap;
-    protected List<String> templatesInOrder;
+    protected List<String> templatesInOrder = new ArrayList<>();
 
     protected boolean hasSystemBatch;
 
@@ -180,12 +180,14 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             setScalingMultiplier(tables);
         }
         tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class, String.class);
-        hasSystemBatch = MapUtils.isNotEmpty(tableTemplateMap) && systemBatchStore != null;
+        hasSystemBatch = systemBatchStore != null && configuration.isEntityMatchEnabled();
         log.info("Has Batch System=" + hasSystemBatch);
         if (hasSystemBatch) {
             Map<BusinessEntity, List> templates = getMapObjectFromContext(CONSOLIDATE_TEMPLATES_IN_ORDER,
                     BusinessEntity.class, List.class);
-            templatesInOrder = JsonUtils.convertList(templates.get(entity), String.class);
+            if (MapUtils.isNotEmpty(templates)) {
+                templatesInOrder = JsonUtils.convertList(templates.get(entity), String.class);
+            }
             log.info("Entity=" + entity.name() + " templates in order=" + String.join(",", templatesInOrder));
         }
     }

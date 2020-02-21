@@ -22,9 +22,9 @@ public class UpsertWithSystemTestNG extends SparkJobFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testUpsert() {
         List<Runnable> runnables = new ArrayList<>();
-        // runnables.add(this::testHasNoSystemBatch);
+        runnables.add(this::testHasNoSystemBatch);
         runnables.add(this::testHasSystemBatch);
-        // runnables.add(this::testHasInputOnly);
+        runnables.add(this::testHasInputOnly);
 
         ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }

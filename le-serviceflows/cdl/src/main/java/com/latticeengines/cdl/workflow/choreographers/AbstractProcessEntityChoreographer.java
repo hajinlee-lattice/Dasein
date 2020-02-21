@@ -51,6 +51,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     boolean rebuildDueToActions = false;
     private boolean initialized = false;
     private boolean hasBatchStore = false;
+    private boolean hasSystemStore = false;
     private boolean hasSoftDelete = false;
     private boolean hasHardDelete = false;
     float diffRate = 0;
@@ -202,6 +203,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         checkSnHDelete(step);
         checkActiveServingStore(step);
         checkHasBatchStore(step);
+        checkHasSystemBatchStore(step);
         checkRebuildDueToActions(step);
         checkHasReplace(step);
     }
@@ -288,6 +290,24 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
+    private void checkHasSystemBatchStore(AbstractStep<? extends BaseStepConfiguration> step) {
+        TableRoleInCollection systemStore = mainEntity().getSystemBatchStore();
+        if (systemStore != null) {
+            DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+            String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
+            String tableName = dataCollectionProxy.getTableName(customerSpace, systemStore, active.complement());
+            if (StringUtils.isBlank(tableName)) {
+                tableName = dataCollectionProxy.getTableName(customerSpace, systemStore, active);
+            }
+            hasSystemStore = StringUtils.isNotBlank(tableName);
+        }
+        if (hasSystemStore) {
+            log.info("Found System batch store for entity " + mainEntity());
+        } else {
+            log.info("No System batch store for entity " + mainEntity());
+        }
+    }
+
     private void checkHasReplace(AbstractStep<? extends BaseStepConfiguration> step) {
         if (step.getConfiguration() instanceof BaseProcessEntityStepConfiguration) {
             replace = ((BaseProcessEntityStepConfiguration)step.getConfiguration()).getNeedReplace();
@@ -346,7 +366,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     }
 
     protected boolean shouldMerge(AbstractStep<? extends BaseStepConfiguration> step) {
-        return hasImports || (checkHasEntityMatchRematch(step) && hasBatchStore);
+        return hasImports || (checkHasEntityMatchRematch(step) && hasBatchStore)
+                || checkForceSystemStore(step);
     }
 
     protected boolean shouldReset(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -446,6 +467,11 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
     protected boolean checkHasEntityMatchRematch(AbstractStep<? extends BaseStepConfiguration> step) {
         return step.getObjectFromContext(FULL_REMATCH_PA, Boolean.class) && step.getObjectFromContext(ENTITY_MATCH_ENABLED, Boolean.class);
+    }
+
+    protected boolean checkForceSystemStore(AbstractStep<? extends BaseStepConfiguration> step) {
+        return mainEntity().getSystemBatchStore() != null && !hasSystemStore && hasBatchStore
+                && step.getObjectFromContext(ENTITY_MATCH_ENABLED, Boolean.class);
     }
 
     /**
