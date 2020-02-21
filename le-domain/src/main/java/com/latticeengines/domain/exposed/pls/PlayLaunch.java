@@ -201,8 +201,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("destinationOrgName")
     private String destinationOrgName;
 
-    @Transient
+    @Column(name = "DESTINATION_SYS_NAME")
     @JsonProperty("destinationSysName")
+    @Enumerated(EnumType.STRING)
     private CDLExternalSystemName destinationSysName;
 
     @JsonProperty("destinationSysType")
@@ -763,6 +764,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         return matchedRate;
     }
 
+    public CDLExternalSystemName getDestinationSysName() {
+        return destinationSysName;
+    }
+
+    public void setDestinationSysName(CDLExternalSystemName destinationSysName) {
+        this.destinationSysName = destinationSysName;
+    }
+
     public void merge(PlayLaunch playLaunch) {
         if (playLaunch.getLaunchState() != null) {
             this.setLaunchState(playLaunch.getLaunchState());
@@ -877,13 +886,5 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         if (StringUtils.isNotBlank(playLaunch.getUpdatedBy())) {
             this.setUpdatedBy(playLaunch.getUpdatedBy());
         }
-    }
-
-    public CDLExternalSystemName getDestinationSysName() {
-        return destinationSysName;
-    }
-
-    public void setDestinationSysName(CDLExternalSystemName destinationSysName) {
-        this.destinationSysName = destinationSysName;
     }
 }

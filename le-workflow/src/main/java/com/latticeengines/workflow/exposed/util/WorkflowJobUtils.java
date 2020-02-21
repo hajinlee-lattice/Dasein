@@ -59,7 +59,7 @@ public final class WorkflowJobUtils {
     private static final Date MIGRATE_THRESHOLD = getMigrateThreshold();
     private static final int DEFAULT_WORKFLOW_JOB_QUOTA_LIMIT = 1000;
     private static final String WORKFLOW_JOB_QUOTA_LIMIT = "WorkflowJobQuotaLimit";
-    private static final String PUBLISH_RECOMMENDATION = "PublishRecommendation";
+    private static final String PUBLISH_RECOMMENDATION_FOR_S3_LAUNCH = "PublishRecommendationsForS3Launch";
     private static final String CDL = "CDL";
     private static ObjectMapper om = new ObjectMapper();
 
@@ -321,17 +321,17 @@ public final class WorkflowJobUtils {
         return value;
     }
 
-    public static boolean getPublishRecommendation(CustomerSpace customerSpace) {
-        boolean publishRecommendation = false;
+    public static boolean getPublishRecommendationsForS3Launch(CustomerSpace customerSpace) {
+        boolean publishRecommendationsForS3Launch = false;
         try {
-            String value = getValueFromZK(customerSpace, CDL, PUBLISH_RECOMMENDATION);
+            String value = getValueFromZK(customerSpace, CDL, PUBLISH_RECOMMENDATION_FOR_S3_LAUNCH);
             if (StringUtils.isNotEmpty(value)) {
-                publishRecommendation = Boolean.valueOf(value);
+                publishRecommendationsForS3Launch = Boolean.valueOf(value);
             }
         } catch (Exception e) {
             log.warn("Failed to get publish recommendation from ZK for " + customerSpace.getTenantId(), e);
         }
-        return publishRecommendation;
+        return publishRecommendationsForS3Launch;
     }
 
 }

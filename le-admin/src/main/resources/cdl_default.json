@@ -56,7 +56,7 @@
       "Data": ""
     },
     {
-      "Node": "PublishRecommendation",
+      "Node": "PublishRecommendationsForS3Launch",
       "Data": "false"
     }
   ]

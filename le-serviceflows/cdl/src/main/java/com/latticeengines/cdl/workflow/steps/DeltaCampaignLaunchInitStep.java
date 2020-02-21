@@ -136,7 +136,7 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setDataDbDriver(dataDbDriver);
         deltaCampaignLaunchSparkContext.setDataDbUrl(dataDbUrl);
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
-        setPublishRecommendation(deltaCampaignLaunchSparkContext, playLaunch);
+        setPublishRecommendationsForS3Launch(deltaCampaignLaunchSparkContext, playLaunch);
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();
@@ -158,16 +158,16 @@ public class DeltaCampaignLaunchInitStep
         return sparkConfig;
     }
 
-    private void setPublishRecommendation(DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext, PlayLaunch playLaunch) {
+    private void setPublishRecommendationsForS3Launch(DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext, PlayLaunch playLaunch) {
         CDLExternalSystemName destinationSysName = playLaunch.getDestinationSysName();
         if (destinationSysName != null) {
             switch (destinationSysName) {
                 case Eloqua:
                 case Salesforce:
-                    deltaCampaignLaunchSparkContext.setPublishRecommendation(true);
+                    deltaCampaignLaunchSparkContext.setPublishRecommendationsForS3Launch(true);
                     break;
                 case AWS_S3:
-                    deltaCampaignLaunchSparkContext.setPublishRecommendation(WorkflowJobUtils.getPublishRecommendation(customerSpace));
+                    deltaCampaignLaunchSparkContext.setPublishRecommendationsForS3Launch(WorkflowJobUtils.getPublishRecommendationsForS3Launch(customerSpace));
                 case Others:
                 default:
                     break;

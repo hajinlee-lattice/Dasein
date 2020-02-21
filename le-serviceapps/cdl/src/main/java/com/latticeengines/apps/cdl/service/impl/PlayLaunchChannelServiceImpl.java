@@ -263,6 +263,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setLaunchUnscored(playLaunchChannel.getLaunchUnscored());
         playLaunch.setDestinationOrgId(playLaunchChannel.getLookupIdMap().getOrgId());
         playLaunch.setDestinationSysType(playLaunchChannel.getLookupIdMap().getExternalSystemType());
+        playLaunch.setDestinationSysName(playLaunchChannel.getLookupIdMap().getExternalSystemName());
         playLaunch.setDestinationAccountId(playLaunchChannel.getLookupIdMap().getAccountId());
         playLaunch.setTableName(createTable());
         playLaunch.setLaunchType(playLaunchChannel.getLaunchType());
