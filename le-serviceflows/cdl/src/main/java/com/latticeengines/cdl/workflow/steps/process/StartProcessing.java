@@ -225,7 +225,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private void setupDataCollectionStatus(String evaluationDate) {
         // get current active collection status
         DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
-                null);
+                activeVersion);
         dcStatus.setEvaluationDate(evaluationDate);
         dcStatus.setApsRollingPeriod(configuration.getApsRollingPeriod());
         log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(dcStatus));
@@ -239,6 +239,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 .getOrCreateDataCollectionStatus(customerSpace.toString(), inactiveVersion);
         if (inactiveStatus != null && configuration.getDataCloudBuildNumber() != null) {
             inactiveStatus.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
+            inactiveStatus.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
             dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), inactiveStatus,
                     inactiveVersion);
         }
