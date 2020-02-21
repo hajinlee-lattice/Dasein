@@ -52,7 +52,6 @@ public class MergeDeleteStep extends RunSparkJob<LegacyDeleteSparkStepConfigurat
             return null;
         }
         MergeImportsConfig mergeImportsConfig = MergeImportsConfig.joinBy(getJoinKey(configuration.getEntity()));
-        mergeImportsConfig.setDedupSrc(true);
         mergeImportsConfig.setAddTimestamps(false);
         List<DataUnit> units = new ArrayList<>();
         inputs.forEach(action -> {
