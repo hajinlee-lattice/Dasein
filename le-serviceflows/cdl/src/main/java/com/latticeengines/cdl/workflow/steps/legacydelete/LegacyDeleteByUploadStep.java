@@ -21,11 +21,12 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PeriodCollectorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.PeriodDataCleanerConfig;
@@ -35,6 +36,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -44,23 +46,24 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.LegacyDeleteByUploadActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteByUploadStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.workflow.exposed.build.BaseMultiTransformationStep;
+import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component(LegacyDeleteByUploadStep.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<LegacyDeleteByUploadStepConfiguration> {
+public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDeleteByUploadStepConfiguration> {
 
     static final String BEAN_NAME = "legacyDeleteByUploadStep";
 
     private static Logger log = LoggerFactory.getLogger(LegacyDeleteByUploadStep.class);
 
-    private static int prepareStep, cleanupStep, collectMasterStep, cleanupMasterStep, collectStep, mergeStep;
+    private static int prepareStep, cleanupStep, collectMasterStep, cleanupMasterStep, collectStep, mergeStep,
+            partitionStep;
 
     private static final String CLEANUP_TABLE_PREFIX = "DeleteByFile";
 
@@ -81,20 +84,15 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
 
     private String cleanupTableName;
 
-    private Long tableRows = 0L;
-
     private TableRoleInCollection batchStore;
 
     private CustomerSpace customerSpace;
-
-    private int cycleCount = 0;// this transformationStep loop limit
 
     private Set<Action> canMergeActions;//all Account/Contact, type BYUPLOAD_MINDATE transaction legacyDeleteAction
 
     private List<Action> otherActions;//except type=BYUPLOAD_MINDATE transaction actions
 
-    @Override
-    protected void intializeConfiguration() {
+    private void intializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         batchStore = configuration.getEntity().equals(BusinessEntity.Transaction)
                 ? ConsolidatedRawTransaction : configuration.getEntity().getBatchStore();
@@ -103,74 +101,52 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
     }
 
     @Override
-    protected boolean shouldContinue(TransformationProgress lastTransactionProgress,
-                                     PipelineTransformationRequest lastTransactionRequest, int currentIndex) {
-        cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, lastTransactionProgress.getVersion());
-        cleanupTable = metadataProxy.getTable(customerSpace.toString(), cleanupTableName);
-        if (cleanupTable == null) {
-            log.info("cleanupTable is empty.");
-            return false;
-        }
-        log.info("result table Name is " + cleanupTable.getName());
-        tableRows = getTableDataLines(cleanupTable);
-        log.info("tableRows is: {}.", tableRows);
-        if (tableRows <= 0L) {
-            return false;
-        }
-        masterTable = cleanupTable;
-        return currentIndex < cycleCount - 1;
+    protected TransformationWorkflowConfiguration executePreTransformation() {
+        intializeConfiguration();
+        PipelineTransformationRequest request = generateRequest();
+        return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request,
+                configuration.getPodId());
     }
 
-    @Override
-    protected PipelineTransformationRequest generateRequest(TransformationProgress lastTransactionProgress,
-                                                            int currentIndex) {
-        //have can merge actions, do it first.
-        if (CollectionUtils.isNotEmpty(canMergeActions) && currentIndex == 0) {
-            return generateRequest(canMergeActions);
-        }
-        Action action;
-        if (cycleCount > otherActions.size()) {//have can merge actions, otherActions index = currentIndex - 1
-            action = otherActions.get(currentIndex - 1);
-        } else {// haven't can merge actions. otherActions index = currentIndex
-            action = otherActions.get(currentIndex);
-        }
-
-        if (action == null) {
+    private PipelineTransformationRequest generateRequest() {
+        if (masterTable == null || (CollectionUtils.isEmpty(canMergeActions) && CollectionUtils.isEmpty(otherActions))) {
             return null;
         }
-        return generateRequest((LegacyDeleteByUploadActionConfiguration) action.getActionConfiguration());
+        PipelineTransformationRequest request = new PipelineTransformationRequest();
+        request.setName("LegacyDeleteByUploadStep");
+        request.setSubmitter(customerSpace.getTenantId());
+        request.setKeepTemp(false);
+        request.setEnableSlack(false);
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        generateSteps(steps);
+        request.setSteps(steps);
+        return request;
     }
 
-    /**
-     * all Account/Contact legacyDeleteAction
-     * type=BYUPLOAD_MINDATE transaction legacyDeleteAction
-     * using this method to create delete request
-     *
-     * @param actionSet can merge ActionSet to Delete
-     * @return PipelineTransformationRequest
-     */
-    private PipelineTransformationRequest generateRequest(Set<Action> actionSet) {
+    private void generateSteps(List<TransformationStepConfig> steps) {
+        if (CollectionUtils.isEmpty(canMergeActions)) {
+            return;
+        }
         try {
-            PipelineTransformationRequest request = new PipelineTransformationRequest();
-            request.setName("LegacyDeleteByUploadStep");
-            request.setSubmitter(customerSpace.getTenantId());
-            request.setKeepTemp(false);
-            request.setEnableSlack(false);
-            boolean cleanupTrx = configuration.getEntity().equals(BusinessEntity.Transaction);
-            log.info(String.format("Cleanup Business Entity is Transaction: %b", cleanupTrx));
-            mergeStep = 0;
-            prepareStep = 1;
-            cleanupStep = 2;
-            collectMasterStep = 3;
-            cleanupMasterStep = 4;
-            collectStep = 5;
+            /*
+             * type=BYUPLOAD_MINDATE transaction legacyDeleteAction
+             * using this logic to create delete steps
+             */
+            if (CollectionUtils.isNotEmpty(canMergeActions)) {
+                boolean cleanupTrx = configuration.getEntity().equals(BusinessEntity.Transaction);
+                log.info(String.format("Cleanup Business Entity is Transaction: %b", cleanupTrx));
+                partitionStep = -1;
+                mergeStep = 0;
+                prepareStep = 1;
+                cleanupStep = 2;
+                collectMasterStep = 3;
+                cleanupMasterStep = 4;
+                collectStep = 5;
 
-            List<TransformationStepConfig> steps = new ArrayList<>();
-            if (cleanupTrx) {
-                TransformationStepConfig merge = mergeDelete(actionSet, getJoinKey(configuration.getEntity(),
+                TransformationStepConfig merge = mergeDelete(canMergeActions, getJoinKey(configuration.getEntity(),
                         CleanupOperationType.BYUPLOAD_MINDATE));
                 TransformationStepConfig prepare = addTrxDate(null);
-                TransformationStepConfig cleanup = cleanup(cleanupTrx, null, CleanupOperationType.BYUPLOAD_MINDATE);
+                TransformationStepConfig cleanup = cleanup(null, CleanupOperationType.BYUPLOAD_MINDATE);
                 TransformationStepConfig collectMaster = collectMaster();
                 TransformationStepConfig cleanupMaster = cleanupMaster();
                 TransformationStepConfig dayPeriods = collectDays();
@@ -183,62 +159,32 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
                 steps.add(cleanupMaster);
                 steps.add(dayPeriods);
                 steps.add(dailyPartition);
-            } else {
-                TransformationStepConfig merge = mergeDelete(actionSet, getJoinKey(configuration.getEntity(),
-                        CleanupOperationType.BYUPLOAD_ID));
-                TransformationStepConfig cleanup = cleanup(cleanupTrx, null, CleanupOperationType.BYUPLOAD_ID);
-                steps.add(merge);
-                steps.add(cleanup);
             }
-
-            request.setSteps(steps);
-            return request;
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * except type = BYUPLOAD_MINDATE transaction legacyDeleteActions
-     * those actions can not merge to delete.
-     * using this method to delete one by one
-     *
-     * @param legacyDeleteByUploadActionConfiguration used to get CleanupOperationType and tableName
-     * @return PipelineTransformationRequest
-     */
-    private PipelineTransformationRequest generateRequest(LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration) {
-        try {
-            PipelineTransformationRequest request = new PipelineTransformationRequest();
-            request.setName("LegacyDeleteByUploadStep");
-            request.setSubmitter(customerSpace.getTenantId());
-            request.setKeepTemp(false);
-            request.setEnableSlack(false);
-            mergeStep = -1;
-            prepareStep = 0;
-            cleanupStep = 1;
-            collectMasterStep = 2;
-            cleanupMasterStep = 3;
-            collectStep = 4;
-
-            List<TransformationStepConfig> steps = new ArrayList<>();
-            TransformationStepConfig prepare = addTrxDate(legacyDeleteByUploadActionConfiguration);
-            TransformationStepConfig cleanup = cleanup(true, legacyDeleteByUploadActionConfiguration,
-                    legacyDeleteByUploadActionConfiguration.getCleanupOperationType());
-            TransformationStepConfig collectMaster = collectMaster();
-            TransformationStepConfig cleanupMaster = cleanupMaster();
-            TransformationStepConfig dayPeriods = collectDays();
-            TransformationStepConfig dailyPartition = partitionDaily();
-
-            steps.add(prepare);
-            steps.add(cleanup);
-            steps.add(collectMaster);
-            steps.add(cleanupMaster);
-            steps.add(dayPeriods);
-            steps.add(dailyPartition);
-
-            request.setSteps(steps);
-            return request;
+            /*
+             * except type = BYUPLOAD_MINDATE transaction legacyDeleteActions
+             * those actions can not merge to delete.
+             * using this logic to delete one by one
+             */
+            if (CollectionUtils.isNotEmpty(otherActions)) {
+                mergeStep = -1;
+                partitionStep = steps.size() - 1;
+                for (Action action : otherActions) {
+                    LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration =
+                            (LegacyDeleteByUploadActionConfiguration) action.getActionConfiguration();
+                    steps.add(addTrxDate(legacyDeleteByUploadActionConfiguration));
+                    prepareStep = steps.size() - 1;
+                    steps.add(cleanup(legacyDeleteByUploadActionConfiguration,
+                            legacyDeleteByUploadActionConfiguration.getCleanupOperationType()));
+                    cleanupStep = steps.size() - 1;
+                    steps.add(collectMaster());
+                    cleanupStep = steps.size() - 1;
+                    steps.add(cleanupMaster());
+                    cleanupMasterStep = steps.size() - 1;
+                    steps.add(collectDays());
+                    collectStep = steps.size() - 1;
+                    steps.add(partitionDaily());
+                }
+            }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -291,15 +237,19 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
 
         List<String> sourceNames = new ArrayList<>();
         Map<String, SourceTable> sourceTables = new HashMap<>();
-        sourceNames.add(masterTable.getName());
-        SourceTable sourceTable = new SourceTable(masterTable.getName(), customerSpace);
-        sourceTables.put(masterTable.getName(), sourceTable);
+        if (partitionStep == -1) {
+            sourceNames.add(masterTable.getName());
+            SourceTable sourceTable = new SourceTable(masterTable.getName(), customerSpace);
+            sourceTables.put(masterTable.getName(), sourceTable);
+            step.setBaseSources(sourceNames);
+            step.setBaseTables(sourceTables);
+        } else {
+            step.setInputSteps(Collections.singletonList(partitionStep));
+        }
 
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
 
-        step.setBaseSources(sourceNames);
-        step.setBaseTables(sourceTables);
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }
@@ -307,16 +257,22 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
     private TransformationStepConfig cleanupMaster() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_CLEANER);
-        step.setInputSteps(Collections.singletonList(collectMasterStep));
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.add(collectMasterStep);
 
-        String tableSourceName = "MasterTable";
-        String sourceTableName = masterTable.getName();
-        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
+        if (partitionStep == -1) {
+            String tableSourceName = "MasterTable";
+            String sourceTableName = masterTable.getName();
+            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+            List<String> baseSources = Collections.singletonList(tableSourceName);
+            step.setBaseSources(baseSources);
+            Map<String, SourceTable> baseTables = new HashMap<>();
+            baseTables.put(tableSourceName, sourceTable);
+            step.setBaseTables(baseTables);
+        } else {
+            inputSteps.add(partitionStep);
+        }
+        step.setInputSteps(inputSteps);
         PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
@@ -329,16 +285,20 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(collectStep);
         inputSteps.add(cleanupStep);
-        step.setInputSteps(inputSteps);
 
-        String tableSourceName = "RawTransaction";
-        String sourceTableName = masterTable.getName();
-        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
+        if (partitionStep == -1) {
+            String tableSourceName = "RawTransaction";
+            String sourceTableName = masterTable.getName();
+            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+            List<String> baseSources = Collections.singletonList(tableSourceName);
+            step.setBaseSources(baseSources);
+            Map<String, SourceTable> baseTables = new HashMap<>();
+            baseTables.put(tableSourceName, sourceTable);
+            step.setBaseTables(baseTables);
+        } else {
+           inputSteps.add(partitionStep);
+        }
+        step.setInputSteps(inputSteps);
 
         PeriodDataDistributorConfig config = new PeriodDataDistributorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
@@ -346,33 +306,26 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
         return step;
     }
 
-    private TransformationStepConfig cleanup(boolean cleanupTrx,
-                                             LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration, CleanupOperationType type) {
+    private TransformationStepConfig cleanup(LegacyDeleteByUploadActionConfiguration legacyDeleteByUploadActionConfiguration, CleanupOperationType type) {
         TransformationStepConfig step = new TransformationStepConfig();
         BusinessEntity entity = configuration.getEntity();
+        List<Integer> inputSteps = new ArrayList<>();
+        inputSteps.add(prepareStep);
 
-        if (cleanupTrx) {
-            step.setInputSteps(Collections.singletonList(prepareStep));
+        if (partitionStep == -1) {
+            List<String> sourceNames = new ArrayList<>();
+            Map<String, SourceTable> baseTables = new HashMap<>();
+            String masterName = masterTable.getName();
+            SourceTable source = new SourceTable(masterName, customerSpace);
+
+            sourceNames.add(masterName);
+            baseTables.put(masterName, source);
+            step.setBaseSources(sourceNames);
+            step.setBaseTables(baseTables);
+        } else {
+            inputSteps.add(partitionStep);
         }
-
-        List<String> sourceNames = new ArrayList<>();
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        if (!cleanupTrx) {
-            if (legacyDeleteByUploadActionConfiguration != null) {
-                String deleteName = legacyDeleteByUploadActionConfiguration.getTableName();
-                SourceTable delete = new SourceTable(deleteName, customerSpace);
-                sourceNames.add(deleteName);
-                baseTables.put(deleteName, delete);
-            }
-            if (mergeStep != -1) {
-                step.setInputSteps(Collections.singletonList(mergeStep));
-            }
-        }
-        String masterName = masterTable.getName();
-        SourceTable source = new SourceTable(masterName, customerSpace);
-
-        sourceNames.add(masterName);
-        baseTables.put(masterName, source);
+        step.setInputSteps(inputSteps);
 
         LegacyDeleteJobConfig legacyDeleteJobConfig = new LegacyDeleteJobConfig();
         legacyDeleteJobConfig.setBusinessEntity(entity);
@@ -382,8 +335,6 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
 
         String configStr = appendEngineConf(legacyDeleteJobConfig, lightEngineConfig());
 
-        step.setBaseSources(sourceNames);
-        step.setBaseTables(baseTables);
         step.setTransformer(TRANSFORMER);
         step.setConfiguration(configStr);
         step.setTargetTable(getTargetTable());
@@ -469,7 +420,7 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
         if (batchStore.equals(TableRoleInCollection.ConsolidatedRawTransaction)) {
             return;
         }
-        if (tableRows <= 0) {
+        if (getTableDataLines(cleanupTable) <= 0) {
             if (noImport()) {
                 log.error("cannot clean up all batchStore with no import.");
                 throw new IllegalStateException("cannot clean up all batchStore with no import, PA failed");
@@ -510,11 +461,9 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
         switch (configuration.getEntity()) {
             case Account:
                 canMergeActions = getSetObjectFromContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
-                cycleCount = 1;
                 break;
             case Contact:
                 canMergeActions = getSetObjectFromContext(CONTACT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
-                cycleCount = 1;
                 break;
             case Transaction:
                 Map<CleanupOperationType, Set> actionMap =
@@ -525,13 +474,11 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
                 if (actionMap.containsKey(CleanupOperationType.BYUPLOAD_MINDATE)) {
                     canMergeActions = JsonUtils.convertSet(actionMap.get(CleanupOperationType.BYUPLOAD_MINDATE),
                             Action.class);
-                    cycleCount += 1;
                     actionMap.remove(CleanupOperationType.BYUPLOAD_MINDATE);
                 }
                 for (Set actionSet : actionMap.values()) {
                     otherActions.addAll(JsonUtils.convertSet(actionSet, Action.class));
                 }
-                cycleCount += otherActions.size();
                 break;
             default:
                 break;
@@ -557,5 +504,20 @@ public class LegacyDeleteByUploadStep extends BaseMultiTransformationStep<Legacy
         }
         step.setBaseSources(baseSources);
         step.setBaseTables(baseTables);
+    }
+
+    protected Long getTableDataLines(Table table) {
+        if (table == null || table.getExtracts() == null) {
+            return 0L;
+        }
+        Long lines = 0L;
+        List<String> paths = new ArrayList<>();
+        for (Extract extract : table.getExtracts()) {
+            paths.add(PathUtils.toAvroGlob(extract.getPath()));
+        }
+        for (String path : paths) {
+            lines += AvroUtils.count(yarnConfiguration, path);
+        }
+        return lines;
     }
 }

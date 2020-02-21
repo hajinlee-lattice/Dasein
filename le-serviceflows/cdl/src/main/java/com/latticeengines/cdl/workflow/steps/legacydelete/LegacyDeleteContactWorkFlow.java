@@ -17,12 +17,16 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LegacyDeleteContactWorkFlow extends AbstractWorkflow<LegacyDeleteContactWorkFlowConfiguratiion> {
     @Inject
-    private LegacyDeleteByUploadStep legacyDeleteByUploadStep;
+    private MergeDeleteStep mergeDeleteStep;
+
+    @Inject
+    private LegacyDeleteByUpload legacyDeleteByUpload;
 
     @Override
     public Workflow defineWorkflow(LegacyDeleteContactWorkFlowConfiguratiion workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
-                .next(legacyDeleteByUploadStep)
+                .next(mergeDeleteStep)
+                .next(legacyDeleteByUpload)
                 .build();
     }
 }

@@ -560,7 +560,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             }
         }
         log.info("legacyDeleteByDateRangeActions is {}.", JsonUtils.serialize(legacyDeleteByDateRangeActions));
-        putObjectInContext(LEGACY_DELTE_BYDATERANGE_ACTIONS, legacyDeleteByDateRangeActions);
+        putObjectInContext(LEGACY_DELETE_BYDATERANGE_ACTIONS, legacyDeleteByDateRangeActions);
     }
 
     private List<Action> getDeleteActions() {

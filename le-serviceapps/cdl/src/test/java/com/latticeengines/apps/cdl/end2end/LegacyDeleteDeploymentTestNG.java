@@ -7,7 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVPrinter;
@@ -18,6 +20,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.csv.LECSVFormat;
@@ -25,6 +28,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -48,10 +52,22 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
     private int originalTxnRecordCount;
     private int numTxnToDelete;
 
+    @BeforeClass(groups = "end2end")
+    @Override
+    public void setup() throws Exception {
+        log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
+        Map<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), true);
+        setupEnd2EndTestEnvironment(featureFlagMap);
+        resumeCheckpoint(ProcessTransactionWithAdvancedMatchDeploymentTestNG.CHECK_POINT);
+        log.info("Setup Complete!");
+        customerSpace = CustomerSpace.parse(mainCustomerSpace).getTenantId();
+    }
+
     @Test(groups = "end2end")
     public void testDeleteContactByUpload() throws Exception {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+//        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         legacyDeleteByUpload();
         uploadTxnsForDelete();
         cleanupByDateRange();

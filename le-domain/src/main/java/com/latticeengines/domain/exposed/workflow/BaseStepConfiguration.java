@@ -45,7 +45,6 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = QueuePlayLaunchesStepConfiguration.class, name = "QueuePlayLaunchesStepConfiguration"), //
         @Type(value = CalculateDeltaStepConfiguration.class, name = "CalculateDeltaStepConfiguration"), //
         @Type(value = MockActivityStoreConfiguration.class, name = "MockActivityStoreConfiguration"), //
-        @Type(value = BaseMultiTransformationStepConfiguration.class, name = "BaseMultiTransformationStepConfiguration"), //
         @Type(value = LegacyDeleteByDateRangeActionConfiguration.class, name =
                 "LegacyDeleteByDateRangeActionConfiguration"), //
 })

@@ -9,26 +9,26 @@ public class LegacyDeleteContactWorkFlowConfiguratiion extends BaseCDLWorkflowCo
     public static class Builder {
         private LegacyDeleteContactWorkFlowConfiguratiion configuration =
                 new LegacyDeleteContactWorkFlowConfiguratiion();
-        private LegacyDeleteByUploadStepConfiguration legacyDeleteByUploadStepConfiguration =
-                new LegacyDeleteByUploadStepConfiguration();
+        private LegacyDeleteSparkStepConfiguration legacyDeleteSparkStepConfiguration =
+                new LegacyDeleteSparkStepConfiguration();
 
         public Builder Customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
-            legacyDeleteByUploadStepConfiguration.setCustomerSpace(customerSpace);
+            legacyDeleteSparkStepConfiguration.setCustomer(customerSpace.toString());
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            legacyDeleteByUploadStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            legacyDeleteSparkStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public LegacyDeleteContactWorkFlowConfiguratiion build() {
             configuration.setContainerConfiguration("legacyDeleteContactWorkFlow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-            legacyDeleteByUploadStepConfiguration.setEntity(BusinessEntity.Contact);
-            configuration.add(legacyDeleteByUploadStepConfiguration);
+            legacyDeleteSparkStepConfiguration.setEntity(BusinessEntity.Contact);
+            configuration.add(legacyDeleteSparkStepConfiguration);
             return configuration;
         }
     }

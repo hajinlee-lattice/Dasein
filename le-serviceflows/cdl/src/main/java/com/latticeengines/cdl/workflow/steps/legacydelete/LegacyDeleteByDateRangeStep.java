@@ -77,7 +77,7 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
             }
             return;
         }
-        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELTE_BYDATERANGE_ACTIONS,
+        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELETE_BYDATERANGE_ACTIONS,
                 BusinessEntity.class, Set.class);
         log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
         if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {

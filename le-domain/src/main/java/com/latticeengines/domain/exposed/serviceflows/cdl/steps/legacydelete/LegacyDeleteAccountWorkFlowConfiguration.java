@@ -8,25 +8,25 @@ public class LegacyDeleteAccountWorkFlowConfiguration extends BaseCDLWorkflowCon
 
     public static class Builder {
         private LegacyDeleteAccountWorkFlowConfiguration configuration = new LegacyDeleteAccountWorkFlowConfiguration();
-        private LegacyDeleteByUploadStepConfiguration legacyDeleteByUploadStepConfiguration = new LegacyDeleteByUploadStepConfiguration();
+        private LegacyDeleteSparkStepConfiguration legacyDeleteSparkStepConfiguration = new LegacyDeleteSparkStepConfiguration();
 
         public Builder Customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
-            legacyDeleteByUploadStepConfiguration.setCustomerSpace(customerSpace);
+            legacyDeleteSparkStepConfiguration.setCustomer(customerSpace.toString());
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            legacyDeleteByUploadStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            legacyDeleteSparkStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public LegacyDeleteAccountWorkFlowConfiguration build() {
             configuration.setContainerConfiguration("legacyDeleteAccountWorkFlow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-            legacyDeleteByUploadStepConfiguration.setEntity(BusinessEntity.Account);
-            configuration.add(legacyDeleteByUploadStepConfiguration);
+            legacyDeleteSparkStepConfiguration.setEntity(BusinessEntity.Account);
+            configuration.add(legacyDeleteSparkStepConfiguration);
             return configuration;
         }
     }

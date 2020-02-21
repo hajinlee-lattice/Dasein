@@ -209,7 +209,7 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
     }
 
     private boolean isEntityMatchEnabled(String customerSpace) {
-        return batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace));
+        return batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)) && !batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpace));
     }
 
 }
