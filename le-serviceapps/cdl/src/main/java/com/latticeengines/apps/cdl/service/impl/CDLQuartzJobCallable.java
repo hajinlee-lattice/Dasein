@@ -44,7 +44,7 @@ public class CDLQuartzJobCallable implements Callable<Boolean> {
         case DFEXECUTIONCLEANUP:
             return dataFeedExecutionCleanupService.removeStuckExecution(jobArguments);
         case REDSHIFTCLEANUP:
-            return redShiftCleanupService.removeUnusedTables();
+            return redShiftCleanupService.removeTempListTables() && redShiftCleanupService.removeUnusedTables();
         case IMPORT:
             return s3ImportService.submitImportJob();
         case ENTITYSTATECORRECTION:

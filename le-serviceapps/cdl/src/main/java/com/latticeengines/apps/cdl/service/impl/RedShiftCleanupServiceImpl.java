@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashSet;
@@ -22,6 +24,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.query.TempListUtils;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
@@ -51,12 +54,13 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
 
     private static final String TABLE_PREFIX = "ToBeDeletedOn_";
 
+    @Override
     public boolean removeUnusedTables() {
         if (!cleanupFlag) {
             log.warn("the cleanupFlag is " + cleanupFlag);
             return true;
         }
-        //FIXME: we don't need this cleanup in future
+        //FIXME: change to scan all partitions
         // only check default partition
         RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
         List<String> allRedshiftTable = redshiftService.getTables("");
@@ -179,4 +183,21 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
         log.info(" unUsed redshiftTable number is " + redshiftTables.size());
         return redshiftTables;
     }
+
+    @Override
+    public boolean removeTempListTables() {
+        //FIXME: change to scan all partitions
+        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
+        List<String> tempListTables = redshiftService.getTables(TempListUtils.TEMPLIST_PREFIX);
+        LocalDate oneDayAgo = LocalDate.now(ZoneId.of("UTC")).minusDays(1);
+        for (String tempList: tempListTables) {
+            LocalDate date = TempListUtils.parseDateFromTableName(tempList);
+            if (date != null && date.isBefore(oneDayAgo)) {
+                log.info("Removing old temp list {}", tempList);
+                redshiftService.dropTable(tempList);
+            }
+        }
+        return true;
+    }
+
 }
