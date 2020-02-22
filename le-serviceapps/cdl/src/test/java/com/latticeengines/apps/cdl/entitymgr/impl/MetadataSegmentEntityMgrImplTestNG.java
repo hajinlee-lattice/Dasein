@@ -3,7 +3,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
@@ -114,7 +113,6 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
 
         MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         assertNotNull(retrieved);
-        assertNull(retrieved.getProducts());
 
         assertEquals(retrieved.getAccounts(), ZERO);
         assertEquals(retrieved.getContacts(), ZERO);
@@ -153,7 +151,6 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
 
         UPDATED_SEGMENT.setAccounts(1L);
         UPDATED_SEGMENT.setContacts(2L);
-        UPDATED_SEGMENT.setProducts(3L);
 
         segmentEntityMgr.updateSegment(UPDATED_SEGMENT, segmentEntityMgr.findByName(segmentName));
 
@@ -161,9 +158,8 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         assertNotNull(retrieved);
         assertEquals(retrieved.getDisplayName(), UPDATED_DISPLAY_SEGMENT_NAME);
         assertEquals(retrieved.getDescription(), UPDATED_SEGMENT_DESCRIPTION);
-        assertEquals(retrieved.getAccounts(), new Long(1));
-        assertEquals(retrieved.getContacts(), new Long(2));
-        assertEquals(retrieved.getProducts(), new Long(3));
+        assertEquals(retrieved.getAccounts(), Long.valueOf(1));
+        assertEquals(retrieved.getContacts(), Long.valueOf(2));
         assertFalse(retrieved.getMasterSegment());
 
         StatisticsContainer container = new StatisticsContainer();

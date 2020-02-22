@@ -122,7 +122,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
         if (existingSegment != null) {
             existingSegment = findByName(existingSegment.getName());
-            existingSegment = cloneForUpdate(existingSegment, segment);
+            cloneForUpdate(existingSegment, segment);
             segmentDao.update(existingSegment);
             setMetadataSegmentActionContext(existingSegment);
             return existingSegment;
@@ -133,12 +133,13 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public MetadataSegment updateSegmentWithoutAction(MetadataSegment segment, MetadataSegment existingSegment) {
+    public MetadataSegment updateSegmentWithoutActionAndAuditing(MetadataSegment segment, MetadataSegment existingSegment) {
         preprocessBeforeCreateOrUpdate(segment);
 
         if (existingSegment != null) {
             existingSegment = findByName(existingSegment.getName());
-            existingSegment = cloneForUpdate(existingSegment, segment);
+            cloneForUpdate(existingSegment, segment);
+            existingSegment.setSkipAuditing(true);
             segmentDao.update(existingSegment);
             return existingSegment;
         } else {
@@ -253,7 +254,6 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     private MetadataSegment cloneForUpdate(MetadataSegment existing, MetadataSegment incoming) {
         existing.setAccounts(incoming.getAccounts());
         existing.setContacts(incoming.getContacts());
-        existing.setProducts(incoming.getProducts());
         existing.setDisplayName(incoming.getDisplayName());
         existing.setDescription(incoming.getDescription());
         existing.setUpdatedBy(incoming.getUpdatedBy());

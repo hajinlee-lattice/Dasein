@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.domain.exposed.util.SegmentDependencyUtil;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -125,7 +127,18 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment findByName(String name) {
-        return segmentEntityMgr.findByName(name);
+        MetadataSegment segment = segmentEntityMgr.findByName(name);
+        if (Boolean.TRUE.equals(segment.getCountsOutdated())) {
+            log.info("Segment {}  has outdated count, trying to update it.", segment.getName());
+            try {
+                Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
+                segment.setAccounts(counts.get(BusinessEntity.Account));
+                segment.setContacts(counts.get(BusinessEntity.Contact));
+            } catch (Exception e) {
+                log.warn("Failed to update segment counts.", e);
+            }
+        }
+        return segment;
     }
 
     @Override
@@ -158,13 +171,52 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
+    public void updateSegmentsCountsAsync() {
+        final Tenant tenant = MultiTenantContext.getTenant();
+        List<MetadataSegment> segments = getSegments();
+        if (CollectionUtils.isNotEmpty(segments)) {
+            segments.forEach(segment -> {
+                MetadataSegment segmentCopy = segment.getDeepCopy();
+                segmentCopy.setCountsOutdated(true);
+                segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+            });
+        }
+        new Thread(() -> {
+            MultiTenantContext.setTenant(tenant);
+            UpdateSegmentCountResponse response = updateSegmentsCounts();
+            log.info("UpdateSegmentCountResponse={}", JsonUtils.serialize(response));
+        }).start();
+    }
+
+    @Override
     public UpdateSegmentCountResponse updateSegmentsCounts() {
+        log.info("Start updating counts for all segment for " + MultiTenantContext.getShortTenantId());
         List<String> failedSegments = new ArrayList<>();
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<MetadataSegment> segments = getSegments();
             log.info("Updating counts for " + CollectionUtils.size(segments) + " segments.");
             Map<String, Map<BusinessEntity, Long>> review = new HashMap<>();
             if (CollectionUtils.isNotEmpty(segments)) {
+                // update the most recently touched segments first
+                segments.sort((o1, o2) -> {
+                    Date updated1 = o1.getUpdated();
+                    Date updated2 = o2.getUpdated();
+                    if (updated1 == null) {
+                        updated1 = o1.getCreated();
+                    }
+                    if (updated2 == null) {
+                        updated2 = o2.getCreated();
+                    }
+                    if (updated1 != null && updated2 != null) {
+                        return updated2.compareTo(updated1);
+                    } else if (updated1 != null) {
+                        return -1;
+                    } else if (updated2 != null) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                });
                 // Do not parallel, as it will be bottle-necked at objectapi
                 segments.forEach(segment -> {
                     String name = segment.getName();
@@ -211,12 +263,13 @@ public class SegmentServiceImpl implements SegmentService {
 
     private Map<BusinessEntity, Long> updateSegmentCounts(MetadataSegment segment) {
         // use a deep copy to avoid changing restriction format to break UI
-        MetadataSegment segmentCopy = JsonUtils.deserialize(JsonUtils.serialize(segment), MetadataSegment.class);
+        MetadataSegment segmentCopy = segment.getDeepCopy();
         Map<BusinessEntity, Long> counts = getEntityCounts(segmentCopy);
         counts.forEach(segmentCopy::setEntityCount);
         log.info("Updating counts for segment " + segment.getName() + " (" + segment.getDisplayName() + ")" //
                 + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
-        segment = segmentEntityMgr.updateSegmentWithoutAction(segmentCopy, segment);
+        segmentCopy.setCountsOutdated(false);
+        segment = segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
         return segment.getEntityCounts();
     }
 

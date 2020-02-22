@@ -11,4 +11,9 @@ public interface HasAuditingFields {
     Date getUpdated();
 
     void setUpdated(Date date);
+
+    default boolean skipAuditing() {
+        return false;
+    }
+
 }

@@ -96,15 +96,19 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         if (owner == null) {
             switch (role) {
                 case Profile:
-                    return BusinessEntity.Account;
+                    owner = BusinessEntity.Account;
+                    break;
                 case ContactProfile:
-                    return BusinessEntity.Contact;
+                    owner = BusinessEntity.Contact;
+                    break;
                 case PurchaseHistoryProfile:
-                    return BusinessEntity.PurchaseHistory;
+                    owner = BusinessEntity.PurchaseHistory;
+                    break;
                 case ConsolidatedRawTransaction:
-                    return BusinessEntity.Transaction;
+                    owner = BusinessEntity.Transaction;
+                    break;
                 default:
-                    return null;
+                    log.warn("Does not know the owner entity of {}", role);
             }
         }
         return owner;

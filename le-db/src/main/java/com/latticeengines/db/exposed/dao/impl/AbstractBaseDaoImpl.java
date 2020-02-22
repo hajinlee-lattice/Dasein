@@ -410,7 +410,9 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
             if (entity.getPid() == null) {
                 ((HasAuditingFields) entity).setCreated(now);
             }
-            ((HasAuditingFields) entity).setUpdated(now);
+            if (!((HasAuditingFields) entity).skipAuditing()) {
+                ((HasAuditingFields) entity).setUpdated(now);
+            }
         }
     }
 

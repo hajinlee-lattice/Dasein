@@ -79,6 +79,15 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         log.info("Switch data collection to version " + inactive);
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
+
+        try {
+            postSwitchOperations();
+        } catch (Exception e) {
+            log.warn("Encountered an error in post switch operations", e);
+        }
+    }
+
+    private void postSwitchOperations() {
         log.info("Evict attr repo cache for inactive version " + inactive);
         dataCollectionProxy.evictAttrRepoCache(customerSpace.toString(), inactive);
         //bump version after entity match tenant rematch operation
@@ -100,17 +109,12 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
         // update bucket metadata and bucketed score summary
         updateBucketMetadata();
+        setPublishedModels();
 
         // update segment and rating engine counts
         SegmentCountUtils.invokeMetadataApi(servingStoreProxy, customerSpace.toString());
-        List<String> failedSegments = SegmentCountUtils.updateEntityCounts(segmentProxy, customerSpace.toString());
-        if (CollectionUtils.isNotEmpty(failedSegments)) {
-            log.warn("Failed to update counts for segments: " + StringUtils.join(failedSegments, ","));
-            String msg = "Encountered error when updating counts for " + CollectionUtils.size(failedSegments) +" segments";
-            addToListInContext(PROCESS_ANALYTICS_WARNING_KEY, msg, String.class);
-        }
+        SegmentCountUtils.updateEntityCountsAsync(segmentProxy, customerSpace.toString());
         updateActiveRuleModelCounts();
-        setPublishedModels();
     }
 
     private void updateActiveRuleModelCounts() {
