@@ -70,6 +70,7 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
     @Test(groups = "unit", dataProvider = "timeRangeDescriptionProvider")
     public void testTimeFilterToDescription(String timeRange, String expected) {
         String generated = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeRange);
+        System.out.println(generated);
         Assert.assertEquals(generated, expected);
     }
 
@@ -119,8 +120,8 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
     @DataProvider(name = "timeRangeDescriptionProvider")
     public Object[][] timeFilterDescriptionProvider() {
         return new Object[][]{
-                {"w_2_w", "in last 2 week"},
-                {"b_2_4_w", "between 2 and 4 week"}};
+                {"w_2_w", "Last 2 weeks"},
+                {"b_2_4_w", "Between 2 and 4 weeks"}};
     }
 
     @DataProvider(name = "timeRangeToTimeFilterProvider")
