@@ -24,6 +24,11 @@ public class LegacyDeleteContactWorkFlowConfiguratiion extends BaseCDLWorkflowCo
             return this;
         }
 
+        public Builder entityMatchGAOnly(boolean gaOnly) {
+            legacyDeleteSparkStepConfiguration.setEntityMatchGAEnabled(gaOnly);
+            return this;
+        }
+
         public LegacyDeleteContactWorkFlowConfiguratiion build() {
             configuration.setContainerConfiguration("legacyDeleteContactWorkFlow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

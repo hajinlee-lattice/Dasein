@@ -324,6 +324,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             matchEntityWorkflowBuilder.entityMatchGAOnly(gaOnly);
             processActivityStreamWorkflowBuilder.entityMatchGAOnly(gaOnly);
             convertBatchStoreToDataTableWorkflowBuilder.entityMatchGAOnly(gaOnly);
+            legacyDeleteWorkFlowBuilder.entityMatchGAOnly(gaOnly);
             return this;
         }
 

@@ -9,6 +9,9 @@ public class LegacyDeleteByUploadStepConfiguration extends BaseWrapperStepConfig
     @JsonProperty("entity")
     private BusinessEntity entity;
 
+    @JsonProperty("entity_matchga_enabled")
+    private boolean entityMatchGAEnabled;
+
     public BusinessEntity getEntity() {
         return entity;
     }
@@ -17,4 +20,11 @@ public class LegacyDeleteByUploadStepConfiguration extends BaseWrapperStepConfig
         this.entity = entity;
     }
 
+    public boolean isEntityMatchGAEnabled() {
+        return entityMatchGAEnabled;
+    }
+
+    public void setEntityMatchGAEnabled(boolean entityMatchGAEnabled) {
+        this.entityMatchGAEnabled = entityMatchGAEnabled;
+    }
 }

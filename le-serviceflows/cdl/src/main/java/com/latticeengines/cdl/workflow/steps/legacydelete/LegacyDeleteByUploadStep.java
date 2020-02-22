@@ -360,12 +360,16 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
 
     private LegacyDeleteJobConfig.JoinedColumns getJoinedColumns(BusinessEntity entity, CleanupOperationType type) {
         LegacyDeleteJobConfig.JoinedColumns joinedColumns = new LegacyDeleteJobConfig.JoinedColumns();
+        String account_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerAccountId.name() :
+                InterfaceName.AccountId.name();
+        String contact_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerContactId.name() :
+                InterfaceName.ContactId.name();
         switch (entity) {
             case Account:
-                joinedColumns.setAccountId(InterfaceName.AccountId.name());
+                joinedColumns.setAccountId(account_id);
                 break;
             case Contact:
-                joinedColumns.setContactId(InterfaceName.ContactId.name());
+                joinedColumns.setContactId(contact_id);
                 break;
             case Transaction:
                 switch (type) {
@@ -373,12 +377,12 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                         joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                         break;
                     case BYUPLOAD_MINDATEANDACCOUNT:
-                        joinedColumns.setAccountId(InterfaceName.AccountId.name());
+                        joinedColumns.setAccountId(account_id);
                         joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                         break;
                     case BYUPLOAD_ACPD:
-                        joinedColumns.setAccountId(InterfaceName.AccountId.name());
-                        joinedColumns.setContactId(InterfaceName.ContactId.name());
+                        joinedColumns.setAccountId(account_id);
+                        joinedColumns.setContactId(contact_id);
                         joinedColumns.setProductId(InterfaceName.ProductId.name());
                         joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                         break;
@@ -393,11 +397,15 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
     }
 
     private String getJoinKey(BusinessEntity entity, CleanupOperationType type) {
+        String account_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerAccountId.name() :
+                InterfaceName.AccountId.name();
+        String contact_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerContactId.name() :
+                InterfaceName.ContactId.name();
         switch (entity) {
             case Account:
-                return InterfaceName.AccountId.name();
+                return account_id;
             case Contact:
-                return InterfaceName.ContactId.name();
+                return contact_id;
             case Transaction:
                 if (type.equals(CleanupOperationType.BYUPLOAD_MINDATE)) {
                     return InterfaceName.TransactionDayPeriod.name();

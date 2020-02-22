@@ -28,6 +28,11 @@ public class LegacyDeleteTransactionWorkFlowConfiguration extends BaseCDLWorkflo
             return this;
         }
 
+        public Builder entityMatchGAOnly(boolean gaOnly) {
+            legacyDeleteByUploadStepConfiguration.setEntityMatchGAEnabled(gaOnly);
+            return this;
+        }
+
         public LegacyDeleteTransactionWorkFlowConfiguration build() {
             configuration.setContainerConfiguration("legacyDeleteTransactionWorkFlow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

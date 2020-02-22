@@ -134,12 +134,16 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
 
     private LegacyDeleteJobConfig.JoinedColumns getJoinedColumns(BusinessEntity entity, CleanupOperationType type) {
         LegacyDeleteJobConfig.JoinedColumns joinedColumns = new LegacyDeleteJobConfig.JoinedColumns();
+        String account_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerAccountId.name() :
+                InterfaceName.AccountId.name();
+        String contact_id = configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerContactId.name() :
+                InterfaceName.ContactId.name();
         switch (entity) {
             case Account:
-                joinedColumns.setAccountId(InterfaceName.AccountId.name());
+                joinedColumns.setAccountId(account_id);
                 break;
             case Contact:
-                joinedColumns.setContactId(InterfaceName.ContactId.name());
+                joinedColumns.setContactId(contact_id);
                 break;
             case Transaction:
                 switch (type) {
@@ -147,12 +151,12 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
                         joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                         break;
                     case BYUPLOAD_MINDATEANDACCOUNT:
-                        joinedColumns.setAccountId(InterfaceName.AccountId.name());
+                        joinedColumns.setAccountId(account_id);
                         joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                         break;
                     case BYUPLOAD_ACPD:
-                        joinedColumns.setAccountId(InterfaceName.AccountId.name());
-                        joinedColumns.setContactId(InterfaceName.ContactId.name());
+                        joinedColumns.setAccountId(account_id);
+                        joinedColumns.setContactId(contact_id);
                         joinedColumns.setProductId(InterfaceName.ProductId.name());
                         joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                         break;

@@ -48,10 +48,16 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
 
     private CustomerSpace customerSpace;
 
+    private List<Action> hardDeleteTableLists;
+
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         intializeConfiguration();
         if (isShortCutMode()) {
+            return null;
+        }
+        hardDeleteTableLists = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
+        if (hardDeleteTableLists == null) {
             return null;
         }
         PipelineTransformationRequest request = generateRequest();
@@ -102,7 +108,6 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
     TransformationStepConfig mergeHardDelete() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
-        List<Action> hardDeleteTableLists = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
         hardDeleteTableLists.forEach(action -> {
             DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
             addBaseTables(step, configuration.getDeleteDataTable());

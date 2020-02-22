@@ -51,6 +51,7 @@ public class MergeDeleteStep extends RunSparkJob<LegacyDeleteSparkStepConfigurat
             return null;
         }
         MergeImportsConfig mergeImportsConfig = MergeImportsConfig.joinBy(getJoinKey(configuration.getEntity()));
+        mergeImportsConfig.setDedupSrc(true);
         mergeImportsConfig.setAddTimestamps(false);
         List<DataUnit> units = new ArrayList<>();
         inputs.forEach(action -> {
@@ -77,9 +78,11 @@ public class MergeDeleteStep extends RunSparkJob<LegacyDeleteSparkStepConfigurat
     private String getJoinKey(BusinessEntity entity) {
         switch (entity) {
             case Account:
-                return InterfaceName.AccountId.name();
+                return configuration.isEntityMatchGAEnabled()? InterfaceName.CustomerAccountId.name() :
+                        InterfaceName.AccountId.name();
             case Contact:
-                return InterfaceName.ContactId.name();
+                return configuration.isEntityMatchGAEnabled()?
+                        InterfaceName.CustomerContactId.name() : InterfaceName.ContactId.name();
             default:
                 return null;
         }

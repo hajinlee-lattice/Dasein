@@ -30,6 +30,10 @@ public class LegacyDeleteWorkflowConfiguration extends BaseCDLWorkflowConfigurat
             return this;
         }
 
+        public Builder entityMatchGAOnly(boolean gaOnly) {
+            return this;
+        }
+
         public LegacyDeleteWorkflowConfiguration build() {
             configuration.setContainerConfiguration("legacyDeleteWorkFlow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

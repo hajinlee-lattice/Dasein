@@ -60,12 +60,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessRatingChoreographer ratingChoreographer;
 
     @Inject
-    private LegacyDeleteChoreographer legacyDeleteChoreographer;
-
-    @Inject
-    private ConvertBatchStoreToDataTableChoreographer convertBatchStoreToDataTableChoreographer;
-
-    @Inject
     private ConvertBatchStoreToDataTableWorkflow convertBatchStoreToDataTableWorkflow;
 
     @Inject
@@ -128,10 +122,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
             skip = skipExportToDynamoStep(step);
         } else if (isRatingStep(seq)) {
             skip = ratingChoreographer.skipStep(step, seq);
-        } else if (isLegacyDeleteStep(seq)) {
-            skip = legacyDeleteChoreographer.skipStep(step, seq);
-        } else if (isHardDeleteStep(seq)) {
-            skip = convertBatchStoreToDataTableChoreographer.skipStep(step, seq);
         }
         return super.skipStep(step, seq) || skip;
     }
@@ -169,14 +159,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     private boolean isRatingStep(int seq) {
         return inWorkflow(seq, ratingWorkflow);
-    }
-
-    private boolean isLegacyDeleteStep(int seq) {
-        return inWorkflow(seq, legacyDeleteWorkFlow);
-    }
-
-    private boolean isHardDeleteStep(int seq) {
-        return inWorkflow(seq, convertBatchStoreToDataTableWorkflow);
     }
 
     private boolean inWorkflow(int seq, AbstractWorkflow<?> workflow) {
