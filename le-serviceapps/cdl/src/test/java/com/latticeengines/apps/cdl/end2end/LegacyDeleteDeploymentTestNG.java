@@ -95,6 +95,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
             if (numRecordsInCsv == 10 || numRecordsInCsv == 20) {
 
                 log.info("There are {} rows in csv.", numRecordsInCsv);
+                log.info("file is {}.", sb);
                 String fileName = String.format("%s_delete_%s.csv", BusinessEntity.Contact.name(), numRecordsInCsv);
                 Resource source = new ByteArrayResource(sb.toString().getBytes()) {
                     @Override
