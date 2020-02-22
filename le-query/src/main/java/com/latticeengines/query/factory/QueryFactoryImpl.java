@@ -37,4 +37,24 @@ public class QueryFactoryImpl implements QueryFactory {
                 repository.getCollectionName()));
     }
 
+    public BaseSQLQuery<?> getQuery(AttributeRepository repository, String sqlUser, String clusterPartition) {
+        for (QueryProvider provider : queryProviders) {
+            if (provider.providesQueryAgainst(repository, sqlUser)) {
+                return provider.getQuery(repository, sqlUser);
+            }
+        }
+        throw new RuntimeException(String.format("Could not find QueryProvider for specified data collection %s",
+                repository.getCollectionName()));
+    }
+
+    public BaseSQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser, String clusterPartition) {
+        for (QueryProvider provider : queryProviders) {
+            if (provider.providesQueryAgainst(repository, sqlUser)) {
+                return provider.getCachedSQLQueryFactory(repository, sqlUser);
+            }
+        }
+        throw new RuntimeException(String.format("Could not find QueryProvider for specified data collection %s",
+                repository.getCollectionName()));
+    }
+
 }

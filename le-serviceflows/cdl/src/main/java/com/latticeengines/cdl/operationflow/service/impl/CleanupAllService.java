@@ -31,6 +31,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
@@ -40,7 +42,9 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("cleanupAllService")
@@ -65,7 +69,10 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
     private CDLAttrConfigProxy cdlAttrConfigProxy;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     @Inject
     private S3Service s3Service;
@@ -273,17 +280,21 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
     private void cleanupRedshift(String customSpace, List<TableRoleInCollection> roles,
                                  List<DataCollection.Version> versions) {
         try {
-            versions.forEach(version -> {
-                roles.forEach(role -> {
-                    Table table = dataCollectionProxy.getTable(customSpace, role, version);
-                    if (table != null) {
+            versions.forEach(version -> roles.forEach(role -> {
+                Table table = dataCollectionProxy.getTable(customSpace, role, version);
+                if (table != null) {
+                    RedshiftDataUnit dataUnit = (RedshiftDataUnit) dataUnitProxy.getByNameAndType(customSpace,
+                            table.getName(), DataUnit.StorageType.Redshift);
+                    if (dataUnit != null) {
+                        RedshiftService redshiftService = //
+                                redshiftPartitionService.getBatchUserService(dataUnit.getClusterPartition());
                         List<String> redshiftTables = redshiftService.getTables(table.getName());
                         if (CollectionUtils.isNotEmpty(redshiftTables)) {
-                            redshiftTables.forEach(redshiftTable -> redshiftService.dropTable(redshiftTable));
+                            redshiftTables.forEach(redshiftService::dropTable);
                         }
                     }
-                });
-            });
+                }
+            }));
         } catch (Exception e) {
             log.error(String.format("Cannot cleanup redshift tables for %s", customSpace));
         }
@@ -293,25 +304,23 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
                                  List<DataCollection.Version> versions) {
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         try {
-            versions.forEach(version -> {
-                roles.forEach(role -> {
-                    Table table = dataCollectionProxy.getTable(customSpace, role, version);
-                    if (table != null) {
-                        List<Extract> extracts = table.getExtracts();
-                        if (CollectionUtils.isEmpty(extracts) || StringUtils.isBlank(extracts.get(0).getPath())) {
-                            log.warn("Can not find extracts of the table=" + table.getName() + " for tenant=" + customSpace);
-                            return;
-                        }
-                        String srcDir = pathBuilder.getFullPath(extracts.get(0).getPath());
-                        String tenantId = CustomerSpace.parse(customSpace).getTenantId();
-                        String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
-                        String prefix = tgtDir.substring(tgtDir.indexOf(s3Bucket) + s3Bucket.length() + 1);
-                        s3Service.cleanupPrefix(s3Bucket, prefix);
-                    } else {
-                        log.warn("Cannot find table for table role: " + role.name());
+            versions.forEach(version -> roles.forEach(role -> {
+                Table table = dataCollectionProxy.getTable(customSpace, role, version);
+                if (table != null) {
+                    List<Extract> extracts = table.getExtracts();
+                    if (CollectionUtils.isEmpty(extracts) || StringUtils.isBlank(extracts.get(0).getPath())) {
+                        log.warn("Can not find extracts of the table=" + table.getName() + " for tenant=" + customSpace);
+                        return;
                     }
-                });
-            });
+                    String srcDir = pathBuilder.getFullPath(extracts.get(0).getPath());
+                    String tenantId = CustomerSpace.parse(customSpace).getTenantId();
+                    String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
+                    String prefix = tgtDir.substring(tgtDir.indexOf(s3Bucket) + s3Bucket.length() + 1);
+                    s3Service.cleanupPrefix(s3Bucket, prefix);
+                } else {
+                    log.warn("Cannot find table for table role: " + role.name());
+                }
+            }));
         } catch (Exception e) {
             log.error(String.format("Cannot cleanup s3 tables for %s", customSpace));
         }

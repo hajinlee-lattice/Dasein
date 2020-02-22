@@ -331,8 +331,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
     private String getConsolidateDataConfig() {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
-        config.setSrcIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
-        config.setMasterIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
+        config.setSrcIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey());
+        config.setMasterIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey());
         config.setCreateTimestampColumn(true);
         config.setColumnsFromRight(new HashSet<>(Collections.singletonList("CREATION_DATE")));
         config.setCompositeKeys(
@@ -668,7 +668,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
         SorterConfig config = new SorterConfig();
         config.setPartitions(20);
-        String sortingKey = TableRoleInCollection.SortedProduct.getForeignKeysAsStringList().get(0);
+        String sortingKey = InterfaceName.ProductId.name();
         config.setSortingField(sortingKey);
         config.setCompressResult(true);
         step.setConfiguration(JsonUtils.serialize(config));
@@ -892,7 +892,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         for (int i = 0; i < productFields.size(); i++) {
             columns.add(Pair.of(productFields.get(i), String.class));
         }
-        Object[][] data = { 
+        Object[][] data = {
                 { "1", "sku1", "b1", null, null, null, ProductStatus.Active.name() }, //
                 { "1", "sku1", "b2", null, null, null, ProductStatus.Active.name() }, //
                 { "1", "sku1", null, "pl1", "pf1", "pc1", ProductStatus.Active.name() }, //
@@ -902,7 +902,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         }; //
         uploadAndRegisterTableSource(columns, data, productTableName);
     }
-    
+
     private void uploadAndRegisterTable1() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         for (int i = 0; i < fieldNames.size(); i++) {

@@ -38,7 +38,7 @@ public class ConsolidateDeltaNewFlow extends ConsolidateBaseFlow<ConsolidateData
         }
 
         Node masterNode = sources.get(1);
-        String latticeId = TableRoleInCollection.AccountMaster.getPrimaryKey().name();
+        String latticeId = TableRoleInCollection.AccountMaster.getPrimaryKey();
         masterNode = masterNode.retain(new FieldList(masterId, latticeId));
         Node deltaNode = sources.get(0);
         List<String> fieldToRetain = deltaNode.getFieldNames();

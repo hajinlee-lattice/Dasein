@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
@@ -38,7 +39,7 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private String customerSpace;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
@@ -123,6 +124,7 @@ public class CleanupAllDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
         assertNull(dataCollectionProxy.getTable(customerSpace, BusinessEntity.Account.getBatchStore()));
         assertNull(dataCollectionProxy.getTable(customerSpace, BusinessEntity.Contact.getBatchStore()));
 
+        RedshiftService redshiftService = redshiftPartitionService.getSegmentUserService(null);
         List<String> redshiftTables = redshiftService.getTables(tableA);
         Assert.assertTrue(CollectionUtils.isEmpty(redshiftTables),
                 String.format("Table %s is still in redshift", tableA));

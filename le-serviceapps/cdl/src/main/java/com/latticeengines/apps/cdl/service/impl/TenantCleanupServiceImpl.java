@@ -14,11 +14,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.TenantCleanupService;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("tenantCleanupService")
@@ -27,7 +29,7 @@ public class TenantCleanupServiceImpl implements TenantCleanupService {
     private static final Logger log = LoggerFactory.getLogger(TenantCleanupServiceImpl.class);
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private DataCollectionService dataCollectionService;
@@ -53,6 +55,8 @@ public class TenantCleanupServiceImpl implements TenantCleanupService {
 
         List<String> allExceptionTable = new ArrayList<String>();
         log.info("metadataTable is " + metadataTables.toString());
+        DataCollectionStatus status = dataCollectionService.getOrCreateDataCollectionStatus(customerSpace, null);
+        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(status.getRedshiftPartition());
         for (String tableName : metadataTables) {
             try {
                 if (StringUtils.isNotEmpty(tableName)) {

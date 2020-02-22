@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -35,6 +36,7 @@ import com.latticeengines.metadata.service.DataUnitCrossTenantService;
 import com.latticeengines.metadata.service.DataUnitService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("cdlComponentService")
@@ -61,7 +63,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
     private DropBoxService dropBoxService;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private ActionService actionService;
@@ -152,6 +154,9 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
                 List<DataUnit> dataUnits = dataUnitService.findAllByType(DataUnit.StorageType.Redshift);
                 if (dataUnits != null) {
                     for (DataUnit dataUnit : dataUnits) {
+                        RedshiftDataUnit redshiftDataUnit = (RedshiftDataUnit) dataUnit;
+                        RedshiftService redshiftService = //
+                                redshiftPartitionService.getBatchUserService(redshiftDataUnit.getClusterPartition());
                         redshiftService.dropTable(dataUnit.getName());
                     }
                 }

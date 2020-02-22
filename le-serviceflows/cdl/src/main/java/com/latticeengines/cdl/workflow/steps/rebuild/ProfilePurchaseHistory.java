@@ -521,7 +521,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     private void finishing() {
         exportTableRoleToRedshift(curatedMetricsTableName, BusinessEntity.DepivotedPurchaseHistory.getServingStore());
-        exportToDynamo(servingStoreTableName, InterfaceName.AccountId.name(), null);
+        TableRoleInCollection role = BusinessEntity.PurchaseHistory.getServingStore();
+        exportToDynamo(servingStoreTableName, role.getPartitionKey(), role.getRangeKey());
         generateReport();
         updateDCStatusForProductSpend();
     }

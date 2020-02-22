@@ -8,6 +8,7 @@ import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.cdl.workflow.steps.EntityAwareWorkflowStep;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 
@@ -23,6 +24,10 @@ public abstract class BaseCloneEntityStep<T extends BaseProcessEntityStepConfigu
         DataCollection.Version active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         cloneTableService.setActiveVersion(active);
         cloneTableService.setCustomerSpace(customerSpace);
+        DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        if (dcStatus != null) {
+            cloneTableService.setRedshiftPartition(dcStatus.getRedshiftPartition());
+        }
         for (TableRoleInCollection role : tablesToClone()) {
             cloneTableService.cloneToInactiveTable(role);
         }

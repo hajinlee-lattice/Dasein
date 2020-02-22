@@ -80,6 +80,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
@@ -118,7 +119,7 @@ public class CheckpointService {
     private TestArtifactService testArtifactService;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private DataUnitProxy dataUnitProxy;
@@ -209,6 +210,7 @@ public class CheckpointService {
 
         Map<String, String> redshiftTablesToClone = new HashMap<>();
         Set<String> uploadedTables = new HashSet<>();
+        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
         for (DataCollection.Version version : DataCollection.Version.values()) {
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 List<Table> tables = parseCheckpointTable(checkpoint, role.name(), version, tenantNames);
@@ -282,6 +284,7 @@ public class CheckpointService {
 
     private void cloneRedshiftTables(Map<String, String> redshiftTablesToClone) {
         if (MapUtils.isNotEmpty(redshiftTablesToClone)) {
+            RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
             ThreadPoolUtils.doInParallel(redshiftTablesToClone.entrySet(), entry -> {
                 String src = entry.getKey();
                 String tgt = entry.getValue();
@@ -653,6 +656,7 @@ public class CheckpointService {
 
     private void saveRedshiftTableIfExists(TableRoleInCollection role, DataCollection.Version version) {
         String tableName = dataCollectionProxy.getTableName(mainTestTenant.getId(), role, version);
+        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
         if (StringUtils.isNotBlank(tableName)) {
             List<String> redshiftTables = redshiftService.getTables(tableName);
             if (CollectionUtils.isNotEmpty(redshiftTables)) {

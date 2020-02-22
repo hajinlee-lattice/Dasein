@@ -26,7 +26,9 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
+
 public class CDLDataCleanupResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CDLDataCleanupResourceDeploymentTestNG.class);
@@ -41,7 +43,7 @@ public class CDLDataCleanupResourceDeploymentTestNG extends CDLDeploymentTestNGB
     private DataCollectionProxy dataCollectionProxy;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @BeforeClass(groups = { "deployment" })
     public void setup() throws Exception {
@@ -70,6 +72,7 @@ public class CDLDataCleanupResourceDeploymentTestNG extends CDLDeploymentTestNGB
         String tableA = dataCollectionProxy.getTable(customerSpace, BusinessEntity.Account.getServingStore()).getName();
         String tableB = dataCollectionProxy.getTable(customerSpace, BusinessEntity.Contact.getServingStore()).getName();
         log.info("cleaning up meta tables " + tableA + " ... " + tableB);
+        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
         List<String> redshiftTables = redshiftService.getTables(tableA);
         log.info("cleaning up redshift data of " + redshiftTables.toString() + " ... ");
 

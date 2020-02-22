@@ -306,6 +306,16 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         this.detail.setServingStoreVersion(servingStoreVersion);
     }
 
+    @JsonProperty("RedshiftPartition")
+    public String getRedshiftPartition() {
+        return this.detail.getRedshiftPartition();
+    }
+
+    @JsonProperty("RedshiftPartition")
+    public void setRedshiftPartition(String redshiftPartition) {
+        this.detail.setRedshiftPartition(redshiftPartition);
+    }
+
     @Override
     @JsonProperty("CreationTime")
     @Temporal(TemporalType.TIMESTAMP)

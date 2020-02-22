@@ -75,6 +75,9 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("ServingStoreVersion")
     private int servingStoreVersion;
 
+    @JsonProperty("RedshiftPartition")
+    private String redshiftPartition;
+
     public Integer getMinTxnDate() {
         return minTxnDate;
     }
@@ -213,5 +216,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setServingStoreVersion(int servingStoreVersion) {
         this.servingStoreVersion = servingStoreVersion;
+    }
+
+    public String getRedshiftPartition() {
+        return redshiftPartition;
+    }
+
+    public void setRedshiftPartition(String redshiftPartition) {
+        this.redshiftPartition = redshiftPartition;
     }
 }

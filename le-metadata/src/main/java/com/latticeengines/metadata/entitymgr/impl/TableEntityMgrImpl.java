@@ -60,6 +60,7 @@ import com.latticeengines.metadata.dao.TableDao;
 import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 @Component("tableEntityMgr")
@@ -98,7 +99,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     private Configuration yarnConfiguration;
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private DataUnitEntityMgr dataUnitEntityMgr;
@@ -514,6 +515,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     RedshiftDataUnit redshiftDataUnit = (RedshiftDataUnit) unit;
                     String redshiftTable = redshiftDataUnit.getRedshiftTable();
                     try {
+                        //FIXME: change to use corresponding partition
+                        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
                         redshiftService.dropTable(redshiftTable);
                     } catch (Exception e) {
                         log.error(String.format("Failed to drop table %s from redshift", redshiftTable), e);
@@ -532,6 +535,8 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             log.error(String.format("Failed to clean up data unit by table name %s", tableName), e);
         }
         try {
+            //FIXME: change to use corresponding partition
+            RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
             redshiftService.dropTable(AvroUtils.getAvroFriendlyString(tableName));
         } catch (Exception e) {
             log.error(

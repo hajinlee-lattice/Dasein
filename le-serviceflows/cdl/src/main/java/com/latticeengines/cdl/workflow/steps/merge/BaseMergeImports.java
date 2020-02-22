@@ -101,7 +101,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected String diffTablePrefix;
     protected String diffReportTablePrefix;
     protected String batchStorePrimaryKey;
-    protected List<String> batchStoreSortKeys;
 
     protected List<Table> inputTables = new ArrayList<>();
     protected List<String> inputTableNames = new ArrayList<>();
@@ -134,8 +133,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         batchStore = entity.getBatchStore();
         if (batchStore != null) {
             batchStoreTablePrefix = entity.name();
-            batchStorePrimaryKey = batchStore.getPrimaryKey().name();
-            batchStoreSortKeys = batchStore.getForeignKeysAsStringList();
+            batchStorePrimaryKey = batchStore.getPrimaryKey();
             mergedBatchStoreName = batchStore.name() + "_Merged";
         }
         systemBatchStore = entity.getSystemBatchStore();

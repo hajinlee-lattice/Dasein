@@ -1,5 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -140,7 +141,7 @@ public final class CipherUtils {
         try {
             Cipher cipher = Cipher.getInstance(CIPHER_OPTS);
             cipher.init(Cipher.DECRYPT_MODE, strToKey(key), getLegacyIVSpec(str));
-            return new String(cipher.doFinal(Base64.decodeBase64(str)), CHARSET_UTF8);
+            return new String(cipher.doFinal(Base64.decodeBase64(str)), StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -224,20 +225,20 @@ public final class CipherUtils {
             CommandLine cmd = parser.parse(options, args);
             if (cmd.hasOption("encrypt")) {
                 String strToEncrypt = cmd.getOptionValue("encrypt");
-                String encrypted = CipherUtils.encrypt(strToEncrypt.trim());
                 System.out.println("String to Encrypt : " + strToEncrypt);
+                String encrypted = CipherUtils.encrypt(strToEncrypt.trim());
                 System.out.println("Encrypted : " + encrypted);
             } else if (cmd.hasOption("decrypt")) {
                 String strToDecrypt = cmd.getOptionValue("decrypt");
-                String decrypted = CipherUtils.decrypt(strToDecrypt.trim());
                 System.out.println("String To Decrypt : " + strToDecrypt);
+                String decrypted = CipherUtils.decrypt(strToDecrypt.trim());
                 System.out.println("Decrypted : " + decrypted);
             } else if (cmd.hasOption("generate")) {
                 String key = generateKey();
                 System.out.println("The generated key is : " + key);
             }
         } catch (Exception e) {
-            log.error("Failed to parse command line.", e);
+            e.printStackTrace();
         }
     }
 }

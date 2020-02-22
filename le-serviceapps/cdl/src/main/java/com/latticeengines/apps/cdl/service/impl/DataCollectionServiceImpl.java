@@ -388,8 +388,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         List<TableRoleInCollection> roles = extractServingRoles(statsCubes);
         Map<TableRoleInCollection, Table> tableMap = constructRoleTableMap(customerSpace, collectionName, roles,
                 version);
+        DataCollectionStatus status = getOrCreateDataCollectionStatus(customerSpace, version);
+        String redshiftPartition = status == null ? null :status.getRedshiftPartition();
         AttributeRepository attrRepo = AttributeRepository.constructRepo(statsCubes, tableMap,
-                CustomerSpace.parse(customerSpace), collectionName);
+                CustomerSpace.parse(customerSpace), collectionName, redshiftPartition);
         addEntityToAttrRepo(attrRepo, BusinessEntity.Product, customerSpace, collectionName, version);
         addEntityToAttrRepo(attrRepo, BusinessEntity.DepivotedPurchaseHistory, customerSpace, collectionName, version);
         return attrRepo;

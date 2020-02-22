@@ -340,7 +340,7 @@ abstract class QueryTranslator {
             CollectionLookup collectionLookup = (CollectionLookup) restriction.getRhs();
             Collection<Object> vals = collectionLookup.getValues();
             if (CollectionUtils.size(vals) >= MAX_IN_LINE_COLLECTION_SIZE) {
-                String tempTableName = tempListService.createTempListIfNotExists(restriction);
+                String tempTableName = tempListService.createTempListIfNotExists(restriction, repository.getRedshiftPartition());
                 String attrName = ((AttributeLookup) restriction.getLhs()).getAttribute();
                 SubQuery subQuery = new SubQuery(tempTableName);
                 restriction.setRhs(new SubQueryAttrLookup(subQuery, attrName));

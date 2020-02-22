@@ -7,6 +7,9 @@ public class RedshiftDataUnit extends DataUnit {
     @JsonProperty("RedshiftTable")
     private String redshiftTable;
 
+    @JsonProperty("ClusterPartition")
+    private String clusterPartition;
+
     @Override
     @JsonProperty("StorageType")
     public StorageType getStorageType() {
@@ -19,5 +22,13 @@ public class RedshiftDataUnit extends DataUnit {
 
     public void setRedshiftTable(String redshiftTable) {
         this.redshiftTable = redshiftTable;
+    }
+
+    public String getClusterPartition() {
+        return clusterPartition;
+    }
+
+    public void setClusterPartition(String clusterPartition) {
+        this.clusterPartition = clusterPartition;
     }
 }

@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -31,6 +30,7 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
@@ -60,11 +60,11 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
 
     private UserDocument currentUser;
 
-    @Autowired
+    @Inject
     private ApplicationContext applicationContext;
 
-    @Autowired
-    private RedshiftService redshiftService;
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private S3Service s3Service;
@@ -227,6 +227,8 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
                 log.info("Skip cleaning up redshift for" + tenant.getId());
             } else {
                 log.info("Clean up redshift test tenant " + tenant.getId());
+                // FIXME: some test tenant may not be on the default partition
+                RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
                 List<String> tables = redshiftService.getTables(CustomerSpace.parse(tenant.getId()).getTenantId());
                 tables.forEach(redshiftService::dropTable);
             }

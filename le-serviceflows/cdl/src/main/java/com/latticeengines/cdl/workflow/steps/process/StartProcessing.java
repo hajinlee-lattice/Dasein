@@ -68,6 +68,7 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("startProcessing")
@@ -97,6 +98,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     private CustomerSpace customerSpace;
     private DataCollection.Version activeVersion;
@@ -221,19 +225,21 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private void setupDataCollectionStatus(String evaluationDate) {
         // get current active collection status
         DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
-                null);
+                activeVersion);
         dcStatus.setEvaluationDate(evaluationDate);
         dcStatus.setApsRollingPeriod(configuration.getApsRollingPeriod());
         log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(dcStatus));
         if (MapUtils.isEmpty(dcStatus.getDateMap())) {
             dcStatus = DataCollectionStatusUtils.initDateMap(dcStatus, getLongValueFromContext(PA_TIMESTAMP));
         }
+        dcStatus.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
 
         DataCollectionStatus inactiveStatus = dataCollectionProxy
                 .getOrCreateDataCollectionStatus(customerSpace.toString(), inactiveVersion);
         if (inactiveStatus != null && configuration.getDataCloudBuildNumber() != null) {
             inactiveStatus.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
+            inactiveStatus.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
             dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), inactiveStatus,
                     inactiveVersion);
         }

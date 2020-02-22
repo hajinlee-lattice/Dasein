@@ -121,7 +121,7 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
             if (servingStore != null) {
                 String tableName = entry.getValue();
                 exportTableRoleToRedshift(tableName, servingStore);
-                exportToDynamo(tableName, servingStore.getPrimaryKey().name(), null);
+                exportToDynamo(tableName, servingStore.getPartitionKey(), servingStore.getRangeKey());
                 String statsTableName = constructStatsTableName(getStatsTablePrefix(servingEntity.name()));
                 log.info("Adding stats table to context: {}", statsTableName);
                 updateEntityValueMapInContext(servingEntity, STATS_TABLE_NAMES, statsTableName, String.class);

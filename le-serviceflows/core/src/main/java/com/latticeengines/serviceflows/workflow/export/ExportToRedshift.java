@@ -114,6 +114,7 @@ public class ExportToRedshift extends BaseWorkflowStep<ExportToRedshiftStepConfi
             exportConfig.setCleanupS3(true);
             exportConfig.setCreateNew(true);
             exportConfig.setAppend(true);
+            exportConfig.setPartition(config.getClusterPartition());
             exportConfig.setExpectedCount(config.getExpectedCount());
 
             exportConfig.setCustomerSpace(configuration.getCustomerSpace());

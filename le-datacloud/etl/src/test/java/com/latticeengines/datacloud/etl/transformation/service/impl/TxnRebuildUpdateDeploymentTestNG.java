@@ -193,7 +193,7 @@ public class TxnRebuildUpdateDeploymentTestNG extends PipelineTransformationDepl
             boolean copyCreateTime) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(InterfaceName.Id.name());
-        config.setMasterIdField(BusinessEntity.Transaction.getBatchStore().getPrimaryKey().name());
+        config.setMasterIdField(BusinessEntity.Transaction.getBatchStore().getPrimaryKey());
         config.setDedupeSource(isDedupeSource);
         config.setMergeOnly(isMergeOnly);
         config.setAddTimestamps(addTimettamps);

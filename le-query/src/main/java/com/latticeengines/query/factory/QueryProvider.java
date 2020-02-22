@@ -35,15 +35,13 @@ public abstract class QueryProvider implements ApplicationContextAware {
         if (factory != null) {
             return factory;
         } else {
-            factory = getSQLQueryFactory(sqlUser);
+            factory = getSQLQueryFactory(repository, sqlUser);
             factoryCache.put(repository.getIdentifier(sqlUser), factory);
             return factory;
         }
     }
 
-    protected abstract BaseSQLQueryFactory getSQLQueryFactory();
-
-    protected abstract  BaseSQLQueryFactory getSQLQueryFactory(String sqlUser);
+    protected abstract  BaseSQLQueryFactory getSQLQueryFactory(AttributeRepository repository, String sqlUser);
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

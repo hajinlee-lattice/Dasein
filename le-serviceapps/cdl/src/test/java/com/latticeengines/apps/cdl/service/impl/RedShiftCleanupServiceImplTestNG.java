@@ -23,12 +23,13 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
 public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
-    private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private RedShiftCleanupService redshiftCleanupService;
@@ -50,9 +51,11 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
     private List<String> metadataTables;
     private List<String> tenantNames;
 
+    private RedshiftService redshiftService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
+        redshiftService = redshiftPartitionService.getBatchUserService(null);
         redshiftTables = redshiftTablesProvider();
         dataUnits = dataUnitProvider();
         metadataTables = metadataTableProvider();

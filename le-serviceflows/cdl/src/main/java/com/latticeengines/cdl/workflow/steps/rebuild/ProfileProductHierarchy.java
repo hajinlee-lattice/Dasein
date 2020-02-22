@@ -113,7 +113,7 @@ public class ProfileProductHierarchy extends BaseSingleEntityProfileStep<Process
 
         SorterConfig config = new SorterConfig();
         config.setPartitions(20);
-        String sortingKey = TableRoleInCollection.SortedProductHierarchy.getForeignKeysAsStringList().get(0);
+        String sortingKey = TableRoleInCollection.SortedProductHierarchy.getSortKeys().get(0);
         config.setSortingField(sortingKey);
         config.setCompressResult(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));

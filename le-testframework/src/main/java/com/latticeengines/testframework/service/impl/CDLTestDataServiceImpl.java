@@ -71,6 +71,7 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
@@ -91,7 +92,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private final TestArtifactService testArtifactService;
     private final MetadataProxy metadataProxy;
     private final DataCollectionProxy dataCollectionProxy;
-    private final RedshiftService redshiftService;
+    private final RedshiftPartitionService redshiftPartitionService;
     private final RatingEngineProxy ratingEngineProxy;
     private final BatonService batonService;
 
@@ -106,12 +107,12 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Inject
     public CDLTestDataServiceImpl(TestArtifactService testArtifactService, MetadataProxy metadataProxy,
-            DataCollectionProxy dataCollectionProxy, RedshiftService redshiftService,
+            DataCollectionProxy dataCollectionProxy, RedshiftPartitionService redshiftPartitionService,
             RatingEngineProxy ratingEngineProxy, BatonService batonService) {
         this.testArtifactService = testArtifactService;
         this.metadataProxy = metadataProxy;
         this.dataCollectionProxy = dataCollectionProxy;
-        this.redshiftService = redshiftService;
+        this.redshiftPartitionService = redshiftPartitionService;
         this.ratingEngineProxy = ratingEngineProxy;
         this.batonService = batonService;
         srcTables.put(BusinessEntity.Account, "cdl_test_account_%d");
@@ -254,6 +255,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             }
             List<List<Object>> data = flux.collectList().block();
             retry = getRedshiftRetryTemplate();
+            RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
             retry.execute(context -> {
                 log.info(String.format("(Attempt=%d) insert %d rows into rating table %s", context.getRetryCount() + 1,
                         CollectionUtils.size(data), ratingTableName));
@@ -400,6 +402,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 schema.add(Pair.of(engineId + PlaymakerConstants.RatingEVColumnSuffix, String.class));
             }
         }
+        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
         RetryTemplate retry = getRedshiftRetryTemplate();
         retry.execute((RetryCallback<Void, RuntimeException>) context -> {
             log.info(
@@ -464,6 +467,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private void cloneRedshiftTables(String tenantId, BusinessEntity entity, int version) {
         if (srcTables.containsKey(entity)) {
             String srcTable = String.format(srcTables.get(entity), version);
+            RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
             if (redshiftService.hasTable(srcTable)) {
                 String tgtTable = servingStoreName(tenantId, entity);
                 RetryTemplate retry = getRedshiftRetryTemplate();

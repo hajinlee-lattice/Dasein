@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
@@ -266,7 +267,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         if (!noImports) {
             exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
         }
-        exportToDynamo(batchStoreTableName, InterfaceName.AccountId.name(), null);
+        TableRoleInCollection role = TableRoleInCollection.ConsolidatedAccount;
+        exportToDynamo(batchStoreTableName, role.getPartitionKey(), role.getRangeKey());
     }
 
     @Override
