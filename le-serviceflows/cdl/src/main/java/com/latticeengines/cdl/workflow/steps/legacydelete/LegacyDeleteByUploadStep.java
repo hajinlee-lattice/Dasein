@@ -117,16 +117,13 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);
-        List<TransformationStepConfig> steps = new ArrayList<>();
-        generateSteps(steps);
+        List<TransformationStepConfig> steps = generateSteps();
         request.setSteps(steps);
         return request;
     }
 
-    private void generateSteps(List<TransformationStepConfig> steps) {
-        if (CollectionUtils.isEmpty(canMergeActions)) {
-            return;
-        }
+    private List<TransformationStepConfig> generateSteps() {
+        List<TransformationStepConfig> steps = new ArrayList<>();
         try {
             /*
              * type=BYUPLOAD_MINDATE transaction legacyDeleteAction
@@ -185,7 +182,7 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                     steps.add(partitionDaily());
                 }
             }
-
+            return steps;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
