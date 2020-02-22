@@ -127,7 +127,18 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment findByName(String name) {
-        return segmentEntityMgr.findByName(name);
+        MetadataSegment segment = segmentEntityMgr.findByName(name);
+        if (Boolean.TRUE.equals(segment.getCountsOutdated())) {
+            log.info("Segment {}  has outdated count, trying to update it.", segment.getName());
+            try {
+                Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
+                segment.setAccounts(counts.get(BusinessEntity.Account));
+                segment.setContacts(counts.get(BusinessEntity.Contact));
+            } catch (Exception e) {
+                log.warn("Failed to update segment counts.", e);
+            }
+        }
+        return segment;
     }
 
     @Override
@@ -257,6 +268,7 @@ public class SegmentServiceImpl implements SegmentService {
         counts.forEach(segmentCopy::setEntityCount);
         log.info("Updating counts for segment " + segment.getName() + " (" + segment.getDisplayName() + ")" //
                 + " to " + JsonUtils.serialize(segmentCopy.getEntityCounts()));
+        segmentCopy.setCountsOutdated(false);
         segment = segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
         return segment.getEntityCounts();
     }
