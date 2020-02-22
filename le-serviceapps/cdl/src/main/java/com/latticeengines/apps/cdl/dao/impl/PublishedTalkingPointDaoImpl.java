@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.dao.PublishedTalkingPointDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
 
 @Component("publishedTalkingPointDao")
@@ -42,9 +43,10 @@ public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPo
                 getEntityClass().getSimpleName())
                 + attributes.stream().map(attr -> "content like '%{!" + attr + "}%'")
                         .collect(Collectors.joining(" or "))
-                + ")";
+                + ") and tp.play.tenant = :tenant";
 
         Query<String> query = session.createQuery(queryStr);
+        query.setParameter("tenant", MultiTenantContext.getTenant());
         return query.list();
     }
 }
