@@ -173,16 +173,16 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public void updateSegmentsCountsAsync() {
         final Tenant tenant = MultiTenantContext.getTenant();
-        List<MetadataSegment> segments = getSegments();
-        if (CollectionUtils.isNotEmpty(segments)) {
-            segments.forEach(segment -> {
-                MetadataSegment segmentCopy = segment.getDeepCopy();
-                segmentCopy.setCountsOutdated(true);
-                segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
-            });
-        }
         new Thread(() -> {
             MultiTenantContext.setTenant(tenant);
+            List<MetadataSegment> segments = getSegments();
+            if (CollectionUtils.isNotEmpty(segments)) {
+                segments.forEach(segment -> {
+                    MetadataSegment segmentCopy = segment.getDeepCopy();
+                    segmentCopy.setCountsOutdated(true);
+                    segmentEntityMgr.updateSegmentWithoutActionAndAuditing(segmentCopy, segment);
+                });
+            }
             UpdateSegmentCountResponse response = updateSegmentsCounts();
             log.info("UpdateSegmentCountResponse={}", JsonUtils.serialize(response));
         }).start();
