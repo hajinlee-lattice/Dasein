@@ -68,18 +68,17 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
         batchStore = stepConfiguration.getEntity().equals(BusinessEntity.Transaction)
                 ? ConsolidatedRawTransaction : stepConfiguration.getEntity().getBatchStore();
         Table masterTable = dataCollectionProxy.getTable(stepConfiguration.getCustomer(), batchStore);
-        Map<BusinessEntity, Table> mergeDeleteTables = getMapObjectFromContext(LEGACY_DELETE_MERGE_TABLENAMES,
-                BusinessEntity.class, Table.class);
+        Map<BusinessEntity, HdfsDataUnit> mergeDeleteTables = getMapObjectFromContext(LEGACY_DELETE_MERGE_TABLENAMES,
+                BusinessEntity.class, HdfsDataUnit.class);
         if (mergeDeleteTables == null) {
             log.info("mergeDeleteTables is null.");
             return null;
         }
-        Table mergeDeleteTable = mergeDeleteTables.get(stepConfiguration.getEntity());
+        HdfsDataUnit mergeDeleteTable = mergeDeleteTables.get(stepConfiguration.getEntity());
         if (masterTable == null || mergeDeleteTable == null) {
             log.info("masterTable is {}, mergeDeleteTable is {}.", masterTable, mergeDeleteTable);
             return null;
         }
-        HdfsDataUnit input1 = mergeDeleteTable.toHdfsDataUnit("Diff");
         HdfsDataUnit input2 = masterTable.toHdfsDataUnit("Master");
         CleanupOperationType type = CleanupOperationType.BYUPLOAD_ID;
         LegacyDeleteJobConfig config = new LegacyDeleteJobConfig();
@@ -87,7 +86,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
         config.setOperationType(type);
         config.setJoinedColumns(getJoinedColumns(stepConfiguration.getEntity(), type));
         config.setDeleteSourceIdx(0);
-        config.setInput(Arrays.asList(input1, input2));
+        config.setInput(Arrays.asList(mergeDeleteTable, input2));
         return config;
     }
 

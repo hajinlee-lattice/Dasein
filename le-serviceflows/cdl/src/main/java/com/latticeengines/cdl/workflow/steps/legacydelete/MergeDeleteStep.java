@@ -15,11 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.LegacyDeleteByUploadActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -66,17 +65,12 @@ public class MergeDeleteStep extends RunSparkJob<LegacyDeleteSparkStepConfigurat
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        String tenantId = CustomerSpace.shortenCustomerSpace(parseCustomerSpace(configuration).toString());
-        String mergedTableName = NamingUtils.timestamp("DeleteFile_");
-        Table mergedTable = toTable(mergedTableName, configuration.getEntity().getServingStore().getPrimaryKey().name(),
-                result.getTargets().get(0));
-        metadataProxy.createTable(tenantId, mergedTableName, mergedTable);
-        Map<BusinessEntity, Table> mergeTables = getMapObjectFromContext(LEGACY_DELETE_MERGE_TABLENAMES,
-                BusinessEntity.class, Table.class);
+        Map<BusinessEntity, HdfsDataUnit> mergeTables = getMapObjectFromContext(LEGACY_DELETE_MERGE_TABLENAMES,
+                BusinessEntity.class, HdfsDataUnit.class);
         if (mergeTables == null) {
             mergeTables = new HashMap<>();
         }
-        mergeTables.put(configuration.getEntity(), mergedTable);
+        mergeTables.put(configuration.getEntity(), result.getTargets().get(0));
         putObjectInContext(LEGACY_DELETE_MERGE_TABLENAMES, mergeTables);
     }
 
