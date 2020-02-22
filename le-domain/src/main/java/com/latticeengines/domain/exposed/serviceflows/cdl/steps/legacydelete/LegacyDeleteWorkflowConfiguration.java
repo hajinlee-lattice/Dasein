@@ -31,6 +31,9 @@ public class LegacyDeleteWorkflowConfiguration extends BaseCDLWorkflowConfigurat
         }
 
         public Builder entityMatchGAOnly(boolean gaOnly) {
+            legacyDeleteAccountWorkFlowBuilder.entityMatchGAOnly(gaOnly);
+            legacyDeleteContactWorkFlowBuilder.entityMatchGAOnly(gaOnly);
+            legacyDeleteTransactionWorkFlowBuilder.entityMatchGAOnly(gaOnly);
             return this;
         }
 
