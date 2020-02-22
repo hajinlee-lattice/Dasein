@@ -210,9 +210,9 @@ public class SegmentServiceImpl implements SegmentService {
                     if (updated1 != null && updated2 != null) {
                         return updated2.compareTo(updated1);
                     } else if (updated1 != null) {
-                        return 1;
-                    } else if (updated2 != null) {
                         return -1;
+                    } else if (updated2 != null) {
+                        return 1;
                     } else {
                         return 0;
                     }
