@@ -111,6 +111,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
             dataCollectionProxy.resetTable(tenantId, batchStore);
             return;
         }
+        metadataProxy.createTable(tenantId, cleanupTableName, cleanupTable);
         DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION,
                 DataCollection.Version.class);
         DynamoDataUnit dataUnit = null;
