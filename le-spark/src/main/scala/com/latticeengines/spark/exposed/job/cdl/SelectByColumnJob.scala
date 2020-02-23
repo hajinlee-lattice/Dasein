@@ -16,6 +16,5 @@ class SelectByColumnJob extends AbstractSparkJob[SelectByColumnConfig] {
     val result = original.join(source, Seq(joinColumn), "inner").select(destColumn).distinct()
     lattice.output = result::Nil
 
-
   }
 }
