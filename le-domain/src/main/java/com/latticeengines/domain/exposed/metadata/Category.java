@@ -37,7 +37,7 @@ public enum Category {
     LEAD_INFORMATION("Lead Information", 13), //
     DEFAULT("Default", 14), //
     AI_INSIGHTS("AI Insights", 15), //
-    WEB_VISIT_PROFILE("My Website Profile", 16) {
+    WEB_VISIT_PROFILE("My Website Visits", 16) {
         @Override
         public FilterOptions getFilterOptions() {
             return WebVisitUtils.attrFilterOptions();

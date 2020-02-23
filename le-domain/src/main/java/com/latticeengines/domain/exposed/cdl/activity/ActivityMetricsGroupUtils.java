@@ -42,8 +42,8 @@ public final class ActivityMetricsGroupUtils {
 
     // (operator in timeRange tmpl) <--> (description)
     private static final BiMap<String, String> RELATION_DESCRIPTION = new ImmutableBiMap.Builder<String, String>()
-            .put("w", "in last") // within
-            .put("b", "between") // between
+            .put("w", "Last") // within
+            .put("b", "Between") // between
             .build();
 
 
@@ -112,6 +112,7 @@ public final class ActivityMetricsGroupUtils {
         map.put("operator", getValueFromBiMap(RELATION_STR, timeFilter.getRelation().toString()));
         map.put("period", getValueFromBiMap(PERIOD_STR, timeFilter.getPeriod()));
         map.put("params", timeFilter.getValues());
+
         return TemplateUtils.renderByMap(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE, map);
     }
 
@@ -172,10 +173,12 @@ public final class ActivityMetricsGroupUtils {
         String[] fragments = timeRange.split("_");
         String operatorLetter = fragments[0].substring(0, 1);
         String periodLetter = fragments[fragments.length - 1].substring(0, 1);
+        String[] params = ArrayUtils.subarray(fragments, 1, fragments.length - 1);
         Map<String, Object> map = new HashMap<>();
-        map.put("operator", getValueFromBiMap(RELATION_DESCRIPTION, operatorLetter).toString().toLowerCase());
+        map.put("operator", getValueFromBiMap(RELATION_DESCRIPTION, operatorLetter).toString());
         map.put("period", getValueFromBiMap(PERIOD_STR.inverse(), periodLetter).toString().toLowerCase());
-        map.put("params", ArrayUtils.subarray(fragments, 1, fragments.length - 1));
+        map.put("params", params);
+        checkPlural(map, params);
         return TemplateUtils.renderByMap(descTemplate, map);
     }
 
@@ -193,5 +196,12 @@ public final class ActivityMetricsGroupUtils {
             return word.charAt(matcher.start());
         }
         return null;
+    }
+
+    private static void checkPlural(Map<String, Object> map, String[] params) {
+        List<String> paramList = Arrays.asList(params);
+        if (paramList.size() > 1 || paramList.stream().anyMatch(n -> Integer.parseInt(n) > 1)) {
+            map.put("period", map.get("period") + "s");
+        }
     }
 }
