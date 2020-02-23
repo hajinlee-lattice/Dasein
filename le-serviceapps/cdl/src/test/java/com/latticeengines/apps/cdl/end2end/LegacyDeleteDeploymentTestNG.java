@@ -80,7 +80,7 @@ public class LegacyDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase
         List<GenericRecord> recordsBeforeDelete = getRecords(table);
         originalNumRecords = recordsBeforeDelete.size();
         log.info("There are " + originalNumRecords + " rows in avro before delete.");
-        String fieldName = table.getAttribute(InterfaceName.ContactId.name()).getName();
+        String fieldName = table.getAttribute(InterfaceName.CustomerContactId.name()).getName();
         StringBuilder sb = new StringBuilder();
         sb.append("id");
         sb.append(',');
