@@ -70,8 +70,8 @@
                 <enabled>true</enabled>
             </snapshots>
             <name>Springframework Maven SNAPSHOT Repository</name>
-            <url>http://repo.spring.io/libs-snapshot</url>
+            <url>https://repo.spring.io/libs-snapshot</url>
         </repository>
     </repositories>
-    
+
 </project>
