@@ -239,8 +239,9 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       val recContactCount = recommendationDfWithContactNum.agg(sum("CONTACT_NUM")).first.get(0)
       contactNums(0) = if (recContactCount != null) recContactCount.toString.toLong else 0L
       val recommendationDf = recommendationDfWithContactNum.drop("CONTACT_NUM").checkpoint(eager = true)
-
-      exportToRecommendationTable(deltaCampaignLaunchSparkContext, recommendationDf)
+      if (deltaCampaignLaunchSparkContext.getPublishRecommendationsForS3Launch) {
+        exportToRecommendationTable(deltaCampaignLaunchSparkContext, recommendationDf)
+      }
       finalDfs += recommendationDf
       if (createAddCsvDataFrame) {
         var finalrecommendationDf: DataFrame = recommendationDf
