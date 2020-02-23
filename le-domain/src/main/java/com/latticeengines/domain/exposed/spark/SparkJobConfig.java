@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.ProcessDimensionConfig;
 import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
+import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
@@ -95,6 +96,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = GenerateAccountLookupConfig.class, name = GenerateAccountLookupConfig.NAME), //
         @JsonSubTypes.Type(value = MergeActivityMetricsJobConfig.class, name = MergeActivityMetricsJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountOrphanTransactionsConfig.class, name = CountOrphanTransactionsConfig.NAME), //
+        @JsonSubTypes.Type(value = SelectByColumnConfig.class, name = SelectByColumnConfig.NAME), //
         @JsonSubTypes.Type(value = MergeCSVConfig.class, name = MergeCSVConfig.NAME)
 })
 public abstract class SparkJobConfig implements Serializable {
