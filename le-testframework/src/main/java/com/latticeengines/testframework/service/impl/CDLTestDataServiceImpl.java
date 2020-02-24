@@ -177,6 +177,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(shortTenantId, active);
         status.setAccountCount(entityCounts.getOrDefault("Account", 0L));
         status.setContactCount(entityCounts.getOrDefault("Contact", 0L));
+        status.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(shortTenantId, status, active);
     }
 
