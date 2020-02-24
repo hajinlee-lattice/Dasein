@@ -144,6 +144,9 @@ public class AttrConfigSelectionDetail {
         @JsonProperty("IsFrozen")
         private Boolean isFrozen;
 
+        @JsonProperty("errorMessage")
+        private String errorMessage;
+
         public String getAttribute() {
             return attribute;
         }
@@ -190,6 +193,14 @@ public class AttrConfigSelectionDetail {
 
         public void setIsFrozen(Boolean isFrozenValue) {
             isFrozen = isFrozenValue;
+        }
+
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+
+        public void setErrorMessage(String errorMessage) {
+            this.errorMessage = errorMessage;
         }
 
         @Override

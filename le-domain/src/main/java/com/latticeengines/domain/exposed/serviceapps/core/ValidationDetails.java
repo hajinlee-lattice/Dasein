@@ -57,6 +57,9 @@ public class ValidationDetails {
         @JsonProperty("attr_name")
         private String attrName;
 
+        @JsonProperty("displayName")
+        private String displayName;
+
         @JsonProperty("subcategory")
         private String subcategory;
 
@@ -96,6 +99,14 @@ public class ValidationDetails {
 
         public void setImpactWarnings(ImpactWarnings impactWarnings) {
             this.impactWarnings = impactWarnings;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        public void setDisplayName(String displayName) {
+            this.displayName = displayName;
         }
     }
 }

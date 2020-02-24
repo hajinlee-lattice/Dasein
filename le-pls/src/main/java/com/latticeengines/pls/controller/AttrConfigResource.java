@@ -80,9 +80,9 @@ public class AttrConfigResource {
 
     @PutMapping(value = "/name/config/category/{categoryName}")
     @ApiOperation("update Name or Description for Account/Contract attributes")
-    public void updateNameConfig(@PathVariable String categoryName, @RequestBody SubcategoryDetail request,
+    public SubcategoryDetail updateNameConfig(@PathVariable String categoryName, @RequestBody SubcategoryDetail request,
             HttpServletResponse response) {
-        attrConfigService.updateNameConfig(categoryName, request);
+        return attrConfigService.updateNameConfig(categoryName, request);
     }
 
     @GetMapping(value = "/activation/config/category/{categoryName}")

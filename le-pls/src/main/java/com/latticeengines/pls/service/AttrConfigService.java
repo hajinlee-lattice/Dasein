@@ -30,7 +30,7 @@ public interface AttrConfigService {
 
     UIAction updateUsageConfig(String categoryName, String usageName, AttrConfigSelectionRequest request);
 
-    void updateNameConfig(String categoryName, SubcategoryDetail request);
+    SubcategoryDetail updateNameConfig(String categoryName, SubcategoryDetail request);
 
     Map<String, AttributeStats> getStats(String categoryName, @PathVariable String subcatName);
 }

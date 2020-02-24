@@ -56,7 +56,7 @@ public class AttrValidationServiceImplTestNG extends ServiceAppsFunctionalTestNG
         ValidationDetails.AttrValidation validation = details.getValidations().get(0);
         Assert.assertNotNull(validation.getValidationErrors());
         Assert.assertNull(validation.getImpactWarnings());
-        Assert.assertEquals(validation.getAttrName(), "TestAttr");
+        Assert.assertEquals(validation.getDisplayName(), "TestAttr");
         Assert.assertTrue(
                 validation.getValidationErrors().getErrors().containsKey(ValidationErrors.Type.INVALID_PROP_CHANGE));
     }

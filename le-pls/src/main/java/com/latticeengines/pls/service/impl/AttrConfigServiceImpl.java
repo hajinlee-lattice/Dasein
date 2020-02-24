@@ -468,11 +468,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public void updateNameConfig(String categoryName, SubcategoryDetail request) {
+    public SubcategoryDetail updateNameConfig(String categoryName, SubcategoryDetail request) {
         String tenantId = MultiTenantContext.getShortTenantId();
         verifyNameUpdateAccessLevel();
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForName(categoryName, request);
-        cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest, AttrConfigUpdateMode.Name);
+        AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest,
+                AttrConfigUpdateMode.Name);
+        retrieveErrorMessageFromAttrConfig(saveResponse, request);
+        return request;
     }
 
     @VisibleForTesting
@@ -554,11 +557,11 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         attrValidations.forEach(attrValidation -> {
             if (attrValidation.getSubcategory() == null) {
                 log.warn(String.format("Attribute %s does not have valid subcategory info",
-                        attrValidation.getAttrName()));
+                        attrValidation.getDisplayName()));
                 return;
             }
             List<String> attrs = result.getOrDefault(attrValidation.getSubcategory(), new ArrayList<>());
-            attrs.add(attrValidation.getAttrName());
+            attrs.add(attrValidation.getDisplayName());
             result.put(attrValidation.getSubcategory(), attrs);
         });
         return result;
@@ -629,6 +632,30 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         }
         return attrConfigRequest;
+    }
+
+    @VisibleForTesting
+    void retrieveErrorMessageFromAttrConfig(AttrConfigRequest saveResponse, SubcategoryDetail request) {
+        List<AttrValidation> attrValidations;
+        if (saveResponse.hasError()) {
+            attrValidations = saveResponse.getDetails().getValidations();
+        } else {
+            return ;
+        }
+        Map<String, AttrValidation> nameToAttrValidation =
+                attrValidations.stream().collect(Collectors.toMap(AttrValidation::getAttrName, e -> e));
+        List<AttrDetail> details = request.getAttributes();
+        for (AttrDetail detail : details) {
+            AttrValidation validation = nameToAttrValidation.get(detail.getAttribute());
+            if (validation != null) {
+                Set<String> messages = new HashSet<>();
+                Map<ValidationErrors.Type, List<String>> errors = validation.getValidationErrors().getErrors();
+                for (Map.Entry<ValidationErrors.Type, List<String>> entry : errors.entrySet()) {
+                    messages.addAll(entry.getValue());
+                }
+                detail.setErrorMessage(StringUtils.join(messages, ","));
+            }
+        }
     }
 
     @Override
