@@ -439,6 +439,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     }
 
     public MetadataSegment getDeepCopy() {
+        setDataCollection(null);
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         KryoUtils.write(bos, this);
         ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
