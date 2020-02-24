@@ -18,7 +18,11 @@ if [[ -f "/opt/java/default" ]]; then
 fi
 
 HACK_LINE="127.0.0.1 ${HOSTNAME}"
-echo ${HACK_LINE} | sudo tee -a /etc/hosts
+if [[ -n $(ps aux | grep "java -jar remoting.jar") ]]; then
+  echo "This is a jenkins slave."
+else
+  echo ${HACK_LINE} | sudo tee -a /etc/hosts
+fi
 "${HADOOP_HOME}/sbin/hadoop-daemon.sh" start namenode
 "${HADOOP_HOME}/sbin/hadoop-daemon.sh" start datanode
 "${HADOOP_HOME}/sbin/yarn-daemon.sh" start resourcemanager
