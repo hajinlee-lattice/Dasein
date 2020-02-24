@@ -1,6 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.maintenance;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SELECT_BY_COLUMN_TXFMR;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -10,7 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
+import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 
 @Lazy
 @Component(SoftDeleteContact.BEAN_NAME)
@@ -27,16 +32,32 @@ public class SoftDeleteContact extends BaseSingleEntitySoftDelete<ProcessContact
         List<TransformationStepConfig> steps = new ArrayList<>();
 
         int softDeleteMergeStep = 0;
+        int selectContactStep = softDeleteMergeStep + 1;
         TransformationStepConfig mergeSoftDelete = mergeSoftDelete(softDeleteActions);
-        TransformationStepConfig softDeleteSystemBatchStore = softDeleteSystemBatchStore(softDeleteMergeStep);
+        TransformationStepConfig selectContact = selectContact(softDeleteMergeStep);
+        TransformationStepConfig softDeleteSystemBatchStore = softDeleteSystemBatchStore(selectContactStep);
         TransformationStepConfig softDelete = softDelete(softDeleteMergeStep);
         steps.add(mergeSoftDelete);
+        steps.add(selectContact);
         steps.add(softDeleteSystemBatchStore);
         steps.add(softDelete);
 
         request.setSteps(steps);
 
         return request;
+    }
+
+    private TransformationStepConfig selectContact(int mergeSoftDeleteStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(TRANSFORMER_SELECT_BY_COLUMN_TXFMR);
+        step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
+
+        SelectByColumnConfig config = new SelectByColumnConfig();
+        config.setSourceColumn(InterfaceName.AccountId.name());
+        config.setDestColumn(InterfaceName.ContactId.name());
+
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
     }
 
     @Override
