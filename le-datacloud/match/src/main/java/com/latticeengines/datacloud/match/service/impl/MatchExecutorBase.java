@@ -144,16 +144,27 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             if (matchInput != null) {
                 if (matchInput.getTenant() != null) {
                     matchHistory.setTenantId(matchInput.getTenant().getId())
-                            .setRootOperationUid(matchInput.getRootOperationUid());
+                            .setRootOperationUid(matchInput.getRootOperationUid())
+                            .setApplicationId(matchInput.getApplicationId());
                 }
                 if (matchInput.getRequestSource() != null)
                     matchHistory.setRequestSource(matchInput.getRequestSource().toString());
             }
+            String matchStatus = getMatchStatus(record, matchHistory);
+            matchHistory.setMatchStatus(matchStatus);
 
             matchHistories.add(matchHistory);
         }
 
         publishMatchHistory(matchHistories);
+    }
+
+    private String getMatchStatus(InternalOutputRecord record, MatchHistory matchHistory) {
+        if (record.isFailed()) {
+            return "U";
+        } else {
+            return Boolean.TRUE.equals(matchHistory.getMatched()) ? "T" : "F";
+        }
     }
 
     private void publishMatchHistory(List<MatchHistory> matchHistories) {
