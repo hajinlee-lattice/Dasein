@@ -32,7 +32,6 @@ import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.util.DiagnoseTable;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
-import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -59,6 +58,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 
 @Component("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
@@ -85,7 +85,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
 
     @Inject
-    private S3Service s3Service;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Inject
     private BatonService batonService;
@@ -480,6 +480,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             status.setDataCollection(collection);
             status.setTenant(tenant);
             status.setVersion(version);
+            status.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
         }
         return status;
     }
