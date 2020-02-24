@@ -168,6 +168,7 @@ public class ExportToRedshift extends BaseWorkflowStep<ExportToRedshiftStepConfi
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
             unit.setName(config.getTableName());
             unit.setRedshiftTable(config.getTableName().toLowerCase());
+            unit.setClusterPartition(config.getClusterPartition());
             DataUnit created = dataUnitProxy.create(customerSpace, unit);
             log.info("Registered DataUnit: " + JsonUtils.pprint(created));
         }

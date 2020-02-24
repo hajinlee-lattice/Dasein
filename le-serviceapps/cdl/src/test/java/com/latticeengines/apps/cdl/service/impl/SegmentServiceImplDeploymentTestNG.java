@@ -24,6 +24,9 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
+/**
+ * dpltc deploy -a admin,lp,cdl,objectapi,matchapi,metadata
+ */
 public class SegmentServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Inject
