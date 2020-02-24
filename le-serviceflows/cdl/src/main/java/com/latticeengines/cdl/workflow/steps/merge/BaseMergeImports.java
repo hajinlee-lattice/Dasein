@@ -643,4 +643,11 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return convertBatchStoreTableName == null;
     }
 
+    protected boolean isHasLegacyDelete() {
+        if (hasKeyInContext(LEGACY_DELETE_BYDATERANGE_ACTIONS) || hasKeyInContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS) || hasKeyInContext(CONTACT_LEGACY_DELTE_BYUOLOAD_ACTIONS) || hasKeyInContext(TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS)) {
+            return true;
+        }
+        return false;
+    }
+
 }
