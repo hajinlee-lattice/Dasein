@@ -24,7 +24,8 @@ public class RedshiftQueryProvider extends QueryProvider {
 
     @Override
     public boolean providesQueryAgainst(AttributeRepository repository, String sqlUser) {
-        return getRedshiftDataSource(repository, sqlUser) != null;
+        boolean validUser = USER_BATCH.equalsIgnoreCase(sqlUser) || USER_SEGMENT.equalsIgnoreCase(sqlUser);
+        return validUser && getRedshiftDataSource(repository, sqlUser) != null;
     }
 
     @Override
