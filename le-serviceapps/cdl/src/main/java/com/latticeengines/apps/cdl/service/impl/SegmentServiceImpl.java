@@ -98,8 +98,7 @@ public class SegmentServiceImpl implements SegmentService {
     }
 
     @Override
-    public Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck,
-            boolean hardDelete) {
+    public Boolean deleteSegmentByName(String segmentName, boolean ignoreDependencyCheck, boolean hardDelete) {
         MetadataSegment segment = segmentEntityMgr.findByName(segmentName);
         if (segment == null) {
             return false;
@@ -128,7 +127,7 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment findByName(String name) {
         MetadataSegment segment = segmentEntityMgr.findByName(name);
-        if (Boolean.TRUE.equals(segment.getCountsOutdated())) {
+        if (segment != null && Boolean.TRUE.equals(segment.getCountsOutdated())) {
             log.info("Segment {}  has outdated count, trying to update it.", segment.getName());
             try {
                 Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
@@ -371,14 +370,14 @@ public class SegmentServiceImpl implements SegmentService {
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(segment.getAccountRestriction()));
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(segment.getContactRestriction()));
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_40057, e, new String[]{ e.getMessage() });
+            throw new LedpException(LedpCode.LEDP_40057, e, new String[] { e.getMessage() });
         }
         if (CollectionUtils.isNotEmpty(invalidBkts)) {
             String message = invalidBkts.stream() //
                     .map(BucketRestriction::getAttr) //
                     .map(AttributeLookup::toString) //
                     .collect(Collectors.joining(","));
-            throw new LedpException(LedpCode.LEDP_40057, new String[]{ message });
+            throw new LedpException(LedpCode.LEDP_40057, new String[] { message });
         }
     }
 }
