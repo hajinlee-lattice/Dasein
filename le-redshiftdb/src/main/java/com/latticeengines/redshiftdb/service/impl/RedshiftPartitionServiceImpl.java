@@ -109,6 +109,9 @@ public class RedshiftPartitionServiceImpl implements RedshiftPartitionService {
     }
 
     private synchronized RedshiftService createService(String partition, String user) {
+        if (StringUtils.isBlank(partition)) {
+            partition = defaultPartition;
+        }
         String cacheKey = getCacheKey(partition, user);
         if (services.containsKey(cacheKey)) {
             return services.get(cacheKey);
