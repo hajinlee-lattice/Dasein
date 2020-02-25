@@ -1,5 +1,7 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
@@ -39,7 +41,8 @@ public class LivySessionManager {
 
     private final AtomicReference<LivySession> livySessionHolder = new AtomicReference<>(null);
 
-    public LivySession createLivySession(String jobName, LivyScalingConfig livySessionConfig) {
+    public LivySession createLivySession(String jobName, LivyScalingConfig livySessionConfig,
+            Map<String, String> extraSparkConf) {
         LivySession session = livySessionHolder.get();
         if (session != null) {
             killSession();
@@ -52,8 +55,16 @@ public class LivySessionManager {
                 .withDriverMem(driverMem).withDriverCores(driverCores) //
                 .withExecutorMem(executorMem).withExecutorCores(executorCores) //
                 .withMinExecutors(minExecutors).withMaxExecutors(maxExecutors);
+
+        // Construct spark configuration
+        Map<String, String> sparkConf = new HashMap<>();
+        sparkConf.putAll(configurer.getSparkConf(livySessionConfig));
+        if (extraSparkConf != null) {
+            sparkConf.putAll(extraSparkConf);
+        }
+
         session = sessionService.startSession(jobName, //
-                configurer.getLivyConf(livySessionConfig), configurer.getSparkConf(livySessionConfig));
+                configurer.getLivyConf(livySessionConfig), sparkConf);
         livySessionHolder.set(session);
         return session;
     }

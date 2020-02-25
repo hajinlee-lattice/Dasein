@@ -87,8 +87,8 @@ public class SessionServiceImpl implements SessionService {
             log.info("Saml Login response is missing required information. " + samlLoginResp);
             throw new LedpException(LedpCode.LEDP_19005);
         }
-        //PLS-6543. Do not allow usernames with lattice-email id.
-        if(EmailUtils.isInternalUser(samlLoginResp.getUserId())) {
+        // PLS-6543. Do not allow usernames with lattice-email id.
+        if (EmailUtils.isInternalUser(samlLoginResp.getUserId())) {
             throw new LedpException(LedpCode.LEDP_19004);
         }
     }
@@ -158,7 +158,7 @@ public class SessionServiceImpl implements SessionService {
         List<GlobalAuthTicket> gaTickets = //
                 globalSessionManagementService.findTicketsByEmailAndExternalIssuer(userName, issuer);
         log.info("Found {} tickets for {} issued by {}", CollectionUtils.size(gaTickets), userName, issuer);
-        for (GlobalAuthTicket gaTicket: gaTickets) {
+        for (GlobalAuthTicket gaTicket : gaTickets) {
             logout(new Ticket(gaTicket.getTicket()));
         }
     }
@@ -192,7 +192,8 @@ public class SessionServiceImpl implements SessionService {
                     break;
                 }
             } catch (Exception e) {
-                log.warn("Failed to retrieve session {} from GA - retried {} out of {} times. Cause: {}", token, retries, MAX_RETRY, e.getMessage());
+                log.warn("Failed to retrieve session {} from GA - retried {} out of {} times. Cause: {}", token,
+                        retries, MAX_RETRY, e.getMessage());
             }
             retryInterval = Double.valueOf(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
             SleepUtils.sleep(retryInterval);

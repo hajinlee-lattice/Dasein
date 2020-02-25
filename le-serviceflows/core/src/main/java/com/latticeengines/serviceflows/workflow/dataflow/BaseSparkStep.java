@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -69,10 +70,16 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     protected CustomerSpace customerSpace;
     private int scalingMultiplier = 1;
     private int partitionMultiplier = 1;
+    private String sparkMaxResultSize = null;
 
     protected LivySession createLivySession(String jobName) {
+        Map<String, String> extraConf = null;
+        if (sparkMaxResultSize != null) {
+            extraConf = new HashMap<>();
+            extraConf.put("spark.driver.maxResultSize", sparkMaxResultSize);
+        }
         return livySessionManager.createLivySession(jobName, //
-                new LivyScalingConfig(scalingMultiplier, partitionMultiplier));
+                new LivyScalingConfig(scalingMultiplier, partitionMultiplier), extraConf);
     }
 
     protected void killLivySession() {
@@ -170,4 +177,8 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
         log.info("Adjust partitionMultiplier to {}", this.partitionMultiplier);
     }
 
+    protected void setSparkMaxResultSize(String maxResultSize) {
+        this.sparkMaxResultSize = maxResultSize;
+        log.info("Adjust sparkMaxResultSize to " + this.sparkMaxResultSize);
+    }
 }
