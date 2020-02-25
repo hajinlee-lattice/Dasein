@@ -53,6 +53,8 @@ public class AmbiguityValidator extends AttrValidator {
             if (attrNames.contains(displayName)) {
                 addErrorMsg(ValidationErrors.Type.DUPLICATE_NAME_CHANGE,
                         ValidationMsg.Errors.DUPLICATED_NAME, attrConfig);
+            } else {
+                attrNames.add(displayName);
             }
         }
     }

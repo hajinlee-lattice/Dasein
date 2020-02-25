@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class AttrConfigResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
                 AttrConfigSelectionDetail.SubcategoryDetail.class);
         List<AttrConfigSelectionDetail.AttrDetail> details = subcategoryDetail.getAttributes();
         Assert.assertTrue(details.size() > 2);
-        // get two details from get api and assign the display name of the second to the first one
+        // case 1: get two details from get api and assign the display name of the second to the first one
         AttrConfigSelectionDetail.AttrDetail detail1 = details.get(0);
         AttrConfigSelectionDetail.AttrDetail detail2 = details.get(1);
         detail1.setDisplayName(detail2.getDisplayName());
@@ -75,16 +76,31 @@ public class AttrConfigResourceDeploymentTestNG extends PlsDeploymentTestNGBase 
         ResponseEntity<AttrConfigSelectionDetail.SubcategoryDetail> responseBody = restTemplate.exchange(url,
                 HttpMethod.PUT, entities,
                 AttrConfigSelectionDetail.SubcategoryDetail.class);
+        verifyResult(responseBody, 1);
+
+        // case 2: duplication of display name of two attributes in one request body
+        String attrName = this.getClass().getSimpleName();
+        detail1.setDisplayName(attrName);
+        detail2.setDisplayName(attrName);
+        requestBody.setAttributes(Arrays.asList(detail1, detail2));
+        responseBody = restTemplate.exchange(url,
+                HttpMethod.PUT, entities,
+                AttrConfigSelectionDetail.SubcategoryDetail.class);
+        verifyResult(responseBody,2);
+    }
+
+    private void verifyResult(ResponseEntity<AttrConfigSelectionDetail.SubcategoryDetail> responseBody, int size) {
         Assert.assertNotNull(responseBody.getBody());
         AttrConfigSelectionDetail.SubcategoryDetail categoryDetailResult = responseBody.getBody();
         List<AttrConfigSelectionDetail.AttrDetail> resultDetails = categoryDetailResult.getAttributes();
         Assert.assertNotNull(resultDetails);
-        Assert.assertEquals(resultDetails.size(), 1);
-        AttrConfigSelectionDetail.AttrDetail resultDetail = resultDetails.get(0);
-        Assert.assertEquals(resultDetail.getErrorMessage(), ValidationMsg.Errors.DUPLICATED_NAME);
-
-
-
+        Assert.assertEquals(resultDetails.size(), size);
+        AttrConfigSelectionDetail.AttrDetail detail =
+                resultDetails.stream().
+                        filter(e -> ValidationMsg.Errors.DUPLICATED_NAME.equals(e.getErrorMessage())).
+                        findFirst().
+                        orElse(null);
+        Assert.assertNotNull(detail);
     }
 
     // TODO: Prepared metadata in cdlTestDataService only has 2 categories.
