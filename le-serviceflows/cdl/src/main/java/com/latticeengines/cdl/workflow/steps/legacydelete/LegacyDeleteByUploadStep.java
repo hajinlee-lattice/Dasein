@@ -103,15 +103,15 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
     @Override
     protected TransformationWorkflowConfiguration executePreTransformation() {
         intializeConfiguration();
+        if (masterTable == null || (CollectionUtils.isEmpty(canMergeActions) && CollectionUtils.isEmpty(otherActions))) {
+            return null;
+        }
         PipelineTransformationRequest request = generateRequest();
         return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request,
                 configuration.getPodId());
     }
 
     private PipelineTransformationRequest generateRequest() {
-        if (masterTable == null || (CollectionUtils.isEmpty(canMergeActions) && CollectionUtils.isEmpty(otherActions))) {
-            return null;
-        }
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("LegacyDeleteByUploadStep");
         request.setSubmitter(customerSpace.getTenantId());
