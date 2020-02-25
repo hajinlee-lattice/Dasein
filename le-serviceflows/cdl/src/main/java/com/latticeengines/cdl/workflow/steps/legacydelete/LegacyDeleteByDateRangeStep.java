@@ -65,6 +65,12 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
         if (configuration.getEntity() == null || configuration.getEntity() != BusinessEntity.Transaction) {
             throw new LedpException(LedpCode.LEDP_40001);
         }
+        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELETE_BYDATERANGE_ACTIONS,
+                BusinessEntity.class, Set.class);
+        log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
+        if (actionMap == null && !actionMap.containsKey(configuration.getEntity())) {
+            return;
+        }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION,
                 DataCollection.Version.class);
         active = getObjectFromContext(CDL_ACTIVE_VERSION,
@@ -77,9 +83,6 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
             }
             return;
         }
-        Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELETE_BYDATERANGE_ACTIONS,
-                BusinessEntity.class, Set.class);
-        log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
         if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {
             Set<Action> actionSet = JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class);
             for (Action action : actionSet) {
