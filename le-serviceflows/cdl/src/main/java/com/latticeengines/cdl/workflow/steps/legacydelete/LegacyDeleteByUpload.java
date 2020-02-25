@@ -58,6 +58,9 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
 
     private TableRoleInCollection batchStore;
 
+    private DataCollection.Version active;
+    private DataCollection.Version inactive;
+
     @Override
     protected Class<? extends AbstractSparkJob<LegacyDeleteJobConfig>> getJobClz() {
         return LegacyDeleteJob.class;
@@ -67,7 +70,9 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
     protected LegacyDeleteJobConfig configureJob(LegacyDeleteSparkStepConfiguration stepConfiguration) {
         batchStore = stepConfiguration.getEntity().equals(BusinessEntity.Transaction)
                 ? ConsolidatedRawTransaction : stepConfiguration.getEntity().getBatchStore();
-        Table masterTable = dataCollectionProxy.getTable(stepConfiguration.getCustomer(), batchStore);
+        active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        Table masterTable = dataCollectionProxy.getTable(stepConfiguration.getCustomer(), batchStore, active);
         Map<BusinessEntity, HdfsDataUnit> mergeDeleteTables = getMapObjectFromContext(LEGACY_DELETE_MERGE_TABLENAMES,
                 BusinessEntity.class, HdfsDataUnit.class);
         if (mergeDeleteTables == null) {
@@ -112,13 +117,11 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
             return;
         }
         metadataProxy.createTable(tenantId, cleanupTableName, cleanupTable);
-        DataCollection.Version version = getObjectFromContext(CDL_INACTIVE_VERSION,
-                DataCollection.Version.class);
         DynamoDataUnit dataUnit = null;
         if (batchStore.equals(BusinessEntity.Account.getBatchStore())) {
             // if replaced account batch store, need to link dynamo table
             String oldBatchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore,
-                    version);
+                    active);
             dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace.toString(), oldBatchStoreName,
                     DataUnit.StorageType.Dynamo);
             if (dataUnit != null) {
@@ -127,7 +130,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
                 dataUnit.setName(cleanupTableName);
             }
         }
-        dataCollectionProxy.upsertTable(customerSpace.toString(), cleanupTableName, batchStore, version);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), cleanupTableName, batchStore, inactive);
         if (dataUnit != null) {
             dataUnitProxy.create(customerSpace.toString(), dataUnit);
         }
