@@ -30,6 +30,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
@@ -50,6 +51,8 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteByDateRangeActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteByUploadActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -290,6 +293,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Action> hardDeleteActions = getSoftOrHardDeleteActions(false, actions);
         putObjectInContext(SOFT_DEELETE_ACTIONS, softDeleteActions);
         putObjectInContext(HARD_DEELETE_ACTIONS, hardDeleteActions);
+        setLegacyDeleteByUploadActions(actions);
+        setLegacyDeleteByDateRangeActions(actions);
 
         grapherContext.setFullRematch(Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class)));
         grapherContext.setHasSoftDelete(CollectionUtils.isNotEmpty(softDeleteActions));
@@ -502,6 +507,60 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         } else {
             return Collections.emptyList();
         }
+    }
+
+    private void setLegacyDeleteByUploadActions(List<Action> actions) {
+        Set<Action> accountLegacyDeleteByUploadActions = new HashSet<>();
+        Set<Action> contactLegacyDeleteByUploadActions = new HashSet<>();
+        Map<CleanupOperationType, Set<Action>> transactionLegacyDeleteByUploadActions = new HashMap<>();
+        if (CollectionUtils.isEmpty(actions)) {
+            return;
+        }
+        for (Action action : actions) {
+            if (!ActionType.LEGACY_DELETE_UPLOAD.equals(action.getType())) {
+                continue;
+            }
+            LegacyDeleteByUploadActionConfiguration config = (LegacyDeleteByUploadActionConfiguration) action.getActionConfiguration();
+            if (BusinessEntity.Account.equals(config.getEntity())) {
+                accountLegacyDeleteByUploadActions.add(action);
+                continue;
+            }
+            if (BusinessEntity.Contact.equals(config.getEntity())) {
+                contactLegacyDeleteByUploadActions.add(action);
+                continue;
+            }
+            if (BusinessEntity.Transaction.equals(config.getEntity())) {
+                transactionLegacyDeleteByUploadActions.putIfAbsent(config.getCleanupOperationType(), new HashSet<>());
+                Set<Action> actionSet = transactionLegacyDeleteByUploadActions.get(config.getCleanupOperationType());
+                actionSet.add(action);
+                transactionLegacyDeleteByUploadActions.put(config.getCleanupOperationType(), actionSet);
+            }
+        }
+        log.info("transactionLegacyDeleteByUploadActions is {}.", JsonUtils.serialize(transactionLegacyDeleteByUploadActions));
+        log.info("accountLegacyDeleteByUploadActions is {}.", accountLegacyDeleteByUploadActions);
+        log.info("contactLegacyDeleteByUploadActions is {}.", contactLegacyDeleteByUploadActions);
+        putObjectInContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, accountLegacyDeleteByUploadActions);
+        putObjectInContext(CONTACT_LEGACY_DELTE_BYUOLOAD_ACTIONS, contactLegacyDeleteByUploadActions);
+        putObjectInContext(TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS, transactionLegacyDeleteByUploadActions);
+    }
+
+    private void setLegacyDeleteByDateRangeActions(List<Action> actions) {
+        Map<BusinessEntity, Set<Action>> legacyDeleteByDateRangeActions = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(actions)) {
+            for (Action action : actions) {
+                if (ActionType.LEGACY_DELETE_DATERANGE.equals(action.getType())) {
+                    LegacyDeleteByDateRangeActionConfiguration config = (LegacyDeleteByDateRangeActionConfiguration) action.getActionConfiguration();
+                    Set<Action> actionSet = legacyDeleteByDateRangeActions.get(config.getEntity());
+                    if (actionSet == null) {
+                        actionSet = new HashSet<>();
+                    }
+                    actionSet.add(action);
+                    legacyDeleteByDateRangeActions.put(config.getEntity(), actionSet);
+                }
+            }
+        }
+        log.info("legacyDeleteByDateRangeActions is {}.", JsonUtils.serialize(legacyDeleteByDateRangeActions));
+        putObjectInContext(LEGACY_DELETE_BYDATERANGE_ACTIONS, legacyDeleteByDateRangeActions);
     }
 
     private List<Action> getDeleteActions() {

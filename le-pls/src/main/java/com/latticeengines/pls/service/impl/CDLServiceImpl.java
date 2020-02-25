@@ -229,7 +229,7 @@ public class CDLServiceImpl implements CDLService {
             CleanupOperationType cleanupOperationType) {
         BusinessEntity entity;
         UIAction uiAction = new UIAction();
-        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
+        if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)) && !batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpace))) {
             uiAction.setTitle(DELETE_FAIL_TITLE);
             uiAction.setView(View.Modal);
             uiAction.setStatus(Status.Error);
@@ -275,7 +275,7 @@ public class CDLServiceImpl implements CDLService {
         }
         String email = MultiTenantContext.getEmailAddress();
         try {
-            cdlProxy.cleanupByUpload(customerSpace, sourceFile, entity, cleanupOperationType, email);
+            cdlProxy.legacyDeleteByUpload(customerSpace, sourceFile, entity, cleanupOperationType, email);
         } catch (RuntimeException e) {
             uiAction.setTitle(DELETE_FAIL_TITLE);
             uiAction.setView(View.Modal);

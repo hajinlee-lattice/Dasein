@@ -249,7 +249,7 @@ public class ModelingFileUploadResource {
             throw new LedpException(LedpCode.LEDP_18173, new String[] { schemaInterpretation.name() });
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (batonService.isEntityMatchEnabled(customerSpace)) {
+        if (batonService.isEntityMatchEnabled(customerSpace) && !batonService.onlyEntityMatchGAEnabled(customerSpace)) {
             if (schemaInterpretation != SchemaInterpretation.RegisterDeleteDataTemplate) {
                 throw new LedpException(LedpCode.LEDP_18235);
             }

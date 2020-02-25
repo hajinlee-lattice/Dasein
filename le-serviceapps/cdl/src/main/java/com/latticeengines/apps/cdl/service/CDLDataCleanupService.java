@@ -10,5 +10,9 @@ public interface CDLDataCleanupService {
 
     void createReplaceAction(String customerSpace, CleanupOperationConfiguration configuration);
 
+    ApplicationId createLegacyDeleteUploadAction(String customerSpace, CleanupOperationConfiguration configuration);
+
+    void createLegacyDeleteDateRangeAction(String customerSpace, CleanupOperationConfiguration configuration);
+
     ApplicationId registerDeleteData(String customerSpace, boolean hardDelete, String sourceFileName, String user);
 }

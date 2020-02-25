@@ -478,6 +478,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, //
                 ActionType.SOFT_DELETE,
                 ActionType.HARD_DELETE,
+                ActionType.LEGACY_DELETE_UPLOAD,
                 ActionType.CDL_OPERATION_WORKFLOW);
         List<String> importAndDeleteJobPidStrs = actions.stream()
                 .filter(action -> importAndDeleteTypes.contains(action.getType()) && action.getTrackingPid() != null

@@ -12,16 +12,19 @@ import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
 import com.latticeengines.apps.cdl.workflow.CDLOperationWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RegisterDeleteDataWorkflowSubmitter;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
+import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteByDateRangeActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -44,6 +47,9 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
 
     @Inject
     private RegisterDeleteDataWorkflowSubmitter registerDeleteDataWorkflowSubmitter;
+
+    @Inject
+    private BatonService batonService;
 
     private final CDLOperationWorkflowSubmitter cdlOperationWorkflowSubmitter;
 
@@ -81,6 +87,59 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
             createReplaceAction(tenant, configuration.getOperationInitiator(), BusinessEntity.Transaction);
         } else {
             createReplaceAction(tenant, configuration.getOperationInitiator(), businessEntity);
+        }
+    }
+
+    @Override
+    public ApplicationId createLegacyDeleteUploadAction(String customerSpace, CleanupOperationConfiguration configuration) {
+        if (isEntityMatchEnabled(customerSpace)) {
+            throw new IllegalStateException("entityMatch tenant cannot create legacyDelete Action.");
+        }
+        String sourceFileName = ((CleanupByUploadConfiguration) configuration).getFileName();
+        SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileName);
+        if (sourceFile == null) {
+            log.error("Cannot find SourceFile with name: {}", sourceFileName);
+            throw new RuntimeException("Cannot find SourceFile with name: " + sourceFileName);
+        }
+        if (StringUtils.isEmpty(sourceFile.getTableName())) {
+            log.error("SourceFile: {} does not have a table object!", sourceFileName);
+            throw new RuntimeException(String.format("SourceFile: %s does not have a table object!", sourceFileName));
+        }
+        return registerDeleteDataWorkflowSubmitter.legacyDeleteSubmit(CustomerSpace.parse(customerSpace), sourceFile,
+                configuration.getOperationInitiator(), configuration, new WorkflowPidWrapper(-1L));
+    }
+
+    @Override
+    public void createLegacyDeleteDateRangeAction(String customerSpace, CleanupOperationConfiguration configuration) {
+        if (isEntityMatchEnabled(customerSpace)) {
+            throw new IllegalStateException("entityMatch tenant cannot create legacyDelete Action.");
+        }
+        log.info("customerSpace: {}, CleanupOperationConfiguration: {}", customerSpace, configuration);
+        log.info("Registering an operation action for tenant={}", customerSpace);
+        Tenant tenant = tenantService.findByTenantId(customerSpace);
+        if (tenant == null) {
+            throw new NullPointerException(
+                    String.format("Tenant with id=%s cannot be found", customerSpace));
+        }
+        if (configuration instanceof CleanupByDateRangeConfiguration) {
+            BusinessEntity businessEntity = configuration.getEntity();
+            if (businessEntity == null) {
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        BusinessEntity.Account);
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        BusinessEntity.Contact);
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        BusinessEntity.Product);
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        BusinessEntity.Transaction);
+            } else {
+                createLegacyDeleteByDateRangeAction(tenant, (CleanupByDateRangeConfiguration) configuration,
+                        businessEntity);
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("Tenant with id=%s cannot find CleanupByDataRangeConfiguration when do delete " +
+                            "operation.", customerSpace));
         }
     }
 
@@ -127,4 +186,30 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
         }
         actionService.create(action);
     }
+
+    private void createLegacyDeleteByDateRangeAction(Tenant tenant,
+                                                     CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration,
+                                                     BusinessEntity entity) {
+        Action action = new Action();
+        action.setType(ActionType.LEGACY_DELETE_DATERANGE);
+        action.setActionInitiator(cleanupByDateRangeConfiguration.getOperationInitiator());
+        LegacyDeleteByDateRangeActionConfiguration legacyDeleteByDateRangeActionConfiguration =
+                new LegacyDeleteByDateRangeActionConfiguration();
+        legacyDeleteByDateRangeActionConfiguration.setEntity(entity);
+        legacyDeleteByDateRangeActionConfiguration.setStartTime(cleanupByDateRangeConfiguration.getStartTime());
+        legacyDeleteByDateRangeActionConfiguration.setEndTime(cleanupByDateRangeConfiguration.getEndTime());
+        action.setActionConfiguration(legacyDeleteByDateRangeActionConfiguration);
+        action.setTenant(tenant);
+        if (tenant.getPid() != null) {
+            MultiTenantContext.setTenant(tenant);
+        } else {
+            log.warn("The tenant in action does not have a pid:{}. ", tenant);
+        }
+        actionService.create(action);
+    }
+
+    private boolean isEntityMatchEnabled(String customerSpace) {
+        return batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)) && !batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(customerSpace));
+    }
+
 }

@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
-import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.HARD_DEELETE_ACTIONS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_DYNAMO;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_REDSHIFT;
 
@@ -14,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.ConvertBatchStoreToDataTableWorkflow;
+import com.latticeengines.cdl.workflow.LegacyDeleteWorkFlow;
 import com.latticeengines.cdl.workflow.MatchEntityWorkflow;
 import com.latticeengines.cdl.workflow.ProcessAccountWorkflow;
 import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
@@ -22,8 +23,6 @@ import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.process.ApsGeneration;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
-import com.latticeengines.cdl.workflow.steps.rematch.DeleteByUploadStep;
-import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ApsGenerationStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
@@ -61,6 +60,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessRatingChoreographer ratingChoreographer;
 
     @Inject
+    private ConvertBatchStoreToDataTableWorkflow convertBatchStoreToDataTableWorkflow;
+
+    @Inject
     private MatchEntityWorkflow matchEntityWorkflow;
 
     @Inject
@@ -79,6 +81,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private ProcessRatingWorkflow ratingWorkflow;
 
     @Inject
+    private LegacyDeleteWorkFlow legacyDeleteWorkFlow;
+
+    @Inject
     private AwsApsGeneratorStep awsApsGeneratorStep;
 
     @Inject
@@ -89,9 +94,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
 
     @Inject
     private ExportToDynamo exportToDynamoStep;
-
-    @Inject
-    private DeleteByUploadStep deleteByUploadStep;
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -120,8 +122,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
             skip = skipExportToDynamoStep(step);
         } else if (isRatingStep(seq)) {
             skip = ratingChoreographer.skipStep(step, seq);
-        } else if (isHardDeleteByUploadStep(step)) {
-            skip = skipHardDeleteByUpload(step);
         }
         return super.skipStep(step, seq) || skip;
     }
@@ -201,15 +201,6 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
                     "Skip APS generation because there is no change in Transaction data, has no analytic product or no enforced rebuild.");
         }
         return skip;
-    }
-
-    private boolean isHardDeleteByUploadStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        return step.name().endsWith(deleteByUploadStep.name());
-    }
-
-    private boolean skipHardDeleteByUpload(AbstractStep<? extends BaseStepConfiguration> step) {
-        List<Action> actions = step.getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
-        return CollectionUtils.isEmpty(actions);
     }
 
     private boolean hasAnalyticProduct(AbstractStep<? extends BaseStepConfiguration> step) {

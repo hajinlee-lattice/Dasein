@@ -24,7 +24,10 @@ public enum ActionType {
     INTENT_CHANGE("intentChange", "Intent Data Refresh"),
     // New clean up operation: soft / hard delete.
     SOFT_DELETE("softDelete", "Soft Delete"),
-    HARD_DELETE("hardDelete", "Hard Delete");
+    HARD_DELETE("hardDelete", "Hard Delete"),
+    //legacy tenant delete operation
+    LEGACY_DELETE_UPLOAD("legacyDeleteUpload", "Delete By Upload"),
+    LEGACY_DELETE_DATERANGE("legacyDeleteDaterange", "Delete By Daterange");
 
     private static final Set<ActionType> NON_WORKFLOW_JOB_TYPES = new HashSet<>(
             Arrays.asList(METADATA_CHANGE, RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE,

@@ -291,6 +291,52 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
+    public void legacyDeleteByDateRange(String customerSpace, String startTime, String endTime,
+                                            BusinessEntity entity, String initiator) throws ParseException {
+        String urlPattern = "/customerspaces/{customerSpace}/datacleanup/legacyDeleteByDateRangeAction";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date start = dateFormat.parse(startTime);
+        Date end = dateFormat.parse(endTime);
+        String url = constructUrl(urlPattern, customerSpace);
+        CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration = new CleanupByDateRangeConfiguration();
+        cleanupByDateRangeConfiguration.setOperationType(MaintenanceOperationType.DELETE);
+        cleanupByDateRangeConfiguration.setCleanupOperationType(CleanupOperationType.BYDATERANGE);
+        cleanupByDateRangeConfiguration.setStartTime(start);
+        cleanupByDateRangeConfiguration.setEndTime(end);
+        cleanupByDateRangeConfiguration.setEntity(entity);
+        cleanupByDateRangeConfiguration.setCustomerSpace(customerSpace);
+        cleanupByDateRangeConfiguration.setOperationInitiator(initiator);
+        post("cleanup by time range", url, cleanupByDateRangeConfiguration,
+                ResponseDocument.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ApplicationId legacyDeleteByUpload(String customerSpace, SourceFile sourceFile, BusinessEntity entity,
+                                         CleanupOperationType operationType, String initiator) {
+        CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
+        configuration.setTableName(sourceFile.getTableName());
+        configuration.setFilePath(sourceFile.getPath());
+        configuration.setFileName(sourceFile.getName());
+        configuration.setFileDisplayName(sourceFile.getDisplayName());
+        configuration.setEntity(entity);
+        configuration.setCleanupOperationType(operationType);
+        configuration.setOperationInitiator(initiator);
+
+        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/legacyDeleteByUploadAction", customerSpace);
+
+        ResponseDocument<String> responseDoc = post("cleanup by upload", url, configuration, ResponseDocument.class);
+
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
+        } else {
+            throw new RuntimeException("Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public ApplicationId cleanupAllAttrConfig(String customerSpace, BusinessEntity entity, String initiator) {
         String urlPattern = "/customerspaces/{customerSpace}/datacleanup";
         String url = constructUrl(urlPattern, customerSpace);

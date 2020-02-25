@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.legacydelete.LegacyDeleteSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @JsonSubTypes.Type(value = PivotScoreAndEventConfiguration.class, name = "PivotScoreAndEventConfiguration"), //
         @JsonSubTypes.Type(value = CreateCdlEventTableFilterConfiguration.class, name = "CreateCdlEventTableFilterConfiguration"), //
         @JsonSubTypes.Type(value = CreateCdlEventTableConfiguration.class, name = "CreateCdlEventTableConfiguration"), //
+        @JsonSubTypes.Type(value = LegacyDeleteSparkStepConfiguration.class, name = "LegacyDeleteSparkStepConfiguration"), //
         @JsonSubTypes.Type(value = ActivityStreamSparkStepConfiguration.class, name = "ActivityStreamSparkStepConfiguration") //
 })
 public class SparkJobStepConfiguration extends BaseStepConfiguration {

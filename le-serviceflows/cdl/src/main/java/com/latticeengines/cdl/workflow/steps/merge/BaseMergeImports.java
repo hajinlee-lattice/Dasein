@@ -35,6 +35,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
@@ -641,6 +642,38 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         String convertBatchStoreTableName = getConvertBatchStoreTableName();
         return convertBatchStoreTableName == null;
+    }
+
+    protected boolean isHasLegacyDelete(BusinessEntity entity) {
+        Set<Action> legacyDeleteAction;
+        switch (entity) {
+            case Account:
+                legacyDeleteAction = getSetObjectFromContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
+                if (CollectionUtils.isNotEmpty(legacyDeleteAction)) {
+                    log.info("legacyDeleteAction is {}", JsonUtils.serialize(legacyDeleteAction));
+                    return true;
+                }
+                break;
+            case Contact:
+                legacyDeleteAction = getSetObjectFromContext(CONTACT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
+                if (CollectionUtils.isNotEmpty(legacyDeleteAction)) {
+                    log.info("legacyDeleteAction is {}", JsonUtils.serialize(legacyDeleteAction));
+                    return true;
+                }
+                break;
+            case Transaction:
+                Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELETE_BYDATERANGE_ACTIONS,
+                        BusinessEntity.class, Set.class);
+                Map<CleanupOperationType, Set> legacyDeleteByUploadMap =
+                        getMapObjectFromContext(TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS, CleanupOperationType.class
+                                , Set.class);
+                if ((actionMap != null && !actionMap.isEmpty()) || (legacyDeleteByUploadMap != null && !legacyDeleteByUploadMap.isEmpty())) {
+                    log.info("already has Transaction legacyDeleteActions");
+                    return true;
+                }
+                break;
+        }
+        return false;
     }
 
 }

@@ -220,7 +220,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         super.initializeConfiguration();
         boolean isEntityMatchRematch = configuration.isEntityMatchEnabled()
                 && Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class));
-        if (softDeleteEntities.containsKey(entity) && Boolean.TRUE.equals(softDeleteEntities.get(entity))) {
+        if ((softDeleteEntities.containsKey(entity) && Boolean.TRUE.equals(softDeleteEntities.get(entity))) || isHasLegacyDelete(entity)) {
             masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, inactive);
         } else {
             if (!Boolean.TRUE.equals(configuration.getNeedReplace()) && !isEntityMatchRematch) {
