@@ -52,8 +52,8 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                     PlayLaunch launch = new PlayLaunch();
                     launch.setLaunchState(LaunchState.Failed);
                     launch.setParentDeltaWorkflowId(job.getPid());
-                    launch = playProxy.createNewLaunchByPlayAndChannel(customerSpace,
-                            playId, channelId, true, launch);
+                    launch.setLaunchType(playProxy.getChannelById(customerSpace, playId, channelId).getLaunchType());
+                    launch = playProxy.createNewLaunchByPlayAndChannel(customerSpace, playId, channelId, true, launch);
                     launchId = launch.getId();
                     log.warn(String.format("Created a new launch (%s) with failed state to log the failure event",
                             launchId));

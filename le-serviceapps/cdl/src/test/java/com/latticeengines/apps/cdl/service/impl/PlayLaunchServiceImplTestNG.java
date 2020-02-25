@@ -156,6 +156,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setDestinationAccountId("SFDC_ACC1");
         playLaunch1.setDestinationOrgId(org1);
         playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch1.setLaunchType(LaunchType.FULL);
         playLaunch1.setCreatedBy(CREATED_BY);
         playLaunch1.setUpdatedBy(CREATED_BY);
 
@@ -172,6 +173,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setDestinationAccountId("SFDC_ACC2");
         playLaunch2.setDestinationOrgId(org2);
         playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch2.setLaunchType(LaunchType.FULL);
         playLaunch2.setCreatedBy(CREATED_BY);
         playLaunch2.setUpdatedBy(CREATED_BY);
 
@@ -325,6 +327,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setDestinationAccountId("SFDC_ACC1");
         playLaunch1.setDestinationOrgId(org1);
         playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch1.setLaunchType(LaunchType.FULL);
         playLaunch1.setCreatedBy(CREATED_BY);
         playLaunch1.setUpdatedBy(CREATED_BY);
         playLaunch1.setChannelConfig(new MarketoChannelConfig());
@@ -467,7 +470,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         playLaunchService.deleteByLaunchId(playLaunch2.getLaunchId(), false);
-        SleepUtils.sleep(2000l);
+        SleepUtils.sleep(2000L);
         PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch1.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
         retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch2.getLaunchId(), false);
@@ -486,6 +489,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch3.setDestinationAccountId("SFDC_ACC2");
         playLaunch3.setDestinationOrgId(org2);
         playLaunch3.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch3.setLaunchType(LaunchType.FULL);
         playLaunch3.setCreatedBy(CREATED_BY);
         playLaunch3.setUpdatedBy(CREATED_BY);
         playLaunchService.create(playLaunch3);

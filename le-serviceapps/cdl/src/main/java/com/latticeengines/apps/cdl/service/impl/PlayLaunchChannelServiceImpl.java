@@ -186,12 +186,15 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
 
     @Override
     public PlayLaunchChannel findById(String channelId) {
-        return playLaunchChannelEntityMgr.findById(channelId);
+        return findById(channelId, false);
     }
 
     @Override
     public PlayLaunchChannel findById(String channelId, boolean useWriterRepo) {
-        return playLaunchChannelEntityMgr.findById(channelId, useWriterRepo);
+        PlayLaunchChannel channel = playLaunchChannelEntityMgr.findById(channelId, useWriterRepo);
+        if (channel != null)
+            channel.setLastLaunch(playLaunchService.findLatestByChannel(channel.getPid()));
+        return channel;
     }
 
     @Override
@@ -262,6 +265,7 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setDestinationSysType(playLaunchChannel.getLookupIdMap().getExternalSystemType());
         playLaunch.setDestinationAccountId(playLaunchChannel.getLookupIdMap().getAccountId());
         playLaunch.setTableName(createTable());
+        playLaunch.setLaunchType(playLaunchChannel.getLaunchType());
         playLaunchChannel.getChannelConfig().populateLaunchFromChannelConfig(playLaunch);
         playLaunch.setChannelConfig(playLaunchChannel.getChannelConfig());
         playLaunch.setScheduledLaunch(isAutoLaunch);
