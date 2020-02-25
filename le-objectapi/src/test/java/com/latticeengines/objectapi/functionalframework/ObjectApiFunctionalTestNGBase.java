@@ -66,9 +66,7 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
         InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
-        if (StringUtils.isBlank(attrRepo.getRedshiftPartition())) {
-            attrRepo.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
-        }
+        attrRepo.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
         if (version >= 3) {
             if (uploadHdfs) {
                 tblPathMap = new HashMap<>();
