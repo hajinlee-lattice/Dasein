@@ -150,7 +150,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     private List<PlayType> types;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         topNCount = 1500L;
         Map<String, Boolean> featureFlagMap = new HashMap<>();
@@ -201,7 +201,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         playLaunchInitStep.setConfiguration(createConf(customerSpace, playId, playLaunchId));
     }
 
-    @AfterClass(groups = { "deployment" })
+    @AfterClass(groups = { "deployment" }, enabled = false)
     public void teardown() {
         testPlayCreationHelper.cleanupArtifacts(true);
 
@@ -243,7 +243,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         Assert.assertEquals(updatedPlayLaunch.getLaunchCompletionPercent(), 100.0D);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testRuleBasedPlayLaunch" })
+    @Test(groups = "deployment", dependsOnMethods = { "testRuleBasedPlayLaunch" }, enabled = false)
     public void verifyRecommendationsDirectly() {
         List<Recommendation> recommendations = recommendationService.findByLaunchId(rulesBasedPlayLaunch.getId());
         Assert.assertNotNull(recommendations);
