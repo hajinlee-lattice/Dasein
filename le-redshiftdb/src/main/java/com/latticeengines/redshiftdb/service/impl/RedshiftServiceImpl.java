@@ -125,7 +125,7 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void renameTable(String originalTableName, String newTableName) {
         try {
-            log.info("Renaming redshift table {} to {}} in partition {}", originalTableName, newTableName, parition);
+            log.info("Renaming redshift table {} to {} in partition {}", originalTableName, newTableName, parition);
             redshiftJdbcTemplate.execute(RedshiftUtils.renameTableStatement(originalTableName, newTableName));
         } catch (Exception e) {
             throw new RuntimeException(
