@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO}
-import com.latticeengines.domain.exposed.query.{BusinessEntity, ComparisonType, TimeFilter}
+import com.latticeengines.domain.exposed.query.{BusinessEntity, TimeFilter}
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DeriveActivityMetricGroupJobConfig}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
@@ -93,7 +93,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
     // divide dataframe by time filters defined in TimeRange SQL column
     // dataframe -> corresponding time range string
-    val filteredByTime: Seq[(DataFrame, String)] = createTimeFilters(group.getActivityTimeRange)
+    val filteredByTime: Seq[(DataFrame, String)] = ActivityMetricsGroupUtils.toTimeFilters(group.getActivityTimeRange).toSeq
       .map(tf => {
         val periodStoreIndex: Int = inputMetadata.getStartIdx + offsetMap(tf.getPeriod)
         separateByTimeFilter(aggregatedPeriodStores.get(periodStoreIndex), tf, translator, group)
@@ -129,7 +129,13 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val bounds = translator.translateRange(timeFilter)
 
     val timeRangeStr: String = ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter)
-    var inRange: DataFrame = df.filter(df(periodIdColumnName).between(bounds.getLeft, bounds.getRight))
+    var inRange: DataFrame = {
+      if (bounds == null) {
+        df
+      } else {
+        df.filter(df(periodIdColumnName).between(bounds.getLeft, bounds.getRight))
+      }
+    }
     if (Option(group.getReducer).isDefined) {
       val reducer = Option(group.getReducer).get
       inRange = DeriveAttrsUtils.applyReducer(inRange, reducer)
@@ -164,17 +170,6 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       .filter(!attrRenamed.columns.contains(_))
       .foreach(attrName => attrRenamed = DeriveAttrsUtils.appendNullColumn(attrRenamed, attrName, group.getJavaClass))
     attrRenamed
-  }
-
-  // create time filters based on timeRange defined
-  private def createTimeFilters(timeRange: ActivityTimeRange): Seq[TimeFilter] = {
-    val periods: Seq[String] = timeRange.getPeriods.toSeq
-    val paramSet: Seq[util.List[Integer]] = timeRange.getParamSet.iterator.toSeq
-    val timeFilters: Seq[TimeFilter] = timeRange.getOperator match {
-      case ComparisonType.WITHIN => for (period <- periods; params <- paramSet) yield TimeFilter.within(params.get(0), period)
-      case _ => throw new UnsupportedOperationException("Only support time filter WITHIN operation")
-    }
-    timeFilters
   }
 
   def getRequiredAttrs(group: ActivityMetricsGroup, streamMetadata: util.Map[String, DimensionMetadata], timeRange: String): Seq[String] = {

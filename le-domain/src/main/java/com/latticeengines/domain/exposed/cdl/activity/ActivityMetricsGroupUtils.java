@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.cdl.activity;
 
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,12 +8,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -36,6 +40,7 @@ public final class ActivityMetricsGroupUtils {
     private static final BiMap<String, String> RELATION_STR = new ImmutableBiMap.Builder<String, String>() //
             .put(ComparisonType.WITHIN.toString(), "w") //
             .put(ComparisonType.BETWEEN.toString(), "b") //
+            .put(ComparisonType.EVER.toString(), "ev") //
             .build();
     private static final BiMap<String, String> PERIOD_STR = new ImmutableBiMap.Builder<String, String>() //
             .put(PeriodStrategy.Template.Week.toString(), "w").build();
@@ -44,6 +49,7 @@ public final class ActivityMetricsGroupUtils {
     private static final BiMap<String, String> RELATION_DESCRIPTION = new ImmutableBiMap.Builder<String, String>()
             .put("w", "Last") // within
             .put("b", "Between") // between
+            .put("ev", "")
             .build();
 
 
@@ -81,30 +87,21 @@ public final class ActivityMetricsGroupUtils {
     }
 
     /**
-     * Expand {@link ActivityTimeRange} TODO maybe merge with
-     * MetricsGroupGenerator#createTimeFilters
+     * Expand {@link ActivityTimeRange}
      *
      * @param timeRange
      *            target time range, nullable
      * @return non-null list of time filters contained by given range
      */
     public static List<TimeFilter> toTimeFilters(ActivityTimeRange timeRange) {
-        if (timeRange == null || CollectionUtils.isEmpty(timeRange.getPeriods())
-                || CollectionUtils.isEmpty(timeRange.getParamSet())) {
+        if (timeRange == null || timeRange.getOperator() == null) {
             return Collections.emptyList();
         }
-        if (timeRange.getOperator() != ComparisonType.WITHIN) {
-            String msg = String.format("Comparison type %s is not supported", timeRange.getOperator());
-            throw new UnsupportedOperationException(msg);
+        switch (timeRange.getOperator()) {
+            case WITHIN: return withinTimeFilters(timeRange.getPeriods(), timeRange.getParamSet());
+            case EVER: return everTimeFilters(timeRange.getPeriods());
+            default: throw new UnsupportedOperationException(String.format("Comparison type %s is not supported", timeRange.getOperator()));
         }
-
-        List<TimeFilter> timeFilters = new ArrayList<>();
-        for (String period : timeRange.getPeriods()) {
-            for (List<Integer> params : timeRange.getParamSet()) {
-                timeFilters.add(TimeFilter.within(params.get(0), period));
-            }
-        }
-        return timeFilters;
     }
 
     public static String timeFilterToTimeRangeTmpl(TimeFilter timeFilter) {
@@ -113,6 +110,9 @@ public final class ActivityMetricsGroupUtils {
         map.put("period", getValueFromBiMap(PERIOD_STR, timeFilter.getPeriod()));
         map.put("params", timeFilter.getValues());
 
+        if (ComparisonType.EVER.equals(timeFilter.getRelation())) {
+            return TemplateUtils.renderByMap(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_NO_VAL, map);
+        }
         return TemplateUtils.renderByMap(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE, map);
     }
 
@@ -132,6 +132,8 @@ public final class ActivityMetricsGroupUtils {
                 } catch (ParseException e) {
                     throw new IllegalArgumentException("Cannot parse " + timeRange);
                 }
+            case "ev":
+                return TimeFilter.ever((String) getValueFromBiMap(PERIOD_STR.inverse(), fragments[fragments.length - 1]));
             default:
                 throw new IllegalArgumentException("Unknown operator " + op);
         }
@@ -167,12 +169,14 @@ public final class ActivityMetricsGroupUtils {
             case "b":
                 descTemplate = StringTemplateConstants.DOUBLE_VAL_TIME_RANGE_DESC;
                 break;
+            case "ev":
+                return Strings.EMPTY; // "ever" no need for description
             default:
                 throw new IllegalArgumentException("Unknown operator " + op);
         }
         String[] fragments = timeRange.split("_");
-        String operatorLetter = fragments[0].substring(0, 1);
-        String periodLetter = fragments[fragments.length - 1].substring(0, 1);
+        String operatorLetter = fragments[0];
+        String periodLetter = fragments[fragments.length - 1];
         String[] params = ArrayUtils.subarray(fragments, 1, fragments.length - 1);
         Map<String, Object> map = new HashMap<>();
         map.put("operator", getValueFromBiMap(RELATION_DESCRIPTION, operatorLetter).toString());
@@ -203,5 +207,22 @@ public final class ActivityMetricsGroupUtils {
         if (paramList.size() > 1 || paramList.stream().anyMatch(n -> Integer.parseInt(n) > 1)) {
             map.put("period", map.get("period") + "s");
         }
+    }
+
+    private static List<TimeFilter> withinTimeFilters(Set<String> periods, Set<List<Integer>> paramSet) {
+        if (CollectionUtils.isEmpty(periods) || CollectionUtils.isEmpty(paramSet)) {
+            return Collections.emptyList();
+        }
+        List<TimeFilter> timeFilters = new ArrayList<>();
+        for (String period : periods) {
+            for (List<Integer> params : paramSet) {
+                timeFilters.add(TimeFilter.within(params.get(0), period));
+            }
+        }
+        return timeFilters;
+    }
+
+    private static List<TimeFilter> everTimeFilters(Set<String> periods) {
+        return periods.stream().map(TimeFilter::ever).collect(Collectors.toList());
     }
 }

@@ -51,6 +51,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
@@ -286,6 +287,9 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
 
     private void setAttrEvaluatedDate(Attribute attr, String timeRange, TimeFilterTranslator translator) {
         TimeFilter timeFilter = ActivityMetricsGroupUtils.timeRangeTmplToTimeFilter(timeRange);
+        if (ComparisonType.EVER.equals(timeFilter.getRelation())) {
+            return;
+        }
         Pair<Integer, Integer> periodIdRange = translator.translateRange(timeFilter);
         Pair<String, String> dateRange = translator.periodIdRangeToDateRange(timeFilter.getPeriod(), periodIdRange);
         attr.setSecondaryDisplayName(String.format(StringTemplateConstants.ACTIVITY_METRICS_ATTR_SECONDARY_DISPLAYNAME, dateRange.getLeft(), dateRange.getRight()));

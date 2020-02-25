@@ -21,7 +21,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.query.ComparisonType;
@@ -70,7 +69,6 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
     @Test(groups = "unit", dataProvider = "timeRangeDescriptionProvider")
     public void testTimeFilterToDescription(String timeRange, String expected) {
         String generated = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeRange);
-        System.out.println(generated);
         Assert.assertEquals(generated, expected);
     }
 
@@ -111,32 +109,37 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
     @DataProvider(name = "timeFilterProvider")
     public Object[][] timeFilterProvider() {
         return new Object[][]{
-                {new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Week.toString(),
+                {new TimeFilter(ComparisonType.WITHIN, Week.toString(),
                         singletonList(2)), "w_2_w" },
-                {new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Week.toString(),
-                        singletonList(10)), "w_10_w" } };
+                {new TimeFilter(ComparisonType.WITHIN, Week.toString(),
+                        singletonList(10)), "w_10_w" },
+                {TimeFilter.ever(Week.toString()), "ev_w"}
+        };
     }
 
     @DataProvider(name = "timeRangeDescriptionProvider")
     public Object[][] timeFilterDescriptionProvider() {
         return new Object[][]{
                 {"w_2_w", "Last 2 weeks"},
-                {"b_2_4_w", "Between 2 and 4 weeks"}};
+                {"b_2_4_w", "Between 2 and 4 weeks"},
+                {"ev_w", ""} // all periods filters don't need description
+        };
     }
 
     @DataProvider(name = "timeRangeToTimeFilterProvider")
     public Object[][] timeRangeToTimeFilterProvider() {
         return new Object[][]{ //
                 { "w_2_w",
-                        new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Week.toString(),
+                        new TimeFilter(ComparisonType.WITHIN, Week.toString(),
                                 singletonList(2)) }, //
                 { "w_4_w",
-                        new TimeFilter(ComparisonType.WITHIN, PeriodStrategy.Template.Week.toString(),
+                        new TimeFilter(ComparisonType.WITHIN, Week.toString(),
                                 singletonList(4)) }, //
                 { "b_2_4_w",
-                        new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Week.toString(), asList(2, 4)) }, //
-                { "b_4_12_w", new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Week.toString(),
-                        asList(4, 12)) }
+                        new TimeFilter(ComparisonType.BETWEEN, Week.toString(), asList(2, 4)) }, //
+                { "b_4_12_w", new TimeFilter(ComparisonType.BETWEEN, Week.toString(),
+                        asList(4, 12)) },
+                {"ev_w", TimeFilter.ever(Week.toString())}, //
         };
     }
 
@@ -170,6 +173,7 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
                 { withinTimeRange(new String[] { Day.name(), Week.name() }, new Integer[] { 1, 2 }),
                         asList(withinTimeFilter(Day.name(), 1), withinTimeFilter(Week.name(), 1),
                                 withinTimeFilter(Day.name(), 2), withinTimeFilter(Week.name(), 2)) }, //
+                { everTimeRange(new String[] { Week.name() }), Collections.singletonList(TimeFilter.ever(Week.name())) } //
         }; //
     }
 
@@ -178,8 +182,7 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
         return new Object[][] { //
                 { timeRangeWithOperator(ComparisonType.AFTER) }, //
                 { timeRangeWithOperator(ComparisonType.BEFORE) }, //
-                { timeRangeWithOperator(ComparisonType.BETWEEN_DATE) }, //
-                { timeRangeWithOperator(null) }, //
+                { timeRangeWithOperator(ComparisonType.BETWEEN_DATE) } //
         }; //
     }
 
@@ -207,6 +210,13 @@ public class ActivityMetricsGroupUtilsUnitTestNG {
             timeRange.setParamSet(Arrays.stream(params) //
                     .map(Collections::singletonList).collect(Collectors.toSet()));
         }
+        return timeRange;
+    }
+
+    private ActivityTimeRange everTimeRange(String[] periods) {
+        ActivityTimeRange timeRange = new ActivityTimeRange();
+        timeRange.setOperator(ComparisonType.EVER);
+        timeRange.setPeriods(Arrays.stream(periods).collect(Collectors.toSet()));
         return timeRange;
     }
 }
