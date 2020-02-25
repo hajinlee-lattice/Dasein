@@ -128,7 +128,7 @@ public class SegmentServiceImpl implements SegmentService {
     @Override
     public MetadataSegment findByName(String name) {
         MetadataSegment segment = segmentEntityMgr.findByName(name);
-        if (Boolean.TRUE.equals(segment.getCountsOutdated())) {
+        if (segment != null && Boolean.TRUE.equals(segment.getCountsOutdated())) {
             log.info("Segment {}  has outdated count, trying to update it.", segment.getName());
             try {
                 Map<BusinessEntity, Long> counts = updateSegmentCounts(segment);
