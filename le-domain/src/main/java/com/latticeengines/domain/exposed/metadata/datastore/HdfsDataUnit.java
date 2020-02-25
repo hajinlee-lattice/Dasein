@@ -21,6 +21,9 @@ public class HdfsDataUnit extends DataUnit {
     @JsonProperty("filePrefix")
     private String filePrefix;
 
+    @JsonProperty("Coalesce")
+    private boolean coalesce;
+
     public static HdfsDataUnit fromPath(String path) {
         HdfsDataUnit dataUnit = new HdfsDataUnit();
         dataUnit.setPath(path);
@@ -48,4 +51,13 @@ public class HdfsDataUnit extends DataUnit {
     public void setFilePrefix(String filePrefix) {
         this.filePrefix = filePrefix;
     }
+
+    public boolean isCoalesce() {
+        return coalesce;
+    }
+
+    public void setCoalesce(boolean coalesce) {
+        this.coalesce = coalesce;
+    }
+
 }
