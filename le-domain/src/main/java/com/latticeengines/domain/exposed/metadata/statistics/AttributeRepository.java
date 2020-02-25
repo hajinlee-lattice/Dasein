@@ -175,7 +175,7 @@ public class AttributeRepository {
     }
 
     public String getIdentifier(String sqlUser) {
-        return customerSpace.getTenantId() + "-" + collectionName + "-" + sqlUser;
+        return customerSpace.getTenantId() + "-" + collectionName + "-" + redshiftPartition + "-" + sqlUser;
     }
 
     public boolean hasAttribute(AttributeLookup lookup) {
