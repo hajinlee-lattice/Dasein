@@ -114,7 +114,7 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
         int totalSize = 0;
         Map<String, List<String>> tableNamesNeedToMigrate = new HashMap<>();
         for (DataUnit dataUnit : dataUnits) {
-            if (totalSize >= batchSize) {
+            if (totalSize >= migrateSize) {
                 log.info("Already found {} dynamo data units in progress of migration.", migrateSize);
                 break;
             }
