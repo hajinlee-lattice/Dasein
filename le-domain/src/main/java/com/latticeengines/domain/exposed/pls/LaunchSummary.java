@@ -24,6 +24,8 @@ public class LaunchSummary {
 
     private LaunchState launchState;
 
+    private String launchDisplayString;
+
     private String destinationOrgId;
 
     private CDLExternalSystemType destinationSysType;
@@ -56,6 +58,7 @@ public class LaunchSummary {
         this.setStats(stats);
         this.setLaunchId(launch.getLaunchId());
         this.setLaunchState(launch.getLaunchState());
+        this.setLaunchDisplayString(launch.getLaunchStateDisplayString());
         this.setLaunchTime(launch.getCreated());
         this.setSelectedBuckets(launch.getBucketsToLaunch());
         this.setDestinationOrgId(launch.getDestinationOrgId());
@@ -119,6 +122,10 @@ public class LaunchSummary {
     public void setLaunchState(LaunchState launchState) {
         this.launchState = launchState;
     }
+
+    public String getLaunchDisplayString() { return launchDisplayString; }
+
+    public void setLaunchDisplayString(String launchDisplayString) { this.launchDisplayString = launchDisplayString; }
 
     public Set<RatingBucketName> getSelectedBuckets() {
         return selectedBuckets;
