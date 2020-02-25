@@ -32,6 +32,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadStatu
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Longitude;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfEmployees;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.OpportunityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.OrderId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
@@ -41,6 +42,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.ProductId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Quantity;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMedium;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SpendAnalyticsSegment;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Title;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.TransactionId;
@@ -53,6 +55,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitP
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Website;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -110,6 +113,9 @@ public class SchemaRepositoryUnitTestNG {
     private static final List<InterfaceName> WEBVISIT_PATHPATTERN_ATTRS = Arrays.asList(PathPatternName, PathPattern);
 
     private static final List<InterfaceName> WEBVISIT_SOURCE_MEDIUM = Arrays.asList(SourceMedium);
+
+    private static final List<InterfaceName> OPPORTUNITY = Arrays.asList(LastModifiedDate, OpportunityId, StageName);
+    private static final List<InterfaceName> OPPORTUNITY_STAGE = Collections.singletonList(StageName);
     /**
      * Currently only covers testing Account & Contact schema with
      * enableEntityMatch turned on and off
@@ -199,15 +205,17 @@ public class SchemaRepositoryUnitTestNG {
     @DataProvider(name = "entityTypeProvider")
     public Object[][] entityTypeProvider() {
         return new Object[][] {
-                {S3ImportSystem.SystemType.Other, EntityType.Accounts, true, ACCOUNT_ENTITY_MATCH_ATTRS }, //
-                {S3ImportSystem.SystemType.Other, EntityType.Accounts, false, ACCOUNT_ATTRS }, //
-                {S3ImportSystem.SystemType.Other, EntityType.Contacts, true, CONTACT_ENTITY_MATCH_ATTRS }, //
-                {S3ImportSystem.SystemType.Other, EntityType.Contacts, false, CONTACT_ATTRS }, //
-                {S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, true, TRANSACTION_ENTITY_MATCH_ATTRS }, //
-                {S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, false, TRANSACTION_ATTRS }, //
-                {S3ImportSystem.SystemType.Other, EntityType.WebVisit, true, WEBVISIT_ATTRS }, //
-                {S3ImportSystem.SystemType.Other, EntityType.WebVisitPathPattern, true, WEBVISIT_PATHPATTERN_ATTRS }, //
-                {S3ImportSystem.SystemType.Other, EntityType.WebVisitSourceMedium, true, WEBVISIT_SOURCE_MEDIUM }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Accounts, true, ACCOUNT_ENTITY_MATCH_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Accounts, false, ACCOUNT_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Contacts, true, CONTACT_ENTITY_MATCH_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Contacts, false, CONTACT_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, true, TRANSACTION_ENTITY_MATCH_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.ProductPurchases, false, TRANSACTION_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.WebVisit, true, WEBVISIT_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.WebVisitPathPattern, true, WEBVISIT_PATHPATTERN_ATTRS }, //
+                { S3ImportSystem.SystemType.Other, EntityType.WebVisitSourceMedium, true, WEBVISIT_SOURCE_MEDIUM }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Opportunity, true, OPPORTUNITY }, //
+                { S3ImportSystem.SystemType.Other, EntityType.OpportunityStageName, true, OPPORTUNITY_STAGE }, //
         };
     }
 }
