@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -21,6 +23,8 @@ import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 @Component(SoftDeleteContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SoftDeleteContact extends BaseSingleEntitySoftDelete<ProcessContactStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(SoftDeleteContact.class);
 
     static final String BEAN_NAME = "softDeleteContact";
 
@@ -51,6 +55,12 @@ public class SoftDeleteContact extends BaseSingleEntitySoftDelete<ProcessContact
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SELECT_BY_COLUMN_TXFMR);
         step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
+        if (masterTable != null) {
+            log.info("Add masterTable=" + masterTable.getName());
+            addBaseTables(step, masterTable.getName());
+        } else {
+            throw new IllegalArgumentException("The master table is empty for contact soft delete!");
+        }
 
         SelectByColumnConfig config = new SelectByColumnConfig();
         config.setSourceColumn(InterfaceName.AccountId.name());
