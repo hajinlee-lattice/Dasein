@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
@@ -42,6 +43,7 @@ import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+
 public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @SuppressWarnings("unused")
@@ -194,6 +196,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch.setTenantId(mainTestTenant.getPid());
         playLaunch.setTenant(mainTestTenant);
         playLaunch.setDestinationOrgId("SomeOrgId");
+        playLaunch.setLaunchType(LaunchType.FULL);
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch);
         playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),

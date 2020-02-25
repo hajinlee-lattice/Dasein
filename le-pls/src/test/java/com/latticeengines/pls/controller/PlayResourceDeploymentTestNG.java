@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -534,11 +535,11 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(playList.size(), 1);
     }
 
-    public void deletePlay(String playName) {
+    private void deletePlay(String playName) {
         restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + playName);
     }
 
-    public void deletePlayLaunch(String playName, String playLaunchId) {
+    private void deletePlayLaunch(String playName, String playLaunchId) {
         restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + playName + "/launches/" + playLaunchId);
     }
 
@@ -643,6 +644,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch.setDestinationAccountId(lookupIdMap.getAccountId());
         playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
         playLaunch.setTopNCount(topNCount);
+        playLaunch.setLaunchType(LaunchType.FULL);
         playLaunch.setCreatedBy(CREATED_BY);
         playLaunch.setUpdatedBy(CREATED_BY);
         return playLaunch;

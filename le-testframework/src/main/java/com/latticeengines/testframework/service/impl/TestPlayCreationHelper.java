@@ -348,6 +348,7 @@ public class TestPlayCreationHelper {
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(testPlayChannelConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
+        playLaunch.setLaunchType(LaunchType.FULL);
         playLaunch.setTopNCount(testPlayChannelConfig.getTopNCount());
         playLaunch.setAudienceId(testPlayChannelConfig.getAudienceId());
         playLaunch.setCreatedBy(CREATED_BY);

@@ -42,6 +42,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -161,6 +162,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     private String completeContactsTable;
 
     // # Launch Config
+    @JsonProperty("launchType")
+    @Column(name = "LAUNCH_TYPE", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LaunchType launchType;
+
     @JsonProperty("excludeItemsWithoutSalesforceId")
     @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = false)
     private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
@@ -535,6 +541,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.tableName = tableName;
     }
 
+    public LaunchType getLaunchType() {
+        return launchType;
+    }
+
+    public void setLaunchType(LaunchType launchType) {
+        this.launchType = launchType;
+    }
+
     public Set<RatingBucketName> getBucketsToLaunch() {
         if (StringUtils.isNotBlank(this.bucketsToLaunch)) {
             List<?> attrListIntermediate = JsonUtils.deserialize(this.bucketsToLaunch, List.class);
@@ -770,6 +784,7 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         }
 
         this.setLaunchCompletionPercent(playLaunch.getLaunchCompletionPercent());
+        this.setLaunchType(playLaunch.getLaunchType());
 
         // Contact stats
         if (playLaunch.getContactsSelected() != null) {

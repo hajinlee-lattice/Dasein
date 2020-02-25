@@ -193,6 +193,7 @@ public class PlayLaunchChannelServiceImplTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(retrievedLaunch);
 
         retrievedLaunch = playLaunchService.findLatestByChannel(playLaunchChannel2.getPid());
+        playLaunchChannel2 = playLaunchChannelService.findById(playLaunchChannel2.getId());
         Assert.assertNotNull(retrievedLaunch);
         Assert.assertNotNull(playLaunchChannel2.getLastLaunch());
         Assert.assertEquals(playLaunchChannel2.getLastLaunch().getId(), retrievedLaunch.getId());

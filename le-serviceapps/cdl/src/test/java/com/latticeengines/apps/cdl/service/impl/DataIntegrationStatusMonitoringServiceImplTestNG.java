@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitorMessage;
 import com.latticeengines.domain.exposed.cdl.ExternalIntegrationWorkflowType;
 import com.latticeengines.domain.exposed.cdl.InitiatedEventDetail;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.cdl.MessageType;
 import com.latticeengines.domain.exposed.cdl.ProgressEventDetail;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -308,6 +309,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         playLaunch.setDestinationAccountId(destinationAccountId);
         playLaunch.setDestinationOrgId(destOrgId);
         playLaunch.setDestinationSysType(destSysType);
+        playLaunch.setLaunchType(LaunchType.FULL);
         playLaunch.setCreatedBy(updatedBy);
         playLaunch.setUpdatedBy(createdBy);
         return playLaunch;
