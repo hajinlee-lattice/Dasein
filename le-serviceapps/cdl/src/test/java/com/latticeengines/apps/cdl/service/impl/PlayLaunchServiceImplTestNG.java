@@ -155,6 +155,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
         playLaunch1.setDestinationAccountId("SFDC_ACC1");
         playLaunch1.setDestinationOrgId(org1);
+        playLaunch1.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch1.setLaunchType(LaunchType.FULL);
         playLaunch1.setCreatedBy(CREATED_BY);
@@ -172,8 +173,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setBucketsToLaunch(bucketsToLaunch2);
         playLaunch2.setDestinationAccountId("SFDC_ACC2");
         playLaunch2.setDestinationOrgId(org2);
-        playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch2.setLaunchType(LaunchType.FULL);
+        playLaunch2.setDestinationSysName(CDLExternalSystemName.Salesforce);
+        playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch2.setCreatedBy(CREATED_BY);
         playLaunch2.setUpdatedBy(CREATED_BY);
 
@@ -326,6 +328,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
         playLaunch1.setDestinationAccountId("SFDC_ACC1");
         playLaunch1.setDestinationOrgId(org1);
+        playLaunch1.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch1.setLaunchType(LaunchType.FULL);
         playLaunch1.setCreatedBy(CREATED_BY);
@@ -488,6 +491,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch3.setBucketsToLaunch(bucketsToLaunch2);
         playLaunch3.setDestinationAccountId("SFDC_ACC2");
         playLaunch3.setDestinationOrgId(org2);
+        playLaunch3.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch3.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch3.setLaunchType(LaunchType.FULL);
         playLaunch3.setCreatedBy(CREATED_BY);

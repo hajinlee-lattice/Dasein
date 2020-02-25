@@ -41,6 +41,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
@@ -199,6 +200,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Transient
     @JsonProperty("destinationOrgName")
     private String destinationOrgName;
+
+    @Column(name = "DESTINATION_SYS_NAME")
+    @JsonProperty("destinationSysName")
+    @Enumerated(EnumType.STRING)
+    private CDLExternalSystemName destinationSysName;
 
     @JsonProperty("destinationSysType")
     @Column(name = "DESTINATION_SYS_TYPE")
@@ -758,6 +764,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         return matchedRate;
     }
 
+    public CDLExternalSystemName getDestinationSysName() {
+        return destinationSysName;
+    }
+
+    public void setDestinationSysName(CDLExternalSystemName destinationSysName) {
+        this.destinationSysName = destinationSysName;
+    }
+
     public void merge(PlayLaunch playLaunch) {
         if (playLaunch.getLaunchState() != null) {
             this.setLaunchState(playLaunch.getLaunchState());
@@ -861,6 +875,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         }
         if (playLaunch.getDestinationOrgName() != null) {
             this.setDestinationOrgName(playLaunch.getDestinationOrgName());
+        }
+        if (playLaunch.getDestinationSysName() != null) {
+            this.setDestinationSysName(playLaunch.getDestinationSysName());
         }
         if (playLaunch.getExcludeItemsWithoutSalesforceId() != null) {
             this.setExcludeItemsWithoutSalesforceId(playLaunch.getExcludeItemsWithoutSalesforceId());

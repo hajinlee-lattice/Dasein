@@ -129,6 +129,9 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
     @JsonProperty("CreateDeleteCsvDataFrame")
     private boolean createDeleteCsvDataFrame;
 
+    @JsonProperty("publishRecommendationsForS3Launch")
+    private boolean publishRecommendationsForS3Launch;
+
     public DeltaCampaignLaunchSparkContext() {
     }
 
@@ -405,6 +408,14 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
         this.createDeleteCsvDataFrame = createDeleteCsvDataFrame;
     }
 
+    public boolean getPublishRecommendationsForS3Launch() {
+        return publishRecommendationsForS3Launch;
+    }
+
+    public void setPublishRecommendationsForS3Launch(boolean publishRecommendationsForS3Launch) {
+        this.publishRecommendationsForS3Launch = publishRecommendationsForS3Launch;
+    }
+
     private void setSyncDestination(PlayLaunch playLaunch) {
         String synchronizationDestination;
         String destinationSysType;
@@ -425,7 +436,6 @@ public class DeltaCampaignLaunchSparkContext implements Serializable {
             throw new RuntimeException(String.format("Destination type %s is not supported yet",
                     playLaunch.getDestinationSysType().name()));
         }
-
         this.synchronizationDestination = synchronizationDestination;
         if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
             this.destinationOrgId = playLaunch.getDestinationOrgId();

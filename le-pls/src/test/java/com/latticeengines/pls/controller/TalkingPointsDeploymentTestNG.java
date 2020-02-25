@@ -25,6 +25,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
@@ -197,6 +198,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch.setTenant(mainTestTenant);
         playLaunch.setDestinationOrgId("SomeOrgId");
         playLaunch.setLaunchType(LaunchType.FULL);
+        playLaunch.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch = playProxy.createPlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch);
         playProxy.updatePlayLaunch(mainTestTenant.getId(), play.getName(), playLaunch.getLaunchId(),

@@ -23,7 +23,6 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -56,7 +55,6 @@ import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobCon
 import com.latticeengines.proxy.exposed.cdl.ExportFieldMetadataProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.util.AttrRepoUtils;
@@ -75,13 +73,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     private PlayProxy playProxy;
 
     @Inject
-    private DataUnitProxy dataUnitProxy;
-
-    @Inject
     private MetadataProxy metadataProxy;
-
-    @Inject
-    private BatonService batonService;
 
     @Inject
     private ExportFieldMetadataProxy exportFieldMetadataProxy;

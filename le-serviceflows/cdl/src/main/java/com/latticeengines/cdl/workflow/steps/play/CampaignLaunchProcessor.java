@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -324,31 +323,6 @@ public class CampaignLaunchProcessor {
         } catch (Exception e) {
             log.error("Unable to update launch progress.", e);
         }
-    }
-
-    @VisibleForTesting
-    void setFrontEndQueryCreator(FrontEndQueryCreator frontEndQueryCreator) {
-        this.frontEndQueryCreator = frontEndQueryCreator;
-    }
-
-    @VisibleForTesting
-    void setPlayProxy(PlayProxy playProxy) {
-        this.playProxy = playProxy;
-    }
-
-    @VisibleForTesting
-    void setLookupIdMappingProxy(LookupIdMappingProxy lookupIdMappingProxy) {
-        this.lookupIdMappingProxy = lookupIdMappingProxy;
-    }
-
-    @VisibleForTesting
-    void setMetadataProxy(MetadataProxy metadataProxy) {
-        this.metadataProxy = metadataProxy;
-    }
-
-    @VisibleForTesting
-    void setRatingEngineProxy(RatingEngineProxy ratingEngineProxy) {
-        this.ratingEngineProxy = ratingEngineProxy;
     }
 
     public static class ProcessedFieldMappingMetadata {

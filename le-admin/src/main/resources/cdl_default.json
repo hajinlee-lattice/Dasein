@@ -54,6 +54,10 @@
     {
       "Node": "CampaignLaunchEndPointUrl",
       "Data": ""
+    },
+    {
+      "Node": "PublishRecommendationsForS3Launch",
+      "Data": "false"
     }
   ]
 }

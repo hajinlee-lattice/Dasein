@@ -36,8 +36,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUni
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -52,12 +50,6 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
 
     @Inject
     private PlayProxy playProxy;
-
-    @Inject
-    private DataUnitProxy dataUnitProxy;
-
-    @Inject
-    private MetadataProxy metadataProxy;
 
     private DataCollection.Version version;
     private String evaluationDate;
