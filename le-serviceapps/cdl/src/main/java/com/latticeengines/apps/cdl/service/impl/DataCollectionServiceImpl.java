@@ -481,6 +481,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             status.setTenant(tenant);
             status.setVersion(version);
             status.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
+        } else if (StringUtils.isBlank(status.getRedshiftPartition())) {
+            status.setRedshiftPartition(redshiftPartitionService.getLegacyPartition());
         }
         return status;
     }

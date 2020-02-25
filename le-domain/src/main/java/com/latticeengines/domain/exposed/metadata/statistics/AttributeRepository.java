@@ -199,4 +199,8 @@ public class AttributeRepository {
     public String getRedshiftPartition() {
         return redshiftPartition;
     }
+
+    public void setRedshiftPartition(String redshiftPartition) {
+        this.redshiftPartition = redshiftPartition;
+    }
 }

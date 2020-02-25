@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.functionalframework.QueryTestUtils;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 import net.lingala.zip4j.core.ZipFile;
@@ -50,6 +52,9 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
     @Inject
     protected Configuration yarnConfiguration;
 
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
+
     @Value("${camille.zk.pod.id}")
     private String podId;
 
@@ -61,6 +66,9 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
         InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
+        if (StringUtils.isBlank(attrRepo.getRedshiftPartition())) {
+            attrRepo.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
+        }
         if (version >= 3) {
             if (uploadHdfs) {
                 tblPathMap = new HashMap<>();
