@@ -11,10 +11,10 @@ import com.latticeengines.domain.exposed.pls.{DeltaCampaignLaunchSparkContext, R
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.{EnumUtils, StringUtils}
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{col, count, lit, sum, when, to_timestamp, from_unixtime}
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-
+import org.apache.spark.sql.functions.asc
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
