@@ -327,10 +327,10 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setPlay(play);
         playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
         playLaunch1.setDestinationAccountId("SFDC_ACC1");
-        playLaunch1.setLaunchType(LaunchType.FULL);
         playLaunch1.setDestinationOrgId(org1);
         playLaunch1.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch1.setLaunchType(LaunchType.FULL);
         playLaunch1.setCreatedBy(CREATED_BY);
         playLaunch1.setUpdatedBy(CREATED_BY);
         playLaunch1.setChannelConfig(new MarketoChannelConfig());
@@ -489,11 +489,11 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch3.setLaunchState(LaunchState.Launching);
         playLaunch3.setPlay(play);
         playLaunch3.setBucketsToLaunch(bucketsToLaunch2);
-        playLaunch3.setLaunchType(LaunchType.FULL);
         playLaunch3.setDestinationAccountId("SFDC_ACC2");
         playLaunch3.setDestinationOrgId(org2);
         playLaunch3.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch3.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch3.setLaunchType(LaunchType.FULL);
         playLaunch3.setCreatedBy(CREATED_BY);
         playLaunch3.setUpdatedBy(CREATED_BY);
         playLaunchService.create(playLaunch3);

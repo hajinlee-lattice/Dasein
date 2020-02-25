@@ -460,5 +460,4 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
     
       processedAggrContacts
   }
-
 }
