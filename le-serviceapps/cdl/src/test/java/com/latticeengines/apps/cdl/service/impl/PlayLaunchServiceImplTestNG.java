@@ -173,6 +173,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setBucketsToLaunch(bucketsToLaunch2);
         playLaunch2.setDestinationAccountId("SFDC_ACC2");
         playLaunch2.setDestinationOrgId(org2);
+        playLaunch2.setLaunchType(LaunchType.FULL);
         playLaunch2.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
         playLaunch2.setCreatedBy(CREATED_BY);
@@ -326,6 +327,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setPlay(play);
         playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
         playLaunch1.setDestinationAccountId("SFDC_ACC1");
+        playLaunch1.setLaunchType(LaunchType.FULL);
         playLaunch1.setDestinationOrgId(org1);
         playLaunch1.setDestinationSysName(CDLExternalSystemName.Salesforce);
         playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
@@ -471,7 +473,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         playLaunchService.deleteByLaunchId(playLaunch1.getLaunchId(), false);
         playLaunchService.deleteByLaunchId(playLaunch2.getLaunchId(), false);
-        SleepUtils.sleep(2000l);
+        SleepUtils.sleep(2000L);
         PlayLaunch retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch1.getLaunchId(), false);
         Assert.assertNull(retreivedPlayLaunch);
         retreivedPlayLaunch = playLaunchService.findByLaunchId(playLaunch2.getLaunchId(), false);
@@ -487,6 +489,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch3.setLaunchState(LaunchState.Launching);
         playLaunch3.setPlay(play);
         playLaunch3.setBucketsToLaunch(bucketsToLaunch2);
+        playLaunch3.setLaunchType(LaunchType.FULL);
         playLaunch3.setDestinationAccountId("SFDC_ACC2");
         playLaunch3.setDestinationOrgId(org2);
         playLaunch3.setDestinationSysName(CDLExternalSystemName.Salesforce);

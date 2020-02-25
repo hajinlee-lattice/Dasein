@@ -105,8 +105,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2 = createPlayLaunch(null, null, null, null);
 
         playLaunch_org1_1 = createPlayLaunch(org1, externalSystemType, externalSystemName, destinationAccountIdColumn_1);
-        playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, externalSystemName,
-                destinationAccountIdColumn_1);
+        playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, externalSystemName, destinationAccountIdColumn_1);
 
         playLaunch_org2_1 = createPlayLaunch(org2, externalSystemType, externalSystemName, destinationAccountIdColumn_2);
         playLaunch_org2_2 = createPlayLaunch(org2, externalSystemType, externalSystemName, destinationAccountIdColumn_2);
