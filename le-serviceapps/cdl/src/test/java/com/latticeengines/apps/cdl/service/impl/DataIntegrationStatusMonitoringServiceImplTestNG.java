@@ -27,6 +27,7 @@ import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationEventType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMessage;
@@ -114,11 +115,11 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         bucketsToLaunch = new TreeSet<>(Arrays.asList(RatingBucketName.values()));
 
         playLaunch1 = createPlayLaunch(play, NamingUtils.randomSuffix("pl", 16), LaunchState.Launching, bucketsToLaunch,
-                "SFDC_ACC1", org1, CDLExternalSystemType.CRM, CREATED_BY, CREATED_BY);
+                "SFDC_ACC1", org1, CDLExternalSystemType.CRM, CDLExternalSystemName.Salesforce, CREATED_BY, CREATED_BY);
         playLaunchService.create(playLaunch1);
 
         playLaunch2 = createPlayLaunch(play, NamingUtils.randomSuffix("pl", 16), LaunchState.Launching, bucketsToLaunch,
-                "SFDC_ACC2", org2, CDLExternalSystemType.CRM, CREATED_BY, CREATED_BY);
+                "SFDC_ACC2", org2, CDLExternalSystemType.CRM, CDLExternalSystemName.Salesforce, CREATED_BY, CREATED_BY);
         playLaunchService.create(playLaunch2);
     }
 
@@ -297,9 +298,9 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         return Arrays.asList(statusMessage);
     }
 
-    private PlayLaunch createPlayLaunch(Play play, String launchId, LaunchState launchState,
-            Set<RatingBucketName> bucketToLaunch, String destinationAccountId, String destOrgId,
-            CDLExternalSystemType destSysType, String createdBy, String updatedBy) {
+    private PlayLaunch createPlayLaunch(Play play, String launchId, LaunchState launchState, Set<RatingBucketName> bucketToLaunch,
+                                        String destinationAccountId, String destOrgId, CDLExternalSystemType destSysType,
+                                        CDLExternalSystemName cdlExternalSystemName, String createdBy, String updatedBy) {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setLaunchId(launchId);
         playLaunch.setTenant(mainTestTenant);
@@ -309,6 +310,7 @@ public class DataIntegrationStatusMonitoringServiceImplTestNG extends CDLFunctio
         playLaunch.setDestinationAccountId(destinationAccountId);
         playLaunch.setDestinationOrgId(destOrgId);
         playLaunch.setDestinationSysType(destSysType);
+        playLaunch.setDestinationSysName(cdlExternalSystemName);
         playLaunch.setLaunchType(LaunchType.FULL);
         playLaunch.setCreatedBy(updatedBy);
         playLaunch.setUpdatedBy(createdBy);

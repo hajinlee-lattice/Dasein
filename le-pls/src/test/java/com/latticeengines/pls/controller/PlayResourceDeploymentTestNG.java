@@ -641,6 +641,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         playLaunch.setBucketsToLaunch(bucketsToLaunch);
         playLaunch.setDestinationOrgId(lookupIdMap.getOrgId());
         playLaunch.setDestinationSysType(lookupIdMap.getExternalSystemType());
+        playLaunch.setDestinationSysName(lookupIdMap.getExternalSystemName());
         playLaunch.setDestinationAccountId(lookupIdMap.getAccountId());
         playLaunch.setExcludeItemsWithoutSalesforceId(excludeItemsWithoutSalesforceId);
         playLaunch.setTopNCount(topNCount);

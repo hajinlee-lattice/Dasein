@@ -25,6 +25,7 @@ import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -70,6 +71,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private String destinationAccountIdColumn_2 = "SFDC_ACCOUNT_ID_COL_2";
 
     private CDLExternalSystemType externalSystemType = CDLExternalSystemType.CRM;
+    private CDLExternalSystemName externalSystemName = CDLExternalSystemName.Salesforce;
 
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
@@ -99,14 +101,15 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.create(play);
         play = playEntityMgr.getPlayByName(NAME, false);
 
-        playLaunch1 = createPlayLaunch(null, null, null);
-        playLaunch2 = createPlayLaunch(null, null, null);
+        playLaunch1 = createPlayLaunch(null, null, null, null);
+        playLaunch2 = createPlayLaunch(null, null, null, null);
 
-        playLaunch_org1_1 = createPlayLaunch(org1, externalSystemType, destinationAccountIdColumn_1);
-        playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, destinationAccountIdColumn_1);
+        playLaunch_org1_1 = createPlayLaunch(org1, externalSystemType, externalSystemName, destinationAccountIdColumn_1);
+        playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, externalSystemName,
+                destinationAccountIdColumn_1);
 
-        playLaunch_org2_1 = createPlayLaunch(org2, externalSystemType, destinationAccountIdColumn_2);
-        playLaunch_org2_2 = createPlayLaunch(org2, externalSystemType, destinationAccountIdColumn_2);
+        playLaunch_org2_1 = createPlayLaunch(org2, externalSystemType, externalSystemName, destinationAccountIdColumn_2);
+        playLaunch_org2_2 = createPlayLaunch(org2, externalSystemType, externalSystemName, destinationAccountIdColumn_2);
 
         allPlayLaunches = Arrays.asList(playLaunch1, playLaunch2, playLaunch_org1_1, playLaunch_org1_2,
                 playLaunch_org2_1, playLaunch_org2_2);
@@ -485,7 +488,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private PlayLaunch createPlayLaunch(String org, CDLExternalSystemType externalSystemType,
-            String destinationAccountIdColumn) {
+                                        CDLExternalSystemName externalSystemName, String destinationAccountIdColumn) {
         PlayLaunch launch = new PlayLaunch();
         launch.setTenant(mainTestTenant);
         launch.setLaunchState(LaunchState.UnLaunched);
@@ -493,6 +496,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         launch.setDestinationOrgId(org);
         launch.setDestinationSysType(externalSystemType);
         launch.setDestinationAccountId(destinationAccountIdColumn);
+        launch.setDestinationSysName(externalSystemName);
         launch.setLaunchType(LaunchType.FULL);
         launch.setCreatedBy(CREATED_BY);
         launch.setUpdatedBy(CREATED_BY);

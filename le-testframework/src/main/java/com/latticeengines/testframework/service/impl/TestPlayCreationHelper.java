@@ -345,6 +345,8 @@ public class TestPlayCreationHelper {
         playLaunch.setDestinationSysType(testPlayChannelConfig.getDestinationSystemType() != null
                 ? testPlayChannelConfig.getDestinationSystemType()
                 : CDLExternalSystemType.CRM); // default
+        playLaunch.setDestinationSysName(testPlayChannelConfig.getDestinationSystemName() != null ?
+                testPlayChannelConfig.getDestinationSystemName() : CDLExternalSystemName.Salesforce);
         playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         playLaunch.setExcludeItemsWithoutSalesforceId(testPlayChannelConfig.isExcludeItemsWithoutSalesforceId());
         playLaunch.setLaunchUnscored(true);
