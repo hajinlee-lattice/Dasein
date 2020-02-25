@@ -28,6 +28,12 @@ public class MatchHistory implements HasId<String> {
     @AvroName("RootOperationUid")
     String rootOperationUid;
     @Nullable
+    @AvroName("ApplicationId")
+    String applicationId;
+    @Nullable
+    @AvroName("MatchStatus")
+    String matchStatus;
+    @Nullable
     @AvroName("RequestTimestamp")
     String requestTimestamp;
     @Nullable
@@ -444,6 +450,28 @@ public class MatchHistory implements HasId<String> {
     @Union({})
     public MatchHistory setRootOperationUid(String rootOperationUid) {
         this.rootOperationUid = rootOperationUid;
+        return this;
+    }
+
+    @Union({})
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    @Union({})
+    public MatchHistory setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+        return this;
+    }
+
+    @Union({})
+    public String getMatchStatus() {
+        return matchStatus;
+    }
+
+    @Union({})
+    public MatchHistory setMatchStatus(String matchStatus) {
+        this.matchStatus = matchStatus;
         return this;
     }
 

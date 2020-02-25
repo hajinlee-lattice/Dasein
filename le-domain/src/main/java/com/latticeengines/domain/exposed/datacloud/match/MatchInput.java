@@ -66,6 +66,8 @@ public class MatchInput implements Fact, Dimension {
     private String logLevel;
     @JsonProperty("RootOperationUid")
     private String rootOperationUid;
+    @JsonProperty("applicationId")
+    private String applicationId;
     @JsonIgnore
     private String matchEngine;
     // optional, but better to provide. if not, will be resolved from the fields
@@ -504,6 +506,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setRootOperationUid(String rootOperationUid) {
         this.rootOperationUid = rootOperationUid;
+    }
+
+    public String getApplicationId() {
+        return applicationId;
+    }
+
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
     }
 
     public String getYarnQueue() {

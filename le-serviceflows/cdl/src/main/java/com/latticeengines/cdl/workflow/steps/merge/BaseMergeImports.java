@@ -355,6 +355,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     MatchInput getBaseMatchInput() {
         MatchInput matchInput = new MatchInput();
         matchInput.setRootOperationUid(UUID.randomUUID().toString().toUpperCase());
+        matchInput.setApplicationId(getApplicationId());
         matchInput.setTenant(new Tenant(customerSpace.getTenantId()));
         matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(false);

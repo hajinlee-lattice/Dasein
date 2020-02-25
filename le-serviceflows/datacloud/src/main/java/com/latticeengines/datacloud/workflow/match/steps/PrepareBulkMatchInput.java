@@ -107,7 +107,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
             log.info("Assign root operation uid " + rootOperationUid + " to match input.");
             matchCommandService.start(input, null, rootOperationUid);
         }
-
+        if (StringUtils.isBlank(input.getApplicationId())) {
+            input.setApplicationId(getApplicationId());
+        }
         if (matchCommandService.getByRootOperationUid(getConfiguration().getRootOperationUid()) == null) {
             log.info("Insert new match command for root uid " + getConfiguration().getRootOperationUid());
             matchCommandService.start(input, null, getConfiguration().getRootOperationUid());

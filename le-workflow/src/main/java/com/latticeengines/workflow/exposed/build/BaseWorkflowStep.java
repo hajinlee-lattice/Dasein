@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
+import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -675,5 +676,16 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
         registeredTableNames.add(tableName);
         putObjectInContext(REGISTERED_TABLE_NAMES, registeredTableNames);
+    }
+
+    protected String getApplicationId() {
+        String applicationId = null;
+        if (jobId != null) {
+            WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobId);
+            if (job != null && job.getApplicationId() != null) {
+                applicationId = ConverterUtils.toApplicationId(job.getApplicationId()).toString();
+            }
+        }
+        return applicationId;
     }
 }
