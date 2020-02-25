@@ -17,5 +17,6 @@ public class ValidationMsg {
         public static final String IMPACT_RATING_MODELS = "Attribute %s change will impact the following rating "
                 + "models: [%s]";
         public static final String IMPACT_PLAYS = "Attribute %s change will impact the following plays: [%s]";
+        public static final String DUPLICATED_NAME = "The name already exists";
     }
 }

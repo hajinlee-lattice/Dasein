@@ -45,6 +45,7 @@ public class AttrValidationServiceImpl implements AttrValidationService {
         usageValidatorList.add(UsageLimitValidator.VALIDATOR_NAME);
 
         nameValidatorList.add(GenericValidator.VALIDATOR_NAME);
+        nameValidatorList.add(AmbiguityValidator.VALIDATOR_NAME);
 
         limitValidatorList.add(ActivationLimitValidator.VALIDATOR_NAME);
 
@@ -112,8 +113,9 @@ public class AttrValidationServiceImpl implements AttrValidationService {
             for (AttrConfig attrConfig : attrConfigs) {
                 if (attrConfig.getImpactWarnings() != null || attrConfig.getValidationErrors() != null) {
                     ValidationDetails.AttrValidation validation = new ValidationDetails.AttrValidation();
+                    validation.setAttrName(attrConfig.getAttrName());
                     validation
-                            .setAttrName(attrConfig.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class));
+                            .setDisplayName(attrConfig.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class));
                     validation.setSubcategory(
                             attrConfig.getPropertyFinalValue(ColumnMetadataKey.Subcategory, String.class));
                     validation.setImpactWarnings(attrConfig.getImpactWarnings());

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.mockito.InjectMocks;
@@ -47,6 +48,9 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -266,6 +270,27 @@ public class AttrConfigServiceImplUnitTestNG {
                 Assert.fail("Does not expect the attribute" + attrConfig.getAttrName());
             }
         }
+
+
+        // populate validation details to attrconfig request
+        ValidationDetails validationDetails = new ValidationDetails();
+        attrConfigRequest.setDetails(validationDetails);
+        ValidationDetails.AttrValidation attrValidation = new ValidationDetails.AttrValidation();
+        validationDetails.setValidations(Collections.singletonList(attrValidation));
+        ValidationErrors errors = new ValidationErrors();
+        attrValidation.setValidationErrors(errors);
+        attrValidation.setAttrName("attr1");
+        errors.setErrors(ImmutableMap.of(ValidationErrors.Type.DUPLICATE_NAME_CHANGE,
+                Collections.singletonList(ValidationMsg.Errors.DUPLICATED_NAME)));
+
+        attrConfigService.retrieveErrorMessageFromAttrConfig(attrConfigRequest, request);
+
+        for (AttrDetail detail : request.getAttributes()) {
+            if (detail.getAttribute().equals("attr1")) {
+                Assert.assertEquals(detail.getErrorMessage(), ValidationMsg.Errors.DUPLICATED_NAME);
+            }
+        }
+
     }
 
     @Test(groups = "unit")

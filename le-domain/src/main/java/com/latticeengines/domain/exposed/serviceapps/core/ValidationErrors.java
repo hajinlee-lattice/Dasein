@@ -25,7 +25,8 @@ public class ValidationErrors {
         EXCEED_USAGE_LIMIT("Usage limit exceeded: %d attributes"), //
         INVALID_ACTIVATION("Cannot activate deprecated attribute: %d attributes"), //
         INVALID_USAGE_CHANGE("Usage change is not allowed: %d attributes"), //
-        INVALID_PROP_CHANGE("Customization is not allowed: %d attributes");
+        INVALID_PROP_CHANGE("Customization is not allowed: %d attributes"), //
+        DUPLICATE_NAME_CHANGE("Duplicated names found: %d attributes");
 
         private String message;
 

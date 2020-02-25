@@ -881,7 +881,7 @@ public final class AttrConfigServiceImplTestUtils {
         ValidationDetails details = attrConfigRequest.getDetails();
         List<AttrValidation> validations = details.getValidations();
         AttrValidation validation1 = new AttrValidation();
-        validation1.setAttrName(attrName1);
+        validation1.setDisplayName(attrName1);
         validation1.setSubcategory(subcategory1);
         ValidationErrors validationErrors1 = new ValidationErrors();
         validation1.setValidationErrors(validationErrors1);
@@ -899,7 +899,7 @@ public final class AttrConfigServiceImplTestUtils {
                 .build());
 
         AttrValidation validation2 = new AttrValidation();
-        validation2.setAttrName(attrName2);
+        validation2.setDisplayName(attrName2);
         validation2.setSubcategory(subcategory2);
         ValidationErrors validationErrors2 = new ValidationErrors();
         validation2.setValidationErrors(validationErrors2);
@@ -918,7 +918,7 @@ public final class AttrConfigServiceImplTestUtils {
 
         // add one validation that only contains warning, the request still will be regarded as error
         AttrValidation validation3 = new AttrValidation();
-        validation3.setAttrName(attrName1);
+        validation3.setDisplayName(attrName1);
         validation3.setSubcategory(subcategory1);
         ImpactWarnings impactWarnings = new ImpactWarnings();
         validation3.setImpactWarnings(impactWarnings);
@@ -947,7 +947,7 @@ public final class AttrConfigServiceImplTestUtils {
         ValidationDetails details = attrConfigRequest.getDetails();
         List<AttrValidation> validations = details.getValidations();
         AttrValidation validation = new AttrValidation();
-        validation.setAttrName(attrName);
+        validation.setDisplayName(attrName);
         validation.setSubcategory(subcategory);
         ImpactWarnings impactWarnings = new ImpactWarnings();
         Map<ImpactWarnings.Type, List<String>> warnings = new HashMap<>();
@@ -984,7 +984,7 @@ public final class AttrConfigServiceImplTestUtils {
         attrConfig.setAttrProps(attrProps);
 
         AttrValidation validation = new AttrValidation();
-        validation.setAttrName(attrName);
+        validation.setDisplayName(attrName);
         validation.setSubcategory(subcategory);
         attrConfigRequest.getDetails().getValidations().add(validation);
         return attrConfigRequest;
@@ -1007,7 +1007,7 @@ public final class AttrConfigServiceImplTestUtils {
         attrConfig.setAttrProps(attrProps);
 
         AttrValidation validation = new AttrValidation();
-        validation.setAttrName(attrName);
+        validation.setDisplayName(attrName);
         validation.setSubcategory(subcategory);
         attrConfigRequest.getDetails().getValidations().add(validation);
         return attrConfigRequest;
