@@ -105,10 +105,6 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Enumerated(EnumType.STRING)
     private LaunchState launchState;
 
-    @JsonProperty("launchStateDisplayString")
-    @Transient
-    private String launchStateDisplayString;
-
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_PLAY_ID", nullable = false)
@@ -382,10 +378,8 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.launchState = launchState;
     }
 
-    public String getLaunchStateDisplayString() {        return null;
-        // TODO: uncomment with https://github.com/LatticeEngines/ledp/pull/4866 is merged
-        // return launchState.toDisplayString(destinationSysName);
-    }
+    @JsonProperty("launchStateDisplayString")
+    public String getLaunchStateDisplayString() { return launchState.toDisplayString(destinationSysName); }
 
     public Play getPlay() {
         return play;
