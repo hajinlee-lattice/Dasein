@@ -68,7 +68,7 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
         Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELETE_BYDATERANGE_ACTIONS,
                 BusinessEntity.class, Set.class);
         log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
-        if (actionMap == null && !actionMap.containsKey(configuration.getEntity())) {
+        if (actionMap == null || !actionMap.containsKey(configuration.getEntity())) {
             return;
         }
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION,
@@ -83,43 +83,41 @@ public class LegacyDeleteByDateRangeStep extends BaseWorkflowStep<LegacyDeleteBy
             }
             return;
         }
-        if (actionMap != null && actionMap.containsKey(configuration.getEntity())) {
-            Set<Action> actionSet = JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class);
-            for (Action action : actionSet) {
-                LegacyDeleteByDateRangeActionConfiguration actionConfiguration = (LegacyDeleteByDateRangeActionConfiguration) action.getActionConfiguration();
-                Date startTime = actionConfiguration.getStartTime();
-                Date endTime = actionConfiguration.getEndTime();
-                if (startTime == null || endTime == null) {
-                    throw new LedpException(LedpCode.LEDP_40002);
-                }
-
-                if (startTime.getTime() > endTime.getTime()) {
-                    throw new LedpException(LedpCode.LEDP_40003);
-                }
-
-                Set<Integer> periods = new HashSet<Integer>();
-                try {
-                    Calendar calendar = Calendar.getInstance();
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    calendar.setTime(simpleDateFormat.parse(simpleDateFormat.format(startTime)));
-
-                    while (calendar.getTime().compareTo(endTime) <= 0) {
-                        log.info("Time: " + calendar.getTime());
-
-                        Integer period = DateTimeUtils.dateToDayPeriod(simpleDateFormat.format(calendar.getTime()));
-                        log.info("Period: " + period);
-
-                        periods.add(period);
-                        calendar.add(Calendar.DAY_OF_YEAR, 1);
-                    }
-                } catch (ParseException pe) {
-                    throw new LedpException(LedpCode.LEDP_40004, new String[]{pe.getMessage()});
-                }
-                String avroDir = getAvroDir();
-                Long deletedRows = TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, avroDir, periods, true);
-                log.info("delete actionPid is {}, entity is {}, deletedRows is {}.",
-                        action.getPid(), configuration.getEntity().name(), deletedRows);
+        Set<Action> actionSet = JsonUtils.convertSet(actionMap.get(configuration.getEntity()), Action.class);
+        for (Action action : actionSet) {
+            LegacyDeleteByDateRangeActionConfiguration actionConfiguration = (LegacyDeleteByDateRangeActionConfiguration) action.getActionConfiguration();
+            Date startTime = actionConfiguration.getStartTime();
+            Date endTime = actionConfiguration.getEndTime();
+            if (startTime == null || endTime == null) {
+                throw new LedpException(LedpCode.LEDP_40002);
             }
+
+            if (startTime.getTime() > endTime.getTime()) {
+                throw new LedpException(LedpCode.LEDP_40003);
+            }
+
+            Set<Integer> periods = new HashSet<Integer>();
+            try {
+                Calendar calendar = Calendar.getInstance();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                calendar.setTime(simpleDateFormat.parse(simpleDateFormat.format(startTime)));
+
+                while (calendar.getTime().compareTo(endTime) <= 0) {
+                    log.info("Time: " + calendar.getTime());
+
+                    Integer period = DateTimeUtils.dateToDayPeriod(simpleDateFormat.format(calendar.getTime()));
+                    log.info("Period: " + period);
+
+                    periods.add(period);
+                    calendar.add(Calendar.DAY_OF_YEAR, 1);
+                }
+            } catch (ParseException pe) {
+                throw new LedpException(LedpCode.LEDP_40004, new String[]{pe.getMessage()});
+            }
+            String avroDir = getAvroDir();
+            Long deletedRows = TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, avroDir, periods, true);
+            log.info("delete actionPid is {}, entity is {}, deletedRows is {}.",
+                    action.getPid(), configuration.getEntity().name(), deletedRows);
         }
     }
 
