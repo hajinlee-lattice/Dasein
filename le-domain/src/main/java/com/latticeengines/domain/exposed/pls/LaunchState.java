@@ -1,11 +1,13 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 
 public enum LaunchState {
@@ -100,6 +102,37 @@ public enum LaunchState {
         }
     }
 
+    public String toDisplayString(CDLExternalSystemName channel) {
+        switch (this) {
+        case UnLaunched:
+            return UNLAUNCHED;
+        case Queued:
+        case PreProcessing:
+        case Launching:
+        case Syncing:
+            return LAUNCHING;
+        case Skipped:
+            return SKIPPED;
+        case Launched:
+            if (Arrays.asList(CDLExternalSystemName.Salesforce, CDLExternalSystemName.Eloqua,
+                    CDLExternalSystemName.AWS_S3).contains(channel))
+                return LAUNCHED;
+            else
+                return LAUNCHING;
+        case Failed:
+        case SyncFailed:
+            return FAILED;
+        case Canceled:
+            return CANCELLED;
+        case Synced:
+            return LAUNCHED;
+        case PartialSync:
+            return PARTIALLAUNCH;
+        default:
+            return null;
+        }
+    }
+
     public Boolean isInitial() {
         return this.initial;
     }
@@ -107,4 +140,13 @@ public enum LaunchState {
     public Boolean isTerminal() {
         return this.terminal;
     }
+
+    private static final String UNLAUNCHED = "Unlaunched";
+    private static final String LAUNCHING = "Launching";
+    private static final String SKIPPED = "Skipped";
+    private static final String LAUNCHED = "Launched";
+    private static final String FAILED = "Failed";
+    private static final String CANCELLED = "Cancelled";
+    private static final String PARTIALLAUNCH = "Partial Launch";
+
 }
