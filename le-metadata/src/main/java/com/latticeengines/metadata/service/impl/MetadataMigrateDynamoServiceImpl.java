@@ -202,6 +202,7 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
             List<String> tableNames = entry.getValue();
             List<List<String>> batchList = Lists.partition(tableNames, batchSize);
             for (List<String> subTableNames : batchList) {
+                log.info("Tables {} in tenant {} will be migrated to signature {}.", subTableNames, tenantId, signature);
                 migrateTable(tenantId, subTableNames);
                 SleepUtils.sleep(TimeUnit.SECONDS.toMillis(30));
             }
