@@ -92,10 +92,17 @@ public final class EntityMatchGAConverterUtils {
                         .filter(fieldMapping -> InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField()))
                         .findAny();
                 if (customerAccountIdMapping.isPresent()) {
-                    for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                        if (defaultSystem.getAccountSystemId().equals(fieldMapping.getMappedField())) {
-                            fieldMapping.setUserField(customerAccountIdMapping.get().getUserField());
-                        }
+                    Optional<FieldMapping> systemAccountIdMapping = fieldMappingDocument.getFieldMappings().stream()
+                            .filter(fieldMapping -> defaultSystem.getAccountSystemId().equals(fieldMapping.getMappedField()))
+                            .findAny();
+                    if (systemAccountIdMapping.isPresent()) {
+                        systemAccountIdMapping.get().setUserField(customerAccountIdMapping.get().getUserField());
+                    } else {
+                        FieldMapping fieldMapping = new FieldMapping();
+                        fieldMapping.setUserField(customerAccountIdMapping.get().getUserField());
+                        fieldMapping.setMappedField(defaultSystem.getAccountSystemId());
+                        fieldMapping.setFieldType(customerAccountIdMapping.get().getFieldType());
+                        fieldMappingDocument.getFieldMappings().add(fieldMapping);
                     }
                 }
             }
@@ -104,10 +111,17 @@ public final class EntityMatchGAConverterUtils {
                         .filter(fieldMapping -> InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField()))
                         .findAny();
                 if (customerContactIdMapping.isPresent()) {
-                    for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-                        if (defaultSystem.getContactSystemId().equals(fieldMapping.getMappedField())) {
-                            fieldMapping.setUserField(customerContactIdMapping.get().getUserField());
-                        }
+                    Optional<FieldMapping> systemContactId = fieldMappingDocument.getFieldMappings().stream()
+                            .filter(fieldMapping -> defaultSystem.getContactSystemId().equals(fieldMapping.getMappedField()))
+                            .findAny();
+                    if (systemContactId.isPresent()) {
+                        systemContactId.get().setUserField(customerContactIdMapping.get().getUserField());
+                    } else {
+                        FieldMapping fieldMapping = new FieldMapping();
+                        fieldMapping.setUserField(customerContactIdMapping.get().getUserField());
+                        fieldMapping.setMappedField(defaultSystem.getContactSystemId());
+                        fieldMapping.setFieldType(customerContactIdMapping.get().getFieldType());
+                        fieldMappingDocument.getFieldMappings().add(fieldMapping);
                     }
                 }
             }
