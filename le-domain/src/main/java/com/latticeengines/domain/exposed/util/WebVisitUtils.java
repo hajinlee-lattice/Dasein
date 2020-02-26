@@ -39,10 +39,10 @@ public final class WebVisitUtils {
     public static final String SOURCE_MEDIUM_GROUPNAME = "Web Visits By Source Medium";
 
     // default time range shown in category tile (current value: last 8 weeks)
-    private static final TimeFilter DEFAULT_TIME_FILTER = new TimeFilter(ComparisonType.WITHIN,
+    private static final TimeFilter UI_DEFAULT_TIME_FILTER = new TimeFilter(ComparisonType.WITHIN,
             PeriodStrategy.Template.Week.name(), Collections.singletonList(8));
     private static final String DEFAULT_TIME_RANGE = ActivityMetricsGroupUtils
-            .timeFilterToTimeRangeTmpl(DEFAULT_TIME_FILTER);
+            .timeFilterToTimeRangeTmpl(UI_DEFAULT_TIME_FILTER);
 
     protected WebVisitUtils() {
         throw new UnsupportedOperationException();
@@ -210,11 +210,11 @@ public final class WebVisitUtils {
      * label shown in web visit category tile
      */
     public static String defaultTimeFilterDisplayName() {
-        return filterOptionDisplayName(DEFAULT_TIME_FILTER);
+        return filterOptionDisplayName(UI_DEFAULT_TIME_FILTER);
     }
 
     /*-
-     * default time range for metrics group
+     * default time range for webvisit metrics group
      * - last 2, 4, 8, 12 weeks
      */
     public static ActivityTimeRange defaultTimeRange() {
