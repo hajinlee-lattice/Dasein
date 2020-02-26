@@ -16,7 +16,7 @@ import com.latticeengines.spark.util.DeriveAttrsUtils
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, StringType}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 
 import scala.collection.JavaConversions._
 
@@ -57,7 +57,7 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
   private def processStream(dailyStore: DataFrame, stream: AtlasStream, evaluationDate: String, calendar: BusinessCalendar): Seq[DataFrame] = {
     val periods: Seq[String] = stream.getPeriods.toSeq
     val dimensions: Seq[StreamDimension] = stream.getDimensions.toSeq
-    val aggregators: Seq[StreamAttributeDeriver] =
+    val aggregations: Seq[StreamAttributeDeriver] =
       if (Option(stream.getAttributeDerivers).isEmpty) Seq()
       else stream.getAttributeDerivers.toSeq
     val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(periods, calendar), evaluationDate)
@@ -69,9 +69,9 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
 
     val withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStore, periodName, translator, stream))
 
-    val aggrProcs = aggregators.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(__Row_Count__.name).as(__Row_Count__.name) // Default row count must exist
+    val aggColumns: Seq[Column] = aggregations.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(__Row_Count__.name).as(__Row_Count__.name) // Default row count must exist
     val columns: Seq[String] = DeriveAttrsUtils.getEntityIdColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
-    val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*).agg(aggrProcs.head, aggrProcs.tail: _*))
+    val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*).agg(aggColumns.head, aggColumns.tail: _*))
     groupedByPeriodId.map((df: DataFrame) => DeriveAttrsUtils.appendPartitionColumns(df, Seq(PeriodId.name)))
   }
 

@@ -55,6 +55,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final int CUR_PERIODID = 1034;
     private static final int ONE_WEEK_AGO = CUR_PERIODID - 1;
     private static final int TWO_WEEKS_AGO = CUR_PERIODID - 2;
+    private static final int FOREVER_AGO = 1;
 
     // column names
     private static final String PathPatternId = InterfaceName.PathPatternId.name();
@@ -125,8 +126,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private Long calculateOpportunityAttrsCount(Map<String, Map<String, DimensionMetadata>> streamMetadata, ActivityMetricsGroup group) {
-        return streamMetadata.get(OPPORTUNITY_STREAM_ID).get(Stage).getCardinality()
-                * group.getActivityTimeRange().getParamSet().size();
+        return streamMetadata.get(OPPORTUNITY_STREAM_ID).get(Stage).getCardinality();
     }
 
     private ActivityStoreSparkIOMetadata constructInputMetadata(AtlasStream stream) {
@@ -224,7 +224,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"acc2", "opp1", ONE_WEEK_AGO, "close", 1},
                 {"acc1", "opp4", TWO_WEEKS_AGO, "close", 1},
                 {"acc2", "opp2", TWO_WEEKS_AGO, "started", 1},
-                {"acc2", "opp3", ONE_WEEK_AGO, "lost", 1}
+                {"acc2", "opp3", ONE_WEEK_AGO, "lost", 1},
+                {"acc999", "opp999", FOREVER_AGO, "lost", 1}
         };
         return uploadHdfsDataUnit(data, periodStoreFields);
     }
@@ -261,7 +262,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         group.setGroupName(OPPORTUNITY_GROUPNAME);
         group.setJavaClass(Long.class.getSimpleName());
         group.setEntity(BusinessEntity.Account);
-        group.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN, TIMEFILTER_PERIODS, TIMEFILTER_PARAMS));
+        group.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER, TIMEFILTER_PERIODS, null));
         group.setRollupDimensions(Stage);
         group.setAggregation(createAttributeDeriver(Collections.singletonList(__Row_Count__), __Row_Count__, StreamAttributeDeriver.Calculation.SUM));
         group.setNullImputation(NullMetricsImputation.ZERO);
@@ -318,10 +319,11 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyOpportunityMetrics(HdfsDataUnit metrics) {
         Object[][] expectedResult = new Object[][]{
-                // 4 for each week range (1, 2), + 1 entityId
-                {"acc1", 0, 0, 0, 0, 1, 0, 0, 0},
-                {"acc2", 1, 1, 0, 0, 1, 1, 1, 0},
-                {"missingAccount", 0, 0, 0, 0, 0, 0, 0, 0}
+                // 4 for each stage (close, lost, started, won), + 1 entityId
+                {"acc1", 1, 0, 0, 0},
+                {"acc2", 1, 1, 1, 0},
+                {"acc999", 0, 1, 0, 0},
+                {"missingAccount", 0, 0, 0, 0}
         };
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> arr[0].toString(), Arrays::asList));
