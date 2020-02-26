@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PreDestroy;
@@ -24,6 +25,7 @@ import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.CollectionLookup;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -43,6 +45,7 @@ public class TempListServiceImpl implements TempListService {
     private static final int INSERT_BATCH_SIZE = 1000;
     // (tempTableName -> redisCacheKey)
     private static final ConcurrentMap<String, String> CACHE_LOOKUP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Semaphore> MUTEXES = new ConcurrentHashMap<>();
 
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
@@ -56,11 +59,26 @@ public class TempListServiceImpl implements TempListService {
         if (StringUtils.isNotBlank(existingTempTable)) {
             log.info("The temp list has already been saved as {}} in redshift.", existingTempTable);
             return existingTempTable;
+        } else {
+            if (restriction == null || !RestrictionUtils.isMultiValueOperator(restriction.getRelation()) //
+                    || !(restriction.getRhs() instanceof CollectionLookup) //
+                    || !(restriction.getLhs() instanceof AttributeLookup)) {
+                throw new IllegalArgumentException("Not a valid big list restriction." + JsonUtils.serialize(restriction));
+            }
+            Semaphore mutex = acquireTenantMutex();
+            try {
+                return createTempListInMutex(restriction, redshiftPartition);
+            } finally {
+                mutex.release();
+            }
         }
-        if (restriction == null || !RestrictionUtils.isMultiValueOperator(restriction.getRelation()) //
-                || !(restriction.getRhs() instanceof CollectionLookup) //
-                || !(restriction.getLhs() instanceof AttributeLookup)) {
-            throw new IllegalArgumentException("Not a valid big list restriction." + JsonUtils.serialize(restriction));
+    }
+
+    private String createTempListInMutex(ConcreteRestriction restriction, String redshiftPartition) {
+        String existingTempTable = getExistingTempTable(restriction, redshiftPartition);
+        if (StringUtils.isNotBlank(existingTempTable)) {
+            log.info("The temp list has already been saved as {}} in redshift.", existingTempTable);
+            return existingTempTable;
         }
         String tempTableName = TempListUtils.newTempTableName();
         try (PerformanceTimer timer = new PerformanceTimer("Create temp table " + tempTableName)) {
@@ -168,6 +186,31 @@ public class TempListServiceImpl implements TempListService {
 
     private RedshiftService getRedshiftService(String partition) {
         return redshiftPartitionService.getBatchUserService(partition);
+    }
+
+    private Semaphore acquireTenantMutex() {
+        String tenantId = MultiTenantContext.getShortTenantId();
+        if (StringUtils.isBlank(tenantId)) {
+            tenantId = "__global__";
+        }
+        if (!MUTEXES.containsKey(tenantId)) {
+            createTenantMutex(tenantId);
+        }
+        Semaphore mutex  = MUTEXES.get(tenantId);
+        try {
+            mutex.acquire();
+        } catch (InterruptedException e) {
+            log.warn("Failed to acquire mutext for tenant {}", tenantId, e);
+        }
+        return mutex;
+    }
+
+    private synchronized void createTenantMutex(String tenantId) {
+        if (!MUTEXES.containsKey(tenantId)) {
+            Semaphore mutex = new Semaphore(1);
+            MUTEXES.putIfAbsent(tenantId, mutex);
+            log.info("Created a mutex for tenant {}", tenantId);
+        }
     }
 
 }
