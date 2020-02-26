@@ -39,7 +39,7 @@ public class SoftDeleteContact extends BaseSingleEntitySoftDelete<ProcessContact
         int selectContactStep = softDeleteMergeStep + 1;
         TransformationStepConfig mergeSoftDelete = mergeSoftDelete(softDeleteActions);
         TransformationStepConfig selectContact = selectContact(softDeleteMergeStep);
-        TransformationStepConfig softDeleteSystemBatchStore = softDeleteSystemBatchStore(selectContactStep);
+        TransformationStepConfig softDeleteSystemBatchStore = softDeleteSystemBatchStoreByContact(selectContactStep);
         TransformationStepConfig softDelete = softDelete(softDeleteMergeStep);
         steps.add(mergeSoftDelete);
         steps.add(selectContact);
