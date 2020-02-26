@@ -480,7 +480,9 @@ public class CheckpointService {
         if (!new File(jsonFile).exists()) {
             return null;
         }
-        return JsonUtils.deserialize(new FileInputStream(jsonFile), DataCollectionStatus.class);
+        DataCollectionStatus status = JsonUtils.deserialize(new FileInputStream(jsonFile), DataCollectionStatus.class);
+        status.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
+        return status;
     }
 
     public void cleanup() {
