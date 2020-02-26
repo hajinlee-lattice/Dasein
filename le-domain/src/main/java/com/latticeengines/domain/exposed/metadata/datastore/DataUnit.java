@@ -81,14 +81,6 @@ public abstract class DataUnit {
         this.partitionKeys = partitionKeys;
     }
 
-    public boolean isCoalesce() {
-        return coalesce;
-    }
-
-    public void setCoalesce(boolean coalesce) {
-        this.coalesce = coalesce;
-    }
-
     public enum StorageType {
         Dynamo, Hdfs, Redshift, S3
     }
