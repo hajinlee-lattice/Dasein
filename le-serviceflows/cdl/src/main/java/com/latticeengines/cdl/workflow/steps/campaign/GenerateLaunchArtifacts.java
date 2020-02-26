@@ -60,7 +60,6 @@ import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.util.AttrRepoUtils;
 import com.latticeengines.spark.exposed.job.cdl.GenerateLaunchArtifactsJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
-import com.latticeengines.workflow.exposed.util.CampaignLaunchUtils;
 
 @Component("generateLaunchArtifacts")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -79,9 +78,6 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     @Inject
     private ExportFieldMetadataProxy exportFieldMetadataProxy;
 
-    @Inject
-    private CampaignLaunchUtils campaignLaunchUtils;
-
     private DataCollection.Version version;
     private String evaluationDate;
     private AttributeRepository attrRepo;
@@ -89,7 +85,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     @Override
     public void execute() {
         GenerateLaunchArtifactsStepConfiguration config = getConfiguration();
-        customerSpace = configuration.getCustomerSpace();
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
 
         Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
         PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
@@ -158,7 +154,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 negativeDeltaDataUnit,
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
                 contactsDataExists);
-        processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult, channel.getLookupIdMap().getExternalSystemName());
+        processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
     }
 
     private boolean doesContactDataExist(AttributeRepository attrRepo) {
@@ -212,14 +208,11 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         });
     }
 
-    private void processSparkJobResults(AudienceType audienceType, SparkJobResult sparkJobResult, CDLExternalSystemName cdlExternalSystemName) {
+    private void processSparkJobResults(AudienceType audienceType, SparkJobResult sparkJobResult) {
         GenerateLaunchArtifactsStepConfiguration config = getConfiguration();
 
-        long addedAccountsCount = 0l;
-        long fullContactsCount = 0l;
         HdfsDataUnit addedAccountsDataUnit = sparkJobResult.getTargets().get(0);
         if (addedAccountsDataUnit != null && addedAccountsDataUnit.getCount() > 0) {
-            addedAccountsCount = addedAccountsDataUnit.getCount();
             processHDFSDataUnit(String.format("AddedAccounts_%s", config.getExecutionId()), addedAccountsDataUnit,
                     AudienceType.ACCOUNTS.getInterfaceName(),
                     getAddDeltaTableContextKeyByAudienceType(AudienceType.ACCOUNTS));
@@ -235,6 +228,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         } else {
             log.info(String.format("No Removed %ss", AudienceType.ACCOUNTS.asBusinessEntity().name()));
         }
+
         HdfsDataUnit fullContactsDataUnit = sparkJobResult.getTargets().get(2);
         if (fullContactsDataUnit != null && fullContactsDataUnit.getCount() > 0) {
             processHDFSDataUnit(String.format("AccountsWithFullContacts_%s", config.getExecutionId()),
@@ -242,7 +236,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         } else {
             log.info("No Full contacts");
         }
-        campaignLaunchUtils.checkCampaignLaunchLimitation(customerSpace, cdlExternalSystemName, addedAccountsCount, fullContactsCount);
+
         if (audienceType == AudienceType.CONTACTS) {
             HdfsDataUnit addedContactsDataUnit = sparkJobResult.getTargets().get(3);
             if (addedContactsDataUnit != null && addedContactsDataUnit.getCount() > 0) {
