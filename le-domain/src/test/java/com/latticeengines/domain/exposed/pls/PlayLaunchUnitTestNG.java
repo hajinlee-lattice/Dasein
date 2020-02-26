@@ -32,6 +32,7 @@ public class PlayLaunchUnitTestNG {
         playLaunch.setBucketsToLaunch(selectedBuckets);
         playLaunch.setCreatedBy(createdBy);
         playLaunch.setUpdatedBy(createdBy);
+        playLaunch.setLaunchState(LaunchState.Canceled);
         String playLaunchStr = playLaunch.toString();
         System.out.println(String.format("playLaunch is %s", playLaunchStr));
         PlayLaunch deserializedPlayLaunch = JsonUtils.deserialize(playLaunchStr, PlayLaunch.class);
