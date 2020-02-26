@@ -99,7 +99,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
     protected void postJobExecution(SparkJobResult result) {
         String tenantId = CustomerSpace.shortenCustomerSpace(parseCustomerSpace(configuration).toString());
         String cleanupTableName = NamingUtils.timestamp("DeleteByFile_");
-        Table cleanupTable = toTable(cleanupTableName, configuration.getEntity().getServingStore().getPrimaryKey().name(),
+        Table cleanupTable = toTable(cleanupTableName, configuration.getEntity().getServingStore().getPrimaryKey(),
                 result.getTargets().get(0));
         if (cleanupTable == null) {
             return;
