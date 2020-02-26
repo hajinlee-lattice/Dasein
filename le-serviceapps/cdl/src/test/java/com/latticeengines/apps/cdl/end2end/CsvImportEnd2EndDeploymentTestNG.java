@@ -22,18 +22,23 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 
 /*
- * dpltc deploy -a pls,admin,cdl,modeling,lp,metadata,workflowapi,eai
+ * dpltc deploy -a pls,admin,cdl,modeling,lp,metadata,workflowapi,eai,matchapi
  */
 public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CsvImportEnd2EndDeploymentTestNG.class);
+
+    private static final String OPPORTUNITY_SYSTEM = "Default_Opportunity_System";
 
     private static final boolean isEntityMatchMode = true;
 
@@ -55,17 +60,43 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
 
     @Test(groups = "manual")
     public void runTest() throws Exception {
-        FileUtils.deleteQuietly(new File(downloadDir));
-        FileUtils.forceMkdirParent(new File(downloadDir));
-        FileUtils.deleteQuietly(new File(uploadDir));
-        FileUtils.forceMkdirParent(new File(uploadDir));
+        ensureEmptyDirs();
 //        importAndDownload(BusinessEntity.Account);
 //        clearHdfs();
-        importAndDownload(BusinessEntity.Contact);
+        // importAndDownload(BusinessEntity.Contact);
+        S3ImportSystem system = createSystem();
+        cdlProxy.createDefaultOpportunityTemplate(mainCustomerSpace, system.getName());
+        importAndDownload(BusinessEntity.Catalog);
 //        clearHdfs();
 //        importAndDownload(BusinessEntity.Product);
 //        clearHdfs();
 //        importAndDownload(BusinessEntity.Transaction);
+    }
+
+    @Test(groups = "manual")
+    private void importOpportunityData() throws Exception {
+        ensureEmptyDirs();
+
+        S3ImportSystem system = createSystem();
+        cdlProxy.createDefaultOpportunityTemplate(mainCustomerSpace, system.getName());
+
+        // import opportunity & stage data
+        importData(BusinessEntity.ActivityStream, "opportunity_1ec2c252-f36d-4054-aaf4-9d6379006244.csv",
+                EntityTypeUtils.generateFullFeedType(system.getName(), EntityType.Opportunity), false, false);
+        importData(BusinessEntity.Catalog, "opportunity_stage.csv",
+                EntityTypeUtils.generateFullFeedType(system.getName(), EntityType.OpportunityStageName), false, false);
+
+        // download data (template not required, just use the API created ones in e2e)
+        downloadData();
+        collectAvroFilesForEntity(BusinessEntity.ActivityStream);
+        collectAvroFilesForEntity(BusinessEntity.Catalog);
+    }
+
+    private void ensureEmptyDirs() throws Exception {
+        FileUtils.deleteQuietly(new File(downloadDir));
+        FileUtils.forceMkdirParent(new File(downloadDir));
+        FileUtils.deleteQuietly(new File(uploadDir));
+        FileUtils.forceMkdirParent(new File(uploadDir));
     }
 
     private void importAndDownload(BusinessEntity importingEntity) throws IOException {
@@ -207,6 +238,23 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         } else {
             log.info("No data feed task for entity " + entity + " of type " + feedType);
         }
+    }
+
+    /*-
+     * create a dummy system for opportunity templates to attach to
+     */
+    private S3ImportSystem createSystem() {
+        String systemName = OPPORTUNITY_SYSTEM;
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(mainTestTenant);
+        system.setName(systemName);
+        system.setDisplayName(systemName);
+        system.setSystemType(S3ImportSystem.SystemType.Other);
+        system.setPriority(1);
+        system.setAccountSystemId(String.format("user_%s_dlugenoz_AccountId", systemName));
+        system.setMapToLatticeAccount(true);
+        cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
+        return system;
     }
 
 }

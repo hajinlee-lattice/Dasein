@@ -21,6 +21,7 @@ import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
@@ -137,7 +138,8 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         stage.setGroupName(OPPORTUNITY_STAGE_GROUPNAME);
         stage.setJavaClass(Long.class.getSimpleName());
         stage.setEntity(BusinessEntity.Account);
-        stage.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER, null, null));
+        stage.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER,
+                Collections.singleton(PeriodStrategy.Template.Week.name()), null));
         stage.setRollupDimensions(DIM_NAME_STAGE);
         stage.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));

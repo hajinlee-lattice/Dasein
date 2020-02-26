@@ -22,7 +22,8 @@ public enum EntityType {
             SchemaInterpretation.WebVisitPathPattern), //
     WebVisitSourceMedium(BusinessEntity.Catalog, SubType.SourceMedium, "Visit Source", "WebVisitSourceMedium",
             SchemaInterpretation.WebVisitSourceMedium),
-    Opportunity(BusinessEntity.Opportunity, null, "Opportunity", "OpportunityData", SchemaInterpretation.Opportunity),
+    Opportunity(BusinessEntity.ActivityStream, null, "Opportunity", "OpportunityData",
+            SchemaInterpretation.Opportunity),
     OpportunityStageName(BusinessEntity.Catalog, SubType.StageName, "Opportunity Stage", "OpportunityStageName",
             SchemaInterpretation.OpportunityStageName);
 

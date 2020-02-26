@@ -1547,45 +1547,85 @@ public class SchemaRepository {
         List<Attribute> attrs;
         //TODO(JHE): 1. systemType support. 2. Split Product & Contact with subType.
         switch (entityType) {
-            case Accounts:
-                schemaTable = getAccountSchema(true, false, enableEntityMatch);
-                schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.Account));
-                break;
-            case Contacts:
-            case Leads:
-                schemaTable = getContactSchema(true, enableEntityMatch);
-                if (enableEntityMatch) {
-                    schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.ContactEntityMatch));
-                } else {
-                    schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.Contact));
-                }
-                break;
-            case ProductPurchases:
-                schemaTable = getTransactionSchema(enableEntityMatch);
-                break;
-            case ProductBundles:
-            case ProductHierarchy:
-                schemaTable = getProductSchema();
-                break;
-            case WebVisit:
-                attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrWebVisitDate(), attrUserId(), //
-                        attrSourceMedium(), attrCompanyName(), attrWebsite(), attrCity(), attrState(), attrCountry(), //
-                        attrPostalCode(), attrDUNS()));
-                schemaTable = createTable(SchemaInterpretation.WebVisit);
-                schemaTable.addAttributes(attrs);
-                break;
-            case WebVisitPathPattern:
-                attrs = new ArrayList<>(Arrays.asList(attrPathPatternName(), attrPathPattern()));
-                schemaTable = createTable(SchemaInterpretation.WebVisitPathPattern);
-                schemaTable.addAttributes(attrs);
-                break;
-            case WebVisitSourceMedium:
-                attrs = new ArrayList<>(Arrays.asList(attrSourceMedium()));
-                schemaTable = createTable(SchemaInterpretation.WebVisitSourceMedium);
-                schemaTable.addAttributes(attrs);
-                break;
+        case Accounts:
+            schemaTable = getAccountSchema(true, false, enableEntityMatch);
+            schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.Account));
+            break;
+        case Contacts:
+        case Leads:
+            schemaTable = getContactSchema(true, enableEntityMatch);
+            if (enableEntityMatch) {
+                schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.ContactEntityMatch));
+            } else {
+                schemaTable.addAttributes(getMatchingAttributes(SchemaInterpretation.Contact));
+            }
+            break;
+        case ProductPurchases:
+            schemaTable = getTransactionSchema(enableEntityMatch);
+            break;
+        case ProductBundles:
+        case ProductHierarchy:
+            schemaTable = getProductSchema();
+            break;
+        case WebVisit:
+            attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrWebVisitDate(), attrUserId(), //
+                    attrSourceMedium(), attrCompanyName(), attrWebsite(), attrCity(), attrState(), attrCountry(), //
+                    attrPostalCode(), attrDUNS()));
+            schemaTable = createTable(SchemaInterpretation.WebVisit);
+            schemaTable.addAttributes(attrs);
+            break;
+        case WebVisitPathPattern:
+            attrs = new ArrayList<>(Arrays.asList(attrPathPatternName(), attrPathPattern()));
+            schemaTable = createTable(SchemaInterpretation.WebVisitPathPattern);
+            schemaTable.addAttributes(attrs);
+            break;
+        case WebVisitSourceMedium:
+            attrs = new ArrayList<>(Arrays.asList(attrSourceMedium()));
+            schemaTable = createTable(SchemaInterpretation.WebVisitSourceMedium);
+            schemaTable.addAttributes(attrs);
+            break;
+        case Opportunity:
+            attrs = new ArrayList<>(Arrays.asList(attrOpportunityDate(), attrOpportunityId(), attrStageName()));
+            schemaTable = createTable(SchemaInterpretation.Opportunity);
+            schemaTable.setAttributes(attrs);
+            break;
+        case OpportunityStageName:
+            attrs = new ArrayList<>(Collections.singletonList(attrStageName()));
+            schemaTable = createTable(SchemaInterpretation.OpportunityStageName);
+            schemaTable.setAttributes(attrs);
+            break;
         }
         return schemaTable;
+    }
+
+    private Attribute attrStageName() {
+        return attr(InterfaceName.StageName.name()).allowedDisplayNames(Arrays.asList("STAGENAME", "STAGE_NAME"))
+                .required().physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.StageName) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrOpportunityId() {
+        return attr(InterfaceName.OpportunityId.name())
+                .allowedDisplayNames(Arrays.asList("ID", "OPPORTUNITYID", "OPPORTUNITY_ID")).required()
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.OpportunityId) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrOpportunityDate() {
+        return attr(InterfaceName.LastModifiedDate.name())
+                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LAST_MODIFIED_DATE")) //
+                .required().physicalDataType(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.LastModifiedDate) //
+                .logicalDataType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
+                .build();
     }
 
     private Attribute attrWebVisitDate() {
