@@ -2,6 +2,8 @@ package com.latticeengines.query.factory;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -13,6 +15,8 @@ import com.latticeengines.query.factory.sqlquery.BaseSQLQuery;
 import com.latticeengines.query.factory.sqlquery.BaseSQLQueryFactory;
 
 public abstract class QueryProvider implements ApplicationContextAware {
+
+    private static final Logger log = LoggerFactory.getLogger(QueryProvider.class);
 
     private static final int MAX_CACHE_SIZE = 10000;
     private Cache<String, BaseSQLQueryFactory> factoryCache;
@@ -36,7 +40,9 @@ public abstract class QueryProvider implements ApplicationContextAware {
             return factory;
         } else {
             factory = getSQLQueryFactory(repository, sqlUser);
-            factoryCache.put(repository.getIdentifier(sqlUser), factory);
+            String repoId = repository.getIdentifier(sqlUser);
+            factoryCache.put(repoId, factory);
+            log.info("Created a query factory for attr-repo {}", repoId);
             return factory;
         }
     }

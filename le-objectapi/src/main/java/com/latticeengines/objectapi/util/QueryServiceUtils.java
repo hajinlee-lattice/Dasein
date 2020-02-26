@@ -1,5 +1,8 @@
 package com.latticeengines.objectapi.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -11,6 +14,8 @@ import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 public final class QueryServiceUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(QueryServiceUtils.class);
 
     protected QueryServiceUtils() {
         throw new UnsupportedOperationException();
@@ -32,6 +37,8 @@ public final class QueryServiceUtils {
             AttributeRepository attrRepo = queryEvaluatorService.getAttributeRepository(tenant, version);
             if (attrRepo == null) {
                 throw new LedpException(LedpCode.LEDP_37015, new Object[]{tenant, version});
+            } else {
+                log.info("Found attr-repo in {} partition.", attrRepo.getRedshiftPartition());
             }
             return attrRepo;
         }
