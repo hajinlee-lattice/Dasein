@@ -322,7 +322,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         });
         missedAttrs.forEach((key, value) -> {
             FieldMapping fieldMapping = new FieldMapping();
-            fieldMapping.setUserField(value.getDisplayName());
+            fieldMapping.setUserField(value.getNameFromFile());
             fieldMapping.setMappedField(value.getName());
             fieldMapping.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(value.getPhysicalDataType()));
             templateMapping.getExtraFieldMappingInfo().addMissedMapping(fieldMapping);
@@ -470,7 +470,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 // check lattice field can be mapped by user field, while not mapped by user
                 for (String userField : unmappedUserFields) {
                     if (!ignored.contains(userField)) { // skip if ignored by user
-                        if (userField.equals(latticeAttr.getDisplayName())
+                        if (userField.equals(latticeAttr.getNameFromFile())
                                 || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
                             String message = String.format("Lattice field %s can be mapped to %s, while not",
                                     attrName, userField);

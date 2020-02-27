@@ -1058,5 +1058,19 @@ public class Attribute
             properties.put("LastDataRefresh", lastDataRefresh);
         }
     }
+
+    public String getNameFromFile() {
+        Object raw = properties.get("NameFromFile");
+        if (raw == null) {
+            return null;
+        }
+        return raw.toString();
+    }
+
+    public void setNameFromFile(String nameFromFile) {
+        if (nameFromFile != null) {
+            properties.put("NameFromFile", nameFromFile);
+        }
+    }
 }
 
