@@ -36,7 +36,6 @@ public final class AttributeUtils {
 
     private static final Logger log = LoggerFactory.getLogger(AttributeUtils.class);
 
-    public static final String PROP_SHOULD_DEPRECATE = "shouldDeprecate";
 
     public static void copyPropertiesFromAttribute(Attribute source, Attribute dest) {
         copyPropertiesFromAttribute(source, dest, true);
@@ -257,7 +256,8 @@ public final class AttributeUtils {
         metadata.setLogicalDataType(attr.getLogicalDataType());
         metadata.setIsHiddenForRemodelingUI(attr.isHiddenForRemodelingUI());
         metadata.setJavaClass(toJavaClass(attr.getPhysicalDataType(), attr.getDataType()));
-        metadata.setShouldDeprecate(Boolean.TRUE.equals(attr.getProperties().get(PROP_SHOULD_DEPRECATE)));
+        metadata.setShouldDeprecate(attr.getShouldDeprecate());
+        metadata.setSecondarySubCategoryDisplayName(attr.getSecondarySubCategoryDisplayName());
         if (StringUtils.isBlank(attr.getCategory())) {
             metadata.setCategory(Category.DEFAULT);
         } else {
@@ -348,5 +348,12 @@ public final class AttributeUtils {
             }
         }
         return javaClass;
+    }
+
+    public static class PropertyKeys {
+        public static final String SHOULD_DEPRECATE = "shouldDeprecate";
+        public static final String CATEGORY = "Category";
+        public static final String SUB_CATEGORY = "Subcategory";
+        public static final String SECONDARY_SUB_CATEGORY_DISPLAY_NAME = "subCategorySecondaryDisplayName";
     }
 }

@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -29,7 +30,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -59,7 +59,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.Activity
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
-import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
@@ -83,9 +82,11 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     private PeriodProxy periodProxy;
 
     private DataCollection.Version inactive;
+    private DataCollection.Version active;
     private boolean shortCutMode = false;
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
+    Map<TableRoleInCollection, Table> tableCache = new HashMap<>();
     private static TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>> streamMetadataCacheTypeRef = new TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>>() {
     };
 
@@ -97,6 +98,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     @Override
     protected MergeActivityMetricsJobConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        active = inactive.complement();
         streamMetadataCache = JsonUtils.deserializeByTypeRef(getStringValueFromContext(ACTIVITY_STREAM_METADATA_CACHE), streamMetadataCacheTypeRef);
         Set<String> skippedStreams = getSkippedStreamIds();
         List<ActivityMetricsGroup> groups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
@@ -108,7 +110,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             return null;
         }
         groups.forEach(group -> {
-            activityMetricsServingEntities.add(CategoryUtils.getEntity(group.getCategory()).get(0).getServingStore().name());
+            activityMetricsServingEntities.add(CategoryUtils.getEntity(group.getCategory()).get(0).name());
             String mergedTableLabel = getMergedLabel(group);
             mergedTablesMap.putIfAbsent(mergedTableLabel, new ArrayList<>());
             mergedTablesMap.get(mergedTableLabel).add(group);
@@ -154,12 +156,11 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     }
 
     private void appendActiveActivityMetrics(List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata, List<ActivityMetricsGroup> groups) {
-        Map<TableRoleInCollection, Table> tableCache = new HashMap<>();
         Map<String, ActivityStoreSparkIOMetadata.Details> metadataMap = inputMetadata.getMetadata();
         groups.forEach(group -> {
             TableRoleInCollection servingEntity = getServingEntity(group.getCategory());
             if (!tableCache.containsKey(servingEntity)) {
-                tableCache.put(servingEntity, dataCollectionProxy.getTable(customerSpace.toString(), servingEntity, inactive.complement()));
+                tableCache.put(servingEntity, dataCollectionProxy.getTable(customerSpace.toString(), servingEntity, active));
             }
             Table activeMetrics = tableCache.get(servingEntity);
             if (activeMetrics != null && metadataMap.get(servingEntity.name()) == null) {
@@ -213,7 +214,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                 log.warn("Empty metrics found: {}. Append dummy record.", tableName);
                 appendDummyRecord(mergedTable);
             } else {
-                enrichActivityAttributes(mergedTable, getEntityInLabel(mergedTableLabel), new HashSet<>(details.getLabels())); // labels are attributes to be deprecated
+                enrichActivityAttributes(mergedTable, getEntityInLabel(mergedTableLabel), getServingEntityInLabel(mergedTableLabel), new HashSet<>(details.getLabels())); // labels are attributes to be deprecated
             }
             metadataProxy.createTable(customerSpace.toString(), tableName, mergedTable);
             TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
@@ -227,13 +228,28 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
     }
 
-    private void enrichActivityAttributes(Table mergedTable, BusinessEntity entity, Set<String> deprecatedAttrs) {
+    private void enrichActivityAttributes(Table mergedTable, BusinessEntity entity, TableRoleInCollection servingEntity, Set<String> deprecatedAttrNames) {
         String entityIdAttrName = getEntityIdColName(entity);
-        log.warn("Mark attributes as deprecated as they are only found in previous version of activity metrics {}: {}", mergedTable.getName(), deprecatedAttrs);
+        Map<String, Attribute> attributeMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(deprecatedAttrNames)) {
+            Table activeMetricsTable = tableCache.get(servingEntity);
+            if (activeMetricsTable == null) {
+                throw new RuntimeException(String.format("Failed to retrieve active metrics from type with serving entity %s of version %s", servingEntity, active));
+            }
+            log.warn("Mark attributes as deprecated as they are only found in previous version of activity metrics {}: {}", mergedTable.getName(), deprecatedAttrNames);
+            activeMetricsTable.getAttributes().stream()
+                    .filter(attr -> deprecatedAttrNames.contains(attr.getName()))
+                    .forEach(attr -> attributeMap.put(attr.getName(), attr));
+        }
         mergedTable.getAttributes().stream()
                 .filter(attribute -> !entityIdAttrName.equalsIgnoreCase(attribute.getName()))
                 .forEach(attr -> {
                     String attrName = attr.getName();
+                    if (attributeMap.containsKey(attrName)) {
+                        copyActivityAttributeMetadata(attributeMap.get(attrName), attr);
+                        attr.setShouldDeprecate(true);
+                        return;
+                    }
                     List<String> tokens;
                     try {
                         tokens = ActivityMetricsGroupUtils.parseAttrName(attrName);
@@ -247,15 +263,21 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                     String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
                     BusinessCalendar calendar = periodProxy.getBusinessCalendar(customerSpace.toString());
                     TimeFilterTranslator translator = new TimeFilterTranslator(getPeriodStrategies(calendar), evaluationDate);
-                    populateAttrDisplayName(attr, groupId, rollupDimVals, timeRange);
-                    setAttrEvaluatedDate(attr, timeRange, translator);
-                    if (deprecatedAttrs.contains(attrName)) {
-                        attr.setProperties(Collections.singletonMap(AttributeUtils.PROP_SHOULD_DEPRECATE, true));
-                    }
+                    enrichAttribute(attr, groupId, rollupDimVals, timeRange, translator);
                 });
     }
 
-    private void populateAttrDisplayName(Attribute attr, String groupId, String[] rollupDimVals, String timeRange) {
+    private void copyActivityAttributeMetadata(Attribute from, Attribute to) {
+        to.setDisplayName(from.getDisplayName());
+        to.setSecondaryDisplayName(from.getSecondaryDisplayName());
+        to.setDescription(from.getDescription());
+        to.setCategory(from.getCategory());
+        to.setSubcategory(from.getSubcategory());
+        to.setSecondarySubCategoryDisplayName(from.getSecondarySubCategoryDisplayName());
+
+    }
+
+    private void enrichAttribute(Attribute attr, String groupId, String[] rollupDimVals, String timeRange, TimeFilterTranslator translator) {
         ActivityMetricsGroup group = configuration.getActivityMetricsGroupMap().get(groupId);
         AtlasStream stream = group.getStream();
         String attrName = attr.getName();
@@ -266,13 +288,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                             rollupDimVals.length, attrName, rollupDimNames.length, groupId));
         }
         Map<String, DimensionMetadata> streamDimMetadata = getStreamMetadataFromCache(stream);
-        Map<String, Object> params = createDisplayNameParamMap(rollupDimNames, rollupDimVals, streamDimMetadata, attrName);
-        try {
-            String timeDesc = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeRange);
-            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN, timeDesc);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to parse time range for attribute " + attrName, e);
-        }
+        Map<String, Object> params = createParamMap(rollupDimNames, rollupDimVals, timeRange, streamDimMetadata, attrName);
         String displayNameTmpl = group.getDisplayNameTmpl().getTemplate();
         if (StringUtils.isNotBlank(displayNameTmpl)) {
             try {
@@ -281,9 +297,45 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                 throw new IllegalArgumentException("Failed to render display name for attribute " + attrName, e);
             }
         }
+        String descTmpl = group.getDescriptionTmpl().getTemplate();
+        if (StringUtils.isNotBlank(descTmpl)) {
+            try {
+                attr.setDescription(TemplateUtils.renderByMap(displayNameTmpl, params));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to render description for attribute " + attrName, e);
+            }
+        }
+        String subCategoryTmpl = group.getSubCategoryTmpl().getTemplate();
+        if (StringUtils.isNotBlank(subCategoryTmpl)) {
+            try {
+                attr.setSubcategory(TemplateUtils.renderByMap(displayNameTmpl, params));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to render sub-category for attribute " + attrName, e);
+            }
+        }
+        if (Category.WEB_VISIT_PROFILE.equals(group.getCategory())) { // TODO - this block is for backwards compatibility, should remove after merge and add secondary tmpl to existing web visit groups and keep only the one in else block
+            String secondarySubCategoryTmpl = "${PathPatternId.PathPattern}";
+            if (StringUtils.isNotBlank(secondarySubCategoryTmpl)) {
+                try {
+                    attr.setSecondarySubCategoryDisplayName(TemplateUtils.renderByMap(secondarySubCategoryTmpl, params));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Failed to render secondary sub-category display name for attribute " + attrName, e);
+                }
+            }
+        } else {
+            String secondarySubCategoryTmpl = group.getSecondarySubCategoryTmpl() == null ? null : group.getSecondarySubCategoryTmpl().getTemplate();
+            if (StringUtils.isNotBlank(secondarySubCategoryTmpl)) {
+                try {
+                    attr.setSecondarySubCategoryDisplayName(TemplateUtils.renderByMap(secondarySubCategoryTmpl, params));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Failed to render secondary sub-category display name for attribute " + attrName, e);
+                }
+            }
+        }
+        setAttrEvaluatedDate(attr, timeRange, translator);
     }
 
-    private Map<String, Object> createDisplayNameParamMap(String[] rollupDimNames, String[] rollupDimVals, Map<String, DimensionMetadata> streamDimMetadata, String attrName) {
+    private Map<String, Object> createParamMap(String[] rollupDimNames, String[] rollupDimVals, String timeRange, Map<String, DimensionMetadata> streamDimMetadata, String attrName) {
         Map<String, Object> params = new HashMap<>();
         for (int i = 0; i < rollupDimNames.length; i++) {
             String dimName = rollupDimNames[i];
@@ -302,6 +354,12 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                                 dimName, dimVal, attrName));
             }
             params.put(dimName, dimParams);
+        }
+        try {
+            String timeDesc = ActivityMetricsGroupUtils.timeRangeTmplToDescription(timeRange);
+            params.put(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TIME_RANGE_TOKEN, timeDesc);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to parse time range for attribute " + attrName, e);
         }
         return params;
     }

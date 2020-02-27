@@ -97,6 +97,7 @@ public class AggActivityStreamToDaily
             config.dimensionMetadataMap = getTypedObjectFromContext(STREAM_DIMENSION_METADATA_MAP, METADATA_MAP_TYPE);
             // dimension value -> short ID
             config.dimensionValueIdMap = getMapObjectFromContext(STREAM_DIMENSION_VALUE_ID_MAP, String.class, String.class);
+            config.streamReducerMap = new HashMap<>();
             Set<AtlasStream> notSkippedStream = streams.values().stream().filter(stream -> {
                 String streamId = stream.getStreamId();
                 if (skippedStreamIds.contains(streamId)) {
@@ -119,6 +120,7 @@ public class AggActivityStreamToDaily
                 config.dimensionCalculatorMap.put(streamId, calculatorMap);
                 config.hashDimensionMap.put(streamId, hashDimensions);
                 config.additionalDimAttrMap.put(streamId, additionalDimAttrs);
+                config.streamReducerMap.put(streamId, stream.getReducer());
                 return true;
             }).collect(Collectors.toSet());
             if (notSkippedStream.isEmpty()) {

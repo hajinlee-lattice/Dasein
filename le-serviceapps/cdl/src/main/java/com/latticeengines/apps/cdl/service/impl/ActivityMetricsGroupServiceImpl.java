@@ -107,6 +107,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         totalVisit.setDisplayNameTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME));
         totalVisit.setDescriptionTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DESCRIPTION));
         totalVisit.setNullImputation(NullMetricsImputation.ZERO);
+        totalVisit.setSecondarySubCategoryTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SECONDARY_SUBCATEGORY));
         return totalVisit;
     }
 
@@ -127,6 +128,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         sourceMedium.setDisplayNameTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DISPLAYNAME));
         sourceMedium.setDescriptionTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SOURCEMEDIUM_DESCRIPTION));
         sourceMedium.setNullImputation(NullMetricsImputation.ZERO);
+        sourceMedium.setSecondarySubCategoryTmpl(getTemplate(StringTemplateConstants.ACTIVITY_METRICS_GROUP_SECONDARY_SUBCATEGORY));
         return sourceMedium;
     }
 

@@ -107,6 +107,12 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     @OnDelete(action = OnDeleteAction.NO_ACTION)
     private StringTemplate subCategoryTmpl;
 
+    @JsonProperty("secondarySubCategoryTmpl")
+    @ManyToOne
+    @JoinColumn(name = "SEC_SUBCATEGORY_TMPL")
+    @OnDelete(action = OnDeleteAction.NO_ACTION)
+    private StringTemplate secondarySubCategoryTmpl;
+
     @JsonProperty("javaClass")
     @Column(name = "JAVA_CLASS", nullable = false)
     private String javaClass;
@@ -227,6 +233,14 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
 
     public void setSubCategoryTmpl(StringTemplate subCategoryTmpl) {
         this.subCategoryTmpl = subCategoryTmpl;
+    }
+
+    public StringTemplate getSecondarySubCategoryTmpl() {
+        return secondarySubCategoryTmpl;
+    }
+
+    public void setSecondarySubCategoryTmpl(StringTemplate secondarySubCategoryTmpl) {
+        this.secondarySubCategoryTmpl = secondarySubCategoryTmpl;
     }
 
     public String getJavaClass() {
