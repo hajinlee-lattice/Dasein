@@ -8,7 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
+import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;

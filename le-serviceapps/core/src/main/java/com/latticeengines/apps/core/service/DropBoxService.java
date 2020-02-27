@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.service;
+package com.latticeengines.apps.core.service;
 
 import java.util.List;
 
@@ -47,4 +47,6 @@ public interface DropBoxService {
     void createSubFolder(String customerSpace, String systemName, String objectName, String path);
 
     List<String> getDropFoldersFromSystem(String customerSpace, String systemName);
+
+    void createFolderUnderDropFolder(String path);
 }

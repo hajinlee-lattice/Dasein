@@ -18,7 +18,7 @@ import com.amazonaws.auth.policy.Principal;
 import com.amazonaws.auth.policy.Resource;
 import com.amazonaws.auth.policy.Statement;
 import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
-import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
+import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;

@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.util;
+package com.latticeengines.apps.core.util;
 
 import org.apache.commons.lang3.StringUtils;
 

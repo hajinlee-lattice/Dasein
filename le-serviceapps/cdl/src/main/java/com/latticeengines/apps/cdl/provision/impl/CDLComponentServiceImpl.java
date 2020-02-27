@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
-import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;

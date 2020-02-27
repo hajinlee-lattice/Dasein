@@ -31,7 +31,7 @@ import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
-import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.aws.s3.S3Service;

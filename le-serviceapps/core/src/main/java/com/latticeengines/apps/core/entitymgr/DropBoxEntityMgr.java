@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.entitymgr;
+package com.latticeengines.apps.core.entitymgr;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.cdl.DropBox;

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
+import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.LookupIdMappingEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;

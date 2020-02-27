@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.repository;
+package com.latticeengines.apps.core.repository;
 
 import org.springframework.data.jpa.repository.Query;
 

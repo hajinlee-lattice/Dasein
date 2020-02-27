@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
@@ -64,6 +65,9 @@ public class SourceServiceImpl implements SourceService {
     @Inject
     private MetadataProxy metadataProxy;
 
+    @Inject
+    private DropBoxService dropBoxService;
+
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId, SimpleTemplateMetadata templateMetadata) {
         Project project = projectService.getProjectByProjectId(customerSpace, projectId);
@@ -76,7 +80,9 @@ public class SourceServiceImpl implements SourceService {
                 templateMetadata.getEntityType());
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, templateMetadata,
                 project.getS3ImportSystem(), standardTable, relativePath, displayName);
-        return convertToSource(customerSpace, dataFeedTask);
+        Source source = convertToSource(customerSpace, dataFeedTask);
+        dropBoxService.createFolderUnderDropFolder(source.getFullPath());
+        return source;
     }
 
     @Override
@@ -91,7 +97,9 @@ public class SourceServiceImpl implements SourceService {
                 templateMetadata.getEntityType());
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, templateMetadata,
                 project.getS3ImportSystem(), standardTable, relativePath, displayName);
-        return convertToSource(customerSpace, dataFeedTask);
+        Source source = convertToSource(customerSpace, dataFeedTask);
+        dropBoxService.createFolderUnderDropFolder(source.getFullPath());
+        return source;
     }
 
     @Override

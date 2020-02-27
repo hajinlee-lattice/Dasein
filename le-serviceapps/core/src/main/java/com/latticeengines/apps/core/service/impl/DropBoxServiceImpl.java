@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.service.impl;
+package com.latticeengines.apps.core.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,10 +29,9 @@ import com.amazonaws.auth.policy.conditions.StringCondition;
 import com.amazonaws.services.identitymanagement.model.AccessKey;
 import com.amazonaws.services.identitymanagement.model.AccessKeyMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
-import com.latticeengines.apps.cdl.service.DropBoxService;
-import com.latticeengines.apps.cdl.service.S3ImportSystemService;
-import com.latticeengines.apps.cdl.util.S3ImportMessageUtils;
+import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
+import com.latticeengines.apps.core.service.DropBoxService;
+import com.latticeengines.apps.core.util.S3ImportMessageUtils;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.BitTransferUtils;
@@ -50,6 +49,7 @@ import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
 @Service("dropBoxService")
 public class DropBoxServiceImpl implements DropBoxService {
@@ -84,7 +84,7 @@ public class DropBoxServiceImpl implements DropBoxService {
     private S3Service s3Service;
 
     @Inject
-    private S3ImportSystemService s3ImportSystemService;
+    private CDLProxy cdlProxy;
 
     @Inject
     private IAMService iamService;
@@ -496,6 +496,20 @@ public class DropBoxServiceImpl implements DropBoxService {
         return exportPath;
     }
 
+    @Override
+    public void createFolderUnderDropFolder(String path) {
+        String dropBoxBucket = getDropBoxBucket();
+        String dropBoxPrefix = getDropBoxPrefix();
+        if (StringUtils.isNotBlank(path)) {
+            if (path.startsWith(SLASH)) {
+                path = path.substring(1);
+            }
+        } else {
+            return;
+        }
+        s3Service.createFolder(dropBoxBucket, dropBoxPrefix + SLASH + path);
+    }
+
     private String getDropBoxId() {
         String prefix = getDropBoxPrefix();
         return prefix.substring(prefix.indexOf(SLASH) + 1);
@@ -787,7 +801,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         if (StringUtils.isEmpty(systemName)) {
             throw new IllegalArgumentException("systemName can not be null.");
         }
-        S3ImportSystem s3ImportSystem = s3ImportSystemService.getS3ImportSystem(customerSpace, systemName);
+        S3ImportSystem s3ImportSystem = cdlProxy.getS3ImportSystem(customerSpace, systemName);
         if (s3ImportSystem == null) {
             throw new IllegalArgumentException("Cannot find import system with name: " + systemName);
         }

@@ -11,7 +11,7 @@ import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
-import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.baton.exposed.service.BatonService;

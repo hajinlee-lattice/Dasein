@@ -30,7 +30,7 @@ import com.latticeengines.apps.cdl.service.DataFeedMetadataService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskManagerService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
-import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportFolderService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;

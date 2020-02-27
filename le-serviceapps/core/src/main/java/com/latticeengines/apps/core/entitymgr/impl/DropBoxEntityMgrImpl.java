@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.entitymgr.impl;
+package com.latticeengines.apps.core.entitymgr.impl;
 
 import javax.inject.Inject;
 
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.apps.cdl.dao.DropBoxDao;
-import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
-import com.latticeengines.apps.cdl.repository.DropBoxRepository;
-import com.latticeengines.apps.cdl.repository.reader.DropBoxReaderRepository;
-import com.latticeengines.apps.cdl.repository.writer.DropBoxWriterRepository;
+import com.latticeengines.apps.core.dao.DropBoxDao;
+import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
+import com.latticeengines.apps.core.repository.DropBoxRepository;
+import com.latticeengines.apps.core.repository.reader.DropBoxReaderRepository;
+import com.latticeengines.apps.core.repository.writer.DropBoxWriterRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
