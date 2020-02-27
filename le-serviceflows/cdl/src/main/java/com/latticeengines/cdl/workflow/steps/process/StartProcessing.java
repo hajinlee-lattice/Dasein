@@ -853,10 +853,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
     }
 
-    private void syncRedshiftTablesToNewPartition() {
-
-    }
-
     public static class RebuildEntitiesProvider {
         static Set<BusinessEntity> getRebuildEntities(StartProcessing st) {
             Set<BusinessEntity> rebuildEntities = new HashSet<>();
