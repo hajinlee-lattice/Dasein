@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -162,7 +164,10 @@ public enum TableRoleInCollection {
     }
 
     public ImmutableList<String> getSortKeys() {
-        return ImmutableList.copyOf(sortKeys.stream().map(InterfaceName::name).collect(Collectors.toList()));
+        List<String> sortKeyNames = new ArrayList<>();
+        sortKeyNames.add(getDistKey());
+        sortKeyNames.addAll(this.sortKeys.stream().map(InterfaceName::name).collect(Collectors.toList()));
+        return ImmutableList.copyOf(sortKeyNames);
     }
 
     public String getPartitionKey() {

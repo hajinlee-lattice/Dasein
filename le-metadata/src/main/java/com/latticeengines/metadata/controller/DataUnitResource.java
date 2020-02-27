@@ -30,7 +30,11 @@ public class DataUnitResource {
 
     @PostMapping("")
     public DataUnit create(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
+        return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit);
+    }
 
+    @PutMapping("")
+    public DataUnit updateByNameAndType(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
         return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit);
     }
 

@@ -137,9 +137,6 @@ public abstract class BaseMergeTableRoleDiff<T extends BaseProcessEntityStepConf
         TableRoleInCollection tableRole = getTableRole();
         String distKey = tableRole.getDistKey();
         List<String> sortKeys = new ArrayList<>(tableRole.getSortKeys());
-        if (!sortKeys.contains(distKey)) {
-            sortKeys.add(distKey);
-        }
         String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
 
         String partition = null;

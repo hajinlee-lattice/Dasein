@@ -8,6 +8,8 @@ public interface DataUnitProxy {
 
     DataUnit create(String customerSpace, DataUnit dataUnit);
 
+    DataUnit updateByNameAndType(String customerSpace, DataUnit dataUnit);
+
     List<DataUnit> getByStorageType(String customerSpace, DataUnit.StorageType type);
 
     DataUnit getByNameAndType(String customerSpace, String name, DataUnit.StorageType type);

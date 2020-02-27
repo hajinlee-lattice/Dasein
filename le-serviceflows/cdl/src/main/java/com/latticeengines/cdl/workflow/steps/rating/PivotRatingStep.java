@@ -169,9 +169,6 @@ public class PivotRatingStep extends RunSparkJob<GenerateRatingStepConfiguration
         TableRoleInCollection tableRole = TableRoleInCollection.PivotedRating;
         String distKey = tableRole.getDistKey();
         List<String> sortKeys = new ArrayList<>(tableRole.getSortKeys());
-        if (!sortKeys.contains(distKey)) {
-            sortKeys.add(distKey);
-        }
 
         String partition = null;
         DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
