@@ -275,11 +275,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     if (dataUnit != null && !newPartition.equals(dataUnit.getClusterPartition())
                             && !newRedshiftService.hasTable(tableName)) {
                         log.info("Publishing redshift table {} to new partition {}", tableName, newPartition);
-                        String distKey = servingStore.getPrimaryKey().name();
-                        List<String> sortKeys = new ArrayList<>(servingStore.getForeignKeysAsStringList());
-                        if (!sortKeys.contains(servingStore.getPrimaryKey().name())) {
-                            sortKeys.add(servingStore.getPrimaryKey().name());
-                        }
+                        String distKey = servingStore.getDistKey();
+                        List<String> sortKeys = new ArrayList<>(servingStore.getSortKeys());
                         String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(),
                                 tableName);
                         RedshiftExportConfig exportConfig = new RedshiftExportConfig();
