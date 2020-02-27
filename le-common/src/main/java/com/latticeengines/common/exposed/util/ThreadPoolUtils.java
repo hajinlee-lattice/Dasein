@@ -200,7 +200,7 @@ public final class ThreadPoolUtils {
 
     private static <T> void doInParallel(final ExecutorService executorService, final Iterable<T> elements,
                                          final Operation<T> operation) {
-        runInParallel(executorService, createRunnables(elements, operation), 10, 1);
+        runInParallel(executorService, createRunnables(elements, operation), 30, 1);
     }
 
     private static <T> Collection<Runnable> createRunnables(final Iterable<T> elements,

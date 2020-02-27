@@ -267,7 +267,10 @@ public class CheckpointService {
             }
         }
 
-        cloneRedshiftTables(redshiftTablesToClone);
+        String cloneRedshiftMsg = String.format("Clone %d redshift tables", MapUtils.size(redshiftTablesToClone));
+        try (PerformanceTimer timer = new PerformanceTimer(cloneRedshiftMsg)) {
+            cloneRedshiftTables(redshiftTablesToClone);
+        }
         uploadCheckpointHdfs(checkpoint);
         if (copyToS3) {
             uploadCheckpointS3(checkpoint);
