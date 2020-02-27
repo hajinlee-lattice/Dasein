@@ -288,6 +288,15 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         }
     }
 
+    @Override
+    public DataFeedTask getDataFeedTaskBySource(String customerSpace, String sourceId) {
+        DataFeed datafeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        if (datafeed == null) {
+            return null;
+        }
+        return dataFeedTaskEntityMgr.getDataFeedTask(datafeed, sourceId);
+    }
+
     private String getSystemNameFromFeedType(String feedType) {
         if (StringUtils.isNotEmpty(feedType) && feedType.contains(SYSTEM_SPLITTER)) {
             return feedType.substring(0, feedType.lastIndexOf(SYSTEM_SPLITTER));

@@ -1,9 +1,11 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -12,13 +14,16 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.ProjectService;
+import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 @Service("projectService")
@@ -34,14 +39,21 @@ public class ProjectServiceImpl implements ProjectService {
     private ProjectEntityMgr projectEntityMgr;
 
     @Inject
+    private CDLProxy cdlProxy;
+
+    @Inject
     private DropBoxProxy dropBoxProxy;
+
+    @Inject
+    private SourceService sourceService;
 
     @Override
     public ProjectDetails createProject(String customerSpace, String displayName,
                                         Project.ProjectType projectType, String user) {
         String projectId = generateRandomProjectId();
         String rootPath = generateRootPath(customerSpace, projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath));
+        S3ImportSystem system = createProjectSystem(customerSpace);
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
         Project project = getProjectByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -54,7 +66,8 @@ public class ProjectServiceImpl implements ProjectService {
                                         Project.ProjectType projectType, String user) {
         validateProjectId(projectId);
         String rootPath = generateRootPath(customerSpace, projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath));
+        S3ImportSystem system = createProjectSystem(customerSpace);
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
         Project project = getProjectByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
@@ -68,7 +81,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDetails getProjectByProjectId(String customerSpace, String projectId) {
+    public Project getProjectByProjectId(String customerSpace, String projectId) {
+        return getProjectByProjectIdWithRetry(projectId);
+    }
+
+    @Override
+    public Project getProjectByImportSystem(String customerSpace, S3ImportSystem importSystem) {
+        return null;
+    }
+
+    @Override
+    public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
         Project project = getProjectByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Get DCP Project %s failed!", projectId));
@@ -114,11 +137,17 @@ public class ProjectServiceImpl implements ProjectService {
         details.setProjectDisplayName(project.getProjectDisplayName());
         details.setProjectRootPath(project.getRootPath());
         details.setDropFolderAccess(getDropBoxAccess(customerSpace));
+        if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
+            details.setSources(new ArrayList<>());
+            project.getS3ImportSystem().getTasks()
+                    .forEach(task -> details.getSources().add(sourceService.convertToSource(customerSpace, task)));
+        }
         return details;
     }
 
     private Project generateProjectObject(String projectId, String displayName,
-                                          Project.ProjectType projectType, String user, String rootPath) {
+                                          Project.ProjectType projectType, String user, String rootPath,
+                                          S3ImportSystem system) {
         Project project = new Project();
         project.setCreatedBy(user);
         project.setProjectDisplayName(displayName);
@@ -127,7 +156,34 @@ public class ProjectServiceImpl implements ProjectService {
         project.setDeleted(Boolean.FALSE);
         project.setProjectType(projectType);
         project.setRootPath(rootPath);
+        project.setS3ImportSystem(system);
         return project;
+    }
+
+    private S3ImportSystem createProjectSystem(String customerSpace) {
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(MultiTenantContext.getTenant());
+        system.setName(S3ImportSystem.SystemType.ProjectSystem.getDefaultSystemName());
+        system.setDisplayName(S3ImportSystem.SystemType.ProjectSystem.getDefaultSystemName());
+        system.setSystemType(S3ImportSystem.SystemType.ProjectSystem);
+        cdlProxy.createS3ImportSystem(customerSpace, system);
+        system = cdlProxy.getS3ImportSystem(customerSpace,
+                S3ImportSystem.SystemType.ProjectSystem.getDefaultSystemName());
+        int retry = 0;
+        while (system == null && retry < MAX_RETRY) {
+            try {
+                Thread.sleep(1000L + retry * 1000L);
+            } catch (InterruptedException e) {
+                return null;
+            }
+            system = cdlProxy.getS3ImportSystem(customerSpace,
+                    S3ImportSystem.SystemType.ProjectSystem.getDefaultSystemName());
+            retry++;
+        }
+        if (system == null) {
+            throw new RuntimeException("Cannot create DCP Project due to ImportSystem creation error!");
+        }
+        return system;
     }
 
     private GrantDropBoxAccessResponse getDropBoxAccess(String customerSpace) {

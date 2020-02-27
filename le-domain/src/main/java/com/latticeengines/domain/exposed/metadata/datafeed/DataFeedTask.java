@@ -30,14 +30,22 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.SoftDeletable;
 
 @Entity
 @javax.persistence.Table(name = "DATAFEED_TASK", //
-        indexes = { @Index(name = "IX_UNIQUE_ID", columnList = "UNIQUE_ID") }, //
-        uniqueConstraints = @UniqueConstraint(columnNames = { "SOURCE", "FEED_TYPE", "`FK_FEED_ID`" }))
-public class DataFeedTask implements HasPid, Serializable {
+        indexes = {
+                @Index(name = "IX_UNIQUE_ID", columnList = "UNIQUE_ID"),
+                @Index(name = "IX_UNIQUE_NAME", columnList = "TASK_UNIQUE_NAME,`FK_FEED_ID`"), //
+                @Index(name = "IX_SOURCE_ID", columnList = "SOURCE_ID,`FK_FEED_ID`") }, //
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = { "SOURCE", "FEED_TYPE", "`FK_FEED_ID`" }),
+                @UniqueConstraint(columnNames = { "`FK_FEED_ID`", "TASK_UNIQUE_NAME"} ),
+                @UniqueConstraint(columnNames = { "`FK_FEED_ID`", "SOURCE_ID"} )})
+public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
 
     private static final long serialVersionUID = -6740417234916797093L;
 
@@ -128,6 +136,32 @@ public class DataFeedTask implements HasPid, Serializable {
     @Enumerated(EnumType.STRING)
     private S3ImportStatus s3ImportStatus = S3ImportStatus.Active;
 
+    @JsonProperty("import_system")
+    @ManyToOne(cascade = { CascadeType.MERGE })
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "FK_IMPORT_SYSTEM")
+    private S3ImportSystem importSystem;
+
+    @Column(name = "SOURCE_ID")
+    @JsonProperty("source_id")
+    private String sourceId;
+
+    @Column(name = "SOURCE_DISPLAY_NAME")
+    @JsonProperty("source_display_name")
+    private String sourceDisplayName;
+
+    @Column(name = "RELATIVE_PATH")
+    @JsonProperty("relative_path")
+    private String relativePath;
+
+    @Column(name = "TASK_UNIQUE_NAME")
+    @JsonProperty("task_unique_name")
+    private String taskUniqueName;
+
+    @Column(name = "DELETED")
+    @JsonProperty("deleted")
+    private Boolean deleted;
+
     @JsonIgnore
     @Transient
     private List<DataFeedTaskTable> tables = new ArrayList<>();
@@ -205,6 +239,46 @@ public class DataFeedTask implements HasPid, Serializable {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public S3ImportSystem getImportSystem() {
+        return importSystem;
+    }
+
+    public void setImportSystem(S3ImportSystem importSystem) {
+        this.importSystem = importSystem;
+    }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getSourceDisplayName() {
+        return sourceDisplayName;
+    }
+
+    public void setSourceDisplayName(String sourceDisplayName) {
+        this.sourceDisplayName = sourceDisplayName;
+    }
+
+    public String getRelativePath() {
+        return relativePath;
+    }
+
+    public void setRelativePath(String relativePath) {
+        this.relativePath = relativePath;
+    }
+
+    public String getTaskUniqueName() {
+        return taskUniqueName;
+    }
+
+    public void setTaskUniqueName(String taskUniqueName) {
+        this.taskUniqueName = taskUniqueName;
     }
 
     public IngestionBehavior getIngestionBehavior() {
@@ -296,6 +370,16 @@ public class DataFeedTask implements HasPid, Serializable {
 
     public void setLastUpdated(Date lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public enum IngestionBehavior {
