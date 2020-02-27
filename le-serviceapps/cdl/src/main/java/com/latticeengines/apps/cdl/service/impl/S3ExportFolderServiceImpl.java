@@ -5,8 +5,8 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ExportFolderService;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.AtlasExportType;

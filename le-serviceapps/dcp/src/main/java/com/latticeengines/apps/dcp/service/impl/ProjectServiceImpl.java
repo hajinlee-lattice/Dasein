@@ -33,6 +33,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private static final String PROJECT_ROOT_PATH_PATTERN = "Projects/%s/";
     private static final String RANDOM_PROJECT_ID_PATTERN = "Project_%s";
+    private static final String SYSTEM_NAME_PATTERN = "ProjectSystem_%s";
     private static final int MAX_RETRY = 3;
 
     @Inject
@@ -52,7 +53,7 @@ public class ProjectServiceImpl implements ProjectService {
                                         Project.ProjectType projectType, String user) {
         String projectId = generateRandomProjectId();
         String rootPath = generateRootPath(projectId);
-        S3ImportSystem system = createProjectSystem(customerSpace);
+        S3ImportSystem system = createProjectSystem(customerSpace, displayName, projectId);
         projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
         Project project = getProjectByProjectIdWithRetry(projectId);
         if (project == null) {
@@ -67,7 +68,7 @@ public class ProjectServiceImpl implements ProjectService {
                                         Project.ProjectType projectType, String user) {
         validateProjectId(projectId);
         String rootPath = generateRootPath(projectId);
-        S3ImportSystem system = createProjectSystem(customerSpace);
+        S3ImportSystem system = createProjectSystem(customerSpace, displayName, projectId);
         projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
         Project project = getProjectByProjectIdWithRetry(projectId);
         if (project == null) {
@@ -162,15 +163,15 @@ public class ProjectServiceImpl implements ProjectService {
         return project;
     }
 
-    private S3ImportSystem createProjectSystem(String customerSpace) {
+    private S3ImportSystem createProjectSystem(String customerSpace, String displayName, String projectId) {
         S3ImportSystem system = new S3ImportSystem();
         system.setTenant(MultiTenantContext.getTenant());
-        system.setName(S3ImportSystem.SystemType.ProjectSystem.getDefaultSystemName());
-        system.setDisplayName(S3ImportSystem.SystemType.ProjectSystem.getDefaultSystemName());
+        String systemName = String.format(SYSTEM_NAME_PATTERN, projectId);
+        system.setName(systemName);
+        system.setDisplayName(displayName);
         system.setSystemType(S3ImportSystem.SystemType.ProjectSystem);
         cdlProxy.createS3ImportSystem(customerSpace, system);
-        system = cdlProxy.getS3ImportSystem(customerSpace,
-                S3ImportSystem.SystemType.ProjectSystem.getDefaultSystemName());
+        system = cdlProxy.getS3ImportSystem(customerSpace, systemName);
         int retry = 0;
         while (system == null && retry < MAX_RETRY) {
             try {
@@ -178,8 +179,7 @@ public class ProjectServiceImpl implements ProjectService {
             } catch (InterruptedException e) {
                 return null;
             }
-            system = cdlProxy.getS3ImportSystem(customerSpace,
-                    S3ImportSystem.SystemType.ProjectSystem.getDefaultSystemName());
+            system = cdlProxy.getS3ImportSystem(customerSpace, systemName);
             retry++;
         }
         if (system == null) {

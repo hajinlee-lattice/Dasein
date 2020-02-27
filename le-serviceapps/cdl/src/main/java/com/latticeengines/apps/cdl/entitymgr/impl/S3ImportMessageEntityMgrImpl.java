@@ -9,11 +9,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.S3ImportMessageDao;
-import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.S3ImportMessageEntityMgr;
 import com.latticeengines.apps.cdl.repository.S3ImportMessageRepository;
 import com.latticeengines.apps.cdl.repository.reader.S3ImportMessageReaderRepository;
 import com.latticeengines.apps.cdl.repository.writer.S3ImportMessageWriterRepository;
+import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.core.util.S3ImportMessageUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;

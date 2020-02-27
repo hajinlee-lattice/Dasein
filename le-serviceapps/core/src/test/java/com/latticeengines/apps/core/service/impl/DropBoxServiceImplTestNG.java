@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.service.impl;
+package com.latticeengines.apps.core.service.impl;
 
 import static com.latticeengines.domain.exposed.cdl.DropBoxAccessMode.LatticeUser;
 
@@ -30,7 +30,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.latticeengines.apps.core.service.DropBoxService;
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.aws.iam.IAMService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -41,7 +41,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public class DropBoxServiceImplTestNG extends CDLFunctionalTestNGBase {
+public class DropBoxServiceImplTestNG extends ServiceAppsFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DropBoxServiceImplTestNG.class);
 

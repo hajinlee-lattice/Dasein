@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.entitymgr.impl;
+package com.latticeengines.apps.core.entitymgr.impl;
 
 import javax.inject.Inject;
 
@@ -9,13 +9,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
-import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.DBConnectionContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public class DropBoxEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
+public class DropBoxEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
 
     @Inject
     private DropBoxEntityMgr entityMgr;

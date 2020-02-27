@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportMessageService;
 import com.latticeengines.apps.cdl.service.S3ImportService;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.util.S3ImportMessageUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;

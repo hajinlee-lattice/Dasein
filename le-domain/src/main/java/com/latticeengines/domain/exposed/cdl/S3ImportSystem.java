@@ -54,7 +54,7 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonProperty("pid")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
