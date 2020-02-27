@@ -46,6 +46,8 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
@@ -58,6 +60,7 @@ import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
@@ -70,8 +73,10 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("startProcessing")
@@ -98,6 +103,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private MatchProxy matchProxy;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     @Inject
     private BatonService batonService;
@@ -229,24 +237,72 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         // get current active collection status
         DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
                 activeVersion);
+        String oldPartition = dcStatus.getRedshiftPartition();
         dcStatus.setEvaluationDate(evaluationDate);
         dcStatus.setApsRollingPeriod(configuration.getApsRollingPeriod());
         log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(dcStatus));
         if (MapUtils.isEmpty(dcStatus.getDateMap())) {
             dcStatus = DataCollectionStatusUtils.initDateMap(dcStatus, getLongValueFromContext(PA_TIMESTAMP));
         }
-        dcStatus.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
+        String newPartition = redshiftPartitionService.getDefaultPartition();
+        dcStatus.setRedshiftPartition(newPartition);
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
 
         DataCollectionStatus inactiveStatus = dataCollectionProxy
                 .getOrCreateDataCollectionStatus(customerSpace.toString(), inactiveVersion);
         if (inactiveStatus != null && configuration.getDataCloudBuildNumber() != null) {
             inactiveStatus.setDataCloudBuildNumber(configuration.getDataCloudBuildNumber());
-            inactiveStatus.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
+            inactiveStatus.setRedshiftPartition(newPartition);
             dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), inactiveStatus,
                     inactiveVersion);
         }
 
+        if (!newPartition.equals(oldPartition)) {
+            syncRedshiftTablesToNewCluster(newPartition);
+        }
+    }
+
+    private void syncRedshiftTablesToNewCluster(String newPartition) {
+        RedshiftService newRedshiftService = redshiftPartitionService.getSegmentUserService(newPartition);
+        for (BusinessEntity entity : BusinessEntity.values()) {
+            TableRoleInCollection servingStore = entity.getServingStore();
+            if (servingStore != null) {
+                String tableName = //
+                        dataCollectionProxy.getTableName(customerSpace.toString(), servingStore, activeVersion);
+                if (StringUtils.isNotBlank(tableName)) {
+                    RedshiftDataUnit dataUnit = (RedshiftDataUnit) dataUnitProxy
+                            .getByNameAndType(customerSpace.toString(), tableName, DataUnit.StorageType.Redshift);
+                    if (dataUnit != null && !newPartition.equals(dataUnit.getClusterPartition())
+                            && !newRedshiftService.hasTable(tableName)) {
+                        log.info("Publishing redshift table {} to new partition {}", tableName, newPartition);
+                        String distKey = servingStore.getPrimaryKey().name();
+                        List<String> sortKeys = new ArrayList<>(servingStore.getForeignKeysAsStringList());
+                        if (!sortKeys.contains(servingStore.getPrimaryKey().name())) {
+                            sortKeys.add(servingStore.getPrimaryKey().name());
+                        }
+                        String inputPath = metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(),
+                                tableName);
+                        RedshiftExportConfig exportConfig = new RedshiftExportConfig();
+                        exportConfig.setTableName(tableName);
+                        exportConfig.setDistKey(distKey);
+                        exportConfig.setSortKeys(sortKeys);
+                        exportConfig.setInputPath(inputPath + "/*.avro");
+                        exportConfig.setClusterPartition(newPartition);
+                        exportConfig.setUpdateMode(false);
+                        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+
+                        if (!newPartition.equals(dataUnit.getClusterPartition())) {
+                            dataUnit.setClusterPartition(newPartition);
+                            try {
+                                dataUnitProxy.updateByNameAndType(customerSpace.toString(), dataUnit);
+                            } catch (Exception e) {
+                                log.warn("Failed to update redshift data unit", e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @SuppressWarnings("unused")
@@ -798,6 +854,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             throw new IllegalStateException(
                     String.format("Current active data collection version not match for %s", customerSpace));
         }
+    }
+
+    private void syncRedshiftTablesToNewPartition() {
+
     }
 
     public static class RebuildEntitiesProvider {

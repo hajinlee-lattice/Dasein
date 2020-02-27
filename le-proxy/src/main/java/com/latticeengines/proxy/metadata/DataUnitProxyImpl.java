@@ -27,6 +27,12 @@ public class DataUnitProxyImpl extends MicroserviceRestApiProxy implements DataU
     }
 
     @Override
+    public DataUnit updateByNameAndType(String customerSpace, DataUnit dataUnit) {
+        String url = constructUrl("/customerspaces/{customerSpace}/dataunit", shortenCustomerSpace(customerSpace));
+        return put("update data unit", url, dataUnit, DataUnit.class);
+    }
+
+    @Override
     public List<DataUnit> getByStorageType(String customerSpace, DataUnit.StorageType type) {
         String url = constructUrl("/customerspaces/{customerSpace}/dataunit/type/{type}",
                 shortenCustomerSpace(customerSpace), type.name());
