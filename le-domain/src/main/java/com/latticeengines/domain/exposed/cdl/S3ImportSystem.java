@@ -113,7 +113,7 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     private SecondaryIdList secondaryContactIds;
 
     @JsonProperty("tasks")
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "importSystem")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "importSystem")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DataFeedTask> tasks = new ArrayList<>();
 

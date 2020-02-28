@@ -61,6 +61,11 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     @JoinColumn(name = "`FK_FEED_ID`", nullable = false)
     private DataFeed dataFeed;
 
+    @JsonIgnore
+    @ManyToOne(cascade = { CascadeType.MERGE })
+    @JoinColumn(name = "FK_IMPORT_SYSTEM")
+    private S3ImportSystem importSystem;
+
     @Column(name = "UNIQUE_ID", unique = true, nullable = false)
     @JsonProperty("unique_id")
     private String uniqueId;
@@ -135,12 +140,6 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     @JsonProperty("s3_import_status")
     @Enumerated(EnumType.STRING)
     private S3ImportStatus s3ImportStatus = S3ImportStatus.Active;
-
-    @JsonProperty("import_system")
-    @ManyToOne(cascade = { CascadeType.MERGE })
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "FK_IMPORT_SYSTEM")
-    private S3ImportSystem importSystem;
 
     @Column(name = "SOURCE_ID")
     @JsonProperty("source_id")
@@ -247,6 +246,15 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
 
     public void setImportSystem(S3ImportSystem importSystem) {
         this.importSystem = importSystem;
+    }
+
+    @JsonProperty("import_system_name")
+    public String getImportSystemName() {
+        if (importSystem != null) {
+            return importSystem.getName();
+        } else {
+            return null;
+        }
     }
 
     public String getSourceId() {

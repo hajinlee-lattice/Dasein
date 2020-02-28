@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflow
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -64,6 +65,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private CDLProxy cdlProxy;
 
     @Inject
     private DropBoxService dropBoxService;
@@ -137,8 +141,10 @@ public class SourceServiceImpl implements SourceService {
         source.setSourceId(dataFeedTask.getSourceId());
         source.setSourceDisplayName(dataFeedTask.getSourceDisplayName());
         source.setRelativePath(dataFeedTask.getRelativePath());
-        if (dataFeedTask.getImportSystem() != null) {
-            Project project = projectService.getProjectByImportSystem(customerSpace, dataFeedTask.getImportSystem());
+        if (StringUtils.isNotEmpty(dataFeedTask.getImportSystemName())) {
+            S3ImportSystem s3ImportSystem = cdlProxy.getS3ImportSystem(customerSpace,
+                    dataFeedTask.getImportSystemName());
+            Project project = projectService.getProjectByImportSystem(customerSpace, s3ImportSystem);
             source.setFullPath(project.getRootPath() + dataFeedTask.getRelativePath());
         }
 

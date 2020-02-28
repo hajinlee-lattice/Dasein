@@ -90,7 +90,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project getProjectByImportSystem(String customerSpace, S3ImportSystem importSystem) {
-        return null;
+        return projectEntityMgr.findByImportSystem(importSystem);
     }
 
     @Override

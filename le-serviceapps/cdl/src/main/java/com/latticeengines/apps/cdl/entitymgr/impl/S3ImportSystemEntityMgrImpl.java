@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +14,12 @@ import com.latticeengines.apps.cdl.entitymgr.S3ImportSystemEntityMgr;
 import com.latticeengines.apps.cdl.repository.S3ImportSystemRepository;
 import com.latticeengines.apps.cdl.repository.reader.S3ImportSystemReaderRepository;
 import com.latticeengines.apps.cdl.repository.writer.S3ImportSystemWriterRepository;
+import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("s3ImportSystemEntityMgr")
 public class S3ImportSystemEntityMgrImpl
@@ -63,30 +67,53 @@ public class S3ImportSystemEntityMgrImpl
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public S3ImportSystem findS3ImportSystem(String name) {
+        S3ImportSystem importSystem;
         if (isReaderConnection()) {
-            return readerRepository.findByName(name);
+            importSystem = readerRepository.findByName(name);
         } else {
-            return writerRepository.findByName(name);
+            importSystem =  writerRepository.findByName(name);
         }
+        inflateDetails(importSystem);
+        return importSystem;
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<S3ImportSystem> findByMapToLatticeAccount(Boolean mapToLatticeAccount) {
+        List<S3ImportSystem> systemList;
         if (isReaderConnection()) {
-            return readerRepository.findByMapToLatticeAccount(mapToLatticeAccount);
+            systemList = readerRepository.findByMapToLatticeAccount(mapToLatticeAccount);
         } else {
-            return writerRepository.findByMapToLatticeAccount(mapToLatticeAccount);
+            systemList = writerRepository.findByMapToLatticeAccount(mapToLatticeAccount);
         }
+        if (CollectionUtils.isNotEmpty(systemList)) {
+            systemList.forEach(this::inflateDetails);
+        }
+        return systemList;
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<S3ImportSystem> findByMapToLatticeContact(Boolean mapToLatticeContact) {
+        List<S3ImportSystem> systemList;
         if (isReaderConnection()) {
-            return readerRepository.findByMapToLatticeContact(mapToLatticeContact);
+            systemList = readerRepository.findByMapToLatticeContact(mapToLatticeContact);
         } else {
-            return writerRepository.findByMapToLatticeContact(mapToLatticeContact);
+            systemList = writerRepository.findByMapToLatticeContact(mapToLatticeContact);
+        }
+        if (CollectionUtils.isNotEmpty(systemList)) {
+            systemList.forEach(this::inflateDetails);
+        }
+        return systemList;
+    }
+
+    private void inflateDetails(S3ImportSystem s3ImportSystem) {
+        if (s3ImportSystem != null) {
+            HibernateUtils.inflateDetails(s3ImportSystem.getTasks());
+            for (DataFeedTask datafeedTask : s3ImportSystem.getTasks()) {
+                TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
+                TableEntityMgr.inflateTable(datafeedTask.getImportData());
+            }
         }
     }
 }
