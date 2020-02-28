@@ -93,11 +93,9 @@ public final class CampaignLaunchUtils {
         } else {
             accountCount = queryCallback.apply(frontEndQuery, BusinessEntity.Account);
         }
-        System.out.println("aaaaaaa" + accountCount);
         checkCampaignLaunchAccountLimitation(accountCount);
         if (contactsDataExists) {
             long contactCount = queryCallback.apply(frontEndQuery, BusinessEntity.Contact);
-            System.out.println("sssssss" + contactCount);
             checkCampaignLaunchContactLimitation(contactCount);
         }
     }
