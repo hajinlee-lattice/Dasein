@@ -29,9 +29,6 @@ import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Inject
-    private RedshiftPartitionService redshiftPartitionService;
-
-    @Inject
     private RedShiftCleanupService redshiftCleanupService;
 
     @Inject
@@ -52,18 +49,20 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
     private List<String> tenantNames;
 
     private RedshiftService redshiftService;
+    private RedshiftPartitionService redshiftPartitionService;
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        redshiftService = redshiftPartitionService.getBatchUserService(null);
         redshiftTables = redshiftTablesProvider();
         dataUnits = dataUnitProvider();
         metadataTables = metadataTableProvider();
         tenantNames = tenantIdProvider();
         redshiftService = Mockito.mock(RedshiftService.class);
+        redshiftPartitionService = Mockito.mock(RedshiftPartitionService.class);
         tenantEntityMgr = Mockito.mock(TenantEntityMgr.class);
         dataCollectionService = Mockito.mock(DataCollectionService.class);
         dataUnitProxy = Mockito.mock(DataUnitProxy.class);
+        Mockito.when(redshiftPartitionService.getBatchUserService(Mockito.any())).thenReturn(redshiftService);
         Mockito.doNothing().when(redshiftService).renameTable(anyString(), anyString());
         Mockito.doNothing().when(redshiftService).dropTable(anyString());
         Mockito.when(dataUnitProxy.delete(anyString(), Mockito.any(DataUnit.class))).thenReturn(true);
@@ -78,7 +77,7 @@ public class RedShiftCleanupServiceImplTestNG extends CDLFunctionalTestNGBase {
             return getDataUnit(tenantName, name);});
         redshiftCleanupService = new RedShiftCleanupServiceImpl();
         // replace with the mock
-        ReflectionTestUtils.setField(redshiftCleanupService, "redshiftService", redshiftService);
+        ReflectionTestUtils.setField(redshiftCleanupService, "redshiftPartitionService", redshiftPartitionService);
         ReflectionTestUtils.setField(redshiftCleanupService, "tenantEntityMgr", tenantEntityMgr);
         ReflectionTestUtils.setField(redshiftCleanupService, "dataCollectionService", dataCollectionService);
         ReflectionTestUtils.setField(redshiftCleanupService, "dataUnitProxy", dataUnitProxy);
