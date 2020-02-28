@@ -15,6 +15,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -43,6 +44,9 @@ public class PurchaseHistoryServiceImplTestNG extends AbstractTestNGSpringContex
         DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
         Mockito.when(proxy.getTableName(any(), any()))
                 .thenReturn("\"app\".\"public\".\"fs_ds_test_3_account_2018_06_05_18_34_34_utc\"");
+        // NOTE set redshift partition in status
+        Mockito.when(proxy.getOrCreateDataCollectionStatus(Mockito.anyString(), Mockito.any()))
+                .thenReturn(new DataCollectionStatus());
         ((PurchaseHistoryServiceImpl) purchaseHistoryService).setDataCollectionProxy(proxy);
     }
 
