@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.zip.GZIPInputStream;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -95,9 +94,6 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private final RedshiftPartitionService redshiftPartitionService;
     private final RatingEngineProxy ratingEngineProxy;
     private final BatonService batonService;
-
-    @Resource(name = "redshiftJdbcTemplate")
-    private JdbcTemplate redshiftJdbcTemplate;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -212,6 +208,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         int maxCount;
         String msg = String.format("Mocking the rating table %s for engineIds %s using coverage %s", ratingTableName,
                 engineIds, JsonUtils.serialize(modelRatingBuckets));
+        JdbcTemplate redshiftJdbcTemplate = redshiftPartitionService.getBatchUserJdbcTemplate(null);
         try (PerformanceTimer timer = new PerformanceTimer(msg)) {
             maxCount = modelRatingBuckets.values().stream().map(m -> m.stream() //
                     .map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b)).max(Integer::compare).orElse(null);
