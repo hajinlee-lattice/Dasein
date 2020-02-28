@@ -7,22 +7,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -33,20 +36,21 @@ import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
 import com.latticeengines.objectapi.service.PurchaseHistoryService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 
 @Component("purchaseHistoryService")
 public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
 
     private static final Logger log = LoggerFactory.getLogger(PurchaseHistoryServiceImpl.class);
 
-    @Resource(name = "redshiftJdbcTemplate")
-    private JdbcTemplate redshiftJdbcTemplate;
-
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -78,7 +82,8 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         if (log.isDebugEnabled()) {
             log.debug("Query for getPeriodTransactionsByAccountId " + query);
         }
-        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, accountId, periodName);
+        List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), null) //
+                .queryForList(query, accountId, periodName);
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
             periodTransaction.setTotalAmount((double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
@@ -131,8 +136,8 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         if (log.isDebugEnabled()) {
             log.debug("Query for getPeriodTransactionForSegmentAccount " + query);
         }
-        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query, periodName, segment,
-                productType.toString());
+        List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), null) //
+                .queryForList(query, periodName, segment, productType.toString());
         for (Map row : retList) {
             PeriodTransaction periodTransaction = new PeriodTransaction();
             periodTransaction.setTotalAmount((double) row.get(InterfaceName.TotalAmount.toString().toLowerCase()));
@@ -162,7 +167,8 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         if (log.isDebugEnabled()) {
             log.debug("query for getProductHierarchy " + query);
         }
-        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
+        List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), version)
+                .queryForList(query);
         for (Map row : retList) {
             ProductHierarchy productHierarchy = new ProductHierarchy();
             productHierarchy
@@ -209,8 +215,8 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
                 if (log.isDebugEnabled()) {
                     log.debug("query for getAllSpendAnalyticsSegments " + query);
                 }
-                List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query,
-                        ProductType.Spending.name());
+                List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), null)
+                        .queryForList(query, ProductType.Spending.name());
                 return new DataPage(retList);
             } catch (Exception e) {
                 if (ExceptionUtils.getStackTrace(e).contains("spendanalyticssegment does not exist")) {
@@ -250,8 +256,20 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         if (log.isDebugEnabled()) {
             log.debug("query for getFinalTransactionDate " + query);
         }
-        List<Map<String, Object>> retList = redshiftJdbcTemplate.queryForList(query);
+        List<Map<String, Object>> retList = getRedshiftJdbcTemplate(MultiTenantContext.getCustomerSpace(), null)
+                .queryForList(query);
         return Arrays.asList((String) retList.get(0).get("max"), (String) retList.get(0).get("min"));
+    }
+
+    /*-
+     * Get redshift jdbc template for target tenant in specific version (null to indicate current active version)
+     */
+    private JdbcTemplate getRedshiftJdbcTemplate(@NotNull CustomerSpace customerSpace, DataCollection.Version version) {
+        Preconditions.checkNotNull(customerSpace, "customer space object should not be null");
+        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
+                version);
+        String partition = StringUtils.defaultIfBlank(status.getRedshiftPartition(), null);
+        return redshiftPartitionService.getBatchUserJdbcTemplate(partition);
     }
 
 }

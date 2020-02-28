@@ -2,14 +2,14 @@ package com.latticeengines.workflowapi.steps.core;
 
 import java.util.Map;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.Assert;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.workflowapi.flows.testflows.framework.TestFrameworkWrapperWorkflowConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.framework.sampletests.SamplePostprocessingStepConfiguration;
 import com.latticeengines.workflowapi.flows.testflows.redshift.PrepareTestRedshiftConfiguration;
@@ -19,8 +19,8 @@ public class ExportToRedshiftDeploymentTestNG extends
 
     private static final Logger log = LoggerFactory.getLogger(ExportToRedshiftDeploymentTestNG.class);
 
-    @Resource(name = "redshiftJdbcTemplate")
-    private JdbcTemplate redshiftJdbcTemplate;
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Override
     protected TestFrameworkWrapperWorkflowConfiguration generateCreateConfiguration() {
@@ -64,7 +64,7 @@ public class ExportToRedshiftDeploymentTestNG extends
         String redshiftTable = tenantName + "_" + TABLE_1;
         String sql = "SELECT AccountName from %s WHERE AccountId = '%s'";
         sql = String.format(sql, redshiftTable, accountId);
-        Map<String, Object> row = redshiftJdbcTemplate.queryForMap(sql);
+        Map<String, Object> row = redshiftPartitionService.getBatchUserJdbcTemplate(null).queryForMap(sql);
         Assert.assertTrue(row.containsKey("accountname"));
         Assert.assertTrue(row.get("accountname") instanceof String);
         String accountName = (String) row.get("accountname");
