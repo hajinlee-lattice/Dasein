@@ -42,9 +42,7 @@ public class S3ChannelConfig implements ChannelConfig {
     @Override
     public void setAudienceName(String audienceName) { }
 
-    public void setAudienceType(AudienceType audienceType) {
-        this.audienceType = audienceType;
-    }
+    public void setAudienceType(AudienceType audienceType) { this.audienceType = audienceType; }
 
     public String getS3CampaignExportDir() { return s3CampaignExportDir; }
 
@@ -73,9 +71,7 @@ public class S3ChannelConfig implements ChannelConfig {
 
     @Override
     @JsonProperty("audienceType")
-    public AudienceType getAudienceType() {
-        return audienceType;
-    }
+    public AudienceType getAudienceType() { return audienceType; }
 
     @Override
     public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) { return false; }
