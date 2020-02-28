@@ -59,7 +59,7 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
     @Value("${eai.export.dynamo.signature}")
     private String signature;
 
-    @Value("${common.adminconsole.url:}")
+    @Value("${common.adminconsole.url}")
     private String quartzMicroserviceHostPort;
 
     @Value("${common.microservice.url}")
