@@ -1,15 +1,18 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -49,12 +52,19 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
         String signature = "0001";
         dataUnitService.updateSignature(unit, signature);
-        DynamoDataUnit dynamoDataUnit = (DynamoDataUnit) dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo);
-        Assert.assertEquals(dynamoDataUnit.getSignature(), signature);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            DynamoDataUnit dynamoDataUnit = (DynamoDataUnit) dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo);
+            Assert.assertEquals(dynamoDataUnit.getSignature(), signature);
+            return true;
+        });
 
         dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
-        Thread.sleep(500);
-        Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
+        retry.execute(context -> {
+            Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
+            return true;
+        });
     }
 
     private DynamoDataUnit createDynamoUnit(String name) {
