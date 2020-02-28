@@ -21,6 +21,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
@@ -43,6 +44,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
@@ -51,7 +53,6 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.spark.exposed.job.cdl.CreateRecommendationsJob;
-import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("campaignLaunchInitStep")
@@ -73,7 +74,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     private PeriodProxy periodProxy;
 
     @Inject
-    protected SparkJobService sparkJobService;
+    private CampaignLaunchUtils campaignLaunchUtils;
 
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
@@ -127,7 +128,6 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     .prepareFrontEndQueries(playLaunchContext, version);
             log.info("Query for Accounts to Launch: " + playLaunchContext.getAccountFrontEndQuery());
             log.info("Query for Contact to Launch: " + playLaunchContext.getContactFrontEndQuery());
-
             SparkJobResult createRecJobResult = executeSparkJob(playLaunchContext, processedFieldMappingMetadata);
 
             long launchedAccountNum = createRecJobResult.getTargets().get(0).getCount();
@@ -186,19 +186,26 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-
+                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+                boolean contactsDataExists = StringUtils.isNotBlank(contactTableName);
+                // check the account and account limit
+                PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+                FrontEndQuery frontEndquery = campaignLaunchUtils.buildCampaignFrontEndQuery(customerSpace,
+                        playLaunch.getChannelConfig(),
+                        playLaunchContext.getPlay(), contactsDataExists, playLaunch.isLaunchUnscored(), playLaunch.getBucketsToLaunch(),
+                        playLaunch.getDestinationSysName(), null, playLaunch.getDestinationAccountId());
+                campaignLaunchUtils.checkCampaignLaunchLimitation(frontEndquery, contactsDataExists,
+                        playLaunch.getTopNCount(), (query, entity) -> getEntityCount(query, entity));
                 // 2. get DataFrame for Account and Contact
                 HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
                 log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
                 HdfsDataUnit contactDataUnit = null;
-                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                if (StringUtils.isBlank(contactTableName)) {
+                if (!contactsDataExists) {
                     log.info("No contact table available in Redshift.");
                 } else {
                     contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
                     log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
                 }
-
                 // 3. generate avro out of DataFrame with predefined format for
                 // Recommendations
                 PlayLaunchSparkContext playLaunchSparkContext = playLaunchContext.toPlayLaunchSparkContext();

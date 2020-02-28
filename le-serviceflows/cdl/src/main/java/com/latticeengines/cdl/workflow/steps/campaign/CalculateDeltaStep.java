@@ -16,26 +16,22 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CalculateDeltaStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -49,10 +45,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     private PeriodProxy periodProxy;
 
     @Inject
-    private PlayProxy playProxy;
-
-    @Inject
-    private DataUnitProxy dataUnitProxy;
+    private CampaignLaunchUtils campaignLaunchUtils;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -65,20 +58,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     public void execute() {
         CalculateDeltaStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
-
-        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
-        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
-                config.getChannelId());
-
-        if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No Campaign found by ID: " + config.getPlayId() });
-        }
-
-        if (channel == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No Channel found by ID: " + config.getChannelId() });
-        }
+        PlayLaunchChannel channel = campaignLaunchUtils.getPlayLaunchChannel(customerSpace, config.getPlayId(), config.getChannelId());
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);

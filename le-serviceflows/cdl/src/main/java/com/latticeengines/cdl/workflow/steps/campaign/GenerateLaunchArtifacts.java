@@ -23,6 +23,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -76,6 +77,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     private MetadataProxy metadataProxy;
 
     @Inject
+    private CampaignLaunchUtils campaignLaunchUtils;
+
+    @Inject
     private ExportFieldMetadataProxy exportFieldMetadataProxy;
 
     private DataCollection.Version version;
@@ -87,19 +91,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         GenerateLaunchArtifactsStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
 
-        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
-        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
-                config.getChannelId());
-
-        if (play == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No Campaign found by ID: " + config.getPlayId() });
-        }
-
-        if (channel == null) {
-            throw new LedpException(LedpCode.LEDP_32000,
-                    new String[] { "No Channel found by ID: " + config.getChannelId() });
-        }
+        Play play = campaignLaunchUtils.getPlay(customerSpace, config.getPlayId(), false, false);
+        PlayLaunchChannel channel = campaignLaunchUtils.getPlayLaunchChannel(customerSpace, config.getPlayId(), config.getChannelId());
 
         PlayLaunch launch = null;
         if (StringUtils.isNotBlank(config.getLaunchId())) {
@@ -439,14 +432,5 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
     }
 
-    private String getFullUniverseContextKeyByAudienceType(AudienceType audienceType) {
-        switch (audienceType) {
-        case ACCOUNTS:
-            return FULL_ACCOUNTS_UNIVERSE;
-        case CONTACTS:
-            return FULL_CONTACTS_UNIVERSE;
-        default:
-            return null;
-        }
-    }
 }
+
