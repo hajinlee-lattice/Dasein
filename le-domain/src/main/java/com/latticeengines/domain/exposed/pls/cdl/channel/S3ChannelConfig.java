@@ -13,6 +13,9 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 public class S3ChannelConfig implements ChannelConfig {
     private static final CDLExternalSystemName systemName = CDLExternalSystemName.AWS_S3;
 
+    @JsonProperty("audienceType")
+    private AudienceType audienceType;
+
     @JsonProperty("accountLimit")
     private Long accountLimit;
 
@@ -38,6 +41,10 @@ public class S3ChannelConfig implements ChannelConfig {
 
     @Override
     public void setAudienceName(String audienceName) { }
+
+    public void setAudienceType(AudienceType audienceType) {
+        this.audienceType = audienceType;
+    }
 
     public String getS3CampaignExportDir() { return s3CampaignExportDir; }
 
@@ -66,7 +73,9 @@ public class S3ChannelConfig implements ChannelConfig {
 
     @Override
     @JsonProperty("audienceType")
-    public AudienceType getAudienceType() { return AudienceType.CONTACTS; }
+    public AudienceType getAudienceType() {
+        return audienceType;
+    }
 
     @Override
     public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) { return false; }
@@ -80,6 +89,7 @@ public class S3ChannelConfig implements ChannelConfig {
     public ChannelConfig copyConfig(ChannelConfig config) {
         S3ChannelConfig s3ChannelConfig = this;
         S3ChannelConfig newS3ChannelConfig = (S3ChannelConfig) config;
+        s3ChannelConfig.setAudienceType(newS3ChannelConfig.getAudienceType());
         s3ChannelConfig.setAccountLimit(newS3ChannelConfig.getAccountLimit());
         s3ChannelConfig.setS3CampaignExportDir(newS3ChannelConfig.getS3CampaignExportDir());
         s3ChannelConfig.setIncludeExportAttributes(newS3ChannelConfig.isIncludeExportAttributes());
