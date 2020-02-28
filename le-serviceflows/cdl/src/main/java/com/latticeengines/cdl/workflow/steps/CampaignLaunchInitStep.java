@@ -200,11 +200,11 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
                 log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
                 HdfsDataUnit contactDataUnit = null;
-                if (!contactsDataExists) {
-                    log.info("No contact table available in Redshift.");
-                } else {
+                if (contactsDataExists) {
                     contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
                     log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
+                } else {
+                    log.info("No contact table available in Redshift.");
                 }
                 // 3. generate avro out of DataFrame with predefined format for
                 // Recommendations

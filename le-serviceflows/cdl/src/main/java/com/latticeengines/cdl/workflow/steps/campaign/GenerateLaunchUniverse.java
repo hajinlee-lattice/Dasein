@@ -99,10 +99,10 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                // 3. check the account and account limit
+                // 2. check the account and account limit
                 campaignLaunchUtils.checkCampaignLaunchLimitation(frontEndQuery, contactsDataExists,
                         channel.getMaxAccountsToLaunch(), (query, entity) -> getEntityCount(query, entity));
-                // 4. get DataFrame for Account and Contact
+                // 3. get DataFrame for Account and Contact
                 HdfsDataUnit launchDataUniverseDataUnit = getEntityQueryData(frontEndQuery.getDeepCopy(), true);
                 log.info("FullLaunchUniverseDataUnit: " + JsonUtils.serialize(launchDataUniverseDataUnit));
                 return launchDataUniverseDataUnit;
