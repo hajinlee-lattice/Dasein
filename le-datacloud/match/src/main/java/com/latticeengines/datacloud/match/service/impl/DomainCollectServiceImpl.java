@@ -123,7 +123,11 @@ public class DomainCollectServiceImpl implements DomainCollectService {
     }
 
     private void dumpDomains(String transferId, Collection<String> domains) {
-        rawCollectionRequestMgr.saveRequests(domains, transferId);
+        try {
+            rawCollectionRequestMgr.saveRequests(domains, transferId);
+        } catch (Exception e) {
+            log.warn("Failed to save collection requests.", e);
+        }
     }
 
     public int getQueueSize() {
