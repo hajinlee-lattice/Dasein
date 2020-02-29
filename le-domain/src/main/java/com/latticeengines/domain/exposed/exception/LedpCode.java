@@ -869,7 +869,12 @@ public enum LedpCode {
     LEDP_41003("Fail to shutdown batch write executor properly"),
 
     // le-db
-    LEDP_50000("Object {0} is not soft deletable."); //
+    LEDP_50000("Object {0} is not soft deletable."), //
+
+    // le-dcp
+    LEDP_60000("Error when create Project!"), //
+    LEDP_60001("Error when create Source!");
+
 
     private String message;
 
