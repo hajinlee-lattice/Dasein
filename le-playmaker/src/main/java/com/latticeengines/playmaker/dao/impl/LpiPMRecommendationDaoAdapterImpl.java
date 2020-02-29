@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
@@ -63,12 +64,42 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                 latestLaunchFlag = true;
             }
         }
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
-        if (CollectionUtils.isNotEmpty(launchIds)) {
-            return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, start, offset, maximum);
-        }
-        else {
-            return new ArrayList<Map<String, Object>>();
+        List<LaunchSummary> summaries = lpiPMPlay.getLaunchSummariesFromDashboard(latestLaunchFlag, start, playIds, syncDestination, orgInfo);
+        if (CollectionUtils.isNotEmpty(summaries)) {
+            summaries.sort((summary1, summary2) -> {
+                long deltaTime = summary1.getLaunchTime().getTime() - summary2.getLaunchTime().getTime();
+                if (deltaTime != 0) {
+                    return deltaTime > 0 ? 1 : -1;
+                } else {
+                    return summary1.getLaunchId().compareTo(summary2.getLaunchId());
+                }
+            });
+            long count = 0L;
+            List<String> launchIdsToQuery = new ArrayList<>();
+            long offsetToQuery = offset;
+            boolean skipCompute = false;
+            for (LaunchSummary launchSummary : summaries) {
+                if (skipCompute) {
+                    launchIdsToQuery.add(launchSummary.getLaunchId());
+                } else {
+                    PlayLaunchDashboard.Stats stats = launchSummary.getStats();
+                    long recommendationsLaunched = stats.getRecommendationsLaunched();
+                    if (count + recommendationsLaunched - 1 >= offset) {
+                        skipCompute = true;
+                        launchIdsToQuery.add(launchSummary.getLaunchId());
+                        continue;
+                    }
+                    count += recommendationsLaunched;
+                    offsetToQuery -= recommendationsLaunched;
+                }
+            }
+            if (CollectionUtils.isNotEmpty(launchIdsToQuery)) {
+                return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIdsToQuery, start, (int) offsetToQuery, maximum, offset);
+            } else {
+                return new ArrayList<>();
+            }
+        } else {
+            return new ArrayList<>();
         }
     }
 
