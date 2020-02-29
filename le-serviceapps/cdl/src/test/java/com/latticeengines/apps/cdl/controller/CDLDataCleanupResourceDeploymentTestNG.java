@@ -62,7 +62,7 @@ public class CDLDataCleanupResourceDeploymentTestNG extends CDLDeploymentTestNGB
         Assert.assertEquals(status, JobStatus.COMPLETED);
     }
 
-    @Test(groups = { "deployment" })
+    @Test(groups = { "deployment" }, enabled = false)
     public void testTenantCleanup() throws IOException {
         checkpointService.resumeCheckpoint( //
                 ProcessTransactionDeploymentTestNG.CHECK_POINT, //
