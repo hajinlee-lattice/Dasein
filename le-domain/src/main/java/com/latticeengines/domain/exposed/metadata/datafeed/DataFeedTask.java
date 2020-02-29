@@ -161,6 +161,10 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     @JsonProperty("deleted")
     private Boolean deleted;
 
+    @JsonProperty("import_system_name")
+    @Transient
+    private String importSystemName;
+
     @JsonIgnore
     @Transient
     private List<DataFeedTaskTable> tables = new ArrayList<>();
@@ -246,15 +250,13 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
 
     public void setImportSystem(S3ImportSystem importSystem) {
         this.importSystem = importSystem;
+        if (importSystem != null) {
+            importSystemName = importSystem.getName();
+        }
     }
 
-    @JsonProperty("import_system_name")
     public String getImportSystemName() {
-        if (importSystem != null) {
-            return importSystem.getName();
-        } else {
-            return null;
-        }
+        return importSystemName;
     }
 
     public String getSourceId() {

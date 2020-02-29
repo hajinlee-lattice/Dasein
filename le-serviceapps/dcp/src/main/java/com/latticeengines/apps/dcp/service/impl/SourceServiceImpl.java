@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.standardschemas.ImportWorkflowSpec;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -50,9 +49,12 @@ public class SourceServiceImpl implements SourceService {
 
     private static final Logger log = LoggerFactory.getLogger(SourceServiceImpl.class);
 
-    private static final String SOURCE_RELATIVE_PATH_PATTERN = "Source/%s/drop";
+    private static final String DROP_FOLDER = "drop/";
+    private static final String UPLOAD_FOLDER = "upload/";
+    private static final String SOURCE_RELATIVE_PATH_PATTERN = "Source/%s/";
     private static final String RANDOM_SOURCE_ID_PATTERN = "Source_%s";
     private static final String USER_PREFIX = "user_";
+    private static final String FEED_TYPE_PATTERN = "%s_%s"; // SystemName_SourceId;
 
     @Inject
     private ProjectService projectService;
@@ -83,9 +85,13 @@ public class SourceServiceImpl implements SourceService {
         Table standardTable = getTemplateFromSpec(customerSpace, project.getS3ImportSystem(),
                 templateMetadata.getEntityType());
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, templateMetadata,
-                project.getS3ImportSystem(), standardTable, relativePath, displayName);
+                project.getS3ImportSystem(), standardTable, relativePath, displayName, sourceId);
         Source source = convertToSource(customerSpace, dataFeedTask);
-        dropBoxService.createFolderUnderDropFolder(source.getFullPath());
+        if (StringUtils.isNotBlank(source.getFullPath())) {
+            dropBoxService.createFolderUnderDropFolder(source.getFullPath());
+            dropBoxService.createFolderUnderDropFolder(source.getFullPath() + DROP_FOLDER);
+            dropBoxService.createFolderUnderDropFolder(source.getFullPath() + UPLOAD_FOLDER);
+        }
         return source;
     }
 
@@ -100,9 +106,13 @@ public class SourceServiceImpl implements SourceService {
         Table standardTable = getTemplateFromSpec(customerSpace, project.getS3ImportSystem(),
                 templateMetadata.getEntityType());
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, templateMetadata,
-                project.getS3ImportSystem(), standardTable, relativePath, displayName);
+                project.getS3ImportSystem(), standardTable, relativePath, displayName, sourceId);
         Source source = convertToSource(customerSpace, dataFeedTask);
-        dropBoxService.createFolderUnderDropFolder(source.getFullPath());
+        if (StringUtils.isNotBlank(source.getFullPath())) {
+            dropBoxService.createFolderUnderDropFolder(source.getFullPath());
+            dropBoxService.createFolderUnderDropFolder(source.getFullPath() + DROP_FOLDER);
+            dropBoxService.createFolderUnderDropFolder(source.getFullPath() + UPLOAD_FOLDER);
+        }
         return source;
     }
 
@@ -147,14 +157,17 @@ public class SourceServiceImpl implements SourceService {
             Project project = projectService.getProjectByImportSystem(customerSpace, s3ImportSystem);
             source.setFullPath(project.getRootPath() + dataFeedTask.getRelativePath());
         }
-
         return source;
+    }
+
+    private String generateFeedType(String systemName, String sourceId) {
+        return String.format(FEED_TYPE_PATTERN, systemName, sourceId);
     }
 
     // TODO: Put create table code under some common place  --jhe
     private DataFeedTask setupDataFeedTask(String customerSpace, SimpleTemplateMetadata simpleTemplateMetadata,
                                            S3ImportSystem importSystem, Table standardTable,
-                                           String relativePath, String displayName) {
+                                           String relativePath, String displayName, String sourceId) {
         EntityType entityType = simpleTemplateMetadata.getEntityType();
         Table templateTable = generateSourceTemplate(standardTable, simpleTemplateMetadata);
         templateTable.setName(templateTable.getName() + System.currentTimeMillis());
@@ -164,7 +177,7 @@ public class SourceServiceImpl implements SourceService {
         dataFeedTask.setImportTemplate(templateTable);
         dataFeedTask.setStatus(DataFeedTask.Status.Active);
         dataFeedTask.setEntity(entityType.getEntity().name());
-        dataFeedTask.setFeedType(EntityTypeUtils.generateFullFeedType(importSystem.getName(), entityType));
+        dataFeedTask.setFeedType(generateFeedType(importSystem.getName(), sourceId));
         dataFeedTask.setSource("File");
         dataFeedTask.setActiveJob("Not specified");
         dataFeedTask.setSourceConfig("Not specified");
@@ -176,6 +189,7 @@ public class SourceServiceImpl implements SourceService {
         dataFeedTask.setImportSystem(importSystem);
         dataFeedTask.setRelativePath(relativePath);
         dataFeedTask.setSourceDisplayName(displayName);
+        dataFeedTask.setSourceId(sourceId);
 
         dataFeedProxy.createDataFeedTask(customerSpace, dataFeedTask);
 

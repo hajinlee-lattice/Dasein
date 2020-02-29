@@ -55,6 +55,10 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     public void createDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         dataFeedTask.setDataFeed(dataFeed);
+        if (StringUtils.isNotBlank(dataFeedTask.getImportSystemName())) {
+            dataFeedTask.setImportSystem(
+                    s3ImportSystemService.getS3ImportSystem(customerSpace, dataFeedTask.getImportSystemName()));
+        }
         dataFeedTaskEntityMgr.create(dataFeedTask);
     }
 
