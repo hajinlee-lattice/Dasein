@@ -84,25 +84,25 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         if (channel.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS) {
             Table previousAccountUniverseTable = StringUtils
                     .isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
-                    ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
-                    channel.getCurrentLaunchedAccountUniverseTable())
-                    : null;
+                            ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                                    channel.getCurrentLaunchedAccountUniverseTable())
+                            : null;
             previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DELTA
                     && !channel.getResetDeltaCalculationData() && previousAccountUniverseTable != null)
-                    ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
-                    : null;
+                            ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
+                            : null;
             log.info(getHDFSDataUnitLogEntry("PreviousAccountLaunchUniverse_", previousLaunchUniverse));
         } else {
             Table previousContactUniverseTable = StringUtils
                     .isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
-                    ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
-                    channel.getCurrentLaunchedContactUniverseTable())
-                    : null;
+                            ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                                    channel.getCurrentLaunchedContactUniverseTable())
+                            : null;
 
             previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DELTA
                     && !channel.getResetDeltaCalculationData() && previousContactUniverseTable != null)
-                    ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
-                    : null;
+                            ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
+                            : null;
 
             log.info(getHDFSDataUnitLogEntry("PreviousContactLaunchUniverse: ", previousLaunchUniverse));
         }
@@ -116,8 +116,8 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 channel.getChannelConfig().getAudienceType().getInterfaceName(),
                 channel.getChannelConfig().isSuppressAccountsWithoutContacts()
                         && channel.getChannelConfig().getAudienceType() == AudienceType.CONTACTS
-                        ? AudienceType.ACCOUNTS.getInterfaceName()
-                        : null,
+                                ? AudienceType.ACCOUNTS.getInterfaceName()
+                                : null,
                 channel.getChannelConfig().isSuppressAccountsWithoutContacts());
 
         // 3) Generate Metadata tables for delta results
@@ -125,7 +125,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     }
 
     private SparkJobResult executeSparkJob(HdfsDataUnit currentLaunchUniverse, HdfsDataUnit previousLaunchUniverse,
-                                           String primaryJoinKey, String secondaryJoinKey, boolean filterJoinKeyNulls) {
+            String primaryJoinKey, String secondaryJoinKey, boolean filterJoinKeyNulls) {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
                 primaryJoinKey, secondaryJoinKey, filterJoinKeyNulls, getRandomWorkspace());
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
@@ -182,7 +182,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     }
 
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey,
-                                     boolean createTable) {
+            boolean createTable) {
         log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
         if (createTable) {
             Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
@@ -209,34 +209,34 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
         switch (audienceType) {
-            case ACCOUNTS:
-                return ADDED_ACCOUNTS_DELTA_TABLE;
-            case CONTACTS:
-                return ADDED_CONTACTS_DELTA_TABLE;
-            default:
-                return null;
+        case ACCOUNTS:
+            return ADDED_ACCOUNTS_DELTA_TABLE;
+        case CONTACTS:
+            return ADDED_CONTACTS_DELTA_TABLE;
+        default:
+            return null;
         }
     }
 
     private String getRemoveDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
         switch (audienceType) {
-            case ACCOUNTS:
-                return REMOVED_ACCOUNTS_DELTA_TABLE;
-            case CONTACTS:
-                return REMOVED_CONTACTS_DELTA_TABLE;
-            default:
-                return null;
+        case ACCOUNTS:
+            return REMOVED_ACCOUNTS_DELTA_TABLE;
+        case CONTACTS:
+            return REMOVED_CONTACTS_DELTA_TABLE;
+        default:
+            return null;
         }
     }
 
     private String getFullUniverseContextKeyByAudienceType(AudienceType audienceType) {
         switch (audienceType) {
-            case ACCOUNTS:
-                return FULL_ACCOUNTS_UNIVERSE;
-            case CONTACTS:
-                return FULL_CONTACTS_UNIVERSE;
-            default:
-                return null;
+        case ACCOUNTS:
+            return FULL_ACCOUNTS_UNIVERSE;
+        case CONTACTS:
+            return FULL_CONTACTS_UNIVERSE;
+        default:
+            return null;
         }
     }
 
@@ -273,3 +273,4 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         return attrRepo;
     }
 }
+
