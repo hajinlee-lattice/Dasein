@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
@@ -74,7 +73,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     private PeriodProxy periodProxy;
 
     @Inject
-    private CampaignLaunchUtils campaignLaunchUtils;
+    protected CampaignLaunchUtils campaignLaunchUtils;
 
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
@@ -128,6 +127,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                     .prepareFrontEndQueries(playLaunchContext, version);
             log.info("Query for Accounts to Launch: " + playLaunchContext.getAccountFrontEndQuery());
             log.info("Query for Contact to Launch: " + playLaunchContext.getContactFrontEndQuery());
+
             SparkJobResult createRecJobResult = executeSparkJob(playLaunchContext, processedFieldMappingMetadata);
 
             long launchedAccountNum = createRecJobResult.getTargets().get(0).getCount();
@@ -176,8 +176,16 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
         }
     }
 
+    private FrontEndQuery buildFrontEndQuery(PlayLaunchContext playLaunchContext, BusinessEntity entity) {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setMainEntity(entity);
+        frontEndQuery.setContactRestriction(playLaunchContext.getContactFrontEndQuery().getContactRestriction());
+        frontEndQuery.setAccountRestriction(playLaunchContext.getAccountFrontEndQuery().getAccountRestriction());
+        return frontEndQuery;
+    }
+
     private SparkJobResult executeSparkJob(PlayLaunchContext playLaunchContext,
-            ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
+                                           ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -187,15 +195,14 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
                 String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                boolean contactsDataExists = StringUtils.isNotBlank(contactTableName);
                 // check the account and account limit
-                PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-                FrontEndQuery frontEndquery = campaignLaunchUtils.buildCampaignFrontEndQuery(customerSpace,
-                        playLaunch.getChannelConfig(),
-                        playLaunchContext.getPlay(), contactsDataExists, playLaunch.isLaunchUnscored(), playLaunch.getBucketsToLaunch(),
-                        playLaunch.getDestinationSysName(), null, playLaunch.getDestinationAccountId());
-                campaignLaunchUtils.checkCampaignLaunchLimitation(frontEndquery, contactsDataExists,
-                        playLaunch.getTopNCount(), (query, entity) -> getEntityCount(query, entity));
+                long accountsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Account));
+                campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
+                boolean contactsDataExists = StringUtils.isNotEmpty(contactTableName);
+                if (contactsDataExists) {
+                    long contactsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Contact));
+                    campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
+                }
                 // 2. get DataFrame for Account and Contact
                 HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
                 log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
@@ -234,7 +241,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     }
 
     private CreateRecommendationConfig generateCreateRecommendationConfig(HdfsDataUnit accountDataUnit,
-            HdfsDataUnit contactDataUnit, PlayLaunchSparkContext playLaunchSparkContext) {
+                                                                          HdfsDataUnit contactDataUnit, PlayLaunchSparkContext playLaunchSparkContext) {
         CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
         createRecConfig.setWorkspace(getRandomWorkspace());
         if (contactDataUnit != null) {
@@ -270,21 +277,6 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             putObjectInContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES, accountDisplayNames);
             putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, contactDisplayNames);
         }
-    }
-
-    @VisibleForTesting
-    void setTenantEntityMgr(TenantEntityMgr tenantEntityMgr) {
-        this.tenantEntityMgr = tenantEntityMgr;
-    }
-
-    @VisibleForTesting
-    void setPlayProxy(PlayProxy playProxy) {
-        this.playProxy = playProxy;
-    }
-
-    @VisibleForTesting
-    void setCampaignLaunchProcessor(CampaignLaunchProcessor campaignLaunchProcessor) {
-        this.campaignLaunchProcessor = campaignLaunchProcessor;
     }
 
     @Override

@@ -16,22 +16,25 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.CalculateDeltaStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -45,7 +48,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     private PeriodProxy periodProxy;
 
     @Inject
-    private CampaignLaunchUtils campaignLaunchUtils;
+    private PlayProxy playProxy;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -58,7 +61,20 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     public void execute() {
         CalculateDeltaStepConfiguration config = getConfiguration();
         CustomerSpace customerSpace = config.getCustomerSpace();
-        PlayLaunchChannel channel = campaignLaunchUtils.getPlayLaunchChannel(customerSpace, config.getPlayId(), config.getChannelId());
+
+        Play play = playProxy.getPlay(customerSpace.getTenantId(), config.getPlayId(), false, false);
+        PlayLaunchChannel channel = playProxy.getChannelById(customerSpace.getTenantId(), config.getPlayId(),
+                config.getChannelId());
+
+        if (play == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No Campaign found by ID: " + config.getPlayId() });
+        }
+
+        if (channel == null) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "No Channel found by ID: " + config.getChannelId() });
+        }
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
@@ -68,25 +84,25 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         if (channel.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS) {
             Table previousAccountUniverseTable = StringUtils
                     .isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
-                            ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
-                                    channel.getCurrentLaunchedAccountUniverseTable())
-                            : null;
+                    ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                    channel.getCurrentLaunchedAccountUniverseTable())
+                    : null;
             previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DELTA
                     && !channel.getResetDeltaCalculationData() && previousAccountUniverseTable != null)
-                            ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
-                            : null;
+                    ? HdfsDataUnit.fromPath(previousAccountUniverseTable.getExtracts().get(0).getPath())
+                    : null;
             log.info(getHDFSDataUnitLogEntry("PreviousAccountLaunchUniverse_", previousLaunchUniverse));
         } else {
             Table previousContactUniverseTable = StringUtils
                     .isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
-                            ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
-                                    channel.getCurrentLaunchedContactUniverseTable())
-                            : null;
+                    ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
+                    channel.getCurrentLaunchedContactUniverseTable())
+                    : null;
 
             previousLaunchUniverse = (channel.getLaunchType() == LaunchType.DELTA
                     && !channel.getResetDeltaCalculationData() && previousContactUniverseTable != null)
-                            ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
-                            : null;
+                    ? HdfsDataUnit.fromPath(previousContactUniverseTable.getExtracts().get(0).getPath())
+                    : null;
 
             log.info(getHDFSDataUnitLogEntry("PreviousContactLaunchUniverse: ", previousLaunchUniverse));
         }
@@ -100,8 +116,8 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                 channel.getChannelConfig().getAudienceType().getInterfaceName(),
                 channel.getChannelConfig().isSuppressAccountsWithoutContacts()
                         && channel.getChannelConfig().getAudienceType() == AudienceType.CONTACTS
-                                ? AudienceType.ACCOUNTS.getInterfaceName()
-                                : null,
+                        ? AudienceType.ACCOUNTS.getInterfaceName()
+                        : null,
                 channel.getChannelConfig().isSuppressAccountsWithoutContacts());
 
         // 3) Generate Metadata tables for delta results
@@ -109,7 +125,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     }
 
     private SparkJobResult executeSparkJob(HdfsDataUnit currentLaunchUniverse, HdfsDataUnit previousLaunchUniverse,
-            String primaryJoinKey, String secondaryJoinKey, boolean filterJoinKeyNulls) {
+                                           String primaryJoinKey, String secondaryJoinKey, boolean filterJoinKeyNulls) {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
                 primaryJoinKey, secondaryJoinKey, filterJoinKeyNulls, getRandomWorkspace());
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
@@ -166,7 +182,7 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
     }
 
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey,
-            boolean createTable) {
+                                     boolean createTable) {
         log.info(getHDFSDataUnitLogEntry(tableName, dataUnit));
         if (createTable) {
             Table dataUnitTable = toTable(tableName, primaryKey, dataUnit);
@@ -193,34 +209,34 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     private String getAddDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
         switch (audienceType) {
-        case ACCOUNTS:
-            return ADDED_ACCOUNTS_DELTA_TABLE;
-        case CONTACTS:
-            return ADDED_CONTACTS_DELTA_TABLE;
-        default:
-            return null;
+            case ACCOUNTS:
+                return ADDED_ACCOUNTS_DELTA_TABLE;
+            case CONTACTS:
+                return ADDED_CONTACTS_DELTA_TABLE;
+            default:
+                return null;
         }
     }
 
     private String getRemoveDeltaTableContextKeyByAudienceType(AudienceType audienceType) {
         switch (audienceType) {
-        case ACCOUNTS:
-            return REMOVED_ACCOUNTS_DELTA_TABLE;
-        case CONTACTS:
-            return REMOVED_CONTACTS_DELTA_TABLE;
-        default:
-            return null;
+            case ACCOUNTS:
+                return REMOVED_ACCOUNTS_DELTA_TABLE;
+            case CONTACTS:
+                return REMOVED_CONTACTS_DELTA_TABLE;
+            default:
+                return null;
         }
     }
 
     private String getFullUniverseContextKeyByAudienceType(AudienceType audienceType) {
         switch (audienceType) {
-        case ACCOUNTS:
-            return FULL_ACCOUNTS_UNIVERSE;
-        case CONTACTS:
-            return FULL_CONTACTS_UNIVERSE;
-        default:
-            return null;
+            case ACCOUNTS:
+                return FULL_ACCOUNTS_UNIVERSE;
+            case CONTACTS:
+                return FULL_CONTACTS_UNIVERSE;
+            default:
+                return null;
         }
     }
 

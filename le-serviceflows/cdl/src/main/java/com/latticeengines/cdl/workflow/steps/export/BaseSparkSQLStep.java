@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -121,13 +120,6 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
             return super.runSparkJob(livySession, jobClz, jobConfig);
         }
         throw new NullPointerException("LivySession not initialized.");
-    }
-
-    protected long getEntityCount(FrontEndQuery frontEndQuery, BusinessEntity businessEntity) {
-        FrontEndQuery frontEndQueryDeepCopy = frontEndQuery.getDeepCopy();
-        frontEndQueryDeepCopy.setMainEntity(businessEntity);
-        frontEndQueryDeepCopy.setPageFilter(null);
-        return getEntityQueryCount(frontEndQueryDeepCopy);
     }
 
     protected long getEntityQueryCount(FrontEndQuery frontEndQuery) {
