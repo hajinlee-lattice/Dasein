@@ -32,6 +32,16 @@ public final class HashUtils {
         }
     }
 
+    public static String getSHA256Hash(String str) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA256");
+            byte[] thedigest = md.digest(str.getBytes(Charset.defaultCharset()));
+            return new String(thedigest);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Failed to get MD5 checksum of string " + str, e);
+        }
+    }
+
     public static String getCleanedString(String str) {
         return str.replaceAll("[^a-zA-Z0-9]+", "");
     }

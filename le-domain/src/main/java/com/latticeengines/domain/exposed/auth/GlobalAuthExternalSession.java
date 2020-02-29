@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "Type")
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = OneLoginExternalSession.class, name = OneLoginExternalSession.TYPE), //
+        @JsonSubTypes.Type(value = IDaaSExternalSession.class, name = IDaaSExternalSession.TYPE), //
 })
 public abstract class GlobalAuthExternalSession {
 

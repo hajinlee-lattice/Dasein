@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +55,7 @@ import com.latticeengines.security.exposed.service.LogoutService;
 import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.IDaaSService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -93,6 +95,9 @@ public class LoginResource {
 
     @Inject
     private LogoutService logoutService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     @Value("${security.login.clear.oldsession:false}")
     private boolean clearOldSession;
@@ -143,6 +148,18 @@ public class LoginResource {
             doc.setErrors(Collections.singletonList(e.getCode().getMessage()));
         }
         return doc;
+    }
+
+    @PostMapping("/idaas-login")
+    @ApiOperation(value = "Login using iDaaS")
+    public LoginDocument login(@RequestBody Credentials creds, HttpServletResponse response) {
+        try {
+            return iDaaSService.login(creds);
+        } catch (Exception e) {
+            log.error("Bad IDaaS Login", e);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            return null;
+        }
     }
 
     @GetMapping("/login-doc")
@@ -196,7 +213,7 @@ public class LoginResource {
         return doc;
     }
 
-    @RequestMapping(value = "/attach", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping("/attach")
     @ResponseBody
     @ApiOperation(value = "Attach the tenant")
     public UserDocument attach(@RequestBody Tenant tenant, HttpServletRequest request) {
