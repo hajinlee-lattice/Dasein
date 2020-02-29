@@ -164,7 +164,7 @@ public class MetadataResolver {
                         } else {
                             attribute.setDisplayName(fieldMapping.getUserField());
                         }
-                        attribute.setNameFromFile(fieldMapping.getUserField());
+                        attribute.setSourceAttrName(fieldMapping.getUserField());
                         attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
                         if (StringUtils.isNotEmpty(fieldMapping.getDateFormatString())) {
                             attribute.setDateFormatString(fieldMapping.getDateFormatString());
@@ -186,7 +186,6 @@ public class MetadataResolver {
             }
         }
         Set<String> currentAttrs = attributes.stream().map(Attribute::getName).collect(Collectors.toSet());
-
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (!fieldMapping.isMappedToLatticeField()) {
                 if (cdlResolve) {
@@ -212,7 +211,7 @@ public class MetadataResolver {
                         if (standardAttrs.containsKey(attrName)) {
                             Attribute attribute = standardAttrs.get(attrName);
                             //attribute.setDisplayName(fieldMapping.getUserField());
-                            attribute.setNameFromFile(fieldMapping.getUserField());
+                            attribute.setSourceAttrName(fieldMapping.getUserField());
                             attribute.setPhysicalDataType(attribute.getPhysicalDataType().toLowerCase());
                             if (StringUtils.isNotEmpty(fieldMapping.getDateFormatString())) {
                                 attribute.setDateFormatString(fieldMapping.getDateFormatString());
@@ -259,7 +258,7 @@ public class MetadataResolver {
         result.cdlExternalSystem.setOtherIdList(otherIds);
         result.cdlExternalSystem.setIdMapping(idMappings);
         if (fieldMappingDocument.getIgnoredFields() != null) {
-            attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getNameFromFile()));
+            attributes.removeIf(attr -> fieldMappingDocument.getIgnoredFields().contains(attr.getSourceAttrName()));
         }
         Attribute lastModified = result.metadata.getAttribute(InterfaceName.LastModifiedDate);
         if (lastModified == null) {
@@ -334,9 +333,15 @@ public class MetadataResolver {
         Set<String> pickedHeaders = new HashSet<>();
         while (attrIterator.hasNext()) {
             Attribute attribute = attrIterator.next();
-            if (headerFields.contains(attribute.getNameFromFile())) {
+            // displayName in attribute can represent default name defined lattice fields, sourceAttrName has sole
+            // meaning which represents header from file
+            // nameFromFile marks the header name corresponds to the attribute, first get from sourceAttrName,
+            // to be compatible with old logic, retrieve displayName if sourceAttrName is null
+            String nameFromFile = attribute.getSourceAttrName() == null ? attribute.getDisplayName() :
+                    attribute.getSourceAttrName();
+            if (headerFields.contains(nameFromFile)) {
                 FieldMapping knownColumn = new FieldMapping();
-                knownColumn.setUserField(attribute.getNameFromFile());
+                knownColumn.setUserField(nameFromFile);
                 knownColumn.setMappedField(attribute.getName());
                 knownColumn.setFieldType(getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
 
@@ -360,7 +365,7 @@ public class MetadataResolver {
                     knownColumn.setTimezone(attribute.getTimezone());
                 }
                 result.fieldMappings.add(knownColumn);
-                pickedHeaders.add(attribute.getNameFromFile());
+                pickedHeaders.add(nameFromFile);
             } else {
                 Iterator<String> headerIterator = headerFields.iterator();
                 FieldMapping knownColumn = new FieldMapping();
@@ -531,8 +536,9 @@ public class MetadataResolver {
                 return true;
             }
         }
-        return (cdlResolve && attribute.getNameFromFile().equalsIgnoreCase(header))
-                || (!cdlResolve && attribute.getDisplayName().equalsIgnoreCase(header));
+        return (cdlResolve && (header.equalsIgnoreCase(attribute.getSourceAttrName())
+                || header.equalsIgnoreCase(attribute.getDisplayName())))
+                || (!cdlResolve && header.equalsIgnoreCase(attribute.getDisplayName()));
     }
 
     public static String standardizeAttrName(String attrName) {
@@ -564,7 +570,7 @@ public class MetadataResolver {
         } else {
             attribute.setDisplayName(fieldMapping.getUserField());
         }
-        attribute.setNameFromFile(fieldMapping.getUserField());
+        attribute.setSourceAttrName(fieldMapping.getUserField());
         attribute.setApprovedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
         attribute.setCategory(getCategoryBasedOnSchemaType(result.metadata.getInterpretation()));
         attribute.setFundamentalType(getFundamentalTypeFromFieldType(fieldType));

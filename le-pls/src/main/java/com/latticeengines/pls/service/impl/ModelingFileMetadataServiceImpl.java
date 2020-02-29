@@ -322,7 +322,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         });
         missedAttrs.forEach((key, value) -> {
             FieldMapping fieldMapping = new FieldMapping();
-            fieldMapping.setUserField(value.getNameFromFile());
+            fieldMapping.setUserField(
+                    value.getSourceAttrName() == null ? value.getDisplayName() : value.getSourceAttrName());
             fieldMapping.setMappedField(value.getName());
             fieldMapping.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(value.getPhysicalDataType()));
             templateMapping.getExtraFieldMappingInfo().addMissedMapping(fieldMapping);
@@ -470,7 +471,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 // check lattice field can be mapped by user field, while not mapped by user
                 for (String userField : unmappedUserFields) {
                     if (!ignored.contains(userField)) { // skip if ignored by user
-                        if (userField.equals(latticeAttr.getNameFromFile())
+                        if (userField.equals(latticeAttr.getSourceAttrName() == null ? latticeAttr.getDisplayName() :
+                                latticeAttr.getSourceAttrName())
                                 || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
                             String message = String.format("Lattice field %s can be mapped to %s, while not",
                                     attrName, userField);
@@ -575,14 +577,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (templateAttrs.containsKey(attrEntry.getKey())) {
                 Attribute attr1 = attrEntry.getValue();
                 Attribute attr2 = templateAttrs.get(attrEntry.getKey());
+                String nameFromFile = attr2.getSourceAttrName() == null ? attr2.getDisplayName() :
+                        attr2.getSourceAttrName();
                 if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
                     String message = "Data type is not the same for attribute: " + attr1.getDisplayName();
-                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                    validations.add(createValidation(nameFromFile, attr2.getName(),
                             ValidationStatus.ERROR, message));
                 }
                 if (!attr1.getRequired().equals(attr2.getRequired())) {
                     String message = "Required flag is not the same for attribute: " + attr1.getDisplayName();
-                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                    validations.add(createValidation(nameFromFile, attr2.getName(),
                             ValidationStatus.ERROR, message));
                 }
             }
