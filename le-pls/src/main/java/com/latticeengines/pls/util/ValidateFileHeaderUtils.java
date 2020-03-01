@@ -276,4 +276,18 @@ public class ValidateFileHeaderUtils {
             }
         }
     }
+
+    /**
+     * check duplicates of headers(case insensitive)
+     * @param headers
+     */
+    public static void checkForDuplicatedHeaders(Set<String> headers) {
+        Set<String> headersWithLowerCase = new HashSet<>();
+        for (String header : headers) {
+            if (!headersWithLowerCase.add(header.toLowerCase())) {
+                throw new LedpException(LedpCode.LEDP_40055);
+            }
+        }
+
+    }
 }

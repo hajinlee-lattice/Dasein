@@ -1028,6 +1028,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         if (checkHeaderFormat) {
             ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
         }
+        ValidateFileHeaderUtils.checkForDuplicatedHeaders(headerFields);
         ValidateFileHeaderUtils.checkForCSVInjectionInFileNameAndHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         ValidateFileHeaderUtils.checkForLongHeaders(headerFields);
