@@ -4,15 +4,25 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.base.Preconditions;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -23,7 +33,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
-@Api(value = "Team Management", description = "REST endpoints for managing teams")
+@Api(value = "Team Management")
 @RestController
 @RequestMapping("/teams")
 public class TeamResource {
@@ -53,10 +63,7 @@ public class TeamResource {
             @ApiParam(value = "List of user ids to assign to the team", required = false) //
             @RequestParam(value = "teamMembers") Set<String> teamMembers) {
 
-        if (StringUtils.isEmpty(teamName)) {
-            log.error("Failed, team name can't be empty...");
-            return null;
-        }
+        Preconditions.checkArgument(StringUtils.isNotBlank(teamName), "Team name can't be empty");
 
         GlobalTeam newTeam = new GlobalTeam();
         newTeam.setTeamId(GlobalTeam.generateId());
@@ -71,12 +78,11 @@ public class TeamResource {
         // Construct new json data by appending the new team info
         String newData = null;
         ArrayNode node = new ArrayNode(jsonParser.getNodeFactory());
-        if (!StringUtils.isEmpty(curData)) {
+        if (StringUtils.isNotBlank(curData)) {
             try {
                 node = (ArrayNode) jsonParser.readTree(curData);
             } catch (JsonProcessingException e) {
-                log.error("Failed to process team data", e);
-                return null;
+                throw new RuntimeException("Failed to process team data", e);
             }
         }
         newData = JsonUtils.serialize(node.addPOJO(newTeam));
@@ -84,8 +90,7 @@ public class TeamResource {
             log.info("Created team " + newTeam.getTeamName() + " with id " + newTeam.getTeamId());
             return newTeam;
         } else {
-            log.error("Failed to write team data");
-            return null;
+            throw new RuntimeException("Failed to write team data");
         }
     }
 
@@ -111,7 +116,7 @@ public class TeamResource {
         for (JsonNode node : teamNodes) {
             GlobalTeam team = JsonUtils.deserialize(node.toString(), GlobalTeam.class);
             if (teamId.equalsIgnoreCase(team.getTeamId())) { // find the team
-                if (!StringUtils.isEmpty(teamName)) {
+                if (StringUtils.isNotBlank(teamName)) {
                     team.setTeamName(teamName);
                 }
                 if (teamMembers != null) {
@@ -203,26 +208,23 @@ public class TeamResource {
         return data;
     }
 
-    private Boolean writeData(String data) {
-        if (!StringUtils.isEmpty(data)) {
+    private boolean writeData(String data) {
+        boolean success = false;
+        if (StringUtils.isNotBlank(data)) {
             log.info("Write data: " + data);
-
-            // Write to camille via locker manager
-            LockManager.registerDivisionPrivateLock(LOCK_NAME);
-            LockManager.acquireWriteLock(LOCK_NAME, 1, TimeUnit.SECONDS);
-
             try {
+                // Write to camille via locker manager
+                LockManager.registerDivisionPrivateLock(LOCK_NAME);
+                LockManager.acquireWriteLock(LOCK_NAME, 1, TimeUnit.SECONDS);
                 LockManager.upsertData(LOCK_NAME, data, CamilleEnvironment.getDivision());
+                success = true;
             } catch (Exception e) {
                 log.error("Failed to upsert data", e);
+            } finally {
                 LockManager.releaseWriteLock(LOCK_NAME);
-                return null;
             }
-            LockManager.releaseWriteLock(LOCK_NAME);
-
-            return true;
         }
 
-        return false;
+        return success;
     }
 }
