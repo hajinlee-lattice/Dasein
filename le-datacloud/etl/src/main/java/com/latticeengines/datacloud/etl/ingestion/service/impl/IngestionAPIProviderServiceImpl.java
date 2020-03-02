@@ -1,9 +1,9 @@
 package com.latticeengines.datacloud.etl.ingestion.service.impl;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,6 +14,8 @@ import java.util.TimeZone;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -72,16 +74,7 @@ public class IngestionAPIProviderServiceImpl extends IngestionProviderServiceImp
             }
             ApiConfiguration apiConfig = (ApiConfiguration) progress.getIngestion().getProviderConfiguration();
             log.info(String.format("Downloading from %s ...", apiConfig.getFileUrl()));
-            URL url = new URL(apiConfig.getFileUrl());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.connect();
-            InputStream connStream = conn.getInputStream();
-            FileSystem hdfs = FileSystem.get(yarnConfiguration);
-            FSDataOutputStream outStream = hdfs.create(new Path(progress.getDestination()));
-            IOUtils.copy(connStream, outStream);
-            outStream.close();
-            connStream.close();
-            conn.disconnect();
+            injestCopy(progress, apiConfig);
             log.info("Download completed");
             Long size = HdfsUtils.getFileSize(yarnConfiguration, progress.getDestination());
             progress = ingestionProgressService.updateProgress(progress).size(size).status(ProgressStatus.FINISHED)
@@ -92,6 +85,21 @@ public class IngestionAPIProviderServiceImpl extends IngestionProviderServiceImp
             log.error(String.format("Ingestion failed of exception %s. Progress: %s", e.getMessage(),
                     progress.toString()));
         }
+    }
+
+    public void injestCopy(IngestionProgress progress, ApiConfiguration apiConfig)
+            throws MalformedURLException, IOException {
+        HttpClient client = new HttpClient();
+        GetMethod method = new GetMethod(apiConfig.getFileUrl());
+        int statusCode = client.executeMethod(method);
+        log.info("Starting to download. status=" + statusCode);
+        InputStream in = new BufferedInputStream(method.getResponseBodyAsStream());
+        FileSystem hdfs = FileSystem.get(yarnConfiguration);
+        FSDataOutputStream outStream = hdfs.create(new Path(progress.getDestination()));
+        long bytes = IOUtils.copy(in, outStream);
+        log.info("Downlowned files size=" + bytes);
+        in.close();
+        outStream.close();
     }
 
     @Override
