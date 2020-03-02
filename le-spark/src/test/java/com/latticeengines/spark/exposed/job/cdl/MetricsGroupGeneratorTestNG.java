@@ -63,7 +63,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String ContactId = InterfaceName.ContactId.name();
     private static final String PeriodId = InterfaceName.PeriodId.name();
     private static final String __Row_Count__ = InterfaceName.__Row_Count__.name();
-    private static final String SomeRollupDim = "SomeRollupDim";
+    private static final String dimNotRequired = "SomeRollupDim";
     private static final String PeriodIdPartition = DeriveAttrsUtils.PARTITION_COL_PREFIX() + PeriodId;
     private static final String OpportunityId = "OpportunityId";
     private static final String Stage = "Stage";
@@ -121,7 +121,6 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     private Long calculateWebActivityAttrsCount(Map<String, Map<String, DimensionMetadata>> streamMetadata, ActivityMetricsGroup group) {
         return streamMetadata.get(WEB_VISIT_STREAM_ID).get(PathPatternId).getCardinality()
-                * streamMetadata.get(WEB_VISIT_STREAM_ID).get(SomeRollupDim).getCardinality()
                 * group.getActivityTimeRange().getParamSet().size();
     }
 
@@ -160,14 +159,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 Collections.singletonMap(PathPatternId, "missingPattern")
         ));
         pathPatternDimMeta.setCardinality(5);
-        DimensionMetadata someRollupDimMeta = new DimensionMetadata();
-        someRollupDimMeta.setDimensionValues(Arrays.asList(
-                Collections.singletonMap(SomeRollupDim, 11),
-                Collections.singletonMap(SomeRollupDim, 999)
-        ));
-        someRollupDimMeta.setCardinality(2);
         dimensions.put(PathPatternId, pathPatternDimMeta);
-        dimensions.put(SomeRollupDim, someRollupDimMeta);
         metadata.put(WEB_VISIT_STREAM_ID, dimensions);
         return metadata;
     }
@@ -195,17 +187,17 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of(PeriodId, Integer.class), //
                 Pair.of(PathPatternId, String.class), //
                 Pair.of(__Row_Count__, Integer.class), //
-                Pair.of(SomeRollupDim, Integer.class), //
+                Pair.of(dimNotRequired, Integer.class), //
                 Pair.of(PeriodIdPartition, Integer.class)
         );
 
         Object[][] data = new Object[][]{ //
-                {"1", "1", TWO_WEEKS_AGO, null, 5, 11, TWO_WEEKS_AGO}, // should be dropped after runAggregation step
-                {"1", "1", TWO_WEEKS_AGO, "pp1", 5, 11, TWO_WEEKS_AGO}, //
-                {"1", "1", CUR_PERIODID, "pp3", 4, 11, CUR_PERIODID}, //
-                {"1", "1", CUR_PERIODID, "pp5", 3, 11, CUR_PERIODID}, //
-                {"2", "6", TWO_WEEKS_AGO, "pp1", 2, 11, TWO_WEEKS_AGO}, //
-                {"2", "5", TWO_WEEKS_AGO, "pp4", 6, 11, TWO_WEEKS_AGO}
+                {"1", "1", TWO_WEEKS_AGO, null, 5, null, TWO_WEEKS_AGO}, // should be dropped after rollup step
+                {"1", "1", TWO_WEEKS_AGO, "pp1", 5, null, TWO_WEEKS_AGO}, // should not be dropped as null column not required
+                {"1", "1", CUR_PERIODID, "pp3", 4, null, CUR_PERIODID}, //
+                {"1", "1", CUR_PERIODID, "pp5", 3, null, CUR_PERIODID}, //
+                {"2", "6", TWO_WEEKS_AGO, "pp1", 2, null, TWO_WEEKS_AGO}, //
+                {"2", "5", TWO_WEEKS_AGO, "pp4", 6, null, TWO_WEEKS_AGO}
         };
 
         return uploadHdfsDataUnit(data, periodStoreFields);
@@ -249,7 +241,7 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         group.setJavaClass(Long.class.getSimpleName());
         group.setEntity(BusinessEntity.Account);
         group.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN, TIMEFILTER_PERIODS, TIMEFILTER_PARAMS));
-        group.setRollupDimensions(String.format("%s,%s", PathPatternId, SomeRollupDim));
+        group.setRollupDimensions(PathPatternId);
         group.setAggregation(createAttributeDeriver(Collections.singletonList(__Row_Count__), __Row_Count__, StreamAttributeDeriver.Calculation.SUM));
         group.setNullImputation(NullMetricsImputation.ZERO);
         return group;
@@ -298,11 +290,11 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifyWebVisitMetrics(HdfsDataUnit metrics) {
         Object[][] expectedResult = new Object[][]{
-                // 10 for each week (1, 2), + 1 entityId
+                // 4 for each week (1, 2), + 1 entityId
                 // w_1_w all zeros
-                {"1", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {"2", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6, 0, 0, 0, 0, 0, 0, 0, 0},
-                {"missingAccount", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+                {"1", 0, 0, 0, 0, 0, 5, 0, 0, 0, 0},
+                {"2", 0, 0, 0, 0, 0, 2, 6, 0, 0, 0},
+                {"missingAccount", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
         };
         Map<Object, List<Object>> expectedMap = Arrays.stream(expectedResult)
                 .collect(Collectors.toMap(arr -> arr[0].toString(), Arrays::asList));
