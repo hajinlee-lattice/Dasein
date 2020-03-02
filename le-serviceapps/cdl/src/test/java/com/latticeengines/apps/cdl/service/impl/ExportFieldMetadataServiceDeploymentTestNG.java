@@ -40,7 +40,6 @@ import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
-import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.EloquaChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.FacebookChannelConfig;
@@ -49,7 +48,6 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.MarketoChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.OutreachChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.S3ChannelConfig;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTestNGBase {
@@ -200,7 +198,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_1");
 
         S3ChannelConfig channelConfig = new S3ChannelConfig();
-        channelConfig.setAudienceType(AudienceType.CONTACTS);
         channelConfig.setIncludeExportAttributes(false);
         createPlayLaunchChannel(channelConfig, lookupIdMap);
 
@@ -208,19 +205,12 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
                 .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
+
         assertEquals(columnMetadata.size(), 33);
+
         long nonStandardFieldsCount = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         log.info("" + nonStandardFieldsCount);
         assertEquals(nonStandardFieldsCount, 21);
-
-        channelConfig.setAudienceType(AudienceType.ACCOUNTS);
-        createPlayLaunchChannel(channelConfig, lookupIdMap);
-        columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
-        log.info(JsonUtils.serialize(columnMetadata));
-        assertEquals(columnMetadata.size(), 21);
-        long accountOnlyFieldsCount = columnMetadata.stream().filter(col -> col.getEntity() == BusinessEntity.Account)
-                .count();
-        assertEquals(accountOnlyFieldsCount, 21);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithOutExportAttributes")
@@ -228,7 +218,6 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         registerLookupIdMap(CDLExternalSystemType.FILE_SYSTEM, CDLExternalSystemName.AWS_S3, "AWS_S3_2");
 
         S3ChannelConfig channelConfig = new S3ChannelConfig();
-        channelConfig.setAudienceType(AudienceType.CONTACTS);
         channelConfig.setIncludeExportAttributes(true);
         createPlayLaunchChannel(channelConfig, lookupIdMap);
 
@@ -236,19 +225,12 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
                 .getExportFieldMetadataService(channel.getLookupIdMap().getExternalSystemName());
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
+
         assertEquals(columnMetadata.size(), 85);
+
         List<ColumnMetadata> nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField)
                 .collect(Collectors.toList());
         assertEquals(nonStandardFields.size(), 21);
-
-        channelConfig.setAudienceType(AudienceType.ACCOUNTS);
-        createPlayLaunchChannel(channelConfig, lookupIdMap);
-        columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
-        log.info(JsonUtils.serialize(columnMetadata));
-        assertEquals(columnMetadata.size(), 78);
-        long accountOnlyFieldsCount = columnMetadata.stream().filter(col -> col.getEntity() == BusinessEntity.Account)
-                .count();
-        assertEquals(accountOnlyFieldsCount, 78);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = "testS3WithExportAttributes")
