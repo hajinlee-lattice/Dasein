@@ -132,7 +132,8 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
                 }
             }
             Map<String, List<Attribute>> displayNameMap = template.getAttributes().stream()
-                    .collect(groupingBy(Attribute::getDisplayName));
+                    .collect(groupingBy(attr -> attr.getSourceAttrName() == null ?
+                            attr.getDisplayName() : attr.getSourceAttrName()));
             List<String> templateMissing = new ArrayList<>();
             List<String> csvMissing = new ArrayList<>();
             List<String> requiredMissing = new ArrayList<>();
