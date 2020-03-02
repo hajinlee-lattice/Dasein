@@ -34,7 +34,7 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         attachProtectedProxy(testProjectProxy);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testCreateDCPProjectWithProjectId() throws Exception {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithProjectId(DISPLAY_NAME, PROJECT_ID, Project.ProjectType.Type1);
         assertNotNull(projectDetail);
@@ -42,7 +42,7 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         testProjectProxy.deleteProject(PROJECT_ID);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testCreateDCPProjectWithOutProjectId() throws Exception {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail);
@@ -50,7 +50,7 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         testProjectProxy.deleteProject(projectDetail.getProjectId());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testGetAllDCPProject() throws Exception {
         ProjectDetails projectDetail1 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail1);
