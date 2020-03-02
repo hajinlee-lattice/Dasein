@@ -688,25 +688,42 @@ public class Attribute
     }
 
     public void setCategory(String category) {
-        setPropertyValue("Category", category);
+        setPropertyValue(AttributeUtils.PropertyKeys.CATEGORY, category);
     }
 
     public String getCategory() {
-        return getPropertyValue("Category") != null ? getPropertyValue("Category").toString()
+        return getPropertyValue(AttributeUtils.PropertyKeys.CATEGORY) != null ? getPropertyValue(AttributeUtils.PropertyKeys.CATEGORY).toString()
                 : null;
     }
 
     public void setCategory(Category category) {
-        setPropertyValue("Category", category.getName());
+        setPropertyValue(AttributeUtils.PropertyKeys.CATEGORY, category.getName());
     }
 
     public String getSubcategory() {
-        return getPropertyValue("Subcategory") != null ? getPropertyValue("Subcategory").toString()
+        return getPropertyValue(AttributeUtils.PropertyKeys.SUB_CATEGORY) != null ? getPropertyValue(AttributeUtils.PropertyKeys.SUB_CATEGORY).toString()
                 : null;
     }
 
     public void setSubcategory(String subcategory) {
-        setPropertyValue("Subcategory", subcategory);
+        setPropertyValue(AttributeUtils.PropertyKeys.SUB_CATEGORY, subcategory);
+    }
+
+    public String getSecondarySubCategoryDisplayName() {
+        return getPropertyValue(AttributeUtils.PropertyKeys.SECONDARY_SUB_CATEGORY_DISPLAY_NAME) != null ? getPropertyValue(AttributeUtils.PropertyKeys.SECONDARY_SUB_CATEGORY_DISPLAY_NAME).toString()
+                : null;
+    }
+
+    public void setSecondarySubCategoryDisplayName(String displayName) {
+        setPropertyValue(AttributeUtils.PropertyKeys.SECONDARY_SUB_CATEGORY_DISPLAY_NAME, displayName);
+    }
+
+    public boolean getShouldDeprecate() {
+        return Boolean.TRUE.equals(getPropertyValue(AttributeUtils.PropertyKeys.SHOULD_DEPRECATE));
+    }
+
+    public void setShouldDeprecate(boolean shouldDeprecate) {
+        setPropertyValue(AttributeUtils.PropertyKeys.SHOULD_DEPRECATE, shouldDeprecate);
     }
 
     public String getDataType() {

@@ -64,15 +64,16 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
 
     // for each requested period name (week, month, etc.):
     //  a: append periodId column based on date and period name
-    //  b: apply filters
-    //  c: group to period: group by (entityId + all dimensions from stream + periodId)
+    //  b: apply reducer if defined
+    //  c: group to period: group by (entityId + all dimensions from stream + periodId) unless reducer is defined
 
-    val withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStore, periodName, translator, stream))
-
-    val aggColumns: Seq[Column] = aggregations.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(__Row_Count__.name).as(__Row_Count__.name) // Default row count must exist
-    val columns: Seq[String] = DeriveAttrsUtils.getEntityIdColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
-    val groupedByPeriodId: Seq[DataFrame] = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*).agg(aggColumns.head, aggColumns.tail: _*))
-    groupedByPeriodId.map((df: DataFrame) => DeriveAttrsUtils.appendPartitionColumns(df, Seq(PeriodId.name)))
+    var withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStore, periodName, translator, stream))
+    if (Option(stream.getReducer).isEmpty) { // if reducer exists, no need to group by PeriodId as each periodId should only has one record
+      val aggColumns: Seq[Column] = aggregations.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(__Row_Count__.name).as(__Row_Count__.name) // Default row count must exist
+      val columns: Seq[String] = DeriveAttrsUtils.getEntityIdColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
+      withPeriodId = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*).agg(aggColumns.head, aggColumns.tail: _*))
+    }
+    withPeriodId.map((df: DataFrame) => DeriveAttrsUtils.appendPartitionColumns(df, Seq(PeriodId.name)))
   }
 
   private def generatePeriodId(dailyStore: DataFrame, periodName: String, translator: TimeFilterTranslator, stream: AtlasStream): DataFrame = {

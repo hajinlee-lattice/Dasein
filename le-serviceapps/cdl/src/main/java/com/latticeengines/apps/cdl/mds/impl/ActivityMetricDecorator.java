@@ -5,7 +5,6 @@ import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
 
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.common.exposed.util.TemplateUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -30,7 +28,6 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.FilterOptions;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -85,15 +82,6 @@ public class ActivityMetricDecorator implements Decorator {
     }
 
     private ColumnMetadata filter(ColumnMetadata cm) {
-        switch (cm.getEntity()) {
-        case WebVisitProfile:
-            cm.setCategory(Category.WEB_VISIT_PROFILE);
-            break;
-        case Opportunity:
-            cm.setCategory(Category.OPPORTUNITY_PROFILE);
-            break;
-            default:
-        }
         if (systemAttrs.contains(cm.getAttrName())) {
             return cm;
         }
@@ -139,41 +127,16 @@ public class ActivityMetricDecorator implements Decorator {
         Map<String, Object> params = getRenderParams(attrName, group, rollupDimVals, timeRange);
         renderTemplates(cm, group, params);
 
-        enrichWebVisitMetadata(cm, group, timeRange, params);
-    }
-
-    /*-
-     * enrich web visit related metadata
-     *
-     * TODO customize only for webvisit for now, if time filtering + other ux
-     *      feature becomes a norm can consider add these value to metrics group
-     *      & other configurations
-     */
-    private void enrichWebVisitMetadata(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group,
-            @NotNull String timeRange, @NotNull Map<String, Object> params) {
-        if (cm.getEntity() != BusinessEntity.WebVisitProfile) {
-            return;
-        }
-
-        // any tag for filtering all attrs
-        cm.setFilterTags(Arrays.asList(timeRange, FilterOptions.Option.ANY_VALUE));
-        if (WebVisitUtils.shouldHideInCategoryTile(cm, group, timeRange)) {
-            // leave null for not hidden attrs to save some space
-            cm.setIsHiddenInCategoryTile(true);
-        }
-
-        // retrieve path pattern as secondary display name
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> pathPtnParams = (Map<String, Object>) params.get(InterfaceName.PathPatternId.name());
-            if (MapUtils.isNotEmpty(pathPtnParams)) {
-                Object pathPtn = pathPtnParams.get(InterfaceName.PathPattern.name());
-                cm.setSecondarySubCategoryDisplayName(pathPtn == null ? null : pathPtn.toString());
-            }
-        } catch (Exception e) {
-            String tenantId = group.getTenant() == null ? null : group.getTenant().getId();
-            log.warn(String.format("Failed to retrieve path pattern for attribute %s in group %s for tenant %s",
-                    cm.getAttrName(), group.getGroupId(), tenantId), e);
+        switch (cm.getEntity()) {
+            case WebVisitProfile:
+                cm.setCategory(Category.WEB_VISIT_PROFILE);
+                WebVisitUtils.setColumnMetadataUIProperties(cm, group, timeRange, params);
+                break;
+            case Opportunity:
+                cm.setCategory(Category.OPPORTUNITY_PROFILE);
+                break;
+            default:
+                log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
         }
     }
 
@@ -259,5 +222,4 @@ public class ActivityMetricDecorator implements Decorator {
             }
         }
     }
-
 }

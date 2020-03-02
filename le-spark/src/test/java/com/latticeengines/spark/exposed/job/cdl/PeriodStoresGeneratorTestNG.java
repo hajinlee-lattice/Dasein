@@ -66,7 +66,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         verify(result, Arrays.asList(this::verifyWeekPeriodStore, this::verifyMonthPeriodStore));
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional")
     public void testWithReducer() {
         List<String> inputs = Collections.singletonList(setupWithReducer());
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();

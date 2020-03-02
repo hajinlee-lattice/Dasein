@@ -90,7 +90,6 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
                                translator: TimeFilterTranslator,
                                periodStoresMetadata: ActivityStoreSparkIOMetadata.Details,
                                dimensionMetadataMap: util.Map[String, DimensionMetadata]): DataFrame = {
-
     // construct period map: period -> idx
     var offsetMap: Map[String, Int] = Map()
     for (idx <- 0 until periodStoresMetadata.getLabels.size) {

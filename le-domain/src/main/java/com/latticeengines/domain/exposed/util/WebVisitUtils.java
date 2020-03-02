@@ -5,8 +5,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -34,6 +39,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
  * TODO remove this when we remove adhoc web visit API
  */
 public final class WebVisitUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(WebVisitUtils.class);
 
     public static final String TOTAL_VISIT_GROUPNAME = "Total Web Visits";
     public static final String SOURCE_MEDIUM_GROUPNAME = "Web Visits By Source Medium";
@@ -228,5 +235,26 @@ public final class WebVisitUtils {
         timeRange.setPeriods(Collections.singleton(PeriodStrategy.Template.Week.name()));
         timeRange.setParamSet(paramSet);
         return timeRange;
+    }
+
+    public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group, @NotNull String timeRange, @NotNull Map<String, Object> params) {
+        // any tag for filtering all attrs
+        cm.setFilterTags(Arrays.asList(timeRange, FilterOptions.Option.ANY_VALUE));
+        if (shouldHideInCategoryTile(cm, group, timeRange)) {
+            // leave null for not hidden attrs to save some space
+            cm.setIsHiddenInCategoryTile(true);
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> pathPtnParams = (Map<String, Object>) params.get(InterfaceName.PathPatternId.name());
+            if (MapUtils.isNotEmpty(pathPtnParams)) {
+                Object pathPtn = pathPtnParams.get(InterfaceName.PathPattern.name());
+                cm.setSecondarySubCategoryDisplayName(pathPtn == null ? null : pathPtn.toString());
+            }
+        } catch (Exception e) {
+            String tenantId = group.getTenant() == null ? null : group.getTenant().getId();
+            log.warn(String.format("Failed to retrieve path pattern for attribute %s in group %s for tenant %s",
+                    cm.getAttrName(), group.getGroupId(), tenantId), e);
+        }
     }
 }
