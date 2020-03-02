@@ -774,7 +774,16 @@ public final class StatsCubeUtils {
                 return -1;
             }
 
-            return d2.compareTo(d1);
+            if (d2.compareTo(d1) != 0) {
+                return d2.compareTo(d1);
+            }
+
+            // desc by value list size because range bucket (e.g., [3, 5])
+            // should be ranked higher than larger than or equal bucket (e.g., >= 3)
+            // when they have the same first val
+            int valSize1 = CollectionUtils.size(b1.getValues());
+            int valSize2 = CollectionUtils.size(b2.getValues());
+            return Integer.compare(valSize2, valSize1);
         };
         return Comparator.nullsLast(cmp.thenComparing(defaultTopBktComparator()));
     }
