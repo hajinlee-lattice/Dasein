@@ -151,6 +151,7 @@ public class LoginResource {
     }
 
     @PostMapping("/idaas-login")
+    @ResponseBody
     @ApiOperation(value = "Login using iDaaS")
     public LoginDocument login(@RequestBody Credentials creds, HttpServletResponse response) {
         try {
