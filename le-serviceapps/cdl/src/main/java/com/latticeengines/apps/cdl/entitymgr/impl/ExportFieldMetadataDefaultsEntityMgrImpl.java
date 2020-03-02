@@ -12,6 +12,7 @@ import com.latticeengines.apps.cdl.dao.ExportFieldMetadataDefaultsDao;
 import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataDefaultsEntityMgr;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("exportFieldMetadataDefaultsEntityMgr")
 public class ExportFieldMetadataDefaultsEntityMgrImpl implements ExportFieldMetadataDefaultsEntityMgr {
@@ -28,8 +29,7 @@ public class ExportFieldMetadataDefaultsEntityMgrImpl implements ExportFieldMeta
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
-    public
-    List<ExportFieldMetadataDefaults> getAllDefaultExportFieldMetadata(CDLExternalSystemName systemName) {
+    public List<ExportFieldMetadataDefaults> getAllDefaultExportFieldMetadata(CDLExternalSystemName systemName) {
         return exportFieldMetadataDefaultsDao.getAllDefaultExportFields(systemName);
     }
 
@@ -41,10 +41,16 @@ public class ExportFieldMetadataDefaultsEntityMgrImpl implements ExportFieldMeta
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
+    public List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldMetadataForEntity(
+            CDLExternalSystemName systemName, BusinessEntity entity) {
+        return exportFieldMetadataDefaultsDao.getExportEnabledDefaultFieldsForEntity(systemName, entity);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, readOnly = true)
     public List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFieldMetadata(CDLExternalSystemName systemName) {
         return exportFieldMetadataDefaultsDao.getHistoryEnabledDefaultFields(systemName);
     }
-
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)

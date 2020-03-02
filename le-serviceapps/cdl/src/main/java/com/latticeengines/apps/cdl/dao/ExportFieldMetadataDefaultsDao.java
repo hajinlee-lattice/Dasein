@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface ExportFieldMetadataDefaultsDao extends BaseDao<ExportFieldMetadataDefaults> {
 
@@ -13,6 +14,9 @@ public interface ExportFieldMetadataDefaultsDao extends BaseDao<ExportFieldMetad
     List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFields(CDLExternalSystemName systemName);
 
     List<ExportFieldMetadataDefaults> getExportEnabledDefaultFields(CDLExternalSystemName systemName);
+
+    List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldsForEntity(CDLExternalSystemName systemName,
+            BusinessEntity entity);
 
     void deleteBySystemName(CDLExternalSystemName systemName);
 

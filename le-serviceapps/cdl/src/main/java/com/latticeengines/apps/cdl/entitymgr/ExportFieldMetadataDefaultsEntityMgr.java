@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface ExportFieldMetadataDefaultsEntityMgr {
 
@@ -12,6 +13,9 @@ public interface ExportFieldMetadataDefaultsEntityMgr {
     List<ExportFieldMetadataDefaults> getAllDefaultExportFieldMetadata(CDLExternalSystemName systemName);
 
     List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldMetadata(CDLExternalSystemName systemName);
+
+    List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldMetadataForEntity(CDLExternalSystemName systemName,
+            BusinessEntity entity);
 
     List<ExportFieldMetadataDefaults> getHistoryEnabledDefaultFieldMetadata(CDLExternalSystemName systemName);
 
