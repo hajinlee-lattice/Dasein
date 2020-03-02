@@ -53,6 +53,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     private static final Logger log = LoggerFactory.getLogger(MetadataProxy.class);
 
     private static final Integer ATTRIBUTE_BATCH_SIZE = 5000;
+    private static final String TEMP_TABLE_POLICY = RetentionPolicyUtil.retentionPolicyToStr(//
+            RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY));
+
+    private boolean enableTempTables;
 
     @PostConstruct
     public void init() {
@@ -109,7 +113,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
 
     public void updateImportTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/importtables/{tableName}", customerSpace, tableName);
-        put("updateTable", url, table);
+        put("updateImportTable", url, table);
     }
 
     public void createTempTable(String customerSpace, String tableName, Table table, RetentionPolicy policy) {
@@ -126,6 +130,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
                         table.getAttributes().size());
                 attributes = table.getAttributes();
                 table.setAttributes(Collections.emptyList());
+            }
+            if (enableTempTables) {
+                table.setRetentionPolicy(TEMP_TABLE_POLICY);
             }
             post("createTable", url, table, null);
             addTableAttributes(customerSpace, tableName, attributes);
@@ -183,6 +190,9 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
                         table.getAttributes().size());
                 attributes = table.getAttributes();
                 table.setAttributes(Collections.emptyList());
+            }
+            if (enableTempTables) {
+                table.setRetentionPolicy(TEMP_TABLE_POLICY);
             }
             put("updateTable", url, table);
             addTableAttributes(customerSpace, tableName, attributes);
@@ -437,5 +447,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public void updateTableRetentionPolicies(String customerSpace, RetentionPolicyUpdateDetail retentionPolicyUpdateDetail) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/policy/updatepolicies", customerSpace);
         put("updateTableRetentionPolicies", url, retentionPolicyUpdateDetail);
+    }
+
+    public void setEnableTempTables(boolean enableTempTables) {
+        this.enableTempTables = enableTempTables;
+        log.info("Switch enableTempTables to {}", this.enableTempTables);
     }
 }

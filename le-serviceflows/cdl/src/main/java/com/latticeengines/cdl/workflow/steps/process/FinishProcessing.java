@@ -76,6 +76,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
         deleteOrphanTables();
+        registerCollectionTables();
 
         log.info("Switch data collection to version " + inactive);
         dataCollectionProxy.switchVersion(customerSpace.toString(), inactive);
@@ -170,6 +171,11 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                 }
             });
         }
+    }
+
+    private void registerCollectionTables() {
+        List<String> inactiveTables = dataCollectionProxy.getTableNames(customerSpace.toString(), inactive);
+        inactiveTables.forEach(this::registerTable);
     }
 
     private void updateBucketMetadata() {

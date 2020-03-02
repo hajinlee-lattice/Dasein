@@ -108,6 +108,7 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         cloneInactiveServingStores();
         registerReport();
+        registerCollectionTables();
     }
 
     private void cloneInactiveServingStores() {
@@ -122,6 +123,11 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                 }
             }
         });
+    }
+
+    private void registerCollectionTables() {
+        List<String> inactiveTables = dataCollectionProxy.getTableNames(customerSpace.toString(), inactive);
+        inactiveTables.forEach(this::registerTable);
     }
 
     private void registerReport() {

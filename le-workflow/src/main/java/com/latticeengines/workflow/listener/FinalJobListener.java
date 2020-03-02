@@ -15,6 +15,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
@@ -47,6 +48,12 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
+        Long executionId = jobExecution.getId();
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(executionId);
+        WorkflowConfiguration workflowConfig = workflowJob.getWorkflowConfiguration();
+        if (Boolean.TRUE.equals(workflowConfig.getEnableTempTable())) {
+            metadataProxy.setEnableTempTables(true);
+        }
     }
 
     @Override

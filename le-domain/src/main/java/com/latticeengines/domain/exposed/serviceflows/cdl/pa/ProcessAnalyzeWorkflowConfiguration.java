@@ -384,6 +384,9 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
+
+            configuration.setEnableTempTable(true);
+
             configuration.add(processStepConfiguration);
             configuration.add(convertBatchStoreToDataTableWorkflowBuilder.build());
             configuration.add(legacyDeleteWorkFlowBuilder.build());
