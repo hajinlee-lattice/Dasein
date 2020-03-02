@@ -251,6 +251,10 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
           finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumnRenamed("ACCOUNT_ID", joinKey).join(aggregatedContacts, joinKey :: Nil, "left").withColumnRenamed(joinKey, "ACCOUNT_ID")
           val contactCount = finalrecommendationDf.agg(sum("CONTACT_NUM")).first.get(0)
           contactNums(0) = if (contactCount != null) contactCount.toString.toLong else 0L
+        } else {
+          // add empty CONTACTS column
+          finalrecommendationDf = recommendationDf.drop("CONTACTS").withColumn("CONTACTS", lit(""))
+          contactNums(0) = 0L
         }
 
         val addCsvDataFrame: DataFrame = generateUserConfiguredDataFrame(finalrecommendationDf, addAccountTable, deltaCampaignLaunchSparkContext, joinKey)

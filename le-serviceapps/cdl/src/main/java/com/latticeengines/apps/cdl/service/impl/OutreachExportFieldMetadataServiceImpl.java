@@ -3,21 +3,16 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -25,9 +20,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataServiceBase {
 
     private static final Logger log = LoggerFactory.getLogger(OutreachExportFieldMetadataServiceImpl.class);
-
-    @Inject
-    private ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
 
     protected OutreachExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.Outreach);
@@ -38,7 +30,7 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling OutreachExportFieldMetadataService");
+        log.info("Calling OutreachExportFieldMetadataService for channle " + channel.getId());
 
         List<String> mappedFieldNames = getMappedFieldNames(channel.getLookupIdMap().getOrgId(),
                 channel.getLookupIdMap().getTenant().getPid());
@@ -59,7 +51,8 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
                     contactAttributesMap);
         }
 
-        // Retrieves enriched fields for prospect owner and account Id and update
+        // Retrieves enriched fields for prospect owner and account Id and
+        // update
         // displayName
         String prospectOwner = channel.getLookupIdMap().getProspectOwner();
         log.info("Outreach account owner " + prospectOwner);
@@ -90,8 +83,4 @@ public class OutreachExportFieldMetadataServiceImpl extends ExportFieldMetadataS
         return exportColumnMetadataList;
     }
 
-    private List<String> getMappedFieldNames(String orgId, Long tenantPid) {
-        List<ExportFieldMetadataMapping> mapping = exportFieldMetadataMappingEntityMgr.findByOrgId(orgId, tenantPid);
-        return mapping.stream().map(ExportFieldMetadataMapping::getSourceField).collect(Collectors.toList());
-    }
 }

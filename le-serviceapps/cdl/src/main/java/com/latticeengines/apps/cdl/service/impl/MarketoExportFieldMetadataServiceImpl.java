@@ -3,18 +3,13 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -23,16 +18,13 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     private static final Logger log = LoggerFactory.getLogger(MarketoExportFieldMetadataServiceImpl.class);
 
-    @Inject
-    private ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
-
     protected MarketoExportFieldMetadataServiceImpl() {
         super(CDLExternalSystemName.Marketo);
     }
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling MarketoExportFieldMetadataService");
+        log.info("Calling MarketoExportFieldMetadataService for channle " + channel.getId());
 
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
                 Collections.singletonList(BusinessEntity.Account));
@@ -57,8 +49,4 @@ public class MarketoExportFieldMetadataServiceImpl extends ExportFieldMetadataSe
 
     }
 
-    private List<String> getMappedFieldNames(String orgId, Long tenantPid) {
-        List<ExportFieldMetadataMapping> mapping = exportFieldMetadataMappingEntityMgr.findByOrgId(orgId, tenantPid);
-        return mapping.stream().map(ExportFieldMetadataMapping::getSourceField).collect(Collectors.toList());
-    }
 }

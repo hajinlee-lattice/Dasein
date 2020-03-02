@@ -10,6 +10,7 @@ import com.latticeengines.apps.cdl.dao.ExportFieldMetadataDefaultsDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component("exportFieldMetadataDefaultsDao")
 public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldMetadataDefaults>
@@ -31,6 +32,12 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
     }
 
     @Override
+    public List<ExportFieldMetadataDefaults> getExportEnabledDefaultFieldsForEntity(CDLExternalSystemName systemName,
+            BusinessEntity entity) {
+        return this.findAllByFields("externalSystemName", systemName, "exportEnabled", true, "entity", entity);
+    }
+
+    @Override
     protected Class<ExportFieldMetadataDefaults> getEntityClass() {
         return ExportFieldMetadataDefaults.class;
     }
@@ -39,8 +46,7 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
     public void deleteBySystemName(CDLExternalSystemName systemName) {
         Session session = getSessionFactory().getCurrentSession();
         Class<ExportFieldMetadataDefaults> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "delete from  %s field where field.externalSystemName=:systemName",
+        String queryStr = String.format("delete from  %s field where field.externalSystemName=:systemName",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("systemName", systemName);
@@ -59,6 +65,4 @@ public class ExportFieldMetadataDefaultsDaoImpl extends BaseDaoImpl<ExportFieldM
         query.setParameter("attrNames", attrNames);
         query.executeUpdate();
     }
-
 }
-

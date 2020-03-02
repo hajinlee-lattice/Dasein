@@ -26,7 +26,7 @@ public class S3ExportFieldMetadataServiceImpl extends ExportFieldMetadataService
 
     @Override
     public List<ColumnMetadata> getExportEnabledFields(String customerSpace, PlayLaunchChannel channel) {
-        log.info("Calling S3ExportFieldMetadataService");
+        log.info("Calling S3ExportFieldMetadataService for channle " + channel.getId());
 
         Map<String, ColumnMetadata> accountAttributesMap = getServingMetadataMap(customerSpace,
                 Arrays.asList(BusinessEntity.Account));

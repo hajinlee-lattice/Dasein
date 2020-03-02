@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.ExportFieldMetadataMappingEntityMgr;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataDefaultsService;
 import com.latticeengines.apps.cdl.service.ExportFieldMetadataService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
@@ -21,6 +22,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ExportFieldMetadataDefaults;
+import com.latticeengines.domain.exposed.pls.ExportFieldMetadataMapping;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
@@ -32,6 +34,9 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
 
     @Inject
     private ExportFieldMetadataDefaultsService defaultExportFieldMetadataService;
+
+    @Inject
+    private ExportFieldMetadataMappingEntityMgr exportFieldMetadataMappingEntityMgr;
 
     @Inject
     private ServingStoreService servingStoreService;
@@ -62,6 +67,30 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
                 .collect(Collectors.toMap(ExportFieldMetadataDefaults::getAttrName, Function.identity()));
     }
 
+    protected Map<String, ExportFieldMetadataDefaults> getDefaultExportFieldsMapForEntity(
+            CDLExternalSystemName systemName, BusinessEntity entity) {
+        return defaultExportFieldMetadataService.getExportEnabledAttributesForEntity(systemName, entity).stream()
+                .collect(Collectors.toMap(ExportFieldMetadataDefaults::getAttrName, Function.identity()));
+    }
+
+    /*
+     * This method uses the defaultFieldsMetadataMap (defined by PM) to
+     * overwrite the DisplayNames for the attributes chose by user at the field
+     * mapping page for the system/connector. If the attribute is not in the
+     * serving store, then it is a campaign-derived attribute
+     * 
+     * @param fieldNames Lattice internal name for attributes that are chosen at
+     * field mapping page for the system
+     * 
+     * @param accountAttributesMap account attributes from serving store
+     * 
+     * @param contactAttributesMap contact attributes from serving store
+     * 
+     * One important thing to note that since fieldNames only has the
+     * information about internal name without the entity, currently PM has
+     * agreed that for the csv sheet, there is no situation where the Account
+     * and Contact with same internal name are both in it.
+     */
     protected List<ColumnMetadata> enrichExportFieldMappings(CDLExternalSystemName systemName, List<String> fieldNames,
             Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
 
@@ -105,6 +134,49 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         return enrichDefaultFieldsMetadata(systemName, accountAttributesMap, contactAttributesMap);
     }
 
+    /*
+     * Enrich the default field metadata based on the entity
+     */
+    protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
+            Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap,
+            BusinessEntity entity) {
+
+        List<ColumnMetadata> exportColumnMetadataList = new ArrayList<>();
+        Map<String, ExportFieldMetadataDefaults> defaultFieldsMetadataMap = getDefaultExportFieldsMapForEntity(
+                systemName, entity);
+
+        defaultFieldsMetadataMap.values().forEach(defaultField -> {
+            String attrName = defaultField.getAttrName();
+            ColumnMetadata cm;
+            if (BusinessEntity.Account.equals(entity)) {
+                if (defaultField.getStandardField() && accountAttributesMap.containsKey(attrName)) {
+                    cm = accountAttributesMap.get(attrName);
+                    cm.setDisplayName(defaultField.getDisplayName());
+                    accountAttributesMap.remove(attrName);
+                } else {
+                    cm = constructCampaignDerivedColumnMetadata(defaultField);
+                }
+            } else if (BusinessEntity.Contact.equals(entity)) {
+                if (defaultField.getStandardField() && contactAttributesMap.containsKey(attrName)) {
+                    cm = contactAttributesMap.get(attrName);
+                    cm.setDisplayName(defaultField.getDisplayName());
+                    contactAttributesMap.remove(attrName);
+                } else {
+                    cm = constructCampaignDerivedColumnMetadata(defaultField);
+                }
+            } else {
+                throw new RuntimeException("entity can either be Account or Contact");
+            }
+
+            exportColumnMetadataList.add(cm);
+        });
+
+        return exportColumnMetadataList;
+    }
+
+    /*
+     * Enrich the default field metadata for both account and contact entity
+     */
     protected List<ColumnMetadata> enrichDefaultFieldsMetadata(CDLExternalSystemName systemName,
             Map<String, ColumnMetadata> accountAttributesMap, Map<String, ColumnMetadata> contactAttributesMap) {
 
@@ -164,6 +236,11 @@ public abstract class ExportFieldMetadataServiceBase implements ExportFieldMetad
         cm.setIsCampaignDerivedField(true);
         cm.setEntity(defaultExportField.getEntity());
         return cm;
+    }
+
+    protected List<String> getMappedFieldNames(String orgId, Long tenantPid) {
+        List<ExportFieldMetadataMapping> mapping = exportFieldMetadataMappingEntityMgr.findByOrgId(orgId, tenantPid);
+        return mapping.stream().map(ExportFieldMetadataMapping::getSourceField).collect(Collectors.toList());
     }
 
 }

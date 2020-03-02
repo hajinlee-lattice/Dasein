@@ -99,6 +99,16 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             inputUnits.put("Input1", null);
             inputUnits.put("Input4", null);
             setInputUnits(inputUnits);
+        } else if (createRecommendationDataFrame && createAddCsvDataFrame && !createDeleteCsvDataFrame) {
+            Map<String, DataUnit> inputUnits = new HashMap<>();
+            getInputUnits().forEach((k, v) -> {
+                inputUnits.put(k, v);
+            });
+            inputUnits.put("Input1", null); // addContact is null, as this
+                                            // mimics Account-based S3 Launch
+            inputUnits.put("Input2", null);
+            inputUnits.put("Input3", null);
+            setInputUnits(inputUnits);
         }
     }
 
@@ -192,6 +202,16 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             } catch (IOException e) {
                 log.error("Failed to read json data.", e);
             }
+        } else if (createRecommendationDataFrame && createAddCsvDataFrame && !createDeleteCsvDataFrame) {
+            HdfsDataUnit recDf = result.getTargets().get(0);
+            HdfsDataUnit addCsvDf = result.getTargets().get(1);
+            Assert.assertEquals(recDf.getCount(), addCsvDf.getCount());
+
+            Iterator<GenericRecord> addCsvDfIter = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                    PathUtils.toAvroGlob(addCsvDf.getPath()));
+            GenericRecord record = addCsvDfIter.next();
+            Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
+            Assert.assertNull(contactObject);
         }
 
     }
@@ -399,7 +419,8 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     public Object[][] dataFrameProvider() {
         return new Object[][] { //
                 { true, true, true }, // generate all three dataFrames
-                { false, false, true } // only generate delete csv dataFrame
+                { false, false, true }, // only generate delete csv dataFrame
+                { true, true, false } // Account only case for two data Frames
         };
     }
 

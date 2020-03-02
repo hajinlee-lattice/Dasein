@@ -262,7 +262,7 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        //ProspectOwner + AccountID + 3 mapped fields
+        // ProspectOwner + AccountID + 3 mapped fields
         assertEquals(columnMetadata.size(), 5);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
@@ -374,12 +374,12 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         lookupIdMap = lookupIdMappingService.registerExternalSystem(lookupIdMap);
     }
 
-    private LookupIdMap registerOutreachLookupIdMap(){
+    private LookupIdMap registerOutreachLookupIdMap() {
         LookupIdMap lookupIdMap = new LookupIdMap();
         lookupIdMap.setTenant(mainTestTenant);
         lookupIdMap.setExternalSystemType(CDLExternalSystemType.MAP);
         lookupIdMap.setExternalSystemName(CDLExternalSystemName.Outreach);
-        lookupIdMap.setOrgId(org1+"outreach");
+        lookupIdMap.setOrgId(org1 + "outreach");
         lookupIdMap.setOrgName("org1nameOutreach");
 
         ExportFieldMetadataMapping fieldMapping_1 = new ExportFieldMetadataMapping();
