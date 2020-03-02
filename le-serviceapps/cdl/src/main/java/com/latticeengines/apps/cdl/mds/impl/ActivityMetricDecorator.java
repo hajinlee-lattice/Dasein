@@ -82,6 +82,15 @@ public class ActivityMetricDecorator implements Decorator {
     }
 
     private ColumnMetadata filter(ColumnMetadata cm) {
+        switch (cm.getEntity()) {
+            case WebVisitProfile:
+                cm.setCategory(Category.WEB_VISIT_PROFILE);
+                break;
+            case Opportunity:
+                cm.setCategory(Category.OPPORTUNITY_PROFILE);
+                break;
+            default:
+        }
         if (systemAttrs.contains(cm.getAttrName())) {
             return cm;
         }
@@ -129,11 +138,9 @@ public class ActivityMetricDecorator implements Decorator {
 
         switch (cm.getEntity()) {
             case WebVisitProfile:
-                cm.setCategory(Category.WEB_VISIT_PROFILE);
                 WebVisitUtils.setColumnMetadataUIProperties(cm, group, timeRange, params);
                 break;
             case Opportunity:
-                cm.setCategory(Category.OPPORTUNITY_PROFILE);
                 break;
             default:
                 log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
