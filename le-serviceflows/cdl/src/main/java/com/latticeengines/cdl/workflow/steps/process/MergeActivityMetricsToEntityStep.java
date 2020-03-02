@@ -111,7 +111,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         }
         groups.forEach(group -> {
             activityMetricsServingEntities.add(CategoryUtils.getEntity(group.getCategory()).get(0).name());
-            String mergedTableLabel = getMergedLabel(group);
+            String mergedTableLabel = getMergedLabel(group); // entity_servingStore e.g. Account_OpportunityProfile
             mergedTablesMap.putIfAbsent(mergedTableLabel, new ArrayList<>());
             mergedTablesMap.get(mergedTableLabel).add(group);
         });
@@ -124,9 +124,9 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             for (Map.Entry<String, String> entry : mergedMetricsGroupTableNames.entrySet()) {
                 String mergedTableLabel = entry.getKey();
                 String tableName = entry.getValue();
-                TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
-                signatureTableNames.putIfAbsent(servingEntity, new HashMap<>());
-                signatureTableNames.get(servingEntity).put(getEntityInLabel(mergedTableLabel).name(), tableName);
+                TableRoleInCollection servingStore = getServingStoreInLable(mergedTableLabel);
+                signatureTableNames.putIfAbsent(servingStore, new HashMap<>());
+                signatureTableNames.get(servingStore).put(getEntityInLabel(mergedTableLabel).name(), tableName);
             }
             log.info(String.format("Found merge activity metrics tables: %s in context, going thru short-cut mode.", mergedMetricsGroupTableNames.values()));
             signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
@@ -158,15 +158,16 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     private void appendActiveActivityMetrics(List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata, List<ActivityMetricsGroup> groups) {
         Map<String, ActivityStoreSparkIOMetadata.Details> metadataMap = inputMetadata.getMetadata();
         groups.forEach(group -> {
-            TableRoleInCollection servingEntity = getServingEntity(group.getCategory());
-            if (!tableCache.containsKey(servingEntity)) {
-                tableCache.put(servingEntity, dataCollectionProxy.getTable(customerSpace.toString(), servingEntity, active));
+            TableRoleInCollection servingStore = getServingStore(group.getCategory());
+            if (!tableCache.containsKey(servingStore)) {
+                tableCache.put(servingStore, dataCollectionProxy.getTable(customerSpace.toString(), servingStore, active));
             }
-            Table activeMetrics = tableCache.get(servingEntity);
-            if (activeMetrics != null && metadataMap.get(servingEntity.name()) == null) {
+            Table activeMetrics = tableCache.get(servingStore);
+            if (activeMetrics != null && metadataMap.get(servingStore.name()) == null) {
+                log.info("Found activity metrics {} from previous version {}.", servingStore, active);
                 ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
                 details.setStartIdx(inputs.size());
-                metadataMap.put(servingEntity.name(), details);
+                metadataMap.put(servingStore.name(), details);
                 inputs.add(activeMetrics.toHdfsDataUnit(null));
             }
         });
@@ -183,13 +184,13 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         }
     }
 
-    private String getMergedLabel(ActivityMetricsGroup group) {
+    private String getMergedLabel(ActivityMetricsGroup group) { // entity_servingStore e.g. Account_OpportunityProfile
         BusinessEntity entity = group.getEntity();
-        TableRoleInCollection servingEntity = getServingEntity(group.getCategory());
-        return String.format("%s_%s", entity, servingEntity);
+        TableRoleInCollection servingStore = getServingStore(group.getCategory());
+        return String.format("%s_%s", entity, servingStore);
     }
 
-    private TableRoleInCollection getServingEntity(Category category) {
+    private TableRoleInCollection getServingStore(Category category) {
         return CategoryUtils.getEntity(category).get(0).getServingStore();
     }
 
@@ -207,19 +208,19 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         Map<String, Table> mergedMetricsGroupTables = new HashMap<>();
         outputMetadata.forEach((mergedTableLabel, details) -> {
             HdfsDataUnit output = result.getTargets().get(details.getStartIdx());
-            String tableName = customerSpace.getTenantId() + "_" + NamingUtils.timestamp(getServingEntityInLabel(mergedTableLabel).name());
+            String tableName = customerSpace.getTenantId() + "_" + NamingUtils.timestamp(getServingStoreInLable(mergedTableLabel).name());
             Table mergedTable = toTable(tableName, output);
             if (output.getCount() <= 0) {
                 // create dummy record with meaningless accountId, append to mergedDU
                 log.warn("Empty metrics found: {}. Append dummy record.", tableName);
                 appendDummyRecord(mergedTable);
             } else {
-                enrichActivityAttributes(mergedTable, getEntityInLabel(mergedTableLabel), getServingEntityInLabel(mergedTableLabel), new HashSet<>(details.getLabels())); // labels are attributes to be deprecated
+                enrichActivityAttributes(mergedTable, getEntityInLabel(mergedTableLabel), getServingStoreInLable(mergedTableLabel), new HashSet<>(details.getLabels())); // labels are attributes to be deprecated
             }
             metadataProxy.createTable(customerSpace.toString(), tableName, mergedTable);
-            TableRoleInCollection servingEntity = getServingEntityInLabel(mergedTableLabel);
-            signatureTableNames.putIfAbsent(servingEntity, new HashMap<>());
-            signatureTableNames.get(servingEntity).put(getEntityInLabel(mergedTableLabel).name(), tableName);
+            TableRoleInCollection servingStore = getServingStoreInLable(mergedTableLabel);
+            signatureTableNames.putIfAbsent(servingStore, new HashMap<>());
+            signatureTableNames.get(servingStore).put(getEntityInLabel(mergedTableLabel).name(), tableName);
             mergedMetricsGroupTables.put(mergedTableLabel, mergedTable);
         });
         // signature: entity (Account/Contact)
@@ -228,13 +229,13 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
     }
 
-    private void enrichActivityAttributes(Table mergedTable, BusinessEntity entity, TableRoleInCollection servingEntity, Set<String> deprecatedAttrNames) {
+    private void enrichActivityAttributes(Table mergedTable, BusinessEntity entity, TableRoleInCollection servingStore, Set<String> deprecatedAttrNames) {
         String entityIdAttrName = getEntityIdColName(entity);
         Map<String, Attribute> attributeMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(deprecatedAttrNames)) {
-            Table activeMetricsTable = tableCache.get(servingEntity);
+            Table activeMetricsTable = tableCache.get(servingStore);
             if (activeMetricsTable == null) {
-                throw new RuntimeException(String.format("Failed to retrieve active metrics from type with serving entity %s of version %s", servingEntity, active));
+                throw new RuntimeException(String.format("Failed to retrieve active metrics from type with serving store %s of version %s", servingStore, active));
             }
             log.warn("Mark attributes as deprecated as they are only found in previous version of activity metrics {}: {}", mergedTable.getName(), deprecatedAttrNames);
             activeMetricsTable.getAttributes().stream()
@@ -405,7 +406,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         return Collections.singletonList(record);
     }
 
-    private TableRoleInCollection getServingEntityInLabel(String mergedTableLabels) {
+    private TableRoleInCollection getServingStoreInLable(String mergedTableLabels) {
         String[] labels = mergedTableLabels.split("_");
         return TableRoleInCollection.getByName(labels[1]);
     }
