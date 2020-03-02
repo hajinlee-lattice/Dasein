@@ -31,6 +31,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "source")
 @RestController
 @RequestMapping("/source")
+@PreAuthorize("hasRole('View_DCP_Projects')")
 public class SourceResource {
 
     private static final Logger log = LoggerFactory.getLogger(SourceResource.class);
@@ -59,7 +60,6 @@ public class SourceResource {
     @GetMapping(value = "/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Get sources by sourceId")
-    @PreAuthorize("hasRole('View_DCP_Projects')")
     public Source getSource(@PathVariable String sourceId) {
         return sourceService.getSource(sourceId);
     }
@@ -67,7 +67,6 @@ public class SourceResource {
     @GetMapping(value = "/projectId/{projectId}")
     @ResponseBody
     @ApiOperation("Get sources by projectId")
-    @PreAuthorize("hasRole('View_DCP_Projects')")
     public List<Source> getSourceUnderProduct(@PathVariable String productId) {
         return sourceService.getSourceList(productId);
     }
