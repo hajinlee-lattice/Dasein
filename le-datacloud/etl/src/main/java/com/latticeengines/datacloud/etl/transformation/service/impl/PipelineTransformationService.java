@@ -344,9 +344,6 @@ public class PipelineTransformationService extends AbstractTransformationService
                     } else {
                         sourceVersion = inputBaseVersions.get(i);
                     }
-                    if (transConf.isAMJob()) {
-                        sourceVersion = copyMissingBaseSourceFromS3(source, sourceVersion);
-                    }
                     sourceVersions.put(source, sourceVersion);
                     baseVersions.add(sourceVersion);
                 }
@@ -436,6 +433,16 @@ public class PipelineTransformationService extends AbstractTransformationService
         Span parent = tracer.activeSpan();
         for (int i = 0; i < steps.length; i++) {
             String slackMessage = String.format("Started step %d at %s", i, new Date().toString());
+            if (transConf.isAMJob()) {
+                Source[] baseSourcesList = steps[i].getBaseSources();
+                List<String> baseVersionsList = steps[i].getBaseVersions();
+                if (baseSourcesList.length != 0) {
+                    int versionId = 0;
+                    for (Source baseSource : baseSourcesList) {
+                        copyMissingBaseSourceFromS3(baseSource, baseVersionsList.get(versionId++));
+                    }
+                }
+            }
             sendSlack(transConf.getName() + " [" + progress.getYarnAppId() + "]", slackMessage,
                     SlackSettings.Color.NORMAL, transConf);
             TransformStep step = steps[i];
