@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -48,6 +49,7 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
@@ -445,6 +447,7 @@ public class CDLResource {
             if (CollectionUtils.isEmpty(fieldPreviews)) {
                 return fieldPreviews;
             }
+            updateUniqueAndMatchIdField(fieldPreviews, templateDisplay.getS3ImportSystem(), entityType);
             Map<String, String> standardNameMapping =
                     standardTable.getAttributes()
                             .stream()
@@ -465,6 +468,30 @@ public class CDLResource {
         } catch (RuntimeException e) {
             log.error("Get template preview Failed: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
+        }
+    }
+
+    private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, S3ImportSystem s3ImportSystem, EntityType entityType) {
+        List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(
+                preview-> preview.getFieldCategory() == FieldCategory.LatticeField).collect(Collectors.toList());
+        Set<String> latticeFieldNameFromFileList = latticeFieldList.stream().map(TemplateFieldPreview::getNameFromFile)
+                .collect(Collectors.toSet());
+        for (TemplateFieldPreview fieldPreview : fieldPreviews) {
+            switch (entityType) {
+                case Accounts:
+                    if (s3ImportSystem.getAccountSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
+                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                    }
+                    break;
+                case Contacts:
+                    if (s3ImportSystem.getContactSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
+                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                    }
+                    break;
+            }
+            if (latticeFieldNameFromFileList.contains(fieldPreview.getNameFromFile())) {
+                fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+            }
         }
     }
 

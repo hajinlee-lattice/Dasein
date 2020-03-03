@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -104,6 +105,19 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         restTemplate.put(getRestAPIHostPort() + url, requestEntity);
         assertTrue(getS3ImportTemplateEntries());
     }
+
+    @Test(groups = "deployment", dependsOnMethods = "testCreateS3Template")
+    public void testPreviewTemplateName() throws Exception {
+        assertTrue(getS3ImportTemplateEntries());
+        String url = BASE_URL_PREFIX + "/s3/template/preview";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
+        HttpEntity<String> requestEntity = new HttpEntity<String>(JsonUtils.serialize(templateDisplay), headers);
+        List<?> list = restTemplate.postForObject(getRestAPIHostPort() + url, requestEntity, List.class);
+        List<TemplateFieldPreview> saved = JsonUtils.convertList(list, TemplateFieldPreview.class);
+        assertTrue(getS3ImportTemplateEntries());
+    }
+
 
     private SourceFile uploadSourceFile(String csvFileName, String entity) {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
