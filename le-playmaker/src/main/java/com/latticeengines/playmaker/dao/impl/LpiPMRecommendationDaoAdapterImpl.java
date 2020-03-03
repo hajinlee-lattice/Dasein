@@ -77,16 +77,21 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             long count = 0L;
             List<String> launchIdsToQuery = new ArrayList<>();
             long offsetToQuery = offset;
-            boolean skipCompute = false;
+            boolean skipOffsetCheck = false;
+            long totalCountInQuery = 0L;
             for (LaunchSummary launchSummary : summaries) {
-                if (skipCompute) {
+                long recommendationsLaunched = launchSummary.getStats().getRecommendationsLaunched();
+                if (skipOffsetCheck) {
+                    if (totalCountInQuery >= maximum + offsetToQuery) {
+                        break;
+                    }
                     launchIdsToQuery.add(launchSummary.getLaunchId());
+                    totalCountInQuery += recommendationsLaunched;
                 } else {
-                    PlayLaunchDashboard.Stats stats = launchSummary.getStats();
-                    long recommendationsLaunched = stats.getRecommendationsLaunched();
                     if (count + recommendationsLaunched - 1 >= offset) {
-                        skipCompute = true;
+                        skipOffsetCheck = true;
                         launchIdsToQuery.add(launchSummary.getLaunchId());
+                        totalCountInQuery += recommendationsLaunched;
                         continue;
                     }
                     count += recommendationsLaunched;
@@ -100,6 +105,23 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             }
         } else {
             return new ArrayList<>();
+        }
+    }
+
+    public List<Map<String, Object>> getRecommendations2(long start, int offset, int maximum, int syncDestination,
+                                                        List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
+        boolean latestLaunchFlag = false;
+        if (appId != null) {
+            if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
+                latestLaunchFlag = true;
+            }
+        }
+        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
+        if (CollectionUtils.isNotEmpty(launchIds)) {
+            return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, start, offset, maximum);
+        }
+        else {
+            return new ArrayList<Map<String, Object>>();
         }
     }
 
