@@ -35,6 +35,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     DataFeedTask getDataFeedTask(String uniqueId);
 
+    DataFeedTask getDataFeedTaskByTaskName(String taskName, DataFeed dataFeed, Boolean withTemplate);
+
     DataFeedTask getDataFeedTask(DataFeed dataFeed, String sourceId);
 
     List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, DataFeed datafeed);

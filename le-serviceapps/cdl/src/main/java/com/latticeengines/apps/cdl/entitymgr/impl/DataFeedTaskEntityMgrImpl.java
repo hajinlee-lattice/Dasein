@@ -286,8 +286,24 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public DataFeedTask getDataFeedTaskByTaskName(String taskName, DataFeed dataFeed, Boolean withTemplate) {
+        DataFeedTask dataFeedTask = datafeedTaskRepository.findByDataFeedAndTaskUniqueName(dataFeed, taskName);
+        if (dataFeedTask != null && Boolean.TRUE.equals(withTemplate)) {
+            TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
+            TableEntityMgr.inflateTable(dataFeedTask.getImportData());
+        }
+        return dataFeedTask;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(DataFeed dataFeed, String sourceId) {
-        return datafeedTaskRepository.findByDataFeedAndSourceId(dataFeed, sourceId);
+        DataFeedTask dataFeedTask = datafeedTaskRepository.findByDataFeedAndSourceId(dataFeed, sourceId);
+        if (dataFeedTask != null) {
+            TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
+            TableEntityMgr.inflateTable(dataFeedTask.getImportData());
+        }
+        return dataFeedTask;
     }
 
     @Override

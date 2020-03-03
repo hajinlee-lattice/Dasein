@@ -21,4 +21,6 @@ public interface DataFeedTaskRepository extends BaseJpaRepository<DataFeedTask, 
 
     DataFeedTask findByDataFeedAndSourceId(DataFeed dataFeed, String sourceId);
 
+    DataFeedTask findByDataFeedAndTaskUniqueName(DataFeed dataFeed, String taskUniqueName);
+
 }

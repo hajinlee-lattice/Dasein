@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.persistence.RollbackException;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskServiceImpl.class);
     private static final String SYSTEM_SPLITTER = "_";
+    private static final String UNIQUE_NAME_PATTERN = "Task_%s";
 
     @Inject
     private DataFeedTaskEntityMgr dataFeedTaskEntityMgr;
@@ -58,6 +60,9 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         if (StringUtils.isNotBlank(dataFeedTask.getImportSystemName())) {
             dataFeedTask.setImportSystem(
                     s3ImportSystemService.getS3ImportSystem(customerSpace, dataFeedTask.getImportSystemName()));
+        }
+        if (StringUtils.isEmpty(dataFeedTask.getTaskUniqueName())) {
+            dataFeedTask.setTaskUniqueName(generateTaskUniqueName(dataFeed));
         }
         dataFeedTaskEntityMgr.create(dataFeedTask);
     }
@@ -82,6 +87,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             dataFeedTask.setStartTime(new Date());
             dataFeedTask.setLastImported(new Date(0L));
             dataFeedTask.setLastUpdated(new Date());
+            dataFeedTask.setTaskUniqueName(generateTaskUniqueName(dataFeed));
             dataFeedTaskEntityMgr.create(dataFeedTask);
         } else {
             if (!dataFeedTask.getImportTemplate().getName().equals(tableName)) {
@@ -306,5 +312,13 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             return feedType.substring(0, feedType.lastIndexOf(SYSTEM_SPLITTER));
         }
         return null;
+    }
+
+    private String generateTaskUniqueName(DataFeed dataFeed) {
+        String taskName = String.format(UNIQUE_NAME_PATTERN, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        while (dataFeedTaskEntityMgr.getDataFeedTaskByTaskName(taskName, dataFeed, Boolean.FALSE) != null) {
+            taskName = String.format(UNIQUE_NAME_PATTERN, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        }
+        return taskName;
     }
 }
