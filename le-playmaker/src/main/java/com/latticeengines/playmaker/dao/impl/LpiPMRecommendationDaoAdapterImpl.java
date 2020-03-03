@@ -100,7 +100,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                     if (countNeedToSkip + recommendationsLaunched - 1 >= offset) {
                         // when code reach here, the offsetInQuery will be
                         // 800 - 500 (Launch1's recommendations) - 150(Launch2's recommendations) = 150
-                        // launchIdsToQuery will only Launch3 id
+                        // launchIdsToQuery will only include Launch3 id
                         // countNeedToSkip is 650
                         skipOffsetCheck = true;
                         offsetInQuery -= countNeedToSkip;
