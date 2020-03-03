@@ -88,7 +88,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         return testPlayCreationHelper.getTenant();
     }
 
-    @BeforeClass(groups = "deployment-app")
+    @BeforeClass(groups = "deployment-app", enabled = false)
     public void setup() throws Exception {
         String existingTenant = null;
         Map<String, Boolean> featureFlags = new HashMap<>();
@@ -152,7 +152,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         defaultPlay = testPlayCreationHelper.getPlay();
     }
 
-    @Test(groups = "deployment-app")
+    @Test(groups = "deployment-app", enabled = false)
     public void testMarketoPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         defaultPlayLaunch = testPlayCreationHelper.launchPlayWorkflow(marketoTestPlaySetupConfig);
@@ -164,7 +164,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testMarketoPlayLaunchWorkflow")
+    @Test(groups = "deployment-app", enabled = false, dependsOnMethods = "testMarketoPlayLaunchWorkflow")
     public void testVerifyAndCleanupMarketoUploadedS3File() {
         String dropboxFolderName = dropboxSummary.getDropBox();
 
@@ -211,7 +211,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testVerifyAndCleanupMarketoUploadedS3File")
+    @Test(groups = "deployment-app", enabled = false, dependsOnMethods = "testVerifyAndCleanupMarketoUploadedS3File")
     public void testS3LaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         testPlayCreationHelper.createPlayLaunch(s3TestPlaySetupConfig);
@@ -224,7 +224,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testS3LaunchWorkflow")
+    @Test(groups = "deployment-app", enabled = false, dependsOnMethods = "testS3LaunchWorkflow")
     public void testVerifyAndCleanupS3UploadedS3File() {
         String dropboxFolderName = dropboxSummary.getDropBox();
 
@@ -269,7 +269,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testVerifyAndCleanupS3UploadedS3File")
+    @Test(groups = "deployment-app", enabled = false, dependsOnMethods = "testVerifyAndCleanupS3UploadedS3File")
     public void testLinkedInPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         testPlayCreationHelper.createLookupIdMapping(linkedInTestPlaySetupConfig);
@@ -283,7 +283,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testLinkedInPlayLaunchWorkflow")
+    @Test(groups = "deployment-app", enabled = false, dependsOnMethods = "testLinkedInPlayLaunchWorkflow")
     public void testVerifyAndCleanupLinkedInUploadedS3File() {
         String dropboxFolderName = dropboxSummary.getDropBox();
 
@@ -330,7 +330,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testVerifyAndCleanupLinkedInUploadedS3File")
+    @Test(groups = "deployment-app", enabled = false, dependsOnMethods = "testVerifyAndCleanupLinkedInUploadedS3File")
     public void testFacebookPlayLaunchWorkflow() {
         log.info("Submitting PlayLaunch Workflow: " + defaultPlayLaunch);
         testPlayCreationHelper.createLookupIdMapping(facebookTestPlaySetupConfig);
@@ -344,7 +344,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = "testFacebookPlayLaunchWorkflow")
+    @Test(groups = "deployment-app", enabled = false, dependsOnMethods = "testFacebookPlayLaunchWorkflow")
     public void testVerifyAndCleanupFacebookUploadedS3File() {
         String dropboxFolderName = dropboxSummary.getDropBox();
 
