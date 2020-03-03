@@ -6,6 +6,7 @@
         "fieldName": "StageName",
         "fieldType": "TEXT",
         "columnName": "StageName",
+        "screenName": "StageName",
         "matchingColumnNames": [
           "StageName",
           "STAGE",

@@ -4,6 +4,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.testng.Assert;
@@ -25,14 +27,17 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
     private static final String TEST_SYSTEM_NAME = "FirstSystem";
 
+    @Inject
+    private DropBoxProxy dropBoxProxy;
+
     private String templateFeedType;
     private DataFeedTask opportunityDataFeedTask;
-    private S3ImportSystem importSystem;
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
@@ -44,17 +49,17 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
     @Test(groups = "deployment-app")
     public void testCreateOpportunityTemplate() {
         cdlService.createS3ImportSystem(customerSpace, TEST_SYSTEM_NAME, S3ImportSystem.SystemType.Other, true);
+        List<String> allSubFolder = dropBoxProxy.getAllSubFolders(customerSpace, TEST_SYSTEM_NAME, null, null);
+        Assert.assertEquals(allSubFolder.size(), 5);
         createAccountTemplateAndVerify();
-        importSystem = cdlService.getS3ImportSystem(customerSpace, TEST_SYSTEM_NAME);
         boolean result =  cdlService.createDefaultOpportunityTemplate(customerSpace, TEST_SYSTEM_NAME);
         Assert.assertTrue(result);
         List<S3ImportSystem> allSystems = cdlService.getAllS3ImportSystem(customerSpace);
-        S3ImportSystem opportunity = allSystems.stream() //
-                .filter(system -> S3ImportSystem.SystemType.Other.equals(system.getSystemType())) //
-                .findAny() //
-                .orElse(null);
+        S3ImportSystem opportunity = cdlService.getS3ImportSystem(customerSpace, TEST_SYSTEM_NAME);
         Assert.assertNotNull(opportunity,
                 String.format("Should exist a opportunity system. systems=%s", JsonUtils.serialize(allSystems)));
+        allSubFolder = dropBoxProxy.getAllSubFolders(customerSpace, TEST_SYSTEM_NAME, null, null);
+        Assert.assertEquals(allSubFolder.size(), 7);
         // verification Opportunity
         templateFeedType = EntityTypeUtils.generateFullFeedType(opportunity.getName(), EntityType.Opportunity);
         opportunityDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, "File", templateFeedType);
@@ -63,7 +68,7 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
         Assert.assertNotNull(template);
         Assert.assertNotNull(template.getAttribute(InterfaceName.StageName));
         Assert.assertNotNull(template.getAttribute(InterfaceName.LastModifiedDate));
-        Assert.assertNotNull(template.getAttribute(importSystem.getAccountSystemId()));
+        Assert.assertNotNull(template.getAttribute(opportunity.getAccountSystemId()));
         Assert.assertNotNull(template.getAttribute(InterfaceName.Id));
 
         //verification Stage

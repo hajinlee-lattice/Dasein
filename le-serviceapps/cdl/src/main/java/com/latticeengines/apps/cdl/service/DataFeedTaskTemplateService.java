@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service;
 
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.EntityType;
 
 public interface DataFeedTaskTemplateService {
@@ -63,9 +62,9 @@ public interface DataFeedTaskTemplateService {
      * @param customerSpace target tenant
      * @param systemName The user defined name for the system for which a template is being created
      * @param entityType using to create Template
-     * @param simpleTemplateMetadata Template description.
-     * @return datafeedTask object if success
+     * @param simpleTemplateMetadata EntityType.Opportunity Template description.
+     * @return true if success
      */
-    DataFeedTask createOpportunityTemplate(String customerSpace, String systemName, EntityType entityType,
+    boolean createOpportunityTemplate(String customerSpace, String systemName, EntityType entityType,
                                            SimpleTemplateMetadata simpleTemplateMetadata);
 }
