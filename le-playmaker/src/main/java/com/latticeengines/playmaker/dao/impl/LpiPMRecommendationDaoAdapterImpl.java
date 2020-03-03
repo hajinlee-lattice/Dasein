@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
-import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
@@ -74,54 +73,51 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                     return summary1.getLaunchId().compareTo(summary2.getLaunchId());
                 }
             });
-            long count = 0L;
+            long countNeedToSkip = 0L;
             List<String> launchIdsToQuery = new ArrayList<>();
-            long offsetToQuery = offset;
+            long offsetInQuery = offset;
             boolean skipOffsetCheck = false;
             long totalCountInQuery = 0L;
+            // Dashboard returns the below 5 launches and API passes offset as 800 and max as 250
+            // Launch1 -> 500
+            // Launch2 -> 150
+            // Launch3 -> 350
+            // Launch4 -> 250
+            // Launch5 -> 100
             for (LaunchSummary launchSummary : summaries) {
                 long recommendationsLaunched = launchSummary.getStats().getRecommendationsLaunched();
                 if (skipOffsetCheck) {
-                    if (totalCountInQuery >= maximum + offsetToQuery) {
+                    // when reach to Launch5, totalCountInQuery will be 600 = 350(Launch3's recommendations) + 250(Launch4's recommendations)
+                    // so finally, the offsetInQuery is 150 and launchIdsToQuery contains id of Launch3 and Launch4
+                    if (maximum + offsetInQuery <= totalCountInQuery) {
                         break;
                     }
+                    // launchIdsToQuery will continue to grow when totalCountInQuery is less than maximum + offsetInQuery
+                    // it will include Launch4 id
                     launchIdsToQuery.add(launchSummary.getLaunchId());
                     totalCountInQuery += recommendationsLaunched;
                 } else {
-                    if (count + recommendationsLaunched - 1 >= offset) {
+                    if (countNeedToSkip + recommendationsLaunched - 1 >= offset) {
+                        // when code reach here, the offsetInQuery will be
+                        // 800 - 500 (Launch1's recommendations) - 150(Launch2's recommendations) = 150
+                        // launchIdsToQuery will only Launch3 id
+                        // countNeedToSkip is 650
                         skipOffsetCheck = true;
+                        offsetInQuery -= countNeedToSkip;
                         launchIdsToQuery.add(launchSummary.getLaunchId());
                         totalCountInQuery += recommendationsLaunched;
                         continue;
                     }
-                    count += recommendationsLaunched;
-                    offsetToQuery -= recommendationsLaunched;
+                    countNeedToSkip += recommendationsLaunched;
                 }
             }
             if (CollectionUtils.isNotEmpty(launchIdsToQuery)) {
-                return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIdsToQuery, start, (int) offsetToQuery, maximum, offset);
+                return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIdsToQuery, start, (int) offsetInQuery, maximum, offset);
             } else {
                 return new ArrayList<>();
             }
         } else {
             return new ArrayList<>();
-        }
-    }
-
-    public List<Map<String, Object>> getRecommendations2(long start, int offset, int maximum, int syncDestination,
-                                                        List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
-        boolean latestLaunchFlag = false;
-        if (appId != null) {
-            if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
-                latestLaunchFlag = true;
-            }
-        }
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
-        if (CollectionUtils.isNotEmpty(launchIds)) {
-            return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, start, offset, maximum);
-        }
-        else {
-            return new ArrayList<Map<String, Object>>();
         }
     }
 
