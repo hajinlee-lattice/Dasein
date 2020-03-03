@@ -107,6 +107,21 @@ public class S3ImportSystemEntityMgrImpl
         return systemList;
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<S3ImportSystem> findAll() {
+        List<S3ImportSystem> systemList;
+        if (isReaderConnection()) {
+            systemList = readerRepository.findAll();
+        } else {
+            systemList = writerRepository.findAll();
+        }
+        if (CollectionUtils.isNotEmpty(systemList)) {
+            systemList.forEach(this::inflateDetails);
+        }
+        return systemList;
+    }
+
     private void inflateDetails(S3ImportSystem s3ImportSystem) {
         if (s3ImportSystem != null) {
             HibernateUtils.inflateDetails(s3ImportSystem.getTasks());
