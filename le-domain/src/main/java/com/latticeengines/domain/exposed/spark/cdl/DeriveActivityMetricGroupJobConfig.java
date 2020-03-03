@@ -7,6 +7,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implements Serializable {
@@ -24,6 +25,9 @@ public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implement
     @JsonProperty("evaluationDate")
     // period -> current period Id
     public String evaluationDate;
+
+    @JsonProperty("businessCalendar")
+    public BusinessCalendar businessCalendar;
 
     @JsonProperty("streamMetadataMap")
     // streamId -> dimensions

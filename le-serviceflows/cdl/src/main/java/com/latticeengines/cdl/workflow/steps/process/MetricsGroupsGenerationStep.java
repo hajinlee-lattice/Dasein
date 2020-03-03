@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobC
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.MetricsGroupGenerator;
@@ -60,6 +61,9 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
 
     @Inject
     private ActivityStoreProxy activityStoreProxy;
+
+    @Inject
+    private PeriodProxy periodProxy;
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
 
@@ -133,6 +137,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             appendAccountBatchStore(inputs, inputMetadata);
             config.setInput(inputs);
             config.inputMetadata = inputMetadata;
+            config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
             return config;
         }
     }

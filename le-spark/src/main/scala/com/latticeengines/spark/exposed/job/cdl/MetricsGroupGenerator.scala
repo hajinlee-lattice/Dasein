@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO}
 import com.latticeengines.domain.exposed.query.{BusinessEntity, TimeFilter}
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DeriveActivityMetricGroupJobConfig}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
@@ -39,9 +40,10 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     import spark.implicits._
     val config: DeriveActivityMetricGroupJobConfig = lattice.config
     val evaluationDate = config.evaluationDate // yyyy-mm-dd
+    val calendar = config.businessCalendar
     val input: Seq[DataFrame] = lattice.input
     val groups: Seq[ActivityMetricsGroup] = config.activityMetricsGroups.toSeq
-    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groups), evaluationDate)
+    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groups, calendar), evaluationDate)
     val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
     val streamMetadata = config.streamMetadataMap
     hasAccountBatchStore = inputMetadata.getMetadata.contains(ACCOUNT_BATCH_STORE)
@@ -206,15 +208,15 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     TemplateUtils.renderByMap(StringTemplateConstants.ACTIVITY_METRICS_GROUP_ATTRNAME, map).toLowerCase()
   }
 
-  private def toPeriodStrategy(name: String): PeriodStrategy = {
-    new PeriodStrategy(Template.fromName(name))
+  private def toPeriodStrategy(name: String, calendar: BusinessCalendar): PeriodStrategy = {
+    new PeriodStrategy(calendar, Template.fromName(name))
   }
 
-  private def getPeriodStrategies(groups: Seq[ActivityMetricsGroup]): util.List[PeriodStrategy] = {
+  private def getPeriodStrategies(groups: Seq[ActivityMetricsGroup], calendar: BusinessCalendar): util.List[PeriodStrategy] = {
     val periodSets: Seq[Set[String]] = groups.map((group: ActivityMetricsGroup) => group.getActivityTimeRange.getPeriods.toSet)
     val periodNames: Seq[String] = periodSets.reduce((masterSet, nextSet) => masterSet ++ nextSet).toSeq
     scala.collection.JavaConversions.seqAsJavaList(
-      periodNames.map(name => toPeriodStrategy(name))
+      periodNames.map(name => toPeriodStrategy(name, calendar))
     )
   }
 
