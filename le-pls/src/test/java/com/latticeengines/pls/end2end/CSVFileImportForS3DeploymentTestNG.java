@@ -7,16 +7,24 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -32,6 +40,8 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
     private DropBoxProxy dropBoxProxy;
     private List<S3ImportTemplateDisplay> templates = null;
 
+    private static final String ACCOUNT_BASE_LOWERCASE = "Account_base_lowercase.csv";
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
@@ -41,17 +51,18 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
     }
 
     @Test(groups = "deployment")
-    public void importS3Base() {
+    public void importS3Base() throws Exception {
         prepareS3BaseData(ENTITY_ACCOUNT, EntityType.Accounts);
         prepareS3BaseData(ENTITY_CONTACT, EntityType.Contacts);
         prepareS3BaseData(ENTITY_TRANSACTION, EntityType.ProductPurchases);
     }
 
-    private void prepareS3BaseData(String entity, EntityType entityType) {
+    private void prepareS3BaseData(String entity, EntityType entityType) throws Exception {
         switch (entity) {
         case ENTITY_ACCOUNT:
             testS3ImportWithTemplateData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT, entityType);
             testS3ImportOnlyData(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
+            verifyAvroData(ACCOUNT_BASE_LOWERCASE, ENTITY_ACCOUNT);
             break;
         case ENTITY_CONTACT:
             testS3ImportWithTemplateData(CONTACT_SOURCE_FILE, ENTITY_CONTACT, entityType);
@@ -64,7 +75,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         }
     }
 
-    private void testS3ImportWithTemplateData(String csvFileName, String entity, EntityType entityType) {
+    private SourceFile testS3ImportWithTemplateData(String csvFileName, String entity, EntityType entityType) {
         SourceFile sourceFile = uploadSourceFile(csvFileName, entity);
         String subType = entityType.getSubType() != null ? entityType.getSubType().name() : null;
         String taskId = cdlService.createS3Template(customerSpace, sourceFile.getName(), SOURCE, entity,
@@ -73,10 +84,10 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
                 sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
-
+        return sourceFile;
     }
 
-    private void testS3ImportOnlyData(String csvFileName, String entity) {
+    private SourceFile testS3ImportOnlyData(String csvFileName, String entity) {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(entity), entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
@@ -86,6 +97,36 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
                 sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        return sourceFile;
+    }
+
+    private void verifyAvroData(String csvFileName, String entity) throws Exception {
+        SourceFile accountFile = testS3ImportOnlyData(csvFileName, entity);
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
+                getFeedTypeByEntity(DEFAULT_SYSTEM, entity));
+        Table table = dataFeedTask.getImportTemplate();
+        String fieldName = "user_S_Account_For_Platform_Test";
+        Assert.assertNotNull(table.getAttribute(fieldName));
+
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
+                PathBuilder
+                        .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
+                        .toString(),
+                SourceType.FILE.getName());
+
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
+        String avroFileName = accountFile.getName().substring(0,
+                accountFile.getName().lastIndexOf("."));
+        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file ->
+                !file.isDirectory() && file.getPath().toString().contains(avroFileName)
+                        && file.getPath().getName().endsWith("avro"));
+        Assert.assertEquals(avroFiles.size(), 1);
+
+        List<GenericRecord> avroRecords = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
+        for (GenericRecord record : avroRecords) {
+            Assert.assertNotNull(record.get(fieldName));
+        }
+
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importS3Base")
