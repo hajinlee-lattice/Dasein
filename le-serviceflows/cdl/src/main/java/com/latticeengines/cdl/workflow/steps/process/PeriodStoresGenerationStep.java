@@ -112,7 +112,10 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        Map<String, Details> metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
+        String outputMetadataStr = result.getOutput();
+        log.info("Generated output metadata: {}", outputMetadataStr);
+        log.info("Generated {} output metrics tables", result.getTargets().size());
+        Map<String, Details> metadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
         Map<String, Table> signatureTables = new HashMap<>();
         metadata.forEach((streamId, details) -> {
             for (int offset = 0; offset < details.getLabels().size(); offset++) {
