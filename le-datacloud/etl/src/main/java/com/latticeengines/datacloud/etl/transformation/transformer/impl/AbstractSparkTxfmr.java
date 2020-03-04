@@ -145,7 +145,8 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             sparkJobConfig.setWorkspace(workflowDir);
 
             configuration = getConfiguration(step.getConfig());
-            modifySparkJobConfig(sparkJobConfig, configuration);
+            preSparkJobProcessing(step, workflowDir, sparkJobConfig, configuration);
+            span.log(Collections.singletonMap("preProcessing", JsonUtils.serialize(sparkJobConfig)));
 
             final Map<String, String> sparkProps = new HashMap<>();
             Map<String, String> extraProps = getSparkProps(step.getConfig());
@@ -181,6 +182,9 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
             step.setCount(output.getCount());
             List<Schema> baseSchemas = getBaseSourceSchemas(step);
             step.setTargetSchema(getTargetSchema(output, sparkJobConfig, configuration, baseSchemas));
+
+            postSparkJobProcessing(step, output.getPath(), sparkJobConfig, configuration, sparkJobResult);
+            span.log(Collections.singletonMap("postProcessing", JsonUtils.serialize(sparkJobResult)));
         } catch (Exception e) {
             log.error("Failed to transform data", e);
             TracingUtils.logError(span, e, String.format("Failed to start spark txfmr step %s", step.getName()));
@@ -194,7 +198,10 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
         return true;
     }
 
-    protected void modifySparkJobConfig(S sparkJobConfig, T stepConfig) {
+    protected void preSparkJobProcessing(TransformStep step, String workflowDir, S sparkJobConfig, T stepConfig) {
+    }
+
+    protected void postSparkJobProcessing(TransformStep step, String workflowDir, S sparkJobConfig, T stepConfig, SparkJobResult sparkJobResult) {
     }
 
     private Map<String, String> getSparkProps(String confJson) {

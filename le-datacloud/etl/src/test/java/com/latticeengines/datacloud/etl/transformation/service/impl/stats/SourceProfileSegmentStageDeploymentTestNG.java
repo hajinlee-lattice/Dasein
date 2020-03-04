@@ -31,6 +31,7 @@ import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.ProfileTxfmr;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.SourceProfiler;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -48,13 +49,16 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 
+/**
+ * dpltc deploy -a matchapi,metadata,workflowapi
+ */
 public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(SourceProfileSegmentStageDeploymentTestNG.class);
 
@@ -110,7 +114,7 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
         TransformationStepConfig step2 = new TransformationStepConfig();
         List<Integer> inputSteps = new ArrayList<>(Collections.singletonList(0));
         step2.setInputSteps(inputSteps);
-        step2.setTransformer(SourceProfiler.TRANSFORMER_NAME);
+        step2.setTransformer(ProfileTxfmr.TRANSFORMER_NAME);
         step2.setTargetSource(source.getSourceName());
         String confParamStr2 = getMatchSegmentProfileConfig();
         step2.setConfiguration(setDataFlowEngine(confParamStr2, "TEZ"));
@@ -150,7 +154,7 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
     }
 
     private String getMatchSegmentProfileConfig() {
-        ProfileConfig conf = new ProfileConfig();
+        ProfileJobConfig conf = new ProfileJobConfig();
         conf.setNumBucketEqualSized(false);
         conf.setBucketNum(4);
         conf.setMinBucketSize(2);
@@ -209,11 +213,12 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
         disBucket.setValues(Arrays.asList(intValues));
         map.put("BusinessTechnologiesSeoMeta", disBucket);
         CategoricalBucket catBucket = new CategoricalBucket();
-        String[] catValues = { "684", "425", "636", "716", "492" };
+//        String[] catValues = { "684", "425", "636", "716" };
+        String[] catValues = { "636", "492", "425", "716" };
         catBucket.setCategories(Arrays.asList(catValues));
         map.put("GLOBAL_ULTIMATE_DnB_COUNTY_CODE", catBucket);
         // map.put("LAST_UPDATE_DATE", null);
-        map.put("acct_int", new IntervalBucket());
+        map.put("acct_int", new DiscreteBucket());
         return map;
     }
 

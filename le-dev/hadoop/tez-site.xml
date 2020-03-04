@@ -23,6 +23,7 @@
     </property>
    <property>
       <name>tez.history.logging.service.class</name>
+<!--       <value>org.apache.tez.dag.history.logging.impl.SimpleHistoryLoggingService</value>-->
       <value>org.apache.tez.dag.history.logging.ats.ATSHistoryLoggingService</value>
     </property>
     <property>

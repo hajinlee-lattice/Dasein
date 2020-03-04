@@ -55,7 +55,11 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
         if (jobConfig != null) {
             String tenantId = customerSpace.getTenantId();
             jobConfig.setWorkspace(getRandomWorkspace());
-            log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + JsonUtils.serialize(jobConfig));
+            String configStr = JsonUtils.serialize(jobConfig);
+            if (configStr.length() > 1000) {
+                configStr = "long string";
+            }
+            log.info("Run spark job " + getJobClz().getSimpleName() + " with configuration: " + configStr);
             computeScalingMultiplier(jobConfig.getInput(), jobConfig.getNumTargets());
             SparkJobResult result;
             try {

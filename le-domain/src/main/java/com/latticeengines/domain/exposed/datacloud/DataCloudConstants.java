@@ -158,6 +158,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_REPARTITION_TXMFR = "RepartitionTxmfr";
     public static final String TRANSFORMER_UPSERT_TXMFR = "UpsertTxmfr";
     public static final String TRANSFORMER_MERGE_SYSTEM_BATCH_TXMFR = "MergeSystemBatchTxmfr";
+    public static final String TRANSFORMER_PROFILE_TXMFR = "ProfileTxmfr";
     public static final String TRANSFORMER_MERGE_IMPORTS = "MergeImports";
     public static final String TRANSFORMER_APPEND_RAWSTREAM = "AppendRawStreamTxmfr";
     public static final String TRANSFORMER_CONSOLIDATE_REPORT = "ConsolidateReporter";

@@ -1,46 +1,60 @@
-package com.latticeengines.domain.exposed.datacloud.dataflow.stats;
+package com.latticeengines.domain.exposed.spark.stats;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.datacloud.dataflow.BucketAlgorithm;
-import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
-import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
+import org.apache.commons.lang3.StringUtils;
 
-public class ProfileParameters extends TransformationFlowParameters {
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
+import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
+import com.latticeengines.domain.exposed.spark.SparkJobConfig;
+
+public class ProfileJobConfig extends SparkJobConfig {
+
+    public static final String NAME = "profile";
+
+    @JsonProperty("Stage")
+    private String stage;
+
+    @JsonProperty("EvaluationDateAsTimestamp")
+    private long evaluationDateAsTimestamp = -1; // Timestamp the PA job is run for use for Date Attribute profiling.
+
+    @JsonProperty("DataCloudVersion")
+    private String dataCloudVersion; // by default, segmentation: use current
+
     @JsonProperty("NumBucketEqualSized")
     private boolean numBucketEqualSized;// true: bucket size is roughly equal
-                                        // false: decide bucket upon
-                                        // distribution
+    // false: decide bucket upon
+    // distribution
 
     @JsonProperty("BucketNum")
     private int bucketNum = 5;// roughly bucket number (might not be exactly
-                              // same in final profiling)
+    // same in final profiling)
 
     @JsonProperty("MinBucketSize")
     private int minBucketSize = 10; // only for numBucketEqualSized = false
 
     @JsonProperty("RandSeed")
     private Long randSeed; // used for testing purpose, leave it null for real
-                           // use case
+    // use case
 
     @JsonProperty("EncAttrPrefix")
     private String encAttrPrefix; // used for testing purpose, leave it null for
-                                  // real use case
+    // real use case
 
-    @JsonProperty("MaxCats")
-    private int maxCats = 2048; // Maximum allowed category number
+    @JsonProperty("MaxCat")
+    private int maxCat = 2048; // Maximum allowed category number
 
     @JsonProperty("MaxCatLen")
     private int maxCatLength = 1024; // Maximum allowed category attribute
-                                     // length. If exceeded, this attribute is
-                                     // not segmentable
+    // length. If exceeded, this attribute is
+    // not segmentable
 
     @JsonProperty("CatAttrsNotEnc")
     private String[] catAttrsNotEnc; // Dimensional attributes for stats should
-                                     // not be encoded
+    // not be encoded
 
     @JsonProperty("MaxDiscrete")
     private int maxDiscrete = 5; // Maximum allowed discrete bucket number
@@ -49,22 +63,55 @@ public class ProfileParameters extends TransformationFlowParameters {
     private String idAttr;
 
     @JsonProperty("NumericAttrs")
-    private List<Attribute> numericAttrs;
+    private List<ProfileParameters.Attribute> numericAttrs;
 
     @JsonProperty("CatAttrs")
-    private List<Attribute> catAttrs;
+    private List<ProfileParameters.Attribute> catAttrs;
 
     @JsonProperty("AMAttrsToEnc")
-    private List<Attribute> amAttrsToEnc;
+    private List<ProfileParameters.Attribute> amAttrsToEnc;
 
     @JsonProperty("ExternalAttrsToEnc")
-    private List<Attribute> exAttrsToEnc;
+    private List<ProfileParameters.Attribute> exAttrsToEnc;
 
     @JsonProperty("CodeBookMap")
     private Map<String, BitCodeBook> codeBookMap; // encoded attr -> bitCodeBook
 
     @JsonProperty("CodeBookLookup")
     private Map<String, String> codeBookLookup; // decoded attr -> encoded attr
+
+    @Override
+    @JsonProperty("Name")
+    public String getName() {
+        return NAME;
+    }
+
+    public String getStage() {
+        if (StringUtils.isBlank(stage)) {
+            setStage(DataCloudConstants.PROFILE_STAGE_SEGMENT);
+        }
+        return stage;
+    }
+
+    public void setStage(String stage) {
+        this.stage = stage;
+    }
+
+    public long getEvaluationDateAsTimestamp() {
+        return evaluationDateAsTimestamp;
+    }
+
+    public void setEvaluationDateAsTimestamp(long evaluationDateAsTimestamp) {
+        this.evaluationDateAsTimestamp = evaluationDateAsTimestamp;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
+    }
 
     public boolean isNumBucketEqualSized() {
         return numBucketEqualSized;
@@ -106,12 +153,12 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.encAttrPrefix = encAttrPrefix;
     }
 
-    public int getMaxCats() {
-        return maxCats;
+    public int getMaxCat() {
+        return maxCat;
     }
 
-    public void setMaxCats(int maxCats) {
-        this.maxCats = maxCats;
+    public void setMaxCat(int maxCat) {
+        this.maxCat = maxCat;
     }
 
     public int getMaxCatLength() {
@@ -138,19 +185,19 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.idAttr = idAttr;
     }
 
-    public List<Attribute> getNumericAttrs() {
+    public List<ProfileParameters.Attribute> getNumericAttrs() {
         return numericAttrs;
     }
 
-    public void setNumericAttrs(List<Attribute> numericAttrs) {
+    public void setNumericAttrs(List<ProfileParameters.Attribute> numericAttrs) {
         this.numericAttrs = numericAttrs;
     }
 
-    public List<Attribute> getCatAttrs() {
+    public List<ProfileParameters.Attribute> getCatAttrs() {
         return catAttrs;
     }
 
-    public void setCatAttrs(List<Attribute> catAttrs) {
+    public void setCatAttrs(List<ProfileParameters.Attribute> catAttrs) {
         this.catAttrs = catAttrs;
     }
 
@@ -162,19 +209,19 @@ public class ProfileParameters extends TransformationFlowParameters {
         this.maxDiscrete = maxDiscrete;
     }
 
-    public List<Attribute> getAmAttrsToEnc() {
+    public List<ProfileParameters.Attribute> getAmAttrsToEnc() {
         return amAttrsToEnc;
     }
 
-    public void setAmAttrsToEnc(List<Attribute> amAttrsToEnc) {
+    public void setAmAttrsToEnc(List<ProfileParameters.Attribute> amAttrsToEnc) {
         this.amAttrsToEnc = amAttrsToEnc;
     }
 
-    public List<Attribute> getExAttrsToEnc() {
+    public List<ProfileParameters.Attribute> getExAttrsToEnc() {
         return exAttrsToEnc;
     }
 
-    public void setExAttrsToEnc(List<Attribute> exAttrsToEnc) {
+    public void setExAttrsToEnc(List<ProfileParameters.Attribute> exAttrsToEnc) {
         this.exAttrsToEnc = exAttrsToEnc;
     }
 
@@ -192,59 +239,6 @@ public class ProfileParameters extends TransformationFlowParameters {
 
     public void setCodeBookLookup(Map<String, String> codeBookLookup) {
         this.codeBookLookup = codeBookLookup;
-    }
-
-    public static class Attribute implements Serializable {
-        private static final long serialVersionUID = -4121611251810005974L;
-
-        private String attr;
-        private Integer encodeBitUnit;
-        private String decodeStrategy;
-        private BucketAlgorithm algo;
-
-        // for jackson
-        private Attribute(){}
-
-        public Attribute(String attr, Integer encodeBitUnit, String decodeStrategy,
-                BucketAlgorithm algo) {
-            this.attr = attr;
-            this.encodeBitUnit = encodeBitUnit;
-            this.decodeStrategy = decodeStrategy;
-            this.algo = algo;
-        }
-
-        public String getAttr() {
-            return attr;
-        }
-
-        public void setAttr(String attr) {
-            this.attr = attr;
-        }
-
-        public Integer getEncodeBitUnit() {
-            return encodeBitUnit;
-        }
-
-        public void setEncodeBitUnit(Integer encodeBitUnit) {
-            this.encodeBitUnit = encodeBitUnit;
-        }
-
-        public BucketAlgorithm getAlgo() {
-            return algo;
-        }
-
-        public void setAlgo(BucketAlgorithm algo) {
-            this.algo = algo;
-        }
-
-        public String getDecodeStrategy() {
-            return decodeStrategy;
-        }
-
-        public void setDecodeStrategy(String decodeStrategy) {
-            this.decodeStrategy = decodeStrategy;
-        }
-
     }
 
 }
