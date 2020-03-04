@@ -27,4 +27,6 @@ public interface SparkSQLService {
 
     List<String> createViews(CustomerSpace customerSpace, LivySession livySession, List<Pair<String, String>> views);
 
+    void createTempListView(LivySession livySession, String viewName, Class<?> fieldClz, List<List<Object>> vals);
+
 }

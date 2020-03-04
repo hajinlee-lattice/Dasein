@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.EntityQueryService;
+import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.EntityQueryTranslator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
@@ -59,8 +60,9 @@ public class EntityQueryServiceImpl extends BaseQueryServiceImpl implements Enti
     private final TransactionService transactionService;
 
     @Inject
-    public EntityQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
-        super(queryEvaluatorService);
+    public EntityQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService,
+            TempListService tempListService) {
+        super(queryEvaluatorService, tempListService);
         this.transactionService = transactionService;
     }
 

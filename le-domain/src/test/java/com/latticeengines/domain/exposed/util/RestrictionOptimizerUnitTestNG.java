@@ -3,6 +3,9 @@ package com.latticeengines.domain.exposed.util;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -12,6 +15,8 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.MetricRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 
@@ -80,6 +85,17 @@ public class RestrictionOptimizerUnitTestNG {
         };
     }
 
+    @Test(groups = "unit")
+    public void testMergeList() {
+        final Restriction AList1 = listBucket(1);
+        final Restriction AList2 = listBucket(2);
+        final Restriction AList3 = listBucket(3);
+        final Restriction AList4 = listBucket(4);
+        Restriction res1 = and(AList1, AList2, AList3, AList4);
+        Restriction flatten = RestrictionOptimizer.optimize(res1);
+        Assert.assertEquals(((LogicalRestriction) flatten).getRestrictions().size(), 2);
+    }
+
     @Test(groups = "unit", dataProvider = "nullTestData")
     public void testNull(Restriction restriction) {
         Assert.assertNull(RestrictionOptimizer.optimize(restriction));
@@ -142,6 +158,15 @@ public class RestrictionOptimizerUnitTestNG {
             bucketRestriction.setIgnored(true);
         }
         return bucketRestriction;
+    }
+
+    private static BucketRestriction listBucket(int idx) {
+        ComparisonType operator = (idx <= 2) ? ComparisonType.IN_COLLECTION : ComparisonType.NOT_IN_COLLECTION;
+        List<Object> vals = Arrays.asList(String.valueOf(idx), String.valueOf(idx * 10), String.valueOf(idx * 100));
+        Bucket bucket = Bucket.valueBkt(operator, vals);
+        BusinessEntity entity = Account;
+        AttributeLookup attrLookup = new AttributeLookup(entity, entity.name().substring(0, 1));
+        return new BucketRestriction(attrLookup, bucket);
     }
 
     private static Restriction and(Restriction... restrictions) {

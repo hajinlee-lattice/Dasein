@@ -35,7 +35,7 @@ import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 
-@Service
+@Service("tempListService")
 public class TempListServiceImpl implements TempListService {
 
     private static final Logger log = LoggerFactory.getLogger(TempListServiceImpl.class);
@@ -52,8 +52,8 @@ public class TempListServiceImpl implements TempListService {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public String createTempListIfNotExists(ConcreteRestriction restriction, String redshiftPartition) {
-        String existingTempTable = getExistingTempTable(restriction, redshiftPartition);
+    public String createTempListIfNotExists(ConcreteRestriction restriction, Class<?> fieldClz, String redshiftPartition) {
+        String existingTempTable = getExistingTempTable(restriction, fieldClz, redshiftPartition);
         if (StringUtils.isNotBlank(existingTempTable)) {
             log.info("The temp list has already been saved as {}} in redshift.", existingTempTable);
             return existingTempTable;
@@ -63,7 +63,7 @@ public class TempListServiceImpl implements TempListService {
                     || !(restriction.getLhs() instanceof AttributeLookup)) {
                 throw new IllegalArgumentException("Not a valid big list restriction." + JsonUtils.serialize(restriction));
             }
-            String lockName = getLockName(restriction, redshiftPartition);
+            String lockName = getLockName(restriction, fieldClz, redshiftPartition);
             try {
                 LockManager.registerCrossDivisionLock(lockName);
                 LockManager.acquireWriteLock(lockName, 10, TimeUnit.MINUTES);
@@ -71,15 +71,15 @@ public class TempListServiceImpl implements TempListService {
                 log.warn("Error while acquiring zk lock {}", lockName, e);
             }
             try {
-                return createTempListInMutex(restriction, redshiftPartition);
+                return createTempListInMutex(restriction, fieldClz, redshiftPartition);
             } finally {
                 LockManager.releaseWriteLock(lockName);
             }
         }
     }
 
-    private String createTempListInMutex(ConcreteRestriction restriction, String redshiftPartition) {
-        String existingTempTable = getExistingTempTable(restriction, redshiftPartition);
+    private String createTempListInMutex(ConcreteRestriction restriction, Class<?> fieldClz, String redshiftPartition) {
+        String existingTempTable = getExistingTempTable(restriction, fieldClz, redshiftPartition);
         if (StringUtils.isNotBlank(existingTempTable)) {
             log.info("The temp list has already been saved as {}} in redshift.", existingTempTable);
             return existingTempTable;
@@ -87,13 +87,10 @@ public class TempListServiceImpl implements TempListService {
         String tempTableName = TempListUtils.newTempTableName();
         try (PerformanceTimer timer = new PerformanceTimer("Create temp table " + tempTableName)) {
             CollectionLookup collectionLookup = (CollectionLookup) restriction.getRhs();
-            Class<?> fieldClz = TempListUtils.getFieldClz(collectionLookup.getValues());
             timer.setTimerMessage("Create temp table " + tempTableName + " for a list of " //
                     + CollectionUtils.size(collectionLookup.getValues()) + " values.");
 
-            AttributeLookup attributeLookup = (AttributeLookup) restriction.getLhs();
-            String attrName = attributeLookup.getAttribute();
-
+            String attrName = TempListUtils.VALUE_COLUMN;
             RedshiftService redshiftService = getRedshiftService(redshiftPartition);
 
             String stagingTableName = "staging_" + tempTableName;
@@ -125,7 +122,7 @@ public class TempListServiceImpl implements TempListService {
             redshiftService.dropTable(tempTableName);
             redshiftService.renameTable(stagingTableName, tempTableName);
 
-            String checksum = TempListUtils.getCheckSum(restriction);
+            String checksum = TempListUtils.getCheckSum(restriction, fieldClz);
             String cacheKey = toCacheKey(checksum, redshiftPartition);
             redisTemplate.opsForValue().set(cacheKey, tempTableName, 1, TimeUnit.HOURS);
             CACHE_LOOKUP.put(tempTableName, cacheKey);
@@ -134,7 +131,7 @@ public class TempListServiceImpl implements TempListService {
         }
     }
 
-    @Override
+    @VisibleForTesting
     public void dropTempList(String tempTableName) {
         String partition = redshiftPartitionService.getDefaultPartition();
         if (CACHE_LOOKUP.containsKey(tempTableName)) {
@@ -156,8 +153,8 @@ public class TempListServiceImpl implements TempListService {
     }
 
     @VisibleForTesting
-    String getExistingTempTable(ConcreteRestriction restriction, String redshiftPartition) {
-        String checksum = TempListUtils.getCheckSum(restriction);
+    String getExistingTempTable(ConcreteRestriction restriction, Class<?> fieldClz, String redshiftPartition) {
+        String checksum = TempListUtils.getCheckSum(restriction, fieldClz);
         String cacheKey = toCacheKey(checksum, redshiftPartition);
         Object obj = redisTemplate.opsForValue().get(cacheKey);
         if (obj != null) {
@@ -192,8 +189,8 @@ public class TempListServiceImpl implements TempListService {
         return redshiftPartitionService.getBatchUserService(partition);
     }
 
-    private String getLockName(ConcreteRestriction restriction, String redshiftPartition) {
-        String checksum = TempListUtils.getCheckSum(restriction);
+    private String getLockName(ConcreteRestriction restriction, Class<?> fieldClz, String redshiftPartition) {
+        String checksum = TempListUtils.getCheckSum(restriction, fieldClz);
         return  "RedshiftTempList_" + redshiftPartition + "_" + checksum;
     }
 

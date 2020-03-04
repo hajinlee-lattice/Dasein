@@ -6,6 +6,7 @@ import javax.inject.Named;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.spark.LivySession;
+import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.service.impl.EntityQueryServiceImpl;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -16,8 +17,9 @@ public class EntityQueryServiceSparkSQLImpl extends EntityQueryServiceImpl {
     @Inject
     public EntityQueryServiceSparkSQLImpl(
             @Named("queryEvaluatorServiceSparkSQL") QueryEvaluatorService queryEvaluatorService,
+            @Named("tempListServiceSparkSQL") TempListService tempListService,
             TransactionService transactionService) {
-        super(queryEvaluatorService, transactionService);
+        super(queryEvaluatorService, transactionService, tempListService);
     }
 
     /**
@@ -28,6 +30,7 @@ public class EntityQueryServiceSparkSQLImpl extends EntityQueryServiceImpl {
      */
     public void setLivySession(LivySession livySession) {
         ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).setLivySession(livySession);
+        ((TempListServiceSparkSQLImpl) tempListService).setLivySession(livySession);
     }
 
 }
