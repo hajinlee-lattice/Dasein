@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.auth;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Basic;
@@ -11,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -57,6 +61,10 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     @Column(name = "Expiration_Date", nullable = true)
     private Long expirationDate;
 
+    @JsonProperty("global_auth_teams")
+    @ManyToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "gaUserTenantRights")
+    private List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
+
     @Override
     public Long getPid() {
         return userTenantRightId;
@@ -102,4 +110,12 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     public String getCreatedByUser() { return createdByUser; }
 
     public void setCreatedByUser(String createdByUser) { this.createdByUser = createdByUser; }
+
+    public List<GlobalAuthTeam> getGlobalAuthTeams() {
+        return globalAuthTeams;
+    }
+
+    public void setGlobalAuthTeams(List<GlobalAuthTeam> globalAuthTeams) {
+        this.globalAuthTeams = globalAuthTeams;
+    }
 }
