@@ -8,22 +8,18 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
-import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
@@ -33,11 +29,16 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 
 public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
     @Inject
     private DropBoxProxy dropBoxProxy;
+
+    @Inject
+    private EaiJobDetailProxy eaiJobDetailProxy;
+
     private List<S3ImportTemplateDisplay> templates = null;
 
     private static final String ACCOUNT_BASE_LOWERCASE = "Account_base_lowercase.csv";
@@ -107,23 +108,19 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         Table table = dataFeedTask.getImportTemplate();
         String fieldName = "user_S_Account_For_Platform_Test";
         Assert.assertNotNull(table.getAttribute(fieldName));
+        String accountIdentifier = dataFeedTask.getUniqueId();
+        EaiImportJobDetail accountDetail = eaiJobDetailProxy
+                .getImportJobDetailByCollectionIdentifier(accountIdentifier);
+        List<String> pathList = accountDetail.getPathDetail();
+        Assert.assertNotNull(pathList);
+        Assert.assertEquals(pathList.size(), 1);
 
-        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
-                PathBuilder
-                        .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
-                        .toString(),
-                SourceType.FILE.getName());
-
-        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
-        String avroFileName = accountFile.getName().substring(0,
-                accountFile.getName().lastIndexOf("."));
-        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file ->
-                !file.isDirectory() && file.getPath().toString().contains(avroFileName)
-                        && file.getPath().getName().endsWith("avro"));
-        Assert.assertEquals(avroFiles.size(), 1);
-
-        List<GenericRecord> avroRecords = AvroUtils.getData(yarnConfiguration, new Path(avroFiles.get(0)));
-        for (GenericRecord record : avroRecords) {
+        String avroPath = pathList.get(0);
+        avroPath = avroPath.substring(avroPath.indexOf("/Pods/"));
+        AvroUtils.AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration,
+                avroPath);
+        while (iterator.hasNext()) {
+            GenericRecord record = iterator.next();
             Assert.assertNotNull(record.get(fieldName));
         }
 
