@@ -122,6 +122,21 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         throw new NullPointerException("LivySession not initialized.");
     }
 
+    protected long getEntityQueryCount(FrontEndQuery frontEndQuery) {
+        setCustomerSpace();
+        frontEndQuery.setEvaluationDateStr(parseEvaluationDateStr(configuration));
+        log.info("frontend query is " + frontEndQuery);
+        DataCollection.Version version = parseDataCollectionVersion(configuration);
+        String sql = entityQueryService.getQueryStr(frontEndQuery, version, SQL_USER, true);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        return retry.execute(ctx -> {
+            if (ctx.getRetryCount() > 0) {
+                log.info("(Attempt=" + ctx.getRetryCount() + ") get SparkSQL count.");
+            }
+            return sparkSQLService.getCount(customerSpace, livySession, sql);
+        });
+    }
+
     protected HdfsDataUnit getEntityQueryData(FrontEndQuery frontEndQuery) {
         return getEntityQueryData(frontEndQuery, false);
     }

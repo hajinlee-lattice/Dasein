@@ -438,15 +438,5 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             return null;
         }
     }
-
-    private String getFullUniverseContextKeyByAudienceType(AudienceType audienceType) {
-        switch (audienceType) {
-        case ACCOUNTS:
-            return FULL_ACCOUNTS_UNIVERSE;
-        case CONTACTS:
-            return FULL_CONTACTS_UNIVERSE;
-        default:
-            return null;
-        }
-    }
 }
+

@@ -20,7 +20,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
@@ -51,7 +52,6 @@ import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.spark.exposed.job.cdl.CreateRecommendationsJob;
-import com.latticeengines.spark.exposed.service.SparkJobService;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
 
 @Component("campaignLaunchInitStep")
@@ -73,7 +73,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     private PeriodProxy periodProxy;
 
     @Inject
-    protected SparkJobService sparkJobService;
+    protected CampaignLaunchUtils campaignLaunchUtils;
 
     @Value("${yarn.pls.url}")
     private String internalResourceHostPort;
@@ -176,8 +176,16 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
         }
     }
 
+    private FrontEndQuery buildFrontEndQuery(PlayLaunchContext playLaunchContext, BusinessEntity entity) {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setMainEntity(entity);
+        frontEndQuery.setContactRestriction(playLaunchContext.getContactFrontEndQuery().getContactRestriction());
+        frontEndQuery.setAccountRestriction(playLaunchContext.getAccountFrontEndQuery().getAccountRestriction());
+        return frontEndQuery;
+    }
+
     private SparkJobResult executeSparkJob(PlayLaunchContext playLaunchContext,
-            ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
+                                           ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -186,19 +194,30 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-
+                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
+                boolean contactsDataExists = StringUtils.isNotEmpty(contactTableName);
+                // check the account and account limit
+                Long accountLimitFromUI = playLaunchContext.getPlayLaunch().getTopNCount();
+                if (accountLimitFromUI != null && accountLimitFromUI > 0) {
+                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountLimitFromUI);
+                } else {
+                    long accountsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Account));
+                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
+                    if (contactsDataExists) {
+                        long contactsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Contact));
+                        campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
+                    }
+                }
                 // 2. get DataFrame for Account and Contact
                 HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
                 log.info("accountDataUnit: " + JsonUtils.serialize(accountDataUnit));
                 HdfsDataUnit contactDataUnit = null;
-                String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                if (StringUtils.isBlank(contactTableName)) {
-                    log.info("No contact table available in Redshift.");
-                } else {
+                if (contactsDataExists) {
                     contactDataUnit = getEntityQueryData(playLaunchContext.getContactFrontEndQuery());
                     log.info("contactDataUnit: " + JsonUtils.serialize(contactDataUnit));
+                } else {
+                    log.info("No contact table available in Redshift.");
                 }
-
                 // 3. generate avro out of DataFrame with predefined format for
                 // Recommendations
                 PlayLaunchSparkContext playLaunchSparkContext = playLaunchContext.toPlayLaunchSparkContext();
@@ -227,7 +246,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     }
 
     private CreateRecommendationConfig generateCreateRecommendationConfig(HdfsDataUnit accountDataUnit,
-            HdfsDataUnit contactDataUnit, PlayLaunchSparkContext playLaunchSparkContext) {
+                                                                          HdfsDataUnit contactDataUnit, PlayLaunchSparkContext playLaunchSparkContext) {
         CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
         createRecConfig.setWorkspace(getRandomWorkspace());
         if (contactDataUnit != null) {
@@ -263,21 +282,6 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             putObjectInContext(RECOMMENDATION_ACCOUNT_DISPLAY_NAMES, accountDisplayNames);
             putObjectInContext(RECOMMENDATION_CONTACT_DISPLAY_NAMES, contactDisplayNames);
         }
-    }
-
-    @VisibleForTesting
-    void setTenantEntityMgr(TenantEntityMgr tenantEntityMgr) {
-        this.tenantEntityMgr = tenantEntityMgr;
-    }
-
-    @VisibleForTesting
-    void setPlayProxy(PlayProxy playProxy) {
-        this.playProxy = playProxy;
-    }
-
-    @VisibleForTesting
-    void setCampaignLaunchProcessor(CampaignLaunchProcessor campaignLaunchProcessor) {
-        this.campaignLaunchProcessor = campaignLaunchProcessor;
     }
 
     @Override
