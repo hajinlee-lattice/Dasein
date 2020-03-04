@@ -24,7 +24,7 @@ public class LaunchSummary {
 
     private LaunchState launchState;
 
-    private String launchDisplayString;
+    private String launchStateDisplayString;
 
     private String destinationOrgId;
 
@@ -58,7 +58,7 @@ public class LaunchSummary {
         this.setStats(stats);
         this.setLaunchId(launch.getLaunchId());
         this.setLaunchState(launch.getLaunchState());
-        this.setLaunchDisplayString(launch.getLaunchStateDisplayString());
+        this.setLaunchStateDisplayString(launch.getLaunchStateDisplayString());
         this.setLaunchTime(launch.getCreated());
         this.setSelectedBuckets(launch.getBucketsToLaunch());
         this.setDestinationOrgId(launch.getDestinationOrgId());
@@ -123,9 +123,11 @@ public class LaunchSummary {
         this.launchState = launchState;
     }
 
-    public String getLaunchDisplayString() { return launchDisplayString; }
+    public String getLaunchStateDisplayString() { return launchStateDisplayString; }
 
-    public void setLaunchDisplayString(String launchDisplayString) { this.launchDisplayString = launchDisplayString; }
+    public void setLaunchStateDisplayString(String launchStateDisplayString) {
+        this.launchStateDisplayString = launchStateDisplayString;
+    }
 
     public Set<RatingBucketName> getSelectedBuckets() {
         return selectedBuckets;
