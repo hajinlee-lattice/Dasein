@@ -190,6 +190,46 @@ public class DropBoxServiceImpl implements DropBoxService {
     }
 
     @Override
+    public void createSubFolder(String customerSpace, String systemName, String objectName, String path) {
+        String dropBoxBucket = getDropBoxBucket();
+        String dropBoxPrefix = getDropBoxPrefix();
+
+        if (StringUtils.isNotEmpty(systemName)) {// new logic that every system all have five folder, can not be edit.
+            if (StringUtils.isBlank(objectName) && StringUtils.isBlank(path)) {
+                createFolderWithSystemName(customerSpace, dropBoxBucket, dropBoxPrefix, systemName);
+            } else {
+                s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, systemName, objectName, path));
+            }
+        } else {// the old logic without systemName
+            s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, null, formatPath(objectName), null));
+
+            if (StringUtils.isNotEmpty(path)) {
+                String[] folderList = path.split("/");
+                String needCreateFolder = "";
+                for (String folder : folderList) {
+                    if (StringUtils.isNotEmpty(folder)) {
+                        needCreateFolder += "/" + folder;
+                        s3Service.createFolder(dropBoxBucket, getFullPath(dropBoxPrefix, systemName,
+                                formatPath(objectName), formatPath(needCreateFolder)));
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<String> getDropFoldersFromSystem(String customerSpace, String systemName) {
+        List<String> allSubFolders = getDropFolders(customerSpace, null, null, null);
+        List<String> subFoldersUnderSystem = new ArrayList<>();
+        for (String subFolder : allSubFolders) {
+            if (systemName.equals(S3PathBuilder.getSystemNameFromFeedType(subFolder))) {
+                subFoldersUnderSystem.add(subFolder);
+            }
+        }
+        return subFoldersUnderSystem;
+    }
+
+    @Override
     public List<String> getDropFolders(String customerSpace, String systemName, String objectName, String path) {
         String dropBoxBucket = getDropBoxBucket();
         String dropBoxPrefix = getDropBoxPrefix();

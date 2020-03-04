@@ -607,16 +607,15 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     private void createDropFolder(String customerSpace, String systemName, EntityType entityType) {
-        List<String> allSubFolder = dropBoxService.getDropFolders(customerSpace, systemName, null, null);
+        List<String> allSubFolder = dropBoxService.getDropFoldersFromSystem(customerSpace, systemName);
         if (CollectionUtils.isEmpty(allSubFolder)) {
-            throw new IllegalArgumentException(String.format("no subFolder in system %s, customerSpace is %s.",
-                    systemName, customerSpace));
+            throw new IllegalArgumentException(String.format("no subFolder, customerSpace is %s.", customerSpace));
         }
         log.info("allSubFolder is {}", JsonUtils.serialize(allSubFolder));
         String folderName = S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName());
         log.info("want create folderName is {}.", folderName);
         if (!allSubFolder.contains(folderName)) {
-            dropBoxService.createFolder(customerSpace, systemName, entityType.getDefaultFeedTypeName(), null);
+            dropBoxService.createSubFolder(customerSpace, systemName, entityType.getDefaultFeedTypeName(), null);
         }
     }
 

@@ -9,6 +9,8 @@ import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -33,6 +35,8 @@ import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBase {
 
+    private static final Logger log  = LoggerFactory.getLogger(OpportunityDeploymentTestNG.class);
+
     private static final String TEST_SYSTEM_NAME = "FirstSystem";
 
     @Inject
@@ -52,6 +56,7 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
     public void testCreateOpportunityTemplate() {
         cdlService.createS3ImportSystem(customerSpace, TEST_SYSTEM_NAME, S3ImportSystem.SystemType.Other, true);
         List<String> allSubFolder = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
+        log.info("allSubFolder is {}", JsonUtils.serialize(allSubFolder));
         List<String> allSubFolderUnderSystem = getAllSubFolderUnderSystemName(allSubFolder, TEST_SYSTEM_NAME);
         Assert.assertEquals(allSubFolderUnderSystem.size(), 5);
         createAccountTemplateAndVerify();
@@ -63,6 +68,7 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
                 String.format("Should exist a opportunity system. systems=%s", JsonUtils.serialize(allSystems)));
         allSubFolder = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
         allSubFolderUnderSystem = getAllSubFolderUnderSystemName(allSubFolder, TEST_SYSTEM_NAME);
+        log.info("allSubFolder is {}", JsonUtils.serialize(allSubFolder));
         Assert.assertEquals(allSubFolderUnderSystem.size(), 7);
         // verification Opportunity
         templateFeedType = EntityTypeUtils.generateFullFeedType(opportunity.getName(), EntityType.Opportunity);
@@ -73,7 +79,7 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
         Assert.assertNotNull(template.getAttribute(InterfaceName.StageName));
         Assert.assertNotNull(template.getAttribute(InterfaceName.LastModifiedDate));
         Assert.assertNotNull(template.getAttribute(opportunity.getAccountSystemId()));
-        Assert.assertNotNull(template.getAttribute(InterfaceName.Id));
+        Assert.assertNotNull(template.getAttribute(InterfaceName.OpportunityId));
 
         //verification Stage
         String stageFeedType = EntityTypeUtils.generateFullFeedType(opportunity.getName(),
