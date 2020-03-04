@@ -2,6 +2,7 @@ package com.latticeengines.pls.end2end;
 
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
@@ -49,8 +51,9 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
     @Test(groups = "deployment-app")
     public void testCreateOpportunityTemplate() {
         cdlService.createS3ImportSystem(customerSpace, TEST_SYSTEM_NAME, S3ImportSystem.SystemType.Other, true);
-        List<String> allSubFolder = dropBoxProxy.getAllSubFolders(customerSpace, TEST_SYSTEM_NAME, null, null);
-        Assert.assertEquals(allSubFolder.size(), 5);
+        List<String> allSubFolder = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
+        List<String> allSubFolderUnderSystem = getAllSubFolderUnderSystemName(allSubFolder, TEST_SYSTEM_NAME);
+        Assert.assertEquals(allSubFolderUnderSystem.size(), 5);
         createAccountTemplateAndVerify();
         boolean result =  cdlService.createDefaultOpportunityTemplate(customerSpace, TEST_SYSTEM_NAME);
         Assert.assertTrue(result);
@@ -58,8 +61,9 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
         S3ImportSystem opportunity = cdlService.getS3ImportSystem(customerSpace, TEST_SYSTEM_NAME);
         Assert.assertNotNull(opportunity,
                 String.format("Should exist a opportunity system. systems=%s", JsonUtils.serialize(allSystems)));
-        allSubFolder = dropBoxProxy.getAllSubFolders(customerSpace, TEST_SYSTEM_NAME, null, null);
-        Assert.assertEquals(allSubFolder.size(), 7);
+        allSubFolder = dropBoxProxy.getAllSubFolders(customerSpace, null, null, null);
+        allSubFolderUnderSystem = getAllSubFolderUnderSystemName(allSubFolder, TEST_SYSTEM_NAME);
+        Assert.assertEquals(allSubFolderUnderSystem.size(), 7);
         // verification Opportunity
         templateFeedType = EntityTypeUtils.generateFullFeedType(opportunity.getName(), EntityType.Opportunity);
         opportunityDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, "File", templateFeedType);
@@ -124,5 +128,15 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
                 opportunityDataFeedTask.getUniqueId(), sourceFile.getName());
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    private List<String> getAllSubFolderUnderSystemName(List<String> allSubFolders, String systemName) {
+        List<String> subFolders = new ArrayList<>();
+        for (String subFolder : allSubFolders) {
+            if (systemName.equals(S3PathBuilder.getSystemNameFromFeedType(subFolder))) {
+                subFolders.add(subFolder);
+            }
+        }
+        return subFolders;
     }
 }
