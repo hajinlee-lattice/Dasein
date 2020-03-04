@@ -195,13 +195,18 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
                 String contactTableName = attrRepo.getTableName(TableRoleInCollection.SortedContact);
-                // check the account and account limit
-                long accountsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Account));
-                campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
                 boolean contactsDataExists = StringUtils.isNotEmpty(contactTableName);
-                if (contactsDataExists) {
-                    long contactsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Contact));
-                    campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
+                // check the account and account limit
+                Long accountLimitFromUI = playLaunchContext.getPlayLaunch().getTopNCount();
+                if (accountLimitFromUI != null && accountLimitFromUI > 0) {
+                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountLimitFromUI);
+                } else {
+                    long accountsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Account));
+                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
+                    if (contactsDataExists) {
+                        long contactsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Contact));
+                        campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
+                    }
                 }
                 // 2. get DataFrame for Account and Contact
                 HdfsDataUnit accountDataUnit = getEntityQueryData(playLaunchContext.getAccountFrontEndQuery());
