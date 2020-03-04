@@ -96,6 +96,19 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
             // }
         });
 
+        //check for saving attribute name case-insensitive
+        AttrConfig attrConfig4a = new AttrConfig();
+        attrConfig4a.setAttrName("ATTR4");
+        attrConfig4a.setAttrProps(new HashMap<>());
+        response = attrConfigEntityMgr.save(tenantName, entity,
+                Arrays.asList(attrConfig2, attrConfig4a));
+        Assert.assertEquals(response.size(), 2);
+        Thread.sleep(500); // wait for replication lag
+        attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
+        Assert.assertEquals(attrConfigs.size(), 4);
+        AttrConfig config = attrConfigs.stream().filter(e-> "ATTR4".equals(e.getAttrName())).findFirst().orElse(null);
+        Assert.assertNotNull(config);
+
         attrConfigs = attrConfigEntityMgr.findAllHaveCustomDisplayNameByTenantId(tenantName);
         Assert.assertEquals(response.size(), 2);
         Assert.assertTrue(attrConfigs.stream().allMatch(attr -> attr.getAttrName().equals(attrConfig2.getAttrName())

@@ -46,10 +46,10 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
     public List<AttrConfig> save(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs) {
         List<AttrConfigEntity> existing = repository.findByTenantIdAndEntity(tenantId, entity);
         Map<String, AttrConfigEntity> existingMap = new HashMap<>();
-        existing.forEach(config -> existingMap.put(config.getDocument().getAttrName(), config));
+        existing.forEach(config -> existingMap.put(config.getDocument().getAttrName().toLowerCase(), config));
         List<AttrConfigEntity> toCreateOrUpdate = new ArrayList<>();
         for (AttrConfig attrConfig : attrConfigs) {
-            String attrName = attrConfig.getAttrName();
+            String attrName = attrConfig.getAttrName().toLowerCase();
             AttrConfigEntity attrConfigEntity;
             if (existingMap.containsKey(attrName)) {
                 attrConfigEntity = existingMap.get(attrName);
