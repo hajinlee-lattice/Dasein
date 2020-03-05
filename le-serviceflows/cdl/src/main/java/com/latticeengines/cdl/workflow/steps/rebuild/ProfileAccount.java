@@ -74,6 +74,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     private boolean ldcRefresh;
     private boolean hasFilter;
+    private boolean hasStats;
+    private boolean isFullProfile;
 
     @Override
     protected BusinessEntity getEntity() {
@@ -91,12 +93,18 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
 
         boolean shortCut;
-        Table statsTableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_STATS_TABLE_NAME);
-        shortCut = statsTableInCtx != null;
+        Table statsTableInCtx = getTableSummaryFromKey(customerSpace.toString(), FULL_ACCOUNT_STATS_TABLE_NAME);
+        Table encodedTableInCtx = getTableSummaryFromKey(customerSpace.toString(), FULL_ACCOUNT_ENCODED_TABLE_NAME);
+        isFullProfile = isFullProfile();
+        shortCut = isFullProfile ? statsTableInCtx != null : encodedTableInCtx != null;
 
         if (shortCut) {
-            log.info("Found stats table in context, going thru short-cut mode.");
-            statsTableName = statsTableInCtx.getName();
+            if (statsTableInCtx != null) {
+                log.info("Found stats table in context, going thru short-cut mode.");
+                statsTableName = statsTableInCtx.getName();
+            } else {
+                log.info("Found encoded table in context, going thru short-cut mode.");
+            }
             finishing();
             return null;
         } else {
@@ -123,11 +131,19 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
     }
 
+    private boolean isFullProfile() {
+        return getConfiguration().isFullProfile() || shouldExcludeDataCloudAttrs();
+    }
+
     @Override
     protected void onPostTransformationCompleted() {
-        statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
+        if (hasStats) {
+            statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
+        }
         finishing();
-        exportToS3AndAddToContext(statsTableName, ACCOUNT_STATS_TABLE_NAME);
+        if (statsTableName != null) {
+            exportToS3AndAddToContext(statsTableName, FULL_ACCOUNT_STATS_TABLE_NAME);
+        }
 
         // no need to make them work for retry, as retry can regenerate them in bucket account step
         String profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
@@ -155,7 +171,10 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         TransformationStepConfig filter = hasFilter ? filter() : null;
         TransformationStepConfig profile = profile(hasFilter);
         TransformationStepConfig encode = bucketEncode(hasFilter);
-        TransformationStepConfig calc = calcStats();
+        TransformationStepConfig calc = null;
+        if (isFullProfile) {
+            calc = calcStats();
+        }
 
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
@@ -164,7 +183,11 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
         steps.add(profile); //
         steps.add(encode); //
-        steps.add(calc); //
+        if (calc != null) {
+            steps.add(calc); //
+            hasStats = true;
+            log.info("It's full profile.");
+        }
         // -----------
         request.setSteps(steps);
         return request;
@@ -360,7 +383,9 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     }
 
     private void finishing() {
-        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+        if (statsTableName != null) {
+            updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+        }
         enrichMasterTableSchema(masterTableName);
     }
 

@@ -57,6 +57,11 @@ public class RebuildAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder fullProfile(boolean fullProfile) {
+            processAccountStepConfiguration.setFullProfile(fullProfile);
+            return this;
+        }
+
         public RebuildAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rebuildAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

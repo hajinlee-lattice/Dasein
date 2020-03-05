@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
@@ -59,6 +58,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
     private int filterStep;
     private int profileStep;
+    private int encodeStep;
 
     private boolean shortCutMode;
 
@@ -70,9 +70,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    @Inject
-    private BatonService batonService;
-
     @Override
     protected TableRoleInCollection profileTableRole() {
         return TableRoleInCollection.Profile;
@@ -82,8 +79,12 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     protected void initializeConfiguration() {
         super.initializeConfiguration();
 
-        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), Arrays.asList(
-                ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME));
+        List<String> tables = Arrays.asList(ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME);
+        if (!getConfiguration().isFullProfile()) {
+            tables = Arrays.asList(ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME, ACCOUNT_STATS_TABLE_NAME);
+        }
+        List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(),
+                tables);
         shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
 
         if (shortCutMode) {
@@ -99,7 +100,9 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
             dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
                     servingStoreRole, inactive);
         } else {
-            statsTablePrefix = null;
+            if (configuration.isFullProfile()) {
+                statsTablePrefix = null;
+            }
             fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
             setEvaluationDateStrAndTimestamp();
             Table fullAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), fullAccountTableName);
@@ -131,22 +134,33 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
             servingStoreTableName = getStringValueFromContext(FULL_ACCOUNT_ENCODED_TABLE_NAME);
             removeFromListInContext(TEMPORARY_CDL_TABLES, servingStoreTableName, String.class);
+            log.info("Use fulll Account table.");
+
         } else {
             int step = 0;
             filterStep = step++;
-            profileStep = step;
+            profileStep = step++;
+            encodeStep = step;
 
             // -----------
             TransformationStepConfig filter = filter();
             TransformationStepConfig profile = profile();
             TransformationStepConfig encode = bucketEncode();
             TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, null);
+            TransformationStepConfig calc = null;
+            if (!getConfiguration().isFullProfile()) {
+                calc = calcStats(profileStep, encodeStep, statsTablePrefix, null);
+            }
 
             // -----------
             steps.add(filter);
             steps.add(profile);
             steps.add(encode);
             steps.add(sortProfile);
+            if (calc != null) {
+                steps.add(calc);
+                log.info("It's not full profile.");
+            }
         }
 
         request.setSteps(steps);
@@ -158,6 +172,10 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         super.onPostTransformationCompleted();
         exportToS3AndAddToContext(profileTableName, ACCOUNT_PROFILE_TABLE_NAME);
         exportToS3AndAddToContext(servingStoreTableName, ACCOUNT_SERVING_TABLE_NAME);
+        if (!getConfiguration().isFullProfile()) {
+            exportToS3AndAddToContext(statsTableName, ACCOUNT_STATS_TABLE_NAME);
+            putStringValueInContext(PROCESS_ACCOUNT_STATS_MERGE, "true");
+        }
     }
 
     private TransformationStepConfig filter() {
@@ -318,12 +336,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private boolean hasFullProfleAndEncoded() {
         String profileTableName = getStringValueFromContext(FULL_ACCOUNT_PROFILE_TABLE_NAME);
         String encodedTableName = getStringValueFromContext(FULL_ACCOUNT_ENCODED_TABLE_NAME);
-        return StringUtils.isNotBlank(profileTableName) & StringUtils.isNotBlank(encodedTableName);
-    }
-
-    private boolean shouldExcludeDataCloudAttrs() {
-        String tenantId = configuration.getCustomerSpace().getTenantId();
-        return batonService.shouldExcludeDataCloudAttrs(tenantId);
+        return StringUtils.isNotBlank(profileTableName) && StringUtils.isNotBlank(encodedTableName);
     }
 
 }
