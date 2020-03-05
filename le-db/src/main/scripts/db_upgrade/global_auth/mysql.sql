@@ -6,14 +6,14 @@ CREATE PROCEDURE `AddGlobalTeamTable`()
     DROP TABLE if EXISTS `GlobalTeam`;
       CREATE TABLE `GlobalTeam` (
 	    `GlobalTeam_ID` bigint(20) NOT NULL AUTO_INCREMENT,
+	    `Created_By` INT(11) NOT NULL,
 	    `Creation_Date` datetime NOT NULL,
 	    `Last_Modification_Date` datetime NOT NULL,
-	    `Created_By` INT(11) NOT NULL,
 	    `Last_Modified_By` INT(11) NOT NULL,
-	    `Team_ID` varchar(255) NOT NULL,
+        `Created_By_User` VARCHAR(255),
 	    `NAME`  VARCHAR(255) NOT NULL,
 	    `Tenant_ID` bigint(20) NOT NULL,
-	    `Created_By_User` VARCHAR(255),
+	    `Team_ID` varchar(255) NOT NULL,
 	    PRIMARY KEY (`GlobalTeam_ID`)
 	) ENGINE=InnoDB;
 
