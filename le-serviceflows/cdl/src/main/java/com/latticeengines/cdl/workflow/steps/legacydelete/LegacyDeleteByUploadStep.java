@@ -471,9 +471,13 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
                 canMergeActions = getSetObjectFromContext(CONTACT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
                 break;
             case Transaction:
-                Map<CleanupOperationType, Set> actionMap =
-                        new HashMap<>(getMapObjectFromContext(TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS,
-                                CleanupOperationType.class, Set.class));
+                Map<CleanupOperationType, Set> actionMap = new HashMap<>();
+                Map<CleanupOperationType, Set> actionMapInContext = //
+                        getMapObjectFromContext(TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS,
+                                CleanupOperationType.class, Set.class);
+                if (MapUtils.isNotEmpty(actionMapInContext)) {
+                    actionMap.putAll(actionMapInContext);
+                }
                 log.info("actionMap is : {}", JsonUtils.serialize(actionMap));
                 otherActions = new ArrayList<>();
                 if (actionMap.containsKey(CleanupOperationType.BYUPLOAD_MINDATE)) {

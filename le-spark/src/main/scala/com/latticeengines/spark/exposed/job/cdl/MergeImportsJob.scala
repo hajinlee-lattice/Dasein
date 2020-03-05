@@ -14,13 +14,13 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
   private val templateColumn = "__template__"
   private var hasSystem = false
-  
+
   override def runJob(spark: SparkSession, lattice: LatticeContext[MergeImportsConfig]): Unit = {
     val config: MergeImportsConfig = lattice.config
     val inputDfs = lattice.input
     val joinKey = config.getJoinKey
     val srcId = config.getSrcId
-    val templates = config.getTemplates
+    val templates: List[String] = if (config.getTemplates == null) List() else  config.getTemplates.asScala.toList
     hasSystem = config.isHasSystem
     var processedInputs = inputDfs map { src => processSrc(src, srcId, joinKey, config.isDedupSrc,
         config.getRenameSrcFields, config.getCloneSrcFields, hasSystem) }
@@ -28,11 +28,11 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
     println(s"templates is: $templates")
     println("----- END SCRIPT OUTPUT -----")
 
-    if (templates != null) {
-        processedInputs = processedInputs.zip(templates.asScala.toList) map { e =>
+    if (templates.nonEmpty) {
+        processedInputs = processedInputs.zip(templates) map { e =>
           val df = e._1
           val template = e._2
-          addTemplateColumn(df, template) 
+          addTemplateColumn(df, template)
         }
     }
     val merged = processedInputs.zipWithIndex.reduce((l, r) => {
@@ -175,5 +175,5 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
       df.withColumn(templateColumn, lit(template))
     }
   }
-   
+
 }

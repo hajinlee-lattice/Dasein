@@ -73,7 +73,6 @@ public class RedShiftCleanupServiceImpl implements RedShiftCleanupService {
             existingTenant.add(CustomerSpace.parse(tenantId).getTenantId().toLowerCase());
         }
         List<String> metadataTables = dataCollectionService.getAllTableNames();
-        log.info("metadataTable is " + metadataTables.toString());
         List<String> unUsedRedshiftTable = getUnusedTable(allRedshiftTable, metadataTables);
         SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
         for (String tableName : unUsedRedshiftTable) {
