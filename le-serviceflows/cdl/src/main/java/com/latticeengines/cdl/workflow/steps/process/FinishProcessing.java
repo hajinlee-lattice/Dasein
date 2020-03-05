@@ -174,6 +174,7 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void registerCollectionTables() {
+        removeObjectFromContext(REGISTERED_TABLE_NAMES);
         List<String> inactiveTables = dataCollectionProxy.getTableNames(customerSpace.toString(), inactive);
         inactiveTables.forEach(this::registerTable);
     }
