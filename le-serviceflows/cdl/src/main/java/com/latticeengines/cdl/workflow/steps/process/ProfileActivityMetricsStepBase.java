@@ -58,6 +58,10 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         request.setEnableSlack(false);
 
         Set<String> servingEntityNames = getObjectFromContext(ACTIVITY_MERGED_METRICS_SERVING_ENTITIES, Set.class);
+        if (CollectionUtils.isEmpty(servingEntityNames)) {
+            log.info("No activity serving entity found. Skip profiling activity metrics.");
+            return null;
+        }
         Set<BusinessEntity> servingEntities = servingEntityNames.stream().map(BusinessEntity::getByName).collect(Collectors.toSet());
         log.info("Found metrics serving entities from context: {}", servingEntities);
         if (CollectionUtils.isEmpty(servingEntities)) {
