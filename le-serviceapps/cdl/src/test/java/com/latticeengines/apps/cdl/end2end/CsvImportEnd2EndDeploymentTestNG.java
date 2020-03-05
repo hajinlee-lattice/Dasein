@@ -5,10 +5,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -23,7 +26,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -38,6 +43,7 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
 
     private static final Logger log = LoggerFactory.getLogger(CsvImportEnd2EndDeploymentTestNG.class);
 
+    private static final String WEBSITE_SYSTEM = "Default_Website_System";
     private static final String OPPORTUNITY_SYSTEM = "Default_Opportunity_System";
 
     private static final boolean isEntityMatchMode = true;
@@ -71,6 +77,37 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
 //        importAndDownload(BusinessEntity.Product);
 //        clearHdfs();
 //        importAndDownload(BusinessEntity.Transaction);
+    }
+
+    @Test(groups = "manual")
+    private void importWebVisitData() throws Exception {
+        ensureEmptyDirs();
+        // setup web visit templates
+        SimpleTemplateMetadata webVisit = new SimpleTemplateMetadata();
+        webVisit.setEntityType(EntityType.WebVisit);
+        Set<String> ignoredAttrSet = Sets.newHashSet(InterfaceName.Website.name(), InterfaceName.PostalCode.name());
+        webVisit.setIgnoredStandardAttributes(ignoredAttrSet);
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(webVisit));
+        SimpleTemplateMetadata ptn = new SimpleTemplateMetadata();
+        ptn.setEntityType(EntityType.WebVisitPathPattern);
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(ptn));
+        SimpleTemplateMetadata sm = new SimpleTemplateMetadata();
+        sm.setEntityType(EntityType.WebVisitSourceMedium);
+        cdlProxy.createWebVisitTemplate2(mainCustomerSpace, Collections.singletonList(sm));
+
+        // import opportunity & stage data
+        importData(BusinessEntity.ActivityStream, "webVisit_no_sm.csv",
+                EntityTypeUtils.generateFullFeedType(WEBSITE_SYSTEM, EntityType.WebVisit), false, false);
+        // importData(BusinessEntity.Catalog, "webVisitPathPtn.csv",
+        // EntityTypeUtils.generateFullFeedType(WEBSITE_SYSTEM,
+        // EntityType.WebVisitPathPattern), false, false);
+        // importData(BusinessEntity.Catalog, "webVisitSrcMedium.csv",
+        // EntityTypeUtils.generateFullFeedType(WEBSITE_SYSTEM,
+        // EntityType.WebVisitSourceMedium), false, false);
+
+        downloadData();
+        collectAvroFilesForEntity(BusinessEntity.ActivityStream);
+        // collectAvroFilesForEntity(BusinessEntity.Catalog);
     }
 
     @Test(groups = "manual")

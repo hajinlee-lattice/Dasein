@@ -1569,7 +1569,7 @@ public class SchemaRepository {
             break;
         case WebVisit:
             attrs = new ArrayList<>(Arrays.asList(attrPageUrl(), attrWebVisitDate(), attrUserId(), //
-                    attrSourceMedium(), attrCompanyName(), attrWebsite(), attrCity(), attrState(), attrCountry(), //
+                    attrSourceMedium(false), attrCompanyName(), attrWebsite(), attrCity(), attrState(), attrCountry(), //
                     attrPostalCode(), attrDUNS()));
             schemaTable = createTable(SchemaInterpretation.WebVisit);
             schemaTable.addAttributes(attrs);
@@ -1580,7 +1580,7 @@ public class SchemaRepository {
             schemaTable.addAttributes(attrs);
             break;
         case WebVisitSourceMedium:
-            attrs = new ArrayList<>(Arrays.asList(attrSourceMedium()));
+            attrs = new ArrayList<>(Collections.singletonList(attrSourceMedium(true)));
             schemaTable = createTable(SchemaInterpretation.WebVisitSourceMedium);
             schemaTable.addAttributes(attrs);
             break;
@@ -1662,15 +1662,19 @@ public class SchemaRepository {
                 .build();
     }
 
-    private Attribute attrSourceMedium() {
-        return attr(InterfaceName.SourceMedium.name())
+    private Attribute attrSourceMedium(boolean required) {
+        AttributeBuilder builder = attr(InterfaceName.SourceMedium.name())
                 .allowedDisplayNames(Arrays.asList("SOURCE_MEDIUM", "SOURCEMEDIUM"))
-                .required()
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.SourceMedium) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .build();
+                .fundamentalType(ModelingMetadata.FT_ALPHA);
+        if (required) {
+            builder = builder.required();
+        } else {
+            builder = builder.defaultValueStr("");
+        }
+        return builder.build();
     }
 
     private Attribute attrCompanyName() {
