@@ -10,6 +10,7 @@ CREATE PROCEDURE `AddGlobalTeamTable`()
 	    `Last_Modification_Date` datetime NOT NULL,
 	    `Created_By` INT(11) NOT NULL,
 	    `Last_Modified_By` INT(11) NOT NULL,
+	    `Team_ID` varchar(255) NOT NULL,
 	    `NAME`  VARCHAR(255) NOT NULL,
 	    `Tenant_ID` bigint(20) NOT NULL,
 	    `Created_By_User` VARCHAR(255),

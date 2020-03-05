@@ -40,6 +40,10 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
     @Column(name = "GlobalTeam_ID", unique = true, nullable = false)
     private Long pid;
 
+    @JsonProperty("team_id")
+    @Column(name = "Team_ID", nullable = false)
+    private String teamId;
+
     @JsonProperty("name")
     @Column(name = "Name", nullable = false)
     private String name;
@@ -102,5 +106,13 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
 
     public void setCreatedByUser(String createdByUser) {
         this.createdByUser = createdByUser;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 }
