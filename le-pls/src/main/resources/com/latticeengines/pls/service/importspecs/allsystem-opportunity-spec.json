@@ -5,7 +5,8 @@
       {
         "fieldName": "OpportunityId",
         "fieldType": "TEXT",
-        "columnName": "Id",
+        "columnName": "OpportunityId",
+        "screenName": "Id",
         "matchingColumnNames": [
           "ID"
         ],
@@ -18,8 +19,9 @@
       },
       {
         "fieldName": "LastModifiedDate",
-        "fieldType": "TEXT",
+        "fieldType": "DATE",
         "columnName": "LastModifiedDate",
+        "screenName": "LastModifiedDate",
         "matchingColumnNames": [
           "Last Modified Date",
           "Last_Modified_Date",
@@ -36,6 +38,7 @@
         "fieldName": "StageName",
         "fieldType": "TEXT",
         "columnName": "StageName",
+        "screenName": "StageName",
         "matchingColumnNames": [
           "StageName",
           "STAGE",
@@ -51,6 +54,7 @@
         "fieldName": "Amount",
         "fieldType": "NUMBER",
         "columnName": "Amount",
+        "screenName": "Amount",
         "matchingColumnNames": [
           "AMOUNT"
         ],
@@ -64,6 +68,7 @@
         "fieldName": "CampaignId",
         "fieldType": "TEXT",
         "columnName": "CampaignId",
+        "screenName": "CampaignId",
         "matchingColumnNames": [
           "CampaignId",
           "CAMPAIGN ID"
@@ -76,8 +81,9 @@
       },
       {
         "fieldName": "CloseDate",
-        "fieldType": "TEXT",
+        "fieldType": "DATE",
         "columnName": "CloseDate",
+        "screenName": "CloseDate",
         "matchingColumnNames": [
           "CloseDate",
           "CLOSE DATE"
@@ -92,6 +98,7 @@
         "fieldName": "ContractId",
         "fieldType": "TEXT",
         "columnName": "Contract",
+        "screenName": "Contract",
         "matchingColumnNames": [
           "CONTRACT",
           "CONTRACT ID"
@@ -104,8 +111,9 @@
       },
       {
         "fieldName": "CreatedDate",
-        "fieldType": "TEXT",
+        "fieldType": "DATE",
         "columnName": "CreatedDate",
+        "screenName": "CreatedDate",
         "matchingColumnNames": [
           "CreatedDate",
           "CREATE DATE"
@@ -120,6 +128,7 @@
         "fieldName": "CurrencyCode",
         "fieldType": "TEXT",
         "columnName": "CurrencyIsoCode",
+        "screenName": "CurrencyIsoCode",
         "matchingColumnNames": [
           "CurrencyCode",
           "CURRENCY CODE",
@@ -135,6 +144,7 @@
         "fieldName": "ExpectedRevenue",
         "fieldType": "NUMBER",
         "columnName": "ExpectedRevenue",
+        "screenName": "ExpectedRevenue",
         "matchingColumnNames": [
           "ExpectedRevenue",
           "EXPECTED REVENUE"
@@ -149,6 +159,7 @@
         "fieldName": "Deleted",
         "fieldType": "BOOLEAN",
         "columnName": "IsDeleted",
+        "screenName": "IsDeleted",
         "matchingColumnNames": [
           "DELETED",
           "IsDeleted"
@@ -163,6 +174,7 @@
         "fieldName": "Won",
         "fieldType": "BOOLEAN",
         "columnName": "IsWon",
+        "screenName": "IsWon",
         "matchingColumnNames": [
           "WON",
           "IsWon"
@@ -177,6 +189,7 @@
         "fieldName": "Closed",
         "fieldType": "BOOLEAN",
         "columnName": "IsClosed",
+        "screenName": "IsClosed",
         "matchingColumnNames": [
           "CLOSED",
           "IsClosed"
@@ -191,6 +204,7 @@
         "fieldName": "LastActivity",
         "fieldType": "TEXT",
         "columnName": "LastActivityDate",
+        "screenName": "LastActivityDate",
         "matchingColumnNames": [
           "LastActivityDate",
           "Last_Activity_Date",
@@ -206,6 +220,7 @@
         "fieldName": "LeadSource",
         "fieldType": "TEXT",
         "columnName": "LeadSource",
+        "screenName": "LeadSource",
         "matchingColumnNames": [
           "LeadSource",
           "LEAD SOURCE"
@@ -220,6 +235,7 @@
         "fieldName": "Name",
         "fieldType": "TEXT",
         "columnName": "Name",
+        "screenName": "Name",
         "matchingColumnNames": [
           "Name",
           "NAME"
@@ -234,6 +250,7 @@
         "fieldName": "Probability",
         "fieldType": "NUMBER",
         "columnName": "Probability",
+        "screenName": "Probability",
         "matchingColumnNames": [
           "Probability",
           "PROBABILITY"
@@ -248,6 +265,7 @@
         "fieldName": "Quantity",
         "fieldType": "NUMBER",
         "columnName": "TotalOpportunityQuantity",
+        "screenName": "TotalOpportunityQuantity",
         "matchingColumnNames": [
           "TotalOpportunityQuantity",
           "Quantity"
@@ -262,6 +280,7 @@
         "fieldName": "CreatedBy",
         "fieldType": "TEXT",
         "columnName": "CreatedById",
+        "screenName": "CreatedById",
         "matchingColumnNames": [
           "CreatedById",
           "CreatedBy",
@@ -277,6 +296,7 @@
         "fieldName": "Division",
         "fieldType": "TEXT",
         "columnName": "Division",
+        "screenName": "Division",
         "matchingColumnNames": [
           "Division",
           "DIVISION"
@@ -291,6 +311,7 @@
         "fieldName": "ForecastCategory",
         "fieldType": "TEXT",
         "columnName": "ForecastCategory",
+        "screenName": "ForecastCategory",
         "matchingColumnNames": [
           "ForecastCategory",
           "FORECAST CATEGORY"
@@ -305,6 +326,7 @@
         "fieldName": "OwnedBy",
         "fieldType": "TEXT",
         "columnName": "OwnerId",
+        "screenName": "OwnerId",
         "matchingColumnNames": [
           "Owned By",
           "OWNED BY",
@@ -321,6 +343,7 @@
         "fieldName": "TerritoryID",
         "fieldType": "TEXT",
         "columnName": "TerritoryId",
+        "screenName": "TerritoryId",
         "matchingColumnNames": [
           "TerritoryID",
           "TERRITORY ID",
@@ -336,6 +359,7 @@
         "fieldName": "Type",
         "fieldType": "TEXT",
         "columnName": "Type",
+        "screenName": "Type",
         "matchingColumnNames": [
           "Type",
           "TYPE"
@@ -350,6 +374,7 @@
         "fieldName": "LastModifiedBy",
         "fieldType": "TEXT",
         "columnName": "LastModifiedById",
+        "screenName": "LastModifiedById",
         "matchingColumnNames": [
           "LastModifiedBy",
           "LastModifiedById",
@@ -368,6 +393,7 @@
       {
         "fieldType": "TEXT",
         "columnName": "AccountId",
+        "screenName": "AccountId",
         "matchingColumnNames": [
           "AccountId",
           "ACCOUNT ID"

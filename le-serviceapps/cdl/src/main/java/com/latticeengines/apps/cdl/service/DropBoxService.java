@@ -43,4 +43,8 @@ public interface DropBoxService {
     List<FileProperty> getFileListForPath(String customerSpace, String s3Path, String filter);
 
     String getExportPath(String customerSpace, AtlasExportType exportType, String datePrefix, String optionalId);
+
+    void createSubFolder(String customerSpace, String systemName, String objectName, String path);
+
+    List<String> getDropFoldersFromSystem(String customerSpace, String systemName);
 }

@@ -3,8 +3,10 @@ package com.latticeengines.pls.service.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,6 +15,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,9 +30,11 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
@@ -39,6 +45,7 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -101,6 +108,8 @@ public class CDLServiceImpl implements CDLService {
 
     private static final String DEFAULT_WEBSITE_SYSTEM = "Default_Website_System";
     private static final String DEFAULT_SYSTEM = "DefaultSystem";
+
+    private static final String ATTR_VALUE = "Record";
 
     @Inject
     protected SourceFileService sourceFileService;
@@ -917,5 +926,100 @@ public class CDLServiceImpl implements CDLService {
         } else {
             return Collections.emptyMap();
         }
+    }
+
+    @Override
+    public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String streamName,
+                                                                        String signature) {
+        Map<String, DimensionMetadata> metadataMap =
+                activityStoreProxy.getDimensionMetadataInStream(customerSpace, streamName, signature);
+        log.info("customerSpace is {}, streamName is {}, signature is {}.", customerSpace, streamName, signature);
+        Map<String, List<Map<String, Object>>> dimensionMetadataMap = new HashMap<>();
+        log.info("dimensionMetadataMap is {}.", JsonUtils.serialize(dimensionMetadataMap));
+        metadataMap.forEach((dimId, metadata) -> {
+            dimensionMetadataMap.put(dimId, resetMetadataValue(metadata));
+        });
+        return dimensionMetadataMap;
+    }
+
+    @Override
+    public void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
+                                                  String mimeType, String fileName, String customerSpace,
+                                                  String streamName, String signature, String dimensionName) {
+        log.info("mimeType is {}, fileName is {}, customerSpace is {}, streamName is {}, signature is {}, " +
+                "dimensionName is {}.", mimeType, fileName, customerSpace, streamName, signature, dimensionName);
+        List<Map<String, Object>> metadataValues = getMetadataValues(customerSpace, streamName, signature, dimensionName);
+        DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
+        builder.setMimeType(mimeType).setFileName(fileName).setFileContent(getCSVFromValues(metadataValues)).setBatonService(batonService);
+        DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
+        downloader.downloadFile(request, response);
+    }
+
+    private List<Map<String, Object>> getMetadataValues(String customerSpace, String streamName, String signature,
+                                                        String dimensionName) {
+        Map<String, List<Map<String, Object>>> getAllDimensionMetadataValues =
+                getDimensionMetadataInStream(customerSpace, streamName, signature);
+        if (!getAllDimensionMetadataValues.containsKey(dimensionName)) {
+            throw new IllegalArgumentException(String.format("CustomerSpace %s, cannot find dimensionName %s in " +
+                            "stream %s, signature is %s.", customerSpace, dimensionName, streamName, signature));
+        }
+        return getAllDimensionMetadataValues.get(dimensionName);
+    }
+
+    private List<Map<String, Object>> resetMetadataValue(DimensionMetadata item) {
+        if (item == null) {
+            return null;
+        }
+        List<String> nlFields = Arrays.asList(InterfaceName.PathPatternId.name(), InterfaceName.SourceMediumId.name(),
+                InterfaceName.StageNameId.name(), InterfaceName.City.name());
+        List<Map<String, Object>> metadataValue = item.getDimensionValues();
+        for (Map<String, Object> simpleMetadataValue : metadataValue) {
+            for (String needDeleteField : nlFields) {
+                simpleMetadataValue.remove(needDeleteField);
+            }
+        }
+        log.info("after reset MetadataValue, metadataValue is {}.", JsonUtils.serialize(metadataValue));
+        return metadataValue;
+    }
+
+    private String getCSVFromValues(List<Map<String, Object>> metadataValues) {
+        if (CollectionUtils.isEmpty(metadataValues)) {
+            return "";
+        }
+        StringBuffer stringBuffer = new StringBuffer();
+        Map<String, Object> firstMetadataValue = metadataValues.get(0);
+        Set<String> keySet = firstMetadataValue.keySet();
+        int count = 0;
+        for (String header : keySet) {
+            if (count == keySet.size() - 1) {
+                stringBuffer.append(modifyStringForCSV(header));
+            } else {
+                stringBuffer.append(modifyStringForCSV(header)).append(",");
+            }
+            count++;
+        }
+        stringBuffer.append("\r\n");
+
+        for (Map<String, Object> metadataValue : metadataValues) {
+            Collection<Object> valueSet = metadataValue.values();
+            int num = 0;
+            for (Object object : valueSet) {
+                if (num == keySet.size() - 1) {
+                    stringBuffer.append(modifyStringForCSV(String.valueOf(object)));
+                } else {
+                    stringBuffer.append(modifyStringForCSV(String.valueOf(object))).append(",");
+                }
+                num++;
+            }
+            stringBuffer.append("\r\n");
+        }
+
+        return stringBuffer.toString();
+    }
+    private String modifyStringForCSV(String value) {
+        if (value == null) {
+            return "";
+        }
+        return "\"" + value.replaceAll("\"", "\"\"") + "\"";
     }
 }

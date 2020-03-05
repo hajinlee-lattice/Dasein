@@ -73,6 +73,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -86,6 +87,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private static final String LATTICE_IDS_SECTION = "Lattice IDs";
     private static final String MATCH_TO_ACCOUNT_ID_SECTION = "Match to Accounts - ID";
     private static final String ACCOUNT_FIELD_NAME = "AccountId";
+    private static final String DEFAULTSYSTEM = "DefaultSystem";
 
     @Inject
     private S3ImportSystemService s3ImportSystemService;
@@ -340,55 +342,54 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         if (importSystem == null) {
             return false;
         }
-        return !StringUtils.isEmpty(importSystem.getAccountSystemId());
+        return !(StringUtils.isEmpty(importSystem.getAccountSystemId()) && !validateGATenant(importSystem));
     }
 
     @Override
     public boolean createDefaultOpportunityTemplate(String customerSpace, String systemName) {
         log.info("setup opportunity data for tenant {}, systemName {}.", customerSpace, systemName);
-        DataFeedTask opportunityDataFeedTask = createOpportunityTemplate(customerSpace, systemName,
+        DataFeedTask opportunityDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
                 EntityType.Opportunity,
                 null);
         log.info("opportunity dataFeedTask unique id is {}.", opportunityDataFeedTask.getUniqueId());
-        DataFeedTask stageDataFeedTask = createOpportunityTemplate(customerSpace, systemName,
+        DataFeedTask stageDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
         log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
         String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
-        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
-        AtlasStream opportunityAtlasStream =
-                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(opportunityDataFeedTask)
-                .withName(opportunityAtlasStreamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
-                .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
-                .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).withReducer(prepareReducer()).build();
-        opportunityAtlasStream.setStreamId(AtlasStream.generateId());
-        streamEntityMgr.create(opportunityAtlasStream);
-        log.info("opportunityAtlasStream is {}.", JsonUtils.serialize(opportunityAtlasStream));
-        Catalog stageCatalog = createCatalog(tenant, opportunityAtlasStreamName, stageDataFeedTask);
-        catalogEntityMgr.create(stageCatalog);
-        log.info("stageCatalog is {}.", JsonUtils.serialize(stageCatalog));
-        StreamDimension dimension = createHashDimension(opportunityAtlasStream, stageCatalog,
-                InterfaceName.StageNameId.name(), StreamDimension.Usage.Pivot, InterfaceName.StageName.name());
-        dimensionEntityMgr.create(dimension);
-        log.info("dimension is {}.", JsonUtils.serialize(dimension));
-        ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(tenant.getId(),
-                opportunityAtlasStream.getName());
-        if (defaultGroup == null) {
-            throw new IllegalStateException(String.format(
-                "Failed to setup default web visit metric groups for tenant %s", customerSpace));
-        }
+        createOpportunityAtlas(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
         return true;
     }
 
     @Override
-    public DataFeedTask createOpportunityTemplate(String customerSpace, String systemName, EntityType entityType,
+    public boolean createOpportunityTemplate(String customerSpace, String systemName, EntityType entityType,
                                                     SimpleTemplateMetadata simpleTemplateMetadata) {
+        if (!EntityType.Opportunity.equals(entityType)) {
+            throw new IllegalArgumentException(String.format("createOpportunityTemplate cannot support entityType %s" +
+                    ".", entityType));
+        }
+        log.info("setup opportunity data for tenant {}, systemName {}, SimpleTemplateMetadata {}.", customerSpace,
+                systemName, JsonUtils.serialize(simpleTemplateMetadata));
+        DataFeedTask opportunityDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
+                EntityType.Opportunity, simpleTemplateMetadata);
+        log.info("opportunity dataFeedTask unique id is {}.", opportunityDataFeedTask.getUniqueId());
+        DataFeedTask stageDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
+                EntityType.OpportunityStageName, null);
+        log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
+        String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
+        createOpportunityAtlas(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
+        return true;
+    }
+
+    private DataFeedTask createOpportunityTemplateOnly(String customerSpace, String systemName, EntityType entityType,
+                                                       SimpleTemplateMetadata simpleTemplateMetadata) {
         S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
                 systemName);
         if (importSystem == null) {
             throw new IllegalStateException(String.format("S3ImportSystem cannot be null, systemName is %s," +
                     " tenant %s.", systemName, customerSpace));
         }
-
+        createDropFolder(customerSpace, systemName, EntityType.Opportunity);
+        createDropFolder(customerSpace, systemName, EntityType.OpportunityStageName);
         ImportWorkflowSpec spec;
         try {
             String fileSystemType = "allsystem";
@@ -579,6 +580,45 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return s3ImportSystemService.getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
     }
 
+    private void createOpportunityAtlas(String customerSpace, String opportunityAtlasStreamName,
+                                        DataFeedTask opportunityDataFeedTask, DataFeedTask stageDataFeedTask) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        AtlasStream opportunityAtlasStream =
+                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(opportunityDataFeedTask)
+                        .withName(opportunityAtlasStreamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
+                        .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
+                        .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).withReducer(prepareReducer()).build();
+        opportunityAtlasStream.setStreamId(AtlasStream.generateId());
+        streamEntityMgr.create(opportunityAtlasStream);
+        log.info("opportunityAtlasStream is {}.", JsonUtils.serialize(opportunityAtlasStream));
+        Catalog stageCatalog = createCatalog(tenant, opportunityAtlasStreamName, stageDataFeedTask);
+        catalogEntityMgr.create(stageCatalog);
+        log.info("stageCatalog is {}.", JsonUtils.serialize(stageCatalog));
+        StreamDimension dimension = createHashDimension(opportunityAtlasStream, stageCatalog,
+                InterfaceName.StageNameId.name(), StreamDimension.Usage.Pivot, InterfaceName.StageName.name());
+        dimensionEntityMgr.create(dimension);
+        log.info("dimension is {}.", JsonUtils.serialize(dimension));
+        ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(tenant.getId(),
+                opportunityAtlasStream.getName());
+        if (defaultGroup == null) {
+            throw new IllegalStateException(String.format(
+                    "Failed to setup Opportunity metric groups for tenant %s", customerSpace));
+        }
+    }
+
+    private void createDropFolder(String customerSpace, String systemName, EntityType entityType) {
+        List<String> allSubFolder = dropBoxService.getDropFoldersFromSystem(customerSpace, systemName);
+        if (CollectionUtils.isEmpty(allSubFolder)) {
+            throw new IllegalArgumentException(String.format("no subFolder, customerSpace is %s.", customerSpace));
+        }
+        log.info("allSubFolder is {}", JsonUtils.serialize(allSubFolder));
+        String folderName = S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName());
+        log.info("want create folderName is {}.", folderName);
+        if (!allSubFolder.contains(folderName)) {
+            dropBoxService.createSubFolder(customerSpace, systemName, entityType.getDefaultFeedTypeName(), null);
+        }
+    }
+
     private void updateLatticeId(boolean isMappedToLatticeId, String fieldName, String columnName,
                                         FieldDefinitionsRecord record) {
         if (isMappedToLatticeId) {
@@ -600,6 +640,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
     /*
      * map to system UniqueId
+     * for entitymatchGA tenant, under DefaultSystem, if no systemAccountId, map to AccountSystemId.
      */
     private void processMatchId(S3ImportSystem importSystem, FieldDefinitionsRecord record) {
         List<FieldDefinition> fieldDefinitionList = record.getFieldDefinitionsRecords(MATCH_TO_ACCOUNT_ID_SECTION);
@@ -608,15 +649,19 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             return;
         }
         for (FieldDefinition matchIdDefinition : fieldDefinitionList) {
-            if (StringUtils.isBlank(importSystem.getAccountSystemId())) {
-                throw new IllegalStateException("Cannot assign column " + matchIdDefinition.getColumnName() +
-                        " ID from system " + importSystem.getName() +
-                        " as match ID in section " + MATCH_TO_ACCOUNT_ID_SECTION + " before that system has been set up");
-            }
 
             // Only set the field name if it is blank, indicating this is the first time it is being updated.
-            if (StringUtils.isBlank(matchIdDefinition.getFieldName())) {
-                matchIdDefinition.setFieldName(importSystem.getAccountSystemId());
+            if (StringUtils.isBlank(matchIdDefinition.getFieldName()) && ACCOUNT_FIELD_NAME.equals(matchIdDefinition.getColumnName())) {
+                if (validateGATenant(importSystem)) {
+                    matchIdDefinition.setFieldName(InterfaceName.CustomerAccountId.name());
+                } else {
+                    if (StringUtils.isBlank(importSystem.getAccountSystemId())) {
+                        throw new IllegalStateException("Cannot assign column " + matchIdDefinition.getColumnName() +
+                                " ID from system " + importSystem.getName() +
+                                " as match ID in section " + MATCH_TO_ACCOUNT_ID_SECTION + " before that system has been set up");
+                    }
+                    matchIdDefinition.setFieldName(importSystem.getAccountSystemId());
+                }
             }
 
             log.info("State|  section: {}  defSystem: {}  isMappedtoAccount:  {}  " +
@@ -669,5 +714,10 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         reducer.setArguments(Collections.singletonList(InterfaceName.LastModifiedDate.name()));
         reducer.setOperator(ActivityRowReducer.Operator.Latest);
         return reducer;
+    }
+
+    private boolean validateGATenant(S3ImportSystem importSystem) {
+        return batonService.onlyEntityMatchGAEnabled(MultiTenantContext.getCustomerSpace())
+                && StringUtils.isEmpty(importSystem.getAccountSystemId()) && DEFAULTSYSTEM.equals(importSystem.getName());
     }
 }
