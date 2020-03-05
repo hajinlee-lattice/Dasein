@@ -46,24 +46,5 @@ val schema = StructType(List(
   }
 ))
 
-//if ("String".equalsIgnoreCase(clzName)) {
-//  val vals: List[List[String]] = mapper.readValue[List[List[String]]](valsStr)
-//  val data: RDD[Row] = spark.sparkContext.parallelize(vals.map(l => Row(l.head)))
-//  val schema = StructType(List(StructField("value", StringType, nullable = false)))
-//  spark.createDataFrame(data, schema).createOrReplaceTempView(lattice.params.get("VIEW_NAME").asText)
-//} else if ("Integer".equalsIgnoreCase(clzName)) {
-//  mapper.readValue[List[List[Int]]](valsStr)
-//} else if ("Long".equalsIgnoreCase(clzName)) {
-//  mapper.readValue[List[List[Long]]](valsStr)
-//} else if ("Float".equalsIgnoreCase(clzName)) {
-//  mapper.readValue[List[List[Float]]](valsStr)
-//} else if ("Double".equalsIgnoreCase(clzName)) {
-//  mapper.readValue[List[List[Double]]](valsStr)
-//} else if ("Boolean".equalsIgnoreCase(clzName)) {
-//  mapper.readValue[List[List[Boolean]]](valsStr)
-//} else {
-//  mapper.readValue[List[List[String]]](valsStr)
-//}
-
 val data: RDD[Row] = spark.sparkContext.parallelize(vals.map(l => Row(l.head)))
 spark.createDataFrame(data, schema).createOrReplaceTempView(lattice.params.get("VIEW_NAME").asText)
