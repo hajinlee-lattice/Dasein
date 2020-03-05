@@ -315,10 +315,10 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     private String generateTaskUniqueName(DataFeed dataFeed) {
-        String taskName = String.format(UNIQUE_NAME_PATTERN, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
-        while (dataFeedTaskEntityMgr.getDataFeedTaskByTaskName(taskName, dataFeed, Boolean.FALSE) != null) {
+        String taskName;
+        do {
             taskName = String.format(UNIQUE_NAME_PATTERN, RandomStringUtils.randomAlphanumeric(8).toLowerCase());
-        }
+        } while (dataFeedTaskEntityMgr.getDataFeedTaskByTaskName(taskName, dataFeed, Boolean.FALSE) != null);
         return taskName;
     }
 }

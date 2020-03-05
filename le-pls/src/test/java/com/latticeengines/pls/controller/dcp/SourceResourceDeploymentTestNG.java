@@ -1,5 +1,10 @@
 package com.latticeengines.pls.controller.dcp;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -56,5 +61,15 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Source source2 = testSourceProxy.createSource(sourceRequest);
 
         Assert.assertNotEquals(source.getSourceId(), source2.getSourceId());
+
+        Source getSource = testSourceProxy.getSource(source.getSourceId());
+        Assert.assertNotNull(getSource);
+        Assert.assertEquals(getSource.getSourceId(), source.getSourceId());
+
+        List<Source> allSources = testSourceProxy.getSourcesByProject(projectDetail.getProjectId());
+        Assert.assertNotNull(allSources);
+        Assert.assertEquals(allSources.size(), 2);
+        Set<String> allIds = new HashSet<>(Arrays.asList(source.getSourceId(),  source2.getSourceId()));
+        allSources.forEach(s -> Assert.assertTrue(allIds.contains(s.getSourceId())));
     }
 }

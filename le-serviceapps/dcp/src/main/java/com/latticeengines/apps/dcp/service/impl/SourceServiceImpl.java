@@ -76,23 +76,8 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId, SimpleTemplateMetadata templateMetadata) {
-        Project project = projectService.getProjectByProjectId(customerSpace, projectId);
-        if (project == null) {
-            throw new RuntimeException(String.format("Cannot create source under project %s", projectId));
-        }
         String sourceId = generateRandomSourceId(customerSpace);
-        String relativePath = generateRelativePath(sourceId);
-        Table standardTable = getTemplateFromSpec(customerSpace, project.getS3ImportSystem(),
-                templateMetadata.getEntityType());
-        DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, templateMetadata,
-                project.getS3ImportSystem(), standardTable, relativePath, displayName, sourceId);
-        Source source = convertToSource(customerSpace, dataFeedTask);
-        if (StringUtils.isNotBlank(source.getFullPath())) {
-            dropBoxService.createFolderUnderDropFolder(source.getFullPath());
-            dropBoxService.createFolderUnderDropFolder(source.getFullPath() + DROP_FOLDER);
-            dropBoxService.createFolderUnderDropFolder(source.getFullPath() + UPLOAD_FOLDER);
-        }
-        return source;
+        return createSource(customerSpace, displayName, projectId, sourceId, templateMetadata);
     }
 
     @Override
