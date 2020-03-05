@@ -479,12 +479,18 @@ public class CDLResource {
         for (TemplateFieldPreview fieldPreview : fieldPreviews) {
             switch (entityType) {
                 case Accounts:
-                    if (s3ImportSystem.getAccountSystemId() != null && s3ImportSystem.getAccountSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
+                    if (s3ImportSystem.getAccountSystemId() != null &&
+                            s3ImportSystem.getAccountSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
                         fieldPreview.setFieldCategory(FieldCategory.LatticeField);
                     }
                     break;
                 case Contacts:
-                    if (s3ImportSystem.getContactSystemId() != null && s3ImportSystem.getContactSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
+                    if (s3ImportSystem.getContactSystemId() != null &&
+                            s3ImportSystem.getContactSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
+                        fieldPreview.setFieldCategory(FieldCategory.LatticeField);
+                    }
+                    if (s3ImportSystem.getAccountSystemId() != null &&
+                            s3ImportSystem.getAccountSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
                         fieldPreview.setFieldCategory(FieldCategory.LatticeField);
                     }
                     break;
