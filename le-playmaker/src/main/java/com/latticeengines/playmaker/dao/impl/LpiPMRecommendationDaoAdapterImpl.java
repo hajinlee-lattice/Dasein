@@ -73,46 +73,26 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                     return summary1.getLaunchId().compareTo(summary2.getLaunchId());
                 }
             });
-            long countNeedToSkip = 0L;
             List<String> launchIdsToQuery = new ArrayList<>();
-            long offsetInQuery = offset;
-            boolean skipOffsetCheck = false;
-            long totalCountInQuery = 0L;
-            // Dashboard returns the below 5 launches and API passes offset as 800 and max as 250
-            // Launch1 -> 500
-            // Launch2 -> 150
-            // Launch3 -> 350
-            // Launch4 -> 250
-            // Launch5 -> 100
+            int totalLaunchedSoFar = 0;
+            long queryOffset = -1L;
             for (LaunchSummary launchSummary : summaries) {
-                long recommendationsLaunched = launchSummary.getStats().getRecommendationsLaunched();
-                if (skipOffsetCheck) {
-                    // when reach to Launch5, totalCountInQuery will be 600 = 350(Launch3's recommendations) + 250(Launch4's recommendations)
-                    // so finally, the offsetInQuery is 150 and launchIdsToQuery contains id of Launch3 and Launch4
-                    if (maximum + offsetInQuery <= totalCountInQuery) {
+                long recsLaunchedByCurrentLaunch = launchSummary.getStats().getRecommendationsLaunched();
+                totalLaunchedSoFar += recsLaunchedByCurrentLaunch;
+                if (totalLaunchedSoFar < offset) {
+                    continue;
+                } else {
+                    if (queryOffset < 0) {
+                        queryOffset = offset - (totalLaunchedSoFar - recsLaunchedByCurrentLaunch);
+                    }
+                    launchIdsToQuery.add(launchSummary.getLaunchId());
+                    if (totalLaunchedSoFar > offset + maximum) {
                         break;
                     }
-                    // launchIdsToQuery will continue to grow when totalCountInQuery is less than maximum + offsetInQuery
-                    // it will include Launch4 id
-                    launchIdsToQuery.add(launchSummary.getLaunchId());
-                    totalCountInQuery += recommendationsLaunched;
-                } else {
-                    if (countNeedToSkip + recommendationsLaunched - 1 >= offset) {
-                        // when code reach here, the offsetInQuery will be
-                        // 800 - 500 (Launch1's recommendations) - 150(Launch2's recommendations) = 150
-                        // launchIdsToQuery will only include Launch3 id
-                        // countNeedToSkip is 650
-                        skipOffsetCheck = true;
-                        offsetInQuery -= countNeedToSkip;
-                        launchIdsToQuery.add(launchSummary.getLaunchId());
-                        totalCountInQuery += recommendationsLaunched;
-                        continue;
-                    }
-                    countNeedToSkip += recommendationsLaunched;
                 }
             }
             if (CollectionUtils.isNotEmpty(launchIdsToQuery)) {
-                return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIdsToQuery, start, (int) offsetInQuery, maximum, offset);
+                return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIdsToQuery, start, (int) queryOffset, maximum, offset);
             } else {
                 return new ArrayList<>();
             }
