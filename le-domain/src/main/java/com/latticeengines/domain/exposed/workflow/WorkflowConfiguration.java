@@ -54,6 +54,11 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("containerMemMB")
     private Integer containerMemoryMB;
 
+    // when this is true, metadata proxy will create temp tables by default
+    // this flag will be removed after all workflows are turned on for this flag.
+    @JsonProperty("enableTempTable")
+    private Boolean enableTempTable;
+
     private Collection<String> swpkgNames;
 
     @JsonProperty
@@ -195,6 +200,14 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void setFailingStep(FailingStep failingStep) {
         this.failingStep = failingStep;
+    }
+
+    public Boolean getEnableTempTable() {
+        return enableTempTable;
+    }
+
+    public void setEnableTempTable(Boolean enableTempTable) {
+        this.enableTempTable = enableTempTable;
     }
 
     @JsonIgnore

@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.listener;
 
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,11 @@ public abstract class LEJobListener implements JobExecutionListener {
         } catch (ClassCastException e) {
             return null;
         }
+    }
+
+    public <V> Set<V> getSetFromContext(JobExecution jobExecution, String key, Class<V> clazz) {
+        Set<?> set = getObjectFromContext(jobExecution, key, Set.class);
+        return JsonUtils.convertSet(set, clazz);
     }
 
     public <V> V getObjectFromContext(JobExecution jobExecution, String key, Class<V> clazz) {
