@@ -1,4 +1,4 @@
-package com.latticeengines.security.exposed.globalauth;
+package com.latticeengines.auth.exposed.service;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 

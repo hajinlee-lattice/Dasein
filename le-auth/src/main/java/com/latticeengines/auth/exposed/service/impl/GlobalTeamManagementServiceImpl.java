@@ -1,4 +1,4 @@
-package com.latticeengines.security.exposed.globalauth.impl;
+package com.latticeengines.auth.exposed.service.impl;
 
 import javax.inject.Inject;
 
@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTeamEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
+import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
-import com.latticeengines.security.exposed.globalauth.GlobalTeamManagementService;
 
 @Component("globalTeamManagementService")
-public class GlobalTeamManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
+public class GlobalTeamManagementServiceImpl implements
         GlobalTeamManagementService {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalTeamManagementServiceImpl.class);

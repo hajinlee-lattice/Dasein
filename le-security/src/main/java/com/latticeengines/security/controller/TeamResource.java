@@ -1,8 +1,10 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.security.controller;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.UpdateTeamUsersRequest;
+import com.latticeengines.security.exposed.service.TeamService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,6 +47,9 @@ public class TeamResource {
     // For mocking purpose, use camille LockerManager to
     // temporarily store team information
     private static final String LOCK_NAME = "TeamLock";
+
+    @Inject
+    private TeamService teamService;
 
     @GetMapping(value = "")
     @ResponseBody
