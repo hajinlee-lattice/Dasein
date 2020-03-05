@@ -1,11 +1,17 @@
 package com.latticeengines.auth.exposed.service;
 
-import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
+import java.util.List;
+
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 
 public interface GlobalTeamManagementService {
 
-    void createGlobalAuthTeam(GlobalAuthTeam globalAuthTeam);
+    void createTeam(GlobalTeam globalTeam);
 
-    void updateGlobalAuthTeam(GlobalAuthTeam globalAuthTeam);
+    void updateTeam(GlobalTeam globalTeam);
+
+    List<GlobalTeam> getTeams(boolean withTenantMember);
+
+    List<GlobalTeam> getTeamsByUserName(String username, boolean withTenantMember);
 
 }

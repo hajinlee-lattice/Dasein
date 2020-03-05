@@ -2,7 +2,7 @@ package com.latticeengines.auth.exposed.dao.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
@@ -132,6 +132,19 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         String queryStr = String.format(queryPattern, entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("email", email);
+        return (List<GlobalAuthUserTenantRight>) query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<GlobalAuthUserTenantRight> findByEmailsAndTenantId(Set<String> emails, Long tenantId) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
+        String queryPattern = "from %s where globalAuthUser.email in (:emails) and Tenant_ID = :tenantId";
+        String queryStr = String.format(queryPattern, entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("emails", emails);
+        query.setParameter("tenantId", tenantId);
         return (List<GlobalAuthUserTenantRight>) query.list();
     }
 

@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.service.impl;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -22,7 +23,22 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<GlobalTeam> getTeams() {
+        return globalTeamManagementService.getTeams(true);
+    }
 
-        return null;
+    @Override
+    public List<GlobalTeam> getTeamsByUserName(String username) {
+        return globalTeamManagementService.getTeamsByUserName(username, true);
+    }
+
+    @Override
+    public GlobalTeam createTeam(String teamName, String createdByUser, Set<String> teamMembers) {
+        GlobalTeam globalTeam = new GlobalTeam();
+        globalTeam.setTeamMembers(teamMembers);
+        globalTeam.setCreatedByUser(createdByUser);
+        globalTeam.setTeamId(GlobalTeam.generateId());
+        globalTeam.setTeamName(teamName);
+        globalTeamManagementService.createTeam(globalTeam);
+        return globalTeam;
     }
 }

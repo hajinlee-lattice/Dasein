@@ -1,6 +1,7 @@
 package com.latticeengines.auth.exposed.dao;
 
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
@@ -13,11 +14,13 @@ public interface GlobalAuthUserTenantRightDao extends BaseDao<GlobalAuthUserTena
     List<GlobalAuthUser> findUsersByTenantId(Long tenantId);
 
     GlobalAuthUserTenantRight findByUserIdAndTenantIdAndOperationName(Long userId, Long tenantId,
-            String operationName);
+                                                                      String operationName);
 
     Boolean deleteByUserId(Long userId);
 
     List<GlobalAuthUserTenantRight> findByEmail(String email);
+
+    List<GlobalAuthUserTenantRight> findByEmailsAndTenantId(Set<String> emails, Long tenantId);
 
     boolean existsByEmail(String email);
 

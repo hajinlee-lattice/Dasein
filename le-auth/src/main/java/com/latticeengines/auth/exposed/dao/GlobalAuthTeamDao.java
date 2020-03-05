@@ -5,4 +5,6 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 
 public interface GlobalAuthTeamDao extends BaseDao<GlobalAuthTeam> {
 
+    GlobalAuthTeam findByTeamNameAndTenantId(Long tenantId, String teamName);
+
 }

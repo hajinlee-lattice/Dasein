@@ -1,10 +1,12 @@
 package com.latticeengines.security.controller;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,7 +32,13 @@ import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.UpdateTeamUsersRequest;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TeamService;
+import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.exposed.util.SecurityUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,52 +59,34 @@ public class TeamResource {
     @Inject
     private TeamService teamService;
 
+    @Inject
+    private SessionService sessionService;
+
+    @Inject
+    private UserService userService;
+
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "List all teams")
-    public String getAllTeams() {
-        String teams = readData();
-        log.info("Get all teams, teams are: " + teams);
-        return teams;
+    public List<GlobalTeam> getAllTeams() {
+        return teamService.getTeams();
     }
 
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Create a new team")
-    public GlobalTeam createTeam( //
-            @RequestParam(value = "teamName", required = true) String teamName, //
-            @RequestParam(value = "createdByUser") String createdByUser, //
-            @ApiParam(value = "List of user ids to assign to the team", required = false) //
-            @RequestParam(value = "teamMembers") Set<String> teamMembers) {
-
+    public GlobalTeam createTeam(@RequestParam(value = "teamName") String teamName, //
+                                 @ApiParam(value = "List of user ids to assign to the team") //
+                                 @RequestParam(value = "teamMembers") Set<String> teamMembers, HttpServletRequest request) {
         Preconditions.checkArgument(StringUtils.isNotBlank(teamName), "Team name can't be empty");
+        User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
+        checkUser(loginUser);
+        return teamService.createTeam(teamName, loginUser.getUsername(), teamMembers);
+    }
 
-        GlobalTeam newTeam = new GlobalTeam();
-        newTeam.setTeamId(GlobalTeam.generateId());
-        newTeam.setTeamName(teamName);
-        newTeam.setCreatedByUser(createdByUser);
-        newTeam.setTeamMembers(teamMembers);
-
-        // Read back the current team data first
-        String curData = readData();
-        log.info(curData);
-
-        // Construct new json data by appending the new team info
-        String newData = null;
-        ArrayNode node = new ArrayNode(jsonParser.getNodeFactory());
-        if (StringUtils.isNotBlank(curData)) {
-            try {
-                node = (ArrayNode) jsonParser.readTree(curData);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("Failed to process team data", e);
-            }
-        }
-        newData = JsonUtils.serialize(node.addPOJO(newTeam));
-        if (writeData(newData)) {
-            log.info("Created team " + newTeam.getTeamName() + " with id " + newTeam.getTeamId());
-            return newTeam;
-        } else {
-            throw new RuntimeException("Failed to write team data");
+    private void checkUser(User user) {
+        if (user == null) {
+            throw new LedpException(LedpCode.LEDP_18221);
         }
     }
 
@@ -106,7 +96,7 @@ public class TeamResource {
     public Boolean editTeam( //
             @PathVariable("teamId") String teamId, //
             @RequestParam(value = "teamName") String teamName, //
-            @ApiParam(value = "List of user ids to assign to the team", required = false) //
+            @ApiParam(value = "List of user ids to assign to the team") //
             @RequestParam(value = "teamMembers") Set<String> teamMembers) {
         log.info("Edit team " + teamId);
         String teams = readData();

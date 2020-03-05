@@ -19,7 +19,7 @@ public class GlobalTeam {
     private String createdByUser;
 
     @JsonProperty("TeamMembers")
-    Set<String> teamMembers;
+    private Set<String> teamMembers;
 
     public static String generateId() {
         return "Team_" + AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));

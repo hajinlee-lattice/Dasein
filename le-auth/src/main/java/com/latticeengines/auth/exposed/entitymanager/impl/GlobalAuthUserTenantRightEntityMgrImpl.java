@@ -1,6 +1,7 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -87,6 +88,11 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<GlobalAuthUserTenantRight> findByNonNullExprationDate() {
         return gaUserTenantRightDao.findByNonNullExprationDate();
+    }
+
+    @Override
+    public List<GlobalAuthUserTenantRight> findByEmailsAndTenantId(Set<String> emails, Long tenantId) {
+        return gaUserTenantRightDao.findByEmailsAndTenantId(emails, tenantId);
     }
 
 }
