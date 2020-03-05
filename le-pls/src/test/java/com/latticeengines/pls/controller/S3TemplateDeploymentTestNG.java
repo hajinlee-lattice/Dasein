@@ -1,6 +1,8 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
@@ -22,7 +24,11 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.pls.frontend.*;
+import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
+import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.FileUploadService;
