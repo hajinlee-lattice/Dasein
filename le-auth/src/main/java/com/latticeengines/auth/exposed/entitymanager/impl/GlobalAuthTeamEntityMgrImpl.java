@@ -78,6 +78,7 @@ public class GlobalAuthTeamEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTea
     }
 
     @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public GlobalAuthTeam findByTeamNameAndTenantId(Long tenantId, String teamName) {
         return globalAuthTeamDao.findByTeamNameAndTenantId(tenantId, teamName);
     }

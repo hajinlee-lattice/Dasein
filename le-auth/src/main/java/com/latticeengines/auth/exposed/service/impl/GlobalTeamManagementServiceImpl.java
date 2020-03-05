@@ -48,6 +48,7 @@ public class GlobalTeamManagementServiceImpl implements
         globalAuthTeam.setName(globalTeam.getTeamName());
         globalAuthTeam.setCreatedByUser(globalAuthTeam.getCreatedByUser());
         globalAuthTeam.setTeamId(GlobalTeam.generateId());
+        globalAuthTeam.setTenantId(tenantData.getPid());
         Set<String> teamMembers = globalTeam.getTeamMembers();
         if (CollectionUtils.isNotEmpty(teamMembers)) {
             List<GlobalAuthUserTenantRight> globalAuthUserTenantRights =

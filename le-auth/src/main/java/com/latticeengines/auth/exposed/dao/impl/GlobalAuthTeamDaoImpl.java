@@ -23,8 +23,9 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTeam> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s where Name = %s and Tenant_ID = %d", entityClz.getSimpleName(), teamName, tenantId);
+                "from %s where name = :teamName and tenantId = %d", entityClz.getSimpleName(), tenantId);
         Query query = session.createQuery(queryStr);
+        query.setParameter("teamName", teamName);
         List list = query.list();
         if (list.size() == 0) {
             return null;
