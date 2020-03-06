@@ -12,6 +12,7 @@ CREATE PROCEDURE `AddGlobalTeamTable`()
 	    `Last_Modified_By` INT(11) NOT NULL,
 	    `NAME`  VARCHAR(255) NOT NULL,
 	    `Tenant_ID` bigint(20) NOT NULL,
+	    `Team_ID` VARCHAR(255) NOT NULL,
 	    `Created_By_User` VARCHAR(255),
 	    PRIMARY KEY (`GlobalTeam_ID`)
 	) ENGINE=InnoDB;
