@@ -202,14 +202,6 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         this.failingStep = failingStep;
     }
 
-    public Boolean getEnableTempTable() {
-        return enableTempTable;
-    }
-
-    public void setEnableTempTable(Boolean enableTempTable) {
-        this.enableTempTable = enableTempTable;
-    }
-
     @JsonIgnore
     public WorkflowConfiguration getSubWorkflowConfiguration(String workflowName) {
         return this.getSubWorkflowConfigRegistry().get(workflowName);
