@@ -98,32 +98,8 @@ public class TeamResource {
             @RequestParam(value = "teamName") String teamName, //
             @ApiParam(value = "List of user ids to assign to the team") //
             @RequestParam(value = "teamMembers") Set<String> teamMembers) {
-        log.info("Edit team " + teamId);
-        String teams = readData();
-        ArrayNode teamNodes = new ArrayNode(jsonParser.getNodeFactory());
-        Set<GlobalTeam> teamSet = new HashSet<>();
-        try {
-            teamNodes = (ArrayNode) jsonParser.readTree(teams);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to process team data", e);
-            return false;
-        }
-
-        for (JsonNode node : teamNodes) {
-            GlobalTeam team = JsonUtils.deserialize(node.toString(), GlobalTeam.class);
-            if (teamId.equalsIgnoreCase(team.getTeamId())) { // find the team
-                if (StringUtils.isNotBlank(teamName)) {
-                    team.setTeamName(teamName);
-                }
-                if (teamMembers != null) {
-                    team.setTeamMembers(teamMembers);
-                }
-            }
-
-            teamSet.add(team);
-        }
-
-        return writeData(JsonUtils.serialize(teamSet));
+        log.info("Edit team {}.", teamId);
+        return teamService.editTeam(teamId, teamName, teamMembers);
     }
 
     @DeleteMapping(value = "/{teamId}")

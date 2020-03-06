@@ -14,4 +14,6 @@ public interface GlobalAuthTeamEntityMgr extends BaseEntityMgr<GlobalAuthTeam> {
     List<GlobalAuthTeam> findByUsernameAndTenantId(Long tenantId, String username, boolean inflate);
 
     GlobalAuthTeam findByTeamNameAndTenantId(Long tenantId, String teamName);
+
+    GlobalAuthTeam findByTeamIdAndTenantId(Long tenantId, String teamId);
 }

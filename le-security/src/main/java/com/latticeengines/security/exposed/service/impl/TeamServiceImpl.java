@@ -41,4 +41,10 @@ public class TeamServiceImpl implements TeamService {
         globalTeamManagementService.createTeam(globalTeam);
         return globalTeam;
     }
+
+    @Override
+    public Boolean editTeam(String teamId, String teamName, Set<String> teamMembers) {
+        globalTeamManagementService.updateTeam(teamId, teamName, teamMembers);
+        return true;
+    }
 }

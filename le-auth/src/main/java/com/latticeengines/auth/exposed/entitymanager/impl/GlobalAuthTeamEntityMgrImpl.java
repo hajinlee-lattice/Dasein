@@ -82,4 +82,9 @@ public class GlobalAuthTeamEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTea
     public GlobalAuthTeam findByTeamNameAndTenantId(Long tenantId, String teamName) {
         return globalAuthTeamDao.findByTeamNameAndTenantId(tenantId, teamName);
     }
+
+    @Override
+    public GlobalAuthTeam findByTeamIdAndTenantId(Long tenantId, String teamId) {
+        return globalAuthTeamDao.findByTeamIdAndTenantId(tenantId, teamId);
+    }
 }

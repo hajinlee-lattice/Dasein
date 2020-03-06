@@ -33,4 +33,20 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
             return (GlobalAuthTeam)list.get(0);
         }
     }
+
+    @Override
+    public GlobalAuthTeam findByTeamIdAndTenantId(Long tenantId, String teamId) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthTeam> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s where teamId = :teamId and tenantId = %d", entityClz.getSimpleName(), tenantId);
+        Query query = session.createQuery(queryStr);
+        query.setParameter("teamId", teamId);
+        List list = query.list();
+        if (list.size() == 0) {
+            return null;
+        } else {
+            return (GlobalAuthTeam)list.get(0);
+        }
+    }
 }

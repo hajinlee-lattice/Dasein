@@ -12,4 +12,6 @@ public interface TeamService {
     List<GlobalTeam> getTeamsByUserName(String username);
 
     GlobalTeam createTeam(String teamName, String createdByUser, Set<String> teamMembers);
+
+    Boolean editTeam(String teamId, String teamName, Set<String> teamMembers);
 }
