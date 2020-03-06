@@ -986,35 +986,35 @@ public class CDLServiceImpl implements CDLService {
         if (CollectionUtils.isEmpty(metadataValues)) {
             return "";
         }
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
         Map<String, Object> firstMetadataValue = metadataValues.get(0);
         Set<String> keySet = firstMetadataValue.keySet();
         int count = 0;
         for (String header : keySet) {
             if (count == keySet.size() - 1) {
-                stringBuffer.append(modifyStringForCSV(header));
+                stringBuilder.append(modifyStringForCSV(header));
             } else {
-                stringBuffer.append(modifyStringForCSV(header)).append(",");
+                stringBuilder.append(modifyStringForCSV(header)).append(",");
             }
             count++;
         }
-        stringBuffer.append("\r\n");
+        stringBuilder.append("\r\n");
 
         for (Map<String, Object> metadataValue : metadataValues) {
             Collection<Object> valueSet = metadataValue.values();
             int num = 0;
             for (Object object : valueSet) {
                 if (num == keySet.size() - 1) {
-                    stringBuffer.append(modifyStringForCSV(String.valueOf(object)));
+                    stringBuilder.append(modifyStringForCSV(String.valueOf(object)));
                 } else {
-                    stringBuffer.append(modifyStringForCSV(String.valueOf(object))).append(",");
+                    stringBuilder.append(modifyStringForCSV(String.valueOf(object))).append(",");
                 }
                 num++;
             }
-            stringBuffer.append("\r\n");
+            stringBuilder.append("\r\n");
         }
 
-        return stringBuffer.toString();
+        return stringBuilder.toString();
     }
     private String modifyStringForCSV(String value) {
         if (value == null) {
