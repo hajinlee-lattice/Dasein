@@ -24,9 +24,14 @@ public final class TempListUtils {
     private static final Pattern PATTERN = Pattern.compile(String.format("%s[A-Za-z0-9]+_(?<date>[A-Za-z0-9_]{%d})",
             TEMPLIST_PREFIX, "yyyy_MM_dd_HH_mm_ss_zzz".length()));
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss_z");
+    public static final String VALUE_COLUMN = "value";
 
     public static String newTempTableName() {
-        return NamingUtils.timestamp(NamingUtils.randomSuffix(TEMPLIST_PREFIX, 8)).toLowerCase();
+        return NamingUtils.timestamp(newShortTempTableName()).toLowerCase();
+    }
+
+    public static String newShortTempTableName() {
+        return NamingUtils.randomSuffix(TEMPLIST_PREFIX, 8);
     }
 
     public static LocalDate parseDateFromTableName(String tableName) {
@@ -39,15 +44,12 @@ public final class TempListUtils {
         }
     }
 
-    public static String getCheckSum(ConcreteRestriction restriction) {
+    public static String getCheckSum(ConcreteRestriction restriction, Class<?> fieldClz) {
         CollectionLookup collectionLookup = (CollectionLookup) restriction.getRhs();
-        Class<?> fieldClz = TempListUtils.getFieldClz(collectionLookup.getValues());
-        AttributeLookup attributeLookup = (AttributeLookup) restriction.getLhs();
-        String attrName = attributeLookup.getAttribute();
         List<List<Object>> vals = insertVals(fieldClz, collectionLookup.getValues());
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         KryoUtils.write(bos, vals);
-        String content = attrName + ":" + new String(bos.toByteArray());
+        String content = fieldClz.getSimpleName() + ":" + new String(bos.toByteArray());
         return HashUtils.getMD5CheckSum(content);
     }
 
@@ -76,12 +78,26 @@ public final class TempListUtils {
     public static List<List<Object>> insertVals(Class<?> fieldClz, Collection<Object> vals) {
         List<List<Object>> lst = new ArrayList<>();
         vals.forEach(val -> {
-            if (val == null || fieldClz.equals(val.getClass())) {
-                lst.add(Collections.singletonList(val));
-            } else if (String.class.equals(fieldClz)) {
-                lst.add(Collections.singletonList(String.valueOf(val)));
-            } else {
-                throw new IllegalArgumentException("Cannot insert "+ val + " as " + fieldClz);
+            if (val != null) {
+                Object casted;
+                if (fieldClz.equals(val.getClass())) {
+                    casted = val;
+                } else if (String.class.equals(fieldClz)) {
+                    casted = String.valueOf(val);
+                } else if (Integer.class.equals(fieldClz)) {
+                    casted = Integer.valueOf(String.valueOf(val));
+                } else if (Long.class.equals(fieldClz)) {
+                    casted = Long.valueOf(String.valueOf(val));
+                } else if (Float.class.equals(fieldClz)) {
+                    casted = Float.valueOf(String.valueOf(val));
+                } else if (Double.class.equals(fieldClz)) {
+                    casted = Double.valueOf(String.valueOf(val));
+                } else if (Boolean.class.equals(fieldClz)) {
+                    casted = Boolean.valueOf(String.valueOf(val));
+                } else {
+                    throw new IllegalArgumentException("Cannot insert " + val + " as " + fieldClz);
+                }
+                lst.add(Collections.singletonList(casted));
             }
         });
         return lst;

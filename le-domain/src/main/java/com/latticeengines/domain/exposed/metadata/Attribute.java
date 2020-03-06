@@ -681,7 +681,7 @@ public class Attribute
     }
 
     /**
-     * Used for VisiDB/legacy systems
+     * Used for VisiDB/legacy systems, and bit encoded attributes
      */
     public void setPhysicalName(String physicalName) {
         properties.put("PhysicalName", physicalName);

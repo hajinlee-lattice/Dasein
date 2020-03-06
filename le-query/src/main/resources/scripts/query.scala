@@ -1,5 +1,5 @@
 import java.io.ByteArrayInputStream
-import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.util.Base64
 import java.util.zip.GZIPInputStream
 
@@ -19,14 +19,14 @@ val decodeMapping: Map[String, Map[String, String]] =
 def parseSqls(): List[List[String]] = {
   val sqlB64: String = lattice.params.get("SQLS").asText()
   val sqls = IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.getDecoder.decode(sqlB64))), //
-    Charset.forName("UTF-8"))
+    StandardCharsets.UTF_8)
   mapper.readValue[List[List[String]]](sqls)
 }
 
 def parseSql(): String = {
   val sqlB64: String = lattice.params.get("SQL").asText()
   IOUtils.toString(new GZIPInputStream(new ByteArrayInputStream(Base64.getDecoder.decode(sqlB64))), //
-    Charset.forName("UTF-8"))
+    StandardCharsets.UTF_8)
 }
 
 val tempViews:List[String] =

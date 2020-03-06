@@ -42,6 +42,18 @@ public class EntityQueryServiceImplBigListTestNG extends QueryServiceImplTestNGB
 
     @Test(groups = "functional")
     public void testBigList() {
+        FrontEndQuery frontEndQuery = getBigListFrontEndQuery();
+        long start = System.currentTimeMillis();
+        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        long duration1 = System.currentTimeMillis() - start;
+        start = System.currentTimeMillis();
+        long count2 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
+        Assert.assertEquals(count2, count);
+        long duration2 = System.currentTimeMillis() - start;
+        Assert.assertTrue(duration2 < duration1, "Second run should be faster");
+    }
+
+    protected FrontEndQuery getBigListFrontEndQuery() {
         List<Object> bigList = getCompanyNamesList();
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
@@ -52,20 +64,13 @@ public class EntityQueryServiceImplBigListTestNG extends QueryServiceImplTestNGB
         frontEndRestriction.setRestriction(accRes);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        long start = System.currentTimeMillis();
-        long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        long duration1 = System.currentTimeMillis() - start;
-        Assert.assertTrue(count >= bigList.size());
-        start = System.currentTimeMillis();
-        long count2 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
-        Assert.assertEquals(count2, count);
-        long duration2 = System.currentTimeMillis() - start;
-        Assert.assertTrue(duration2 < duration1, "Second run should be faster");
+        return frontEndQuery;
     }
 
     private List<Object> getCompanyNamesList() {
         List<Object> candidates = new ArrayList<>();
-        final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("CompanyNameBigList");
+        final InputStream is = Thread.currentThread() //
+                .getContextClassLoader().getResourceAsStream("CompanyNameBigList");
         Assert.assertNotNull(is);
         Iterable<String> lns = () -> {
             try {
