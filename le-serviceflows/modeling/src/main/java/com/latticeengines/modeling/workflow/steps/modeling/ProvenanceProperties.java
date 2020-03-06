@@ -17,7 +17,8 @@ public enum ProvenanceProperties {
         String[] props = new String[] { //
                 artifactId, //
                 "swlib.group_id=com.latticeengines", //
-                "swlib.version=latest", //
+                "ledp.version=latest", //
+                "leds.version=latest", //
                 "swlib.module=dataflowapi" //
         };
         return StringUtils.join(props, " ");

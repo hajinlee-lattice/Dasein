@@ -215,6 +215,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ACCOUNT_PROFILE_TABLE_NAME = "ACCOUNT_PROFILE_TABLE_NAME";
     protected static final String ACCOUNT_SERVING_TABLE_NAME = "ACCOUNT_SERVING_TABLE_NAME";
     protected static final String ACCOUNT_STATS_TABLE_NAME = "ACCOUNT_STATS_TABLE_NAME";
+    protected static final String FULL_ACCOUNT_STATS_TABLE_NAME = "FULL_ACCOUNT_STATS_TABLE_NAME";
     protected static final String ACCOUNT_LOOKUP_TABLE_NAME = "ACCOUNT_LOOKUP_TABLE_NAME";
     protected static final String FULL_ACCOUNT_PROFILE_TABLE_NAME = "FULL_ACCOUNT_PROFILE_TABLE_NAME";
     protected static final String FULL_ACCOUNT_ENCODED_TABLE_NAME = "FULL_ACCOUNT_ENCODED_TABLE_NAME";

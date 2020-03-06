@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -74,6 +75,9 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
 
     @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private BatonService batonService;
 
     protected abstract BusinessEntity getEntity();
 
@@ -332,6 +336,11 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
             }
         }
         return evaluationDate;
+    }
+
+    protected boolean shouldExcludeDataCloudAttrs() {
+        String tenantId = configuration.getCustomerSpace().getTenantId();
+        return batonService.shouldExcludeDataCloudAttrs(tenantId);
     }
 
 }

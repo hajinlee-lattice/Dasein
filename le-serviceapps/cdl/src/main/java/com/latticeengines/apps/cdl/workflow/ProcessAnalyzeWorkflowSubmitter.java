@@ -766,6 +766,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .fullRematch(Boolean.TRUE.equals(request.getFullRematch())) //
                 .autoSchedule(Boolean.TRUE.equals(request.getAutoSchedule())) //
+                .fullProfile(Boolean.TRUE.equals(request.getFullProfile())) //
                 .skipEntities(request.getSkipEntities()) //
                 .skipPublishToS3(Boolean.TRUE.equals(request.getSkipPublishToS3())) //
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //

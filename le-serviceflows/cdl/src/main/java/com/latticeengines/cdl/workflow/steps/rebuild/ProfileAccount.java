@@ -91,15 +91,20 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
 
         boolean shortCut;
-        Table statsTableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_STATS_TABLE_NAME);
+        Table statsTableInCtx = getTableSummaryFromKey(customerSpace.toString(), FULL_ACCOUNT_STATS_TABLE_NAME);
         shortCut = statsTableInCtx != null;
 
         if (shortCut) {
             log.info("Found stats table in context, going thru short-cut mode.");
             statsTableName = statsTableInCtx.getName();
-            finishing();
+            finishing(true);
             return null;
         } else {
+            if (!getConfiguration().isFullProfile()) {
+                log.info("It's not full profile, skip this step.");
+                finishing(false);
+                return null;
+            }
             // reset result table names
             statsTableName = null;
 
@@ -125,9 +130,9 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     @Override
     protected void onPostTransformationCompleted() {
+        log.info("Run in onPostTransformationCompleted.");
         statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
-        finishing();
-        exportToS3AndAddToContext(statsTableName, ACCOUNT_STATS_TABLE_NAME);
+        exportToS3AndAddToContext(statsTableName, FULL_ACCOUNT_STATS_TABLE_NAME);
 
         // no need to make them work for retry, as retry can regenerate them in bucket account step
         String profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
@@ -359,8 +364,10 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         return hasBatchStore;
     }
 
-    private void finishing() {
-        updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+    private void finishing(boolean hasStats) {
+        if (hasStats) {
+            updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+        }
         enrichMasterTableSchema(masterTableName);
     }
 
