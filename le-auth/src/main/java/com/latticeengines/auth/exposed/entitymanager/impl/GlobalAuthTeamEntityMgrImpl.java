@@ -43,6 +43,12 @@ public class GlobalAuthTeamEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTea
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
+    public void deleteByTeamId(String teamId, Long tenantId) {
+        globalAuthTeamDao.deleteByTeamId(teamId, tenantId);
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void update(GlobalAuthTeam globalAuthTeam) {
         globalAuthTeam.setLastModificationDate(new Date(System.currentTimeMillis()));
         globalAuthTeamDao.update(globalAuthTeam);
@@ -91,6 +97,7 @@ public class GlobalAuthTeamEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTea
     }
 
     @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public GlobalAuthTeam findByTeamIdAndTenantId(Long tenantId, String teamId) {
         return globalAuthTeamDao.findByTeamIdAndTenantId(tenantId, teamId);
     }

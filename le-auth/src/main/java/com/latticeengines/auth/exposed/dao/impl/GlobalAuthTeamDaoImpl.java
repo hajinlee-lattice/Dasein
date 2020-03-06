@@ -23,7 +23,7 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTeam> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s where name = :teamName and globalAuthTenant.pid = %d", entityClz.getSimpleName(), tenantId);
+                "from %s where name = :teamName and Tenant_Id = %d", entityClz.getSimpleName(), tenantId);
         Query query = session.createQuery(queryStr);
         query.setParameter("teamName", teamName);
         List list = query.list();
@@ -39,7 +39,7 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTeam> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s where teamId = :teamId and globalAuthTenant.pid = %d", entityClz.getSimpleName(), tenantId);
+                "from %s where teamId = :teamId and Tenant_Id = %d", entityClz.getSimpleName(), tenantId);
         Query query = session.createQuery(queryStr);
         query.setParameter("teamId", teamId);
         List list = query.list();
@@ -60,5 +60,16 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
         Query query = session.createQuery(queryStr);
         query.setParameter("username", username);
         return query.list();
+    }
+
+    @Override
+    public void deleteByTeamId(String teamId, Long tenantId) {
+        Session session = getCurrentSession();
+        Class<GlobalAuthTeam> entityClz = getEntityClass();
+        String deleteStr = String.format(
+                "delete from %s where teamId = :teamId and Tenant_Id = %d", entityClz.getSimpleName(), tenantId);
+        Query query = session.createQuery(deleteStr);
+        query.setParameter("teamId", teamId);
+        query.executeUpdate();
     }
 }

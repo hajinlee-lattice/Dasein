@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.security.User;
 
 public class GlobalTeam {
 
@@ -16,10 +17,10 @@ public class GlobalTeam {
     private String teamName;
 
     @JsonProperty("CreatedBy")
-    private String createdByUser;
+    private User createdByUser;
 
     @JsonProperty("TeamMembers")
-    private Set<String> teamMembers;
+    private Set<User> teamMembers;
 
     public static String generateId() {
         return "Team_" + AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
@@ -41,20 +42,12 @@ public class GlobalTeam {
         this.teamName = teamName;
     }
 
-    public String getCreatedByUser() {
+    public User getCreatedByUser() {
         return createdByUser;
     }
 
-    public void setCreatedByUser(String createdByUser) {
+    public void setCreatedByUser(User createdByUser) {
         this.createdByUser = createdByUser;
-    }
-
-    public Set<String> getTeamMembers() {
-        return teamMembers;
-    }
-
-    public void setTeamMembers(Set<String> teamMembers) {
-        this.teamMembers = teamMembers;
     }
 
     @Override
@@ -63,5 +56,9 @@ public class GlobalTeam {
                 ", Created_By_User: " + this.createdByUser + //
                 ", TeamMembers: " + this.teamMembers;
         return team;
+    }
+
+    public void setTeamMembers(Set<User> teamMembers) {
+        this.teamMembers = teamMembers;
     }
 }

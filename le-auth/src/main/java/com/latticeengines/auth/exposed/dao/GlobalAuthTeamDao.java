@@ -9,4 +9,6 @@ public interface GlobalAuthTeamDao extends BaseDao<GlobalAuthTeam> {
 
     GlobalAuthTeam findByTeamIdAndTenantId(Long tenantId, String teamId);
 
+    void deleteByTeamId(String teamId, Long tenantId);
+
 }

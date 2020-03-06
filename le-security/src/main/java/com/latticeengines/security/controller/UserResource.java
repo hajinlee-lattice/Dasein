@@ -78,13 +78,7 @@ public class UserResource {
         UserFilter filter;
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
         if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
-            filter = user -> {
-                if (StringUtils.isEmpty(user.getAccessLevel())) {
-                    return false;
-                }
-                AccessLevel level = AccessLevel.valueOf(user.getAccessLevel());
-                return level.equals(AccessLevel.EXTERNAL_USER) || level.equals(AccessLevel.EXTERNAL_ADMIN);
-            };
+            filter = UserFilter.EXTERNAL_FILTER;
         } else {
             filter = UserFilter.TRIVIAL_FILTER;
         }
