@@ -28,7 +28,7 @@ public class AmFlagRebuildTestNG extends PipelineTransformationTestNGBase {
     private GeneralSource source = new GeneralSource("FinalOutput");
     private GeneralSource orbCompanyRaw = new GeneralSource("OrbCompanyRaw");
     private GeneralSource targetSource1 = new GeneralSource("TargetSource1");
-    private GeneralSource targetSource3 = new GeneralSource("OrbDomainRaw");
+    private GeneralSource targetSource3 = new GeneralSource("TargetSource3");
     private GeneralSource orbDomainRaw = new GeneralSource("OrbDomainRaw");
 
     @Test(groups = "functional", enabled = true)
