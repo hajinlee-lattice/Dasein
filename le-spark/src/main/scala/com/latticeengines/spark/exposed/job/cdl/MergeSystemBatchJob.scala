@@ -20,7 +20,9 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
     val joinKey = config.getJoinKey
     val templates = 
       if (CollectionUtils.isEmpty(config.getTemplates)) getTemplates(lattice.input.head.columns, joinKey) else config.getTemplates.asScala.toList 
-      
+    val minCols: Set[String] = if (config.getMinColumns == null) Set() else config.getMinColumns.asScala.toSet
+    val maxCols: Set[String] = if (config.getMaxColumns == null) Set() else config.getMaxColumns.asScala.toSet
+    
     val overwriteByNull: Boolean =
       if (config.getNotOverwriteByNull == null) true else !config.getNotOverwriteByNull.booleanValue()
     var lhsDf = selectSystemBatch(lattice.input.head, templates(0), joinKey, config.isKeepPrefix)
@@ -29,7 +31,7 @@ class MergeSystemBatchJob extends AbstractSparkJob[MergeSystemBatchConfig] {
         breakable {
           var rhsDf = selectSystemBatch(lattice.input.head, templates(i), joinKey, config.isKeepPrefix)
           if (rhsDf.count() == 0) break
-          lhsDf = MergeUtils.merge2(lhsDf, rhsDf, Seq(joinKey), Set(), overwriteByNull = overwriteByNull) 
+          lhsDf = MergeUtils.merge(lhsDf, rhsDf, Seq(joinKey), Set(), minCols, maxCols, overwriteByNull = overwriteByNull) 
         }
       }
     }
