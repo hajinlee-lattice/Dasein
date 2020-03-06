@@ -132,7 +132,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.BETA_FEATURE, //
                 LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, //
                 LatticeFeatureFlag.ADVANCED_FILTERING, //
-                LatticeFeatureFlag.ATTRIBUTE_TOGGLING);
+                LatticeFeatureFlag.ATTRIBUTE_TOGGLING, //
+                LatticeFeatureFlag.TEAM_FEATURE);
         expectedNonLpiFlags.addAll(expectedLp2Flags);
         expectedNonLpiFlags.addAll(expectedPdFlags);
         expectedNonLpiFlags.addAll(expectedCgFlags);
