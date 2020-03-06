@@ -82,6 +82,7 @@ import com.latticeengines.domain.exposed.pls.ActionStatus;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ImportActionConfiguration;
+import com.latticeengines.domain.exposed.pls.LegacyDeleteByUploadActionConfiguration;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -244,6 +245,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             List<Action> actions = actionService.findByOwnerId(null);
             validateHardDelete(actions, request.getFullRematch());
             List<Action> completedActions = getCompletedActions(customerSpace, actions, needDeletedEntity);
+            request.getRebuildEntities().addAll(getLegacyDeleteEntity(completedActions));
             List<Long> actionIds = completedActions.stream().map(Action::getPid).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(lastFailedActions)) {
                 List<Long> lastFailedActionIds = lastFailedActions.stream().map(Action::getPid)
@@ -259,6 +261,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                     action.setOwnerId(pidWrapper.getPid());
                 });
                 lastFailedActions = actionService.copy(lastFailedActions);
+                request.getRebuildEntities().addAll(getLegacyDeleteEntity(lastFailedActions));
                 List<Long> copiedActionIds = lastFailedActions.stream().map(Action::getPid)
                         .collect(Collectors.toList());
                 // add to front
@@ -1219,5 +1222,22 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             }
         }
         return false;
+    }
+
+    private Set<BusinessEntity> getLegacyDeleteEntity(List<Action> actions) {
+        Set<BusinessEntity> entitySet = new HashSet<>();
+        if (CollectionUtils.isEmpty(actions)) {
+            return entitySet;
+        }
+        actions.forEach(action -> {
+            if (ActionType.LEGACY_DELETE_UPLOAD.equals(action.getType())) {
+                LegacyDeleteByUploadActionConfiguration config =
+                        (LegacyDeleteByUploadActionConfiguration) action.getActionConfiguration();
+                entitySet.add(config.getEntity());
+            } else if (ActionType.LEGACY_DELETE_DATERANGE.equals(action.getType()))  {
+                entitySet.add(BusinessEntity.Transaction);
+            }
+        });
+        return entitySet;
     }
 }
