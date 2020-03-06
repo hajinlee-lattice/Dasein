@@ -43,7 +43,7 @@ public class GlobalTeamManagementServiceImpl implements
     @Override
     public void createTeam(GlobalTeam globalTeam) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
-        validateTeam(globalTeam, tenantData);
+        validateTeam(globalTeam.getTeamName(), tenantData);
         GlobalAuthTeam globalAuthTeam = new GlobalAuthTeam();
         globalAuthTeam.setName(globalTeam.getTeamName());
         globalAuthTeam.setCreatedByUser(globalAuthTeam.getCreatedByUser());
@@ -58,11 +58,11 @@ public class GlobalTeamManagementServiceImpl implements
         globalAuthTeamEntityMgr.create(globalAuthTeam);
     }
 
-    private void validateTeam(GlobalTeam globalTeam, GlobalAuthTenant globalAuthTenant) {
+    private void validateTeam(String teamName, GlobalAuthTenant globalAuthTenant) {
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamNameAndTenantId(globalAuthTenant.getPid(),
-                globalTeam.getTeamName());
+                teamName);
         if (globalAuthTeam != null) {
-            throw new LedpException(LedpCode.LEDP_18242, new String[]{globalTeam.getTeamName(), globalAuthTenant.getId()});
+            throw new LedpException(LedpCode.LEDP_18242, new String[]{teamName, globalAuthTenant.getId()});
         }
     }
 
@@ -74,6 +74,7 @@ public class GlobalTeamManagementServiceImpl implements
             throw new IllegalArgumentException(String.format("cannot find globalAuthTeam using teamId %s.", teamId));
         }
         if (StringUtils.isNotBlank(teamName)) {
+            validateTeam(teamName, tenantData);
             globalAuthTeam.setName(teamName);
         }
         if (CollectionUtils.isNotEmpty(teamMembers)) {
