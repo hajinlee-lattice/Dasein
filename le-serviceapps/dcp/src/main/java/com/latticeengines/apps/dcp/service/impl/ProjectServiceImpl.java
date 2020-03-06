@@ -1,51 +1,65 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.ProjectService;
+import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessRequest;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
-import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
 @Service("projectService")
 public class ProjectServiceImpl implements ProjectService {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
 
-    private static final String PROJECT_ROOT_PATH_PATTERN = "/%s/Projects/%s/";
+    private static final String PROJECT_ROOT_PATH_PATTERN = "Projects/%s/";
     private static final String RANDOM_PROJECT_ID_PATTERN = "Project_%s";
+    private static final String SYSTEM_NAME_PATTERN = "ProjectSystem_%s";
     private static final int MAX_RETRY = 3;
 
     @Inject
     private ProjectEntityMgr projectEntityMgr;
 
     @Inject
-    private DropBoxProxy dropBoxProxy;
+    private CDLProxy cdlProxy;
+
+    @Inject
+    private DropBoxService dropBoxService;
+
+    @Inject
+    private SourceService sourceService;
 
     @Override
     public ProjectDetails createProject(String customerSpace, String displayName,
                                         Project.ProjectType projectType, String user) {
         String projectId = generateRandomProjectId();
-        String rootPath = generateRootPath(customerSpace, projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath));
+        String rootPath = generateRootPath(projectId);
+        S3ImportSystem system = createProjectSystem(customerSpace, displayName, projectId);
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
         Project project = getProjectByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
+        dropBoxService.createFolderUnderDropFolder(project.getRootPath());
         return getProjectDetails(customerSpace, project);
     }
 
@@ -53,12 +67,14 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDetails createProject(String customerSpace, String projectId, String displayName,
                                         Project.ProjectType projectType, String user) {
         validateProjectId(projectId);
-        String rootPath = generateRootPath(customerSpace, projectId);
-        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath));
+        String rootPath = generateRootPath(projectId);
+        S3ImportSystem system = createProjectSystem(customerSpace, displayName, projectId);
+        projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
         Project project = getProjectByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
+        dropBoxService.createFolderUnderDropFolder(project.getRootPath());
         return getProjectDetails(customerSpace, project);
     }
 
@@ -68,7 +84,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectDetails getProjectByProjectId(String customerSpace, String projectId) {
+    public Project getProjectByProjectId(String customerSpace, String projectId) {
+        return getProjectByProjectIdWithRetry(projectId);
+    }
+
+    @Override
+    public Project getProjectByImportSystem(String customerSpace, S3ImportSystem importSystem) {
+        return projectEntityMgr.findByImportSystem(importSystem);
+    }
+
+    @Override
+    public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
         Project project = getProjectByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Get DCP Project %s failed!", projectId));
@@ -113,12 +139,18 @@ public class ProjectServiceImpl implements ProjectService {
         details.setProjectId(project.getProjectId());
         details.setProjectDisplayName(project.getProjectDisplayName());
         details.setProjectRootPath(project.getRootPath());
-        details.setDropFolderAccess(getDropBoxAccess(customerSpace));
+        details.setDropFolderAccess(getDropBoxAccess());
+        if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
+            details.setSources(new ArrayList<>());
+            project.getS3ImportSystem().getTasks()
+                    .forEach(task -> details.getSources().add(sourceService.convertToSource(customerSpace, task)));
+        }
         return details;
     }
 
     private Project generateProjectObject(String projectId, String displayName,
-                                          Project.ProjectType projectType, String user, String rootPath) {
+                                          Project.ProjectType projectType, String user, String rootPath,
+                                          S3ImportSystem system) {
         Project project = new Project();
         project.setCreatedBy(user);
         project.setProjectDisplayName(displayName);
@@ -127,23 +159,48 @@ public class ProjectServiceImpl implements ProjectService {
         project.setDeleted(Boolean.FALSE);
         project.setProjectType(projectType);
         project.setRootPath(rootPath);
+        project.setS3ImportSystem(system);
         return project;
     }
 
-    private GrantDropBoxAccessResponse getDropBoxAccess(String customerSpace) {
-        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+    private S3ImportSystem createProjectSystem(String customerSpace, String displayName, String projectId) {
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(MultiTenantContext.getTenant());
+        String systemName = String.format(SYSTEM_NAME_PATTERN, projectId);
+        system.setName(systemName);
+        system.setDisplayName(displayName);
+        system.setSystemType(S3ImportSystem.SystemType.ProjectSystem);
+        cdlProxy.createS3ImportSystem(customerSpace, system);
+        system = cdlProxy.getS3ImportSystem(customerSpace, systemName);
+        int retry = 0;
+        while (system == null && retry < MAX_RETRY) {
+            try {
+                Thread.sleep(1000L + retry * 1000L);
+            } catch (InterruptedException e) {
+                return null;
+            }
+            system = cdlProxy.getS3ImportSystem(customerSpace, systemName);
+            retry++;
+        }
+        if (system == null) {
+            throw new RuntimeException("Cannot create DCP Project due to ImportSystem creation error!");
+        }
+        return system;
+    }
+
+    private GrantDropBoxAccessResponse getDropBoxAccess() {
+        DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
         if (StringUtils.isEmpty(dropBoxSummary.getAccessKeyId())) {
             GrantDropBoxAccessRequest request = new GrantDropBoxAccessRequest();
             request.setAccessMode(DropBoxAccessMode.LatticeUser);
-            return dropBoxProxy.grantAccess(customerSpace, request);
+            return dropBoxService.grantAccess(request);
         } else {
-            return dropBoxProxy.getAccessKey(customerSpace);
+            return dropBoxService.getAccessKey();
         }
     }
 
-    private String generateRootPath(String customerSpace, String projectId) {
-        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
-        return String.format(PROJECT_ROOT_PATH_PATTERN, dropBoxSummary.getDropBox(), projectId);
+    private String generateRootPath(String projectId) {
+        return String.format(PROJECT_ROOT_PATH_PATTERN, projectId);
     }
 
     private Project getProjectByProjectIdWithRetry(String projectId) {

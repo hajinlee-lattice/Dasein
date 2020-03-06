@@ -64,7 +64,7 @@ public class ProjectResource {
     @ResponseBody
     @ApiOperation(value = "Get project by projectId")
     public ProjectDetails getProjectByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
-        return projectService.getProjectByProjectId(customerSpace, projectId);
+        return projectService.getProjectDetailByProjectId(customerSpace, projectId);
     }
 
     @DeleteMapping(value = "/{projectId}")

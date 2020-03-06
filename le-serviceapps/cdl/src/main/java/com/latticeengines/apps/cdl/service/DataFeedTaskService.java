@@ -58,4 +58,6 @@ public interface DataFeedTaskService {
      * @return A list of template names ordered by priority.
      */
     List<String> getTemplatesBySystemPriority(String customerSpace, String entity, boolean highestFirst);
+
+    DataFeedTask getDataFeedTaskBySource(String customerSpace, String sourceId);
 }
