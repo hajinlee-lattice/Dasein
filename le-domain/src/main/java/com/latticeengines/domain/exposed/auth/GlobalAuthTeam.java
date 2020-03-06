@@ -16,10 +16,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -53,9 +56,11 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
     @Fetch(value = FetchMode.SUBSELECT)
     private List<GlobalAuthUserTenantRight> gaUserTenantRights = new ArrayList<>();
 
-    @JsonProperty("tenant_id")
-    @Column(name = "Tenant_ID", nullable = false)
-    private Long tenantId;
+    @JsonProperty("ga_tenant")
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "Tenant_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private GlobalAuthTenant globalAuthTenant;
 
     @JsonProperty("created_by_user")
     @Column(name = "Created_By_User")
@@ -104,11 +109,11 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
         this.teamId = teamId;
     }
 
-    public Long getTenantId() {
-        return tenantId;
+    public GlobalAuthTenant getGlobalAuthTenant() {
+        return globalAuthTenant;
     }
 
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
+    public void setGlobalAuthTenant(GlobalAuthTenant globalAuthTenant) {
+        this.globalAuthTenant = globalAuthTenant;
     }
 }

@@ -23,14 +23,14 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTeam> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s where name = :teamName and tenantId = %d", entityClz.getSimpleName(), tenantId);
+                "from %s where name = :teamName and globalAuthTenant.pid = %d", entityClz.getSimpleName(), tenantId);
         Query query = session.createQuery(queryStr);
         query.setParameter("teamName", teamName);
         List list = query.list();
         if (list.size() == 0) {
             return null;
         } else {
-            return (GlobalAuthTeam)list.get(0);
+            return (GlobalAuthTeam) list.get(0);
         }
     }
 
@@ -39,14 +39,26 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTeam> entityClz = getEntityClass();
         String queryStr = String.format(
-                "from %s where teamId = :teamId and tenantId = %d", entityClz.getSimpleName(), tenantId);
+                "from %s where teamId = :teamId and globalAuthTenant.pid = %d", entityClz.getSimpleName(), tenantId);
         Query query = session.createQuery(queryStr);
         query.setParameter("teamId", teamId);
         List list = query.list();
         if (list.size() == 0) {
             return null;
         } else {
-            return (GlobalAuthTeam)list.get(0);
+            return (GlobalAuthTeam) list.get(0);
         }
+    }
+
+    @Override
+    public List<GlobalAuthTeam> findByUsernameAndTenantId(Long tenantId, String username) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthTeam> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "select gat from %s as gat join gat.gaUserTenantRights as gaur where gaur.globalAuthUser.email = :username " +
+                        "and gat.globalAuthTenant.pid = %d", entityClz.getSimpleName(), tenantId);
+        Query query = session.createQuery(queryStr);
+        query.setParameter("username", username);
+        return query.list();
     }
 }
