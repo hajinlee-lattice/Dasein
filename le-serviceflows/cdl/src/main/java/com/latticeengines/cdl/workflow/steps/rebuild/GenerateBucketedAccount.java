@@ -79,9 +79,10 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     protected void initializeConfiguration() {
         super.initializeConfiguration();
 
-        List<String> tables = Arrays.asList(ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME);
-        if (!getConfiguration().isFullProfile()) {
-            tables = Arrays.asList(ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME, ACCOUNT_STATS_TABLE_NAME);
+        List<String> tables = Arrays.asList(ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME,
+                ACCOUNT_STATS_TABLE_NAME);
+        if (getConfiguration().isFullProfile()) {
+            tables = Arrays.asList(ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME);
         }
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(),
                 tables);
@@ -159,7 +160,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
             steps.add(sortProfile);
             if (calc != null) {
                 steps.add(calc);
-                log.info("It's not full profile.");
             }
         }
 
@@ -336,7 +336,9 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private boolean hasFullProfleAndEncoded() {
         String profileTableName = getStringValueFromContext(FULL_ACCOUNT_PROFILE_TABLE_NAME);
         String encodedTableName = getStringValueFromContext(FULL_ACCOUNT_ENCODED_TABLE_NAME);
-        return StringUtils.isNotBlank(profileTableName) && StringUtils.isNotBlank(encodedTableName);
+        String statsTableName = getStringValueFromContext(FULL_ACCOUNT_STATS_TABLE_NAME);
+        return StringUtils.isNotBlank(profileTableName) && StringUtils.isNotBlank(encodedTableName)
+                && StringUtils.isNotBlank(statsTableName);
     }
 
 }
