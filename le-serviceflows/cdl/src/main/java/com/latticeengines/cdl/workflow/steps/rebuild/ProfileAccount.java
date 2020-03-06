@@ -132,6 +132,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     protected void onPostTransformationCompleted() {
         log.info("Run in onPostTransformationCompleted.");
         statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
+        finishing(true);
         exportToS3AndAddToContext(statsTableName, FULL_ACCOUNT_STATS_TABLE_NAME);
 
         // no need to make them work for retry, as retry can regenerate them in bucket account step
