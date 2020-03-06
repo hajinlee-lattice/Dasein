@@ -16,8 +16,8 @@ CREATE PROCEDURE `AddGlobalTeamTable`()
 	    PRIMARY KEY (`GlobalTeam_ID`)
 	) ENGINE=InnoDB;
 
-	ALTER TABLE `GlobalTeam` ADD CONSTRAINT `FK_GlobalTeam_TenantID_GlobalTenant` FOREIGN KEY (`TENANT_ID`)
-	  REFERENCES `GlobalTenant` (`TENANT_PID`) ON DELETE CASCADE;
+	ALTER TABLE `GlobalTeam` ADD CONSTRAINT `FK_GlobalTeam_TenantID_GlobalTenant` FOREIGN KEY (`Tenant_ID`)
+	  REFERENCES `GlobalTenant` (`GlobalTenant_ID`) ON DELETE CASCADE;
 
     DROP TABLE if EXISTS `GlobalTeamTenantMember`;
     CREATE TABLE GlobalTeamTenantMember (
