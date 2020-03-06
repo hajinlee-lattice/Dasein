@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -27,7 +28,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "GlobalUserTenantRight")
+@Table(name = "GlobalUserTenantRight", //
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "Operation_Name", "Tenant_ID", "User_ID" }) })
 public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements HasPid {
 
     @Id
