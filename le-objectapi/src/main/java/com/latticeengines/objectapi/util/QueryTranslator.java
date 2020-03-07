@@ -478,7 +478,7 @@ abstract class QueryTranslator {
     }
 
     protected boolean isSparkQuery() {
-        return !SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
+        return SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
     }
 
 }
