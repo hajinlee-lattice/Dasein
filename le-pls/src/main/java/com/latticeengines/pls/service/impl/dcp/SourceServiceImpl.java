@@ -47,4 +47,13 @@ public class SourceServiceImpl implements SourceService {
         }
         return sourceProxy.getSourceList(customerSpace.toString(), projectId);
     }
+
+    @Override
+    public Boolean deleteSource(String sourceId) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return sourceProxy.deleteSource(customerSpace.toString(), sourceId);
+    }
 }

@@ -4,6 +4,8 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -14,6 +16,8 @@ import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 
 @Component("sourceProxy")
 public class SourceProxyImpl extends MicroserviceRestApiProxy implements SourceProxy {
+
+    private static final Logger log = LoggerFactory.getLogger(SourceProxyImpl.class);
 
     protected SourceProxyImpl() {
         super("dcp");
@@ -40,5 +44,17 @@ public class SourceProxyImpl extends MicroserviceRestApiProxy implements SourceP
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), projectId);
         List<?> rawResult = get("get dcp source by sourceId", url, List.class);
         return JsonUtils.convertList(rawResult, Source.class);
+    }
+
+    @Override
+    public Boolean deleteSource(String customerSpace, String sourceId) {
+        String baseUrl = "/customerspaces/{customerSpace}/source/sourceId/{sourceId}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), sourceId);
+        try {
+            delete("delete source", url);
+            return true;
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 }

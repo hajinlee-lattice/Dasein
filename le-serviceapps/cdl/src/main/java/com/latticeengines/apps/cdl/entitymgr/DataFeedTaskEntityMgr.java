@@ -58,4 +58,6 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     List<DataFeedTaskTable> getInflatedDataFeedTaskTables(DataFeedTask task);
 
+    void setDeleted(Long pid, Boolean deleted);
+
 }

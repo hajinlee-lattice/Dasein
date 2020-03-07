@@ -205,4 +205,13 @@ public class DataFeedTaskResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getTemplatesBySystemPriority(customerSpace, entity, Boolean.TRUE.equals(highestFirst));
     }
+
+    @PutMapping(value = "/{pid}/deleted/{deleted}")
+    @ApiOperation(value = "Set data feed task deleted status")
+    public void setDataFeedTaskDeleteStatus(@PathVariable String customerSpace, @PathVariable Long pid,
+                                            @PathVariable Boolean deleted) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.setDataFeedTaskDelete(customerSpace, pid, deleted);
+    }
+
 }

@@ -71,5 +71,11 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(allSources.size(), 2);
         Set<String> allIds = new HashSet<>(Arrays.asList(source.getSourceId(),  source2.getSourceId()));
         allSources.forEach(s -> Assert.assertTrue(allIds.contains(s.getSourceId())));
+
+        testSourceProxy.deleteSourceById(source.getSourceId());
+
+        allSources = testSourceProxy.getSourcesByProject(projectDetail.getProjectId());
+        Assert.assertEquals(allSources.size(), 1);
+        Assert.assertEquals(allSources.get(0).getSourceId(), source2.getSourceId());
     }
 }

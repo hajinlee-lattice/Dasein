@@ -326,4 +326,10 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         List<?> res = get("getTemplatesBySystemPriority", url, List.class);
         return JsonUtils.convertList(res, String.class);
     }
+
+    public void setDataFeedTaskDeletedStatus(String customerSpace, Long pid, Boolean deleted) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{pid}/deleted/{deleted}",
+                shortenCustomerSpace(customerSpace), pid, deleted);
+        put("set DataFeedTask deleted status", url);
+    }
 }
