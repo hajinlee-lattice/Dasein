@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,6 +55,7 @@ public class TeamResource {
     @GetMapping(value = "/byUsername")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
+    @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getTeamsByUsername(HttpServletRequest request,
                                                @RequestParam(value = "username") String username) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
@@ -64,6 +66,7 @@ public class TeamResource {
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "List all teams")
+    @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getAllTeams(HttpServletRequest request) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
@@ -73,6 +76,7 @@ public class TeamResource {
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Create a new team")
+    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean createTeam(@RequestBody GlobalTeamData globalTeamData, HttpServletRequest request) {
         Preconditions.checkArgument(StringUtils.isNotBlank(globalTeamData.getTeamName()), "Team name can't be empty");
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
@@ -83,6 +87,7 @@ public class TeamResource {
     @PutMapping(value = "/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Update a team")
+    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean editTeam(@PathVariable("teamId") String teamId, //
                             @RequestBody GlobalTeamData globalTeamData) {
         log.info("Edit team {}.", teamId);
@@ -97,7 +102,8 @@ public class TeamResource {
 
     @DeleteMapping(value = "/{teamId}")
     @ResponseBody
-    @ApiOperation(value = "Update a team")
+    @ApiOperation(value = "Delete a team")
+    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean deleteTeam(@PathVariable("teamId") String teamId) {
         log.info("Delete team " + teamId);
         teamService.deleteTeam(teamId);
@@ -108,6 +114,7 @@ public class TeamResource {
     @PutMapping(value = "/{teamId}/users")
     @ResponseBody
     @ApiOperation(value = "Manager user by team")
+    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean manageUserByTeam(@PathVariable("teamId") String teamId, //
                                     @ApiParam(value = " Request to assign or remove users", required = true) //
                                     @RequestBody UpdateTeamUsersRequest teamUsersRequest) {
