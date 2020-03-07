@@ -139,7 +139,7 @@ abstract class QueryTranslator {
     }
 
     Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction, boolean translatePriorOnly) {
-        boolean useDepivotedPhTable = !SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
+        boolean useDepivotedPhTable = !isSparkQuery();
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction, translatePriorOnly,
                 useDepivotedPhTable);
         if (restriction == null) {
@@ -469,12 +469,16 @@ abstract class QueryTranslator {
             int rowSize = CollectionUtils.isNotEmpty(frontEndQuery.getLookups()) ? frontEndQuery.getLookups().size()
                     : 1;
             int maxRows = Math.floorDiv(MAX_CARDINALITY, rowSize);
-            if (frontEndQuery.getPageFilter().getNumRows() > maxRows) {
+            if (!isSparkQuery() && frontEndQuery.getPageFilter().getNumRows() > maxRows) {
                 log.warn(String.format("Refusing to accept a query requesting more than %s rows."
                         + " Currently specified page filter: %s", maxRows, frontEndQuery.getPageFilter()));
                 frontEndQuery.getPageFilter().setNumRows(maxRows);
             }
         }
+    }
+
+    protected boolean isSparkQuery() {
+        return SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
     }
 
 }
