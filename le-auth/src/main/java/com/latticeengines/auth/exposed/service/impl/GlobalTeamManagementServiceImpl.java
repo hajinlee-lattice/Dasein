@@ -65,7 +65,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamNameAndTenantId(globalAuthTenant.getPid(),
                 globalTeamData.getTeamName());
         if (globalAuthTeam != null && !globalAuthTeam.getTeamId().equals(teamId)) {
-            throw new LedpException(LedpCode.LEDP_18242, new String[]{teamName, globalAuthTenant.getId()});
+            throw new LedpException(LedpCode.LEDP_18241, new String[]{teamName, globalAuthTenant.getId()});
         }
     }
 
