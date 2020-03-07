@@ -40,7 +40,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
     @Override
-    public void createTeam(String createdByUser, GlobalTeamData globalTeamData) {
+    public String createTeam(String createdByUser, GlobalTeamData globalTeamData) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         validateTeam(null, globalTeamData, tenantData);
         GlobalAuthTeam globalAuthTeam = new GlobalAuthTeam();
@@ -55,6 +55,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
             globalAuthTeam.setUserTenantRights(globalAuthUserTenantRights);
         }
         globalAuthTeamEntityMgr.create(globalAuthTeam);
+        return globalAuthTeam.getTeamId();
     }
 
     private void validateTeam(String teamId, GlobalTeamData globalTeamData, GlobalAuthTenant globalAuthTenant) {
@@ -74,7 +75,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamIdAndTenantId(tenantData.getPid(), teamId);
         if (globalAuthTeam == null) {
-            throw new IllegalArgumentException(String.format("cannot find globalAuthTeam using teamId %s.", teamId));
+            throw new IllegalArgumentException(String.format("cannot find GlobalAuthTeam using teamId %s.", teamId));
         }
         validateTeam(teamId, globalTeamData, tenantData);
         globalAuthTeam.setName(globalTeamData.getTeamName());
@@ -86,7 +87,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         log.info(String.format("Getting all teams for tenant %s.", tenantId));
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
-            throw new LedpException(LedpCode.LEDP_18241, new String[]{tenantId});
+            throw new IllegalArgumentException(String.format("cannot find GlobalAuthTenant using tenantId %s.", tenantId));
         }
         return tenantData;
     }

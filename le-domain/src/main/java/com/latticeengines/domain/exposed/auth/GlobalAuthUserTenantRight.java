@@ -65,6 +65,7 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
 
     @JsonIgnore
     @ManyToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "gaUserTenantRights")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
 
     @Override

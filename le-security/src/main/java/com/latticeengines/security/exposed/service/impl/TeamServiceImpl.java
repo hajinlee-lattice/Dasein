@@ -92,9 +92,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Boolean createTeam(String createdByUser, GlobalTeamData globalTeamData) {
-        globalTeamManagementService.createTeam(createdByUser, globalTeamData);
-        return true;
+    public String createTeam(String createdByUser, GlobalTeamData globalTeamData) {
+        return globalTeamManagementService.createTeam(createdByUser, globalTeamData);
     }
 
     @Override

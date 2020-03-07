@@ -61,4 +61,8 @@ public class GlobalTeam {
     public void setTeamMembers(Set<User> teamMembers) {
         this.teamMembers = teamMembers;
     }
+
+    public Set<User> getTeamMembers() {
+        return teamMembers;
+    }
 }

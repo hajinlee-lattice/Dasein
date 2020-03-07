@@ -13,7 +13,7 @@ public interface TeamService {
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser);
 
-    Boolean createTeam(String createdByUser, GlobalTeamData globalTeamData);
+    String createTeam(String createdByUser, GlobalTeamData globalTeamData);
 
     Boolean editTeam(String teamId, GlobalTeamData globalTeamData);
 

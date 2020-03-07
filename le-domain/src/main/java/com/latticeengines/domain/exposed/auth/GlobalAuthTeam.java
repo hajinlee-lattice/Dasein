@@ -10,6 +10,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -53,7 +54,7 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
     @JoinTable(name = "GlobalTeamTenantMember", joinColumns = {
             @JoinColumn(name = "Team_ID")}, inverseJoinColumns = {
             @JoinColumn(name = "TenantMember_ID")})
-    @Fetch(value = FetchMode.SUBSELECT)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthUserTenantRight> gaUserTenantRights = new ArrayList<>();
 
     @JsonProperty("ga_tenant")

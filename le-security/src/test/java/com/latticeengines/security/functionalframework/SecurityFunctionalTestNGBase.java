@@ -83,10 +83,10 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     private GlobalAuthenticationService globalAuthenticationService;
 
     @Inject
-    private GlobalUserManagementService globalUserManagementService;
+    protected GlobalUserManagementService globalUserManagementService;
 
     @Inject
-    private GlobalTenantManagementService globalTenantManagementService;
+    protected GlobalTenantManagementService globalTenantManagementService;
 
     @Inject
     private TenantEntityMgr tenantEntityMgr;
@@ -175,6 +175,11 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         return tenant;
     }
 
+    protected void deleteTenant(Tenant tenant) {
+        tenantEntityMgr.delete(tenant);
+        globalTenantManagementService.discardTenant(tenant);
+    }
+
     public void deleteUserByRestCall(String username) {
         String url = getPLSRestAPIHostPort() + "/pls/users/\"" + username + "\"";
         sendHttpDeleteForObject(restTemplate, url, ResponseDocument.class);
@@ -240,6 +245,20 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         tenant.setName(adminTenantName);
         tenantEntityMgr.delete(tenant);
         globalTenantManagementService.discardTenant(tenant);
+    }
+
+    protected Tenant createTenant(String tenantId, String tenantName) {
+        Tenant tenant = new Tenant();
+        tenant.setId(tenantId);
+        tenant.setName(tenantName);
+        globalTenantManagementService.discardTenant(tenant);
+        Tenant tenantToDelete = tenantEntityMgr.findByTenantName(tenantName);
+        if (tenantToDelete != null) {
+            tenantEntityMgr.delete(tenantToDelete);
+        }
+        globalTenantManagementService.registerTenant(tenant);
+        tenantEntityMgr.create(tenant);
+        return tenant;
     }
 
     protected Tenant getAdminTenant() {
