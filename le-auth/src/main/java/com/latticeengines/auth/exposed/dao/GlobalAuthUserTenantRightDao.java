@@ -24,5 +24,5 @@ public interface GlobalAuthUserTenantRightDao extends BaseDao<GlobalAuthUserTena
 
     boolean existsByEmail(String email);
 
-    List<GlobalAuthUserTenantRight> findByNonNullExprationDate();
+    List<GlobalAuthUserTenantRight> findByNonNullExpirationDate();
 }

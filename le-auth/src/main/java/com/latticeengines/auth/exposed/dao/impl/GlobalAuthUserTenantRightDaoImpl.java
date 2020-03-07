@@ -162,7 +162,7 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<GlobalAuthUserTenantRight> findByNonNullExprationDate() {
+    public List<GlobalAuthUserTenantRight> findByNonNullExpirationDate() {
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Expiration_Date is not null", entityClz.getSimpleName());

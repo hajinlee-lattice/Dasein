@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.auth.UpdateTeamUsersRequest;
@@ -40,13 +39,8 @@ import io.swagger.annotations.ApiParam;
 @RestController
 @RequestMapping("/teams")
 public class TeamResource {
+
     private static final Logger log = LoggerFactory.getLogger(TeamResource.class);
-
-    private static ObjectMapper jsonParser = new ObjectMapper();
-
-    // For mocking purpose, use camille LockerManager to
-    // temporarily store team information
-    private static final String LOCK_NAME = "TeamLock";
 
     @Inject
     private TeamService teamService;

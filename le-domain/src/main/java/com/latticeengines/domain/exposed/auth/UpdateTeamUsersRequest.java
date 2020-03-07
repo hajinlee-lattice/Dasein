@@ -13,12 +13,4 @@ public class UpdateTeamUsersRequest {
     public void setUserToAssign(Set<String> userToAssign) {
         this.userToAssign = userToAssign;
     }
-
-    public Set<String> getUserToRemove() {
-        return userToRemove;
-    }
-
-    public void setUserToRemove(Set<String> userToRemove) {
-        this.userToRemove = userToRemove;
-    }
 }
