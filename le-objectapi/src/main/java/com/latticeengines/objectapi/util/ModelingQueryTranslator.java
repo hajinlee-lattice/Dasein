@@ -1,7 +1,5 @@
 package com.latticeengines.objectapi.util;
 
-import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_USER;
-
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -52,7 +50,7 @@ public class ModelingQueryTranslator extends QueryTranslator {
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
         EventQueryTranslator eventQueryTranslator = new EventQueryTranslator();
         QueryBuilder queryBuilder = Query.builder();
-        boolean useDepivotedPhTable = !SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
+        boolean useDepivotedPhTable = !isSparkQuery();
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction, false, useDepivotedPhTable);
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction,
                 useDepivotedPhTable);
