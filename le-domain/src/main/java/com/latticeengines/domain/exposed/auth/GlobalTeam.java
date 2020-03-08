@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.auth;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,7 +21,7 @@ public class GlobalTeam {
     private User createdByUser;
 
     @JsonProperty("TeamMembers")
-    private Set<User> teamMembers;
+    private List<User> teamMembers;
 
     public static String generateId() {
         return "Team_" + AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
@@ -58,11 +59,11 @@ public class GlobalTeam {
         return team;
     }
 
-    public void setTeamMembers(Set<User> teamMembers) {
+    public void setTeamMembers(List<User> teamMembers) {
         this.teamMembers = teamMembers;
     }
 
-    public Set<User> getTeamMembers() {
+    public List<User> getTeamMembers() {
         return teamMembers;
     }
 }

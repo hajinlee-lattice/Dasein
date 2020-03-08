@@ -3,7 +3,9 @@ package com.latticeengines.security.exposed.globalauth;
 import java.util.AbstractMap;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
@@ -19,7 +21,8 @@ public interface GlobalUserManagementService {
 
     Boolean grantRight(String right, String tenant, String username);
 
-    Boolean grantRight(String right, String tenant, String username, String createdByUser, Long expirationDate);
+    Boolean grantRight(String right, String tenant, String username, String createdByUser, Long expirationDate,
+                       List<GlobalAuthTeam> globalAuthTeams);
 
     Boolean revokeRight(String right, String tenant, String username);
 
@@ -56,5 +59,9 @@ public interface GlobalUserManagementService {
     boolean userExpireIntenant(String email, String tenantId);
 
     Long getIdByUsername(String username);
+
+    List<GlobalAuthUserTenantRight> getUserRightsByUsername(String username, String tenantId, boolean inflate);
+
+    List<String> getRights(List<GlobalAuthUserTenantRight> rightsData);
 
 }

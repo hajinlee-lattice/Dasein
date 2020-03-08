@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.slf4j.Logger;
@@ -19,9 +20,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -268,11 +271,16 @@ public class UserServiceImpl implements UserService {
                 }
             }
         }
-        List<String> originalRights = globalUserManagementService.getRights(username, tenantId);
+        List<GlobalAuthUserTenantRight> rightsData = globalUserManagementService.getUserRightsByUsername(username, tenantId, true);
+        List<String> originalRights = globalUserManagementService.getRights(rightsData);
         if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
+                List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(rightsData)) {
+                    globalAuthTeams = rightsData.get(0).getGlobalAuthTeams();
+                }
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
-                        createdByUser, expirationDate);
+                        createdByUser, expirationDate, globalAuthTeams);
                 if (result && clearSession) {
                     AccessLevel originalLevel = AccessLevel.findAccessLevel(originalRights);
                     if (!isSuperior(accessLevel, originalLevel)) {

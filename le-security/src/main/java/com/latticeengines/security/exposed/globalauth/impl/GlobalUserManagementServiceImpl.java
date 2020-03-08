@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEn
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
@@ -47,7 +49,7 @@ import com.latticeengines.security.exposed.globalauth.zendesk.ZendeskService;
 import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
 @Component("globalUserManagementService")
-public class GlobalUserManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
+    public class GlobalUserManagementServiceImpl extends GlobalAuthenticationServiceBaseImpl implements
         GlobalUserManagementService {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalUserManagementServiceImpl.class);
@@ -174,7 +176,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         try {
             log.info(String.format("Granting right %s to user %s for tenant %s.", right, username,
                     tenant));
-            return globalAuthGrantRight(right, tenant, username, null, null);
+            return globalAuthGrantRight(right, tenant, username, null, null, null);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
                     new String[]{right, username, tenant});
@@ -183,11 +185,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     @Override
     public synchronized Boolean grantRight(String right, String tenant, String username, String createdByUser,
-                                           Long expirationDate) {
+                                           Long expirationDate, List<GlobalAuthTeam> globalAuthTeams) {
         try {
             log.info(String.format("Granting right %s to user %s for tenant %s with expiration period %s.", right,
                     username, tenant, expirationDate));
-            return globalAuthGrantRight(right, tenant, username, createdByUser, expirationDate);
+            return globalAuthGrantRight(right, tenant, username, createdByUser, expirationDate, globalAuthTeams);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18005, e,
                     new String[]{right, username, tenant});
@@ -195,20 +197,14 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     public Boolean globalAuthGrantRight(String right, String tenant, String username, String createdByUser,
-                                        Long expirationDate)
-            throws Exception {
-
+                                        Long expirationDate, List<GlobalAuthTeam> globalAuthTeams) throws Exception {
         GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
-
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
         if (tenantData == null) {
             throw new Exception("Unable to find the tenant requested.");
         }
-
         GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
-                .findByUserIdAndTenantIdAndOperationName(
-                        globalAuthUser.getPid(),
-                        tenantData.getPid(), right);
+                .findByUserIdAndTenantIdAndOperationName(globalAuthUser.getPid(), tenantData.getPid(), right, true);
         if (rightData != null) {
             // update expiration date of tenant for user
             // if expiration date changes, update tenant right
@@ -218,15 +214,14 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             }
             return true;
         }
-
         rightData = new GlobalAuthUserTenantRight();
         rightData.setGlobalAuthUser(globalAuthUser);
         rightData.setGlobalAuthTenant(tenantData);
         rightData.setOperationName(right);
         rightData.setCreatedByUser(createdByUser);
         rightData.setExpirationDate(expirationDate);
+        rightData.setGlobalAuthTeams(globalAuthTeams);
         gaUserTenantRightEntityMgr.create(rightData);
-
         if (isZendeskEnabled(globalAuthUser.getEmail())) {
             List<GlobalAuthUserTenantRight> rights = gaUserTenantRightEntityMgr.findByEmail(globalAuthUser.getEmail());
             if (rights.size() == 1) {
@@ -274,6 +269,38 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
+    private List<GlobalAuthUserTenantRight> globalUserRightsByUsername(String username, String tenantId, boolean inflate) throws Exception {
+        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
+        if (tenantData == null) {
+            return new ArrayList<>();
+        }
+        GlobalAuthUser userData = findGlobalAuthUserByUsername(username);
+        if (userData == null) {
+            return new ArrayList<>();
+        }
+        List<GlobalAuthUserTenantRight> rightsData =
+                gaUserTenantRightEntityMgr.findByUserIdAndTenantId(userData.getPid(), tenantData.getPid(), inflate);
+        if (rightsData != null) {
+            return rightsData;
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<GlobalAuthUserTenantRight> getUserRightsByUsername(String username, String tenantId, boolean inflate) {
+        try {
+            log.info(String.format("Getting rights of user %s in tenant %s.", username, tenantId));
+            return globalUserRightsByUsername(username, tenantId, inflate);
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Sequence contains no elements")) {
+                return new ArrayList<>();
+            }
+            throw new LedpException(LedpCode.LEDP_18000,
+                    "Getting rights of user " + username + " in tenant " + tenantId + ".", e);
+        }
+    }
+
     private List<GlobalAuthUserTenantRight> globalAuthGetRightsDetail(String email, String tenantId) {
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
@@ -283,33 +310,23 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (userData == null) {
             return new ArrayList<>();
         }
-        List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
-                .findByUserIdAndTenantId(userData.getPid(),
-                        tenantData.getPid());
+        List<GlobalAuthUserTenantRight> rightsData =
+                gaUserTenantRightEntityMgr.findByUserIdAndTenantId(userData.getPid(), tenantData.getPid());
         if (rightsData != null) {
             return rightsData;
         } else {
             return new ArrayList<>();
         }
-
     }
 
     private List<String> globalAuthGetRights(String tenantId, String username) throws Exception {
-        GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
-        if (tenantData == null) {
-            return new ArrayList<>();
-        }
+        List<GlobalAuthUserTenantRight> rightsData = globalUserRightsByUsername(username, tenantId, false);
+        return getRights(rightsData);
+    }
 
-        GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username);
-        if (globalAuthUser == null) {
-            return new ArrayList<>();
-        }
-
-        List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
-                .findByUserIdAndTenantId(globalAuthUser.getPid(),
-                        tenantData.getPid());
-        if (rightsData != null) {
-
+    @Override
+    public List<String> getRights(List<GlobalAuthUserTenantRight> rightsData){
+        if (CollectionUtils.isNotEmpty(rightsData)) {
             Set<String> distinctRights = new HashSet<String>();
             for (GlobalAuthUserTenantRight rightData : rightsData) {
                 distinctRights.add(rightData.getOperationName());
@@ -319,7 +336,6 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         } else {
             return new ArrayList<>();
         }
-
     }
 
     @Override

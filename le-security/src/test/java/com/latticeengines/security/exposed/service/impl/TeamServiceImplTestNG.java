@@ -3,9 +3,7 @@ package com.latticeengines.security.exposed.service.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -17,9 +15,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TeamService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
@@ -68,27 +64,12 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         deleteTenant(anotherTenant);
     }
 
-    private GlobalTeamData getGlobalTeamData(String teamName, Set<String> teamMembers) {
-        GlobalTeamData globalTeamData = new GlobalTeamData();
-        globalTeamData.setTeamName(teamName);
-        globalTeamData.setTeamMembers(teamMembers);
-        return globalTeamData;
-    }
-
-    private User getUser(String username, String accessLevel) {
-        User user = new User();
-        user.setEmail(username);
-        user.setAccessLevel(accessLevel);
-        return user;
-    }
-
     private void validateTeamInfo(GlobalTeam globalTeam, String teamName, String teamMemberName) {
         assertNotNull(globalTeam.getTeamId());
         assertEquals(globalTeam.getTeamName(), teamName);
         assertNotNull(globalTeam.getCreatedByUser());
         assertEquals(globalTeam.getTeamMembers().size(), 1);
-        List<User> userList = new ArrayList<>(globalTeam.getTeamMembers());
-        assertEquals(userList.get(0).getEmail(), teamMemberName);
+        assertEquals(globalTeam.getTeamMembers().get(0).getEmail(), teamMemberName);
     }
 
     @Test(groups = "functional")
@@ -103,6 +84,9 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         assertEquals(globalTeams.size(), 2);
         globalTeams = teamService.getTeamsByUserName(username2InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
+        teamService.editTeam(teamId, getGlobalTeamData(teamName1InTenant, Sets.newHashSet(username1InTenant)));
+        globalTeams = teamService.getTeamsByUserName(username2InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
+        assertEquals(globalTeams.size(), 0);
         MultiTenantContext.setTenant(anotherTenant);
         teamService.createTeam(usernameInAnotherTenant, getGlobalTeamData(teamNameInAnotherTenant, Sets.newHashSet(usernameInAnotherTenant)));
         globalTeams = teamService.getTeamsByUserName(usernameInAnotherTenant, getUser(usernameInAnotherTenant, AccessLevel.INTERNAL_ADMIN.name()));

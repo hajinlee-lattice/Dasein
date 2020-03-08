@@ -138,7 +138,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     }
 
     private GlobalAuthTenant getGlobalAuthTenant() {
-        String tenantId = MultiTenantContext.getCustomerSpace().toString();
+        String tenantId = MultiTenantContext.getTenant().getId();
         return getTenantData(tenantId);
     }
 }

@@ -63,7 +63,7 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     @Column(name = "Expiration_Date", nullable = true)
     private Long expirationDate;
 
-    @JsonIgnore
+    @JsonProperty("global_auth_teams")
     @ManyToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "gaUserTenantRights")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();

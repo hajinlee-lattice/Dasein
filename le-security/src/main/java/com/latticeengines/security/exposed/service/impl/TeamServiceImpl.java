@@ -1,10 +1,8 @@
 package com.latticeengines.security.exposed.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -77,7 +75,7 @@ public class TeamServiceImpl implements TeamService {
         globalTeam.setTeamId(globalAuthTeam.getTeamId());
         globalTeam.setCreatedByUser(userMap.get(globalAuthTeam.getCreatedByUser()));
         if (withTeamMember) {
-            Set<User> teamMembers = new HashSet<>();
+            List<User> teamMembers = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(globalAuthTeam.getUserTenantRights())) {
                 for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthTeam.getUserTenantRights()) {
                     User user = userMap.get(globalAuthUserTenantRight.getGlobalAuthUser().getEmail());

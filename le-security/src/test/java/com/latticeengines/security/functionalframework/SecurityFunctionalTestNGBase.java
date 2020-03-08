@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -43,6 +44,7 @@ import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -89,7 +91,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     protected GlobalTenantManagementService globalTenantManagementService;
 
     @Inject
-    private TenantEntityMgr tenantEntityMgr;
+    protected TenantEntityMgr tenantEntityMgr;
 
     @Inject
     private SessionService sessionService;
@@ -442,6 +444,20 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     public void tearDown() throws Exception {
         globalUserManagementService.deleteUser(adminUsername);
         deleteAdminTenant();
+    }
+
+    protected GlobalTeamData getGlobalTeamData(String teamName, Set<String> teamMembers) {
+        GlobalTeamData globalTeamData = new GlobalTeamData();
+        globalTeamData.setTeamName(teamName);
+        globalTeamData.setTeamMembers(teamMembers);
+        return globalTeamData;
+    }
+
+    protected User getUser(String username, String accessLevel) {
+        User user = new User();
+        user.setEmail(username);
+        user.setAccessLevel(accessLevel);
+        return user;
     }
 
 }

@@ -12,6 +12,8 @@ public interface GlobalAuthUserTenantRightEntityMgr extends
 
     List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId);
 
+    List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId, boolean inflate);
+
     List<GlobalAuthUser> findUsersByTenantId(Long tenantId);
 
     GlobalAuthUserTenantRight findByUserIdAndTenantIdAndOperationName(Long userId, Long tenantId,
@@ -28,5 +30,8 @@ public interface GlobalAuthUserTenantRightEntityMgr extends
     List<GlobalAuthUserTenantRight> findByNonNullExprationDate();
 
     List<GlobalAuthUserTenantRight> findByEmailsAndTenantId(Set<String> emails, Long tenantId);
+
+    GlobalAuthUserTenantRight findByUserIdAndTenantIdAndOperationName(Long userId,
+                                                                      Long tenantId, String operationName, boolean inflate);
 
 }
