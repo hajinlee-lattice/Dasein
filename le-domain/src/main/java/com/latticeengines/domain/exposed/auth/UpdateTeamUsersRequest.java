@@ -3,8 +3,8 @@ package com.latticeengines.domain.exposed.auth;
 import java.util.Set;
 
 public class UpdateTeamUsersRequest {
-    Set<String> userToAssign;
-    Set<String> userToRemove;
+
+    private Set<String> userToAssign;
 
     public Set<String> getUserToAssign() {
         return userToAssign;

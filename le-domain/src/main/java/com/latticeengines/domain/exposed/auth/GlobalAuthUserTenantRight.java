@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 @Entity
 @Access(AccessType.FIELD)
 @Table(name = "GlobalUserTenantRight", //
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "Operation_Name", "Tenant_ID", "User_ID" }) })
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"Tenant_ID", "User_ID"})})
 public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements HasPid {
 
     @Id

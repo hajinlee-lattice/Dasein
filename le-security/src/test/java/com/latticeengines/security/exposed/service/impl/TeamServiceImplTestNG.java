@@ -77,6 +77,7 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant);
         String teamId = teamService.createTeam(username1InTenant, getGlobalTeamData(teamName1InTenant, Sets.newHashSet(username1InTenant, username2InTenant)));
         assertNotNull(teamId);
+        // create
         teamService.createTeam(username2InTenant, getGlobalTeamData(teamName2InTenant, Sets.newHashSet(username1InTenant)));
         List<GlobalTeam> globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 2);
@@ -84,9 +85,14 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         assertEquals(globalTeams.size(), 2);
         globalTeams = teamService.getTeamsByUserName(username2InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
+        // edit
         teamService.editTeam(teamId, getGlobalTeamData(teamName1InTenant, Sets.newHashSet(username1InTenant)));
         globalTeams = teamService.getTeamsByUserName(username2InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 0);
+        // delete
+        teamService.deleteTeam(teamId);
+        globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
+        assertEquals(globalTeams.size(), 1);
         MultiTenantContext.setTenant(anotherTenant);
         teamService.createTeam(usernameInAnotherTenant, getGlobalTeamData(teamNameInAnotherTenant, Sets.newHashSet(usernameInAnotherTenant)));
         globalTeams = teamService.getTeamsByUserName(usernameInAnotherTenant, getUser(usernameInAnotherTenant, AccessLevel.INTERNAL_ADMIN.name()));

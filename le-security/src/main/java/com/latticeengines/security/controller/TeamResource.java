@@ -52,12 +52,12 @@ public class TeamResource {
     @Inject
     private UserService userService;
 
-    @GetMapping(value = "/byUsername")
+    @GetMapping(value = "/username/{username}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
     @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getTeamsByUsername(HttpServletRequest request,
-                                               @RequestParam(value = "username") String username) {
+                                               @PathVariable(value = "username") String username) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
         return teamService.getTeamsByUserName(username, loginUser);
@@ -84,7 +84,7 @@ public class TeamResource {
         return teamService.createTeam(loginUser.getUsername(), globalTeamData);
     }
 
-    @PutMapping(value = "/{teamId}")
+    @PutMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Update a team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
@@ -100,7 +100,7 @@ public class TeamResource {
         }
     }
 
-    @DeleteMapping(value = "/{teamId}")
+    @DeleteMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Delete a team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
@@ -111,7 +111,7 @@ public class TeamResource {
 
     }
 
-    @PutMapping(value = "/{teamId}/users")
+    @PutMapping(value = "/teamId/{teamId}/users")
     @ResponseBody
     @ApiOperation(value = "Manager user by team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")

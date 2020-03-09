@@ -20,7 +20,7 @@ CREATE PROCEDURE `AddGlobalTeamTable`()
 	ALTER TABLE `GlobalTeam` ADD CONSTRAINT `FK_GlobalTeam_TenantID_GlobalTenant` FOREIGN KEY (`Tenant_ID`)
 	  REFERENCES `GlobalTenant` (`GlobalTenant_ID`) ON DELETE CASCADE;
 
-    ALTER TABLE `GlobalUserTenantRight` ADD CONSTRAINT `UKeu0uqycmovglkyn6yudo4eih1` unique (`Operation_Name`, `Tenant_ID`, `User_ID`);
+    ALTER TABLE `GlobalUserTenantRight` ADD CONSTRAINT `UKbgb06swixji98da137u00ra4c` unique (`Tenant_ID`, `User_ID`);
 
     DROP TABLE if EXISTS `GlobalTeamTenantMember`;
     CREATE TABLE GlobalTeamTenantMember (
