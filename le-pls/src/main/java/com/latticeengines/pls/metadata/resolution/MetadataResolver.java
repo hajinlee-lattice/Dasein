@@ -541,7 +541,7 @@ public class MetadataResolver {
         if (cdlResolve) {
             String attrName = getAvroFriendlyString(fieldMapping.getMappedField());
             if (!fieldMapping.isMappedToLatticeField() && !attrName.startsWith(USER_PREFIX)) {
-                attrName = USER_PREFIX + attrName;
+                attrName = USER_PREFIX + attrName.toLowerCase();
             }
             attribute.setName(attrName);
         } else {
