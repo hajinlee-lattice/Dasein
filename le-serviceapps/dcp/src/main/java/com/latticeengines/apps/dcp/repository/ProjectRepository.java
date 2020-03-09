@@ -17,5 +17,5 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
     @Query("SELECT pjc from Project pjc WHERE pjc.importSystem = :importSystem AND pjc.deleted != TRUE")
     Project findByImportSystem(@Param("importSystem") S3ImportSystem importSystem);
 
-    List<Project> findByDeleteNot(Boolean deleted);
+    List<Project> findByDeletedNot(Boolean deleted);
 }
