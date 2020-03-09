@@ -111,6 +111,8 @@ public class CDLServiceImpl implements CDLService {
 
     private static final String ATTR_VALUE = "Record";
 
+    private static final String SOURCE = "File";
+
     @Inject
     protected SourceFileService sourceFileService;
 
@@ -929,11 +931,19 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String streamName,
-                                                                        String signature) {
+    public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String systemName,
+                                                                        EntityType entityType) {
+        log.info("customerSpace is {}, systemName is {}, entityType is {}.", customerSpace, systemName, entityType);
+        String streamName;
+        switch (entityType) {
+            case WebVisit: streamName = entityType.name();break;
+            case Opportunity: streamName = systemName + "_" + entityType.name();break;
+            default: throw new IllegalArgumentException(String.format("getDimensionMetadata() Cannot support " +
+                    "entityType %s", entityType.name()));
+        }
         Map<String, DimensionMetadata> metadataMap =
-                activityStoreProxy.getDimensionMetadataInStream(customerSpace, streamName, signature);
-        log.info("customerSpace is {}, streamName is {}, signature is {}.", customerSpace, streamName, signature);
+                activityStoreProxy.getDimensionMetadataInStream(customerSpace, streamName, null);
+        log.info("customerSpace is {}, streamName is {}, signature is {}.", customerSpace, streamName, null);
         Map<String, List<Map<String, Object>>> dimensionMetadataMap = new HashMap<>();
         log.info("dimensionMetadataMap is {}.", JsonUtils.serialize(dimensionMetadataMap));
         metadataMap.forEach((dimId, metadata) -> {
@@ -945,23 +955,33 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
                                                   String mimeType, String fileName, String customerSpace,
-                                                  String streamName, String signature, String dimensionName) {
-        log.info("mimeType is {}, fileName is {}, customerSpace is {}, streamName is {}, signature is {}, " +
-                "dimensionName is {}.", mimeType, fileName, customerSpace, streamName, signature, dimensionName);
-        List<Map<String, Object>> metadataValues = getMetadataValues(customerSpace, streamName, signature, dimensionName);
+                                                  String systemName, EntityType entityType) {
+        log.info("mimeType is {}, fileName is {}, customerSpace is {}, systemName is {}, entityType is {}, ",
+                mimeType, fileName, customerSpace, systemName, entityType);
+        List<Map<String, Object>> metadataValues = getMetadataValues(customerSpace, systemName, entityType);
         DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
         builder.setMimeType(mimeType).setFileName(fileName).setFileContent(getCSVFromValues(metadataValues)).setBatonService(batonService);
         DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
         downloader.downloadFile(request, response);
     }
 
-    private List<Map<String, Object>> getMetadataValues(String customerSpace, String streamName, String signature,
-                                                        String dimensionName) {
+    private List<Map<String, Object>> getMetadataValues(String customerSpace, String systemName, EntityType entityType) {
+        String dimensionName;
+        EntityType streamType;
+        switch(entityType) {
+            case WebVisitPathPattern: streamType = EntityType.WebVisit; dimensionName =
+                    InterfaceName.PathPatternId.name();break;
+            case WebVisitSourceMedium: streamType = EntityType.WebVisit; dimensionName =
+                    InterfaceName.SourceMediumId.name();break;
+                    default: throw new IllegalArgumentException(String.format("this method cannot support this " +
+                            "entityType. entityType is %s.", entityType.name()));
+        }
+
         Map<String, List<Map<String, Object>>> getAllDimensionMetadataValues =
-                getDimensionMetadataInStream(customerSpace, streamName, signature);
+                getDimensionMetadataInStream(customerSpace, systemName, streamType);
         if (!getAllDimensionMetadataValues.containsKey(dimensionName)) {
             throw new IllegalArgumentException(String.format("CustomerSpace %s, cannot find dimensionName %s in " +
-                            "stream %s, signature is %s.", customerSpace, dimensionName, streamName, signature));
+                            "systemName %s, entityType is %s.", customerSpace, dimensionName, systemName, entityType));
         }
         return getAllDimensionMetadataValues.get(dimensionName);
     }
