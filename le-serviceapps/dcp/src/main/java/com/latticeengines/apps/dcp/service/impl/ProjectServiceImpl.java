@@ -85,7 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project getProjectByProjectId(String customerSpace, String projectId) {
-        return getProjectByProjectIdWithRetry(projectId);
+        return projectEntityMgr.findByProjectId(projectId);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
-        Project project = getProjectByProjectIdWithRetry(projectId);
+        Project project = projectEntityMgr.findByProjectId(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Get DCP Project %s failed!", projectId));
         }
@@ -104,11 +104,12 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Boolean deleteProject(String customerSpace, String projectId) {
-        Project project = getProjectByProjectIdWithRetry(projectId);
+        Project project = projectEntityMgr.findByProjectId(projectId);
         if (project == null) {
             return false;
         }
-        projectEntityMgr.delete(project);
+        project.setDeleted(Boolean.TRUE);
+        projectEntityMgr.update(project);
         return true;
     }
 

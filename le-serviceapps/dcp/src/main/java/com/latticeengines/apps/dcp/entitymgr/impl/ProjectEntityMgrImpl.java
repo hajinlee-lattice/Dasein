@@ -88,9 +88,9 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     public List<Project> findAll() {
         List<Project> projectList;
         if(isReaderConnection()) {
-            projectList = projectReaderRepository.findAll();
+            projectList = projectReaderRepository.findByDeleteNot(Boolean.TRUE);
         } else {
-            projectList = projectWriterRepository.findAll();
+            projectList = projectWriterRepository.findByDeleteNot(Boolean.TRUE);
         }
         if (CollectionUtils.isNotEmpty(projectList)) {
             projectList.forEach(this::inflateSystem);
