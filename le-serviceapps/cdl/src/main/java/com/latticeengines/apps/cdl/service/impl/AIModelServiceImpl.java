@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -353,15 +354,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         stopWatch.resume();
         splitter.start();
-        Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
-                modelSummary);
-        log.info(String.format("Iteration metadata compilation (Split: %d ms Total: %d ms): Build Feature Importance",
-                splitter.getTime(), stopWatch.getTime()));
-        stopWatch.suspend();
-        splitter.reset();
-
-        stopWatch.resume();
-        splitter.start();
         Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy
                 .getMetadata(MetadataStoreName.Table, CustomerSpace.shortenCustomerSpace(customerSpace),
                         table.getName()) //
@@ -372,12 +364,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                         splitter.getTime(), stopWatch.getTime()));
         stopWatch.suspend();
         splitter.reset();
-
         stopWatch.resume();
         splitter.start();
         List<ColumnMetadata> acctAttrs = servingStoreService.getAttrsEnabledForModeling(customerSpace,
                 BusinessEntity.Account, dataCollectionService.getActiveVersion(customerSpace)).collectList().block();
-
         Map<String, ColumnMetadata> modelingAttributes = Flux.fromIterable(acctAttrs)
                 .concatWith(servingStoreService.getAttrsEnabledForModeling(customerSpace,
                         BusinessEntity.AnalyticPurchaseState, dataCollectionService.getActiveVersion(customerSpace)))
@@ -386,6 +376,8 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
                 .collectMap(this::getKey, cm -> {
                     ColumnMetadata toReturn = iterationAttributes.getOrDefault(getKey(cm), cm);
                     cm.setSubcategory(Category.SUB_CAT_OTHER);
+                    toReturn.setAdminDisabled(false);
+                    cm.setAdminDisabled(false);
                     return toReturn;
                 }, () -> iterationAttributes).block();
         log.info(String.format(
@@ -398,6 +390,27 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             throw new LedpException(LedpCode.LEDP_40036,
                     new String[] { "Modeling Attributes", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
+        modelingAttributes.forEach((key, cm) -> {
+            if (cm.isAdminDisabled()) {
+                cm.setApprovedUsageList(Collections.singletonList(ApprovedUsage.NONE));
+            }
+        });
+        populateFeatureImportances(customerSpace, stopWatch, splitter, modelSummary, predictors, modelingAttributes);
+        return modelingAttributes;
+    }
+
+    private void populateFeatureImportances(String customerSpace, StopWatch stopWatch, StopWatch splitter,
+            ModelSummary modelSummary, Map<String, Predictor> predictors,
+            Map<String, ColumnMetadata> modelingAttributes) {
+
+        stopWatch.resume();
+        splitter.start();
+        Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
+                modelSummary);
+        log.info(String.format("Iteration metadata compilation (Split: %d ms Total: %d ms): Build Feature Importance",
+                splitter.getTime(), stopWatch.getTime()));
+        stopWatch.suspend();
+        splitter.reset();
 
         stopWatch.resume();
         splitter.start();
@@ -418,8 +431,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         if (MapUtils.isNotEmpty(importanceOrdering)) {
             log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
         }
-
-        return modelingAttributes;
     }
 
     @Override
