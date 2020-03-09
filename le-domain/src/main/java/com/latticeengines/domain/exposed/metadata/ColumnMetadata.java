@@ -111,9 +111,9 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("DataLicense")
     private String dataLicense;
     @JsonProperty("IsHiddenForRemodelingUI")
-    private boolean isHiddenForRemodelingUI;
-    @JsonProperty("IsAdminDisabled")
-    private boolean isAdminDisabled = true;
+    private Boolean isHiddenForRemodelingUI;
+    @JsonProperty("IsAdminDisabledForModel")
+    private Boolean isAdminDisabledForModel;
     /**
      * whether this attribute should be hidden in category tile in home page
      */
@@ -367,11 +367,11 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.dataLicense = dataLicense;
     }
 
-    public boolean isHiddenForRemodelingUI() {
+    public Boolean isHiddenForRemodelingUI() {
         return isHiddenForRemodelingUI;
     }
 
-    public void setIsHiddenForRemodelingUI(boolean isHiddenForRemodelingUI) {
+    public void setIsHiddenForRemodelingUI(Boolean isHiddenForRemodelingUI) {
         this.isHiddenForRemodelingUI = isHiddenForRemodelingUI;
     }
 
@@ -383,12 +383,12 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         IsHiddenInCategoryTile = hiddenInCategoryTile;
     }
 
-    public boolean isAdminDisabled() {
-        return isAdminDisabled;
+    public Boolean isAdminDisabledForModel() {
+        return isAdminDisabledForModel;
     }
 
-    public void setAdminDisabled(boolean isAdminDisabled) {
-        this.isAdminDisabled = isAdminDisabled;
+    public void setAdminDisabledForModel(Boolean isAdminDisabledForModel) {
+        this.isAdminDisabledForModel = isAdminDisabledForModel;
     }
 
     @JsonProperty("FundamentalType")

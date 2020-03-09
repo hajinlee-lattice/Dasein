@@ -254,7 +254,7 @@ public final class AttributeUtils {
         metadata.setAttrName(attr.getName());
         metadata.setDescription(attr.getDescription());
         metadata.setLogicalDataType(attr.getLogicalDataType());
-        metadata.setIsHiddenForRemodelingUI(attr.isHiddenForRemodelingUI());
+        metadata.setIsHiddenForRemodelingUI(attr.isHiddenForRemodelingUI() ? true : null);
         metadata.setJavaClass(toJavaClass(attr.getPhysicalDataType(), attr.getDataType()));
         metadata.setShouldDeprecate(attr.getShouldDeprecate());
         metadata.setSecondarySubCategoryDisplayName(attr.getSecondarySubCategoryDisplayName());
