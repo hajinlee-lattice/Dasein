@@ -97,7 +97,8 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
         Project project = projectEntityMgr.findByProjectId(projectId);
         if (project == null) {
-            throw new RuntimeException(String.format("Get DCP Project %s failed!", projectId));
+            log.warn("No project found with id: " + projectId);
+            return null;
         }
         return getProjectDetails(customerSpace, project);
     }
