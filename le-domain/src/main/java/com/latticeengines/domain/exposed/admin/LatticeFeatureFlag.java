@@ -42,7 +42,6 @@ public enum LatticeFeatureFlag {
     IMPORT_WITHOUT_ID("ImportWithoutIds", "Allow import without id columns."), //
     ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"), //
     MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"), //
-    ENABLE_MULTI_TEMPLATE_IMPORT("EnableMultiTemplateImport", "Allows multiple templates for import"), //
     ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
     ENABLE_LINKEDIN_INTEGRATION("EnableLinkedInIntegration", "Enable LinkedIn integration"), //
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //

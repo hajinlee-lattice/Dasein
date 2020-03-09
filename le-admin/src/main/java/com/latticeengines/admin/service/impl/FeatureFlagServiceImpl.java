@@ -169,7 +169,6 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         Collection<LatticeProduct> dcpCg = Arrays.asList(LatticeProduct.CG, LatticeProduct.DCP);
         createDefaultFeatureFlag(LatticeFeatureFlag.AUTO_IMPORT_ON_INACTIVE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_ENTITY_MATCH, dcpCg).setDefaultValue(false);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.PROTOTYPE_FEATURE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.ALPHA_FEATURE, dcpCg).setDefaultValue(false);
         createDefaultFeatureFlag(LatticeFeatureFlag.BETA_FEATURE, dcpCg).setDefaultValue(false);
