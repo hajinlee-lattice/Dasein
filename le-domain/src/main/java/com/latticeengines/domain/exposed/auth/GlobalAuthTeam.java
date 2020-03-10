@@ -19,8 +19,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -40,6 +38,10 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
     @Column(name = "GlobalTeam_ID", unique = true, nullable = false)
     private Long pid;
 
+    @JsonProperty("team_id")
+    @Column(name = "Team_ID", nullable = false)
+    private String teamId;
+
     @JsonProperty("name")
     @Column(name = "Name", nullable = false)
     private String name;
@@ -49,11 +51,11 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
     @JoinTable(name = "GlobalTeamTenantMember", joinColumns = {
             @JoinColumn(name = "Team_ID")}, inverseJoinColumns = {
             @JoinColumn(name = "TenantMember_ID")})
-    @Fetch(value = FetchMode.SUBSELECT)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthUserTenantRight> gaUserTenantRights = new ArrayList<>();
 
     @JsonProperty("ga_tenant")
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
     @JoinColumn(name = "Tenant_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private GlobalAuthTenant globalAuthTenant;
@@ -88,13 +90,6 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
         this.name = name;
     }
 
-    public GlobalAuthTenant getGlobalAuthTenant() {
-        return globalAuthTenant;
-    }
-
-    public void setGlobalAuthTenant(GlobalAuthTenant globalAuthTenant) {
-        this.globalAuthTenant = globalAuthTenant;
-    }
 
     public String getCreatedByUser() {
         return createdByUser;
@@ -102,5 +97,21 @@ public class GlobalAuthTeam extends BaseGlobalAuthObject implements HasPid {
 
     public void setCreatedByUser(String createdByUser) {
         this.createdByUser = createdByUser;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
+    }
+
+    public GlobalAuthTenant getGlobalAuthTenant() {
+        return globalAuthTenant;
+    }
+
+    public void setGlobalAuthTenant(GlobalAuthTenant globalAuthTenant) {
+        this.globalAuthTenant = globalAuthTenant;
     }
 }

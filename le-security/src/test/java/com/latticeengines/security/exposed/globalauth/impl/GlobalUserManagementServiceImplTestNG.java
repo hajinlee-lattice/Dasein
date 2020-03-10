@@ -19,14 +19,20 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
+import com.latticeengines.security.exposed.service.TeamService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
+
 public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @Inject
@@ -38,9 +44,14 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
     @Inject
     private UserService userService;
 
+    @Inject
+    private TeamService teamService;
+
     private String testTenantId;
     private Ticket ticket;
     private final String testUsername = "ga_usermanagementservice_tester@test.lattice-engines.com";
+    private String firstName = "First";
+    private String lastName = "Last";
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -56,20 +67,20 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
         }
     }
 
-    @AfterClass(groups = { "functional", "deployment" })
+    @AfterClass(groups = {"functional", "deployment"})
     public void tearDown() throws Exception {
         globalUserManagementService.deleteUser(testUsername);
         globalAuthenticationService.discard(ticket);
         super.tearDown();
     }
 
-    @BeforeMethod(groups = { "functional", "deployment" })
+    @BeforeMethod(groups = {"functional", "deployment"})
     public void beforeMethod() {
         createUser(testUsername, testUsername, "Abc", "Def");
         userService.assignAccessLevel(AccessLevel.EXTERNAL_USER, testTenantId, testUsername);
     }
 
-    @AfterMethod(groups = { "functional", "deployment" })
+    @AfterMethod(groups = {"functional", "deployment"})
     public void afterMethod() {
         globalUserManagementService.deleteUser(testUsername);
     }
@@ -89,7 +100,7 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
         assertTrue(exception);
     }
 
-    private void assertUserInfo(User user){
+    private void assertUserInfo(User user) {
         assertNotNull(user);
 
         assertEquals(user.getEmail(), testUsername);
@@ -129,13 +140,8 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
     @Test(groups = "functional")
     public void getAllUsersForTenant() {
         int originalNumber = globalUserManagementService.getAllUsersOfTenant(testTenantId).size();
-
         String prefix = "Tester" + UUID.randomUUID().toString();
-        String firstName = "First";
-        String lastName = "Last";
-
         AccessLevel randomAccessLevel = AccessLevel.values()[new Random().nextInt(AccessLevel.values().length)];
-
         for (int i = 0; i < 10; i++) {
             String username = prefix + String.valueOf(i + 1);
             createUser(username, username + "@xyz.com", firstName, lastName);
@@ -144,28 +150,47 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
         try {
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
                     .getAllUsersOfTenant(testTenantId);
-
             // this assertion may fail if multiple developers are testing
             // against the same database simultaneously.
             assertEquals(userRightsList.size() - originalNumber, 10);
-
             for (AbstractMap.SimpleEntry<User, List<String>> userRight : userRightsList) {
                 User user = userRight.getKey();
                 if (user.getUsername().contains(prefix)) {
                     assertTrue(user.getEmail().endsWith("@xyz.com"));
                     assertEquals(user.getFirstName(), firstName);
                     assertEquals(user.getLastName(), lastName);
-
                     List<String> rights = userRight.getValue();
                     assertEquals(rights.size(), 1);
                     assertEquals(AccessLevel.valueOf(rights.get(0)), randomAccessLevel);
                 }
             }
-
         } finally {
             for (int i = 0; i < 10; i++) {
                 makeSureUserDoesNotExist(prefix + String.valueOf(i + 1));
             }
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testUserRightWithTeam() {
+        String username = "Tester" + UUID.randomUUID().toString() + "@lattice-engines.com";
+        try {
+            AccessLevel accessLevel = AccessLevel.INTERNAL_ADMIN;
+            Tenant preTenant = MultiTenantContext.getTenant();
+            Tenant tenant = tenantEntityMgr.findByTenantId(testTenantId);
+            MultiTenantContext.setTenant(tenant);
+            String teamName = "TestName_" + UUID.randomUUID().toString();
+            createUser(username, username, firstName, lastName);
+            userService.assignAccessLevel(accessLevel, testTenantId, username);
+            teamService.createTeam(username, getGlobalTeamData(teamName, Sets.newHashSet(username)));
+            userService.assignAccessLevel(accessLevel, testTenantId, username, null, null, false);
+            List<GlobalTeam> globalTeams = teamService.getTeamsByUserName(username, getUser(username, accessLevel.name()));
+            assertEquals(globalTeams.size(), 1);
+            assertNotNull(globalTeams.get(0).getTeamMembers());
+            assertEquals(globalTeams.get(0).getTeamMembers().get(0).getEmail(), username);
+            MultiTenantContext.setTenant(preTenant);
+        } finally {
+            makeSureUserDoesNotExist(username);
         }
     }
 }

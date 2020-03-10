@@ -6,15 +6,21 @@ CREATE PROCEDURE `AddGlobalTeamTable`()
     DROP TABLE if EXISTS `GlobalTeam`;
       CREATE TABLE `GlobalTeam` (
 	    `GlobalTeam_ID` bigint(20) NOT NULL AUTO_INCREMENT,
+	    `Created_By` INT(11) NOT NULL,
 	    `Creation_Date` datetime NOT NULL,
 	    `Last_Modification_Date` datetime NOT NULL,
-	    `Created_By` INT(11) NOT NULL,
 	    `Last_Modified_By` INT(11) NOT NULL,
-	    `NAME`  VARCHAR(255) NOT NULL,
-	    `Tenant_ID` bigint(20) NOT NULL,
 	    `Created_By_User` VARCHAR(255),
+	    `NAME`  VARCHAR(255) NOT NULL,
+	    `Team_ID` VARCHAR(255) NOT NULL,
+	    `Tenant_ID` bigint(20) NOT NULL,
 	    PRIMARY KEY (`GlobalTeam_ID`)
 	) ENGINE=InnoDB;
+
+	ALTER TABLE `GlobalTeam` ADD CONSTRAINT `FK_GlobalTeam_TenantID_GlobalTenant` FOREIGN KEY (`Tenant_ID`)
+	  REFERENCES `GlobalTenant` (`GlobalTenant_ID`) ON DELETE CASCADE;
+
+    ALTER TABLE `GlobalUserTenantRight` ADD CONSTRAINT `UKbgb06swixji98da137u00ra4c` unique (`Tenant_ID`, `User_ID`);
 
     DROP TABLE if EXISTS `GlobalTeamTenantMember`;
     CREATE TABLE GlobalTeamTenantMember (

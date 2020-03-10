@@ -2,7 +2,7 @@ package com.latticeengines.auth.exposed.dao.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
@@ -135,6 +135,19 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
         return (List<GlobalAuthUserTenantRight>) query.list();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<GlobalAuthUserTenantRight> findByEmailsAndTenantId(Set<String> emails, Long tenantId) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
+        String queryPattern = "from %s where globalAuthUser.email in (:emails) and Tenant_ID = :tenantId";
+        String queryStr = String.format(queryPattern, entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("emails", emails);
+        query.setParameter("tenantId", tenantId);
+        return (List<GlobalAuthUserTenantRight>) query.list();
+    }
+
     @Override
     public boolean existsByEmail(String email) {
         Session session = sessionFactory.getCurrentSession();
@@ -149,7 +162,7 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<GlobalAuthUserTenantRight> findByNonNullExprationDate() {
+    public List<GlobalAuthUserTenantRight> findByNonNullExpirationDate() {
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
         String queryStr = String.format("from %s where Expiration_Date is not null", entityClz.getSimpleName());

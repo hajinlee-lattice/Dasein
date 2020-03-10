@@ -14,9 +14,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -27,7 +29,8 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "GlobalUserTenantRight")
+@Table(name = "GlobalUserTenantRight", //
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"Tenant_ID", "User_ID"})})
 public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements HasPid {
 
     @Id
@@ -50,19 +53,23 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
     private GlobalAuthTenant globalAuthTenant;
 
     @JsonProperty("operation_name")
-    @Column(name = "Operation_Name", nullable = true)
+    @Column(name = "Operation_Name")
     private String operationName;
 
     @JsonProperty("created_by_user")
-    @Column(name = "Created_By_User", nullable = true)
+    @Column(name = "Created_By_User")
     private String createdByUser;
 
     @JsonProperty("expiration_date")
-    @Column(name = "Expiration_Date", nullable = true)
+    @Column(name = "Expiration_Date")
     private Long expirationDate;
 
     @JsonProperty("global_auth_teams")
-    @ManyToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "gaUserTenantRights")
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
+    @JoinTable(name = "GlobalTeamTenantMember", joinColumns = {
+            @JoinColumn(name = "TenantMember_ID")}, inverseJoinColumns = {
+            @JoinColumn(name = "Team_ID")})
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
 
     @Override
