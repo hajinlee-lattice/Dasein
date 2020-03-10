@@ -79,6 +79,7 @@ public class RecommendationEntityMgrImpl extends BaseEntityMgrImpl<Recommendatio
     @Override
     @Transactional(value = "datadb", propagation = Propagation.REQUIRED, readOnly = false)
     public void create(Recommendation entity) {
+        entity.setRecommendationId(generateRecommendationId());
         if (entity.getLastUpdatedTimestamp() == null) {
             Date timestamp = new Date(System.currentTimeMillis());
             entity.setLastUpdatedTimestamp(timestamp);
