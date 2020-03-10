@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.auth;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
