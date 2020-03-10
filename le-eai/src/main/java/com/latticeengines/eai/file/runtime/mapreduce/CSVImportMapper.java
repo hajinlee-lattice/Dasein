@@ -571,7 +571,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     header -> header));
             for (Attribute attr : table.getAttributes()) {
                 Object avroFieldValue = null;
-                String csvColumnNameInLowerCase = attr.getDisplayName().toLowerCase();
+                String csvColumnNameInLowerCase = attr.getSourceAttrName() == null ?
+                        attr.getDisplayName().toLowerCase() : attr.getSourceAttrName().toLowerCase();
                 // try other possible names:
                 if (!headerCaseMapping.containsKey(csvColumnNameInLowerCase)) {
                     List<String> possibleNames = attr.getPossibleCSVNames();

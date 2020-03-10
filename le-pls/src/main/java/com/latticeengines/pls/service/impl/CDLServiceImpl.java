@@ -667,7 +667,8 @@ public class CDLServiceImpl implements CDLService {
             } else {
                 appendTemplateMapptingValue(fileContent, CUSTOM);
             }
-            appendTemplateMapptingValue(fileContent, attribute.getDisplayName());
+            appendTemplateMapptingValue(fileContent, attribute.getSourceAttrName() == null ?
+                    attribute.getDisplayName() : attribute.getSourceAttrName());
             appendTemplateMapptingValue(fileContent, attribute.getName());
             appendFieldType(fileContent, attribute);
             fileContent.append("\n");
@@ -818,7 +819,8 @@ public class CDLServiceImpl implements CDLService {
     private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {
         TemplateFieldPreview fieldPreview = new TemplateFieldPreview();
         fieldPreview.setNameInTemplate(attribute.getName());
-        fieldPreview.setNameFromFile(attribute.getDisplayName());
+        fieldPreview.setNameFromFile(
+                attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName());
         fieldPreview.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
         if (UserDefinedType.DATE.equals(fieldPreview.getFieldType())) {
             fieldPreview.setDateFormatString(attribute.getDateFormatString());
