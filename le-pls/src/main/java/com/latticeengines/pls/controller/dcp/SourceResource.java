@@ -76,8 +76,8 @@ public class SourceResource {
     @GetMapping(value = "/projectId/{projectId}")
     @ResponseBody
     @ApiOperation("Get sources by projectId")
-    public List<Source> getSourceUnderProduct(@PathVariable String productId) {
-        return sourceService.getSourceList(productId);
+    public List<Source> getSourceUnderProduct(@PathVariable String projectId) {
+        return sourceService.getSourceList(projectId);
     }
 
 }
