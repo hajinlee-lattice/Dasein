@@ -471,6 +471,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void setDeleted(Long pid, Boolean deleted) {
-        datafeedTaskRepository.setDataFeedTaskDeleted(pid, deleted);
+        datafeedTaskDao.updateDeleted(pid, deleted);
     }
 }

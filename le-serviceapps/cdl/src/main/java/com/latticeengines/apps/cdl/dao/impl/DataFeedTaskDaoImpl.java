@@ -69,5 +69,18 @@ public class DataFeedTaskDaoImpl extends BaseDaoImpl<DataFeedTask> implements Da
         query.executeUpdate();
     }
 
+    @Override
+    public void updateDeleted(Long pid, Boolean deleted) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<DataFeedTask> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s datafeedtask set deleted=:deleted where datafeedtask.pid=:pid",
+                entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("pid", pid);
+        query.setParameter("deleted", deleted);
+        query.executeUpdate();
+    }
+
 
 }
