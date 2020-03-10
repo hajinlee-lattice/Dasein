@@ -564,13 +564,13 @@ public class CDLResource {
     @GetMapping(value = "/s3import/template/getDimensionMetadataInStream")
     @ResponseBody
     @ApiOperation("get dimension metadata using streamName")
-    public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(@RequestParam("streamName") String streamName,
-                                                                               @RequestParam(value = "signature", required = false) String signature) {
+    public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(@RequestParam("systemName") String systemName,
+                                                                               @RequestParam("entityType") EntityType entityType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
-        return cdlService.getDimensionMetadataInStream(customerSpace.toString(), streamName, signature);
+        return cdlService.getDimensionMetadataInStream(customerSpace.toString(), systemName, entityType);
     }
 
     @RequestMapping(value = "s3import/template/downloadDimensionMetadataInStream", headers = "Accept=application/json", method =
@@ -578,19 +578,18 @@ public class CDLResource {
     @ResponseBody
     @ApiOperation("Download DimensionMetadata csv file using streamName and dimensionName")
     public void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
-                                                  @RequestParam("streamName") String streamName,
-                                                  @RequestParam(value = "signature", required = false) String signature,
-                                                  @RequestParam("dimensionName") String dimensionName) {
+                                                  @RequestParam("systemName") String systemName,
+                                                  @RequestParam("entityType") EntityType entityType) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
         String dateString = dateFormat.format(new Date());
-        String fileName = String.format("%s_%s_%s.csv", streamName, dimensionName, dateString);
+        String fileName = String.format("%s_%s_%s.csv", systemName, entityType, dateString);
         try {
             cdlService.downloadDimensionMetadataInStream(request, response, "application/csv", fileName,
-                    customerSpace.toString(), streamName, signature, dimensionName);
+                    customerSpace.toString(), systemName, entityType);
         } catch (RuntimeException e) {
             log.error("Download DimensionMetadata csv Failed: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_40076, new String[]{e.getMessage()});
