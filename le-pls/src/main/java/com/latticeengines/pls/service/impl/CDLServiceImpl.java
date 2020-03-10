@@ -936,9 +936,14 @@ public class CDLServiceImpl implements CDLService {
         log.info("customerSpace is {}, systemName is {}, entityType is {}.", customerSpace, systemName, entityType);
         String streamName;
         switch (entityType) {
-            case WebVisit: streamName = entityType.name();break;
-            case Opportunity: streamName = systemName + "_" + entityType.name();break;
-            default: throw new IllegalArgumentException(String.format("getDimensionMetadata() Cannot support " +
+            case WebVisit:
+                streamName = entityType.name();
+                break;
+            case Opportunity:
+                streamName = systemName + "_" + entityType.name();
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("getDimensionMetadata() Cannot support " +
                     "entityType %s", entityType.name()));
         }
         Map<String, DimensionMetadata> metadataMap =
@@ -969,11 +974,16 @@ public class CDLServiceImpl implements CDLService {
         String dimensionName;
         EntityType streamType;
         switch(entityType) {
-            case WebVisitPathPattern: streamType = EntityType.WebVisit; dimensionName =
-                    InterfaceName.PathPatternId.name();break;
-            case WebVisitSourceMedium: streamType = EntityType.WebVisit; dimensionName =
-                    InterfaceName.SourceMediumId.name();break;
-                    default: throw new IllegalArgumentException(String.format("this method cannot support this " +
+            case WebVisitPathPattern:
+                streamType = EntityType.WebVisit;
+                dimensionName = InterfaceName.PathPatternId.name();
+                break;
+            case WebVisitSourceMedium:
+                streamType = EntityType.WebVisit;
+                dimensionName = InterfaceName.SourceMediumId.name();
+                break;
+                    default:
+                        throw new IllegalArgumentException(String.format("this method cannot support this " +
                             "entityType. entityType is %s.", entityType.name()));
         }
 
