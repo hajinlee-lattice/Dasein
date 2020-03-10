@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -18,7 +17,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +47,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -353,39 +352,30 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         stopWatch.resume();
         splitter.start();
-        Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
-                modelSummary);
-        log.info(String.format("Iteration metadata compilation (Split: %d ms Total: %d ms): Build Feature Importance",
-                splitter.getTime(), stopWatch.getTime()));
-        stopWatch.suspend();
-        splitter.reset();
-
-        stopWatch.resume();
-        splitter.start();
         Map<String, ColumnMetadata> iterationAttributes = metadataStoreProxy
                 .getMetadata(MetadataStoreName.Table, CustomerSpace.shortenCustomerSpace(customerSpace),
                         table.getName()) //
-                .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
+                .filter(cm -> !Boolean.TRUE.equals(cm.isHiddenForRemodelingUI())) //
                 .collectMap(this::getKey).block();
         log.info(
                 String.format("Iteration metadata compilation (Split: %d ms Total: %d ms): Retrieve Iteration Metadata",
                         splitter.getTime(), stopWatch.getTime()));
         stopWatch.suspend();
         splitter.reset();
-
         stopWatch.resume();
         splitter.start();
         List<ColumnMetadata> acctAttrs = servingStoreService.getAttrsEnabledForModeling(customerSpace,
                 BusinessEntity.Account, dataCollectionService.getActiveVersion(customerSpace)).collectList().block();
-
         Map<String, ColumnMetadata> modelingAttributes = Flux.fromIterable(acctAttrs)
                 .concatWith(servingStoreService.getAttrsEnabledForModeling(customerSpace,
                         BusinessEntity.AnalyticPurchaseState, dataCollectionService.getActiveVersion(customerSpace)))
                 .filter(cm -> selectedCategories.contains(cm.getCategory()))
-                .filter(((Predicate<ColumnMetadata>) ColumnMetadata::isHiddenForRemodelingUI).negate()) //
+                .filter(cm -> !Boolean.TRUE.equals(cm.isHiddenForRemodelingUI())) //
                 .collectMap(this::getKey, cm -> {
                     ColumnMetadata toReturn = iterationAttributes.getOrDefault(getKey(cm), cm);
                     cm.setSubcategory(Category.SUB_CAT_OTHER);
+                    toReturn.setAdminDisabledForModel(false);
+                    cm.setAdminDisabledForModel(false);
                     return toReturn;
                 }, () -> iterationAttributes).block();
         log.info(String.format(
@@ -398,6 +388,27 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             throw new LedpException(LedpCode.LEDP_40036,
                     new String[] { "Modeling Attributes", aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
+        modelingAttributes.forEach((key, cm) -> {
+            if (!Boolean.FALSE.equals(cm.isAdminDisabledForModel())) {
+                cm.setApprovedUsageList(Collections.singletonList(ApprovedUsage.NONE));
+            }
+        });
+        populateFeatureImportances(customerSpace, stopWatch, splitter, modelSummary, predictors, modelingAttributes);
+        return modelingAttributes;
+    }
+
+    private void populateFeatureImportances(String customerSpace, StopWatch stopWatch, StopWatch splitter,
+            ModelSummary modelSummary, Map<String, Predictor> predictors,
+            Map<String, ColumnMetadata> modelingAttributes) {
+
+        stopWatch.resume();
+        splitter.start();
+        Map<String, Integer> importanceOrdering = featureImportanceUtil.getFeatureImportance(customerSpace,
+                modelSummary);
+        log.info(String.format("Iteration metadata compilation (Split: %d ms Total: %d ms): Build Feature Importance",
+                splitter.getTime(), stopWatch.getTime()));
+        stopWatch.suspend();
+        splitter.reset();
 
         stopWatch.resume();
         splitter.start();
@@ -418,8 +429,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         if (MapUtils.isNotEmpty(importanceOrdering)) {
             log.info("AttributesNotFound: " + StringUtils.join(", ", importanceOrdering.keySet()));
         }
-
-        return modelingAttributes;
     }
 
     @Override
@@ -458,32 +467,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     private String getKey(ColumnMetadata cm) {
         return cm.getCategory().getName() + cm.getAttrName();
-    }
-
-    private void checkAndRemoveHiddenAttributes(Map<String, List<ColumnMetadata>> toReturn) {
-        new HashSet<>(toReturn.keySet()).stream() //
-                .map(k -> new MutablePair<>(k, toReturn.get(k))) //
-                .filter(pair -> CollectionUtils.isNotEmpty(pair.getRight())) //
-                .forEach(pair -> {
-                    List<ColumnMetadata> cms = //
-                            pair.getRight().stream() //
-                                    .filter(cm -> (cm.isHiddenForRemodelingUI() != Boolean.TRUE)) //
-                                    .collect(Collectors.toList());
-                    if (CollectionUtils.isEmpty(cms)) {
-                        log.info(String.format(
-                                "Removed all '%d' attributes and '%s' category as all attributes under it "
-                                        + "were marked as hidden from remodeling UI",
-                                pair.getRight().size(), pair.getLeft()));
-                        toReturn.remove(pair.getLeft());
-                    } else {
-                        if (pair.getRight().size() != cms.size()) {
-                            log.info(
-                                    String.format("Removed '%d' attributes from list of attributes under '%s' category",
-                                            (pair.getRight().size() - cms.size()), pair.getLeft()));
-                            toReturn.put(pair.getLeft(), new ArrayList<>(cms));
-                        }
-                    }
-                });
     }
 
     private AttributeStats convertToAttributeStats(ColumnMetadata cm, Predictor predictor) {
