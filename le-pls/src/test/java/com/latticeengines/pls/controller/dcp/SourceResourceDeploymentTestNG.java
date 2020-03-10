@@ -40,7 +40,7 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         attachProtectedProxy(testSourceProxy);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testCreateAndGetSource() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId("testProject",
                 Project.ProjectType.Type1);
