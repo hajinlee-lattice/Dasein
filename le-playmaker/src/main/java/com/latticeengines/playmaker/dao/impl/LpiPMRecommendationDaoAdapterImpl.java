@@ -106,6 +106,8 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                     queryOffset = offset - totalLaunchedSoFar + recsLaunchedByCurrentLaunch;
                 }
                 launchIdsToQuery.add(launchSummary.getLaunchId());
+            } else {
+                continue;
             }
             if (totalLaunchedSoFar >= offset + maximum) {
                 break;
