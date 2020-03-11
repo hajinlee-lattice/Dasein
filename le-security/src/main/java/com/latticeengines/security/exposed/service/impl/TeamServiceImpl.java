@@ -108,8 +108,13 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Boolean deleteTeam(String teamId) {
-        globalTeamManagementService.deleteTeam(teamId);
+        globalTeamManagementService.deleteTeamByTeamId(teamId);
         return true;
+    }
+
+    @Override
+    public void deleteTeamByTenantId() {
+        globalTeamManagementService.deleteTeamByTenantId();
     }
 
 }
