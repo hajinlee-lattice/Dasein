@@ -141,9 +141,6 @@ public class LoginResource {
                 result.setTenants(tenants);
             }
             doc.setResult(result);
-            if (clearOldSession) {
-                userService.clearOldSessionForNewLogin(userData.getPid(), ticketData.getTicket());
-            }
         } catch (LedpException e) {
             doc.setErrors(Collections.singletonList(e.getCode().getMessage()));
         }
@@ -248,6 +245,9 @@ public class LoginResource {
             user.setAccessLevel(session.getAccessLevel());
             result.setUser(user);
             doc.setResult(result);
+            if (clearOldSession) {
+                userService.clearOldSessionForNewLogin(tenant.getId(), ticketData);
+            }
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001 || e.getCode() == LedpCode.LEDP_18002
                     || e.getCode() == LedpCode.LEDP_18123) {

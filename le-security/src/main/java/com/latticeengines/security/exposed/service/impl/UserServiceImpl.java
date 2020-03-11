@@ -637,26 +637,31 @@ public class UserServiceImpl implements UserService {
                 GlobalAuthTenant tenantData = globalTenantManagementService.findByTenantId(tenantId);
                 List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService
                         .findTicketsByUserIdAndTenant(userId, tenantData);
-                discardTickets(globalAuthTickets);
+                discardTickets(globalAuthTickets, tenantData.getPid());
             });
         }
     }
 
-    private void discardTickets(List<GlobalAuthTicket> globalAuthTickets) {
+    private void discardTickets(List<GlobalAuthTicket> globalAuthTickets, Long tenantId) {
         LOGGER.info(String.format("Ticket ids in %s will be deleted.",
                 globalAuthTickets.stream().map(GlobalAuthTicket::getPid).collect(Collectors.toList())));
         for (GlobalAuthTicket globalAuthTicket : globalAuthTickets) {
-            globalAuthenticationService.discard(new Ticket(globalAuthTicket.getTicket()));
+            globalSessionManagementService.discardSession(new Ticket(globalAuthTicket.getTicket()), tenantId,
+                    globalAuthTicket.getPid(), globalAuthTicket.getUserId());
         }
     }
 
     @Override
-    public void clearOldSessionForNewLogin(Long userId, String ticket) {
-        if (userId != null) {
+    public void clearOldSessionForNewLogin(String tenantId, String ticket) {
             clearSessionService.submit(() -> {
-                List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService.findByUserIdAndNotInTicket(userId, ticket);
-                discardTickets(globalAuthTickets);
+                GlobalAuthTicket ticketData = globalAuthenticationService.findByTicket(ticket);
+                if (ticketData != null) {
+                    GlobalAuthTenant globalAuthTenant = globalTenantManagementService.findByTenantId(tenantId);
+                    Long tenantPid = globalAuthTenant.getPid();
+                    List<GlobalAuthTicket> globalAuthTickets =
+                            globalSessionManagementService.findByUserIdAndTenantIdAndNotInTicket(tenantPid, ticketData.getUserId(), ticket);
+                    discardTickets(globalAuthTickets, globalAuthTenant.getPid());
+                }
             });
-        }
     }
 }

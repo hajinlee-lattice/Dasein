@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -307,7 +308,28 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
     }
 
     @Override
-    public List<GlobalAuthTicket> findByUserIdAndNotInTicket(Long userId, String ticket) {
-        return gaTicketEntityMgr.findByUserIdAndNotInTicketAndLastAccessDate(userId, ticket);
+    @CacheEvict(key = "#ticket.data")
+    public synchronized boolean discardSession(Ticket ticket, Long tenantId, Long ticketId, Long userId) {
+        try {
+            LOGGER.info("Discarding session with ticket id " + ticketId + ", tenant id " + tenantId + ", user id " + userId + "against Global Auth.");
+            return globalDiscard(tenantId, ticketId, userId);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18009, e, new String[]{ticket.toString()});
+        }
+    }
+
+    private boolean globalDiscard(Long tenantId, Long ticketId, Long userId) {
+        GlobalAuthSession globalAuthSession = gaSessionEntityMgr.findByTicketIdAndTenantIdAndUserId(ticketId, tenantId, userId);
+        if (globalAuthSession != null) {
+            gaSessionEntityMgr.delete(globalAuthSession);
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public List<GlobalAuthTicket> findByUserIdAndTenantIdAndNotInTicket(Long tenantId, Long userId, String ticket) {
+        return gaTicketEntityMgr.findByUserAndTenantIdAndNotInTicketAndLastAccessDate(tenantId, userId, ticket);
     }
 }

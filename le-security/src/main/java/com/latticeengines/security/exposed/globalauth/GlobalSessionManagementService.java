@@ -19,5 +19,7 @@ public interface GlobalSessionManagementService {
 
     GlobalAuthExternalSession retrieveExternalSession(Ticket ticket);
 
-    List<GlobalAuthTicket> findByUserIdAndNotInTicket(Long userId, String ticket);
+    List<GlobalAuthTicket> findByUserIdAndTenantIdAndNotInTicket(Long tenantId, Long userId, String ticket);
+
+    boolean discardSession(Ticket ticket, Long tenantId, Long ticketId, Long userId);
 }
