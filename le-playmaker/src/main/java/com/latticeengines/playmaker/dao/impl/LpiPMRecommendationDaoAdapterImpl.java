@@ -10,12 +10,14 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
@@ -56,21 +58,67 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
-            List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
+                                                        List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
+        Pair<Long, List<String>> result = getQueryOffsetAndIds(start, offset, maximum, syncDestination, playIds, orgInfo, appId);
+        if (CollectionUtils.isNotEmpty(result.getRight())) {
+            return lpiPMRecommendation.getRecommendationsByLaunchIds(result.getRight(), start, result.getLeft().intValue(), maximum, offset);
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    private boolean getLatestLaunchFlag(Map<String, String> appId) {
         boolean latestLaunchFlag = false;
         if (appId != null) {
             if (appId.get(CDLConstants.AUTH_APP_ID).startsWith(ELOQUA_APP_ID)) {
                 latestLaunchFlag = true;
             }
         }
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
-        if (CollectionUtils.isNotEmpty(launchIds)) {
-            return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, start, offset, maximum);
-        }
-        else {
-            return new ArrayList<Map<String, Object>>();
-        }
+        return latestLaunchFlag;
     }
+
+    @VisibleForTesting
+    public Pair<Long, List<String>> getQueryOffsetAndIds(long start, int offset, int maximum,
+                                                         int syncDestination, List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
+        boolean latestLaunchFlag = getLatestLaunchFlag(appId);
+        List<String> launchIdsToQuery = new ArrayList<>();
+        int totalLaunchedSoFar = 0;
+        long queryOffset = -1L;
+        List<LaunchSummary> summaries = lpiPMPlay.getLaunchSummariesFromDashboard(latestLaunchFlag, start, playIds, syncDestination, orgInfo);
+        if (CollectionUtils.isEmpty(summaries)) {
+            return Pair.of(queryOffset, launchIdsToQuery);
+        }
+        summaries.sort((summary1, summary2) -> {
+            long deltaTime = summary1.getLaunchTime().getTime() - summary2.getLaunchTime().getTime();
+            if (deltaTime != 0) {
+                return deltaTime > 0 ? 1 : -1;
+            } else {
+                return summary1.getLaunchId().compareTo(summary2.getLaunchId());
+            }
+        });
+        for (LaunchSummary launchSummary : summaries) {
+            long recsLaunchedByCurrentLaunch = launchSummary.getStats().getRecommendationsLaunched();
+            totalLaunchedSoFar += recsLaunchedByCurrentLaunch;
+            if (totalLaunchedSoFar < offset) {
+                continue;
+            } else {
+                if (queryOffset < 0) {
+                    queryOffset = offset - totalLaunchedSoFar;
+                    if (queryOffset < 0) {
+                        queryOffset += recsLaunchedByCurrentLaunch;
+                        launchIdsToQuery.add(launchSummary.getLaunchId());
+                    }
+                } else {
+                    launchIdsToQuery.add(launchSummary.getLaunchId());
+                }
+                if (totalLaunchedSoFar >= offset + maximum) {
+                    break;
+                }
+            }
+        }
+        return Pair.of(queryOffset, launchIdsToQuery);
+    }
+
 
     @Override
     public long getRecommendationCount(long start, int syncDestination, List<String> playIds,
