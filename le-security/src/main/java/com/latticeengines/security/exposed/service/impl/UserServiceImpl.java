@@ -281,14 +281,11 @@ public class UserServiceImpl implements UserService {
         if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
                 List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
-                if (CollectionUtils.isNotEmpty(rightsData)) {
+                if (userTeams == null && CollectionUtils.isNotEmpty(rightsData)) {
                     globalAuthTeams = rightsData.get(0).getGlobalAuthTeams();
-                }
-                if (CollectionUtils.isNotEmpty(userTeams)) {
+                } else if (CollectionUtils.isNotEmpty(userTeams)) {
                     List<String> userTeamIds = userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
-                    List<GlobalAuthTeam> allGlobalAuthTeams = globalTeamManagementService.getTeams(false);
-                    allGlobalAuthTeams.removeIf(globalAuthTeam -> !userTeamIds.contains(globalAuthTeam.getTeamId()));
-                    globalAuthTeams = allGlobalAuthTeams;
+                    globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
                         createdByUser, expirationDate, globalAuthTeams);

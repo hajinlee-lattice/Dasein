@@ -205,8 +205,9 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         if (tenantData == null) {
             throw new Exception("Unable to find the tenant requested.");
         }
+        boolean withTeam = true;
         GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
-                .findByUserIdAndTenantIdAndOperationName(globalAuthUser.getPid(), tenantData.getPid(), right, true);
+                .findByUserIdAndTenantIdAndOperationName(globalAuthUser.getPid(), tenantData.getPid(), right, withTeam);
         if (rightData != null) {
             // update expiration date of tenant for user
             // if expiration date changes, update tenant right

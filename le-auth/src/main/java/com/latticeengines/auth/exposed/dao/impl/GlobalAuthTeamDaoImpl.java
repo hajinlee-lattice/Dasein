@@ -63,6 +63,17 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
     }
 
     @Override
+    public List<GlobalAuthTeam> findByTeamIdsAndTenantId(Long tenantId, List<String> teamIds) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthTeam> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s where teamId in (:teamIds) and Tenant_Id = %d ", entityClz.getSimpleName(), tenantId);
+        Query query = session.createQuery(queryStr);
+        query.setParameter("teamIds", teamIds);
+        return query.list();
+    }
+
+    @Override
     public void deleteByTeamId(String teamId, Long tenantId) {
         Session session = getCurrentSession();
         Class<GlobalAuthTeam> entityClz = getEntityClass();

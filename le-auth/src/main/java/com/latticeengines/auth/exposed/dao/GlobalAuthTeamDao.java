@@ -15,4 +15,5 @@ public interface GlobalAuthTeamDao extends BaseDao<GlobalAuthTeam> {
 
     List<GlobalAuthTeam> findByUsernameAndTenantId(Long tenantId, String username);
 
+    List<GlobalAuthTeam> findByTeamIdsAndTenantId(Long tenantId, List<String> teamIds);
 }
