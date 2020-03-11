@@ -23,6 +23,8 @@ public interface GlobalAuthUserTenantRightEntityMgr extends
 
     List<GlobalAuthUserTenantRight> findByTenantId(Long tenantId);
 
+    List<GlobalAuthUserTenantRight> findByTenantId(Long tenantId, boolean inflate);
+
     Boolean deleteByUserId(Long userId);
 
     boolean isRedundant(String email);
