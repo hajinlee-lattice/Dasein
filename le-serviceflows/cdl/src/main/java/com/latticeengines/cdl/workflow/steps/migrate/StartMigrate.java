@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.EntityMatchMigrateStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.cdl.MigrateTrackingProxy;
@@ -50,10 +51,14 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
+    @Inject
+    private DataCollectionProxy dataCollectionProxy;
+
     @Override
     public void execute() {
         Long migrateTrackingPid = configuration.getMigrateTrackingPid();
         CustomerSpace customerSpace = configuration.getCustomerSpace();
+        putObjectInContext(CDL_ACTIVE_VERSION, dataCollectionProxy.getActiveVersion(customerSpace.toString()));
         Map<BusinessEntity, List<String>> dataFeedTaskMap = configuration.getDataFeedTaskMap();
         if (MapUtils.isEmpty(dataFeedTaskMap)) {
             throw new RuntimeException("No import template to be migrated!");

@@ -12,6 +12,7 @@ import com.latticeengines.cdl.workflow.steps.migrate.FinishMigrate;
 import com.latticeengines.cdl.workflow.steps.migrate.StartMigrate;
 import com.latticeengines.domain.exposed.serviceflows.cdl.migrate.CDLEntityMatchMigrationWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.export.ExportImportMigrationToS3;
+import com.latticeengines.serviceflows.workflow.export.ImportProcessAnalyzeFromS3;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -42,11 +43,15 @@ public class CDLEntityMatchMigrationWorkflow extends AbstractWorkflow<CDLEntityM
     @Inject
     private CDLEntityMatchMigrationListener cdlEntityMatchMigrationListener;
 
+    @Inject
+    private ImportProcessAnalyzeFromS3 importProcessAnalyzeFromS3;
+
 
     @Override
     public Workflow defineWorkflow(CDLEntityMatchMigrationWorkflowConfiguration workflowConfig) {
         return new WorkflowBuilder(name(), workflowConfig)
                 .next(startMigrate)
+                .next(importProcessAnalyzeFromS3)
                 .next(accountImportsMigrateWorkflow)
                 .next(contactImportsMigrateWorkflow)
                 .next(transactionImportsMigrateWorkflow)
