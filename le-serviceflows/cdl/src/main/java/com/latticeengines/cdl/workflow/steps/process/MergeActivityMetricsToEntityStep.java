@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
@@ -36,6 +35,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.TemplateUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -335,6 +335,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                 }
             }
         }
+        setFundamentalType(attr, group);
         setAttrEvaluatedDate(attr, timeRange, translator);
     }
 
@@ -374,6 +375,14 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                     String.format("Cannot find dimension metadata for stream %s", stream.getStreamId()));
         }
         return streamDimMetadata;
+    }
+
+    private void setFundamentalType(@NotNull Attribute attr, ActivityMetricsGroup group) {
+        if (attr.getFundamentalType() != null || group.getAggregation() == null) {
+            // already have type set
+            return;
+        }
+        attr.setFundamentalType(group.getAggregation().getTargetFundamentalType());
     }
 
     private void setAttrEvaluatedDate(Attribute attr, String timeRange, TimeFilterTranslator translator) {
