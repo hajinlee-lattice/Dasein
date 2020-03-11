@@ -46,12 +46,12 @@ public class SourceResource {
         if (StringUtils.isBlank(sourceRequest.getSourceId())) {
             log.debug("Create source with empty sourceId.");
             return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
-                    sourceRequest.getProjectId(), sourceRequest.getSimpleTemplateMetadata());
+                    sourceRequest.getProjectId(), sourceRequest.getFieldDefinitionsRecord());
         } else {
             log.debug("Create source with specified sourceId: " + sourceRequest.getSourceId());
             return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
                     sourceRequest.getProjectId(), sourceRequest.getSourceId(),
-                    sourceRequest.getSimpleTemplateMetadata());
+                    sourceRequest.getFieldDefinitionsRecord());
         }
     }
 

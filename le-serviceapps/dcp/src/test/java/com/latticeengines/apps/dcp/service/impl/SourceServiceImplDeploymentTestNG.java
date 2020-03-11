@@ -1,5 +1,7 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import java.io.InputStream;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,14 +14,16 @@ import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
-import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
-import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 
 public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
+
+    private static final String SPEC_FILE_LOCAL_PATH = "service/impl/dcp-accounts-example-spec.json";
 
     @Inject
     private ProjectService projectService;
@@ -45,9 +49,10 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
                 Project.ProjectType.Type1, "test@dnb.com");
         String projectId = details.getProjectId();
 
-        SimpleTemplateMetadata simpleTemplateMetadata = new SimpleTemplateMetadata();
-        simpleTemplateMetadata.setEntityType(EntityType.Accounts);
-        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId, simpleTemplateMetadata);
+        InputStream specStream = ClassLoader.getSystemResourceAsStream(SPEC_FILE_LOCAL_PATH);
+
+        FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
+        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId, fieldDefinitionsRecord);
 
         Assert.assertNotNull(source);
 
@@ -61,7 +66,7 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         // create another source under same project
         Source source2 = sourceService.createSource(mainCustomerSpace, "TestSource2", projectId,
-                simpleTemplateMetadata);
+                fieldDefinitionsRecord);
         Assert.assertNotEquals(source.getSourceId(), source2.getSourceId());
         s3Service.objectExist(dropBoxSummary.getBucket(),
                 dropBoxService.getDropBoxPrefix() + "/" + source2.getFullPath() + "drop/");

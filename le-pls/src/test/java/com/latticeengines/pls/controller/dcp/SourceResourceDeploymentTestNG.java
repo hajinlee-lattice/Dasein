@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller.dcp;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -12,19 +13,21 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
-import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestSourceProxy;
 
 public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+
+    private static final String SPEC_FILE_LOCAL_PATH = "com/latticeengines/pls/controller/dcp-accounts-example-spec.json";
 
     @Inject
     private TestProjectProxy testProjectProxy;
@@ -46,12 +49,17 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 Project.ProjectType.Type1);
         Assert.assertNotNull(projectDetail);
         String projectId = projectDetail.getProjectId();
-        SimpleTemplateMetadata simpleTemplateMetadata = new SimpleTemplateMetadata();
-        simpleTemplateMetadata.setEntityType(EntityType.Accounts);
+
+        InputStream specStream = ClassLoader.getSystemResourceAsStream(SPEC_FILE_LOCAL_PATH);
+
+        FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
+//        SimpleTemplateMetadata simpleTemplateMetadata = new SimpleTemplateMetadata();
+//        simpleTemplateMetadata.setEntityType(EntityType.Accounts);
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setProjectId(projectId);
         sourceRequest.setDisplayName("testSource");
-        sourceRequest.setSimpleTemplateMetadata(simpleTemplateMetadata);
+        sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
+//        sourceRequest.setSimpleTemplateMetadata(simpleTemplateMetadata);
         Source source = testSourceProxy.createSource(sourceRequest);
         Assert.assertNotNull(source);
         Assert.assertFalse(StringUtils.isBlank(source.getSourceId()));
