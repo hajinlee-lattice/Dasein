@@ -740,7 +740,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
             throw new Exception("Unable to find the tenant requested: " + tenantId);
         }
         List<GlobalAuthUserTenantRight> userRightDatas =
-                gaUserTenantRightEntityMgr.findByTenantId(tenantData.getPid(), true);
+                gaUserTenantRightEntityMgr.findByTenantId(tenantData.getPid(), withTeam);
         if (userRightDatas == null || userRightDatas.size() == 0) {
             return userRightsList;
         }

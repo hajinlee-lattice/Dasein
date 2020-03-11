@@ -376,10 +376,9 @@ public class UserServiceImpl implements UserService {
             }
         } catch (LedpException e) {
             LOGGER.warn(String.format("Trying to get all users from a non-existing tenant %s", tenantId));
-            throw e;
-//            if (e.getCode() == LedpCode.LEDP_18001) {
-//                throw new LoginException(e);
-//            }
+            if (e.getCode() == LedpCode.LEDP_18001) {
+                throw new LoginException(e);
+            }
         }
 
         return users;
