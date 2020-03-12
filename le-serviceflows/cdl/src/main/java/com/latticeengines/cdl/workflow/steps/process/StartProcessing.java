@@ -237,7 +237,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         // get current active collection status
         DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
                 activeVersion);
-        String oldPartition = dcStatus.getRedshiftPartition();
         dcStatus.setEvaluationDate(evaluationDate);
         dcStatus.setApsRollingPeriod(configuration.getApsRollingPeriod());
         log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(dcStatus));
@@ -257,9 +256,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     inactiveVersion);
         }
 
-        if (!newPartition.equals(oldPartition)) {
-            syncRedshiftTablesToNewCluster(newPartition);
-        }
+        syncRedshiftTablesToNewCluster(newPartition);
     }
 
     private void syncRedshiftTablesToNewCluster(String newPartition) {
