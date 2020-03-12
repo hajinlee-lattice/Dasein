@@ -25,6 +25,9 @@ public class ProjectDetails {
     @JsonProperty("drop_folder_access")
     private GrantDropBoxAccessResponse dropFolderAccess;
 
+    @JsonProperty("deleted")
+    private Boolean deleted;
+
     @JsonProperty("sources")
     private List<Source> sources;
 
@@ -58,6 +61,14 @@ public class ProjectDetails {
 
     public void setDropFolderAccess(GrantDropBoxAccessResponse dropFolderAccess) {
         this.dropFolderAccess = dropFolderAccess;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     public List<Source> getSources() {

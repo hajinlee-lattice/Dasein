@@ -142,6 +142,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setProjectDisplayName(project.getProjectDisplayName());
         details.setProjectRootPath(project.getRootPath());
         details.setDropFolderAccess(getDropBoxAccess());
+        details.setDeleted(project.getDeleted());
         if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
             details.setSources(new ArrayList<>());
             project.getS3ImportSystem().getTasks()
