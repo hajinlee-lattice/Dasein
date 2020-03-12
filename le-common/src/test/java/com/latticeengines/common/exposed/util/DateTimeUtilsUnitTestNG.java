@@ -22,5 +22,4 @@ public class DateTimeUtilsUnitTestNG {
     public void testDateStringConversionBad() {
         DateTimeUtils.convertToDateUTCISO8601("bad format");
     }
-
 }

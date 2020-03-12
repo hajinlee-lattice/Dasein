@@ -272,4 +272,8 @@ public final class PathBuilder {
     public static Path buildSingleWorkflowThrottlingFlagPath(String podId, String division, String workflowType) {
         return new Path(PathConstants.PODS, podId, PathConstants.DIVISION, division, PathConstants.WORKFLOW_THROTTLING_FLAG, workflowType);
     }
+
+    public static Path buildTenantActivityUploadQuotaConfigPath(String podId, CustomerSpace customerSpace) {
+        return new Path(PathConstants.PODS, podId, PathConstants.CONTRACTS, customerSpace.getContractId(), PathConstants.TENANTS, customerSpace.getTenantId(), PathConstants.SPACES, customerSpace.getSpaceId(), PathConstants.SERVICES, PathConstants.CDL, PathConstants.ACTIVITY_UPLOAD_QUOTA);
+    }
 }

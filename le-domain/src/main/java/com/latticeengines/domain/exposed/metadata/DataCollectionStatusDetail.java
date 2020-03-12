@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -77,6 +78,9 @@ public class DataCollectionStatusDetail implements Serializable {
 
     @JsonProperty("RedshiftPartition")
     private String redshiftPartition;
+
+    @JsonProperty("activityBookKeeping")
+    private ActivityBookkeeping bookkeeping;
 
     public Integer getMinTxnDate() {
         return minTxnDate;
@@ -224,5 +228,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setRedshiftPartition(String redshiftPartition) {
         this.redshiftPartition = redshiftPartition;
+    }
+
+    public ActivityBookkeeping getBookkeeping() {
+        return bookkeeping;
+    }
+
+    public void setBookkeeping(ActivityBookkeeping bookkeeping) {
+        this.bookkeeping = bookkeeping;
     }
 }
