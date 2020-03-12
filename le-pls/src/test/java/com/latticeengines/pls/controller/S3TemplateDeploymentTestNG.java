@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -23,8 +24,10 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.frontend.FieldCategory;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -104,6 +107,24 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         restTemplate.put(getRestAPIHostPort() + url, requestEntity);
         assertTrue(getS3ImportTemplateEntries());
     }
+
+    @Test(groups = "deployment", dependsOnMethods = "testCreateS3Template")
+    public void testPreviewTemplateName() throws Exception {
+        assertTrue(getS3ImportTemplateEntries());
+        templateDisplay.getS3ImportSystem().setAccountSystemId("user_CrmAccount_External_ID");
+        String url = BASE_URL_PREFIX + "/s3import/template/preview";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
+        HttpEntity<String> requestEntity = new HttpEntity<String>(JsonUtils.serialize(templateDisplay), headers);
+        List<?> list = restTemplate.postForObject(getRestAPIHostPort() + url, requestEntity, List.class);
+        List<TemplateFieldPreview> previewList = JsonUtils.convertList(list, TemplateFieldPreview.class);
+        for (TemplateFieldPreview preview : previewList) {
+            if (preview.getNameInTemplate().equalsIgnoreCase("user_CrmAccount_External_ID")) {
+                assertEquals(preview.getFieldCategory(), FieldCategory.LatticeField);
+            }
+        }
+    }
+
 
     private SourceFile uploadSourceFile(String csvFileName, String entity) {
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
