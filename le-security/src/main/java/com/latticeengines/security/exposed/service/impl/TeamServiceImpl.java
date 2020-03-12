@@ -80,7 +80,7 @@ public class TeamServiceImpl implements TeamService {
     public GlobalTeam getTeamByTeamId(String teamId, User loginUser) {
         GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
         if (globalAuthTeam != null) {
-
+            log.warn("There is no team with id {}", teamId);
         }
         return null;
     }
