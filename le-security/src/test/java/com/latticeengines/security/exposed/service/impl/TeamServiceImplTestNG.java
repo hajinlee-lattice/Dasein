@@ -4,6 +4,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,6 +18,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TeamService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
@@ -57,19 +60,23 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @AfterClass(groups = {"functional"})
     public void tearDown() {
+        deleteTenant(tenant);
+        deleteTenant(anotherTenant);
         makeSureUserDoesNotExist(username1InTenant);
         makeSureUserDoesNotExist(username2InTenant);
         makeSureUserDoesNotExist(usernameInAnotherTenant);
-        deleteTenant(tenant);
-        deleteTenant(anotherTenant);
     }
 
-    private void validateTeamInfo(GlobalTeam globalTeam, String teamName, String teamMemberName) {
+    private void validateTeamInfo(GlobalTeam globalTeam, String teamName, String teamMemberName, int teamMemberSize) {
         assertNotNull(globalTeam.getTeamId());
         assertEquals(globalTeam.getTeamName(), teamName);
         assertNotNull(globalTeam.getCreatedByUser());
-        assertEquals(globalTeam.getTeamMembers().size(), 1);
-        assertEquals(globalTeam.getTeamMembers().get(0).getEmail(), teamMemberName);
+        assertNotNull(globalTeam.getTeamMembers());
+        assertEquals(globalTeam.getTeamMembers().size(), teamMemberSize);
+        Map<String, User> userMap = globalTeam.getTeamMembers().stream()
+                .collect(Collectors.toMap(User::getEmail, User -> User));
+        User user = userMap.get(teamMemberName);
+        assertNotNull(user);
     }
 
     @Test(groups = "functional")
@@ -86,19 +93,20 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         globalTeams = teamService.getTeamsByUserName(username2InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
         // edit
-        teamService.editTeam(teamId, getGlobalTeamData(teamName1InTenant, Sets.newHashSet(username1InTenant)));
+        teamService.editTeam(getUser(username2InTenant, AccessLevel.EXTERNAL_ADMIN.name()),
+                teamId, getGlobalTeamData(teamName1InTenant, Sets.newHashSet(username2InTenant)));
         globalTeams = teamService.getTeamsByUserName(username2InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
-        assertEquals(globalTeams.size(), 0);
+        assertEquals(globalTeams.size(), 1);
+        validateTeamInfo(globalTeams.get(0), teamName1InTenant, username2InTenant, 2);
         // delete
         teamService.deleteTeam(teamId);
         globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
-        teamService.deleteTeamByTenantId();
+
         MultiTenantContext.setTenant(anotherTenant);
         teamService.createTeam(usernameInAnotherTenant, getGlobalTeamData(teamNameInAnotherTenant, Sets.newHashSet(usernameInAnotherTenant)));
         globalTeams = teamService.getTeamsByUserName(usernameInAnotherTenant, getUser(usernameInAnotherTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
-        validateTeamInfo(globalTeams.get(0), teamNameInAnotherTenant, usernameInAnotherTenant);
-        teamService.deleteTeamByTenantId();
+        validateTeamInfo(globalTeams.get(0), teamNameInAnotherTenant, usernameInAnotherTenant, 1);
     }
 }

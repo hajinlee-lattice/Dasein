@@ -113,7 +113,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     @Override
     public GlobalAuthTeam getTeamById(String teamId, boolean withTeamMember) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
-        return globalAuthTeamEntityMgr.findByTeamIdAndTenantId(tenantData.getPid(), teamId);
+        return globalAuthTeamEntityMgr.findByTeamIdAndTenantId(tenantData.getPid(), teamId, withTeamMember);
     }
 
     @Override

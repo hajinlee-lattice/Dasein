@@ -119,4 +119,14 @@ public class GlobalAuthTeamEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTea
     public GlobalAuthTeam findByTeamIdAndTenantId(Long tenantId, String teamId) {
         return globalAuthTeamDao.findByTeamIdAndTenantId(tenantId, teamId);
     }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public GlobalAuthTeam findByTeamIdAndTenantId(Long tenantId, String teamId, boolean inflate) {
+        GlobalAuthTeam globalAuthTeam = globalAuthTeamDao.findByTeamIdAndTenantId(tenantId, teamId);
+        if (inflate) {
+            Hibernate.initialize(globalAuthTeam.getUserTenantRights());
+        }
+        return globalAuthTeam;
+    }
 }

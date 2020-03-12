@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -43,11 +44,29 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private UserFilter getFilter(User loginUser) {
-        AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
-        if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
+        if (isExternalUser(loginUser)) {
             return UserFilter.EXTERNAL_FILTER;
         } else {
             return UserFilter.TRIVIAL_FILTER;
+        }
+    }
+
+    private boolean isExternalUser(User loginUser) {
+        AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
+        if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isInternalUser(GlobalAuthUserTenantRight globalAuthUserTenantRight) {
+        if (AccessLevel.INTERNAL_ADMIN.name().equals(globalAuthUserTenantRight.getOperationName())
+                || AccessLevel.INTERNAL_USER.name().equals(globalAuthUserTenantRight.getOperationName())
+                || AccessLevel.SUPER_ADMIN.name().equals(globalAuthUserTenantRight.getOperationName())) {
+            return globalAuthUserTenantRight.getExpirationDate() == null || globalAuthUserTenantRight.getExpirationDate() > System.currentTimeMillis();
+        } else {
+            return false;
         }
     }
 
@@ -55,6 +74,15 @@ public class TeamServiceImpl implements TeamService {
     public List<GlobalTeam> getTeamsByUserName(String username, User loginUser) {
         List<GlobalAuthTeam> globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, true);
         return getGlobalTeams(globalAuthTeams, true, loginUser);
+    }
+
+    @Override
+    public GlobalTeam getTeamByTeamId(String teamId, User loginUser) {
+        GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
+        if (globalAuthTeam != null) {
+
+        }
+        return null;
     }
 
     private List<GlobalTeam> getGlobalTeams(List<GlobalAuthTeam> globalAuthTeams, boolean withTeamMember, User loginUser) {
@@ -95,7 +123,21 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Boolean editTeam(String teamId, GlobalTeamData globalTeamData) {
+    public Boolean editTeam(User loginUser, String teamId, GlobalTeamData globalTeamData) {
+        if (CollectionUtils.isNotEmpty(globalTeamData.getTeamMembers()) && isExternalUser(loginUser)) {
+            // add the internal users into team member list if internal user exists in the edit team
+            GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
+            if (globalAuthTeam != null && CollectionUtils.isNotEmpty(globalAuthTeam.getUserTenantRights())) {
+                List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
+                Set<String> teamMembers = globalTeamData.getTeamMembers();
+                for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
+                    String username = globalAuthUserTenantRight.getGlobalAuthUser().getEmail();
+                    if (!teamMembers.contains(username) && isInternalUser(globalAuthUserTenantRight)) {
+                        teamMembers.add(username);
+                    }
+                }
+            }
+        }
         globalTeamManagementService.updateTeam(teamId, globalTeamData);
         return true;
     }
