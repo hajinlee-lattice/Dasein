@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -205,10 +206,18 @@ public class ActivityMetricDecorator implements Decorator {
      * fill missing fundamental type for backward compatibility
      */
     private void renderFundamentalType(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group) {
-        if (cm.getFundamentalType() != null || group.getAggregation() == null) {
+        /*-
+         * when transforming from Attribute to ColumnMetadata, FundamentalType.ALPHA
+         * will be set as default if Attribute doesn't have it, so still need to force
+         * override if it's ALPHA.
+         */
+        if ((cm.getFundamentalType() != null && cm.getFundamentalType() != FundamentalType.ALPHA)
+                || group.getAggregation() == null) {
             return;
         }
-        cm.setFundamentalType(group.getAggregation().getTargetFundamentalType());
+        if (group.getAggregation().getTargetFundamentalType() != null) {
+            cm.setFundamentalType(group.getAggregation().getTargetFundamentalType());
+        }
     }
 
     private void renderTemplates(ColumnMetadata cm, ActivityMetricsGroup group, Map<String, Object> params) {
