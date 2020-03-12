@@ -73,6 +73,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.OpportunityUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -355,7 +356,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask stageDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
         log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
-        String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
+        String opportunityAtlasStreamName = OpportunityUtils.getStreamName(systemName);
         createOpportunityMetadata(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
         return true;
     }
@@ -375,7 +376,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask stageDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
         log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
-        String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
+        String opportunityAtlasStreamName = OpportunityUtils.getStreamName(systemName);
         createOpportunityMetadata(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
         return true;
     }
