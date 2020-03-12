@@ -54,7 +54,7 @@ public class ActivityMetricsGroupEntityMgrImpl extends JpaEntityMgrRepositoryImp
         if (tenant == null) {
             throw new IllegalStateException("Tenant not set for multitenant context.");
         }
-        List<String> groupIds = readerRepository.findGroupIdsByBase(tenant, base);
+        List<String> groupIds = readerRepository.findGroupIdsByBase(tenant, base + "%");
         String idx = CollectionUtils.isEmpty(groupIds) ? "" : getNextIndex(base, groupIds.get(0)).toString();
         return String.format("%s%s", base, idx);
     }
@@ -71,8 +71,8 @@ public class ActivityMetricsGroupEntityMgrImpl extends JpaEntityMgrRepositoryImp
         return readerRepository.findByStream(stream);
     }
 
-    private Long getNextIndex(String base, String groupIds) {
-        String curIdxStr = groupIds.substring(base.length());
+    private Long getNextIndex(String base, String lastGroupId) {
+        String curIdxStr = lastGroupId.substring(base.length());
         return StringUtils.isBlank(curIdxStr) ? 1L : Long.parseLong(curIdxStr) + 1;
     }
 }

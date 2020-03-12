@@ -35,6 +35,7 @@ import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEntityMgrImplTestNGBase {
 
     private static ActivityMetricsGroup TEST_GROUP_TOTAL_VISIT;
+    private static ActivityMetricsGroup TEST_GROUP_TOTAL_VISIT_1;
     private static AtlasStream STREAM_WEBVISIT;
 
     private static final String PERIOD = PeriodStrategy.Template.Week.name();
@@ -63,7 +64,8 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
         prepareStream();
 
         STREAM_WEBVISIT = createStream(STREAM_NAME_WEBVISIT);
-        TEST_GROUP_TOTAL_VISIT = prepareMetricsGroup(GROUPNAME_TOTAL_VISIT, STREAM_WEBVISIT);
+        TEST_GROUP_TOTAL_VISIT = prepareMetricsGroup(GROUPNAME_TOTAL_VISIT, STREAM_WEBVISIT, "");
+        TEST_GROUP_TOTAL_VISIT_1 = prepareMetricsGroup(GROUPNAME_TOTAL_VISIT, STREAM_WEBVISIT, "1");
 
         MultiTenantContext.setTenant(mainTestTenant);
     }
@@ -100,7 +102,7 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
     public void testFindByTenant() {
         List<ActivityMetricsGroup> groups = activityMetricsGroupEntityMgr.findByTenant(mainTestTenant);
         Assert.assertNotNull(groups);
-        Assert.assertEquals(groups.size(), 1);
+        Assert.assertEquals(groups.size(), 2);
         groups.forEach(g -> Assert.assertEquals(g.getTenant().getPid(), mainTestTenant.getPid()));
     }
 
@@ -108,20 +110,22 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
     public void testFindByStream() {
         List<ActivityMetricsGroup> groups = activityMetricsGroupEntityMgr.findByStream(STREAM_WEBVISIT);
         Assert.assertNotNull(groups);
-        Assert.assertEquals(groups.size(), 1);
+        Assert.assertEquals(groups.size(), 2);
         groups.forEach(g -> Assert.assertEquals(g.getStream().getPid(), STREAM_WEBVISIT.getPid()));
     }
 
     @DataProvider(name = "testGroupsDataProvider")
     public Object[][] testGroupsDataProvider() {
         return new Object[][]{
-                {TEST_GROUP_TOTAL_VISIT, prepareMetricsGroup(GROUPNAME_TOTAL_VISIT, STREAM_WEBVISIT)}};
+                {TEST_GROUP_TOTAL_VISIT, prepareMetricsGroup(GROUPNAME_TOTAL_VISIT, STREAM_WEBVISIT, "")},
+                {TEST_GROUP_TOTAL_VISIT_1, prepareMetricsGroup(GROUPNAME_TOTAL_VISIT, STREAM_WEBVISIT, "1")}
+        };
     }
 
     @DataProvider(name = "groupNamesDataProvider")
     public Object[][] groupNameDataProvider() {
         return new Object[][]{{GROUPNAME_TOTAL_VISIT,
-                ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(GROUPNAME_TOTAL_VISIT) + "1"}};
+                ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(GROUPNAME_TOTAL_VISIT) + "2"}};
     }
 
     private ActivityTimeRange createTimeRollup() {
@@ -132,11 +136,11 @@ public class ActivityMetricsGroupEntityMgrImplTestNG extends ActivityRelatedEnti
         return activityTimeRange;
     }
 
-    private ActivityMetricsGroup prepareMetricsGroup(String groupName, AtlasStream stream) {
+    private ActivityMetricsGroup prepareMetricsGroup(String groupName, AtlasStream stream, String seq) {
         ActivityTimeRange activityTimeRange = createTimeRollup();
         ActivityMetricsGroup group = new ActivityMetricsGroup();
         group.setGroupName(groupName);
-        group.setGroupId(ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(groupName));
+        group.setGroupId(ActivityMetricsGroupUtils.fromGroupNameToGroupIdBase(groupName) + seq);
         group.setTenant(mainTestTenant);
         group.setStream(stream);
         group.setEntity(BusinessEntity.Account);
