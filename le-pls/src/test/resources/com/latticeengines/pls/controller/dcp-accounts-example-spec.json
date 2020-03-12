@@ -7,7 +7,7 @@
                 "fieldName": "CustomerAccountId",
                 "fieldType": "TEXT",
                 "screenName": "Customer Account ID",
-                "columnName": "CustomerAccountId"
+                "columnName": "CustomerAccountId",
                 "matchingColumnNames": [
                     "ID",
                     "ACCOUNT",
@@ -25,7 +25,7 @@
                 "fieldName": "CompanyName",
                 "fieldType": "TEXT",
                 "screenName": "Company Name",
-                "columnName": "CompanyName"
+                "columnName": "CompanyName",
                 "matchingColumnNames": [
                     "NAME",
                     "COMPANY",
@@ -39,7 +39,7 @@
                 "fieldName": "Address_Street_1",
                 "fieldType": "TEXT",
                 "screenName": "Street Address Line 1",
-                "columnName": "Street Address"
+                "columnName": "Street Address",
                 "matchingColumnNames": [
                     "ADDRESS LINE 1",
                     "BILLING ADDRESS LINE 1",
@@ -52,7 +52,7 @@
                 "fieldName": "Address_Street_2",
                 "fieldType": "TEXT",
                 "screenName": "Street Address Line 2",
-                "columnName": "Street Address 2"
+                "columnName": "Street Address 2",
                 "matchingColumnNames": [
                     "ADDRESS LINE 2",
                     "BILLING ADDRESS LINE 2",
@@ -65,7 +65,7 @@
                 "fieldName": "City",
                 "fieldType": "TEXT",
                 "screenName": "City",
-                "columnName": "City"
+                "columnName": "City",
                 "matchingColumnNames": [
                     "CITY",
                     "BILLING CITY"
@@ -76,7 +76,7 @@
                 "fieldName": "State",
                 "fieldType": "TEXT",
                 "screenName": "State",
-                "columnName": "State"
+                "columnName": "State",
                 "matchingColumnNames": [
                     "STATE",
                     "PROVINCE",
@@ -91,7 +91,7 @@
                 "fieldName": "PostalCode",
                 "fieldType": "TEXT",
                 "screenName": "Postal Code",
-                "columnName": "ZIP"
+                "columnName": "ZIP",
                 "matchingColumnNames": [
                     "ZIP",
                     "ZIP CODE",
@@ -107,7 +107,7 @@
                 "fieldName": "Country",
                 "fieldType": "TEXT",
                 "screenName": "Country",
-                "columnName": "Country"
+                "columnName": "Country",
                 "matchingColumnNames": [
                     "COUNTRY",
                     "COUNTRY CODE",
@@ -120,7 +120,7 @@
                 "fieldName": "PhoneNumber",
                 "fieldType": "TEXT",
                 "screenName": "Phone Number",
-                "columnName": "Phone"
+                "columnName": "Phone",
                 "matchingColumnNames": [
                     "PHONE",
                     "PHONE NUMBER"
@@ -131,7 +131,7 @@
                 "fieldName": "Website",
                 "fieldType": "TEXT",
                 "screenName": "Website",
-                "columnName": "Website"
+                "columnName": "Website",
                 "matchingColumnNames": [
                     "WEBSITE",
                     "DOMAIN"
@@ -142,7 +142,7 @@
                 "fieldName": "DUNS",
                 "fieldType": "TEXT",
                 "screenName": "D-U-N-S",
-                "columnName": "DUNS"
+                "columnName": "DUNS",
                 "matchingColumnNames": [
                     "DUNS",
                     "D-U-N-S",
@@ -154,7 +154,7 @@
                 "fieldName": "NationalId",
                 "fieldType": "TEXT",
                 "screenName": "National ID",
-                "columnName": "National ID"
+                "columnName": "National ID",
                 "matchingColumnNames": [
                     "NATIONAL ID",
                     "FEDERAL ID",

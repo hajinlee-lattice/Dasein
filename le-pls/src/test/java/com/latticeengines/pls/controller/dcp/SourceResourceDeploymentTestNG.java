@@ -43,7 +43,7 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         attachProtectedProxy(testSourceProxy);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testCreateAndGetSource() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId("testProject",
                 Project.ProjectType.Type1);
@@ -53,13 +53,11 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         InputStream specStream = ClassLoader.getSystemResourceAsStream(SPEC_FILE_LOCAL_PATH);
 
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
-//        SimpleTemplateMetadata simpleTemplateMetadata = new SimpleTemplateMetadata();
-//        simpleTemplateMetadata.setEntityType(EntityType.Accounts);
+
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setProjectId(projectId);
         sourceRequest.setDisplayName("testSource");
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
-//        sourceRequest.setSimpleTemplateMetadata(simpleTemplateMetadata);
         Source source = testSourceProxy.createSource(sourceRequest);
         Assert.assertNotNull(source);
         Assert.assertFalse(StringUtils.isBlank(source.getSourceId()));
