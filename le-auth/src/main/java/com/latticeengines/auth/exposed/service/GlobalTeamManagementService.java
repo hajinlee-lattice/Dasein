@@ -14,6 +14,8 @@ public interface GlobalTeamManagementService {
 
     List<GlobalAuthTeam> getTeams(boolean withTenantMember);
 
+    List<GlobalAuthTeam> getTeamsByTeamIds(List<String> teamIds, boolean withTeamMember);
+
     List<GlobalAuthTeam> getTeamsByUserName(String username, boolean withTenantMember);
 
     GlobalAuthTeam getTeamById(String teamId, boolean withTeamMember);

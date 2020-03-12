@@ -19,12 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -62,6 +64,9 @@ public class UserServiceImpl implements UserService {
 
     @Inject
     private GlobalSessionManagementService globalSessionManagementService;
+
+    @Inject
+    private GlobalTeamManagementService globalTeamManagementService;
 
     private static EmailValidator emailValidator = EmailValidator.getInstance();
 
@@ -244,7 +249,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-            Long expirationDate, boolean createUser, boolean clearSession) {
+            Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
@@ -276,8 +281,11 @@ public class UserServiceImpl implements UserService {
         if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
                 List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
-                if (CollectionUtils.isNotEmpty(rightsData)) {
+                if (userTeams == null && CollectionUtils.isNotEmpty(rightsData)) {
                     globalAuthTeams = rightsData.get(0).getGlobalAuthTeams();
+                } else if (CollectionUtils.isNotEmpty(userTeams)) {
+                    List<String> userTeamIds = userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
+                    globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
                         createdByUser, expirationDate, globalAuthTeams);
@@ -300,7 +308,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
             Long expirationDate, boolean createUser) {
-        return assignAccessLevel(accessLevel, tenantId, username, createdByUser, expirationDate, createUser, false);
+        return assignAccessLevel(accessLevel, tenantId, username, createdByUser, expirationDate, createUser, false,
+                null);
     }
 
     private boolean resignAccessLevel(String tenantId, String username, List<String> rights) {
@@ -350,17 +359,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getUsers(String tenantId, UserFilter filter) {
+    public List<User> getUsers(String tenantId, UserFilter filter, boolean withTeam) {
         List<User> users = new ArrayList<>();
         try {
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
-                    .getAllUsersOfTenant(tenantId);
+                    .getAllUsersOfTenant(tenantId, withTeam);
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
                 AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
                 if (accessLevel != null) {
                     user.setAccessLevel(accessLevel.name());
                 }
+                LOGGER.info("access is {}, filter visible is {}", accessLevel, filter.visible(user));
                 if (filter.visible(user))
                     users.add(user);
             }
@@ -376,7 +386,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getUsers(String tenantId) {
-        return getUsers(tenantId, UserFilter.TRIVIAL_FILTER);
+        return getUsers(tenantId, UserFilter.TRIVIAL_FILTER, false);
+    }
+
+    @Override
+    public List<User> getUsers(String tenantId, UserFilter filter) {
+        return getUsers(tenantId, filter, false);
     }
 
     @Override
@@ -455,7 +470,7 @@ public class UserServiceImpl implements UserService {
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
-                    user.getExpirationDate(), true);
+                    user.getExpirationDate(), true, false, user.getUserTeams());
         }
 
         String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());

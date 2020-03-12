@@ -48,6 +48,8 @@ public interface GlobalUserManagementService {
 
     List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId);
 
+    List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId, boolean withTeam);
+
     String deactiveUserStatus(String userName, String emails);
 
     GlobalAuthUser findByEmailNoJoin(String email);

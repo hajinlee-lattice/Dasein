@@ -58,7 +58,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private List<GlobalTeam> getGlobalTeams(List<GlobalAuthTeam> globalAuthTeams, boolean withTeamMember, User loginUser) {
-        List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser));
+        List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser), false);
         Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
         List<GlobalTeam> globalTeams = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(globalAuthTeams)) {

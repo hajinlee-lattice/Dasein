@@ -6,12 +6,16 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -30,10 +34,13 @@ import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.TeamService;
+import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 
 public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalUserManagementServiceImplTestNG.class);
 
     @Inject
     private GlobalUserManagementService globalUserManagementService;
@@ -188,6 +195,24 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
             assertEquals(globalTeams.size(), 1);
             assertNotNull(globalTeams.get(0).getTeamMembers());
             assertEquals(globalTeams.get(0).getTeamMembers().get(0).getEmail(), username);
+            //get users with global Teams
+            List<User> users = userService.getUsers(testTenantId, UserFilter.TRIVIAL_FILTER, true);
+            Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getUsername, User->User));
+            User targetUser = userMap.get(username);
+            assertNotNull(targetUser);
+            assertNotNull(targetUser.getUserTeams());
+            assertEquals(targetUser.getUserTeams().get(0).getTeamName(), teamName);
+            User testUser = users.get(0);
+            //update user with global teams
+            userService.assignAccessLevel(AccessLevel.EXTERNAL_ADMIN, testTenantId, testUser.getUsername(), null,
+                    null,false, true, globalTeams);
+            users = userService.getUsers(testTenantId, UserFilter.TRIVIAL_FILTER, true);
+            userMap = users.stream().collect(Collectors.toMap(User::getUsername, User->User));
+            targetUser = userMap.get(testUser.getUsername());
+            assertEquals(users.size(), 3);
+            assertNotNull(targetUser.getUserTeams());
+            assertEquals(targetUser.getUsername(), testUser.getUsername());
+            assertEquals(targetUser.getUserTeams().get(0).getTeamName(), teamName);
             MultiTenantContext.setTenant(preTenant);
         } finally {
             makeSureUserDoesNotExist(username);

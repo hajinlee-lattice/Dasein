@@ -81,7 +81,7 @@ public class UserResource {
         } else {
             filter = UserFilter.TRIVIAL_FILTER;
         }
-        List<User> users = userService.getUsers(tenant.getId(), filter);
+        List<User> users = userService.getUsers(tenant.getId(), filter, true);
 
         response.setSuccess(true);
         response.setResult(users);
@@ -205,7 +205,7 @@ public class UserResource {
             }
             boolean newUser = !userService.inTenant(tenantId, username);
             userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
-                    false, !newUser);
+                    false, !newUser, data.getUserTeams());
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                     targetLevel.name(), username, tenantId));
             User user = userService.findByUsername(username);

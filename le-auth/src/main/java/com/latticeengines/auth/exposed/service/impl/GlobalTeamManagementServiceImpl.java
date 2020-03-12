@@ -99,6 +99,12 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     }
 
     @Override
+    public List<GlobalAuthTeam> getTeamsByTeamIds(List<String> teamIds, boolean withTeamMember) {
+        GlobalAuthTenant tenantData = getGlobalAuthTenant();
+        return globalAuthTeamEntityMgr.findByTeamIdsAndTenantId(tenantData.getPid(), teamIds, withTeamMember);
+    }
+
+    @Override
     public List<GlobalAuthTeam> getTeamsByUserName(String username, boolean withTeamMember) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         return globalAuthTeamEntityMgr.findByUsernameAndTenantId(tenantData.getPid(), username, withTeamMember);

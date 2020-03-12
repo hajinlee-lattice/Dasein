@@ -110,6 +110,19 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     }
 
     @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthUserTenantRight> findByTenantId(Long tenantId, boolean inflate) {
+        List<GlobalAuthUserTenantRight> globalAuthUserTenantRightList = gaUserTenantRightDao.findAllByField(
+                "Tenant_ID", tenantId);
+        if (inflate) {
+            for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRightList) {
+                Hibernate.initialize(globalAuthUserTenantRight.getGlobalAuthTeams());
+            }
+        }
+        return globalAuthUserTenantRightList;
+    }
+
+    @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public Boolean deleteByUserId(Long userId) {
         return gaUserTenantRightDao.deleteByUserId(userId);
