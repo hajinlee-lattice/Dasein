@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
@@ -41,7 +42,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
     protected void initializeConfiguration() {
         super.initializeConfiguration();
         matchedContactTable = getStringValueFromContext(ENTITY_MATCH_CONTACT_TARGETTABLE);
-        if (StringUtils.isBlank(matchedContactTable)) { //&& skipSoftDelete) {
+        if (StringUtils.isBlank(matchedContactTable)) { // && skipSoftDelete) {
             if (configuration.isEntityMatchEnabled()) {
                 log.warn("There's no matched table found, and no soft delete action!");
             } else {
@@ -162,5 +163,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         super.onPostTransformationCompleted();
         String batchStoreTableName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
+        exportToDynamo(batchStoreTableName, TableRoleInCollection.ConsolidatedContact.getPartitionKey(),
+                TableRoleInCollection.ConsolidatedContact.getRangeKey());
     }
 }
