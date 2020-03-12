@@ -99,21 +99,16 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
         for (LaunchSummary launchSummary : summaries) {
             long recsLaunchedByCurrentLaunch = launchSummary.getStats().getRecommendationsLaunched();
             totalLaunchedSoFar += recsLaunchedByCurrentLaunch;
-            if (totalLaunchedSoFar < offset) {
-                continue;
-            } else {
+            if (totalLaunchedSoFar == offset) {
+                queryOffset = 0;
+            } else if (totalLaunchedSoFar > offset) {
                 if (queryOffset < 0) {
-                    queryOffset = offset - totalLaunchedSoFar;
-                    if (queryOffset < 0) {
-                        queryOffset += recsLaunchedByCurrentLaunch;
-                        launchIdsToQuery.add(launchSummary.getLaunchId());
-                    }
-                } else {
-                    launchIdsToQuery.add(launchSummary.getLaunchId());
+                    queryOffset = offset - totalLaunchedSoFar + recsLaunchedByCurrentLaunch;
                 }
-                if (totalLaunchedSoFar >= offset + maximum) {
-                    break;
-                }
+                launchIdsToQuery.add(launchSummary.getLaunchId());
+            }
+            if (totalLaunchedSoFar >= offset + maximum) {
+                break;
             }
         }
         return Pair.of(queryOffset, launchIdsToQuery);
