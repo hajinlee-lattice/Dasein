@@ -19,10 +19,6 @@ public class SourceRequest {
     @ApiModelProperty(value = "sourceId")
     private String sourceId;
 
-//    @JsonProperty("simple_template_metadata")
-//    @ApiModelProperty(value = "simpleTemplateMetadata")
-//    private SimpleTemplateMetadata simpleTemplateMetadata;
-
     @JsonProperty("field_definitions_record")
     @ApiModelProperty(required = true, value = "fieldDefinitionsRecord")
     private FieldDefinitionsRecord fieldDefinitionsRecord;
@@ -50,14 +46,6 @@ public class SourceRequest {
     public void setSourceId(String sourceId) {
         this.sourceId = sourceId;
     }
-
-//    public SimpleTemplateMetadata getSimpleTemplateMetadata() {
-//        return simpleTemplateMetadata;
-//    }
-//
-//    public void setSimpleTemplateMetadata(SimpleTemplateMetadata simpleTemplateMetadata) {
-//        this.simpleTemplateMetadata = simpleTemplateMetadata;
-//    }
 
     public FieldDefinitionsRecord getFieldDefinitionsRecord() {
         return fieldDefinitionsRecord;
