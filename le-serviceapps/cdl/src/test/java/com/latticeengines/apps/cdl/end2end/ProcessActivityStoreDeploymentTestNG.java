@@ -133,10 +133,10 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     }
 
     private void setupOpportunityTemplates() throws Exception {
-        Assert.assertTrue(createS3Folder(OPPORTUNITY_SYSTEM, Arrays.asList(EntityType.Opportunity,
-                EntityType.OpportunityStageName)));
         createOpportunitySystem();
         Thread.sleep(2000L);
+        Assert.assertTrue(createS3Folder(OPPORTUNITY_SYSTEM, Arrays.asList(EntityType.Opportunity,
+                EntityType.OpportunityStageName)));
 
         // setup templates
         boolean created = cdlProxy.createDefaultOpportunityTemplate(mainCustomerSpace, OPPORTUNITY_SYSTEM);
