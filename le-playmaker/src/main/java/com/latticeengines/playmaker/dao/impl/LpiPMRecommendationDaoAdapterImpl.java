@@ -100,14 +100,12 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             long recsLaunchedByCurrentLaunch = launchSummary.getStats().getRecommendationsLaunched();
             totalLaunchedSoFar += recsLaunchedByCurrentLaunch;
             if (totalLaunchedSoFar == offset) {
-                queryOffset = offset - totalLaunchedSoFar;
+                queryOffset = 0;
             } else if (totalLaunchedSoFar > offset) {
                 if (queryOffset < 0) {
                     queryOffset = offset - totalLaunchedSoFar + recsLaunchedByCurrentLaunch;
                 }
                 launchIdsToQuery.add(launchSummary.getLaunchId());
-            } else {
-                continue;
             }
             if (totalLaunchedSoFar >= offset + maximum) {
                 break;
