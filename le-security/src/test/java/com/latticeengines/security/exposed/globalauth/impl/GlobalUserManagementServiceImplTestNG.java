@@ -213,6 +213,7 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
             assertNotNull(targetUser.getUserTeams());
             assertEquals(targetUser.getUsername(), testUser.getUsername());
             assertEquals(targetUser.getUserTeams().get(0).getTeamName(), teamName);
+            teamService.deleteTeamByTenantId();
             MultiTenantContext.setTenant(preTenant);
         } finally {
             makeSureUserDoesNotExist(username);

@@ -93,10 +93,12 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         teamService.deleteTeam(teamId);
         globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
+        teamService.deleteTeamByTenantId();
         MultiTenantContext.setTenant(anotherTenant);
         teamService.createTeam(usernameInAnotherTenant, getGlobalTeamData(teamNameInAnotherTenant, Sets.newHashSet(usernameInAnotherTenant)));
         globalTeams = teamService.getTeamsByUserName(usernameInAnotherTenant, getUser(usernameInAnotherTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
         validateTeamInfo(globalTeams.get(0), teamNameInAnotherTenant, usernameInAnotherTenant);
+        teamService.deleteTeamByTenantId();
     }
 }

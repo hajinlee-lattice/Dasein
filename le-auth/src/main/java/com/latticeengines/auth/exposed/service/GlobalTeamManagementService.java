@@ -20,7 +20,9 @@ public interface GlobalTeamManagementService {
 
     GlobalAuthTeam getTeamById(String teamId, boolean withTeamMember);
 
-    Boolean deleteTeam(String teamId);
+    Boolean deleteTeamByTeamId(String teamId);
 
     void updateTeam(String teamId, UpdateTeamUsersRequest updateTeamUsersRequest);
+
+    Boolean deleteTeamByTenantId();
 }

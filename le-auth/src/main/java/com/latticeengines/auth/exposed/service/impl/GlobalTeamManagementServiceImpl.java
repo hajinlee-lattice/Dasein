@@ -117,7 +117,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     }
 
     @Override
-    public Boolean deleteTeam(String teamId) {
+    public Boolean deleteTeamByTeamId(String teamId) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         globalAuthTeamEntityMgr.deleteByTeamId(teamId, tenantData.getPid());
         return true;
@@ -146,5 +146,12 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     private GlobalAuthTenant getGlobalAuthTenant() {
         String tenantId = MultiTenantContext.getTenant().getId();
         return getTenantData(tenantId);
+    }
+
+    @Override
+    public Boolean deleteTeamByTenantId() {
+        GlobalAuthTenant tenantData = getGlobalAuthTenant();
+        globalAuthTeamEntityMgr.deleteByTenantId(tenantData.getPid());
+        return true;
     }
 }

@@ -20,4 +20,6 @@ public interface TeamService {
     Boolean editTeam(String teamId, UpdateTeamUsersRequest updateTeamUsersRequest);
 
     Boolean deleteTeam(String teamId);
+
+    void deleteTeamByTenantId();
 }
