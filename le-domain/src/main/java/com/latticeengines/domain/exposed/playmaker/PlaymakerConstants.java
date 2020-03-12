@@ -5,6 +5,7 @@ public final class PlaymakerConstants {
     protected PlaymakerConstants() {
         throw new UnsupportedOperationException();
     }
+
     public static final String ID = "ID";
     public static final String AccountID = "AccountID";
     public static final String SfdcAccountID = "SfdcAccountID";
@@ -29,6 +30,8 @@ public final class PlaymakerConstants {
     public static final String Country = "Country";
     public static final String City = "City";
     public static final String Name = "Name";
+    public static final String FirstName = "FirstName";
+    public static final String LastName = "LastName";
     public static final String DisplayName = "DisplayName";
     public static final String Type = "Type";
     public static final String StringLength = "StringLength";
