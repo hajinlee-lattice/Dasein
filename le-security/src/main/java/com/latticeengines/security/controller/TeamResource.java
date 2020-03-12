@@ -88,9 +88,11 @@ public class TeamResource {
     @ApiOperation(value = "Update a team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean editTeam(@PathVariable("teamId") String teamId, //
-                            @RequestBody GlobalTeamData globalTeamData) {
+                            @RequestBody GlobalTeamData globalTeamData, HttpServletRequest request) {
         log.info("Edit team {}.", teamId);
-        return teamService.editTeam(teamId, globalTeamData);
+        User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
+        checkUser(loginUser);
+        return teamService.editTeam(loginUser, teamId, globalTeamData);
     }
 
     private void checkUser(User user) {

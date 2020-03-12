@@ -741,7 +741,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         }
         List<GlobalAuthUserTenantRight> userRightDatas =
                 gaUserTenantRightEntityMgr.findByTenantId(tenantData.getPid(), withTeam);
-        if (userRightDatas == null || userRightDatas.size() == 0) {
+        if (CollectionUtils.isEmpty(userRightDatas)) {
             return userRightsList;
         }
 

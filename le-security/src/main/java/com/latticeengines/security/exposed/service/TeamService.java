@@ -13,9 +13,11 @@ public interface TeamService {
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser);
 
+    GlobalTeam getTeamByTeamId(String teamId, User loginUser);
+
     String createTeam(String createdByUser, GlobalTeamData globalTeamData);
 
-    Boolean editTeam(String teamId, GlobalTeamData globalTeamData);
+    Boolean editTeam(User loginUser, String teamId, GlobalTeamData globalTeamData);
 
     Boolean editTeam(String teamId, UpdateTeamUsersRequest updateTeamUsersRequest);
 
