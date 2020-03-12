@@ -33,9 +33,15 @@ public final class EntityMatchGAConverterUtils {
         boolean containsContactId = false;
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
+                //add this properties to make sure systemAccountId can be set correctly.
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMapToLatticeId(true);
                 containsAccountId = true;
             }
             if (InterfaceName.ContactId.name().equals(fieldMapping.getMappedField())) {
+                //add this properties to make sure systemContactId can be set correctly.
+                fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                fieldMapping.setMapToLatticeId(true);
                 containsContactId = true;
             }
             if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
@@ -52,6 +58,9 @@ public final class EntityMatchGAConverterUtils {
             for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
                 if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
                     fieldMapping.setMappedField(InterfaceName.AccountId.name());
+                    //add this properties to make sure systemAccountId can be set correctly.
+                    fieldMapping.setIdType(FieldMapping.IdType.Account);
+                    fieldMapping.setMapToLatticeId(true);
                 }
             }
         }
@@ -62,6 +71,9 @@ public final class EntityMatchGAConverterUtils {
             for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
                 if (InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField())) {
                     fieldMapping.setMappedField(InterfaceName.ContactId.name());
+                    //add this properties to make sure systemContactId can be set correctly.
+                    fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                    fieldMapping.setMapToLatticeId(true);
                 }
             }
         }
