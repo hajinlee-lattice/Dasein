@@ -306,7 +306,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         stopWatch.start();
         splitter.start();
 
-        if (!aiModel.getModelingJobStatus().isTerminated()) {
+        if (aiModel.getModelingJobStatus() == null || !aiModel.getModelingJobStatus().isTerminated()) {
             throw new LedpException(LedpCode.LEDP_40034,
                     new String[] { aiModel.getId(), ratingEngine.getId(), customerSpace });
         }
