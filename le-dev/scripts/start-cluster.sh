@@ -18,25 +18,30 @@ if [[ -f "/opt/java/default" ]]; then
 fi
 
 HACK_LINE="127.0.0.1 ${HOSTNAME}"
-if [[ -n $(ps aux | grep "java -jar remoting.jar") ]]; then
+if [[ -n $(ps aux | grep "java -jar remoting.jar" | grep -v grep) ]]; then
   echo "This is a jenkins slave."
 else
+  echo "sudo required to fix /etc/hosts during cluster startup"
   echo ${HACK_LINE} | sudo tee -a /etc/hosts
 fi
+
 "${HADOOP_HOME}/sbin/hadoop-daemon.sh" start namenode
 "${HADOOP_HOME}/sbin/hadoop-daemon.sh" start datanode
 "${HADOOP_HOME}/sbin/yarn-daemon.sh" start resourcemanager
 "${HADOOP_HOME}/sbin/yarn-daemon.sh" start nodemanager
 "${HADOOP_HOME}/sbin/yarn-daemon.sh" start timelineserver
 "${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh" start historyserver
+
+echo "Removing /etc/hosts hack"
 UNAME=`uname`
-if [[ "${UNAME}" == 'Darwin' ]]; then
+if [[ "$UNAME" == 'Darwin' ]]; then
     sudo sed -i '' "/^${HACK_LINE}$/d" /etc/hosts
 else
     sudo sed -i "/^${HACK_LINE}$/d" /etc/hosts
 fi
 
 "${SPARK_HOME}"/sbin/start-history-server.sh
+
 if [[ -n "${J8_HOME}" ]]; then
     JAVA_HOME="${J8_HOME}" "${LIVY_HOME}/bin/livy-server" start
 else
