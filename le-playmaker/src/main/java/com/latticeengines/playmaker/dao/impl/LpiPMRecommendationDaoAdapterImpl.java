@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
@@ -111,7 +112,9 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                 break;
             }
         }
-        return Pair.of(queryOffset, launchIdsToQuery);
+        Pair<Long, List<String>> pair = Pair.of(queryOffset, launchIdsToQuery);
+        log.info("Query offset and launch id in query will be {}.", JsonUtils.serialize(pair));
+        return pair;
     }
 
 
