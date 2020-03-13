@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -32,12 +33,19 @@ public class LocalCache<K, V> implements Cache {
 
     @SuppressWarnings("unchecked")
     public LocalCache(CacheName cacheName, Function<K, V> load, int capacity, int waitBeforeRefreshInSec) {
+        this(cacheName, load, capacity, waitBeforeRefreshInSec, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public LocalCache(CacheName cacheName, Function<K, V> load, int capacity, int waitBeforeRefreshInSec,
+            Consumer<Object> onCacheInstantiated) {
         cache = WatcherCache.builder() //
                 .name(cacheName.name()) //
                 .watch(cacheName.name()) //
                 .maximum(capacity) //
                 .load(load) //
                 .waitBeforeRefreshInSec(waitBeforeRefreshInSec) //
+                .onCacheInstantiated(onCacheInstantiated) //
                 .build();
     }
 
