@@ -406,7 +406,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         step.setTransformer(TRANSFORMER_PROFILER);
         ProfileConfig conf = new ProfileConfig();
         conf.setEncAttrPrefix(CEAttr);
-        String confStr = appendEngineConf(conf, lightEngineConfig());
+        String confStr = appendEngineConf(conf, heavyMemoryEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
@@ -415,7 +415,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(pivotStep, profileStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
-        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
+        step.setConfiguration(emptyStepConfig(heavyMemoryEngineConfig()));
         return step;
     }
 
@@ -430,7 +430,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         step.setTargetTable(targetTable);
 
         CalculateStatsConfig conf = new CalculateStatsConfig();
-        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
+        step.setConfiguration(appendEngineConf(conf, heavyMemoryEngineConfig()));
         return step;
     }
 

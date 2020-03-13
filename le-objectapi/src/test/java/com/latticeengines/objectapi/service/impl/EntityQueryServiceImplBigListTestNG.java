@@ -57,7 +57,7 @@ public class EntityQueryServiceImplBigListTestNG extends QueryServiceImplTestNGB
         List<Object> bigList = getCompanyNamesList();
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
-        Bucket bkt = Bucket.valueBkt(ComparisonType.IN_COLLECTION, bigList);
+        Bucket bkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, bigList);
         AttributeLookup attr = new AttributeLookup(BusinessEntity.Account, AccountAttr.CompanyName);
         Restriction accRes = new BucketRestriction(attr, bkt);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
