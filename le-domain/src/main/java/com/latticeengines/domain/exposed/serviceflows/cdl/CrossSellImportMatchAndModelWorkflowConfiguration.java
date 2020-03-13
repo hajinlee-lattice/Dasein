@@ -383,6 +383,7 @@ public class CrossSellImportMatchAndModelWorkflowConfiguration extends BaseCDLWo
             generateAIRating.forceEVSteps(expectedValue);
             // force skip RealculatePercentile only when model type is EV model
             generateAIRating.forceSkipRealculatePercentile(expectedValue);
+            exportScoreTrainingFile.setExpectedValue(expectedValue);
             return this;
         }
 
