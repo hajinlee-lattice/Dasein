@@ -297,6 +297,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
         String backupName = template.getName() + "_" + System.currentTimeMillis() + ".json";
         s3Service.uploadInputStream(customerBucket, backupPath + backupName, backupStream, true);
+        dropBoxService.removeTemplatePath(customerSpace, dataFeedTask.getFeedType());
         return backupName;
     }
 
@@ -324,6 +325,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                     dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, false);
                 }
             }
+            dropBoxService.restoreTemplatePath(customerSpace, backupTask.getFeedType());
             return backupTask.getImportTemplate();
         } catch (Exception e) {
             log.error("Cannot deserialize backup file for task {}, backup file {}", uniqueTaskId, backupName);
