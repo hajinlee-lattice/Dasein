@@ -510,6 +510,26 @@ public class DropBoxServiceImpl implements DropBoxService {
         s3Service.createFolder(dropBoxBucket, dropBoxPrefix + SLASH + path);
     }
 
+    @Override
+    public void removeTemplatePath(String customerSpace, String feedType) {
+        String dropBoxBucket = getDropBoxBucket();
+        String dropBoxPrefix = getDropBoxPrefix();
+        String templatePath = dropBoxPrefix + SLASH + TEMPLATES + SLASH + feedType;
+        if (s3Service.objectExist(dropBoxBucket, templatePath)) {
+            s3Service.cleanupPrefix(dropBoxBucket, templatePath);
+        }
+    }
+
+    @Override
+    public void restoreTemplatePath(String customerSpace, String feedType) {
+        String dropBoxBucket = getDropBoxBucket();
+        String dropBoxPrefix = getDropBoxPrefix();
+        String templatePath = dropBoxPrefix + SLASH + TEMPLATES + SLASH + feedType;
+        if (!s3Service.objectExist(dropBoxBucket, templatePath)) {
+            s3Service.createFolder(dropBoxBucket, templatePath);
+        }
+    }
+
     private String getDropBoxId() {
         String prefix = getDropBoxPrefix();
         return prefix.substring(prefix.indexOf(SLASH) + 1);

@@ -49,4 +49,20 @@ public interface DropBoxService {
     List<String> getDropFoldersFromSystem(String customerSpace, String systemName);
 
     void createFolderUnderDropFolder(String path);
+
+    /**
+     * Remove the template path based on feedType.
+     * A template path should be: dropfolder/{dropfolderid}/Templates/{feedType}
+     * @param customerSpace: TenantId
+     * @param feedType: eg: AccountData, DefaultSystem_AccountData.
+     */
+    void removeTemplatePath(String customerSpace, String feedType);
+
+    /**
+     * Re-create template path based on feedType
+     * Re-created template path will be: dropfolder/{dropfolderid}/Templates/{feedType}
+     * @param customerSpace: TenantId
+     * @param feedType: (Same as remove)
+     */
+    void restoreTemplatePath(String customerSpace, String feedType);
 }
