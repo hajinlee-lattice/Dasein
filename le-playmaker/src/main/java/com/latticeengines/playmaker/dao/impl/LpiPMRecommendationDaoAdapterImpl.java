@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.LaunchSummary;
+import com.latticeengines.domain.exposed.pls.LookupIdMapUtils;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmaker.service.LpiPMPlay;
@@ -79,8 +80,8 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @VisibleForTesting
-    public Pair<Long, List<String>> getQueryOffsetAndIds(long start, int offset, int maximum,
-                                                         int syncDestination, List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
+    public Pair<Long, List<String>> getQueryOffsetAndIds(long start, int offset, int maximum, int syncDestination,
+                                                         List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
         boolean latestLaunchFlag = getLatestLaunchFlag(appId);
         List<String> launchIdsToQuery = new ArrayList<>();
         int totalLaunchedSoFar = 0;
@@ -113,10 +114,11 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             }
         }
         Pair<Long, List<String>> pair = Pair.of(queryOffset, launchIdsToQuery);
-        log.info("Query offset and launch id in query will be {}.", JsonUtils.serialize(pair));
+        Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
+        log.info("Query offset and launch id in query will be {}, and its org info is {}.",
+                JsonUtils.serialize(pair), JsonUtils.serialize(effectiveOrgInfo));
         return pair;
     }
-
 
     @Override
     public long getRecommendationCount(long start, int syncDestination, List<String> playIds,
