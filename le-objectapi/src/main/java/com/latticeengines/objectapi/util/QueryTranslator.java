@@ -52,6 +52,13 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.DateRangeTranslator;
 import com.latticeengines.query.exposed.translator.DayRangeTranslator;
 import com.latticeengines.query.exposed.translator.MetricTranslator;
+import com.latticeengines.query.util.AttrRepoUtils;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.sql.SQLQuery;
 
 abstract class QueryTranslator {
 
@@ -359,8 +366,30 @@ abstract class QueryTranslator {
                     }
                     String tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz,
                             repository.getRedshiftPartition());
-                    SubQuery subQuery = new SubQuery(tempTableName);
-                    restriction.setRhs(new SubQueryAttrLookup(subQuery, TempListUtils.VALUE_COLUMN));
+
+                    if (SPARK_BATCH_USER.equals(sqlUser) && ComparisonType.NOT_IN_COLLECTION.equals(restriction.getRelation())) {
+                        BusinessEntity entity = attributeLookup.getEntity();
+                        StringPath entityTable = AttrRepoUtils.getTablePath(repository, entity);
+                        String idAttrStr = entity.getServingStore().getPrimaryKey().name();
+                        EntityPath<String> tempTable = new PathBuilder<>(String.class, tempTableName);
+                        StringPath lhs = Expressions.stringPath(entityTable, attributeLookup.getAttribute());
+                        StringPath rhs = Expressions.stringPath(tempTable, TempListUtils.VALUE_COLUMN);
+                        BooleanExpression joinPredicate = lhs.eq(rhs);
+                        BooleanExpression filterPredicate = lhs.isNotNull().and(rhs.isNull());
+                        SQLQuery<?> query = queryFactory.getQuery(repository, sqlUser) //
+                                .select(Expressions.stringPath(idAttrStr)) //
+                                .from(entityTable) //
+                                .leftJoin(tempTable).on(joinPredicate) //
+                                .where(filterPredicate);
+                        SubQuery subQuery = new SubQuery();
+                        subQuery.setSubQueryExpression(query);
+                        restriction.setLhs(new AttributeLookup(entity, idAttrStr));
+                        restriction.setRelation(ComparisonType.IN_COLLECTION);
+                        restriction.setRhs(new SubQueryAttrLookup(subQuery));
+                    } else {
+                        SubQuery subQuery = new SubQuery(tempTableName);
+                        restriction.setRhs(new SubQueryAttrLookup(subQuery, TempListUtils.VALUE_COLUMN));
+                    }
                 } catch (NullPointerException e) {
                     throw e;
                 }
