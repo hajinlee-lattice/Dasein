@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.OpportunityUtils;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 
 import reactor.core.publisher.Flux;
@@ -144,6 +145,7 @@ public class ActivityMetricDecorator implements Decorator {
                 WebVisitUtils.setColumnMetadataUIProperties(cm, group, timeRange, params);
                 break;
             case Opportunity:
+                OpportunityUtils.setColumnMetadataUIProperties(cm, group);
                 break;
             default:
                 log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());

@@ -86,7 +86,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     private boolean shortCutMode = false;
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
-    Map<TableRoleInCollection, Table> tableCache = new HashMap<>();
+    private Map<TableRoleInCollection, Table> tableCache = new HashMap<>();
     private static TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>> streamMetadataCacheTypeRef = new TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>>() {
     };
     private Set<String> dateRangeEvaluatedSet = new HashSet<>();
