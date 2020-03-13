@@ -8,11 +8,22 @@ public class ExportScoreTrainingFileStepConfiguration extends ExportStepConfigur
     @JsonProperty("exportInclusionColumns")
     private String exportInclusionColumns;
 
+    @JsonProperty("expectedValue")
+    private boolean expectedValue;
+
     public void setExportInclusionColumns(String exportInclusionColumns) {
         this.exportInclusionColumns = exportInclusionColumns;
     }
 
     public String getExportInclusionColumns() {
         return this.exportInclusionColumns;
+    }
+
+    public boolean isExpectedValue() {
+        return this.expectedValue;
+    }
+
+    public void setExpectedValue(boolean expectedValue) {
+        this.expectedValue = expectedValue;
     }
 }
