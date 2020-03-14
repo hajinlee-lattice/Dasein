@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -8,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -40,7 +44,8 @@ public class ServingStoreResource {
     public Flux<ColumnMetadata> getDecoratedMetadata( //
             @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
             @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
-            @RequestParam(name = "version", required = false) DataCollection.Version version, //) {
+            @RequestParam(name = "version", required = false) DataCollection.Version version, // )
+                                                                                              // {
             @RequestParam(name = "filter", required = false) StoreFilter filter) {
         return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups, filter);
     }
@@ -78,10 +83,19 @@ public class ServingStoreResource {
             @RequestParam(name = "version", required = false) DataCollection.Version version, //
             @RequestParam(name = "all-customer-attrs", required = false) Boolean allCustomerAttrs) {
         log.info(String.format("Get allow modeling attributes for %s with entity %s", customerSpace, entity));
-        return servingStoreService.getAttrsCanBeEnabledForModeling(customerSpace, entity, version,
-                allCustomerAttrs);
+        return servingStoreService.getAttrsCanBeEnabledForModeling(customerSpace, entity, version, allCustomerAttrs);
     }
 
-
+    @PostMapping(value = "/{entity}/attrs-usage")
+    @ResponseBody
+    @ApiOperation(value = "Get attributes usage")
+    public Map<String, Boolean> getAttrsUsage( //
+            @PathVariable String customerSpace, //
+            @PathVariable BusinessEntity entity, //
+            @RequestParam(name = "groups", required = true) ColumnSelection.Predefined group, //
+            @RequestParam(name = "version", required = false) DataCollection.Version version, //
+            @RequestBody Set<String> attrs) {
+        return servingStoreService.getAttributesUsage(customerSpace, entity, attrs, group, version);
+    }
 
 }

@@ -26,6 +26,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -45,6 +46,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
@@ -55,6 +57,7 @@ import com.latticeengines.domain.exposed.spark.cdl.GenerateLaunchArtifactsJobCon
 import com.latticeengines.proxy.exposed.cdl.ExportFieldMetadataProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import com.latticeengines.query.util.AttrRepoUtils;
@@ -77,6 +80,12 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     @Inject
     private ExportFieldMetadataProxy exportFieldMetadataProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
+
+    private Set<String> firstAndLastName = Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name())
+            .stream().collect(Collectors.toSet());
 
     private DataCollection.Version version;
     private String evaluationDate;
@@ -333,7 +342,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     InterfaceName.CompanyName.name(), //
                     InterfaceName.LDC_Name.name()));
         case Contact:
-            return new HashSet<>(Arrays.asList(InterfaceName.AccountId.name(), //
+            Set<String> set = new HashSet<>();
+            set.addAll(Arrays.asList(InterfaceName.AccountId.name(), //
                     InterfaceName.ContactId.name(), //
                     InterfaceName.CompanyName.name(), //
                     InterfaceName.Email.name(), //
@@ -345,6 +355,18 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                     InterfaceName.PhoneNumber.name(), //
                     InterfaceName.Title.name(), //
                     InterfaceName.Address_Street_1.name()));
+
+            /*
+             * PLS-16386 Add FirstName and LastName
+             */
+            CustomerSpace cs = configuration.getCustomerSpace();
+            log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
+            Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
+                    Predefined.Enrichment, firstAndLastName, null);
+            log.info("attrsUsage for firstName & lastName=" + map);
+            map.keySet().stream().filter(key -> map.get(key)).map(key -> set.add(key));
+            log.info("set=" + set);
+            return set;
         default:
             throw new LedpException(LedpCode.LEDP_32001,
                     new String[] { String.format("Entity %s not supported", entity.name()) });
@@ -439,4 +461,3 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
     }
 }
-

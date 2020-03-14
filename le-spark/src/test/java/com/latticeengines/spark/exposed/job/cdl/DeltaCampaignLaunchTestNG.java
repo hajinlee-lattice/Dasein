@@ -79,6 +79,11 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         });
     }
 
+    /*
+     * This test is similar to TestRecommendationGenTestNG, but focuses on
+     * AWS_S3 channel, testing different scenarios of delta cases.
+     */
+
     @Test(groups = "functional", dataProvider = "dataFrameProvider")
     public void runTest(boolean createRecommendationDataFrameVal, boolean createAddCsvDataFrameVal,
             boolean createDeleteCsvDataFrameVal) {

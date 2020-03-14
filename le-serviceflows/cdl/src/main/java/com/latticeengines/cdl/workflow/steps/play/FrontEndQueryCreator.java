@@ -27,6 +27,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CollectionLookup;
@@ -47,6 +50,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component
 public class FrontEndQueryCreator {
@@ -65,6 +69,12 @@ public class FrontEndQueryCreator {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
+
+    private Set<String> firstAndLastName = Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name())
+            .stream().collect(Collectors.toSet());
 
     @PostConstruct
     public void init() {
@@ -394,7 +404,9 @@ public class FrontEndQueryCreator {
                 InterfaceName.LDC_Name.name()));
 
         contactLookupFields = new HashMap<>();
-        contactLookupFields.put(BusinessEntity.Contact, Arrays.asList(InterfaceName.AccountId.name(), //
+        List<String> contactAttrs = new ArrayList<>();
+        contactLookupFields.put(BusinessEntity.Contact, contactAttrs);
+        contactAttrs.addAll(Arrays.asList(InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.CompanyName.name(), //
                 InterfaceName.Email.name(), //
@@ -406,6 +418,18 @@ public class FrontEndQueryCreator {
                 InterfaceName.PhoneNumber.name(), //
                 InterfaceName.Title.name(), //
                 InterfaceName.Address_Street_1.name()));
+
+        /*
+         * PLS-16386 Add FirstName and LastName
+         */
+        CustomerSpace cs = MultiTenantContext.getCustomerSpace();
+        log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
+        Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
+                Predefined.Enrichment, firstAndLastName, null);
+        log.info("attrsUsage for firstName & lastName=" + map);
+        map.keySet().stream().filter(key -> map.get(key)).map(key -> contactAttrs.add(key));
+        log.info("accountLookupFields=" + accountLookupFields);
+        log.info("contactLookupFields=" + contactLookupFields);
     }
 
     @VisibleForTesting

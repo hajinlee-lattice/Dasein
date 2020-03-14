@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -23,7 +25,9 @@ import com.latticeengines.domain.exposed.cdl.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.StoreFilter;
 
@@ -92,7 +96,7 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
 
             @Override
             public Flux<ColumnMetadata> getAttrsCanBeEnabledForModeling(String customerSpace, BusinessEntity entity,
-                                                                        DataCollection.Version version, Boolean allCustomerAttrs) {
+                    DataCollection.Version version, Boolean allCustomerAttrs) {
                 return null;
             }
 
@@ -104,7 +108,13 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
 
             @Override
             public Flux<ColumnMetadata> getAttrsEnabledForModeling(String customerSpace, BusinessEntity entity,
-                                                                   DataCollection.Version version) {
+                    DataCollection.Version version) {
+                return null;
+            }
+
+            @Override
+            public Map<String, Boolean> getAttributesUsage(String customerSpace, BusinessEntity entity,
+                    Set<String> attributes, Predefined group, Version version) {
                 return null;
             }
 
