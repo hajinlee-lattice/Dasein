@@ -13,4 +13,5 @@ public interface GenericTableEntityMgr {
 
     List<Map<String, Object>> getByKeyPairs(String tenantId, String tableName, List<Pair<String, String>> keyPairs);
 
+    List<Map<String, Object>> getAllByPartitionKey(String tenantId, String tableName, String partitionKey);
 }
