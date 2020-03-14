@@ -2,6 +2,7 @@ package com.latticeengines.dataflow.runtime.cascading.propdata;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.inject.Inject;
@@ -9,6 +10,8 @@ import javax.inject.Inject;
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.RecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +28,11 @@ import cascading.avro.AvroScheme;
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
 import cascading.flow.FlowDef;
+import cascading.operation.regex.RegexReplace;
+import cascading.pipe.Each;
 import cascading.pipe.Pipe;
 import cascading.property.AppProps;
+import cascading.scheme.Scheme;
 import cascading.scheme.hadoop.TextDelimited;
 import cascading.scheme.util.DelimitedParser;
 import cascading.scheme.util.FieldTypeResolver;
@@ -59,9 +65,9 @@ public class SimpleCascadingExecutor {
         this.yarnConfiguration = yarnConfiguration;
     }
 
-    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath,
-            String avroDirPath, String delimiter, String qualifier, String charset,
-            boolean treatEqualQuoteSpecial) throws IOException {
+    public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath,
+            String delimiter, String qualifier, String charset, boolean treatEqualQuoteSpecial,
+            Map<String, String> columnDefaultValueMapping) throws IOException {
         delimiter = delimiter == null ? CSV_DELIMITER : delimiter;
         log.info(String.format("Delimiter: %s, Qualifier: %s", delimiter, qualifier));
 
@@ -69,21 +75,30 @@ public class SimpleCascadingExecutor {
         AvroScheme avroScheme = new AvroScheme(schema);
         FieldTypeResolver fieldTypeResolver = new CustomFieldTypeResolver(fieldMapping);
         DelimitedParser delimitedParser = (treatEqualQuoteSpecial && qualifier != null)
-                ? new CustomDelimitedParserSpecialEqualQuote(fieldMapping, delimiter, qualifier,
-                        false, true, fieldTypeResolver)
-                : new CustomDelimitedParser(fieldMapping, delimiter, qualifier, false, true,
-                        fieldTypeResolver);
+                ? new CustomDelimitedParserSpecialEqualQuote(fieldMapping, delimiter, qualifier, false, true,
+                        fieldTypeResolver)
+                : new CustomDelimitedParser(fieldMapping, delimiter, qualifier, false, true, fieldTypeResolver);
         TextDelimited textDelimited = charset == null ? new TextDelimited(true, delimitedParser)
                 : new TextDelimited(Fields.ALL, null, true, true, charset, delimitedParser);
 
         Tap<?, ?, ?> csvTap = new Hfs(textDelimited, uncompressedFilePath);
         Tap<?, ?, ?> avroTap = new Hfs(avroScheme, avroDirPath, SinkMode.REPLACE);
 
+        // check if we need to fill in default values for null cells
+        if ((columnDefaultValueMapping != null) && (columnDefaultValueMapping.size() != 0)) {
+            // replace the source tap with the updated tap which has default values
+            csvTap = fillInDefaultValue(csvTap, uncompressedFilePath, columnDefaultValueMapping);
+        }
+
         Pipe csvToAvroPipe = new Pipe(CSV_TO_AVRO_PIPE);
 
-        FlowDef flowDef = FlowDef.flowDef().setName(CSV_TO_AVRO_PIPE)
-                .addSource(csvToAvroPipe, csvTap).addTailSink(csvToAvroPipe, avroTap);
+        FlowDef flowDef = FlowDef.flowDef().setName(CSV_TO_AVRO_PIPE).addSource(csvToAvroPipe, csvTap)
+                .addTailSink(csvToAvroPipe, avroTap);
 
+        runFlow(flowDef);
+    }
+
+    private void runFlow(FlowDef flow) {
         String appJarPath = "";
         try {
             String artifactVersion = versionManager.getCurrentVersionInStack(stackName);
@@ -97,7 +112,7 @@ public class SimpleCascadingExecutor {
                     appJarPath = file;
                 } else {
                     log.info("Adding " + file + " to flowdef classpath.");
-                    flowDef.addToClassPath(file);
+                    flow.addToClassPath(file);
                 }
             }
         } catch (Exception e) {
@@ -110,15 +125,36 @@ public class SimpleCascadingExecutor {
             AppProps.setApplicationJarPath(properties, appJarPath);
         }
         String translatedQueue = LedpQueueAssigner.overwriteQueueAssignment(
-                LedpQueueAssigner.getPropDataQueueNameForSubmission(),
-                emrEnvService.getYarnQueueScheme());
+                LedpQueueAssigner.getPropDataQueueNameForSubmission(), emrEnvService.getYarnQueueScheme());
         ExecutionEngine engine = ExecutionEngine.get(ENGINE);
         DataFlowContext dataFlowCtx = new DataFlowContext();
         dataFlowCtx.setProperty(DataFlowProperty.QUEUE, translatedQueue);
         dataFlowCtx.setProperty(DataFlowProperty.HADOOPCONF, yarnConfiguration);
         FlowConnector flowConnector = engine.createFlowConnector(dataFlowCtx, properties);
-        Flow<?> wcFlow = flowConnector.connect(flowDef);
-
+        Flow<?> wcFlow = flowConnector.connect(flow);
         wcFlow.complete();
+    }
+
+    private Tap<?, ?, ?> fillInDefaultValue(Tap<?, ?, ?> tap, String path,
+            Map<String, String> columnDefaultValueMapping) {
+        log.info("Start to fill in default values for null cells");
+
+        String outputPath = path + "/../" + "updated";
+        Tap<?, ?, ?> updatedTap = new Hfs((Scheme<Configuration, RecordReader, OutputCollector, ?, ?>) tap.getScheme(),
+                outputPath, SinkMode.UPDATE);
+        Pipe fillInDefault = new Pipe("FILL-DEFAULT");
+
+        for (String column : columnDefaultValueMapping.keySet()) {
+            String value = columnDefaultValueMapping.get(column);
+            // RegexReplace will replace the null cells with the default value
+            RegexReplace replace = new RegexReplace(new Fields(column), "^$", value, true);
+            fillInDefault = new Each(fillInDefault, new Fields(column), replace, Fields.REPLACE);
+        }
+
+        FlowDef fDef = FlowDef.flowDef().setName("fill-in-default").addSource(fillInDefault, tap)
+                .addTailSink(fillInDefault, updatedTap);
+        runFlow(fDef);
+
+        return updatedTap;
     }
 }

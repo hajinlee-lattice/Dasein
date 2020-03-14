@@ -72,6 +72,9 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "Categories", length = 1000)
     private String categories;
 
+    @Column(name = "DefaultValue", length = 100)
+    private String DefaultValue;
+
     @Transient
     private List<String> categoryList;
 
@@ -185,6 +188,14 @@ public class SourceColumn implements HasPid, Serializable {
 
     private String getCategories() {
         return categories;
+    }
+
+    public String getDefaultValue() {
+        return DefaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        DefaultValue = defaultValue;
     }
 
     public List<String> getCategoryList() {
