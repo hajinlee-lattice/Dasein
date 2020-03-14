@@ -90,7 +90,6 @@ public class IngestedFileToSourceTransformer
             Source[] baseTemplates = step.getBaseTemplates();
             Source targetTemplate = step.getTargetTemplate();
             String confStr = step.getConfig();
-            log.info("transformInternal, confStr: " + confStr);
             IngestedFileToSourceTransformerConfig configuration = getConfiguration(confStr);
             IngestedFileToSourceParameters parameters = getParameters(progress, baseSources, baseTemplates,
                     targetTemplate, configuration, confStr, baseSourceVersions);
