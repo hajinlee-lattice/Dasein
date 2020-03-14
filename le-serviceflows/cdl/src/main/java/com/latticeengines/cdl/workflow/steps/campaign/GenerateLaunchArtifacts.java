@@ -359,7 +359,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             /*
              * PLS-16386 Add FirstName and LastName
              */
-            CustomerSpace cs = MultiTenantContext.getCustomerSpace();
+            CustomerSpace cs = configuration.getCustomerSpace();
             log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
             Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
                     Predefined.Enrichment, firstAndLastName, null);
