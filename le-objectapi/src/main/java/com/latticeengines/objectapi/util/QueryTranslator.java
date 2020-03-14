@@ -367,10 +367,11 @@ abstract class QueryTranslator {
                     String tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz,
                             repository.getRedshiftPartition());
 
-                    if (SPARK_BATCH_USER.equals(sqlUser) && ComparisonType.NOT_IN_COLLECTION.equals(restriction.getRelation())) {
+                    if (SPARK_BATCH_USER.equals(sqlUser)
+                            && ComparisonType.NOT_IN_COLLECTION.equals(restriction.getRelation())) {
                         BusinessEntity entity = attributeLookup.getEntity();
                         StringPath entityTable = AttrRepoUtils.getTablePath(repository, entity);
-                        String idAttrStr = entity.getServingStore().getPrimaryKey().name();
+                        String idAttrStr = entity.getServingStore().getPrimaryKey();
                         EntityPath<String> tempTable = new PathBuilder<>(String.class, tempTableName);
                         StringPath lhs = Expressions.stringPath(entityTable, attributeLookup.getAttribute());
                         StringPath rhs = Expressions.stringPath(tempTable, TempListUtils.VALUE_COLUMN);
