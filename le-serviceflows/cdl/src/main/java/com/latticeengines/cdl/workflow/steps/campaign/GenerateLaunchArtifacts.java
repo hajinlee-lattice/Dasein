@@ -26,7 +26,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
