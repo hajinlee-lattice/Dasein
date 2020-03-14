@@ -13,9 +13,11 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 public class DefaultExportFieldMetadataServiceImpl extends ExportFieldMetadataServiceBase {
 
     DefaultExportFieldMetadataServiceImpl() {
-        super(Arrays.asList(CDLExternalSystemName.LinkedIn, CDLExternalSystemName.Facebook,
-                CDLExternalSystemName.GoogleAds, CDLExternalSystemName.Eloqua, CDLExternalSystemName.Salesforce,
-                CDLExternalSystemName.Outreach));
+        super(Arrays.asList(CDLExternalSystemName.LinkedIn, //
+                CDLExternalSystemName.Facebook, //
+                CDLExternalSystemName.GoogleAds, //
+                CDLExternalSystemName.Eloqua, //
+                CDLExternalSystemName.Salesforce));
     }
 
     @Override
