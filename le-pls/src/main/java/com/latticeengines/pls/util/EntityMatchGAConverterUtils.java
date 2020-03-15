@@ -17,7 +17,7 @@ public final class EntityMatchGAConverterUtils {
     }
 
     public static void convertGuessingMappings(boolean enableEntityMatch, boolean enableEntityMatchGA,
-                                               FieldMappingDocument fieldMappingDocument) {
+                                               FieldMappingDocument fieldMappingDocument, S3ImportSystem defaultSystem) {
         if (!enableEntityMatchGA) {
             return;
         }
@@ -76,6 +76,16 @@ public final class EntityMatchGAConverterUtils {
                     fieldMapping.setMapToLatticeId(true);
                 }
             }
+        }
+
+        if (defaultSystem != null) {
+            if (StringUtils.isNotEmpty(defaultSystem.getAccountSystemId())) {
+                fieldMappingDocument.getFieldMappings().removeIf(fieldMapping -> defaultSystem.getAccountSystemId().equals(fieldMapping.getMappedField()));
+            }
+            if (StringUtils.isNotEmpty(defaultSystem.getContactSystemId())) {
+                fieldMappingDocument.getFieldMappings().removeIf(fieldMapping -> defaultSystem.getContactSystemId().equals(fieldMapping.getMappedField()));
+            }
+
         }
     }
 
