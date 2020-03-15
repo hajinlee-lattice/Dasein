@@ -39,7 +39,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.VIEW_S3_CREDENTIAL, //
-            GrantedRight.VIEW_PLS_TEAMS
+            GrantedRight.VIEW_PLS_TEAMS, //
+            GrantedRight.VIEW_PLS_USERS
     ) //
     ), //
     EXTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
