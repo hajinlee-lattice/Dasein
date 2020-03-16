@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.pls.service.dcp.SourceService;
 import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 
-@Service("sourceService")
+@Service("dcpSourceService")
 public class SourceServiceImpl implements SourceService {
 
     @Inject
