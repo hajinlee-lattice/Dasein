@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -147,7 +149,8 @@ public class IDaaSServiceImpl implements IDaaSService {
         }
     }
 
-    private IDaaSUser getIDaaSUser(String email) {
+    @Override
+    public IDaaSUser getIDaaSUser(String email) {
         if (enabled) {
             IDaaSUser user = null;
             try {
@@ -173,6 +176,54 @@ public class IDaaSServiceImpl implements IDaaSService {
             user.setRoles(Collections.singletonList(DCP_ROLE));
             return user;
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public IDaaSUser updateIDaaSUser(IDaaSUser user) {
+        initialize();
+        String email = user.getEmailAddress();
+        IDaaSUser returnedUser = null;
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            returnedUser = retryTemplate.execute(ctx -> {
+                try (PerformanceTimer timer = new PerformanceTimer("update user in IDaaS.")) {
+                    HttpEntity entity = new HttpEntity(user);
+                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.exchange(userUri(email),
+                            HttpMethod.PUT, entity, IDaaSUser.class);
+                    return responseEntity.getBody();
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to update user detail in IDaaS for {}", email, e);
+        }
+        return returnedUser;
+    }
+
+    @Override
+    public IDaaSUser createIDaaSUser(IDaaSUser user) {
+        initialize();
+        String email = user.getEmailAddress();
+        IDaaSUser returnedUser = null;
+        try {
+            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+            returnedUser = retryTemplate.execute(ctx -> {
+                try (PerformanceTimer timer = new PerformanceTimer("create user in IDaaS.")) {
+                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.postForEntity(createUserUri(),
+                            user, IDaaSUser.class);
+                    return responseEntity.getBody();
+                } catch (HttpClientErrorException.Unauthorized e) {
+                    log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
+                    return null;
+                }
+            });
+        } catch (Exception e) {
+            log.warn("Failed to create user detail in IDaaS for {}", email, e);
+        }
+        return returnedUser;
     }
 
     private boolean hasAccessToApp(IDaaSUser user) {
@@ -238,6 +289,10 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private URI userUri(String email) {
         return URI.create(apiUrl + "/user/" + email);
+    }
+
+    private URI createUserUri() {
+        return URI.create(apiUrl + "/user");
     }
 
 }
