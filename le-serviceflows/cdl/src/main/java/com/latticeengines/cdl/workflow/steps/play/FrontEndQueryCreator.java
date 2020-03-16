@@ -423,13 +423,15 @@ public class FrontEndQueryCreator {
          * PLS-16386 Add FirstName and LastName
          */
         CustomerSpace cs = MultiTenantContext.getCustomerSpace();
-        log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
-        Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                Predefined.Enrichment, firstAndLastName, null);
-        log.info("attrsUsage for firstName & lastName=" + map);
-        map.keySet().stream().filter(key -> map.get(key)).map(key -> contactAttrs.add(key));
-        log.info("accountLookupFields=" + accountLookupFields);
-        log.info("contactLookupFields=" + contactLookupFields);
+        if (cs != null) {
+            log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
+            Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
+                    Predefined.Enrichment, firstAndLastName, null);
+            log.info("attrsUsage for firstName & lastName=" + map);
+            map.keySet().stream().filter(key -> map.get(key)).map(key -> contactAttrs.add(key));
+            log.info("accountLookupFields=" + accountLookupFields);
+            log.info("contactLookupFields=" + contactLookupFields);
+        }
     }
 
     @VisibleForTesting
