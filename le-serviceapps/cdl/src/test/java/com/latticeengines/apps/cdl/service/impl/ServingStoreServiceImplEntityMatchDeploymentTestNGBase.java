@@ -36,6 +36,7 @@ abstract class ServingStoreServiceImplEntityMatchDeploymentTestNGBase extends Se
                 .withAttrName(InterfaceName.AccountId.name()) //
                 .withCategory(Category.ACCOUNT_ATTRIBUTES) //
                 .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
+                .withGroups(ColumnSelection.Predefined.Enrichment)
                 .build());
         return cms;
     }
@@ -60,6 +61,7 @@ abstract class ServingStoreServiceImplEntityMatchDeploymentTestNGBase extends Se
                 .withAttrName(InterfaceName.ContactId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory(Category.SUB_CAT_OTHER) //
+                .withGroups(ColumnSelection.Predefined.Enrichment) //
                 .build());
         return cms;
     }

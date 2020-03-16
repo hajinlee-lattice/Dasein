@@ -86,7 +86,7 @@ public class AccountAttrsDecorator implements Decorator {
 
         if (InterfaceName.AccountId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
             cm.disableGroup(Segment);
-            cm.disableGroup(Enrichment);
+            cm.enableGroup(Enrichment);
             cm.disableGroup(TalkingPoint);
             cm.disableGroup(CompanyProfile);
             cm.disableGroup(Model);
@@ -116,7 +116,7 @@ public class AccountAttrsDecorator implements Decorator {
             } else {
                 cm.setCanSegment(true);
             }
-            cm.setCanModel(false);
+            cm.setCanModel(true);
             cm.setCanEnrich(true);
             if (onlyEntityMatchGAEnabled) {
                 cm.enableGroup(Segment);
