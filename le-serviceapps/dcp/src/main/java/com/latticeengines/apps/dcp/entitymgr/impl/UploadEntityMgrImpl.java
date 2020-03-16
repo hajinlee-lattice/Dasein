@@ -71,4 +71,14 @@ public class UploadEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<UploadRe
             return uploadWriterRepository.findBySourceIdAndStatus(sourceId, status);
         }
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Upload findByPid(Long pid) {
+        if (isReaderConnection()) {
+            return uploadReaderRepository.findByPid(pid);
+        } else {
+            return uploadWriterRepository.findByPid(pid);
+        }
+    }
 }
