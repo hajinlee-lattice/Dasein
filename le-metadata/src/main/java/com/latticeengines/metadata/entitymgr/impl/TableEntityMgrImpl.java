@@ -517,7 +517,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     try {
                         String partition = redshiftDataUnit.getClusterPartition();
                         if (redshiftPartitionService.getLegacyPartition().equals(partition)) {
-                            log.warn("Ignore table on legacy partition");
+                            log.warn("Ignore table {} on legacy partition", tableName);
                         } else {
                             RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(partition);
                             redshiftService.dropTable(redshiftTable);
