@@ -10,6 +10,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -66,10 +67,14 @@ public class GlobalAuthUserTenantRight extends BaseGlobalAuthObject implements H
 
     @JsonProperty("global_auth_teams")
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
-    @JoinTable(name = "GlobalTeamTenantMember", joinColumns = {
-            @JoinColumn(name = "TenantMember_ID")}, inverseJoinColumns = {
-            @JoinColumn(name = "Team_ID")})
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinTable(name = "GlobalTeamTenantMember",
+            joinColumns = {
+                    @JoinColumn(name = "TenantMember_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_GlobalTeamTenantMember_TenantMemberID_GlobalUserTenantRight",
+                            foreignKeyDefinition = "foreign key (TenantMember_ID) references GlobalUserTenantRight (GlobalUserTenantRight_ID) on delete cascade"))},
+            inverseJoinColumns = {
+                    @JoinColumn(name = "Team_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_GlobalTeamTenantMember_TeamID_GlobalTeam",
+                            foreignKeyDefinition = "foreign key (Team_ID) references GlobalTeam (GlobalTeam_ID) on delete cascade"))}
+    )
     private List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
 
     @Override
