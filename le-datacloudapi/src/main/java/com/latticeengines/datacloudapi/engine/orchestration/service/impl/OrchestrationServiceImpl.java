@@ -122,18 +122,24 @@ public class OrchestrationServiceImpl implements OrchestrationService {
 
     private List<OrchestrationProgress> process(List<OrchestrationProgress> progresses) {
         for (OrchestrationProgress progress : progresses) {
-            switch (progress.getStatus()) {
-            case FAILED:
-                retryFailedProgress(progress);
-                break;
-            case NEW:
-                startNewProgress(progress);
-                break;
-            case PROCESSING:
-                checkRunningProgress(progress);
-                break;
-            default:
-                throw new RuntimeException(String.format("Unsupported status %s to process", progress.getStatus()));
+            try {
+                switch (progress.getStatus()) {
+                case FAILED:
+                    retryFailedProgress(progress);
+                    break;
+                case NEW:
+                    startNewProgress(progress);
+                    break;
+                case PROCESSING:
+                    checkRunningProgress(progress);
+                    break;
+                default:
+                    throw new RuntimeException(String.format("Unsupported status %s to process", progress.getStatus()));
+                }
+            } catch (Exception ex) {
+                log.error("Failed on processing Orchestration name=" + progress.getOrchestration().getName()
+                        + " progress PId=" + progress.getPid(),
+                        ex);
             }
         }
         return progresses;
@@ -141,8 +147,8 @@ public class OrchestrationServiceImpl implements OrchestrationService {
 
     private OrchestrationProgress retryFailedProgress(OrchestrationProgress progress) {
         DataCloudEngineStage currentStage = progress.getCurrentStage();
-        startJob(currentStage, progress.getHdfsPod());
         progress = orchestrationProgressService.updateSubmittedProgress(progress);
+        startJob(currentStage, progress.getHdfsPod());
         return progress;
     }
 
@@ -151,9 +157,9 @@ public class OrchestrationServiceImpl implements OrchestrationService {
         OrchestrationConfig config = orch.getConfig();
         DataCloudEngineStage currentStage = config.firstStage();
         currentStage.setVersion(progress.getVersion());
-        startJob(currentStage, progress.getHdfsPod());
         progress.setCurrentStage(currentStage);
         progress = orchestrationProgressService.updateSubmittedProgress(progress);
+        startJob(currentStage, progress.getHdfsPod());
         return progress;
     }
 
@@ -240,8 +246,8 @@ public class OrchestrationServiceImpl implements OrchestrationService {
         }
         DataCloudEngineVersionService engineService = serviceMap.get(stage.getEngine());
         if (engineService == null) {
-            throw new UnsupportedOperationException(String
-                    .format("Specified engine name %s is not supported.", stage.getEngine().name()));
+            throw new UnsupportedOperationException(
+                    String.format("Specified engine name %s is not supported.", stage.getEngine().name()));
         }
         DataCloudEngineStage status = engineService.findProgressAtVersion(stage);
         return status;
