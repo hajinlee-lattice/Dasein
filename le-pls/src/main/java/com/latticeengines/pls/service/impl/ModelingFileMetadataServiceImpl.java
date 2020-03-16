@@ -163,8 +163,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
         SchemaInterpretation schemaInterpretation;
         Table table;
+        S3ImportSystem s3ImportSystem = null;
         if (StringUtils.isNotEmpty(systemName) && entityType != null) {
-            S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+            s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
             schemaInterpretation = entityType.getSchemaInterpretation();
             table = SchemaRepository.instance().getSchema(s3ImportSystem.getSystemType(), entityType,
                     batonService.isEntityMatchEnabled(customerSpace));
@@ -192,7 +193,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             Table templateTable = dataFeedTask.getImportTemplate();
             FieldMappingDocument fieldMappingFromTemplate = getFieldMappingBaseOnTable(sourceFile, templateTable);
             if (StringUtils.isNotEmpty(systemName)) {
-                S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
                 if (s3ImportSystem != null) {
                     for (FieldMapping fieldMapping : fieldMappingFromTemplate.getFieldMappings()) {
                         if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
@@ -212,7 +213,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
                     templateTable, table);
         }
-        EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument);
+        EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument,
+                s3ImportSystem);
         return resultDocument;
     }
 
