@@ -447,7 +447,10 @@ public class CDLResource {
             if (CollectionUtils.isEmpty(fieldPreviews)) {
                 return fieldPreviews;
             }
-            updateUniqueAndMatchIdField(fieldPreviews, templateDisplay.getS3ImportSystem(), entityType);
+
+            List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(customerSpace.toString());
+            systemList.add(templateDisplay.getS3ImportSystem());
+            updateUniqueAndMatchIdField(fieldPreviews, systemList, entityType);
             Map<String, String> standardNameMapping =
                     standardTable.getAttributes()
                             .stream()
@@ -471,26 +474,27 @@ public class CDLResource {
         }
     }
 
-    private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, S3ImportSystem s3ImportSystem, EntityType entityType) {
+    private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, List<S3ImportSystem> s3ImportSystem, EntityType entityType) {
         List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(
                 preview-> preview.getFieldCategory() == FieldCategory.LatticeField).collect(Collectors.toList());
         Set<String> latticeFieldNameFromFileList = latticeFieldList.stream().map(TemplateFieldPreview::getNameFromFile)
                 .collect(Collectors.toSet());
+        Set<String> accountSystemIdList = s3ImportSystem.stream().map(system-> system.getAccountSystemId())
+                .collect(Collectors.toSet());
+        Set<String> contactSystemIdList = s3ImportSystem.stream().map(system-> system.getContactSystemId())
+                .collect(Collectors.toSet());
         for (TemplateFieldPreview fieldPreview : fieldPreviews) {
             switch (entityType) {
                 case Accounts:
-                    if (s3ImportSystem.getAccountSystemId() != null &&
-                            s3ImportSystem.getAccountSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
+                    if (accountSystemIdList.contains(fieldPreview.getNameInTemplate())) {
                         fieldPreview.setFieldCategory(FieldCategory.LatticeField);
                     }
                     break;
                 case Contacts:
-                    if (s3ImportSystem.getContactSystemId() != null &&
-                            s3ImportSystem.getContactSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
+                    if (contactSystemIdList.contains(fieldPreview.getNameInTemplate())) {
                         fieldPreview.setFieldCategory(FieldCategory.LatticeField);
                     }
-                    if (s3ImportSystem.getAccountSystemId() != null &&
-                            s3ImportSystem.getAccountSystemId().equalsIgnoreCase(fieldPreview.getNameInTemplate())) {
+                    if (accountSystemIdList.contains(fieldPreview.getNameInTemplate())) {
                         fieldPreview.setFieldCategory(FieldCategory.LatticeField);
                     }
                     break;
