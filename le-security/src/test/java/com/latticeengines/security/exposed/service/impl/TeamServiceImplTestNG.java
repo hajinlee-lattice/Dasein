@@ -60,11 +60,11 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
 
     @AfterClass(groups = {"functional"})
     public void tearDown() {
-        deleteTenant(tenant);
-        deleteTenant(anotherTenant);
         makeSureUserDoesNotExist(username1InTenant);
         makeSureUserDoesNotExist(username2InTenant);
         makeSureUserDoesNotExist(usernameInAnotherTenant);
+        deleteTenant(tenant);
+        deleteTenant(anotherTenant);
     }
 
     private void validateTeamInfo(GlobalTeam globalTeam, String teamName, String teamMemberName, int teamMemberSize) {
@@ -102,7 +102,6 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         teamService.deleteTeam(teamId);
         globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
-
         MultiTenantContext.setTenant(anotherTenant);
         teamService.createTeam(usernameInAnotherTenant, getGlobalTeamData(teamNameInAnotherTenant, Sets.newHashSet(usernameInAnotherTenant)));
         globalTeams = teamService.getTeamsByUserName(usernameInAnotherTenant, getUser(usernameInAnotherTenant, AccessLevel.INTERNAL_ADMIN.name()));
