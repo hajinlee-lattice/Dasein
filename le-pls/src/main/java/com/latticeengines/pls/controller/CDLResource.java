@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
@@ -338,7 +337,7 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18217);
         }
         return cdlService.getS3ImportTemplate(customerSpace.toString(), sortBy,
-                ImmutableSet.of(EntityType.WebVisit));
+                null);
     }
 
     @GetMapping(value = "/s3import/fileList")
