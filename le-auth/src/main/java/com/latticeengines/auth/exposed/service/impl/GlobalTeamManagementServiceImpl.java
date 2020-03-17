@@ -59,10 +59,11 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     }
 
     private void validateTeam(String teamId, GlobalTeamData globalTeamData, GlobalAuthTenant globalAuthTenant) {
-        String teamName = globalTeamData.getTeamName();
+        String teamName = globalTeamData.getTeamName() == null ? null : globalTeamData.getTeamName().trim();
         if (StringUtils.isEmpty(teamName)) {
-            throw new IllegalArgumentException(String.format("Team name is empty."));
+            throw new LedpException(LedpCode.LEDP_18242);
         }
+        globalTeamData.setTeamName(teamName);
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamNameAndTenantId(globalAuthTenant.getPid(),
                 globalTeamData.getTeamName());
         if (globalAuthTeam != null && !globalAuthTeam.getTeamId().equals(teamId)) {

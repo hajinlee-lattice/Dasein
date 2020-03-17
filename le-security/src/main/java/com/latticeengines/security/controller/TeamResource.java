@@ -77,7 +77,6 @@ public class TeamResource {
     @ApiOperation(value = "Create a new team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public String createTeam(@RequestBody GlobalTeamData globalTeamData, HttpServletRequest request) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(globalTeamData.getTeamName()), "Team name can't be empty");
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
         return teamService.createTeam(loginUser.getUsername(), globalTeamData);
