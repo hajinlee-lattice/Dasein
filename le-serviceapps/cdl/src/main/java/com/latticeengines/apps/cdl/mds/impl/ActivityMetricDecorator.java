@@ -228,7 +228,7 @@ public class ActivityMetricDecorator implements Decorator {
         String dispNameTmpl = group.getDisplayNameTmpl().getTemplate();
         if (StringUtils.isNotBlank(dispNameTmpl)) {
             try {
-                cm.setDisplayName(TemplateUtils.renderByMap(dispNameTmpl, params));
+                cm.setDisplayName(getTrimmedTemplate(dispNameTmpl, params));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to render display name for attribute " + attrName, e);
             }
@@ -237,7 +237,7 @@ public class ActivityMetricDecorator implements Decorator {
         String descTmpl = group.getDescriptionTmpl().getTemplate();
         if (StringUtils.isNotBlank(descTmpl)) {
             try {
-                cm.setDescription(TemplateUtils.renderByMap(descTmpl, params));
+                cm.setDescription(getTrimmedTemplate(descTmpl, params));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to render description for attribute " + attrName, e);
             }
@@ -246,10 +246,18 @@ public class ActivityMetricDecorator implements Decorator {
         String subCatTmpl = group.getSubCategoryTmpl().getTemplate();
         if (StringUtils.isNotBlank(subCatTmpl)) {
             try {
-                cm.setSubcategory(TemplateUtils.renderByMap(subCatTmpl, params));
+                cm.setSubcategory(getTrimmedTemplate(subCatTmpl, params));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to render sub-category for attribute " + attrName, e);
             }
         }
+    }
+
+    private String getTrimmedTemplate(String template, Map<String, Object> params) {
+        String result = TemplateUtils.renderByMap(template, params);
+        if (StringUtils.isNotBlank(result)) {
+            result = result.trim();
+        }
+        return result;
     }
 }
