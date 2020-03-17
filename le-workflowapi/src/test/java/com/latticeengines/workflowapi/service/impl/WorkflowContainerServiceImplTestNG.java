@@ -35,7 +35,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowJobEntityMgr.delete(workflowJob);
     }
 
-    @Test(groups = "functional", enabled = true)
+    @Test(groups = "functional", enabled = false)
     public void testSubmitAwsWorkflow() {
         WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
         workflowConfig.setWorkflowName("dummyWorkflow");
