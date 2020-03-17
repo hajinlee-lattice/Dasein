@@ -128,6 +128,10 @@ public class RedshiftPartitionServiceImpl implements RedshiftPartitionService {
             return dataSources.get(cacheKey);
         }
 
+        if (legacyPartition.equals(partition) && !"prodcluster".equals(leEnv)) {
+            throw new IllegalArgumentException("Should not connect to the legacy partition.");
+        }
+
         String jdbcUrl = getJdbcUrl(partition);
         log.info("Constructing c3p0 connection pool for " + jdbcUrl);
         ComboPooledDataSource cpds = new ComboPooledDataSource();
