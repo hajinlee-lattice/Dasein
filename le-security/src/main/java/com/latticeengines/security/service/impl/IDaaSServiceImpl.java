@@ -181,49 +181,57 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     @SuppressWarnings("unchecked")
     public IDaaSUser updateIDaaSUser(IDaaSUser user) {
-        initialize();
-        String email = user.getEmailAddress();
-        IDaaSUser returnedUser = null;
-        try {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
-            returnedUser = retryTemplate.execute(ctx -> {
-                try (PerformanceTimer timer = new PerformanceTimer("update user in IDaaS.")) {
-                    HttpEntity entity = new HttpEntity(user);
-                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.exchange(userUri(email),
-                            HttpMethod.PUT, entity, IDaaSUser.class);
-                    return responseEntity.getBody();
-                } catch (HttpClientErrorException.Unauthorized e) {
-                    log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
-                    return null;
-                }
-            });
-        } catch (Exception e) {
-            log.warn("Failed to update user detail in IDaaS for {}", email, e);
+        if (enabled) {
+            initialize();
+            String email = user.getEmailAddress();
+            IDaaSUser returnedUser = null;
+            try {
+                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+                returnedUser = retryTemplate.execute(ctx -> {
+                    try (PerformanceTimer timer = new PerformanceTimer("update user in IDaaS.")) {
+                        HttpEntity entity = new HttpEntity(user);
+                        ResponseEntity<IDaaSUser> responseEntity = restTemplate.exchange(userUri(email),
+                                HttpMethod.PUT, entity, IDaaSUser.class);
+                        return responseEntity.getBody();
+                    } catch (HttpClientErrorException.Unauthorized e) {
+                        log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
+                        return null;
+                    }
+                });
+            } catch (Exception e) {
+                log.warn("Failed to update user detail in IDaaS for {}", email, e);
+            }
+            return returnedUser;
+        } else {
+            return user;
         }
-        return returnedUser;
     }
 
     @Override
     public IDaaSUser createIDaaSUser(IDaaSUser user) {
-        initialize();
-        String email = user.getEmailAddress();
-        IDaaSUser returnedUser = null;
-        try {
-            RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
-            returnedUser = retryTemplate.execute(ctx -> {
-                try (PerformanceTimer timer = new PerformanceTimer("create user in IDaaS.")) {
-                    ResponseEntity<IDaaSUser> responseEntity = restTemplate.postForEntity(createUserUri(),
-                            user, IDaaSUser.class);
-                    return responseEntity.getBody();
-                } catch (HttpClientErrorException.Unauthorized e) {
-                    log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
-                    return null;
-                }
-            });
-        } catch (Exception e) {
-            log.warn("Failed to create user detail in IDaaS for {}", email, e);
+        if (enabled) {
+            initialize();
+            String email = user.getEmailAddress();
+            IDaaSUser returnedUser = null;
+            try {
+                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+                returnedUser = retryTemplate.execute(ctx -> {
+                    try (PerformanceTimer timer = new PerformanceTimer("create user in IDaaS.")) {
+                        ResponseEntity<IDaaSUser> responseEntity = restTemplate.postForEntity(createUserUri(),
+                                user, IDaaSUser.class);
+                        return responseEntity.getBody();
+                    } catch (HttpClientErrorException.Unauthorized e) {
+                        log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
+                        return null;
+                    }
+                });
+            } catch (Exception e) {
+                log.warn("Failed to create user detail in IDaaS for {}", email, e);
+            }
+            return returnedUser;
+        } else {
+            return user;
         }
-        return returnedUser;
     }
 
     private boolean hasAccessToApp(IDaaSUser user) {
