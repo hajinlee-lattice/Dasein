@@ -127,11 +127,11 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         validateJobsPage();
 
         DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_ACCOUNT);
-        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_SFDC_ID"));
+        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_sfdc_id"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_ACCOUNT);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("user_SFDC_ID"));
-        Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains("user_sfdc_id"));
+        Assert.assertEquals(system.getDisplayNameById("user_sfdc_id"), "SFDC ID");
     }
 
     @Test(groups = "deployment")
@@ -220,7 +220,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         Assert.assertEquals(rowCount, 49);
 
         // Validate TestDate1
-        String fieldName1 = "user_TestDate1";
+        String fieldName1 = "user_testdate1";
         Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
         Assert.assertEquals(schema.getField(fieldName1).schema().getTypes().get(0).getType(), Schema.Type.LONG);
         Assert.assertEquals(schema.getField(fieldName1).getProp("DateFormatString"), dateFormatString1);
@@ -248,7 +248,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
 
 
         // Validate TestDate2
-        String fieldName2 = "user_TestDate2";
+        String fieldName2 = "user_testdate2";
         Assert.assertEquals(schema.getField(fieldName2).schema().getTypes().get(0).getType(), Schema.Type.LONG);
         Assert.assertEquals(schema.getField(fieldName2).getProp("DateFormatString"), dateFormatString2);
         Assert.assertEquals(schema.getField(fieldName2).getProp("TimeFormatString"), timeFormatString2);
@@ -275,7 +275,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                 + records.get(4).get(fieldName2).toString());
 
         // Validate TestDate3
-        String fieldName3 = "user_TestDate3";
+        String fieldName3 = "user_testdate3";
         Assert.assertEquals(schema.getField(fieldName3).schema().getTypes().get(0).getType(), Schema.Type.LONG);
         Assert.assertEquals(schema.getField(fieldName3).getProp("DateFormatString"), dateFormatString3);
         Assert.assertEquals(schema.getField(fieldName3).getProp("TimeFormatString"), timeFormatString3);
@@ -342,11 +342,11 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
         validateJobsPage();
 
         DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_CONTACT);
-        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_SFDC_ID"));
+        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("user_sfdc_id"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace, ENTITY_CONTACT);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("user_SFDC_ID"));
-        Assert.assertEquals(system.getDisplayNameById("user_SFDC_ID"), "SFDC ID");
+        Assert.assertTrue(system.getCRMIdList().contains("user_sfdc_id"));
+        Assert.assertEquals(system.getDisplayNameById("user_sfdc_id"), "SFDC ID");
     }
 
     private void validateImportAction(List<Action> actions) {
