@@ -107,6 +107,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.collection.s3bucket.prefix}")
     private String s3BucketPrefix;
 
+    @Value("${datacloud.collection.s3bucket.high_priority_reqs.prefix}")
+    private String s3BucketHighPriorityReqPrefix;
+
     @Value("${aws.region}")
     private String awsRegion;
 
@@ -158,11 +161,15 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.collection.checkfield.empty}")
     private String checkFieldEmptyValue;
 
+    @Value("${datacloud.collection.high_priority.period}")
+    private long highPriorityReqCheckPeriod;
+
     private long prevCollectMillis = 0;
     private long prevCleanupMillis = 0;
     private int prevCollectTasks;
     private long prevIngestionMillis = 0;
     private long prevLogIngestionMillis = 0;
+    private long prevHighPirorityReqHandledMillis = 0;
 
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
 
@@ -200,18 +207,26 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    private File generateCSV(List<CollectionRequest> readyReqs) throws Exception {
+    private File generateCsvEx(List<CollectionRequest> readyReqs) throws Exception {
+
+        List<String> domains = readyReqs.stream().map( req -> req.getDomain() ).collect(Collectors.toList());
+        File ret = generateCsv("Domain", domains);
+        domains.clear();
+        return ret;
+    }
+
+    private File generateCsv(String domainField, List<String> domains) throws Exception {
 
         File tempFile = File.createTempFile("temp-", ".csv");
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
 
-            writer.write("Domain");
+            writer.write(domainField);
             writer.newLine();
 
-            for (CollectionRequest req : readyReqs) {
+            for (String domain : domains) {
 
-                writer.write(req.getDomain());
+                writer.write(domain);
                 writer.newLine();
 
             }
@@ -222,12 +237,87 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
     }
 
-    private int spawnCollectionWorker() throws Exception {
+    private void spawnHighPriorityCollectionWorker() throws Exception {
+
+        //find high priority reqs in csv file
+        List<S3ObjectSummary> summaries =
+                s3Service.listObjects(s3Bucket, s3BucketHighPriorityReqPrefix).stream()
+                        .filter(summary -> summary.getKey().endsWith(".csv"))
+                        .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(summaries)) {
+            return;
+        }
+
+        //load input domains
+        List<String> domains = new ArrayList<>();
+        List<File> files = new ArrayList<>();
+        for (S3ObjectSummary summary: summaries) {
+
+            File tmpFile = File.createTempFile("temp-", ".csv");
+            tmpFile.deleteOnExit();
+            files.add(tmpFile);
+            s3Service.downloadS3File(summary, tmpFile);
+
+            List<String> ret = loadDomainsFromCsv("Domain", tmpFile);
+            domains.addAll(ret);
+            ret.clear();
+        }
+        log.info("found " + domains.size() + " high-priority domains to collect");
+
+        //generate csv file
+        File csvFile = generateCsv("Domain", domains);
+        files.add(csvFile);
+
+        //spawn collector task
+        for (String vendor: VendorConfig.EFFECTIVE_VENDOR_SET) {
+            //generate worker id
+            String workerId = UUID.randomUUID().toString().toUpperCase();
+
+            //upload to s3
+            String prefix = s3BucketPrefix + workerId + "/input/domains.csv";
+            s3Service.uploadLocalFile(s3Bucket, prefix, csvFile, true);
+
+            //spawn worker in aws, '-v vendor -w worker_id'
+            String cmdLine = "-v " + vendor + " -w " + workerId;
+            String taskArn = ecsService.spawECSTask(
+                    ecsClusterName,
+                    ecsTaskDefName,
+                    "python",
+                    cmdLine,
+                    ecsTaskSubnets);
+
+            //create worker record in
+            Timestamp ts = new Timestamp(System.currentTimeMillis());
+            CollectionWorker worker = new CollectionWorker();
+            worker.setWorkerId(workerId);
+            worker.setVendor(vendor);
+            worker.setStatus(CollectionWorker.STATUS_NEW);
+            worker.setSpawnTime(ts);
+            worker.setTaskArn(taskArn);
+            worker.setHighPriority(true);
+
+            log.info("BEG_COLLECTING_REQ=" + vendor + "," + domains.size());
+
+            collectionWorkerService.getEntityMgr().create(worker);
+        }
+
+        //clean every thing
+        for (File file: files) {
+
+            FileUtils.deleteQuietly(file);
+
+        }
+
+        s3Service.cleanupByObjectList(summaries);
+    }
+
+    private int spawnCollectionWorker(boolean forceCollect) throws Exception {
 
         int spawnedTasks = 0;
 
         int maxRetries = vendorConfigService.getDefMaxRetries();
         int collectingBatch = vendorConfigService.getDefCollectionBatch();
+        int minCollectingBatch = vendorConfigService.getMinCollectionBatch();
         for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
 
             List<CollectionWorker> activeTasks = collectionWorkerService.getActiveWorker(vendor);
@@ -250,14 +340,14 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             //get ready reqs
             List<CollectionRequest> readyReqs = collectionRequestService.getReady(vendor, collectingBatch);
-            if (CollectionUtils.isEmpty(readyReqs)) {
+            if (CollectionUtils.isEmpty(readyReqs) || (!forceCollect && readyReqs.size() < minCollectingBatch)) {
 
                 continue;
 
             }
 
             //generate input csv
-            File tempCsv = generateCSV(readyReqs);
+            File tempCsv = generateCsvEx(readyReqs);
 
             //generate worker id
             String workerId = UUID.randomUUID().toString().toUpperCase();
@@ -321,6 +411,35 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         return arn2tasks;
 
+    }
+
+    List<String> loadDomainsFromCsv(String domainField, File csvFile) throws Exception {
+
+        List<String> ret = new ArrayList<>();
+
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
+                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile)))) {
+            try (CSVParser parser = new CSVParser(reader, format)) {
+
+                Map<String, Integer> colMap = parser.getHeaderMap();
+                int domainIdx = colMap.getOrDefault(domainField, -1);
+
+                if (domainIdx == -1) {
+                    log.warn(csvFile + " does not contain " + domainField + " field");
+                    return ret;
+                }
+
+                for (CSVRecord rec : parser) {
+
+                    String domain = rec.get(domainIdx);
+                    ret.add(domain);
+                }
+
+            }
+        }
+
+        return ret;
     }
 
     private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains, Set<String> errDomains, Set<String> emptyDomains) throws Exception {
@@ -456,13 +575,16 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
 
         //consumeFinished reqs
-        List<CollectionRequest> processedReqs = collectionRequestService.getProcessed(workerId);
-        int reqRetried = collectionRequestService.consumeFinished(processedReqs, domains, emptyDomains);
-        int reqCollected = domains.size() + emptyDomains.size();
-        int reqErrorred = reqCollected + errDomains.size() == processedReqs.size() ? errDomains.size() : processedReqs.size() - reqCollected;
-        log.info("END_COLLECTING_REQ=" + vendor + "," + reqCollected + "," + recordsCollected + "," + reqErrorred +
-                "," + reqRetried );
-        processedReqs.clear();
+        int reqCollected = 1;
+        if (!worker.getHighPriority()) {
+            List<CollectionRequest> processedReqs = collectionRequestService.getProcessed(workerId);
+            int reqRetried = collectionRequestService.consumeFinished(processedReqs, domains, emptyDomains);
+            reqCollected = domains.size() + emptyDomains.size();
+            int reqErrorred = reqCollected + errDomains.size() == processedReqs.size() ? errDomains.size() : processedReqs.size() - reqCollected;
+            log.info("END_COLLECTING_REQ=" + vendor + "," + reqCollected + "," + recordsCollected + "," + reqErrorred +
+                    "," + reqRetried);
+            processedReqs.clear();
+        }
 
         domains.clear();
         emptyDomains.clear();
@@ -622,7 +744,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         }
     }
 
-    public boolean collect() {
+    public boolean collect(boolean forceCollect) {
         if (prevCollectMillis == 0) {
 
             log.info("datacloud collection job starts...");
@@ -662,6 +784,14 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             }
 
+            //handling high-priority reqs
+            if (currentMillis - prevHighPirorityReqHandledMillis >= highPriorityReqCheckPeriod * 1000) {
+
+                prevHighPirorityReqHandledMillis = currentMillis;
+                spawnHighPriorityCollectionWorker();
+
+            }
+
             activeTasks = getActiveTaskCount();
             if (prevCollectTasks != activeTasks ||
                     currentMillis - prevCollectMillis >= HOUR_MILLIS) {
@@ -679,7 +809,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             }
             Thread.sleep(LATENCY_GAP_MS);
 
-            int newTasks = spawnCollectionWorker();
+            int newTasks = spawnCollectionWorker(forceCollect);
             activeTasks += newTasks;
             if (newTasks > 0) {
                 log.info(newTasks + " new collection workers spawned, active tasks => " + activeTasks);

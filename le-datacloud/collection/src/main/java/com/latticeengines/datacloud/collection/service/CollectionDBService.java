@@ -15,7 +15,7 @@ public interface CollectionDBService {
 
     int getActiveTaskCount();
 
-    boolean collect();
+    boolean collect(boolean forceCollect);
 
     int getIngestionTaskCount();
 

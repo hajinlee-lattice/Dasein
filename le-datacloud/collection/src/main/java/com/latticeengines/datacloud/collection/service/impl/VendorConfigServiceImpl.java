@@ -24,8 +24,14 @@ public class VendorConfigServiceImpl implements VendorConfigService {
     @Value("${datacloud.collection.req.collect.batch}")
     private int DEF_COLLECTION_BATCH;
 
+    @Value("${datacloud.collection.req.collect.batch.min}")
+    private int MIN_COLLECTION_BATCH;
+
     @Value("${datacloud.collection.req.max.retry}")
     private int DEF_MAX_RETRIES;
+
+    @Value("${datacloud.collection.config.db.force_load.period}")
+    private long forceLoadConfigPeriod;
 
     @Inject
     private VendorConfigMgr vendorConfigMgr;
@@ -34,6 +40,7 @@ public class VendorConfigServiceImpl implements VendorConfigService {
     private List<String> vendors;
 
     private boolean ready = false;
+    private long prevLoadConfigMillis = 0;
 
     private List<VendorConfig> fetchVendorConfigs() {
 
@@ -109,10 +116,13 @@ public class VendorConfigServiceImpl implements VendorConfigService {
     }
 
     private void init() {
-        if (ready) {
+        long curMillis = System.currentTimeMillis();
+        if (ready && curMillis - prevLoadConfigMillis < forceLoadConfigPeriod * 1000) {
 
             return;
         }
+
+        prevLoadConfigMillis = curMillis;
 
         List<VendorConfig> allConfigs = fetchVendorConfigs();
 
@@ -144,6 +154,13 @@ public class VendorConfigServiceImpl implements VendorConfigService {
     public int getDefCollectionBatch() {
 
         return DEF_COLLECTION_BATCH;
+
+    }
+
+    @Override
+    public int getMinCollectionBatch() {
+
+        return MIN_COLLECTION_BATCH;
 
     }
 

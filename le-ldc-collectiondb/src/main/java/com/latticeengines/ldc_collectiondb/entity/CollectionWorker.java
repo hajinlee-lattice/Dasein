@@ -43,6 +43,9 @@ public class CollectionWorker {
     @Column(name = "RECORDS_COLLECTED")
     private long recordsCollected;
 
+    @Column(name = "HIGH_PRTY")
+    private boolean highPriority = false;
+
     public String getWorkerId() {
 
         return workerId;
@@ -124,6 +127,18 @@ public class CollectionWorker {
     public void setRecordsCollected(long recordsCollected) {
 
         this.recordsCollected = recordsCollected;
+
+    }
+
+    public boolean getHighPriority() {
+
+        return highPriority;
+
+    }
+
+    public void setHighPriority(boolean highPriority) {
+
+        this.highPriority = highPriority;
 
     }
 }

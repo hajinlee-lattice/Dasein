@@ -1,7 +1,9 @@
 package com.latticeengines.datacloud.collection.service;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Timestamp;
@@ -74,9 +76,21 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
     @Inject
     VendorConfigMgr vendorConfigMgr;
 
+    @Inject
+    VendorConfigService vendorConfigService;
+
+    @Value("${datacloud.collection.s3bucket}")
+    private String s3Bucket;
+
+    @Value("${datacloud.collection.s3bucket.prefix}")
+    private String s3BucketPrefix;
+
+    @Value("${datacloud.collection.s3bucket.high_priority_reqs.prefix}")
+    private String s3BucketHighPriorityReqPrefix;
+
     @BeforeMethod(groups = "functional")
     public void beforeMethod() {
-        start = new Timestamp(System.currentTimeMillis() - 1000);
+        start = new Timestamp(System.currentTimeMillis());
     }
 
     @AfterMethod(groups = "functional")
@@ -150,7 +164,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
                 domainIdx = (domainIdx + 1) % domainLists.size();
 
             }
-            finished = collectionDBService.collect();
+            finished = collectionDBService.collect(false);
             Thread.sleep(15 * 1000);
         }
 
@@ -166,7 +180,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         collectionDBService.addNewDomains(domains, UUID.randomUUID().toString().toUpperCase());
         boolean finished = false;
         while (!finished) {
-            finished = collectionDBService.collect();
+            finished = collectionDBService.collect(false);
             Thread.sleep(5000);
         }
 
@@ -176,21 +190,63 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         Assert.assertNotNull(workers);
 
     }
+    private File generateCsv(String domainField, List<String> domains) throws Exception {
+
+        File tempFile = File.createTempFile("temp-", ".csv");
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
+
+            writer.write(domainField);
+            writer.newLine();
+
+            for (String domain : domains) {
+
+                writer.write(domain);
+                writer.newLine();
+
+            }
+
+        }
+
+        return tempFile;
+
+    }
 
     @Test(groups = "functional")
     public void testCollection() throws Exception {
+        Timestamp beg = new Timestamp(System.currentTimeMillis());
 
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
         collectionDBService.addNewDomains(domains, UUID.randomUUID().toString().toUpperCase());
         boolean finished = false;
         while (!finished) {
-            finished = collectionDBService.collect();
+            finished = collectionDBService.collect(true);
             Thread.sleep(15000);
         }
 
-        List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start,
+        List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(beg,
                 new Timestamp(System.currentTimeMillis()));
-        Assert.assertNotNull(workers);
+        Assert.assertTrue(workers.size() > 0);
+    }
+
+    @Test(groups = "functional")
+    public void testHighPriorityCollection() throws Exception {
+        Timestamp beg = new Timestamp(System.currentTimeMillis());
+
+        List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
+        File tmpFile = generateCsv("Domain", domains);
+        s3Service.uploadLocalFile(s3Bucket, s3BucketHighPriorityReqPrefix + "temp.csv", tmpFile, true);
+
+        boolean finished = false;
+        while (!finished) {
+            finished = collectionDBService.collect(false);
+            Thread.sleep(15000);
+        }
+
+        List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(beg,
+                new Timestamp(System.currentTimeMillis()));
+        Assert.assertTrue(workers.size() > 0);
+
     }
 
     @Test(groups = "functional")
