@@ -67,7 +67,7 @@ public class TalkingPointResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         mainCustomerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
 
         testPlayCreationHelper.setupTestSegment();
-        testPlayCreationHelper.setupTestRulesBasedModel();
+        testPlayCreationHelper.setupTestRulesBasedModel(false);
         testPlay = testPlayCreationHelper.createPlayOnlyAndGet();
     }
 

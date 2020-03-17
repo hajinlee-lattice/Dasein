@@ -12,9 +12,11 @@ public interface CDLTestDataService {
     void populateMetadata(String tenantId, int version);
 
     void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
-            List<BucketMetadata> coverage);
+                                         List<BucketMetadata> coverage);
 
     void mockRatingTable(String tenantId, List<String> engineIds, //
-            Map<String, List<BucketMetadata>> coverages);
+                         Map<String, List<BucketMetadata>> modelRatingBuckets, boolean uploadRatingTable);
+
+    void mockRatingTableWithSingleEngine(String tenantId, String engineId, List<BucketMetadata> coverage, boolean uploadRatingTable);
 
 }

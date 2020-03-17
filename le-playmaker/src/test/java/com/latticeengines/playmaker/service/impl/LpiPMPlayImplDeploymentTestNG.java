@@ -71,7 +71,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     public void testGetPlayCountAfterCreatingPlayWithoutLaunch() throws Exception {
         TestPlaySetupConfig plConfig = new TestPlaySetupConfig.Builder().build();
         testPlayCreationHelper.setupTestSegment();
-        testPlayCreationHelper.setupTestRulesBasedModel();
+        testPlayCreationHelper.setupTestRulesBasedModel(false);
         testPlayCreationHelper.createDefaultPlayAndTestCrud(plConfig);
 
         int playCount = lpiPMPlayImpl.getPlayCount(0, null, 1, null);

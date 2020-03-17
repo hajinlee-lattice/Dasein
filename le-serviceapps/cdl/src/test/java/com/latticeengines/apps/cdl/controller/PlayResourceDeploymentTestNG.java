@@ -73,7 +73,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         MetadataSegment retrievedSegment = playCreationHelper.createSegment(NamingUtils.timestamp("Segment"), null,
                 null);
-        ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule());
+        ratingEngine = playCreationHelper.createRatingEngine(retrievedSegment, new RatingRule(), false);
 
         playCreationHelper.createPlayTargetSegment();
         playCreationHelper.createLookupIdMapping(testPlaySetupConfig);

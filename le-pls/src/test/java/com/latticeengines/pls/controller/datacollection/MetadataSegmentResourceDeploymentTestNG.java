@@ -121,7 +121,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertNotNull(ratingEngine);
         ratingEngineId = ratingEngine.getId();
         cdlTestDataService.mockRatingTable(mainTestTenant.getId(), Collections.singletonList(ratingEngineId),
-                generateRatingCounts(ratingEngineId));
+                generateRatingCounts(ratingEngineId), false);
         ratingEngine = testRatingEngineProxy.getRatingEngine(ratingEngineId);
         Map<String, Long> ratingCounts = ratingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(ratingCounts));

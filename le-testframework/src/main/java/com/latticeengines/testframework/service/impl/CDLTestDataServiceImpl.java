@@ -2,6 +2,7 @@ package com.latticeengines.testframework.service.impl;
 
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.zip.GZIPInputStream;
@@ -20,11 +22,17 @@ import java.util.zip.GZIPInputStream;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.avro.io.DatumWriter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,8 +46,10 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -100,6 +110,12 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
+
+    @Value("${camille.zk.pod.id}")
+    private String podId;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Inject
     public CDLTestDataServiceImpl(TestArtifactService testArtifactService, MetadataProxy metadataProxy,
@@ -178,17 +194,23 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     @Override
     public void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
-            List<BucketMetadata> coverage) {
+                                                List<BucketMetadata> coverage) {
+        mockRatingTableWithSingleEngine(tenantId, engineId, coverage, false);
+    }
+
+    @Override
+    public void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
+                                                List<BucketMetadata> coverage, boolean uploadRatingTable) {
         if (CollectionUtils.isNotEmpty(coverage)) {
-            mockRatingTable(tenantId, Collections.singletonList(engineId), ImmutableMap.of(engineId, coverage));
+            mockRatingTable(tenantId, Collections.singletonList(engineId), ImmutableMap.of(engineId, coverage), uploadRatingTable);
         } else {
-            mockRatingTable(tenantId, Collections.singletonList(engineId), null);
+            mockRatingTable(tenantId, Collections.singletonList(engineId), null, uploadRatingTable);
         }
     }
 
     @Override
     public void mockRatingTable(String tenantId, List<String> engineIds, //
-            Map<String, List<BucketMetadata>> modelRatingBuckets) {
+                                Map<String, List<BucketMetadata>> modelRatingBuckets, boolean uploadRatingTable) {
         tenantId = CustomerSpace.parse(tenantId).getTenantId();
         if (MapUtils.isEmpty(modelRatingBuckets)) {
             modelRatingBuckets = new HashMap<>();
@@ -209,6 +231,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         String msg = String.format("Mocking the rating table %s for engineIds %s using coverage %s", ratingTableName,
                 engineIds, JsonUtils.serialize(modelRatingBuckets));
         JdbcTemplate redshiftJdbcTemplate = redshiftPartitionService.getBatchUserJdbcTemplate(null);
+        List<List<Object>> data;
         try (PerformanceTimer timer = new PerformanceTimer(msg)) {
             maxCount = modelRatingBuckets.values().stream().map(m -> m.stream() //
                     .map(BucketMetadata::getNumLeads).reduce(0, (a, b) -> a + b)).max(Integer::compare).orElse(null);
@@ -250,7 +273,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 }
 
             }
-            List<List<Object>> data = flux.collectList().block();
+            data = flux.collectList().block();
             retry = getRedshiftRetryTemplate();
             RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
             retry.execute(context -> {
@@ -263,9 +286,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
 
         msg = String.format("Inserting rating stats for %d engines.", engineIds.size());
-        try (
-
-                PerformanceTimer timer = new PerformanceTimer(msg)) {
+        try (PerformanceTimer timer = new PerformanceTimer(msg)) {
             StatisticsContainer container = dataCollectionProxy.getStats(tenantId);
             Map<String, StatsCube> cubes = container.getStatsCubes();
             if (MapUtils.isEmpty(cubes)) {
@@ -283,11 +304,62 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         metadataProxy.createTable(tenantId, ratingTableName, table);
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(tenantId);
         dataCollectionProxy.upsertTable(tenantId, ratingTableName, TableRoleInCollection.PivotedRating, active);
-
         final String finalTenantId = tenantId;
         Flux.fromIterable(engineIds).parallel().runOn(Schedulers.parallel()) //
                 .map(engineId -> ratingEngineProxy.updateRatingEngineCounts(finalTenantId, engineId)) //
                 .sequential().collectList().block();
+        if (uploadRatingTable) {
+            uploadRatingTable(finalTenantId, ratingTableName, schema, columns, data);
+        }
+    }
+
+    private void deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                deleteDir(new File(dir, children[i]));
+            }
+        }
+        dir.delete();
+    }
+
+    private void makeDir(String dirName) {
+        File dir = new File(dirName);
+        deleteDir(dir);
+        dir.mkdir();
+    }
+
+    private void uploadRatingTable(String tenantId, String ratingTableName,
+                                   Schema schema, List<Pair<String, Class<?>>> columns, List<List<Object>> data) {
+        String dirName = tenantId;
+        String fileName = "part-00000-" + UUID.randomUUID().toString() + ".avro";
+        DatumWriter<GenericRecord> userDatumWriter = new GenericDatumWriter<>();
+        if (CollectionUtils.isNotEmpty(data)) {
+            makeDir(dirName);
+            try {
+                try (DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(userDatumWriter)) {
+                    dataFileWriter.create(schema, new File(dirName, fileName));
+                    GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                    for (List<Object> objects : data) {
+                        int index = 0;
+                        for (Object object : objects) {
+                            builder.set(columns.get(index).getLeft(), object.toString());
+                            index++;
+                        }
+                        GenericRecord genericRecord = builder.build();
+                        dataFileWriter.append(genericRecord);
+                    }
+                }
+                CustomerSpace cs = CustomerSpace.parse(tenantId);
+                String targetPath = PathBuilder.buildDataTablePath(podId, cs).toString() + "/" + ratingTableName;
+                HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, dirName, targetPath);
+            } catch (IOException exception) {
+                log.info("Fail to upload rating table {}.", exception.getMessage());
+            } finally {
+                File dir = new File(dirName);
+                deleteDir(dir);
+            }
+        }
     }
 
     private List<Double> generateEV(String tenantId, String engineId, List<String> ratings) {
