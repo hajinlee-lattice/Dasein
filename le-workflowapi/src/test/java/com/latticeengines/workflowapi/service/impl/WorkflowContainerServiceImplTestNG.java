@@ -50,7 +50,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         workflowConfig.add(baseConfig);
 
         String applicationId = workflowContainerService.submitAwsWorkflow(workflowConfig, null);
-        Assert.assertNull(applicationId);
+        Assert.assertNotNull(applicationId);
         workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
         Assert.assertNotNull(workflowJob);
 
