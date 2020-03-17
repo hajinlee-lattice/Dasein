@@ -16,6 +16,8 @@ public interface VendorConfigService {
 
     int getDefCollectionBatch();
 
+    int getMinCollectionBatch();
+
     int getDefMaxRetries();
 
 }
