@@ -116,7 +116,8 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.VIEW_PLS_SPEC, //
-            GrantedRight.VIEW_PLS_TEAMS
+            GrantedRight.VIEW_PLS_TEAMS, //
+            GrantedRight.VIEW_PLS_USERS
     ) //
     ), //
     INTERNAL_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
