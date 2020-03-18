@@ -117,7 +117,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = "testCreateS3Template")
     public void testPreviewTemplateName() throws Exception {
         assertTrue(getS3ImportTemplateEntries());
-        templateDisplay.getS3ImportSystem().setAccountSystemId("user_CrmAccount_External_ID");
+        templateDisplay.getS3ImportSystem().setAccountSystemId("user_crmaccount_external_id");
         String url = BASE_URL_PREFIX + "/s3import/template/preview";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
@@ -125,7 +125,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         List<?> list = restTemplate.postForObject(getRestAPIHostPort() + url, requestEntity, List.class);
         List<TemplateFieldPreview> previewList = JsonUtils.convertList(list, TemplateFieldPreview.class);
         for (TemplateFieldPreview preview : previewList) {
-            if (preview.getNameInTemplate().equalsIgnoreCase("user_CrmAccount_External_ID")) {
+            if (preview.getNameInTemplate().equalsIgnoreCase("user_crmaccount_external_id")) {
                 assertEquals(preview.getFieldCategory(), FieldCategory.LatticeField);
             }
         }
