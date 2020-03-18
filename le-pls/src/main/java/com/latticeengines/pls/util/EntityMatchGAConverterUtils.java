@@ -33,7 +33,7 @@ public final class EntityMatchGAConverterUtils {
         boolean containsAccountId = false;
         boolean containsCustomerContactId = false;
         boolean containsContactId = false;
-        boolean isDefaultSystem = DEFAULT_SYSTEM.equals(defaultSystem.getName());
+        boolean isDefaultSystem = defaultSystem != null && DEFAULT_SYSTEM.equals(defaultSystem.getName());
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
                 //add this properties to make sure systemAccountId can be set correctly.
@@ -89,7 +89,7 @@ public final class EntityMatchGAConverterUtils {
             }
         }
 
-        if (defaultSystem != null && isDefaultSystem) {
+        if (isDefaultSystem) {
             if (StringUtils.isNotEmpty(defaultSystem.getAccountSystemId())) {
                 fieldMappingDocument.getFieldMappings().removeIf(fieldMapping -> defaultSystem.getAccountSystemId().equals(fieldMapping.getMappedField()));
             }
