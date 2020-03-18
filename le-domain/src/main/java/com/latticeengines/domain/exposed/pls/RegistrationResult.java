@@ -1,10 +1,12 @@
 package com.latticeengines.domain.exposed.pls;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.security.User;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegistrationResult {
     private String password;
     private User conflictingUser;
