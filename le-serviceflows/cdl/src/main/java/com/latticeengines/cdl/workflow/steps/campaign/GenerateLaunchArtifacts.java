@@ -287,7 +287,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             }
             if (model.getType() == RatingEngineType.CROSS_SELL
                     && ((AIModel) model.getPublishedIteration()).getPredictionType() == PredictionType.EXPECTED_VALUE) {
-                accountLookups.add(new AttributeLookup(BusinessEntity.Rating, model + "_ev"));
+                accountLookups.add(new AttributeLookup(BusinessEntity.Rating, model.getId() + "_ev"));
             }
             return accountLookups;
         }
