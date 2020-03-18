@@ -363,7 +363,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
             Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
                     Predefined.Enrichment, firstAndLastName, null);
             log.info("attrsUsage for firstName & lastName=" + map);
-            map.keySet().stream().filter(key -> map.get(key)).map(key -> set.add(key));
+            map.keySet().stream().filter(key -> map.get(key)).forEach(key -> set.add(key));
             log.info("set=" + set);
             return set;
         default:

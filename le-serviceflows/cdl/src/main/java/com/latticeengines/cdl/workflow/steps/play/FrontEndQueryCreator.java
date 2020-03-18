@@ -27,8 +27,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -50,6 +48,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component
@@ -145,10 +144,28 @@ public class FrontEndQueryCreator {
                 .keySet().forEach( //
                         businessEntity -> prepareLookups(businessEntity, accountLookups, accLookupFields));
 
+        /*
+         * PLS-16386 Add FirstName and LastName
+         */
+        Map<BusinessEntity, List<String>> temContactLookupFields = new HashMap<>();
+        List<String> contactAttrs = contactLookupFields.get(BusinessEntity.Contact).stream()
+                .collect(Collectors.toList());
+        temContactLookupFields.put(BusinessEntity.Contact, contactAttrs);
+        Tenant tenant = playLaunchContext.getTenant();
+        if (tenant != null) {
+            log.info("Trying to get the attrsUsage for tenant " + tenant.getId());
+            Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(tenant.getId(), BusinessEntity.Contact,
+                    Predefined.Enrichment, firstAndLastName, null);
+            log.info("attrsUsage for firstName & lastName=" + map);
+            map.keySet().stream().filter(key -> map.get(key)).forEach(key -> contactAttrs.add(key));
+            log.info("temContactLookupFields=" + temContactLookupFields);
+        }
+
         List<Lookup> contactLookups = new ArrayList<>();
         contactLookupFields //
                 .keySet().forEach( //
-                        businessEntity -> prepareLookups(businessEntity, contactLookups, contactLookupFields));
+                        businessEntity -> prepareLookups(businessEntity, contactLookups, temContactLookupFields));
+
         // if useSpark, need to union with user configured fields
         if (useSpark) {
             unionAccountAndContactLookups(accountLookups, contactLookups, playLaunchContext.getFieldMappingMetadata(),
@@ -418,20 +435,6 @@ public class FrontEndQueryCreator {
                 InterfaceName.PhoneNumber.name(), //
                 InterfaceName.Title.name(), //
                 InterfaceName.Address_Street_1.name()));
-
-        /*
-         * PLS-16386 Add FirstName and LastName
-         */
-        CustomerSpace cs = MultiTenantContext.getCustomerSpace();
-        if (cs != null) {
-            log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
-            Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
-                    Predefined.Enrichment, firstAndLastName, null);
-            log.info("attrsUsage for firstName & lastName=" + map);
-            map.keySet().stream().filter(key -> map.get(key)).map(key -> contactAttrs.add(key));
-            log.info("accountLookupFields=" + accountLookupFields);
-            log.info("contactLookupFields=" + contactLookupFields);
-        }
     }
 
     @VisibleForTesting
