@@ -44,6 +44,7 @@ public class ServingStoreServiceImplEntityMatchGADeploymentTestNG extends Servin
                 JsonUtils.serialize(contactId));
         Assert.assertNotEquals(contactId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(contactId));
     }
+
     // AttributeName -> ColumnMetadata (Only involve columns to verify, not
     // complete)
     @Override
