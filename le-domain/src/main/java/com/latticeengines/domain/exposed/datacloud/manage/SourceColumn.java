@@ -72,12 +72,6 @@ public class SourceColumn implements HasPid, Serializable {
     @Column(name = "Categories", length = 1000)
     private String categories;
 
-    @Column(name = "DefaultValue", length = 100)
-    private String DefaultValue;
-
-    @Column(name = "ImportAction", length = 1)
-    private String ImportAction;
-
     @Transient
     private List<String> categoryList;
 
@@ -193,22 +187,6 @@ public class SourceColumn implements HasPid, Serializable {
         return categories;
     }
 
-    public String getDefaultValue() {
-        return DefaultValue;
-    }
-
-    public void setDefaultValue(String defaultValue) {
-        DefaultValue = defaultValue;
-    }
-
-    public String getImportAction() {
-        return ImportAction;
-    }
-
-    public void setImportAction(String importAction) {
-        ImportAction = importAction;
-    }
-
     public List<String> getCategoryList() {
         if (categoryList == null) {
             List<String> catList = new ArrayList<>();
@@ -254,6 +232,7 @@ public class SourceColumn implements HasPid, Serializable {
         ADD_ROWNUM, //
         STANDARD_DOMAIN, //
         CONVERT_TYPE, //
-        BIT_ENCODE;
+        BIT_ENCODE, //
+        STORE_DEFAULT;
     }
 }

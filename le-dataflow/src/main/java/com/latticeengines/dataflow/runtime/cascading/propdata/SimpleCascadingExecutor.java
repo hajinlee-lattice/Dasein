@@ -146,8 +146,8 @@ public class SimpleCascadingExecutor {
 
         for (String column : columnDefaultValueMapping.keySet()) {
             String value = columnDefaultValueMapping.get(column);
-            // RegexReplace will replace the null cells with the default value
-            RegexReplace replace = new RegexReplace(new Fields(column), "^$", value, true);
+            // RegexReplace will fill the cell with the default mock-up value
+            RegexReplace replace = new RegexReplace(new Fields(column), "^$|^.+$", value, true);
             fillInDefault = new Each(fillInDefault, new Fields(column), replace, Fields.REPLACE);
         }
 

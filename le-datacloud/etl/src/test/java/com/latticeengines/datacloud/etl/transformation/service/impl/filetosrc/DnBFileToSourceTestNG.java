@@ -88,6 +88,7 @@ public class DnBFileToSourceTestNG extends PipelineTransformationTestNGBase {
         conf.setDelimiter("|");
         conf.setQualifier(null);
         conf.setCharset("ISO-8859-1");
+        conf.setEnableDefaultValue(false);
         return JsonUtils.serialize(conf);
     }
 

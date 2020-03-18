@@ -29,9 +29,6 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
-    ALTER TABLE `SourceColumn`
-        ADD COLUMN `ImportAction` varchar(1) DEFAULT 'P',
-        ADD COLUMN `DefaultValue` varchar(100) DEFAULT '';
 
   END //
 DELIMITER ;

@@ -105,7 +105,7 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
             // If enableDefaultValue set to true, get the column and default value mapping
             // from SourceColumn
             if (enableDefaultValue) {
-                columnDefaultValueMapping = getColumnDefaultValueMapping(source.getSourceName());
+                columnDefaultValueMapping = getColumnDefaultValueMapping();
             }
 
             convertCsvToAvro(fieldTypeMapping, searchWildCard, workflowDir, parameters);
@@ -234,13 +234,12 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
                 parameters.getQualifier(), parameters.getCharset(), false, columnDefaultValueMapping);
     }
 
-    private Map<String, String> getColumnDefaultValueMapping(String sourceName) {
+    private Map<String, String> getColumnDefaultValueMapping() {
         Map<String, String> columnDefaultValueMapping = new HashMap<>();
-        log.info("SourceName: " + sourceName);
-        List<SourceColumn> columns = sourceColumnEntityMgr.getSourceColumns(sourceName);
+        List<SourceColumn> columns = sourceColumnEntityMgr.getSourceColumns("DnBCacheSeedDefault");
         for (SourceColumn column : columns) {
-            if (StringUtils.isNotEmpty(column.getDefaultValue())) {
-                columnDefaultValueMapping.put(column.getColumnName(), column.getDefaultValue());
+            if ((column.getCalculation() == SourceColumn.Calculation.STORE_DEFAULT) && (!column.getArguments().equalsIgnoreCase("NULL"))){
+                columnDefaultValueMapping.put(column.getColumnName(), column.getArguments());
             }
         }
         log.info("Columns with default values are: ");
