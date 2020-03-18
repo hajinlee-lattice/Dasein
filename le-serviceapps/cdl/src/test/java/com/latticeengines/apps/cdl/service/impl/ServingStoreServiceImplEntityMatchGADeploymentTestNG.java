@@ -44,7 +44,6 @@ public class ServingStoreServiceImplEntityMatchGADeploymentTestNG extends Servin
                 JsonUtils.serialize(contactId));
         Assert.assertNotEquals(contactId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(contactId));
     }
-
     // AttributeName -> ColumnMetadata (Only involve columns to verify, not
     // complete)
     @Override
@@ -66,4 +65,27 @@ public class ServingStoreServiceImplEntityMatchGADeploymentTestNG extends Servin
         return cms;
     }
 
+    // AttributeName -> ColumnMetadata (Only involve columns to verify, not
+    // complete)
+    @Override
+    protected Map<String, ColumnMetadata> getContactMetadataToVerify() {
+        Map<String, ColumnMetadata> cms = new HashMap<>();
+        cms.put(InterfaceName.CustomerContactId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.CustomerContactId.name()) //
+                .withCategory(Category.CONTACT_ATTRIBUTES) //
+                .withSubcategory(Category.SUB_CAT_OTHER) //
+                .withGroups(ColumnSelection.Predefined.Enrichment, ColumnSelection.Predefined.Segment) //
+                .build());
+        cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.CustomerAccountId.name()) //
+                .withCategory(Category.CONTACT_ATTRIBUTES) //
+                .withSubcategory(Category.SUB_CAT_OTHER) //
+                .build());
+        cms.put(InterfaceName.ContactId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.ContactId.name()) //
+                .withCategory(Category.CONTACT_ATTRIBUTES) //
+                .withSubcategory(Category.SUB_CAT_OTHER) //
+                .build());
+        return cms;
+    }
 }

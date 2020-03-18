@@ -184,7 +184,8 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
             Collections.sort(enabledGroups);
             Collections.sort(enabledGroupsExpected);
             Assert.assertEquals(enabledGroups, enabledGroupsExpected,
-                    String.format("Expected enabled groups: %s, actual enabled groups: %s",
+                    String.format("Attribute %s, Expected enabled groups: %s, actual enabled groups: %s",
+                            cm.getAttrName(),
                             enabledGroupsExpected.stream().map(ColumnSelection.Predefined::getName)
                                     .collect(Collectors.joining(",")),
                             enabledGroups.stream().map(ColumnSelection.Predefined::getName)

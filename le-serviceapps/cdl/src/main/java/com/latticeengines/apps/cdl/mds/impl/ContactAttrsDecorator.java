@@ -95,7 +95,6 @@ public class ContactAttrsDecorator implements Decorator {
             if ((InterfaceName.CustomerAccountId.name().equals(cm.getAttrName()) ||
                     InterfaceName.CustomerContactId.name().equals(cm.getAttrName()) ||
                     attrNameInOtherIDAndMatchID.contains(cm.getAttrName())) && entityMatchEnabled) {
-                cm.disableGroup(Segment);
                 cm.enableGroup(Enrichment);
                 cm.disableGroup(TalkingPoint);
                 cm.disableGroup(CompanyProfile);
