@@ -6,11 +6,13 @@ import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.
 
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
@@ -19,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
+import com.latticeengines.apps.cdl.service.ActivityStoreService;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.common.exposed.util.TemplateUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -34,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.OpportunityUtils;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
@@ -54,23 +58,37 @@ public class ActivityMetricDecorator implements Decorator {
     private final Tenant tenant;
     private DimensionMetadataService dimensionMetadataService;
     private ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr;
+    private ActivityStoreService activityStoreService;
 
     private final ThreadLocal<Boolean> setTenantCtx = new ThreadLocal<>();
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> metadataCache = new ConcurrentHashMap<>();
     private ConcurrentMap<String, ActivityMetricsGroup> groupCache = new ConcurrentHashMap<>();
+    private AtomicReference<Set<String>> streamsNeedSystemName = new AtomicReference<>(new HashSet<>()); // stream names of those who need to append system name
 
     ActivityMetricDecorator(String signature, Tenant tenant, //
                             DimensionMetadataService dimensionMetadataService, //
-                            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr) {
+                            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr, //
+                            ActivityStoreService activityStoreService) {
         this.signature = signature;
         this.tenant = tenant;
         this.dimensionMetadataService = dimensionMetadataService;
         this.activityMetricsGroupEntityMgr = activityMetricsGroupEntityMgr;
+        this.activityStoreService = activityStoreService;
     }
 
     @Override
     public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
+        MultiTenantContext.setTenant(tenant);
+        Set<String> opportunityStreamNames = new HashSet<>();
+        activityStoreService.getStreamNameMap().values().forEach(streamName -> {
+            if (streamName.endsWith(EntityType.Opportunity.name())) {
+                opportunityStreamNames.add(streamName);
+            }
+        });
+        if (opportunityStreamNames.size() > 1) {
+            streamsNeedSystemName.set(opportunityStreamNames);
+        }
         return metadata.map(this::filter);
     }
 
@@ -145,7 +163,7 @@ public class ActivityMetricDecorator implements Decorator {
                 WebVisitUtils.setColumnMetadataUIProperties(cm, group, timeRange, params);
                 break;
             case Opportunity:
-                OpportunityUtils.setColumnMetadataUIProperties(cm, group);
+                OpportunityUtils.setColumnMetadataUIProperties(cm, group, streamsNeedSystemName.get().contains(group.getStream().getName()));
                 break;
             default:
                 log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());

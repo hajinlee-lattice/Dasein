@@ -141,4 +141,11 @@ public interface ActivityStoreService {
      * @return map of dimension value -> allocated ID
      */
     Map<String, String> getDimensionIds(@NotNull String tenantId, @NotNull Set<String> dimensionValues);
+
+    /**
+     * get all streams' ID and names of a tenant
+     *
+     * @return streamId -> streamName
+     */
+    Map<String, String> getStreamNameMap();
 }
