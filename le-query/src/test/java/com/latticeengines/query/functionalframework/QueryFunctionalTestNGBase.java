@@ -194,6 +194,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
+        attrRepo.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
         Map<TableRoleInCollection, String> pathMap = readTablePaths(version);
         if (version >= 3) {
             tblPathMap = new HashMap<>();
