@@ -107,4 +107,16 @@ public class MatchProxy extends BaseRestApiProxy {
         request.setDataCollectionVersion(version);
         return post("lookup_internal_account_id", url, request, String.class);
     }
+
+    public List<Map<String, Object>> lookupContactsByAccountId(@NotNull String customerSpace, @NotNull String lookupId,
+            @NotNull String lookupIdVal, DataCollection.Version version) {
+        String url = constructUrl("/cdllookup/contacts", customerSpace);
+        InternalAccountIdLookupRequest request = new InternalAccountIdLookupRequest();
+        request.setCustomerSpace(customerSpace);
+        request.setLookupId(lookupId);
+        request.setLookupIdVal(lookupIdVal);
+        request.setDataCollectionVersion(version);
+        List<?> raw = post("lookup_contacts_by_account_id", url, request, List.class);
+        return JsonUtils.convertListOfMaps(raw, String.class, Object.class);
+    }
 }
