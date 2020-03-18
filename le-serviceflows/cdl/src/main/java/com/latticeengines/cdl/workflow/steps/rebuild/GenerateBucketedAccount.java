@@ -100,6 +100,12 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
             exportTableRoleToRedshift(servingStoreTableName, servingStoreRole);
             dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
                     servingStoreRole, inactive);
+
+            if (!getConfiguration().isFullProfile()) {
+                Table statsTableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_STATS_TABLE_NAME);
+                updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableInCtx.getName(), String.class);
+            }
+
         } else {
             if (configuration.isFullProfile()) {
                 statsTablePrefix = null;

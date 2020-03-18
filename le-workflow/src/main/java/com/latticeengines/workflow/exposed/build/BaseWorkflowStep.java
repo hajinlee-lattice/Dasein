@@ -307,6 +307,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACCOUNT_PROFILE_TABLE_NAME, //
             ACCOUNT_SERVING_TABLE_NAME, //
             ACCOUNT_STATS_TABLE_NAME, //
+            FULL_ACCOUNT_STATS_TABLE_NAME, //
             ACCOUNT_LOOKUP_TABLE_NAME,
             REMATCHED_ACCOUNT_TABLE_NAME, //
             ENRICHED_ACCOUNT_DIFF_TABLE_NAME, //
