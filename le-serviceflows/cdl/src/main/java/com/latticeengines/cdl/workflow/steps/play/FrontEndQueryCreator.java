@@ -27,6 +27,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchProcessor.ProcessedFieldMappingMetadata;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -48,7 +49,6 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component
@@ -151,10 +151,10 @@ public class FrontEndQueryCreator {
         List<String> contactAttrs = contactLookupFields.get(BusinessEntity.Contact).stream()
                 .collect(Collectors.toList());
         temContactLookupFields.put(BusinessEntity.Contact, contactAttrs);
-        Tenant tenant = playLaunchContext.getTenant();
-        if (tenant != null) {
-            log.info("Trying to get the attrsUsage for tenant " + tenant.getId());
-            Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(tenant.getId(), BusinessEntity.Contact,
+        CustomerSpace cs = playLaunchContext.getCustomerSpace();
+        if (cs != null) {
+            log.info("Trying to get the attrsUsage for tenant " + cs.getTenantId());
+            Map<String, Boolean> map = servingStoreProxy.getAttrsUsage(cs.getTenantId(), BusinessEntity.Contact,
                     Predefined.Enrichment, firstAndLastName, null);
             log.info("attrsUsage for firstName & lastName=" + map);
             map.keySet().stream().filter(key -> map.get(key)).forEach(key -> contactAttrs.add(key));

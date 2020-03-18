@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.play;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -8,7 +10,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.mockito.InjectMocks;
@@ -28,10 +32,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 public class FrontEndQueryCreatorTestNG {
 
@@ -47,6 +53,9 @@ public class FrontEndQueryCreatorTestNG {
 
     @Mock
     private BatonService batonService;
+
+    @Mock
+    private ServingStoreProxy servingStoreProxy;
 
     @InjectMocks
     private FrontEndQueryCreator frontEndQueryCreator = new FrontEndQueryCreator();
@@ -72,6 +81,11 @@ public class FrontEndQueryCreatorTestNG {
         frontEndQueryCreator.init();
         MockitoAnnotations.initMocks(this);
         when(batonService.isEntityMatchEnabled(any(CustomerSpace.class))).thenReturn(true);
+        Map<String, Boolean> map = new HashMap<>();
+        map.put(InterfaceName.FirstName.name(), true);
+        map.put(InterfaceName.LastName.name(), true);
+        when(servingStoreProxy.getAttrsUsage(any(String.class), any(BusinessEntity.class), any(Predefined.class),
+                anySet(), isNull())).thenReturn(map);
     }
 
     @Test(groups = "functional")
