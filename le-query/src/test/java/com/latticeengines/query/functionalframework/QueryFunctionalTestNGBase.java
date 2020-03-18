@@ -43,6 +43,7 @@ import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.factory.RedshiftQueryProvider;
+import com.latticeengines.redshiftdb.exposed.service.RedshiftPartitionService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.querydsl.sql.SQLQuery;
 
@@ -72,6 +73,9 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
 
     @Inject
     protected Configuration yarnConfiguration;
+
+    @Inject
+    private RedshiftPartitionService redshiftPartitionService;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -174,6 +178,7 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         InputStream is = testArtifactService.readTestArtifactAsStream(ATTR_REPO_S3_DIR,
                 String.valueOf(version), ATTR_REPO_S3_FILENAME);
         AttributeRepository attrRepo = QueryTestUtils.getCustomerAttributeRepo(is);
+        attrRepo.setRedshiftPartition(redshiftPartitionService.getDefaultPartition());
         if (version >= 3) {
             for (TableRoleInCollection role: QueryTestUtils.getRolesInAttrRepo()) {
                 attrRepo.changeServingStoreTableName(role, QueryTestUtils.getServingStoreName(role, version));
