@@ -99,9 +99,6 @@ public class LoginResource {
     @Inject
     private IDaaSService iDaaSService;
 
-    @Value("${security.login.clear.oldsession:false}")
-    private boolean clearOldSession;
-
     @PostMapping("/login")
     @ResponseBody
     @ApiOperation(value = "Login to Lattice external application")
@@ -245,9 +242,6 @@ public class LoginResource {
             user.setAccessLevel(session.getAccessLevel());
             result.setUser(user);
             doc.setResult(result);
-            if (clearOldSession) {
-                userService.clearOldSessionForNewLogin(tenant.getId(), ticketData);
-            }
         } catch (LedpException e) {
             if (e.getCode() == LedpCode.LEDP_18001 || e.getCode() == LedpCode.LEDP_18002
                     || e.getCode() == LedpCode.LEDP_18123) {

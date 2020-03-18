@@ -126,7 +126,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         ticketData.setLastAccessDate(now);
         gaTicketEntityMgr.update(ticketData);
 
-        Session session = new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
+        Session session = new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
         session.setExternalSession(ticketData.getExternalSession());
         return session;
     }
@@ -230,7 +230,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         if (sessionData != null) {
             if (sessionData.getTenantId() == tenantData.getPid()) {
-                return new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
+                return new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
             } else {
                 gaSessionEntityMgr.delete(sessionData);
             }
@@ -241,13 +241,13 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         sessionData.setUserId(ticketData.getUserId());
         sessionData.setTicketId(ticketData.getPid());
         gaSessionEntityMgr.create(sessionData);
-        return new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
+        return new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
     }
 
     static class SessionBuilder {
 
         @SuppressWarnings("unused")
-        public Session build(GlobalAuthUser userData, GlobalAuthSession sessionData, GlobalAuthTenant tenantData,
+        public Session build(GlobalAuthTicket ticketData, GlobalAuthUser userData, GlobalAuthSession sessionData, GlobalAuthTenant tenantData,
                 List<GlobalAuthUserTenantRight> userTenantRightData) {
 
             Tenant tenant = new Tenant();
@@ -267,7 +267,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             session.setRights(rights);
             session.setTitle(userData.getTitle());
             session.setTenant(new TenantBuilder().build(tenantData));
-
+            session.setTicketCreationTime(ticketData.getCreationDate().getTime());
             if (session == null) {
                 throw new RuntimeException("Failed to attach ticket against GA.");
             }

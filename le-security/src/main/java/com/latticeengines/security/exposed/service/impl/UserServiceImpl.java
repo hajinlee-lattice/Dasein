@@ -651,17 +651,4 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    public void clearOldSessionForNewLogin(String tenantId, String ticket) {
-            clearSessionService.submit(() -> {
-                GlobalAuthTicket ticketData = globalAuthenticationService.findByTicket(ticket);
-                if (ticketData != null) {
-                    GlobalAuthTenant globalAuthTenant = globalTenantManagementService.findByTenantId(tenantId);
-                    Long tenantPid = globalAuthTenant.getPid();
-                    List<GlobalAuthTicket> globalAuthTickets =
-                            globalSessionManagementService.findByUserIdAndTenantIdAndNotInTicket(tenantPid, ticketData.getUserId(), ticket);
-                    discardTickets(globalAuthTickets, globalAuthTenant.getPid());
-                }
-            });
-    }
 }
