@@ -194,6 +194,7 @@ public class IDaaSServiceImpl implements IDaaSService {
                                 HttpMethod.PUT, entity, IDaaSUser.class);
                         return responseEntity.getBody();
                     } catch (HttpClientErrorException.Unauthorized e) {
+                        // TODO(penglong) re-evaluate this part after network is setup
                         log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
                         return null;
                     }
@@ -221,6 +222,7 @@ public class IDaaSServiceImpl implements IDaaSService {
                                 user, IDaaSUser.class);
                         return responseEntity.getBody();
                     } catch (HttpClientErrorException.Unauthorized e) {
+                        // TODO(penglong) re-evaluate this part after network is setup
                         log.warn("Failed to authenticate user {}: {}", email, e.getMessage());
                         return null;
                     }
