@@ -12,5 +12,5 @@ public interface GlobalAuthTicketDao extends BaseDao<GlobalAuthTicket> {
 
     List<GlobalAuthTicket> findTicketsByUserIdAndExternalIssuer(Long userId, String issuer);
 
-    List<GlobalAuthTicket> findByUserIdAndNotInTicketAndLastAccessDate(Long userId, String ticket);
+    List<GlobalAuthTicket> findByUserAndTenantIdAndNotInTicketAndLastAccessDate(Long tenantId, Long userId, String ticket);
 }

@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed.globalauth;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthExternalSession;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -16,4 +17,6 @@ public interface GlobalAuthenticationService {
     List<Tenant> getValidTenants(GlobalAuthUser user);
 
     boolean discard(Ticket ticket);
+
+    GlobalAuthTicket findByTicket(String ticket);
 }

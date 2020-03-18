@@ -68,6 +68,4 @@ public interface UserService {
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
                               Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams);
 
-    void clearOldSessionForNewLogin(Long userId, String ticket);
-
 }
