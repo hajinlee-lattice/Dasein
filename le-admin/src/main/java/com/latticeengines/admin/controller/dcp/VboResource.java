@@ -1,27 +1,44 @@
 package com.latticeengines.admin.controller.dcp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.admin.tenant.batonadapter.cdl.CDLComponent;
+import com.latticeengines.admin.tenant.batonadapter.datacloud.DataCloudComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.admin.*;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
+import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
+import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
-import com.latticeengines.domain.exposed.camille.lifecycle.*;
-import com.latticeengines.domain.exposed.dcp.vbo.User;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
+import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.security.exposed.Constants;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -43,65 +60,83 @@ public class VboResource {
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create a DCP tenant from VBO request")
-    public boolean createTenant(@RequestBody VboRequest vboRequest, HttpServletRequest request) {
-        String userName = getUserName(request);
+    public VboResponse createTenant(@RequestBody VboRequest vboRequest, HttpServletRequest request) {
+        VboResponse vboResponse = new VboResponse();
+        try{
+            String userName = getUserName(request);
 
-        String tenantName = vboRequest.getSubscriber().getName();
+            String tenantName = vboRequest.getSubscriber().getName();
 
-        // TenantInfo
-        TenantProperties tenantProperties = new TenantProperties();
-        tenantProperties.description = "A tenant created by vbo request";
-        tenantProperties.displayName = tenantName;
-        TenantInfo tenantInfo = new TenantInfo(tenantProperties);
+            // TenantInfo
+            TenantProperties tenantProperties = new TenantProperties();
+            tenantProperties.description = "A tenant created by vbo request";
+            tenantProperties.displayName = tenantName;
+            TenantInfo tenantInfo = new TenantInfo(tenantProperties);
 
-        // FeatureFlags
-        FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
-        FeatureFlagValueMap defaultValueMap = new FeatureFlagValueMap();
-        definitionMap.forEach((flagId, flagDef) -> {
-            boolean defaultVal = flagDef.getDefaultValue();
-            defaultValueMap.put(flagId, defaultVal);
-        });
+            // FeatureFlags
+            FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
+            FeatureFlagValueMap defaultValueMap = new FeatureFlagValueMap();
+            definitionMap.forEach((flagId, flagDef) -> {
+                boolean defaultVal = flagDef.getDefaultValue();
+                defaultValueMap.put(flagId, defaultVal);
+            });
 
-        // SpaceInfo
-        CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
-        spaceProperties.description = tenantProperties.description;
-        spaceProperties.displayName = tenantProperties.displayName;
+            // SpaceInfo
+            CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
+            spaceProperties.description = tenantProperties.description;
+            spaceProperties.displayName = tenantProperties.displayName;
 
-        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, JsonUtils.serialize(defaultValueMap));
+            CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, JsonUtils.serialize(defaultValueMap));
 
-        // SpaceConfiguration
-        SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
-        spaceConfiguration.setProducts(Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP));
+            // SpaceConfiguration
+            SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
+            spaceConfiguration.setProducts(Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP));
 
-        Set<String> services = serviceService.getRegisteredServices();
+            List<String> services = Arrays.asList(PLSComponent.componentName, CDLComponent.componentName, DataCloudComponent.componentName);
 
-        List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
+            List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
 
-        for (String component : services) {
-            SerializableDocumentDirectory componentConfig = serviceService.getDefaultServiceConfig(component);
-            if(component.equalsIgnoreCase(PLSComponent.componentName)){
-                for (SerializableDocumentDirectory.Node node : componentConfig.getNodes()) {
-                    if (node.getNode().contains("ExternalAdminEmails")) {
-                        StringBuilder mails = new StringBuilder("[");
-                        for(User user : vboRequest.getProduct().getUsers()) {
-                            mails.append("\"").append(user.getEmailAddress()).append("\";");
+            for (String component : services) {
+                SerializableDocumentDirectory componentConfig = serviceService.getDefaultServiceConfig(component);
+                if(component.equalsIgnoreCase(PLSComponent.componentName)){
+                    for (SerializableDocumentDirectory.Node node : componentConfig.getNodes()) {
+                        if (node.getNode().contains("ExternalAdminEmails")) {
+                            StringBuilder mails = new StringBuilder("[");
+                            for(VboRequest.User user : vboRequest.getProduct().getUsers()) {
+                                mails.append("\"").append(user.getEmailAddress()).append("\",");
+                                // to add create IDaaS user after interface ready
+                            }
+                            mails.deleteCharAt(mails.lastIndexOf(","));
+                            mails.append("]");
+                            node.setData(mails.toString());
                         }
-                        mails.append("]");
-                        node.setData(mails.toString());
                     }
                 }
+                componentConfig.setRootPath("/" + component);
+                configDirs.add(componentConfig);
             }
-            componentConfig.setRootPath("/" + component);
-            configDirs.add(componentConfig);
-        }
 
-        TenantRegistration registration = new TenantRegistration();
-        registration.setContractInfo(new ContractInfo(new ContractProperties()));
-        registration.setSpaceConfig(spaceConfiguration);
-        registration.setSpaceInfo(spaceInfo);
-        registration.setTenantInfo(tenantInfo);
-        registration.setConfigDirectories(configDirs);
-        return tenantService.createTenant("", tenantName.trim(), registration, userName);
+            TenantRegistration registration = new TenantRegistration();
+            registration.setContractInfo(new ContractInfo(new ContractProperties()));
+            registration.setSpaceConfig(spaceConfiguration);
+            registration.setSpaceInfo(spaceInfo);
+            registration.setTenantInfo(tenantInfo);
+            registration.setConfigDirectories(configDirs);
+
+
+            boolean result = tenantService.createTenant(tenantName.trim(), tenantName.trim(), registration, userName);
+            if (result) {
+                vboResponse.setStatus("success");
+                vboResponse.setMessage("tenant " + tenantName.trim() + "created successfully via Vbo request");
+            } else {
+                vboResponse.setStatus("failed");
+                vboResponse.setMessage("tenant " + tenantName.trim() + "created failed via Vbo request");
+            }
+        } catch(Exception e){
+            vboResponse.setStatus("failed");
+            vboResponse.setMessage("tenant created failed via Vbo request," + e.getMessage());
+        }
+        return vboResponse;
     }
 
     private String getUserName(HttpServletRequest request) {
