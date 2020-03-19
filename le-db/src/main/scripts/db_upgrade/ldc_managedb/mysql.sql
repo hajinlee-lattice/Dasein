@@ -29,9 +29,11 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
   BEGIN
+
   END //
 DELIMITER ;
 
+CALL `UpdateSchema`();
 
 
 

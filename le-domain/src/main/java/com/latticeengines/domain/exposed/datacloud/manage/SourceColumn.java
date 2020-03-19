@@ -232,6 +232,7 @@ public class SourceColumn implements HasPid, Serializable {
         ADD_ROWNUM, //
         STANDARD_DOMAIN, //
         CONVERT_TYPE, //
-        BIT_ENCODE;
+        BIT_ENCODE, //
+        STORE_DEFAULT;
     }
 }

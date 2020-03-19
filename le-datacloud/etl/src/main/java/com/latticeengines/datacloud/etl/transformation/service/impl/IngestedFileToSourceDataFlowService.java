@@ -2,7 +2,9 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -29,11 +31,13 @@ import com.latticeengines.common.exposed.util.HdfsUtils.HdfsFileFilter;
 import com.latticeengines.datacloud.core.service.DataCloudNotificationService;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.entitymgr.SourceColumnEntityMgr;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMapping;
 import com.latticeengines.dataflow.runtime.cascading.propdata.CsvToAvroFieldMappingImpl;
 import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExecutor;
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.source.IngestedFileToSourceParameters;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.source.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -51,6 +55,11 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
 
     @Inject
     private DataCloudNotificationService notificationService;
+
+    @Inject
+    protected SourceColumnEntityMgr sourceColumnEntityMgr;
+
+    Map<String, String> columnDefaultValueMapping = null;
 
     public void executeDataFlow(Source source, String workflowDir, String baseVersion,
             IngestedFileToSourceParameters parameters) {
@@ -91,6 +100,14 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
             Path path = new Path(files.get(0));
             String searchWildCard = new Path(path.getParent(), "*" + parameters.getFileNameOrExtension()).toString();
             log.info("SearchWildCard: " + searchWildCard);
+
+            boolean enableDefaultValue = parameters.isEnableDefaultValue();
+            // If enableDefaultValue set to true, get the column and default value mapping
+            // from SourceColumn
+            if (enableDefaultValue) {
+                columnDefaultValueMapping = getColumnDefaultValueMapping();
+            }
+
             convertCsvToAvro(fieldTypeMapping, searchWildCard, workflowDir, parameters);
             if (HdfsUtils.isDirectory(yarnConfiguration, uncompressedDir.toString())) {
                 HdfsUtils.rmdir(yarnConfiguration, uncompressedDir.toString());
@@ -214,7 +231,22 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
     private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping, String inputPath, String outputPath,
             IngestedFileToSourceParameters parameters) throws IOException {
         simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, inputPath, outputPath, parameters.getDelimiter(),
-                parameters.getQualifier(), parameters.getCharset(), false);
+                parameters.getQualifier(), parameters.getCharset(), false, columnDefaultValueMapping);
+    }
+
+    private Map<String, String> getColumnDefaultValueMapping() {
+        Map<String, String> columnDefaultValueMapping = new HashMap<>();
+        List<SourceColumn> columns = sourceColumnEntityMgr.getSourceColumns("DnBCacheSeedDefault");
+        for (SourceColumn column : columns) {
+            if ((column.getCalculation() == SourceColumn.Calculation.STORE_DEFAULT) && (!column.getArguments().equalsIgnoreCase("NULL"))){
+                columnDefaultValueMapping.put(column.getColumnName(), column.getArguments());
+            }
+        }
+        log.info("Columns with default values are: ");
+        for (String key : columnDefaultValueMapping.keySet()) {
+            log.info("Column name: " + key + ", default value: " + columnDefaultValueMapping.get(key));
+        }
+        return columnDefaultValueMapping;
     }
 
     private void sendUncompressFailureNotification(String file, String applicationId) {
