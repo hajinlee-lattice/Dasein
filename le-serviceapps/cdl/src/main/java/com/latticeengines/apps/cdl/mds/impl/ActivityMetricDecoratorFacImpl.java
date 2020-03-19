@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.mds.ActivityMetricDecoratorFac;
+import com.latticeengines.apps.cdl.service.ActivityStoreService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -37,6 +38,9 @@ public class ActivityMetricDecoratorFacImpl implements ActivityMetricDecoratorFa
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
+    @Inject
+    private ActivityStoreService activityStoreService;
+
     @Override
     public Decorator getDecorator(Namespace1<String> namespace) {
         String tenantId = namespace.getCoord1();
@@ -51,7 +55,7 @@ public class ActivityMetricDecoratorFacImpl implements ActivityMetricDecoratorFa
                 String signature = status.getDimensionMetadataSignature();
                 Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(tenantId).toString());
                 return new ActivityMetricDecorator(signature, tenant, dimensionMetadataService,
-                        activityMetricsGroupEntityMgr);
+                        activityMetricsGroupEntityMgr, activityStoreService);
             }
         }
         return new DummyDecorator();

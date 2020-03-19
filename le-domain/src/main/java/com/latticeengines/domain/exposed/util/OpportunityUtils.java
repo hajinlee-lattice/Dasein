@@ -18,9 +18,10 @@ public final class OpportunityUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group) {
-        String originDisplayName = cm.getDisplayName();
-        cm.setDisplayName(String.format("%s: %s", getSystemNameFromStreamName(group.getStream().getName()), originDisplayName));
+    public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group, boolean shouldAppendSystemName) {
+        if (shouldAppendSystemName) {
+            appendSystemName(cm, getSystemNameFromStreamName(group.getStream().getName()));
+        }
     }
 
     public static String getStreamName(String systemName) {
@@ -34,5 +35,9 @@ public final class OpportunityUtils {
             return streamName;
         }
         return streamName.substring(0, idx);
+    }
+
+    private static void appendSystemName(ColumnMetadata cm, String systemName) {
+        cm.setDisplayName(String.format("%s: %s", systemName, cm.getDisplayName()));
     }
 }
