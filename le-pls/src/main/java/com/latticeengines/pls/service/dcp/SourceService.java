@@ -13,4 +13,6 @@ public interface SourceService {
 
     List<Source> getSourceList(String projectId);
 
+    Boolean deleteSource(String sourceId);
+
 }

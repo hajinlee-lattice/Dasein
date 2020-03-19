@@ -60,4 +60,6 @@ public interface DataFeedTaskService {
     List<String> getTemplatesBySystemPriority(String customerSpace, String entity, boolean highestFirst);
 
     DataFeedTask getDataFeedTaskBySource(String customerSpace, String sourceId);
+
+    void setDataFeedTaskDelete(String customerSpace, Long pid, Boolean deleted);
 }

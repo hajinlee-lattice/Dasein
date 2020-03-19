@@ -154,6 +154,7 @@ public class DataFeedTaskServiceImplTestNG extends CDLFunctionalTestNGBase {
     public void testUpdate() {
         dataFeedTask = datafeedTaskService.getDataFeedTask(customerSpace.toString(), dataFeedTask.getUniqueId());
         Assert.assertNotNull(dataFeedTask);
+        datafeedTaskService.setDataFeedTaskDelete(customerSpace.toString(), dataFeedTask.getPid(), Boolean.TRUE);
         dataFeedTask.setTemplateDisplayName("DisplayB");
         datafeedTaskService.updateDataFeedTask(customerSpace.toString(), dataFeedTask, true);
         dataFeedTask = datafeedTaskService.getDataFeedTask(customerSpace.toString(), dataFeedTask.getUniqueId());

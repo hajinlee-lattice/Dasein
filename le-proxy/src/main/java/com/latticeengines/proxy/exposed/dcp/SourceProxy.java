@@ -12,4 +12,6 @@ public interface SourceProxy {
     Source getSource(String customerSpace, String sourceId);
 
     List<Source> getSourceList(String customerSpace, String projectId);
+
+    Boolean deleteSource(String customerSpace, String sourceId);
 }

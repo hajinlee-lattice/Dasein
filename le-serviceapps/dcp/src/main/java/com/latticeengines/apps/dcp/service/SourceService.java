@@ -16,6 +16,8 @@ public interface SourceService {
 
     Source getSource(String customerSpace, String sourceId);
 
+    Boolean deleteSource(String customerSpace, String sourceId);
+
     List<Source> getSourceList(String customerSpace, String projectId);
 
     Source convertToSource(String customerSpace, DataFeedTask dataFeedTask);

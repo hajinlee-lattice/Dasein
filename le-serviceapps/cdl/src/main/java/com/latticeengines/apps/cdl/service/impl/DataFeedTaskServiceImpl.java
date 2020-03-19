@@ -307,6 +307,11 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         return dataFeedTaskEntityMgr.getDataFeedTask(datafeed, sourceId);
     }
 
+    @Override
+    public void setDataFeedTaskDelete(String customerSpace, Long pid, Boolean deleted) {
+        dataFeedTaskEntityMgr.setDeleted(pid, deleted);
+    }
+
     private String getSystemNameFromFeedType(String feedType) {
         if (StringUtils.isNotEmpty(feedType) && feedType.contains(SYSTEM_SPLITTER)) {
             return feedType.substring(0, feedType.lastIndexOf(SYSTEM_SPLITTER));

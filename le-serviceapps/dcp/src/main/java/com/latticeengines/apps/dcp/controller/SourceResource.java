@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,6 +69,14 @@ public class SourceResource {
     public List<Source> getSourceUnderProject(@PathVariable String customerSpace, @PathVariable String projectId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return sourceService.getSourceList(customerSpace, projectId);
+    }
+
+    @DeleteMapping("/sourceId/{sourceId}")
+    @ResponseBody
+    @ApiOperation("Delete source by sourceId")
+    public Boolean deleteSource(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return sourceService.deleteSource(customerSpace, sourceId);
     }
 
 }

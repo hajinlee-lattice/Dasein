@@ -143,7 +143,11 @@ public class ProjectServiceImpl implements ProjectService {
         if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
             details.setSources(new ArrayList<>());
             project.getS3ImportSystem().getTasks()
-                    .forEach(task -> details.getSources().add(sourceService.convertToSource(customerSpace, task)));
+                    .forEach(task -> {
+                        if (!Boolean.TRUE.equals(task.getDeleted())) {
+                            details.getSources().add(sourceService.convertToSource(customerSpace, task));
+                        }
+                    });
         }
         return details;
     }

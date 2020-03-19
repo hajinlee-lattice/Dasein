@@ -30,4 +30,9 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
         List<?> rawList = get("get source list", url, List.class);
         return JsonUtils.convertList(rawList, Source.class);
     }
+
+    public void deleteSourceById(String sourceId) {
+        String url = constructUrl("/sourceId/{sourceId}", sourceId);
+        delete("delete source", url);
+    }
 }

@@ -108,6 +108,16 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public Boolean deleteSource(String customerSpace, String sourceId) {
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
+        if (dataFeedTask == null || dataFeedTask.getPid() == null) {
+            throw new RuntimeException(String.format("Cannot find source %s for delete!", sourceId));
+        }
+        dataFeedProxy.setDataFeedTaskDeletedStatus(customerSpace, dataFeedTask.getPid(), Boolean.TRUE);
+        return true;
+    }
+
+    @Override
     public List<Source> getSourceList(String customerSpace, String projectId) {
         ProjectDetails projectDetail = projectService.getProjectDetailByProjectId(customerSpace, projectId);
         return projectDetail.getSources();
