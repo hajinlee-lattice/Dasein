@@ -37,6 +37,7 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 
@@ -76,8 +77,11 @@ public class S3ImportJmsConsumer {
     @Inject
     private DropBoxService dropBoxService;
 
-    @Value("${cdl.app.public.url:https://localhost:9081}")
+    @Value("${cdl.app.public.url}")
     private String appPublicUrl;
+
+    @Value("${dcp.app.public.url")
+    private String dcpPublicUrl;
 
     @Value("${common.le.stack}")
     private String currentStack;
@@ -140,15 +144,9 @@ public class S3ImportJmsConsumer {
                 } catch (UnsupportedEncodingException e) {
                     log.error("Cannot decode object key " + key);
                 }
-                String[] parts = key.split("/");
-                if (parts.length < 4 || !key.toLowerCase().endsWith(".csv")) {
+                S3ImportMessageType messageType = S3ImportMessageUtils.getMessageTypeFromKey(key);
+                if (S3ImportMessageType.UNDEFINED.equals(messageType)) {
                     log.warn("S3 import path is not correct: " + key);
-                    return;
-                }
-                String fileName = S3ImportMessageUtils.getFileNameFromKey(key);
-                String feedType = S3ImportMessageUtils.getFeedTypeFromKey(key);
-                if (PS_SHARE.equals(feedType)) {
-                    // skip files in PS_SHARE folder.
                     return;
                 }
                 String dropBoxPrefix = S3ImportMessageUtils.getDropBoxPrefix(key);
@@ -157,9 +155,12 @@ public class S3ImportJmsConsumer {
                     log.error("Cannot find DropBox Owner: " + dropBoxPrefix);
                     return;
                 }
+                if (S3ImportMessageUtils.shouldSkipMessage(key, messageType)) {
+                    return;
+                }
                 String tenantId = tenant.getId();
                 tenantId = CustomerSpace.shortenCustomerSpace(tenantId);
-                if (shouldRun(tenantId)) {
+                if (shouldRun(tenantId, messageType)) {
                     synchronized (this) {
                         if (redisTemplate.opsForValue().get(REDIS_PREFIX + key) != null) {
                             log.warn(String.format("Already processed file %s in less then %d seconds, skip import!",
@@ -168,8 +169,8 @@ public class S3ImportJmsConsumer {
                         } else {
                             redisTemplate.opsForValue().set(REDIS_PREFIX + key, System.currentTimeMillis(),
                                     idleFrame, TimeUnit.SECONDS);
-                            log.info(String.format("S3 import for %s / %s / %s / %s", bucket, tenantId, feedType, fileName));
-                            if (!s3ImportService.saveImportMessage(bucket, key, hostUrl)) {
+                            log.info(String.format("S3 import for %s / %s / %s ", bucket, tenantId, key));
+                            if (!s3ImportService.saveImportMessage(bucket, key, hostUrl, messageType)) {
                                 log.warn(String.format("Cannot save import message: bucket %s, key %s, hostUrl %s",
                                         bucket, key, hostUrl));
                             }
@@ -192,8 +193,8 @@ public class S3ImportJmsConsumer {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean shouldRun(String tenantId) {
-        String url = appPublicUrl + STACK_INFO_URL;
+    private boolean shouldRun(String tenantId, S3ImportMessageType messageType) {
+        String url = S3ImportMessageType.Atlas.equals(messageType) ? appPublicUrl + STACK_INFO_URL : dcpPublicUrl + STACK_INFO_URL;
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
         boolean currentActive = true;
         boolean inactiveImport = false;
@@ -213,8 +214,8 @@ public class S3ImportJmsConsumer {
             if (MapUtils.isNotEmpty(stackInfo.get()) && stackInfo.get().containsKey("CurrentStack")) {
                 String activeStack = stackInfo.get().get("CurrentStack");
                 currentActive = currentStack.equalsIgnoreCase(activeStack);
-                log.info("Current stack: " + currentStack + " Active stack: " + activeStack + " INACTIVE IMPORT=" +
-                        String.valueOf(inactiveImport));
+                log.info("Message type: " + messageType + " Current stack: " + currentStack + " Active stack: " + activeStack +
+                        " INACTIVE IMPORT=" + inactiveImport);
             }
             return currentActive ^ inactiveImport;
         } catch (Exception e) {

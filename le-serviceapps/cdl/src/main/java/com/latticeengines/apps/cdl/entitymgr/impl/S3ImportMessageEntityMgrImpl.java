@@ -19,6 +19,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 
 @Component("s3ImportMessageEntityMgr")
 public class S3ImportMessageEntityMgrImpl
@@ -62,7 +63,7 @@ public class S3ImportMessageEntityMgrImpl
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public S3ImportMessage createOrUpdateS3ImportMessage(String bucket, String key, String hostUrl) {
+    public S3ImportMessage createOrUpdateS3ImportMessage(String bucket, String key, String hostUrl, S3ImportMessageType messageType) {
         S3ImportMessage message;
         if (isReaderConnection()) {
             message = readerRepository.findByKey(key);
@@ -81,6 +82,7 @@ public class S3ImportMessageEntityMgrImpl
             message.setFeedType(S3ImportMessageUtils.getFeedTypeFromKey(key));
             message.setHostUrl(hostUrl);
             message.setDropBox(dropBox);
+            message.setMessageType(messageType);
             s3ImportMessageDao.create(message);
         }
         return message;

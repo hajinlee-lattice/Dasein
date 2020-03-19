@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -305,7 +306,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
         if (csvImportFileInfo.isPartialFile()) {
             s3ImportService.saveImportMessage(csvImportFileInfo.getS3Bucket(),
-                    csvImportFileInfo.getS3Path(), hostUrl);
+                    csvImportFileInfo.getS3Path(), hostUrl, S3ImportMessageType.Atlas);
             return null;
         } else {
             ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
@@ -512,9 +513,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
             String dataFeedTaskUniqueId) {
         List<DataFeedTask> dataFeedTasks = dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace.toString(),
                 entity);
-        if (dataFeedTasks == null || dataFeedTasks.size() == 0) {
-            return;
-        } else {
+        if (dataFeedTasks != null && dataFeedTasks.size() != 0) {
             boolean updatedAttrName = false;
             for (DataFeedTask dataFeedTask : dataFeedTasks) {
                 if (!updatedAttrName) {
@@ -526,7 +525,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 }
                 List<String> inconsistentAttrs = compareAttribute(dataFeedTask.getSource(),
                         dataFeedTask.getImportTemplate(), source, metaTable);
-                if (inconsistentAttrs != null && inconsistentAttrs.size() > 0) {
+                if (CollectionUtils.isNotEmpty(inconsistentAttrs)) {
                     throw new RuntimeException(String.format(
                             "The following field data type is not consistent with " + "the one that already exists: %s",
                             String.join(",", inconsistentAttrs)));
@@ -640,8 +639,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 if (templateTable == null) {
                     log.info(String.format("Template table is empty for tenant %s, entity %s", customerSpace.toString(),
                             entity));
-                }
-                if (CollectionUtils.isEmpty(templateTable.getAttributes())) {
+                } else if (CollectionUtils.isEmpty(templateTable.getAttributes())) {
                     log.info(String.format("Template table does not contain any attributes, tenant %s, entity %s",
                             customerSpace.toString(), entity));
                 }
