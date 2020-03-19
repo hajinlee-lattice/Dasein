@@ -449,7 +449,6 @@ public class CDLResource {
             }
 
             List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(customerSpace.toString());
-            systemList.add(templateDisplay.getS3ImportSystem());
             updateUniqueAndMatchIdField(fieldPreviews, systemList, entityType);
             Map<String, String> standardNameMapping =
                     standardTable.getAttributes()
@@ -475,10 +474,6 @@ public class CDLResource {
     }
 
     private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, List<S3ImportSystem> s3ImportSystem, EntityType entityType) {
-        List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(
-                preview-> preview.getFieldCategory() == FieldCategory.LatticeField).collect(Collectors.toList());
-        Set<String> latticeFieldNameFromFileList = latticeFieldList.stream().map(TemplateFieldPreview::getNameFromFile)
-                .collect(Collectors.toSet());
         Set<String> accountSystemIdList = s3ImportSystem.stream().map(system-> system.getAccountSystemId())
                 .collect(Collectors.toSet());
         Set<String> contactSystemIdList = s3ImportSystem.stream().map(system-> system.getContactSystemId())
@@ -499,10 +494,17 @@ public class CDLResource {
                     }
                     break;
             }
+        }
+        List<TemplateFieldPreview> latticeFieldList = fieldPreviews.stream().filter(
+                preview-> preview.getFieldCategory() == FieldCategory.LatticeField).collect(Collectors.toList());
+        Set<String> latticeFieldNameFromFileList = latticeFieldList.stream().map(TemplateFieldPreview::getNameFromFile)
+                .collect(Collectors.toSet());
+        for (TemplateFieldPreview fieldPreview : fieldPreviews) {
             if (latticeFieldNameFromFileList.contains(fieldPreview.getNameFromFile())) {
                 fieldPreview.setFieldCategory(FieldCategory.LatticeField);
             }
         }
+
     }
 
     private DataFeedTask getDataFeedTask(CustomerSpace customerSpace, String source, S3ImportTemplateDisplay templateDisplay) {

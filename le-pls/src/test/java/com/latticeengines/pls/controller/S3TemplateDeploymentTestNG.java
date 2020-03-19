@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.frontend.TemplateFieldPreview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
@@ -43,6 +45,9 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Inject
     private FileUploadService fileUploadService;
+
+    @Inject
+    private CDLService cdlService;
 
     @Inject
     private SourceFileService sourceFileService;
@@ -111,7 +116,9 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
     @Test(groups = "deployment", dependsOnMethods = "testCreateS3Template")
     public void testPreviewTemplateName() throws Exception {
         assertTrue(getS3ImportTemplateEntries());
-        templateDisplay.getS3ImportSystem().setAccountSystemId("user_CrmAccount_External_ID");
+        S3ImportSystem importSystem = cdlService.getS3ImportSystem(MultiTenantContext.getCustomerSpace().toString(), templateDisplay.getS3ImportSystem().getName());
+        importSystem.setAccountSystemId("user_CrmAccount_External_ID");
+        cdlService.updateS3ImportSystem(mainTestTenant.getId(), importSystem);
         String url = BASE_URL_PREFIX + "/s3import/template/preview";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
