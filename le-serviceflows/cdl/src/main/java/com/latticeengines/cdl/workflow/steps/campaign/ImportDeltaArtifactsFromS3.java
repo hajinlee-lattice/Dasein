@@ -55,6 +55,7 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
                     + channel.getCurrentLaunchedAccountUniverseTable());
             addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
                     channel.getCurrentLaunchedAccountUniverseTable()), requests);
+            putStringValueInContext(PREVIOUS_ACCOUNTS_UNIVERSE, channel.getCurrentLaunchedAccountUniverseTable());
         }
 
         if (StringUtils.isNotBlank(channel.getCurrentLaunchedContactUniverseTable())
@@ -63,6 +64,7 @@ public class ImportDeltaArtifactsFromS3 extends BaseImportExportS3<ImportDeltaAr
                     + channel.getCurrentLaunchedContactUniverseTable());
             addTableToRequestForImport(metadataProxy.getTable(customerSpace.getTenantId(),
                     channel.getCurrentLaunchedContactUniverseTable()), requests);
+            putStringValueInContext(PREVIOUS_CONTACTS_UNIVERSE, channel.getCurrentLaunchedContactUniverseTable());
         }
 
         AttributeRepository attrRepo = buildAttrRepo(customerSpace);
