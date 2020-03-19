@@ -11,9 +11,9 @@ public class CipherUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testEncrytionAndDecryption() throws Exception {
-        String strToEncrypt = "8lFfE8MvUGSSy3zpAPYiOIaArCRZkO1qoZNQduxXhOs=";
+        String strToEncrypt = "welcome";
         String encrypted = CipherUtils.encrypt(strToEncrypt);
-        String decrypted = CipherUtils.decrypt(strToEncrypt);
+        String decrypted = CipherUtils.decrypt(encrypted);
         System.out.println("Encrypted: " + encrypted + "\n" + "Decrypted: " + decrypted);
         Assert.assertEquals(decrypted, strToEncrypt);
     }

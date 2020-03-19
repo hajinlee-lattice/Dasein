@@ -47,6 +47,23 @@ public class IDaaSUser {
     @JsonProperty("webUserStatus")
     private String webUserStatus;
 
+    @JsonProperty("app_name")
+    private String appName;
+
+    @JsonProperty("source")
+    private String source;
+
+    @JsonProperty("requestor")
+    private String requestor;
+
+    @JsonProperty("language_preference_code")
+    private String language;
+
+    @JsonProperty("phone_number")
+    private String phoneNumber;
+
+
+
     public String getUserName() {
         return userName;
     }
@@ -117,5 +134,45 @@ public class IDaaSUser {
 
     public void setWebUserStatus(String webUserStatus) {
         this.webUserStatus = webUserStatus;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    public String getRequestor() {
+        return requestor;
+    }
+
+    public void setRequestor(String requestor) {
+        this.requestor = requestor;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

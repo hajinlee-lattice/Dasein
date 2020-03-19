@@ -20,6 +20,7 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.cdl.CDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.datacloud.DataCloudComponent;
+import com.latticeengines.admin.tenant.batonadapter.dcp.DCPComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -38,6 +39,8 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.security.exposed.Constants;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -48,6 +51,9 @@ import io.swagger.annotations.ApiOperation;
 @PostAuthorize("hasRole('adminconsole')")
 public class VboResource {
 
+    private static final String DCP_PRODUCT = "Data Cloud Portal";
+    private static final String DCP_ROLE = "DATA_CLOUD_PORTAL_ACCESS";
+
     @Inject
     private TenantService tenantService;
 
@@ -56,6 +62,9 @@ public class VboResource {
 
     @Inject
     private FeatureFlagService featureFlagService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     @PostMapping("")
     @ResponseBody
@@ -92,7 +101,7 @@ public class VboResource {
             SpaceConfiguration spaceConfiguration = tenantService.getDefaultSpaceConfig();
             spaceConfiguration.setProducts(Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP));
 
-            List<String> services = Arrays.asList(PLSComponent.componentName, CDLComponent.componentName, DataCloudComponent.componentName);
+            List<String> services = Arrays.asList(PLSComponent.componentName, CDLComponent.componentName, DataCloudComponent.componentName, DCPComponent.componentName);
 
             List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
 
@@ -105,6 +114,7 @@ public class VboResource {
                             for(VboRequest.User user : vboRequest.getProduct().getUsers()) {
                                 mails.append("\"").append(user.getEmailAddress()).append("\",");
                                 // to add create IDaaS user after interface ready
+                                createIDaaSUser(user, vboRequest.getSubscriber().getLanguage());
                             }
                             mails.deleteCharAt(mails.lastIndexOf(","));
                             mails.append("]");
@@ -137,6 +147,17 @@ public class VboResource {
             vboResponse.setMessage("tenant created failed via Vbo request," + e.getMessage());
         }
         return vboResponse;
+    }
+
+    private void createIDaaSUser(VboRequest.User user, String language) {
+        IDaaSUser iDaasuser = new IDaaSUser();
+        iDaasuser.setFirstName(user.getName().getFirstName());
+        iDaasuser.setEmailAddress(user.getEmailAddress());
+        iDaasuser.setLastName(user.getName().getLastName());
+        iDaasuser.setUserName(user.getUserId());
+        iDaasuser.setPhoneNumber(user.getTelephoneNumber());
+        iDaasuser.setLanguage(language);
+        iDaaSService.createIDaaSUser(iDaasuser);
     }
 
     private String getUserName(HttpServletRequest request) {
