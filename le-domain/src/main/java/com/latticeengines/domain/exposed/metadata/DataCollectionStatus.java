@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -342,4 +343,13 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
         this.updateTime = updated;
     }
 
+    @JsonProperty("activityBookkeeping")
+    public ActivityBookkeeping getActivityBookkeeping() {
+        return this.detail.getBookkeeping();
+    }
+
+    @JsonProperty("activityBookkeeping")
+    public void setActivityBookkeeping(ActivityBookkeeping activityBookkeeping) {
+        this.detail.setBookkeeping(activityBookkeeping);
+    }
 }

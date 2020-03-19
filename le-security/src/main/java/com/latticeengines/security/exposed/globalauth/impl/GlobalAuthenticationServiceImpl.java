@@ -214,6 +214,11 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
     }
 
+    @Override
+    public GlobalAuthTicket findByTicket(String ticket) {
+        return gaTicketEntityMgr.findByTicket(ticket);
+    }
+
     private boolean globalDiscard(Ticket ticket) {
         GlobalAuthTicket ticketData = gaTicketEntityMgr.findByTicket(ticket.getData());
         if (ticketData != null) {

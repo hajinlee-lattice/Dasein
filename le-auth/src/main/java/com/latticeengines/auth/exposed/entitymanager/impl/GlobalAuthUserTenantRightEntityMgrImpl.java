@@ -1,9 +1,12 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +38,18 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId, boolean inflate) {
+        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = gaUserTenantRightDao.findByUserIdAndTenantId(userId, tenantId);
+        if (CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
+            for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
+                inflateUserTenantRight(globalAuthUserTenantRight);
+            }
+        }
+        return globalAuthUserTenantRights;
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<GlobalAuthUser> findUsersByTenantId(Long tenantId) {
         return gaUserTenantRightDao.findUsersByTenantId(tenantId);
     }
@@ -45,6 +60,23 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
             Long tenantId, String operationName) {
         return gaUserTenantRightDao.findByUserIdAndTenantIdAndOperationName(userId, tenantId,
                 operationName);
+    }
+
+    private void inflateUserTenantRight(GlobalAuthUserTenantRight gaUserTenantRight) {
+        if (gaUserTenantRight != null) {
+            Hibernate.initialize(gaUserTenantRight.getGlobalAuthTeams());
+        }
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public GlobalAuthUserTenantRight findByUserIdAndTenantIdAndOperationName(Long userId,
+                                                                             Long tenantId, String operationName, boolean inflate) {
+        GlobalAuthUserTenantRight gaUserTenantRight = gaUserTenantRightDao.findByUserIdAndTenantIdAndOperationName(userId, tenantId, operationName);
+        if (inflate) {
+            inflateUserTenantRight(gaUserTenantRight);
+        }
+        return gaUserTenantRight;
     }
 
     @Override
@@ -78,6 +110,19 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     }
 
     @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthUserTenantRight> findByTenantId(Long tenantId, boolean inflate) {
+        List<GlobalAuthUserTenantRight> globalAuthUserTenantRightList = gaUserTenantRightDao.findAllByField(
+                "Tenant_ID", tenantId);
+        if (inflate) {
+            for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRightList) {
+                Hibernate.initialize(globalAuthUserTenantRight.getGlobalAuthTeams());
+            }
+        }
+        return globalAuthUserTenantRightList;
+    }
+
+    @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public Boolean deleteByUserId(Long userId) {
         return gaUserTenantRightDao.deleteByUserId(userId);
@@ -86,7 +131,13 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<GlobalAuthUserTenantRight> findByNonNullExprationDate() {
-        return gaUserTenantRightDao.findByNonNullExprationDate();
+        return gaUserTenantRightDao.findByNonNullExpirationDate();
+    }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<GlobalAuthUserTenantRight> findByEmailsAndTenantId(Set<String> emails, Long tenantId) {
+        return gaUserTenantRightDao.findByEmailsAndTenantId(emails, tenantId);
     }
 
 }

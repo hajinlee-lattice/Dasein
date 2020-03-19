@@ -1,10 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.spark.cdl.DeriveActivityMetricGroupJobC
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.MetricsGroupGenerator;
@@ -60,6 +61,9 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
 
     @Inject
     private ActivityStoreProxy activityStoreProxy;
+
+    @Inject
+    private PeriodProxy periodProxy;
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
 
@@ -106,9 +110,14 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             idx += periods.size();
         }
         inputMetadata.setMetadata(detailsMap);
-        List<DataUnit> inputs = getTablesFromMapCtxKey(customerSpace.toString(), PERIOD_STORE_TABLE_NAME).values().stream().filter(Objects::nonNull)
-                .map(table -> table.partitionedToHdfsDataUnit(table.getName(), Collections.singletonList(InterfaceName.PeriodId.name()))
-                ).collect(Collectors.toList());
+        List<DataUnit> inputs = new ArrayList<>();
+        Map<String, Table> periodStoreTableMap = getTablesFromMapCtxKey(customerSpace.toString(), PERIOD_STORE_TABLE_NAME);
+        inputMetadata.getMetadata().forEach((streamId, details) -> {
+            details.getLabels().forEach(period -> {
+                String ctxKey = String.format(PERIOD_STORE_TABLE_FORMAT, streamId, period);
+                inputs.add(periodStoreTableMap.get(ctxKey).partitionedToHdfsDataUnit(null, Collections.singletonList(InterfaceName.PeriodId.name())));
+            });
+        });
         if (CollectionUtils.isEmpty(inputs)) {
             log.warn("No period store tables found. Skip metrics generation.");
             return null;
@@ -128,6 +137,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             appendAccountBatchStore(inputs, inputMetadata);
             config.setInput(inputs);
             config.inputMetadata = inputMetadata;
+            config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
             return config;
         }
     }

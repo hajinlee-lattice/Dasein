@@ -4,13 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.DateRestriction;
 import com.latticeengines.domain.exposed.query.ExistsRestriction;
@@ -105,7 +110,7 @@ public final class RestrictionOptimizer {
             }
         });
 
-        logicalRestriction.setRestrictions(children);
+        logicalRestriction.setRestrictions(mergeListOperations(children));
 
         if (children.isEmpty()) {
             return null;
@@ -195,6 +200,42 @@ public final class RestrictionOptimizer {
             }
         }
         return null;
+    }
+
+    private static List<Restriction> mergeListOperations(List<Restriction> clauses) {
+        Map<ImmutablePair<AttributeLookup, ComparisonType>, List<Object>> listVals = new HashMap<>();
+        List<Restriction> merged = new ArrayList<>();
+        for (Restriction clause: clauses) {
+            boolean shouldMerge = false;
+            if (clause instanceof BucketRestriction) {
+                BucketRestriction bucketRestriction = (BucketRestriction) clause;
+                ComparisonType operator = bucketRestriction.getBkt().getComparisonType();
+                if (RestrictionUtils.isMultiValueOperator(operator)) {
+                    AttributeLookup attr = bucketRestriction.getAttr();
+                    ImmutablePair<AttributeLookup, ComparisonType> key = ImmutablePair.of(attr, operator);
+                    List<Object> vals = listVals.getOrDefault(key, new ArrayList<>());
+                    vals.addAll(bucketRestriction.getBkt().getValues());
+                    listVals.put(key, vals);
+                    shouldMerge = true;
+                }
+            }
+            if (!shouldMerge) {
+                merged.add(clause);
+            }
+        }
+        if (MapUtils.isNotEmpty(listVals)) {
+            listVals.forEach((pair, vals) -> {
+                List<Object> cleanVals = vals.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(cleanVals)) {
+                    AttributeLookup attr = pair.getLeft();
+                    ComparisonType operator = pair.getRight();
+                    Bucket bkt = Bucket.valueBkt(operator, cleanVals);
+                    BucketRestriction restriction = new BucketRestriction(attr, bkt);
+                    merged.add(restriction);
+                }
+            });
+        }
+        return merged;
     }
 
 }

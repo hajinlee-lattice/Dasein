@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
@@ -126,12 +127,14 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         Assert.assertEquals(cm1.getDisplayName(), "Last 2 weeks");
         Assert.assertNull(cm1.getDescription());
         Assert.assertEquals(cm1.getSubcategory(), "Page 123");
+        Assert.assertEquals(cm1.getFundamentalType(), FundamentalType.NUMERIC);
 
         ColumnMetadata cm2 = rendered.get(1);
         Assert.assertEquals(cm2.getCategory(), Category.WEB_VISIT_PROFILE);
         Assert.assertEquals(cm2.getDisplayName(), "Between 2 and 4 weeks");
         Assert.assertNull(cm2.getDescription());
         Assert.assertEquals(cm2.getSubcategory(), "Page 123");
+        Assert.assertEquals(cm2.getFundamentalType(), FundamentalType.NUMERIC);
     }
 
     private void mockBatonService() {

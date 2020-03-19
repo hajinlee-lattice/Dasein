@@ -94,6 +94,14 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTask(customerSpace, taskId);
     }
 
+    @GetMapping("/source/{sourceId}")
+    @ResponseBody
+    @ApiOperation(value = "Get data feed task by source")
+    public DataFeedTask getDataFeedTaskBySource(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getDataFeedTaskBySource(customerSpace, sourceId);
+    }
+
     @RequestMapping(value = "/{entity}/list", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")

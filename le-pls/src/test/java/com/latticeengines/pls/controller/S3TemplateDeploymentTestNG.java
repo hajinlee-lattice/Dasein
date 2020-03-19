@@ -4,7 +4,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -20,6 +22,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
@@ -62,7 +65,10 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(featureFlag, true);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
     }
 
@@ -126,7 +132,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         List<?> list = restTemplate.postForObject(getRestAPIHostPort() + url, requestEntity, List.class);
         List<TemplateFieldPreview> previewList = JsonUtils.convertList(list, TemplateFieldPreview.class);
         for (TemplateFieldPreview preview : previewList) {
-            if (preview.getNameInTemplate().equalsIgnoreCase("user_CrmAccount_External_ID")) {
+            if (preview.getNameInTemplate().equalsIgnoreCase("user_crmaccount_external_id")) {
                 assertEquals(preview.getFieldCategory(), FieldCategory.LatticeField);
             }
         }

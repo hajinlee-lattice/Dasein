@@ -2,6 +2,7 @@ package com.latticeengines.cache.exposed.cachemanager;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.springframework.cache.Cache;
@@ -21,7 +22,12 @@ public class LocalCacheManager<K, V> implements CacheManager {
     }
 
     public LocalCacheManager(CacheName cacheName, Function<K, V> load, int capacity, int waitBeforeRefreshInSec) {
-        cache = new LocalCache<>(cacheName, load, capacity, waitBeforeRefreshInSec);
+        this(cacheName, load, capacity, waitBeforeRefreshInSec, null);
+    }
+
+    public LocalCacheManager(CacheName cacheName, Function<K, V> load, int capacity, int waitBeforeRefreshInSec,
+            Consumer<Object> onCacheInstantiated) {
+        cache = new LocalCache<>(cacheName, load, capacity, waitBeforeRefreshInSec, onCacheInstantiated);
         cache.setEvictKeyResolver((updateSignal, existingKeys) -> //
         cache.getDefaultKeyResolver(updateSignal, existingKeys, CacheOperation.Evict));
         cache.setRefreshKeyResolver((updateSignal, existingKeys) -> //

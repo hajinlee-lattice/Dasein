@@ -134,6 +134,13 @@ public class CombineInputTableWithScoreDataFlow
     }
 
     private String getInputTableName() {
+        if (configuration.isCdlMultiModel() && !configuration.isExportKeyColumnsOnly()) {
+            Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
+            if (eventTable != null) {
+                log.info("Use event table=" + eventTable.getName());
+                return eventTable.getName();
+            }
+        }
         String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
         if (StringUtils.isBlank(inputTableName)) {
             inputTableName = getConfiguration().getInputTableName();

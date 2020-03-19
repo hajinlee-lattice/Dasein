@@ -117,8 +117,7 @@ public class MatchResource {
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
             + "Domain can be anything that can be parsed to a domain, such as website, email, etc. "
-            + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
-    )
+            + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. ")
     @InvocationMeter(name = "realtime", measurment = "matchapi", instrument = RealtimeMatchInstrument.NAME)
     @InvocationMeter(name = "realtime-matched", measurment = "matchapi", instrument = RealtimeMatchInstrument.NAME_MATCHED)
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
@@ -245,6 +244,18 @@ public class MatchResource {
         );
     }
 
+    @PostMapping(value = "/cdllookup/contacts")
+    @ResponseBody
+    @ApiOperation(value = "Looking for AccountId using given LookupId")
+    public List<Map<String, Object>> lookupContactsByInternalAccountId(@RequestBody InternalAccountIdLookupRequest request) {
+        return cdlLookupService.lookupContactsByInternalAccountId( //
+                request.getCustomerSpace(), //
+                request.getDataCollectionVersion(), //
+                request.getLookupId(), //
+                request.getLookupIdVal() //
+        );
+    }
+
     @PostMapping(value = "/entity/publish")
     @ResponseBody
     @ApiOperation(value = "Publish entity seed/lookup entries "
@@ -351,16 +362,16 @@ public class MatchResource {
     }
 
     /**
-     * Force to refresh DnB token in redis and local cache of all the envs. Only
-     * for MANUAL OPERATION purpose when any unexpected issue happens
+     * Force to refresh DnB token in redis and local cache of all the envs. Only for
+     * MANUAL OPERATION purpose when any unexpected issue happens
      *
      * @param keyType:
      *            DnB key type -- realtime/batch
      * @param newToken:
-     *            If provided, will use this token to overwrite token in redis;
-     *            if not provided, request a new token from DnB. ONLY use case
-     *            to provide newToken here is: DnB authentication service is
-     *            down and DnB provides us some temporary token to use.
+     *            If provided, will use this token to overwrite token in redis; if
+     *            not provided, request a new token from DnB. ONLY use case to
+     *            provide newToken here is: DnB authentication service is down and
+     *            DnB provides us some temporary token to use.
      * @return
      */
     @ApiIgnore
@@ -463,8 +474,7 @@ public class MatchResource {
                 datacloudVersion = datacloudVersionService.currentApprovedVersion().getVersion();
             }
             log.warn("Found a match request without DataCloud version, force to use {}. MatchInput={}",
-                    datacloudVersion,
-                    JsonUtils.serialize(input));
+                    datacloudVersion, JsonUtils.serialize(input));
             input.setDataCloudVersion(datacloudVersion);
         }
     }

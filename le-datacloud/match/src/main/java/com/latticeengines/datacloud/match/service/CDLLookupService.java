@@ -22,4 +22,7 @@ public interface CDLLookupService {
     String lookupInternalAccountId(String customerSpace, DataCollection.Version version, String lookupIdKey,
             String lookupIdValue);
 
+    List<Map<String, Object>> lookupContactsByInternalAccountId(String customerSpace, DataCollection.Version version,
+            String lookupIdKey, String lookupIdValue);
+
 }

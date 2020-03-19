@@ -49,7 +49,7 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         Assert.assertNotNull(loginDocument.getUniqueness());
         Assert.assertNotNull(loginDocument.getRandomness());
 
-        credentials.setPassword("wrong");
+        credentials.setUsername("wrong@gmail.com");
         loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
         Assert.assertTrue(CollectionUtils.isNotEmpty(loginDocument.getErrors()));

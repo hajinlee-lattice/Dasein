@@ -35,7 +35,6 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.spark.exposed.job.cdl.CalculateDeltaJob;
 import com.latticeengines.workflow.exposed.build.WorkflowStaticContext;
@@ -50,9 +49,6 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     @Inject
     private PlayProxy playProxy;
-
-    @Inject
-    private DataUnitProxy dataUnitProxy;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -277,3 +273,4 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         return attrRepo;
     }
 }
+

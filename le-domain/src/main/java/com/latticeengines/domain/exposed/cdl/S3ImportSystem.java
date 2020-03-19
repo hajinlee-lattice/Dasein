@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,6 +19,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -35,6 +37,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.HasTenantId;
@@ -51,7 +54,7 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonProperty("pid")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
@@ -108,6 +111,11 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @Column(name = "SECONDARY_CONTACT_IDS", columnDefinition = "'JSON'")
     @Type(type = "json")
     private SecondaryIdList secondaryContactIds;
+
+    @JsonProperty("tasks")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "importSystem")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<DataFeedTask> tasks = new ArrayList<>();
 
     @Override
     public Long getPid() {
@@ -283,6 +291,14 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
         return Collections.emptyList();
     }
 
+    public List<DataFeedTask> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<DataFeedTask> tasks) {
+        this.tasks = tasks;
+    }
+
     public enum SystemType {
         Salesforce {
             @Override
@@ -343,6 +359,16 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
             @Override
             public String getDefaultSystemName() {
                 return "Default_Website_System";
+            }
+        },
+        ProjectSystem {
+            @Override
+            public Collection<EntityType> getEntityTypes() {
+                return Collections.emptyList();
+            }
+            @Override
+            public String getDefaultSystemName() {
+                return "Default_Project_System";
             }
         },
         Other;

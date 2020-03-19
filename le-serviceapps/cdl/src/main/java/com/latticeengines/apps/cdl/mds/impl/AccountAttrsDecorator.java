@@ -102,18 +102,23 @@ public class AccountAttrsDecorator implements Decorator {
             return cm;
         }
 
-        // setting for attributes corresponds to mappings in section Unique ID, Other IDs, Match IDs, only enable for
-        // usage export
+        // PLS-15406 setting for attributes corresponds to mappings in section
+        // Unique ID, Other IDs, Match IDs, only enable for usage export
         if ((InterfaceName.CustomerAccountId.name().equals(cm.getAttrName()) ||
                 attrNameInOtherIDAndMatchID.contains(cm.getAttrName())) && entityMatchEnabled) {
-            cm.disableGroup(Segment);
             cm.enableGroup(Enrichment);
             cm.disableGroup(TalkingPoint);
             cm.disableGroup(CompanyProfile);
             cm.disableGroup(Model);
-            cm.setCanSegment(false);
             cm.setCanModel(false);
             cm.setCanEnrich(true);
+            if (onlyEntityMatchGAEnabled) {
+                cm.enableGroup(Segment);
+                cm.setCanSegment(true);
+            } else {
+                cm.disableGroup(Segment);
+                cm.setCanSegment(false);
+            }
             return cm;
         }
 

@@ -244,10 +244,10 @@ public class ExportFieldMetadataServiceDeploymentTestNG extends CDLDeploymentTes
         List<ColumnMetadata> columnMetadata = fieldMetadataService.getExportEnabledFields(mainCustomerSpace, channel);
         log.info(JsonUtils.serialize(columnMetadata));
 
-        assertEquals(columnMetadata.size(), 3);
+        assertEquals(columnMetadata.size(), 5);
 
         List<String> attrNames = columnMetadata.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toList());
-
+        log.info(JsonUtils.serialize(attrNames));
         long nonStandardFields = columnMetadata.stream().filter(ColumnMetadata::isCampaignDerivedField).count();
         assertEquals(nonStandardFields, 0);
     }

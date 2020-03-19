@@ -12,9 +12,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.core.entitymgr.DropBoxEntityMgr;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;

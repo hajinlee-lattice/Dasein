@@ -366,6 +366,9 @@ public enum LedpCode {
     LEDP_18237("Audience name {0} with Audience Id {1} can not be set in a null PlayLaunchChannel"), //
     LEDP_18238("PlayLaunch id {0} has Play null {1} and PlayLaunchChannel null {2}"), //
     LEDP_18239("All records in {0} batch store has been deleted!"), //
+    LEDP_18240("Total launched {0} count exceeds maximum allowed limit of {1}."), //
+    LEDP_18241("Team {0} already exists in tenant {1}."), //
+    LEDP_18242("Team name can't be empty."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
@@ -859,6 +862,7 @@ public enum LedpCode {
     LEDP_40074("You can only activate {0} models at a time."), //
     LEDP_40075(
             "{0} is setup as your primary. This cannot be changed. Don't assign the unique ID of this system to {1} and try again."),
+    LEDP_40076("Cannot download file {0}."),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //
@@ -866,7 +870,12 @@ public enum LedpCode {
     LEDP_41003("Fail to shutdown batch write executor properly"),
 
     // le-db
-    LEDP_50000("Object {0} is not soft deletable."); //
+    LEDP_50000("Object {0} is not soft deletable."), //
+
+    // le-dcp
+    LEDP_60000("Error when create Project!"), //
+    LEDP_60001("Error when create Source!");
+
 
     private String message;
 

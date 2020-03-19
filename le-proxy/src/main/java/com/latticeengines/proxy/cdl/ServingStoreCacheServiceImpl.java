@@ -5,8 +5,8 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,10 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -27,12 +29,16 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+
+import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
 
 @Component("servingStoreCacheService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -42,9 +48,9 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
 
     // FIXME remove temp capacity increase for matchapi
     private static final String MATCHAPI_SVC = "matchapi";
-    private static final int SERVING_STORE_CACHE_LIMIT = 20;
+    private static final int SERVING_STORE_CACHE_LIMIT = 5;
 
-    private LocalCacheManager<String, List<ColumnMetadata>> metadataCache;
+    private ConcurrentHashMap<BusinessEntity, LocalCacheManager<String, List<ColumnMetadata>>> metadataCaches = new ConcurrentHashMap<>();
 
     private final DataCollectionProxy dataCollectionProxy;
 
@@ -52,23 +58,27 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
 
     private ServingStoreCacheServiceImpl _service;
 
+    private MeterRegistryFactoryService registryFactory;
+
     // FIXME remove temp capacity increase for matchapi
     @Value("${proxy.serving.store.matchapi.cache.limit}")
     private int servingStoreMatchapiLimit;
 
     @Inject
     protected ServingStoreCacheServiceImpl(DataCollectionProxy dataCollectionProxy, //
-                                           MetadataProxy metadataProxy, ServingStoreCacheServiceImpl service) {
+            MetadataProxy metadataProxy, ServingStoreCacheServiceImpl service,
+            @Lazy MeterRegistryFactoryService registryFactory) {
         super("cdl");
         this.dataCollectionProxy = dataCollectionProxy;
         this.metadataProxy = metadataProxy;
         this._service = service;
+        this.registryFactory = registryFactory;
     }
 
     @Override
     public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity) {
         String key = customerSpace + "|" + entity.name();
-        return metadataCache.getWatcherCache().get(key);
+        return getOrCreateMetadataCache(entity).getWatcherCache().get(key);
     }
 
     @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|decoratedmetadata\", #customerSpace, #entity)", unless="#result == null")
@@ -124,27 +134,40 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
     }
 
     private List<ColumnMetadata> loadServingColumnMetadata(String cacheKey) {
-        long estimatedSize = metadataCache.getWatcherCache().getEstimatedSize();
+        String[] tokens = cacheKey.split("\\|");
+        String tenant = tokens[0];
+        BusinessEntity entity = BusinessEntity.valueOf(tokens[1]);
+
+        long estimatedSize = getOrCreateMetadataCache(entity).getWatcherCache().getEstimatedSize();
         Runtime rt = Runtime.getRuntime();
         long totalMb = rt.totalMemory() / 1024 / 1024;
         long freeMb = rt.freeMemory() / 1024 / 1024;
         log.info("Before inserting {}, approximately {} entries in the cache, total mem is {}, free mem is {}", //
                 cacheKey, estimatedSize, totalMb, freeMb);
-        String[] tokens = cacheKey.split("\\|");
-        String tenant = tokens[0];
-        BusinessEntity entity = BusinessEntity.valueOf(tokens[1]);
         return _service.getDecoratedMetadataFromDistributedCache(tenant, entity);
     }
 
-    @PostConstruct
-    private void initCache() {
-        int cacheLimit = SERVING_STORE_CACHE_LIMIT;
-        if (MATCHAPI_SVC.equals(BeanFactoryEnvironment.getService())) {
-            log.info("Overriding serving store cache limit to {} for matchapi", servingStoreMatchapiLimit);
-            cacheLimit = servingStoreMatchapiLimit;
-        }
-        log.info("Instantiating serving metadata local cache, capacity = {}", cacheLimit);
-        metadataCache = new LocalCacheManager<>(CacheName.ServingMetadataLocalCache, this::loadServingColumnMetadata,
-                cacheLimit, 5);
+    private LocalCacheManager<String, List<ColumnMetadata>> getOrCreateMetadataCache(BusinessEntity entity) {
+        return metadataCaches.computeIfAbsent(entity, (e) -> {
+            int cacheLimit = SERVING_STORE_CACHE_LIMIT;
+            if (MATCHAPI_SVC.equals(BeanFactoryEnvironment.getService())) {
+                log.info("Overriding serving store cache limit to {} for matchapi", servingStoreMatchapiLimit);
+                cacheLimit = servingStoreMatchapiLimit;
+            }
+            log.info("Instantiating serving metadata local cache for entity {}, capacity = {}", entity.name(),
+                    cacheLimit);
+            return new LocalCacheManager<>(CacheName.ServingMetadataLocalCache, this::loadServingColumnMetadata,
+                    cacheLimit, 5, (cache) -> { //
+                        if (cache instanceof Cache) {
+                            String cacheName = String.format("%s|%s", CacheName.ServingMetadataLocalCache,
+                                    entity.name());
+                            log.info("Start monitoring serving store metadata cache {}", cacheName);
+                            Cache<?, ?> caffineCache = (Cache<?, ?>) cache;
+                            CaffeineCacheMetrics.monitor( //
+                                    registryFactory.getHostLevelRegistry(MetricDB.LDC_Match), //
+                                    caffineCache, cacheName);
+                        }
+                    });
+        });
     }
 }

@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -63,8 +65,10 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
     @Override
     protected DailyStoreToPeriodStoresJobConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        Set<String> skippedStreamIds = getSkippedStreamIds();
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
-        config.streams = new ArrayList<>(stepConfiguration.getActivityStreamMap().values());
+        config.streams = stepConfiguration.getActivityStreamMap().values()
+                .stream().filter(stream -> !skippedStreamIds.contains(stream.getStreamId())).collect(Collectors.toList());
         config.evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
 
@@ -112,7 +116,10 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
 
     @Override
     protected void postJobExecution(SparkJobResult result) {
-        Map<String, Details> metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class).getMetadata();
+        String outputMetadataStr = result.getOutput();
+        log.info("Generated output metadata: {}", outputMetadataStr);
+        log.info("Generated {} output metrics tables", result.getTargets().size());
+        Map<String, Details> metadata = JsonUtils.deserialize(outputMetadataStr, ActivityStoreSparkIOMetadata.class).getMetadata();
         Map<String, Table> signatureTables = new HashMap<>();
         metadata.forEach((streamId, details) -> {
             for (int offset = 0; offset < details.getLabels().size(); offset++) {
@@ -126,5 +133,15 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         });
         Map<String, String> signatureTableNames = exportToS3AndAddToContext(signatureTables, PERIOD_STORE_TABLE_NAME);
         dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames, TableRoleInCollection.PeriodStores, inactive);
+    }
+
+    private Set<String> getSkippedStreamIds() {
+        if (!hasKeyInContext(ACTIVITY_STREAMS_SKIP_AGG)) {
+            return Collections.emptySet();
+        }
+
+        Set<String> skippedStreamIds = getSetObjectFromContext(ACTIVITY_STREAMS_SKIP_AGG, String.class);
+        log.info("Stream IDs skipped for period stores generation = {}", skippedStreamIds);
+        return skippedStreamIds;
     }
 }

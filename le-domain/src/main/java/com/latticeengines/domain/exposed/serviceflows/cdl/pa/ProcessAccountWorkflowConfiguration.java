@@ -80,6 +80,11 @@ public class ProcessAccountWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder fullProfile(boolean fullProfile) {
+            rebuildAccountWorkflowBuilder.fullProfile(fullProfile);
+            return this;
+        }
+
         public ProcessAccountWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAccountWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

@@ -1,7 +1,10 @@
 package com.latticeengines.domain.exposed.security;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 
 public class User {
 
@@ -15,6 +18,7 @@ public class User {
     private String accessLevel;
     // tenant level property will be set during getting tenant right
     private Long expirationDate;
+    private List<GlobalTeam> userTeams;
 
     @JsonProperty("Email")
     public String getEmail() {
@@ -111,4 +115,13 @@ public class User {
         return JsonUtils.serialize(this);
     }
 
+    @JsonProperty("UserTeams")
+    public List<GlobalTeam> getUserTeams() {
+        return userTeams;
+    }
+
+    @JsonProperty("UserTeams")
+    public void setUserTeams(List<GlobalTeam> userTeams) {
+        this.userTeams = userTeams;
+    }
 }

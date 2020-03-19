@@ -38,6 +38,9 @@ public class Session {
     @JsonProperty("AuthenticationRoute")
     private String authenticationRoute;
 
+    @JsonProperty("ticketCreationTime")
+    private Long ticketCreationTime;
+
     @JsonProperty("ExternalSession")
     private GlobalAuthExternalSession externalSession;
 
@@ -134,4 +137,11 @@ public class Session {
         return JsonUtils.serialize(this);
     }
 
+    public Long getTicketCreationTime() {
+        return ticketCreationTime;
+    }
+
+    public void setTicketCreationTime(Long ticketCreationTime) {
+        this.ticketCreationTime = ticketCreationTime;
+    }
 }

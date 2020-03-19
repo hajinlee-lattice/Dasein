@@ -86,7 +86,7 @@ public class ImportDynamoTableFromS3 extends BaseImportExportS3<ImportDynamoTabl
                         log.error("Can't get file info from HDFS with exception {}.", e.getMessage());
                     }
                 } else {
-                    // table info doesn't exist
+                    log.info("metadata table info doesn't exist for table name {}", tableName);
                     updateDataUnit(dynamoDataUnit);
                 }
             }

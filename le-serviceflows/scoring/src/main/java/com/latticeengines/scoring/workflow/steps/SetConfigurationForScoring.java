@@ -100,7 +100,7 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
                         BucketMetadataUtils.getDefaultMetadata());
                 putObjectInContext(ITERATION_RATING_MODELS, Collections.singletonList(container));
 
-                ModelSummary modelSummary = modelSummaryProxy.findValidByModelId(customerSpace, modelId);
+                ModelSummary modelSummary = modelSummaryProxy.findValidByModelId(customerSpace, modelGuid);
                 putObjectInContext(SCORE_TRAINING_FILE_INCLUDED_FEATURES, featureImportanceUtil.getFeatureImportance(customerSpace, modelSummary).keySet());
 
                 putStringValueInContext(SCORING_MODEL_ID, modelGuid);

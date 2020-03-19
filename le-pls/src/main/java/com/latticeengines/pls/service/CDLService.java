@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -85,4 +88,28 @@ public interface CDLService {
      * @return Attribute name as map key and Attribute display name as map value.
      */
     Map<String, String> getDecoratedDisplayNameMapping(String customerSpace, EntityType entityType);
+
+    /**
+     *
+     * @param customerSpace Identify current tenant
+     * @param systemName {@link S3ImportSystem#getName()} of target S3ImportSystem
+     * @param entityType EntityType for current template.
+     * @return map of dimensionName -> metadataValue, will not be {@code null}
+     */
+    Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String systemName,
+                                                                        EntityType entityType);
+
+    /**
+     *
+     * @param request
+     * @param response
+     * @param mimeType such as "application/csv"
+     * @param fileName downloadCSV fileName
+     * @param customerSpace Identify current tenant
+     * @param systemName {@link S3ImportSystem#getName()} of target system
+     * @param entityType EntityType for current template.
+     */
+    void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
+                                           String mimeType, String fileName, String customerSpace,
+                                           String systemName, EntityType entityType);
 }

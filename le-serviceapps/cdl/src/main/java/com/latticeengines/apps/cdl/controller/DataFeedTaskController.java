@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -255,7 +254,7 @@ public class DataFeedTaskController {
         }
         if (!dataFeedTaskTemplateService.validationOpportunity(customerSpace, systemName, EntityType.Opportunity)) {
             return ResponseDocument.failedResponse(new IllegalStateException("Opportunities by stage cannot be " +
-                    "created as the corresponding Salesforce Account object does not have a Unique ID"));
+                    "created as the corresponding system Account object does not have a Unique ID"));
         }
         try {
             Boolean result = dataFeedTaskTemplateService.createDefaultOpportunityTemplate(customerSpace, systemName);
@@ -285,9 +284,8 @@ public class DataFeedTaskController {
                     "created as the corresponding Salesforce Account object does not have a Unique ID"));
         }
         try {
-            DataFeedTask dataFeedTask = dataFeedTaskTemplateService.createOpportunityTemplate(customerSpace, systemName,
-                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata);
-            return ResponseDocument.successResponse(true);
+            return ResponseDocument.successResponse(dataFeedTaskTemplateService.createOpportunityTemplate(customerSpace, systemName,
+                    simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata));
         } catch (Exception e) {
             log.error("Create Default Opportunity template failed with error: {}", e.toString());
             String stacktrace = ExceptionUtils.getStackTrace(e);

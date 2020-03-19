@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.RatingQueryService;
+import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.RatingQueryTranslator;
@@ -60,8 +61,9 @@ public class RatingQueryServiceImpl extends BaseQueryServiceImpl implements Rati
     private final TransactionService transactionService;
 
     @Inject
-    public RatingQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
-        super(queryEvaluatorService);
+    public RatingQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService,
+                                 TempListService tempListService) {
+        super(queryEvaluatorService, tempListService);
         this.transactionService = transactionService;
     }
 

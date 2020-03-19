@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.spark.LivySession;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.objectapi.service.RatingQuerySparkSQLService;
+import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.service.impl.RatingQueryServiceImpl;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -50,8 +51,8 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
     @Inject
     public RatingQueryServiceSparkSQLImpl(
             @Named("queryEvaluatorServiceSparkSQL") QueryEvaluatorService queryEvaluatorService,
-            TransactionService transactionService) {
-        super(queryEvaluatorService, transactionService);
+            @Named("tempListServiceSparkSQL") TempListService tempListService, TransactionService transactionService) {
+        super(queryEvaluatorService, transactionService, tempListService);
     }
 
     /**
@@ -62,6 +63,7 @@ public class RatingQueryServiceSparkSQLImpl extends RatingQueryServiceImpl imple
      */
     public void setLivySession(LivySession livySession) {
         ((QueryEvaluatorServiceSparkSQL) queryEvaluatorService).setLivySession(livySession);
+        ((TempListServiceSparkSQLImpl) tempListService).setLivySession(livySession);
     }
 
     @Override

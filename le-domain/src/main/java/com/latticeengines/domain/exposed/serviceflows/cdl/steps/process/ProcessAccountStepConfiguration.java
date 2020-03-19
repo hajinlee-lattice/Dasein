@@ -11,6 +11,9 @@ public class ProcessAccountStepConfiguration extends BaseProcessEntityStepConfig
     @JsonProperty("allow_internal_enrich_attrs")
     private boolean allowInternalEnrichAttrs;
 
+    @JsonProperty("full_profile")
+    private boolean fullProfile;
+
     @Override
     public BusinessEntity getMainEntity() {
         return BusinessEntity.Account;
@@ -31,4 +34,13 @@ public class ProcessAccountStepConfiguration extends BaseProcessEntityStepConfig
     public void setAllowInternalEnrichAttrs(boolean allowInternalEnrichAttrs) {
         this.allowInternalEnrichAttrs = allowInternalEnrichAttrs;
     }
+
+    public boolean isFullProfile() {
+        return fullProfile;
+    }
+
+    public void setFullProfile(boolean fullProfile) {
+        this.fullProfile = fullProfile;
+    }
+
 }

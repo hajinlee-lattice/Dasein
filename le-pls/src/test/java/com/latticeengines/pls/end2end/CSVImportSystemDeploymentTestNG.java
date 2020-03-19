@@ -176,7 +176,8 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Attribute otherSystemCustomerAccountIdAttr =
                 otherSystemContactTable.getAttribute(InterfaceName.CustomerAccountId);
         Assert.assertNotNull(otherSystemCustomerAccountIdAttr);
-        Assert.assertEquals(otherSystemCustomerAccountIdAttr.getDisplayName(), "Account_ID");
+        Assert.assertEquals(otherSystemCustomerAccountIdAttr.getSourceAttrName(), "Account_ID");
+        Assert.assertEquals(otherSystemCustomerAccountIdAttr.getDisplayName(), InterfaceName.CustomerAccountId.name());
     }
 
     private String createOtherContactTemplateAndVerify(String sfSystemName, String otherSystemName) {
@@ -253,7 +254,8 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         Assert.assertNotNull(sfAccountTable);
         Assert.assertNotNull(sfAccountTable.getAttribute(defaultSystem.getAccountSystemId()));
         Assert.assertNotNull(customerAccountId);
-        Assert.assertEquals(customerAccountId.getDisplayName(), "ID");
+        Assert.assertEquals(customerAccountId.getDisplayName(), InterfaceName.CustomerAccountId.name());
+        Assert.assertEquals(customerAccountId.getSourceAttrName(), "ID");
         Assert.assertNotNull(sfSystemIdAttr);
         Assert.assertEquals(sfSystemIdAttr.getDisplayName(), "ID");
         Assert.assertNotNull(otherSystem.getAccountSystemId());

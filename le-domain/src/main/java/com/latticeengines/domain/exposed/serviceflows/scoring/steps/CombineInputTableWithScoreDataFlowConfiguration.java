@@ -20,6 +20,9 @@ public class CombineInputTableWithScoreDataFlowConfiguration
     private String inputTableName;
 
     @JsonProperty
+    private boolean exportKeyColumnsOnly;
+
+    @JsonProperty
     private List<BucketMetadata> bucketMetadata;
 
     @JsonProperty
@@ -113,6 +116,14 @@ public class CombineInputTableWithScoreDataFlowConfiguration
 
     public void setInputTableName(String inputTableName) {
         this.inputTableName = inputTableName;
+    }
+
+    public boolean isExportKeyColumnsOnly() {
+        return exportKeyColumnsOnly;
+    }
+
+    public void setExportKeyColumnsOnly(boolean exportKeyColumnsOnly) {
+        this.exportKeyColumnsOnly = exportKeyColumnsOnly;
     }
 
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,7 +57,12 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         request.setKeepTemp(false);
         request.setEnableSlack(false);
 
-        Set<String> servingEntities = getObjectFromContext(ACTIVITY_MERGED_METRICS_SERVING_ENTITIES, Set.class);
+        Set<String> servingEntityNames = getObjectFromContext(ACTIVITY_MERGED_METRICS_SERVING_ENTITIES, Set.class);
+        if (CollectionUtils.isEmpty(servingEntityNames)) {
+            log.info("No activity serving entity found. Skip profiling activity metrics.");
+            return null;
+        }
+        Set<BusinessEntity> servingEntities = servingEntityNames.stream().map(BusinessEntity::getByName).collect(Collectors.toSet());
         log.info("Found metrics serving entities from context: {}", servingEntities);
         if (CollectionUtils.isEmpty(servingEntities)) {
             return null;
@@ -66,17 +72,18 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         int bucketStep = 1;
         List<TransformationStepConfig> steps = new ArrayList<>();
         Map<String, String> mergedMetricsGroupTableNames = getMapObjectFromContext(MERGED_METRICS_GROUP_TABLE_NAME, String.class, String.class);
-        for (String servingEntity : servingEntities) {
-            String tableCtxName = String.format("%s_%s", getEntityLevel().name(), servingEntity);
+        for (BusinessEntity servingEntity : servingEntities) {
+            TableRoleInCollection servingStore = servingEntity.getServingStore();
+            String tableCtxName = String.format("%s_%s", getEntityLevel().name(), servingStore.name());
             String tableName = mergedMetricsGroupTableNames.get(tableCtxName);
             if (noNeedToProfile(tableCtxName, tableName)) {
-                log.info("No need to profile {}", servingEntity);
+                log.info("No need to profile serving entity: {}, serving store: {}", servingEntity, servingStore);
                 continue;
             }
-            profiledTableNames.put(servingEntity, tableName);
+            profiledTableNames.put(servingEntity.name(), tableName);
             steps.add(profile(tableName));
-            steps.add(bucket(profileStep, tableName, getBucketTablePrefix(servingEntity)));
-            steps.add(calcStats(profileStep, bucketStep, getStatsTablePrefix(servingEntity), null));
+            steps.add(bucket(profileStep, tableName, getBucketTablePrefix(servingEntity.name())));
+            steps.add(calcStats(profileStep, bucketStep, getStatsTablePrefix(servingEntity.name()), null));
             profileStep += 3;
             bucketStep += 3;
         }
@@ -133,7 +140,7 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         return String.format("%s%s", servingEntity, "Stats");
     }
 
-    private String getBucketTablePrefix(String servingEntity) {
-        return String.format("%s%s", servingEntity, "Buckets");
+    private String getBucketTablePrefix(String servingStore) {
+        return String.format("%s%s", servingStore, "Buckets");
     }
 }

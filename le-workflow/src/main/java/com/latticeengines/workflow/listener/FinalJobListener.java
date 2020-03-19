@@ -1,9 +1,10 @@
 package com.latticeengines.workflow.listener;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,6 +15,7 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -47,6 +49,12 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
+        Long executionId = jobExecution.getId();
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(executionId);
+        String workflowType = workflowJob.getType();
+        if (workflowTypesEnabledTempTable().contains(workflowType)) {
+            metadataProxy.setEnableTempTables(true);
+        }
     }
 
     @Override
@@ -102,14 +110,16 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         workflowJob.setStatus(JobStatus.fromString(status.getStatus().name()).name());
         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
         log.info("Updated work flow status=" + status + " workflow Id=" + executionId);
-        if (!BatchStatus.FAILED.equals(jobExecution.getStatus())) {
-            Set<String> registeredTableNames = getObjectFromContext(jobExecution, BaseWorkflowStep.REGISTERED_TABLE_NAMES, Set.class);
+        if (BatchStatus.COMPLETED.equals(jobExecution.getStatus())) {
+            Set<String> registeredTableNames = getSetFromContext(jobExecution, BaseWorkflowStep.REGISTERED_TABLE_NAMES,
+                    String.class);
             if (CollectionUtils.isNotEmpty(registeredTableNames)) {
                 String customerSpace = workflowJob.getTenant().getId();
                 try {
-                    metadataProxy.keepTablesForever(customerSpace, registeredTableNames.stream().collect(Collectors.toList()));
+                    metadataProxy.keepTablesForever(customerSpace, new ArrayList<>(registeredTableNames));
                 } catch (Exception e) {
-                    log.error(String.format("Failed to update table retention policy when workflow %d finished.", workflowJob.getPid()), e);
+                    log.error(String.format("Failed to update table retention policy when workflow %d finished.",
+                            workflowJob.getPid()), e);
                 }
 
             }
@@ -129,4 +139,11 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         log.info("Listener will wait for LEJobCaller to be set");
         waitForCaller = true;
     }
+
+    private Set<String> workflowTypesEnabledTempTable() {
+        Set<String> workflowNames = new HashSet<>();
+        workflowNames.add(ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME);
+        return workflowNames;
+    }
+
 }

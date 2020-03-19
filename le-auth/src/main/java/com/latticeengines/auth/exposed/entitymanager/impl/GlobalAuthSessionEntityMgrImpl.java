@@ -31,6 +31,12 @@ public class GlobalAuthSessionEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuth
     }
 
     @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public GlobalAuthSession findByTicketIdAndTenantIdAndUserId(Long ticketId, Long tenantId, Long userId) {
+        return gaSessionDao.findByFields("Ticket_ID", ticketId, "Tenant_ID", tenantId, "User_ID", userId);
+    }
+
+    @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthSession gaSession) {
         getDao().create(gaSession);

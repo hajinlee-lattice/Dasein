@@ -101,4 +101,8 @@
         <property name="sessionFactory" ref="sessionFactoryGlobalAuth" />
     </bean>
 
+    <bean id="globalAuthTeamDao" class="com.latticeengines.auth.exposed.dao.impl.GlobalAuthTeamDaoImpl">
+        <property name="sessionFactory" ref="sessionFactoryGlobalAuth" />
+    </bean>
+
 </beans>

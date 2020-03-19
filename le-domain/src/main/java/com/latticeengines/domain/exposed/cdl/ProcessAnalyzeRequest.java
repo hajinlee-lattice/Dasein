@@ -51,6 +51,10 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("AutoSchedule")
     private Boolean autoSchedule;
 
+    // flag to indiate if it's doing full-profile
+    @JsonProperty("FullProfile")
+    private Boolean fullProfile;
+
     /*
      * flag to inherit all import actions from last failed PA
      */
@@ -178,6 +182,14 @@ public class ProcessAnalyzeRequest {
 
     public void setFullRematch(Boolean fullRematch) {
         this.fullRematch = fullRematch;
+    }
+
+    public Boolean getFullProfile() {
+        return fullProfile;
+    }
+
+    public void setFullProfile(Boolean fullProfile) {
+        this.fullProfile = fullProfile;
     }
 
     public Boolean getSkipPublishToS3() {

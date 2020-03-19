@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.service.DropBoxService;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;

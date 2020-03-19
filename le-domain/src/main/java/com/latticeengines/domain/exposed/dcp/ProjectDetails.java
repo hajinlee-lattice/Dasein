@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.dcp;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,6 +24,9 @@ public class ProjectDetails {
 
     @JsonProperty("drop_folder_access")
     private GrantDropBoxAccessResponse dropFolderAccess;
+
+    @JsonProperty("sources")
+    private List<Source> sources;
 
     public String getProjectId() {
         return projectId;
@@ -53,5 +58,13 @@ public class ProjectDetails {
 
     public void setDropFolderAccess(GrantDropBoxAccessResponse dropFolderAccess) {
         this.dropFolderAccess = dropFolderAccess;
+    }
+
+    public List<Source> getSources() {
+        return sources;
+    }
+
+    public void setSources(List<Source> sources) {
+        this.sources = sources;
     }
 }

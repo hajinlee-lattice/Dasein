@@ -97,7 +97,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
         Map<BusinessEntity, String> statsTableNames = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class,
                 String.class);
         statsTableMap = new HashMap<>();
-        if (statsTableNames != null) {
+        if (MapUtils.isNotEmpty(statsTableNames)) {
             statsTableNames.forEach((entity, tableName) -> {
                 log.info(String.format("statsTableName for entity %s and customer %s is %s", entity, customerSpaceStr,
                         tableName));

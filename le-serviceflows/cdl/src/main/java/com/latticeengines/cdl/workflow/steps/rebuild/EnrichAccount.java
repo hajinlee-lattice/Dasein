@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -55,9 +54,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
-
-    @Inject
-    private BatonService batonService;
 
     private String fullAccountTablePrefix = "FullAccount";
     private String masterTableName;
@@ -218,11 +214,6 @@ public class EnrichAccount extends ProfileStepBase<ProcessAccountStepConfigurati
     private boolean canBeUsedInModelOrSegment(ColumnMetadata columnMetadata) {
         return columnMetadata.isEnabledFor(ColumnSelection.Predefined.Model) ||
                 columnMetadata.isEnabledFor(ColumnSelection.Predefined.Segment);
-    }
-
-    private boolean shouldExcludeDataCloudAttrs() {
-        String tenantId = configuration.getCustomerSpace().getTenantId();
-        return batonService.shouldExcludeDataCloudAttrs(tenantId);
     }
 
 }

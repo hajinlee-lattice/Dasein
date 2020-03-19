@@ -1837,6 +1837,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(isLocalEnvironment());
         request.setFullRematch(isFullRematch);
+        request.setFullProfile(false);
         runTestWithRetry(request, failingAtStep);
     }
 
@@ -1848,6 +1849,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setSkipPublishToS3(isLocalEnvironment());
         request.setSkipDynamoExport(true);
+        request.setFullProfile(false);
         request.setFullRematch(fullRematch);
         request.setCurrentPATimestamp(currentPATimestamp);
         return request;

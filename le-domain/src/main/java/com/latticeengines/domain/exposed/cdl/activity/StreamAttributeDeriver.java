@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Objects;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -24,6 +25,10 @@ public class StreamAttributeDeriver implements Serializable {
     // target attribute to be generated
     @JsonProperty("target_attributes")
     private String targetAttribute;
+
+    // type of target attribute (default to numeric for backward compatibility)
+    @JsonProperty("target_fundamental_type")
+    private FundamentalType targetFundamentalType = FundamentalType.NUMERIC;
 
     // input attributes to derive target attribute
     @JsonProperty("source_attributes")
@@ -39,6 +44,14 @@ public class StreamAttributeDeriver implements Serializable {
 
     public void setTargetAttribute(String targetAttribute) {
         this.targetAttribute = targetAttribute;
+    }
+
+    public FundamentalType getTargetFundamentalType() {
+        return targetFundamentalType;
+    }
+
+    public void setTargetFundamentalType(FundamentalType targetFundamentalType) {
+        this.targetFundamentalType = targetFundamentalType;
     }
 
     public List<String> getSourceAttributes() {

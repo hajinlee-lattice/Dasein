@@ -295,6 +295,12 @@ public class TestPlayCreationHelper {
         assertPlayLaunch(playLaunch);
     }
 
+    public PlayLaunch createPlayLaunch2(TestPlaySetupConfig testPlaySetupConfig) {
+        PlayLaunch playLaunch = playProxy.createPlayLaunch(tenant.getId(), playName, preparePlayLaunchObject(testPlaySetupConfig));
+        assertPlayLaunch(playLaunch);
+        return playLaunch;
+    }
+
     public List<LookupIdMap> createLookupIdMapping(TestPlaySetupConfig testPlaySetupConfig) {
         List<LookupIdMap> createdLookups = new ArrayList<>();
 

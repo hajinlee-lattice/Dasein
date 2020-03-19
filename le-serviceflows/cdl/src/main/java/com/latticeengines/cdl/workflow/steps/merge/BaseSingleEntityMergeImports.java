@@ -348,6 +348,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         templates.add(SystemBatchTemplateName.Embedded.name());
         templates.addAll(templatesInOrder);
         config.setTemplates(templates);
+        config.setMinColumns(Arrays.asList(InterfaceName.CDLCreatedTime.name()));
+        config.setMaxColumns(Arrays.asList(InterfaceName.CDLUpdatedTime.name()));
         return config;
     }
 

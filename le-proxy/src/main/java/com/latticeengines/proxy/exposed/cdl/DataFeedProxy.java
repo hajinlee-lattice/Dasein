@@ -182,6 +182,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return get("getDataFeedTaskById", url, DataFeedTask.class);
     }
 
+    public DataFeedTask getDataFeedTaskBySourceId(String customerSpace, String sourceId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/source/{sourceId}",
+                shortenCustomerSpace(customerSpace), sourceId);
+        return get("getDataFeedTaskById", url, DataFeedTask.class);
+    }
+
     public S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskId) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/getSystem",
                 shortenCustomerSpace(customerSpace), taskId);

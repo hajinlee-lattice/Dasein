@@ -231,6 +231,8 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     private void setRedshiftPartition(RedshiftDataUnit dataUnit) {
         if (StringUtils.isBlank(dataUnit.getClusterPartition())) {
+            log.warn("Redshift data unit {} in {} is still in the legacy partition.",
+                    dataUnit.getName(), dataUnit.getTenant());
             dataUnit.setClusterPartition(redshiftPartitionService.getLegacyPartition());
         }
     }

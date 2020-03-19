@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.EventQueryService;
+import com.latticeengines.objectapi.service.TempListService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.ModelingQueryTranslator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
@@ -55,8 +56,9 @@ public class EventQueryServiceImpl extends BaseQueryServiceImpl implements Event
     }
 
     @Inject
-    public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
-        super(queryEvaluatorService);
+    public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService,
+            TempListService tempListService) {
+        super(queryEvaluatorService, tempListService);
         this.transactionService = transactionService;
     }
 

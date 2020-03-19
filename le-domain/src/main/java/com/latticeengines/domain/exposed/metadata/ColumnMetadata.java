@@ -111,7 +111,9 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     @JsonProperty("DataLicense")
     private String dataLicense;
     @JsonProperty("IsHiddenForRemodelingUI")
-    private boolean isHiddenForRemodelingUI;
+    private Boolean isHiddenForRemodelingUI;
+    @JsonProperty("IsAdminDisabledForModel")
+    private Boolean isAdminDisabledForModel;
     /**
      * whether this attribute should be hidden in category tile in home page
      */
@@ -365,11 +367,11 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.dataLicense = dataLicense;
     }
 
-    public boolean isHiddenForRemodelingUI() {
+    public Boolean isHiddenForRemodelingUI() {
         return isHiddenForRemodelingUI;
     }
 
-    public void setIsHiddenForRemodelingUI(boolean isHiddenForRemodelingUI) {
+    public void setIsHiddenForRemodelingUI(Boolean isHiddenForRemodelingUI) {
         this.isHiddenForRemodelingUI = isHiddenForRemodelingUI;
     }
 
@@ -379,6 +381,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setIsHiddenInCategoryTile(boolean hiddenInCategoryTile) {
         IsHiddenInCategoryTile = hiddenInCategoryTile;
+    }
+
+    public Boolean isAdminDisabledForModel() {
+        return isAdminDisabledForModel;
+    }
+
+    public void setAdminDisabledForModel(Boolean isAdminDisabledForModel) {
+        this.isAdminDisabledForModel = isAdminDisabledForModel;
     }
 
     @JsonProperty("FundamentalType")

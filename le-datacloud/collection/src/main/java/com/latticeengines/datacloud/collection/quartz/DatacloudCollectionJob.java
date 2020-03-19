@@ -22,7 +22,7 @@ public class DatacloudCollectionJob implements QuartzJobBean {
             @Override
             public Boolean call() {
 
-                collectionDBService.collect();
+                collectionDBService.collect(false);
 
                 return true;
 

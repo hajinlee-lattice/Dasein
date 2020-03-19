@@ -28,6 +28,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
@@ -566,37 +567,40 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         private GenericRecord toGenericRecord(CSVRecord csvRecord, long lineNum) {
+            Map<String, String> headerCaseMapping = headers.stream().collect(Collectors.toMap(header -> header.toLowerCase(),
+                    header -> header));
             for (Attribute attr : table.getAttributes()) {
                 Object avroFieldValue = null;
-                String csvColumnName = attr.getDisplayName();
+                String csvColumnNameInLowerCase = attr.getSourceAttrName() == null ?
+                        attr.getDisplayName().toLowerCase() : attr.getSourceAttrName().toLowerCase();
                 // try other possible names:
-                if (!headers.contains(csvColumnName)) {
+                if (!headerCaseMapping.containsKey(csvColumnNameInLowerCase)) {
                     List<String> possibleNames = attr.getPossibleCSVNames();
                     if (CollectionUtils.isNotEmpty(possibleNames)) {
                         for (String possibleName : possibleNames) {
-                            if (headers.contains(possibleName)) {
-                                csvColumnName = possibleName;
+                            if (headerCaseMapping.containsKey(possibleName.toLowerCase())) {
+                                csvColumnNameInLowerCase = possibleName.toLowerCase();
                                 break;
                             }
                         }
                     }
                 }
-                if (headers.contains(csvColumnName) || attr.getDefaultValueStr() != null) {
+                if (headerCaseMapping.containsKey(csvColumnNameInLowerCase) || attr.getDefaultValueStr() != null) {
                     Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
                     String csvFieldValue = null;
                     try {
-                        if (headers.contains(csvColumnName)) {
-                            csvFieldValue = String.valueOf(csvRecord.get(csvColumnName));
+                        if (headerCaseMapping.containsKey(csvColumnNameInLowerCase)) {
+                            csvFieldValue = String.valueOf(csvRecord.get(headerCaseMapping.get(csvColumnNameInLowerCase)));
                         }
                     } catch (Exception e) { // This catch is for the row error
                         rowError = true;
                         LOG.warn(e.getMessage());
                     }
                     try {
-                        if (StringUtils.isNotEmpty(csvFieldValue) && csvFieldValue.length() > MAX_STRING_LENGTH) {
+                        if (StringUtils.length(csvFieldValue) > MAX_STRING_LENGTH) {
                             throw new RuntimeException(String.format("%s exceeds %s chars", csvFieldValue, MAX_STRING_LENGTH));
                         }
-                        validateAttribute(csvRecord, attr, csvColumnName);
+                        validateAttribute(csvRecord, attr, headerCaseMapping.get(csvColumnNameInLowerCase));
                         if (StringUtils.isNotEmpty(attr.getDefaultValueStr()) || StringUtils.isNotEmpty(csvFieldValue)) {
                             if (StringUtils.isEmpty(csvFieldValue) && attr.getDefaultValueStr() != null) {
                                 csvFieldValue = attr.getDefaultValueStr();
@@ -626,7 +630,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                 } else {
                     try {
-                        validateAttribute(csvRecord, attr, csvColumnName);
+                        validateAttribute(csvRecord, attr, headerCaseMapping.get(csvColumnNameInLowerCase));
                     } catch (Exception e) {
                         LOG.warn(e.getMessage());
                         errorMap.put(attr.getDisplayName(), e.getMessage());

@@ -52,6 +52,9 @@ public class RedshiftPartitionServiceImpl implements RedshiftPartitionService {
     @Value("${redshift.jdbc.url.pattern}")
     private String jdbcUrlPattern;
 
+    @Value("${common.le.environment}")
+    private String leEnv;
+
     @Override
     public String getLegacyPartition() {
         return legacyPartition;
@@ -125,6 +128,10 @@ public class RedshiftPartitionServiceImpl implements RedshiftPartitionService {
             return dataSources.get(cacheKey);
         }
 
+        if (legacyPartition.equals(partition) && !"prodcluster".equals(leEnv)) {
+            throw new IllegalArgumentException("Should not connect to the legacy partition.");
+        }
+
         String jdbcUrl = getJdbcUrl(partition);
         log.info("Constructing c3p0 connection pool for " + jdbcUrl);
         ComboPooledDataSource cpds = new ComboPooledDataSource();
@@ -164,6 +171,9 @@ public class RedshiftPartitionServiceImpl implements RedshiftPartitionService {
     private String getCacheKey(String partition, String user) {
         if (StringUtils.isBlank(partition)) {
             partition = defaultPartition;
+        }
+        if (legacyPartition.equals(partition) && !"prodcluster".equals(leEnv)) {
+            throw new IllegalArgumentException("Should not be querying the legacy partition.");
         }
         return user + "@" + partition;
     }

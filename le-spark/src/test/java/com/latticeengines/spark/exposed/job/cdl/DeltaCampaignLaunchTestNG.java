@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,13 +66,23 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
     private boolean createRecommendationDataFrame;
     private boolean createAddCsvDataFrame;
     private boolean createDeleteCsvDataFrame;
+    Map<String, DataUnit> inputUnitsCopy = new HashMap<>();
 
     @Override
     @BeforeClass(groups = "functional")
     public void setup() {
         super.setup();
         uploadInputAvro();
+        Assert.assertNotNull(getInputUnits());
+        getInputUnits().forEach((k, v) -> {
+            inputUnitsCopy.put(k, v);
+        });
     }
+
+    /*
+     * This test is similar to TestRecommendationGenTestNG, but focuses on
+     * AWS_S3 channel, testing different scenarios of delta cases.
+     */
 
     @Test(groups = "functional", dataProvider = "dataFrameProvider")
     public void runTest(boolean createRecommendationDataFrameVal, boolean createAddCsvDataFrameVal,
@@ -91,8 +102,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
         } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
             // only have delete Accounts and delete contacts
             Map<String, DataUnit> inputUnits = new HashMap<>();
-            Assert.assertNotNull(getInputUnits());
-            getInputUnits().forEach((k, v) -> {
+            inputUnitsCopy.forEach((k, v) -> {
                 inputUnits.put(k, v);
             });
             inputUnits.put("Input0", null);
@@ -101,7 +111,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             setInputUnits(inputUnits);
         } else if (createRecommendationDataFrame && createAddCsvDataFrame && !createDeleteCsvDataFrame) {
             Map<String, DataUnit> inputUnits = new HashMap<>();
-            getInputUnits().forEach((k, v) -> {
+            inputUnitsCopy.forEach((k, v) -> {
                 inputUnits.put(k, v);
             });
             inputUnits.put("Input1", null); // addContact is null, as this
@@ -117,6 +127,8 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
             targetNum = 3;
         } else if (!createRecommendationDataFrame && !createAddCsvDataFrame && createDeleteCsvDataFrame) {
             targetNum = 1;
+        } else if (createRecommendationDataFrame && createAddCsvDataFrame && !createDeleteCsvDataFrame) {
+            targetNum = 2;
         }
         CreateDeltaRecommendationConfig sparkConfig = new CreateDeltaRecommendationConfig();
         DeltaCampaignLaunchSparkContext deltaCampaignLaunchSparkContext = generateDeltaCampaignLaunchSparkContextForS3();
@@ -211,7 +223,7 @@ public class DeltaCampaignLaunchTestNG extends TestJoinTestNGBase {
                     PathUtils.toAvroGlob(addCsvDf.getPath()));
             GenericRecord record = addCsvDfIter.next();
             Object contactObject = record.get(RecommendationColumnName.CONTACTS.name());
-            Assert.assertNull(contactObject);
+            Assert.assertTrue(StringUtils.isEmpty(contactObject.toString()));
         }
 
     }

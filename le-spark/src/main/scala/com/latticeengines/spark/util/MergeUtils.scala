@@ -6,6 +6,8 @@ import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.functions.{col, lit}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Row}
+import scala.math.min
+import scala.math.max
 
 private[spark] object MergeUtils {
 
@@ -13,6 +15,11 @@ private[spark] object MergeUtils {
   private val rhsMarker = "__merge_marker_rhs__"
 
   def merge2(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], //
+           overwriteByNull: Boolean): DataFrame = {
+    merge(lhs, rhs, joinKeys, colsFromLhs, Set(), Set(), overwriteByNull)
+  }
+  
+  def merge(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String], colsFromLhs: Set[String], minCols: Set[String], maxCols: Set[String], //
              overwriteByNull: Boolean): DataFrame = {
     val intersectCols = lhs.columns.intersect(rhs.columns).diff(joinKeys)
     val uniqueColsFromLhs = lhs.columns.diff(joinKeys.union(intersectCols))
@@ -61,6 +68,17 @@ private[spark] object MergeUtils {
             row.get(lhsColPos(attr))
           } else {
             val (firstVal, secondVal) =
+              if (minCols.contains(attr) || maxCols.contains(attr)) {
+                val lhs = row.get(lhsColPos(attr)).asInstanceOf[Long]
+                val rhs = row.get(rhsColPos(attr)).asInstanceOf[Long]
+                val minV = min(lhs, rhs)
+                val maxV = max(lhs, rhs)
+                if (minCols.contains(attr)) {
+                  (minV, maxV)
+                } else {
+                  (maxV, minV)
+                }
+              } else 
               if (colsFromLhs.contains(attr)) {
                 (row.get(lhsColPos(attr)), row.get(rhsColPos(attr)))
               } else {

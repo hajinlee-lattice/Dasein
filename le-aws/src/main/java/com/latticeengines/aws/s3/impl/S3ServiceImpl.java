@@ -188,6 +188,13 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public void cleanupByObjectList(List<S3ObjectSummary> summaries) {
+        for (S3ObjectSummary summary: summaries) {
+            s3Client.deleteObject(summary.getBucketName(), summary.getKey());
+        }
+    }
+
+    @Override
     public void cleanupPrefixByDateBetween(String bucket, String prefix, Date start, Date end) {
         prefix = sanitizePathToKey(prefix);
         List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();

@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
@@ -52,9 +51,6 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     @Inject
     private S3Service s3Service;
 
-    @Resource(name = "redshiftJdbcTemplate")
-    private JdbcTemplate redshiftJdbcTemplate;
-
     @Value("${aws.test.s3.bucket}")
     private String s3Bucket;
 
@@ -65,10 +61,12 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     private String jsonPathPrefix;
     private String unloadPrefix;
     private Schema schema;
+    private JdbcTemplate redshiftJdbcTemplate;
 
     @BeforeClass(groups = "functional")
     public void setup() {
         redshiftService = redshiftPartitionService.getBatchUserService(null);
+        redshiftJdbcTemplate = redshiftPartitionService.getBatchUserJdbcTemplate(null);
         avroPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/eventTable/EventTable.avro";
         jsonPathPrefix = RedshiftUtils.AVRO_STAGE + "/" + leStack + "/eventTable/EventTable.jsonpath";
         unloadPrefix = RedshiftUtils.CSV_STAGE + "/" + leStack + "/eventTable";

@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -42,6 +43,8 @@ public interface UserService {
 
     List<User> getUsers(String tenantId, UserFilter filter);
 
+    List<User> getUsers(String tenantId, UserFilter filter, boolean withTeam);
+
     boolean isSuperior(AccessLevel loginLevel, AccessLevel targetLevel);
 
     boolean inTenant(String tenantId, String username);
@@ -63,8 +66,6 @@ public interface UserService {
     RegistrationResult registerUserWithNoTenant(UserRegistration userReg);
 
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-                              Long expirationDate, boolean createUser, boolean clearSession);
-
-    void clearOldSessionForNewLogin(Long userId, String ticket);
+                              Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams);
 
 }

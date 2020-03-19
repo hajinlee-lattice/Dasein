@@ -215,6 +215,18 @@ public final class JsonUtils {
         return output;
     }
 
+    public static <K, V> List<Map<K, V>> convertListOfMaps(List<?> raw, Class<K> elementKeyClazz,
+            Class<V> elementValueClazz) {
+        if (raw == null) {
+            return null;
+        }
+        List<Map<K, V>> output = new ArrayList<>();
+        for (Object elt : raw) {
+            output.add(convertMap((Map<?, ?>) elt, elementKeyClazz, elementValueClazz));
+        }
+        return output;
+    }
+
     public static <T> Set<T> convertSet(Set<?> raw, Class<T> elementClazz) {
         if (raw == null) {
             return null;
@@ -288,23 +300,24 @@ public final class JsonUtils {
         return mapper.createObjectNode();
     }
 
-    // Converts a JSON object stored as a String in a system resource file to a "Plain Old Java Object" of the
+    // Converts a JSON object stored as a String in a system resource file to a
+    // "Plain Old Java Object" of the
     // provided class.
     // resourceJsonFileRelativePath should start "com/latticeengines/...".
-    public static <T> T pojoFromJsonResourceFile(String resourceJsonFileRelativePath, Class<T> clazz) throws
-            IOException {
+    public static <T> T pojoFromJsonResourceFile(String resourceJsonFileRelativePath, Class<T> clazz)
+            throws IOException {
         T pojo = null;
         try {
             InputStream jsonInputStream = ClassLoader.getSystemResourceAsStream(resourceJsonFileRelativePath);
             if (jsonInputStream == null) {
-                throw new IOException("Failed to convert resource file " + resourceJsonFileRelativePath +
-                        " to InputStream.  Please check path");
+                throw new IOException("Failed to convert resource file " + resourceJsonFileRelativePath
+                        + " to InputStream.  Please check path");
             }
             pojo = JsonUtils.deserialize(jsonInputStream, clazz);
             if (pojo == null) {
                 String jsonString = IOUtils.toString(jsonInputStream, Charset.defaultCharset());
-                throw new IOException("POJO was null. Failed to deserialize InputStream containing string: " +
-                        jsonString);
+                throw new IOException(
+                        "POJO was null. Failed to deserialize InputStream containing string: " + jsonString);
             }
         } catch (IOException e1) {
             throw new IOException("File to POJO conversion failed for resource file " + resourceJsonFileRelativePath,

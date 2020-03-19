@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsGroupEntityMgr;
 import com.latticeengines.apps.cdl.service.DimensionMetadataService;
 import com.latticeengines.common.exposed.util.TemplateUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -28,11 +29,13 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.OpportunityUtils;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 
 import reactor.core.publisher.Flux;
@@ -135,12 +138,14 @@ public class ActivityMetricDecorator implements Decorator {
         String timeRange = tokens.get(2);
         Map<String, Object> params = getRenderParams(attrName, group, rollupDimVals, timeRange);
         renderTemplates(cm, group, params);
+        renderFundamentalType(cm, group);
 
         switch (cm.getEntity()) {
             case WebVisitProfile:
                 WebVisitUtils.setColumnMetadataUIProperties(cm, group, timeRange, params);
                 break;
             case Opportunity:
+                OpportunityUtils.setColumnMetadataUIProperties(cm, group);
                 break;
             default:
                 log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
@@ -199,13 +204,31 @@ public class ActivityMetricDecorator implements Decorator {
         return params;
     }
 
+    /*
+     * fill missing fundamental type for backward compatibility
+     */
+    private void renderFundamentalType(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group) {
+        /*-
+         * when transforming from Attribute to ColumnMetadata, FundamentalType.ALPHA
+         * will be set as default if Attribute doesn't have it, so still need to force
+         * override if it's ALPHA.
+         */
+        if ((cm.getFundamentalType() != null && cm.getFundamentalType() != FundamentalType.ALPHA)
+                || group.getAggregation() == null) {
+            return;
+        }
+        if (group.getAggregation().getTargetFundamentalType() != null) {
+            cm.setFundamentalType(group.getAggregation().getTargetFundamentalType());
+        }
+    }
+
     private void renderTemplates(ColumnMetadata cm, ActivityMetricsGroup group, Map<String, Object> params) {
         String attrName = cm.getAttrName();
 
         String dispNameTmpl = group.getDisplayNameTmpl().getTemplate();
         if (StringUtils.isNotBlank(dispNameTmpl)) {
             try {
-                cm.setDisplayName(TemplateUtils.renderByMap(dispNameTmpl, params));
+                cm.setDisplayName(getTrimmedTemplate(dispNameTmpl, params));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to render display name for attribute " + attrName, e);
             }
@@ -214,7 +237,7 @@ public class ActivityMetricDecorator implements Decorator {
         String descTmpl = group.getDescriptionTmpl().getTemplate();
         if (StringUtils.isNotBlank(descTmpl)) {
             try {
-                cm.setDescription(TemplateUtils.renderByMap(descTmpl, params));
+                cm.setDescription(getTrimmedTemplate(descTmpl, params));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to render description for attribute " + attrName, e);
             }
@@ -223,10 +246,18 @@ public class ActivityMetricDecorator implements Decorator {
         String subCatTmpl = group.getSubCategoryTmpl().getTemplate();
         if (StringUtils.isNotBlank(subCatTmpl)) {
             try {
-                cm.setSubcategory(TemplateUtils.renderByMap(subCatTmpl, params));
+                cm.setSubcategory(getTrimmedTemplate(subCatTmpl, params));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to render sub-category for attribute " + attrName, e);
             }
         }
+    }
+
+    private String getTrimmedTemplate(String template, Map<String, Object> params) {
+        String result = TemplateUtils.renderByMap(template, params);
+        if (StringUtils.isNotBlank(result)) {
+            result = result.trim();
+        }
+        return result;
     }
 }

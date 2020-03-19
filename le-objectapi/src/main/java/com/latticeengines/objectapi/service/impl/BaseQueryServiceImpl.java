@@ -33,16 +33,15 @@ public abstract class BaseQueryServiceImpl {
 
     private static final Logger log = LoggerFactory.getLogger(BaseQueryServiceImpl.class);
 
-    protected QueryEvaluatorService queryEvaluatorService;
-
     @Inject
     protected QueryDiagnostics queryDiagnostics;
+    protected QueryEvaluatorService queryEvaluatorService;
 
-    @Inject
     protected TempListService tempListService;
 
-    BaseQueryServiceImpl(QueryEvaluatorService queryEvaluatorService) {
+    BaseQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TempListService tempListService) {
         this.queryEvaluatorService = queryEvaluatorService;
+        this.tempListService = tempListService;
     }
 
     public QueryEvaluatorService getQueryEvaluatorService() {

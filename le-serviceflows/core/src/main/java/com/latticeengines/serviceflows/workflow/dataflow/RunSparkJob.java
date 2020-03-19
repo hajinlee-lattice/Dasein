@@ -37,10 +37,12 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
     private C jobConfig;
 
     protected abstract Class<? extends AbstractSparkJob<C>> getJobClz();
+
     /**
      * Set job config except jobName and workspace.
      */
     protected abstract C configureJob(S stepConfiguration);
+
     protected abstract void postJobExecution(SparkJobResult result);
 
     @Override
@@ -60,7 +62,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
                     if (context.getRetryCount() > 0) {
                         log.info("Attempt=" + (context.getRetryCount() + 1) + ": retry running spark job " //
                                 + getJobClz().getSimpleName());
-                        log.warn("Previous failure:",  context.getLastThrowable());
+                        log.warn("Previous failure:", context.getLastThrowable());
                         killLivySession();
                     }
                     String jobName = tenantId + "~" + getJobClz().getSimpleName() + "~" + getClass().getSimpleName();
@@ -107,6 +109,6 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
         Map<String, Table> tables = tableNames.entrySet().stream()
                 .map(entry -> Pair.of(entry.getKey(), metadataProxy.getTable(customer, entry.getValue())))
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
-        return MapUtils.isEmpty(tables) ? false : tables.values().stream().noneMatch(Objects::isNull);
+        return MapUtils.isNotEmpty(tables) && tables.values().stream().noneMatch(Objects::isNull);
     }
 }

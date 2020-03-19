@@ -42,20 +42,10 @@ public class EntityQueryServiceImplBigListTestNG extends QueryServiceImplTestNGB
 
     @Test(groups = "functional")
     public void testBigList() {
-        List<Object> bigList = getCompanyNamesList();
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
-        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
-        Bucket bkt = Bucket.valueBkt(ComparisonType.IN_COLLECTION, bigList);
-        AttributeLookup attr = new AttributeLookup(BusinessEntity.Account, AccountAttr.CompanyName);
-        Restriction accRes = new BucketRestriction(attr, bkt);
-        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        frontEndRestriction.setRestriction(accRes);
-        frontEndQuery.setAccountRestriction(frontEndRestriction);
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        FrontEndQuery frontEndQuery = getBigListFrontEndQuery();
         long start = System.currentTimeMillis();
         long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         long duration1 = System.currentTimeMillis() - start;
-        Assert.assertTrue(count >= bigList.size());
         start = System.currentTimeMillis();
         long count2 = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue, SEGMENT_USER);
         Assert.assertEquals(count2, count);
@@ -63,9 +53,24 @@ public class EntityQueryServiceImplBigListTestNG extends QueryServiceImplTestNGB
         Assert.assertTrue(duration2 < duration1, "Second run should be faster");
     }
 
+    protected FrontEndQuery getBigListFrontEndQuery() {
+        List<Object> bigList = getCompanyNamesList();
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        Bucket bkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, bigList);
+        AttributeLookup attr = new AttributeLookup(BusinessEntity.Account, AccountAttr.CompanyName);
+        Restriction accRes = new BucketRestriction(attr, bkt);
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndRestriction.setRestriction(accRes);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        return frontEndQuery;
+    }
+
     private List<Object> getCompanyNamesList() {
         List<Object> candidates = new ArrayList<>();
-        final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("CompanyNameBigList");
+        final InputStream is = Thread.currentThread() //
+                .getContextClassLoader().getResourceAsStream("CompanyNameBigList");
         Assert.assertNotNull(is);
         Iterable<String> lns = () -> {
             try {

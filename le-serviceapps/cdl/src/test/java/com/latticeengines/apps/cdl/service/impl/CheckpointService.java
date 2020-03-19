@@ -298,6 +298,7 @@ public class CheckpointService {
                     dataUnit.setTenant(CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
                     dataUnit.setName(tgt);
                     dataUnit.setRedshiftTable(tgt.toLowerCase());
+                    dataUnit.setClusterPartition(redshiftPartitionService.getDefaultPartition());
                     dataUnitProxy.create(mainTestTenant.getId(), dataUnit);
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to clone redshift table.", e);

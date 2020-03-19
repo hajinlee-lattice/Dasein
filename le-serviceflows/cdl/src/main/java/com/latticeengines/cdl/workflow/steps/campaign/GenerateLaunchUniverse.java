@@ -15,6 +15,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignFrontEndQueryBuilder;
+import com.latticeengines.cdl.workflow.steps.campaign.utils.CampaignLaunchUtils;
 import com.latticeengines.cdl.workflow.steps.export.BaseSparkSQLStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
@@ -51,9 +53,13 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
     @Inject
     private PlayProxy playProxy;
 
+    @Inject
+    private CampaignLaunchUtils campaignLaunchUtils;
+
     private DataCollection.Version version;
     private String evaluationDate;
     private AttributeRepository attrRepo;
+    private boolean contactsDataExists;
 
     @Override
     public void execute() {
@@ -81,7 +87,7 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
-        boolean contactsDataExists = doesContactDataExist(attrRepo);
+        contactsDataExists = doesContactDataExist(attrRepo);
 
         ChannelConfig channelConfig = launch == null ? channel.getChannelConfig() : launch.getChannelConfig();
         Set<RatingBucketName> launchBuckets = launch == null ? channel.getBucketsToLaunch()
@@ -128,6 +134,14 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
         }
     }
 
+    private FrontEndQuery buildFrontEndQuery(FrontEndQuery frontEndQuery, BusinessEntity entity) {
+        FrontEndQuery result = new FrontEndQuery();
+        result.setMainEntity(entity);
+        result.setContactRestriction(frontEndQuery.getContactRestriction());
+        result.setAccountRestriction(frontEndQuery.getAccountRestriction());
+        return result;
+    }
+
     private HdfsDataUnit executeSparkJob(FrontEndQuery frontEndQuery) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
@@ -138,7 +152,17 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-
+                PageFilter pageFilter = frontEndQuery.getPageFilter();
+                if (pageFilter != null) {
+                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(pageFilter.getNumRows());
+                } else {
+                    long accountsCount = getEntityQueryCount(buildFrontEndQuery(frontEndQuery, BusinessEntity.Account));
+                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
+                    if (contactsDataExists) {
+                        long contactsCount = getEntityQueryCount(buildFrontEndQuery(frontEndQuery, BusinessEntity.Contact));
+                        campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
+                    }
+                }
                 // 2. get DataFrame for Account and Contact
                 HdfsDataUnit launchDataUniverseDataUnit = getEntityQueryData(frontEndQuery, true);
 

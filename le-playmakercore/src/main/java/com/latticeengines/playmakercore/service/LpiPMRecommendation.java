@@ -28,4 +28,6 @@ public interface LpiPMRecommendation {
     List<Map<String, Object>> getAccountIdsFromRecommendationByLaunchId(List<String> launchIds, long start, int offset, int max);
 
     int getAccountIdsCountFromRecommendationByLaunchId(List<String> launchIds, long start);
+
+    List<Map<String, Object>> getRecommendationsByLaunchIds(List<String> launchIds, long start, int offset, int maximum, int originOffset);
 }

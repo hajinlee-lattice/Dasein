@@ -237,7 +237,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         // get current active collection status
         DataCollectionStatus dcStatus = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
                 activeVersion);
-        String oldPartition = dcStatus.getRedshiftPartition();
         dcStatus.setEvaluationDate(evaluationDate);
         dcStatus.setApsRollingPeriod(configuration.getApsRollingPeriod());
         log.info("StartProcessing step: dataCollection Status is " + JsonUtils.serialize(dcStatus));
@@ -257,23 +256,27 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     inactiveVersion);
         }
 
-        if (!newPartition.equals(oldPartition)) {
-            syncRedshiftTablesToNewCluster(newPartition);
-        }
+        syncRedshiftTablesToNewCluster(newPartition);
     }
 
     private void syncRedshiftTablesToNewCluster(String newPartition) {
         RedshiftService newRedshiftService = redshiftPartitionService.getSegmentUserService(newPartition);
-        for (BusinessEntity entity : BusinessEntity.values()) {
-            TableRoleInCollection servingStore = entity.getServingStore();
-            if (servingStore != null) {
+        for (TableRoleInCollection servingStore: TableRoleInCollection.values()) {
+            if (StringUtils.isNotBlank(servingStore.getDistKey())) {
                 String tableName = //
                         dataCollectionProxy.getTableName(customerSpace.toString(), servingStore, activeVersion);
                 if (StringUtils.isNotBlank(tableName)) {
                     RedshiftDataUnit dataUnit = (RedshiftDataUnit) dataUnitProxy
                             .getByNameAndType(customerSpace.toString(), tableName, DataUnit.StorageType.Redshift);
-                    if (dataUnit != null && !newPartition.equals(dataUnit.getClusterPartition())
-                            && !newRedshiftService.hasTable(tableName)) {
+                    boolean newDataUnit = false;
+                    if (dataUnit == null) {
+                        dataUnit = new RedshiftDataUnit();
+                        dataUnit.setName(tableName);
+                        dataUnit.setTenant(customerSpace.getTenantId());
+                        dataUnit.setRedshiftTable(tableName.toLowerCase());
+                        newDataUnit = true;
+                    }
+                    if (!newPartition.equals(dataUnit.getClusterPartition()) || !newRedshiftService.hasTable(tableName)) {
                         log.info("Publishing redshift table {} to new partition {}", tableName, newPartition);
                         String distKey = servingStore.getDistKey();
                         List<String> sortKeys = new ArrayList<>(servingStore.getSortKeys());
@@ -287,11 +290,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                         exportConfig.setClusterPartition(newPartition);
                         exportConfig.setUpdateMode(false);
                         addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
-
                         if (!newPartition.equals(dataUnit.getClusterPartition())) {
                             dataUnit.setClusterPartition(newPartition);
                             try {
-                                dataUnitProxy.updateByNameAndType(customerSpace.toString(), dataUnit);
+                                if (newDataUnit) {
+                                    dataUnitProxy.create(customerSpace.toString(), dataUnit);
+                                } else {
+                                    dataUnitProxy.updateByNameAndType(customerSpace.toString(), dataUnit);
+                                }
                             } catch (Exception e) {
                                 log.warn("Failed to update redshift data unit", e);
                             }
