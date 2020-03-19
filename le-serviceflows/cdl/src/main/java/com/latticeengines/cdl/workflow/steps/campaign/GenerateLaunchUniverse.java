@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.GenerateLaunchUniverseStepConfiguration;
 import com.latticeengines.domain.exposed.util.ChannelConfigUtil;
@@ -152,17 +151,21 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                PageFilter pageFilter = frontEndQuery.getPageFilter();
-                if (pageFilter != null) {
-                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(pageFilter.getNumRows());
-                } else {
+                long userConfiguredLimit = frontEndQuery.getPageFilter().getNumRows();
+
+                if (frontEndQuery.getMainEntity() == BusinessEntity.Account) {
                     long accountsCount = getEntityQueryCount(buildFrontEndQuery(frontEndQuery, BusinessEntity.Account));
-                    campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
+                    campaignLaunchUtils
+                            .checkCampaignLaunchAccountLimitation(limitToCheck(userConfiguredLimit, accountsCount));
+                } else {
                     if (contactsDataExists) {
-                        long contactsCount = getEntityQueryCount(buildFrontEndQuery(frontEndQuery, BusinessEntity.Contact));
-                        campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
+                        long contactsCount = getEntityQueryCount(
+                                buildFrontEndQuery(frontEndQuery, BusinessEntity.Contact));
+                        campaignLaunchUtils
+                                .checkCampaignLaunchContactLimitation(limitToCheck(userConfiguredLimit, contactsCount));
                     }
                 }
+
                 // 2. get DataFrame for Account and Contact
                 HdfsDataUnit launchDataUniverseDataUnit = getEntityQueryData(frontEndQuery, true);
 
@@ -173,6 +176,10 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             }
         });
 
+    }
+
+    private long limitToCheck(long userConfiguredLimit, long queryCount) {
+        return userConfiguredLimit > 0 ? Math.min(userConfiguredLimit, queryCount) : queryCount;
     }
 
     @Override
