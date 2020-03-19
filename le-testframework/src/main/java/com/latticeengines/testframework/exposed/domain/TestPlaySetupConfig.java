@@ -12,6 +12,8 @@ public class TestPlaySetupConfig {
 
     private boolean mockRatingTable;
 
+    private boolean uploadRatingTable;
+
     private boolean testPlayCrud;
 
     private boolean launchPlay;
@@ -32,6 +34,11 @@ public class TestPlaySetupConfig {
 
         public Builder existingTenant(String existingTenant) {
             testPlaySetupConfig.existingTenantName = existingTenant;
+            return this;
+        }
+
+        public Builder uploadRatingTable(boolean uploadRatingTable) {
+            testPlaySetupConfig.uploadRatingTable = uploadRatingTable;
             return this;
         }
 
@@ -104,6 +111,10 @@ public class TestPlaySetupConfig {
     // Convenience method if the test only uses one channel
     public TestPlayChannelConfig getSinglePlayLaunchChannelConfig() {
         return CollectionUtils.isNotEmpty(channels) ? channels.get(0) : null;
+    }
+
+    public boolean isUploadRatingTable() {
+        return uploadRatingTable;
     }
 
 }

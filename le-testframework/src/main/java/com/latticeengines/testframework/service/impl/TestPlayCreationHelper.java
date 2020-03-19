@@ -213,10 +213,10 @@ public class TestPlayCreationHelper {
 
         createLookupIdMapping(testPlaySetupConfig);
         setupTestSegment();
-        setupTestRulesBasedModel();
+        setupTestRulesBasedModel(testPlaySetupConfig.isUploadRatingTable());
 
         if (testPlaySetupConfig.isMockRatingTable()) {
-            cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
+            cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null, testPlaySetupConfig.isUploadRatingTable());
         }
 
         createDefaultPlayAndTestCrud(testPlaySetupConfig);
@@ -243,14 +243,14 @@ public class TestPlayCreationHelper {
         playTargetSegment = createPlayTargetSegment();
     }
 
-    public void setupTestRulesBasedModel() {
+    public void setupTestRulesBasedModel(boolean uploadRatingTable) {
         if (segment == null) {
             throw new TestException("Segment not generated yet, model can only be created after creating a segment");
         }
 
         RatingRule ratingRule = createRatingRule();
         log.info("Creating test rules based model for test tenant: " + tenant.getId());
-        ruleBasedRatingEngine = createRatingEngine(segment, ratingRule);
+        ruleBasedRatingEngine = createRatingEngine(segment, ratingRule, uploadRatingTable);
     }
 
     public Play createPlayOnlyAndGet() {
@@ -731,7 +731,7 @@ public class TestPlayCreationHelper {
         return ratingRule;
     }
 
-    public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
+    public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule, boolean uploadRatingTable) {
         log.info("Creating Rating Engine");
         RatingEngine ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);
@@ -756,7 +756,7 @@ public class TestPlayCreationHelper {
         createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), re);
         Assert.assertNotNull(createdRatingEngine.getPublishedIteration());
 
-        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null, uploadRatingTable);
         ratingEngine1.setId(createdRatingEngine.getId());
 
         List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());
@@ -967,10 +967,6 @@ public class TestPlayCreationHelper {
 
     public RatingEngine getRulesBasedRatingEngine() {
         return ruleBasedRatingEngine;
-    }
-
-    public void publishRatingEngines(List<String> ratingIdsToPublish) {
-        cdlTestDataService.mockRatingTable(tenant.getId(), ratingIdsToPublish, null);
     }
 
     public void setTenant(Tenant tenant) {
