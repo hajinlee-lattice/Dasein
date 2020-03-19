@@ -177,6 +177,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ADDED_ACCOUNTS_FULL_CONTACTS_TABLE = "ADDED_ACCOUNTS_FULL_CONTACTS_TABLE";
     protected static final String FULL_ACCOUNTS_UNIVERSE = "FULL_ACCOUNTS_UNIVERSE";
     protected static final String FULL_CONTACTS_UNIVERSE = "FULL_CONTACTS_UNIVERSE";
+    protected static final String PREVIOUS_ACCOUNTS_UNIVERSE = "PREVIOUS_ACCOUNTS_UNIVERSE";
+    protected static final String PREVIOUS_CONTACTS_UNIVERSE = "PREVIOUS_CONTACTS_UNIVERSE";
     protected static final String FULL_LAUNCH_UNIVERSE = "FULL_LAUNCH_UNIVERSE";
     protected static final String DELTA_TABLE_COUNTS = "DELTA_TABLE_COUNTS";
     protected static final String RECOMMENDATION_ACCOUNT_DISPLAY_NAMES = "RECOMMENDATION_ACCOUNT_DISPLAY_NAMES";
@@ -308,7 +310,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ACCOUNT_SERVING_TABLE_NAME, //
             ACCOUNT_STATS_TABLE_NAME, //
             FULL_ACCOUNT_STATS_TABLE_NAME, //
-            ACCOUNT_LOOKUP_TABLE_NAME,
+            ACCOUNT_LOOKUP_TABLE_NAME, //
             REMATCHED_ACCOUNT_TABLE_NAME, //
             ENRICHED_ACCOUNT_DIFF_TABLE_NAME, //
             CONTACT_SERVING_TABLE_NAME, //
@@ -678,7 +680,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     protected void registerTable(String tableName) {
-        Set<String> registeredTableNames = getObjectFromContext(REGISTERED_TABLE_NAMES, Set.class);
+        Set<String> registeredTableNames = getSetObjectFromContext(REGISTERED_TABLE_NAMES, String.class);
         if (CollectionUtils.isEmpty(registeredTableNames)) {
             registeredTableNames = new HashSet<>();
         }

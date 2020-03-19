@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -58,6 +59,17 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                     log.warn(String.format("Created a new launch (%s) with failed state to log the failure event",
                             launchId));
                 }
+
+                PlayLaunchChannel channel = playProxy.getChannelById(customerSpace, playId, channelId);
+                channel.setCurrentLaunchedAccountUniverseTable(
+                        getStringValueFromContext(jobExecution, "PREVIOUS_ACCOUNTS_UNIVERSE"));
+                channel.setCurrentLaunchedContactUniverseTable(
+                        getStringValueFromContext(jobExecution, "PREVIOUS_CONTACTS_UNIVERSE"));
+                log.warn(String.format(
+                        "Reverting the Launch universe to the launch universe prior to the current workflow AccountUniverseTable:%s ContactUniverseTable: %s ",
+                        channel.getCurrentLaunchedAccountUniverseTable(),
+                        channel.getCurrentLaunchedContactUniverseTable()));
+                playProxy.updatePlayLaunchChannel(customerSpace, playId, channelId, channel, false);
             }
         } catch (Exception e) {
             log.error("Failed to execute Listener for CampaignDeltaCalculationWorkflow successfully", e);
