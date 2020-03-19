@@ -123,7 +123,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void testPreviewTemplateName() throws Exception {
         assertTrue(getS3ImportTemplateEntries());
         S3ImportSystem importSystem = cdlService.getS3ImportSystem(MultiTenantContext.getCustomerSpace().toString(), templateDisplay.getS3ImportSystem().getName());
-        importSystem.setAccountSystemId("user_CrmAccount_External_ID");
+        importSystem.setAccountSystemId("user_crmaccount_external_id");
         cdlService.updateS3ImportSystem(mainTestTenant.getId(), importSystem);
         String url = BASE_URL_PREFIX + "/s3import/template/preview";
         HttpHeaders headers = new HttpHeaders();
