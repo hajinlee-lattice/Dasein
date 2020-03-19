@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -78,17 +77,11 @@ public class UserResource {
         UserFilter filter;
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
         if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
-            filter = user -> {
-                if (StringUtils.isEmpty(user.getAccessLevel())) {
-                    return false;
-                }
-                AccessLevel level = AccessLevel.valueOf(user.getAccessLevel());
-                return level.equals(AccessLevel.EXTERNAL_USER) || level.equals(AccessLevel.EXTERNAL_ADMIN);
-            };
+            filter = UserFilter.EXTERNAL_FILTER;
         } else {
             filter = UserFilter.TRIVIAL_FILTER;
         }
-        List<User> users = userService.getUsers(tenant.getId(), filter);
+        List<User> users = userService.getUsers(tenant.getId(), filter, true);
 
         response.setSuccess(true);
         response.setResult(users);
@@ -212,7 +205,7 @@ public class UserResource {
             }
             boolean newUser = !userService.inTenant(tenantId, username);
             userService.assignAccessLevel(targetLevel, tenantId, username, loginUsername, data.getExpirationDate(),
-                    false, !newUser);
+                    false, !newUser, data.getUserTeams());
             LOGGER.info(String.format("%s assigned %s access level to %s in tenant %s", loginUsername,
                     targetLevel.name(), username, tenantId));
             User user = userService.findByUsername(username);

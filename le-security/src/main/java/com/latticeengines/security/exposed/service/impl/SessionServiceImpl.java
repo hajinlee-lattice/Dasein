@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.service.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -14,6 +15,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.util.SessionUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
@@ -132,6 +134,8 @@ public class SessionServiceImpl implements SessionService {
             retryInterval = Double.valueOf(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
             SleepUtils.sleep(retryInterval);
         }
+        Date now = new Date(System.currentTimeMillis());
+        validateSession(now, session);
         if (session != null) {
             session.setAuthenticationRoute(AUTH_ROUTE_GA);
         }
@@ -180,6 +184,13 @@ public class SessionServiceImpl implements SessionService {
         return false;
     }
 
+    private void validateSession(Date now, Session session) {
+        Long timeElapsed = now.getTime() - session.getTicketCreationTime();
+        if ((int) (timeElapsed / (1000 * 60)) > SessionUtils.TicketTimeoutInMinute) {
+            throw new LedpException(LedpCode.LEDP_19016);
+        }
+    }
+
     private Session retrieve(String token) {
         Ticket ticket = new Ticket(token);
         Long retryInterval = retryIntervalMsec;
@@ -198,7 +209,8 @@ public class SessionServiceImpl implements SessionService {
             retryInterval = Double.valueOf(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
             SleepUtils.sleep(retryInterval);
         }
-
+        Date now = new Date(System.currentTimeMillis());
+        validateSession(now, session);
         return setTenantPid(session);
     }
 

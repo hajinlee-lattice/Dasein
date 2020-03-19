@@ -47,11 +47,11 @@ public class RecommendationResource {
     @ApiOperation(value = "Get recommendations")
     public Map<String, Object> getRecommendations(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
-            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
-            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
-            @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum", required = true) int maximum,
-            @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = true) @RequestParam(value = "destination", required = true) String destination,
-            @ApiParam(value = "Play's Id whose recommendations are returned", required = false) @RequestParam(value = "playId", required = false) List<String> playIds) {
+            @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start") long start,
+            @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset") int offset,
+            @ApiParam(value = "Maximum records returned above offset", required = true) @RequestParam(value = "maximum") int maximum,
+            @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = true) @RequestParam(value = "destination") String destination,
+            @ApiParam(value = "Play's Id whose recommendations are returned") @RequestParam(value = "playId", required = false) List<String> playIds) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getRecommendations(tenantName, lookupSource, start, offset, maximum,

@@ -72,8 +72,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         put("update dataCollection datacloudbuildnumber", url);
     }
 
-    public DataCollectionStatus getOrCreateDataCollectionStatus(String customerSpace,
-            DataCollection.Version version) {
+    public DataCollectionStatus getOrCreateDataCollectionStatus(String customerSpace, DataCollection.Version version) {
         String urlPattern = "/customerspaces/{customerSpace}/datacollection/status";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
@@ -292,7 +291,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         args.add(tableName);
         args.add(role);
         args.add(version);
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTable", url);
     }
 
@@ -302,7 +301,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         args.add(shortenCustomerSpace(customerSpace));
         args.add(role);
         args.add(version);
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTables", url);
     }
 
@@ -311,7 +310,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
         args.add(version);
-        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        String url = constructUrl(urlPattern, args.toArray());
         delete("unlinkTables", url);
     }
 
@@ -385,7 +384,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         if (version != null) {
             url = constructUrl("/customerspaces/{customerSpace}/datacollection/attrrepo?version={version}",
                     shortenCustomerSpace(customerSpace), version);
-            method = "get default attribute repo for customer " + customerSpace  + " at version " + version;
+            method = "get default attribute repo for customer " + customerSpace + " at version " + version;
         }
         return getKryo(method, url, AttributeRepository.class);
     }
@@ -399,7 +398,7 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return activeVersion.complement();
     }
 
-    //FIXME: to be implemented
+    // FIXME: to be implemented
     public DataCloudVersion getDataCloudVersion(String customerSpace, DataCollection.Version version) {
         return columnMetadataProxy.latestVersion();
     }
@@ -407,6 +406,18 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     public DynamoDataUnit getAccountLookupDynamoDataUnit(String customerSpace, DataCollection.Version version) {
         DynamoDataUnit dynamoDataUnit = null;
         String tableName = getTableName(customerSpace, TableRoleInCollection.AccountLookup, version);
+        if (StringUtils.isNotBlank(tableName)) {
+            DataUnit dataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName, DataUnit.StorageType.Dynamo);
+            if (dataUnit != null) {
+                dynamoDataUnit = (DynamoDataUnit) dataUnit;
+            }
+        }
+        return dynamoDataUnit;
+    }
+
+    public DynamoDataUnit getContactsByAccountLookupDataUnit(String customerSpace, DataCollection.Version version) {
+        DynamoDataUnit dynamoDataUnit = null;
+        String tableName = getTableName(customerSpace, TableRoleInCollection.ConsolidatedContact, version);
         if (StringUtils.isNotBlank(tableName)) {
             DataUnit dataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName, DataUnit.StorageType.Dynamo);
             if (dataUnit != null) {
@@ -472,28 +483,27 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     public DataCollectionArtifact updateDataCollectionArtifact(String customerSpace, DataCollectionArtifact artifact) {
         String url = "/customerspaces/{customerSpace}/datacollection/artifact";
-        artifact = put("updateDataCollectionArtifact", constructUrl(url, shortenCustomerSpace(customerSpace)),
-                artifact, DataCollectionArtifact.class);
+        artifact = put("updateDataCollectionArtifact", constructUrl(url, shortenCustomerSpace(customerSpace)), artifact,
+                DataCollectionArtifact.class);
         return artifact;
     }
 
     public DataCollectionArtifact createDataCollectionArtifact(String customerSpace, DataCollection.Version version,
-                                                               DataCollectionArtifact artifact) {
-        String requestUrl = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/artifact/version/{version}",
+            DataCollectionArtifact artifact) {
+        String requestUrl = constructUrl("/customerspaces/{customerSpace}/datacollection/artifact/version/{version}",
                 shortenCustomerSpace(customerSpace), version);
         return post("createDataCollectionArtifact", requestUrl, artifact, DataCollectionArtifact.class);
     }
 
     public String getDataCollectionArtifactPath(String customerSpace, String exportId) {
-        String requestUrl = constructUrl(
-                "/customerspaces/{customerSpace}/datacollection/artifact/{exportId}/path",
+        String requestUrl = constructUrl("/customerspaces/{customerSpace}/datacollection/artifact/{exportId}/path",
                 shortenCustomerSpace(customerSpace), exportId);
         return getGenericBinary("getDataCollectionArtifactPath", requestUrl, String.class);
     }
 
     public void clearCache(String customerSpace) {
-        String requestUrl = constructUrl("/customerspaces/{customerSpace}//clearcache", shortenCustomerSpace(customerSpace));
+        String requestUrl = constructUrl("/customerspaces/{customerSpace}//clearcache",
+                shortenCustomerSpace(customerSpace));
         delete("createDataCollectionArtifact", requestUrl);
     }
 

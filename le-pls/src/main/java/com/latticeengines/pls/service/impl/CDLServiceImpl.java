@@ -111,6 +111,8 @@ public class CDLServiceImpl implements CDLService {
 
     private static final String ATTR_VALUE = "Record";
 
+    private static final String SOURCE = "File";
+
     @Inject
     protected SourceFileService sourceFileService;
 
@@ -665,7 +667,8 @@ public class CDLServiceImpl implements CDLService {
             } else {
                 appendTemplateMapptingValue(fileContent, CUSTOM);
             }
-            appendTemplateMapptingValue(fileContent, attribute.getDisplayName());
+            appendTemplateMapptingValue(fileContent, attribute.getSourceAttrName() == null ?
+                    attribute.getDisplayName() : attribute.getSourceAttrName());
             appendTemplateMapptingValue(fileContent, attribute.getName());
             appendFieldType(fileContent, attribute);
             fileContent.append("\n");
@@ -816,7 +819,8 @@ public class CDLServiceImpl implements CDLService {
     private TemplateFieldPreview getFieldPreviewFromAttribute(Attribute attribute) {
         TemplateFieldPreview fieldPreview = new TemplateFieldPreview();
         fieldPreview.setNameInTemplate(attribute.getName());
-        fieldPreview.setNameFromFile(attribute.getDisplayName());
+        fieldPreview.setNameFromFile(
+                attribute.getSourceAttrName() == null ? attribute.getDisplayName() : attribute.getSourceAttrName());
         fieldPreview.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
         if (UserDefinedType.DATE.equals(fieldPreview.getFieldType())) {
             fieldPreview.setDateFormatString(attribute.getDateFormatString());
@@ -929,11 +933,24 @@ public class CDLServiceImpl implements CDLService {
     }
 
     @Override
-    public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String streamName,
-                                                                        String signature) {
+    public Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String systemName,
+                                                                        EntityType entityType) {
+        log.info("customerSpace is {}, systemName is {}, entityType is {}.", customerSpace, systemName, entityType);
+        String streamName;
+        switch (entityType) {
+            case WebVisit:
+                streamName = entityType.name();
+                break;
+            case Opportunity:
+                streamName = systemName + "_" + entityType.name();
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("getDimensionMetadata() Cannot support " +
+                    "entityType %s", entityType.name()));
+        }
         Map<String, DimensionMetadata> metadataMap =
-                activityStoreProxy.getDimensionMetadataInStream(customerSpace, streamName, signature);
-        log.info("customerSpace is {}, streamName is {}, signature is {}.", customerSpace, streamName, signature);
+                activityStoreProxy.getDimensionMetadataInStream(customerSpace, streamName, null);
+        log.info("customerSpace is {}, streamName is {}, signature is {}.", customerSpace, streamName, null);
         Map<String, List<Map<String, Object>>> dimensionMetadataMap = new HashMap<>();
         log.info("dimensionMetadataMap is {}.", JsonUtils.serialize(dimensionMetadataMap));
         metadataMap.forEach((dimId, metadata) -> {
@@ -945,23 +962,38 @@ public class CDLServiceImpl implements CDLService {
     @Override
     public void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
                                                   String mimeType, String fileName, String customerSpace,
-                                                  String streamName, String signature, String dimensionName) {
-        log.info("mimeType is {}, fileName is {}, customerSpace is {}, streamName is {}, signature is {}, " +
-                "dimensionName is {}.", mimeType, fileName, customerSpace, streamName, signature, dimensionName);
-        List<Map<String, Object>> metadataValues = getMetadataValues(customerSpace, streamName, signature, dimensionName);
+                                                  String systemName, EntityType entityType) {
+        log.info("mimeType is {}, fileName is {}, customerSpace is {}, systemName is {}, entityType is {}, ",
+                mimeType, fileName, customerSpace, systemName, entityType);
+        List<Map<String, Object>> metadataValues = getMetadataValues(customerSpace, systemName, entityType);
         DlFileHttpDownloader.DlFileDownloaderBuilder builder = new DlFileHttpDownloader.DlFileDownloaderBuilder();
         builder.setMimeType(mimeType).setFileName(fileName).setFileContent(getCSVFromValues(metadataValues)).setBatonService(batonService);
         DlFileHttpDownloader downloader = new DlFileHttpDownloader(builder);
         downloader.downloadFile(request, response);
     }
 
-    private List<Map<String, Object>> getMetadataValues(String customerSpace, String streamName, String signature,
-                                                        String dimensionName) {
+    private List<Map<String, Object>> getMetadataValues(String customerSpace, String systemName, EntityType entityType) {
+        String dimensionName;
+        EntityType streamType;
+        switch(entityType) {
+            case WebVisitPathPattern:
+                streamType = EntityType.WebVisit;
+                dimensionName = InterfaceName.PathPatternId.name();
+                break;
+            case WebVisitSourceMedium:
+                streamType = EntityType.WebVisit;
+                dimensionName = InterfaceName.SourceMediumId.name();
+                break;
+                    default:
+                        throw new IllegalArgumentException(String.format("this method cannot support this " +
+                            "entityType. entityType is %s.", entityType.name()));
+        }
+
         Map<String, List<Map<String, Object>>> getAllDimensionMetadataValues =
-                getDimensionMetadataInStream(customerSpace, streamName, signature);
+                getDimensionMetadataInStream(customerSpace, systemName, streamType);
         if (!getAllDimensionMetadataValues.containsKey(dimensionName)) {
             throw new IllegalArgumentException(String.format("CustomerSpace %s, cannot find dimensionName %s in " +
-                            "stream %s, signature is %s.", customerSpace, dimensionName, streamName, signature));
+                            "systemName %s, entityType is %s.", customerSpace, dimensionName, systemName, entityType));
         }
         return getAllDimensionMetadataValues.get(dimensionName);
     }
@@ -986,35 +1018,35 @@ public class CDLServiceImpl implements CDLService {
         if (CollectionUtils.isEmpty(metadataValues)) {
             return "";
         }
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuilder = new StringBuilder();
         Map<String, Object> firstMetadataValue = metadataValues.get(0);
         Set<String> keySet = firstMetadataValue.keySet();
         int count = 0;
         for (String header : keySet) {
             if (count == keySet.size() - 1) {
-                stringBuffer.append(modifyStringForCSV(header));
+                stringBuilder.append(modifyStringForCSV(header));
             } else {
-                stringBuffer.append(modifyStringForCSV(header)).append(",");
+                stringBuilder.append(modifyStringForCSV(header)).append(",");
             }
             count++;
         }
-        stringBuffer.append("\r\n");
+        stringBuilder.append("\r\n");
 
         for (Map<String, Object> metadataValue : metadataValues) {
             Collection<Object> valueSet = metadataValue.values();
             int num = 0;
             for (Object object : valueSet) {
                 if (num == keySet.size() - 1) {
-                    stringBuffer.append(modifyStringForCSV(String.valueOf(object)));
+                    stringBuilder.append(modifyStringForCSV(String.valueOf(object)));
                 } else {
-                    stringBuffer.append(modifyStringForCSV(String.valueOf(object))).append(",");
+                    stringBuilder.append(modifyStringForCSV(String.valueOf(object))).append(",");
                 }
                 num++;
             }
-            stringBuffer.append("\r\n");
+            stringBuilder.append("\r\n");
         }
 
-        return stringBuffer.toString();
+        return stringBuilder.toString();
     }
     private String modifyStringForCSV(String value) {
         if (value == null) {

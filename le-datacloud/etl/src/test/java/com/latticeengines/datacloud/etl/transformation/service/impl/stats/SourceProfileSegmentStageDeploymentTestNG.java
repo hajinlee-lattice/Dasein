@@ -209,7 +209,7 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
         disBucket.setValues(Arrays.asList(intValues));
         map.put("BusinessTechnologiesSeoMeta", disBucket);
         CategoricalBucket catBucket = new CategoricalBucket();
-        String[] catValues = { "684", "425", "636", "716" };
+        String[] catValues = { "684", "425", "636", "716", "492" };
         catBucket.setCategories(Arrays.asList(catValues));
         map.put("GLOBAL_ULTIMATE_DnB_COUNTY_CODE", catBucket);
         // map.put("LAST_UPDATE_DATE", null);
@@ -236,7 +236,6 @@ public class SourceProfileSegmentStageDeploymentTestNG extends PipelineTransform
                 decAttrToEnc.put(srcAttr.getAttribute(), bitDecodeStrategy.getEncodedColumn());
             }
         }
-
         while (records.hasNext()) {
             GenericRecord record = records.next();
             Object attr = record.get("AttrName");

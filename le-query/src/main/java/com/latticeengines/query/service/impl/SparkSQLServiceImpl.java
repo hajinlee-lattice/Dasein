@@ -5,7 +5,7 @@ import static com.latticeengines.query.util.SparkSQLQueryUtils.FINAL;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -193,6 +193,41 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return result.getTargets().get(0);
     }
 
+    @Override
+    public void createTempListView(LivySession livySession, String viewName, Class<?> fieldClz, //
+                                   List<List<Object>> vals) {
+        String compressedVals = compressSql(JsonUtils.serialize(vals));
+        buildLongString(livySession, compressedVals);
+        InputStreamSparkScript sparkScript = getTempListScript();
+        ScriptJobConfig jobConfig = new ScriptJobConfig();
+        jobConfig.setNumTargets(0);
+        Map<String, Object> params = new HashMap<>();
+        params.put("VIEW_NAME", viewName);
+        params.put("TYPE", fieldClz.getSimpleName());
+        jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
+        sparkJobService.runScript(livySession, sparkScript, jobConfig);
+    }
+
+    private void buildLongString(LivySession livySession, String longStr) {
+        List<String> splits = splitLongStr(longStr);
+        boolean isFirstSplit = true;
+        for (String split: splits) {
+            InputStreamSparkScript sparkScript;
+            if (isFirstSplit) {
+                sparkScript = getBuildStrScript("new");
+                isFirstSplit = false;
+            } else {
+                sparkScript = getBuildStrScript("append");
+            }
+            ScriptJobConfig jobConfig = new ScriptJobConfig();
+            jobConfig.setNumTargets(0);
+            Map<String, Object> params = new HashMap<>();
+            params.put("FRAGMENT", split);
+            jobConfig.setParams(JsonUtils.convertValue(params, JsonNode.class));
+            sparkJobService.runScript(livySession, sparkScript, jobConfig);
+        }
+    }
+
     private void setSQLParam(String sql, Map<String, Object> params) {
         List<List<String>> sqls = splitSql(sql, FINAL);
         if (CollectionUtils.size(sqls) > 1) {
@@ -270,6 +305,14 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         return getScalaScript("merge-rules");
     }
 
+    private InputStreamSparkScript getTempListScript() {
+        return getScalaScript("temp-list");
+    }
+
+    private InputStreamSparkScript getBuildStrScript(String mode) {
+        return getScalaScript("build-str-" + mode);
+    }
+
     private InputStreamSparkScript getScalaScript(String script) {
         InputStream is = Thread.currentThread().getContextClassLoader() //
                 .getResourceAsStream("scripts/" + script + ".scala");
@@ -327,13 +370,24 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     private String compressSql(String sql) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             try (GzipCompressorOutputStream gzip = new GzipCompressorOutputStream(baos)) {
-                gzip.write(sql.getBytes(Charset.forName("UTF-8")));
+                gzip.write(sql.getBytes(StandardCharsets.UTF_8));
                 gzip.close();
                 return Base64.getEncoder().encodeToString(baos.toByteArray());
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to compress sql: " + sql);
         }
+    }
+
+    private List<String> splitLongStr(String longStr) {
+        List<String> splits = new ArrayList<>();
+        int maxLength = 40000;
+        while (longStr.length() > maxLength) {
+            splits.add(longStr.substring(0, maxLength));
+            longStr = longStr.substring(maxLength);
+        }
+        splits.add(longStr);
+        return splits;
     }
 
 }

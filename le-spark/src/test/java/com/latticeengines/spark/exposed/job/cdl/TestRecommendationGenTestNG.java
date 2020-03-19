@@ -64,6 +64,12 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         uploadInputAvro();
     }
 
+    /*
+     * This test manipulates the account and contact data and manually uploads
+     * to HDFS. The focus is at the expected columns of generated recommendation
+     * dataframe and csv dataframe
+     */
+
     @Test(groups = "functional", dataProvider = "destinationProvider")
     public void runTest(final CDLExternalSystemName destination, boolean accountDataOnly) {
         overwriteInputs(accountDataOnly);
@@ -96,9 +102,9 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         return list;
     }
 
-    private Boolean verifyOutput(HdfsDataUnit target, List<Pair<List<String>, Boolean>> accountAndContextExpectedCols) {
-        Pair<List<String>, Boolean> accountExpectedCols = accountAndContextExpectedCols.get(0);
-        Pair<List<String>, Boolean> contactExpectedCols = accountAndContextExpectedCols.get(1);
+    private Boolean verifyOutput(HdfsDataUnit target, List<Pair<List<String>, Boolean>> accountAndContactExpectedCols) {
+        Pair<List<String>, Boolean> accountExpectedCols = accountAndContactExpectedCols.get(0);
+        Pair<List<String>, Boolean> contactExpectedCols = accountAndContactExpectedCols.get(1);
         AtomicInteger count = new AtomicInteger();
 
         verifyAndReadTarget(target).forEachRemaining(record -> {
@@ -362,7 +368,7 @@ public class TestRecommendationGenTestNG extends TestJoinTestNGBase {
         return Arrays.asList(PlaymakerConstants.Email, PlaymakerConstants.Address, PlaymakerConstants.Phone,
                 PlaymakerConstants.State, PlaymakerConstants.ZipCode, PlaymakerConstants.Country,
                 PlaymakerConstants.SfdcContactID, PlaymakerConstants.City, PlaymakerConstants.ContactID,
-                PlaymakerConstants.Name);
+                PlaymakerConstants.Name, PlaymakerConstants.FirstName, PlaymakerConstants.LastName);
     }
 
     private PlayLaunchSparkContext generateMarketoPlayLaunchSparkContext() {

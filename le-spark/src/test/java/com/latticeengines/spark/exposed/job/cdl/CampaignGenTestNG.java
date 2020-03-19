@@ -61,6 +61,12 @@ public class CampaignGenTestNG extends TestJoinTestNGBase {
         super.setup();
     }
 
+    /*
+     * This test make uses of the TestJoinTestNGBase framework by uploading
+     * Account and Contact data, and assert on the externalIds from
+     * recommendation dataframe and csv dataframe are consistent.
+     */
+
     @Test(groups = "functional", dataProvider = "destinationProvider")
     public void runTest(final CDLExternalSystemName destination, boolean accountDataOnly) {
         CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();

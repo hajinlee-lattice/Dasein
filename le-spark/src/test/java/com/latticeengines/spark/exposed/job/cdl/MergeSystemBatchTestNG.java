@@ -66,11 +66,17 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of("Id", Integer.class), //
                 Pair.of("template1__Attr1", String.class), //
+                Pair.of("template1__" + InterfaceName.CDLCreatedTime, Long.class), //
+                Pair.of("template1__" + InterfaceName.CDLUpdatedTime, Long.class), //
                 Pair.of("template2__Attr1", String.class), //
                 Pair.of("template2__Attr2", String.class), //
                 Pair.of("template2__" + InterfaceName.CustomerAccountId.name(), String.class), //
+                Pair.of("template2__" + InterfaceName.CDLCreatedTime, Long.class), //
+                Pair.of("template2__" + InterfaceName.CDLUpdatedTime, Long.class), //
                 Pair.of("template3__Attr1", String.class), //
-                Pair.of("template3__Attr2", String.class) //
+                Pair.of("template3__Attr2", String.class), //
+                Pair.of("template3__" + InterfaceName.CDLCreatedTime, Long.class), //
+                Pair.of("template3__" + InterfaceName.CDLUpdatedTime, Long.class) //
         );
         Object[][] data = getInput1Data();
         input.add(uploadHdfsDataUnit(data, fields));
@@ -80,8 +86,8 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
 
     private Object[][] getInput1Data() {
         Object[][] data = new Object[][] { //
-                { 1, "1_1", "2_1", "2_2", "2_3", "3_1", "3_2" }, //
-                { 2, "1_1b", "2_1b", "2_2b", "2_3b", "3_1b", null } //
+                { 1, "1_1", 1L, 2L, "2_1", "2_2", "2_3", 100L, 200L, "3_1", "3_2", 1000L, 2000L }, //
+                { 2, "1_1b", 1000L, 2000L, "2_1b", "2_2b", "2_3b", 100L, 200L, "3_1b", null, 1L, 2L } //
         };
         return data;
     }
@@ -104,7 +110,7 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
     private Boolean verifySingleSystemBatch(HdfsDataUnit tgt) {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            Assert.assertEquals(record.getSchema().getFields().size(), 4, record.toString());
+            Assert.assertEquals(record.getSchema().getFields().size(), 6, record.toString());
             int id = (int) record.get("Id");
             String attr1 = record.get("Attr1") == null ? null : record.get("Attr1").toString();
             String attr2 = record.get("Attr2") == null ? null : record.get("Attr2").toString();
@@ -133,7 +139,7 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
     private Boolean verifySystemBatchForKeepPrefix(HdfsDataUnit tgt) {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            Assert.assertEquals(record.getSchema().getFields().size(), 5, record.toString());
+            Assert.assertEquals(record.getSchema().getFields().size(), 9, record.toString());
             int id = (int) record.get("Id");
             String prefix = "template1__";
             String template1Attr1 = record.get(prefix + "Attr1") == null ? null
@@ -183,13 +189,16 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
         config.setJoinKey("Id");
         config.setKeepPrefix(false);
         config.setNotOverwriteByNull(true);
+        config.setTemplates(Arrays.asList("template1", "template3", "template2"));
+        config.setMinColumns(Arrays.asList(InterfaceName.CDLCreatedTime.name()));
+        config.setMaxColumns(Arrays.asList(InterfaceName.CDLUpdatedTime.name()));
         return config;
     }
 
     private Boolean verifySystemBatchWithoutPrefix(HdfsDataUnit tgt) {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            Assert.assertEquals(record.getSchema().getFields().size(), 4, record.toString());
+            Assert.assertEquals(record.getSchema().getFields().size(), 6, record.toString());
             int id = (int) record.get("Id");
             String attr1 = record.get("Attr1") == null ? null : record.get("Attr1").toString();
             String attr2 = record.get("Attr2") == null ? null : record.get("Attr2").toString();
@@ -218,17 +227,23 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
     private Boolean verifySystemBatchPrimarySecondary(HdfsDataUnit tgt) {
         final AtomicLong count = new AtomicLong();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            Assert.assertEquals(record.getSchema().getFields().size(), 4, record.toString());
+            Assert.assertEquals(record.getSchema().getFields().size(), 6, record.toString());
             int id = (int) record.get("Id");
             String attr1 = record.get("Attr1") == null ? null : record.get("Attr1").toString();
             String attr2 = record.get("Attr2") == null ? null : record.get("Attr2").toString();
             String attr3 = record.get(InterfaceName.CustomerAccountId.name()) == null ? null
                     : record.get(InterfaceName.CustomerAccountId.name()).toString();
+            Long createTime = new Long(record.get(InterfaceName.CDLCreatedTime.name()) == null ? null
+                    : record.get(InterfaceName.CDLCreatedTime.name()).toString());
+            Long updateTime = new Long(record.get(InterfaceName.CDLCreatedTime.name()) == null ? null
+                    : record.get(InterfaceName.CDLUpdatedTime.name()).toString());
             switch (id) {
             case 1:
                 Assert.assertEquals(attr1, "2_1", record.toString());
                 Assert.assertEquals(attr2, "2_2", record.toString());
                 Assert.assertEquals(attr3, "2_3", record.toString());
+                Assert.assertTrue(createTime == 1L, record.toString());
+                Assert.assertTrue(updateTime == 2000L, record.toString());
                 break;
             case 2:
                 Assert.assertEquals(attr1, "2_1b", record.toString());

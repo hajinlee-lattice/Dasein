@@ -23,6 +23,12 @@ public class MergeSystemBatchConfig extends SparkJobConfig {
     @JsonProperty("Templates")
     private List<String> templates; // increasing priority
 
+    @JsonProperty("MinColumns")
+    private List<String> minColumns; // increasing priority
+
+    @JsonProperty("MaxColumns")
+    private List<String> maxColumns; // increasing priority
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -65,6 +71,22 @@ public class MergeSystemBatchConfig extends SparkJobConfig {
 
     public void setKeepPrefix(boolean keepPrefix) {
         this.keepPrefix = keepPrefix;
+    }
+
+    public List<String> getMinColumns() {
+        return minColumns;
+    }
+
+    public void setMinColumns(List<String> minColumns) {
+        this.minColumns = minColumns;
+    }
+
+    public List<String> getMaxColumns() {
+        return maxColumns;
+    }
+
+    public void setMaxColumns(List<String> maxColumns) {
+        this.maxColumns = maxColumns;
     }
 
 }

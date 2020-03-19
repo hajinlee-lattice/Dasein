@@ -53,7 +53,9 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
       			  PlaymakerConstants.SfdcContactID -> "", //
       			  PlaymakerConstants.City -> getInputValue(input, InterfaceName.City.name()), //
       			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
-      			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()))
+      			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()), //
+      			  PlaymakerConstants.FirstName -> getInputValue(input, InterfaceName.FirstName.name()), //
+      			  PlaymakerConstants.LastName -> getInputValue(input, InterfaceName.LastName.name()))
     } 
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
     buffer(0) = cur :+ ele  

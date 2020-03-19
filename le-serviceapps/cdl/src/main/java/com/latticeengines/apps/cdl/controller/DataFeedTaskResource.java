@@ -94,6 +94,14 @@ public class DataFeedTaskResource {
         return dataFeedTaskService.getDataFeedTask(customerSpace, taskId);
     }
 
+    @GetMapping("/source/{sourceId}")
+    @ResponseBody
+    @ApiOperation(value = "Get data feed task by source")
+    public DataFeedTask getDataFeedTaskBySource(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getDataFeedTaskBySource(customerSpace, sourceId);
+    }
+
     @RequestMapping(value = "/{entity}/list", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get data feed task")
@@ -197,4 +205,13 @@ public class DataFeedTaskResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getTemplatesBySystemPriority(customerSpace, entity, Boolean.TRUE.equals(highestFirst));
     }
+
+    @PutMapping(value = "/{pid}/deleted/{deleted}")
+    @ApiOperation(value = "Set data feed task deleted status")
+    public void setDataFeedTaskDeleteStatus(@PathVariable String customerSpace, @PathVariable Long pid,
+                                            @PathVariable Boolean deleted) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.setDataFeedTaskDelete(customerSpace, pid, deleted);
+    }
+
 }

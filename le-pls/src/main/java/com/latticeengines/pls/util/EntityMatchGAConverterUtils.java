@@ -12,12 +12,14 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 
 public final class EntityMatchGAConverterUtils {
 
+    protected static final String DEFAULT_SYSTEM = "DefaultSystem";
+
     protected EntityMatchGAConverterUtils() {
         throw new UnsupportedOperationException();
     }
 
     public static void convertGuessingMappings(boolean enableEntityMatch, boolean enableEntityMatchGA,
-                                               FieldMappingDocument fieldMappingDocument) {
+                                               FieldMappingDocument fieldMappingDocument, S3ImportSystem defaultSystem) {
         if (!enableEntityMatchGA) {
             return;
         }
@@ -31,11 +33,22 @@ public final class EntityMatchGAConverterUtils {
         boolean containsAccountId = false;
         boolean containsCustomerContactId = false;
         boolean containsContactId = false;
+        boolean isDefaultSystem = defaultSystem != null && DEFAULT_SYSTEM.equals(defaultSystem.getName());
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (InterfaceName.AccountId.name().equals(fieldMapping.getMappedField())) {
+                //add this properties to make sure systemAccountId can be set correctly.
+                if (isDefaultSystem) {
+                    fieldMapping.setIdType(FieldMapping.IdType.Account);
+                    fieldMapping.setMapToLatticeId(true);
+                }
                 containsAccountId = true;
             }
             if (InterfaceName.ContactId.name().equals(fieldMapping.getMappedField())) {
+                //add this properties to make sure systemContactId can be set correctly.
+                if (isDefaultSystem) {
+                    fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                    fieldMapping.setMapToLatticeId(true);
+                }
                 containsContactId = true;
             }
             if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
@@ -52,6 +65,11 @@ public final class EntityMatchGAConverterUtils {
             for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
                 if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
                     fieldMapping.setMappedField(InterfaceName.AccountId.name());
+                    if (isDefaultSystem) {
+                        //add this properties to make sure systemAccountId can be set correctly.
+                        fieldMapping.setIdType(FieldMapping.IdType.Account);
+                        fieldMapping.setMapToLatticeId(true);
+                    }
                 }
             }
         }
@@ -62,8 +80,23 @@ public final class EntityMatchGAConverterUtils {
             for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
                 if (InterfaceName.CustomerContactId.name().equals(fieldMapping.getMappedField())) {
                     fieldMapping.setMappedField(InterfaceName.ContactId.name());
+                    if (isDefaultSystem) {
+                        //add this properties to make sure systemContactId can be set correctly.
+                        fieldMapping.setIdType(FieldMapping.IdType.Contact);
+                        fieldMapping.setMapToLatticeId(true);
+                    }
                 }
             }
+        }
+
+        if (isDefaultSystem) {
+            if (StringUtils.isNotEmpty(defaultSystem.getAccountSystemId())) {
+                fieldMappingDocument.getFieldMappings().removeIf(fieldMapping -> defaultSystem.getAccountSystemId().equals(fieldMapping.getMappedField()));
+            }
+            if (StringUtils.isNotEmpty(defaultSystem.getContactSystemId())) {
+                fieldMappingDocument.getFieldMappings().removeIf(fieldMapping -> defaultSystem.getContactSystemId().equals(fieldMapping.getMappedField()));
+            }
+
         }
     }
 

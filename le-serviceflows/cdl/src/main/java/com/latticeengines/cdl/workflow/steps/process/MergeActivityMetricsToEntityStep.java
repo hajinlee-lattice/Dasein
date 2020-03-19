@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
@@ -36,6 +35,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.TemplateUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.StringTemplateConstants;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
@@ -86,9 +86,10 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     private boolean shortCutMode = false;
 
     private ConcurrentMap<String, Map<String, DimensionMetadata>> streamMetadataCache;
-    Map<TableRoleInCollection, Table> tableCache = new HashMap<>();
+    private Map<TableRoleInCollection, Table> tableCache = new HashMap<>();
     private static TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>> streamMetadataCacheTypeRef = new TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>>() {
     };
+    private Set<String> dateRangeEvaluatedSet = new HashSet<>();
 
     @Override
     protected Class<? extends AbstractSparkJob<MergeActivityMetricsJobConfig>> getJobClz() {
@@ -222,6 +223,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             signatureTableNames.putIfAbsent(servingStore, new HashMap<>());
             signatureTableNames.get(servingStore).put(getEntityInLabel(mergedTableLabel).name(), tableName);
             mergedMetricsGroupTables.put(mergedTableLabel, mergedTable);
+            log.info("Processed date ranges for {}: {}", servingStore, dateRangeEvaluatedSet);
         });
         // signature: entity (Account/Contact)
         // role: WebVisitProfile
@@ -301,7 +303,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         String descTmpl = group.getDescriptionTmpl().getTemplate();
         if (StringUtils.isNotBlank(descTmpl)) {
             try {
-                attr.setDescription(TemplateUtils.renderByMap(displayNameTmpl, params));
+                attr.setDescription(TemplateUtils.renderByMap(descTmpl, params));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to render description for attribute " + attrName, e);
             }
@@ -309,7 +311,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         String subCategoryTmpl = group.getSubCategoryTmpl().getTemplate();
         if (StringUtils.isNotBlank(subCategoryTmpl)) {
             try {
-                attr.setSubcategory(TemplateUtils.renderByMap(displayNameTmpl, params));
+                attr.setSubcategory(TemplateUtils.renderByMap(subCategoryTmpl, params));
             } catch (Exception e) {
                 throw new IllegalArgumentException("Failed to render sub-category for attribute " + attrName, e);
             }
@@ -333,6 +335,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
                 }
             }
         }
+        setFundamentalType(attr, group);
         setAttrEvaluatedDate(attr, timeRange, translator);
     }
 
@@ -374,14 +377,25 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         return streamDimMetadata;
     }
 
+    private void setFundamentalType(@NotNull Attribute attr, ActivityMetricsGroup group) {
+        if (attr.getFundamentalType() != null || group.getAggregation() == null) {
+            // already have type set
+            return;
+        }
+        attr.setFundamentalType(group.getAggregation().getTargetFundamentalType());
+    }
+
     private void setAttrEvaluatedDate(Attribute attr, String timeRange, TimeFilterTranslator translator) {
         TimeFilter timeFilter = ActivityMetricsGroupUtils.timeRangeTmplToTimeFilter(timeRange);
         if (ComparisonType.EVER.equals(timeFilter.getRelation())) {
+            dateRangeEvaluatedSet.add(ComparisonType.EVER.name());
             return;
         }
         Pair<Integer, Integer> periodIdRange = translator.translateRange(timeFilter);
         Pair<String, String> dateRange = translator.periodIdRangeToDateRange(timeFilter.getPeriod(), periodIdRange);
-        attr.setSecondaryDisplayName(String.format(StringTemplateConstants.ACTIVITY_METRICS_ATTR_SECONDARY_DISPLAYNAME, dateRange.getLeft(), dateRange.getRight()));
+        String evaluatedDaterange = String.format(StringTemplateConstants.ACTIVITY_METRICS_ATTR_SECONDARY_DISPLAYNAME, dateRange.getLeft(), dateRange.getRight());
+        attr.setSecondaryDisplayName(evaluatedDaterange);
+        dateRangeEvaluatedSet.add(evaluatedDaterange);
     }
 
     private void appendDummyRecord(Table targetTable) {

@@ -106,7 +106,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
                 getFeedTypeByEntity(DEFAULT_SYSTEM, entity));
         Table table = dataFeedTask.getImportTemplate();
-        String fieldName = "user_S_Account_For_Platform_Test";
+        String fieldName = "user_s_account_for_platform_test";
         Assert.assertNotNull(table.getAttribute(fieldName));
         String accountIdentifier = dataFeedTask.getUniqueId();
         EaiImportJobDetail accountDetail = eaiJobDetailProxy

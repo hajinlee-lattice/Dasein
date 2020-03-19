@@ -86,7 +86,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/matchapi" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -109,7 +111,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/admin" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/admin" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -132,7 +136,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/playmaker" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/playmaker" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -155,7 +161,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/oauth" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/oauth" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -178,7 +186,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/scoringapi" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/scoringapi" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -201,7 +211,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/saml" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/saml" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -224,7 +236,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/api" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/api" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -247,7 +261,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/ulysses" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/ulysses" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -270,7 +286,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/ms" unpackWARs="true" autoDeploy="true" startStopThreads="4"/>
+            <Host name="localhost" appBase="webapps/ms" unpackWARs="true" autoDeploy="true" startStopThreads="4">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 
@@ -293,7 +311,9 @@
             <Realm className="org.apache.catalina.realm.LockOutRealm">
                 <Realm className="org.apache.catalina.realm.UserDatabaseRealm" resourceName="UserDatabase"/>
             </Realm>
-            <Host name="localhost" appBase="webapps/pls" unpackWARs="true" autoDeploy="true"/>
+            <Host name="localhost" appBase="webapps/pls" unpackWARs="true" autoDeploy="true">
+                <Valve className="org.apache.catalina.valves.ErrorReportValve"  showReport="false" showServerInfo="false"/>
+            </Host>
         </Engine>
     </Service>
 

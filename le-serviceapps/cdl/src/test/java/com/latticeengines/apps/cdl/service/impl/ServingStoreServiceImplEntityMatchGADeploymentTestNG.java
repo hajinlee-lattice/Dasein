@@ -1,11 +1,14 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -40,6 +43,27 @@ public class ServingStoreServiceImplEntityMatchGADeploymentTestNG extends Servin
         Assert.assertFalse(contactId.isEnabledFor(ColumnSelection.Predefined.Enrichment),
                 JsonUtils.serialize(contactId));
         Assert.assertNotEquals(contactId.getCanEnrich(), Boolean.TRUE, JsonUtils.serialize(contactId));
+    }
+
+    // AttributeName -> ColumnMetadata (Only involve columns to verify, not
+    // complete)
+    @Override
+    protected Map<String, ColumnMetadata> getAccountMetadataToVerify() {
+        Map<String, ColumnMetadata> cms = new HashMap<>();
+        // PLS-15406 allow CustomerAccountId to be used in segmentation only for
+        // EntityMatchGA tenant
+        cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.CustomerAccountId.name()) //
+                .withCategory(Category.ACCOUNT_ATTRIBUTES) //
+                .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
+                .withGroups(ColumnSelection.Predefined.Enrichment, ColumnSelection.Predefined.Segment) //
+                .build());
+        cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
+                .withAttrName(InterfaceName.AccountId.name()) //
+                .withCategory(Category.ACCOUNT_ATTRIBUTES) //
+                .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
+                .build());
+        return cms;
     }
 
 }

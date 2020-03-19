@@ -32,13 +32,14 @@ public class TempListServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @AfterClass(groups = "functional")
     public void tearDown() {
-        tempListService.dropTempList(tempTableName);
+        ((TempListServiceImpl) tempListService).dropTempList(tempTableName);
     }
 
     @Test(groups = "functional")
     public void testCreateAndDeleteTempList() {
         String redshiftPartition = redshiftPartitionService.getDefaultPartition();
         JdbcTemplate redshiftJdbcTemplate = redshiftPartitionService.getSegmentUserJdbcTemplate(redshiftPartition);
+        Class<?> fieldClz = String.class;
 
         String attrName = "Attr";
         AttributeLookup lhs = new AttributeLookup(BusinessEntity.Account, attrName);
@@ -46,20 +47,20 @@ public class TempListServiceImplTestNG extends QueryServiceImplTestNGBase {
         CollectionLookup rhs = new CollectionLookup(Arrays.asList("A", "B", "C"));
         ConcreteRestriction restriction = new ConcreteRestriction(false, lhs, op, rhs);
 
-        tempTableName = tempListService.createTempListIfNotExists(restriction, redshiftPartition);
+        tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz, redshiftPartition);
 
-        String sql = String.format("SELECT %s FROM %s", attrName, tempTableName);
+        String sql = String.format("SELECT value FROM %s", tempTableName);
         List<String> vals = redshiftJdbcTemplate.queryForList(sql, String.class);
         Assert.assertEquals(StringUtils.join(vals, ","), "A,B,C");
 
-        String tempTableName2 = tempListService.createTempListIfNotExists(restriction, redshiftPartition);
+        String tempTableName2 = tempListService.createTempListIfNotExists(restriction, fieldClz, redshiftPartition);
         Assert.assertEquals(tempTableName2, tempTableName);
         vals = redshiftJdbcTemplate.queryForList(sql, String.class);
         Assert.assertEquals(StringUtils.join(vals, ","), "A,B,C");
 
-        tempListService.dropTempList(tempTableName);
+        ((TempListServiceImpl) tempListService).dropTempList(tempTableName);
         String existingTempTable =
-                ((TempListServiceImpl) tempListService).getExistingTempTable(restriction, redshiftPartition);
+                ((TempListServiceImpl) tempListService).getExistingTempTable(restriction, fieldClz, redshiftPartition);
         Assert.assertTrue(StringUtils.isBlank(existingTempTable));
         Assert.assertThrows(BadSqlGrammarException.class, () -> redshiftJdbcTemplate.queryForList(sql, String.class));
     }

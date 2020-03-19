@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -66,8 +67,8 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
 
         String existingColumns = getConfiguration().getExportInclusionColumns();
 
-        Set<String> features = getObjectFromContext(SCORE_TRAINING_FILE_INCLUDED_FEATURES, Set.class);
-        if (features == null)//will not be set when it is LPI model
+        Set<String> features = getSetObjectFromContext(SCORE_TRAINING_FILE_INCLUDED_FEATURES, String.class);
+        if (CollectionUtils.isEmpty(features))
             return existingColumns;
 
         String featureListStr = StringUtils.join(features, ';');
@@ -82,6 +83,10 @@ public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingF
         String exclusionColumns = ScoreResultField.NormalizedScore.displayName + ";" //
                 + ScoreResultField.PredictedRevenuePercentile.displayName + ";" //
                 + ScoreResultField.ExpectedRevenuePercentile.displayName;
+        if (!getConfiguration().isExpectedValue()) {
+            exclusionColumns += ";" + ScoreResultField.PredictedRevenue.displayName + ";"
+                    + ScoreResultField.ExpectedRevenue.displayName;
+        }
         if (batonService.isEntityMatchEnabled(getConfiguration().getCustomerSpace())) {
             exclusionColumns += ";" //
                     + InterfaceName.AccountId.name() + ";" //

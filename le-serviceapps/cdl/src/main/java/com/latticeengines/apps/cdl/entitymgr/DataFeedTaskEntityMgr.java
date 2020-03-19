@@ -35,6 +35,10 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     DataFeedTask getDataFeedTask(String uniqueId);
 
+    DataFeedTask getDataFeedTaskByTaskName(String taskName, DataFeed dataFeed, Boolean withTemplate);
+
+    DataFeedTask getDataFeedTask(DataFeed dataFeed, String sourceId);
+
     List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, DataFeed datafeed);
 
     List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String entity, DataFeed datafeed,
@@ -53,5 +57,7 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
     List<Extract> getExtractsPendingInQueue(DataFeedTask task);
 
     List<DataFeedTaskTable> getInflatedDataFeedTaskTables(DataFeedTask task);
+
+    void setDeleted(Long pid, Boolean deleted);
 
 }

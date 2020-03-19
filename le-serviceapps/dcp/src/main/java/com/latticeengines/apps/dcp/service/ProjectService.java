@@ -2,6 +2,7 @@ package com.latticeengines.apps.dcp.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 
@@ -15,7 +16,11 @@ public interface ProjectService {
 
     List<Project> getAllProject(String customerSpace);
 
-    ProjectDetails getProjectByProjectId(String customerSpace, String projectId);
+    Project getProjectByProjectId(String customerSpace, String projectId);
+
+    Project getProjectByImportSystem(String customerSpace, S3ImportSystem importSystem);
+
+    ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId);
 
     Boolean deleteProject(String customerSpace, String projectId);
 

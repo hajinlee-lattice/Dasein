@@ -69,6 +69,11 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             .expireAfterWrite(1, TimeUnit.MINUTES) //
             .build(this::getAccountLookupDataUnit);
 
+    private LoadingCache<String, DynamoDataUnit> contactsByAccountLookupCache = Caffeine.newBuilder() //
+            .maximumSize(500) //
+            .expireAfterWrite(1, TimeUnit.MINUTES) //
+            .build(this::getContactsByAccountLookupDataUnit);
+
     private LoadingCache<String, List<DynamoDataUnit>> dataUnitsCache = Caffeine.newBuilder() //
             .maximumSize(500) //
             .expireAfterWrite(1, TimeUnit.MINUTES) //
@@ -147,6 +152,13 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         return dataCollectionProxy.getAccountLookupDynamoDataUnit(tenant, version);
     }
 
+    private DynamoDataUnit getContactsByAccountLookupDataUnit(String cacheKey) {
+        String[] tokens = cacheKey.split("\\|");
+        String tenant = tokens[0];
+        DataCollection.Version version = tokens.length > 1 ? DataCollection.Version.valueOf(tokens[1]) : null;
+        return dataCollectionProxy.getContactsByAccountLookupDataUnit(tenant, version);
+    }
+
     @Override
     public List<DynamoDataUnit> parseCustomDynamoDataUnits(MatchInput input) {
         String customerSpace = input.getTenant().getId();
@@ -174,6 +186,33 @@ public class CDLLookupServiceImpl implements CDLLookupService {
                 accountLookupCache.get(version == null ? CustomerSpace.shortenCustomerSpace(customerSpace)
                         : CustomerSpace.shortenCustomerSpace(customerSpace) + "|" + version.toString());
         return lookupInternalAccountId(lookupDataUnit, lookupIdKey, lookupIdValue);
+    }
+
+    @Override
+    public List<Map<String, Object>> lookupContactsByInternalAccountId(String customerSpace,
+            DataCollection.Version version, String lookupIdKey, String lookupIdValue) {
+        String internalAccountId = lookupInternalAccountId(customerSpace, version, lookupIdKey, lookupIdValue);
+
+        if (StringUtils.isBlank(internalAccountId)) {
+            log.info(String.format("No Account found for LookupId:%s | LookupIdValue:%s | CustomerSpace: %s",
+                    lookupIdKey, lookupIdValue, customerSpace));
+            return new ArrayList<>();
+        }
+
+        DynamoDataUnit lookupDataUnit = contactsByAccountLookupCache
+                .get(version == null ? CustomerSpace.shortenCustomerSpace(customerSpace)
+                        : CustomerSpace.shortenCustomerSpace(customerSpace) + "|" + version.toString());
+        if (lookupDataUnit == null) {
+            log.info(String.format("No Dynamo dataunit found for Account based contact lookups for CustomerSpace: %s",
+                    customerSpace));
+            return new ArrayList<>();
+        }
+        String signature = lookupDataUnit.getSignature();
+        GenericTableEntityMgr tableEntityMgr = getTableEntityMgr(signature);
+        String tenantId = parseTenantId(lookupDataUnit);
+        String tableName = parseTableName(lookupDataUnit);
+
+        return tableEntityMgr.getAllByPartitionKey(tenantId, tableName, internalAccountId);
     }
 
     private String lookupInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String lookupIdValue) {
@@ -258,9 +297,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     private Set<String> extractColumnNames(ColumnSelection columnSelection) {
         Set<String> columns = new HashSet<>();
         if (CollectionUtils.isNotEmpty(columnSelection.getColumns())) {
-            columnSelection.getColumns().forEach(cm -> {
-                columns.add(cm.getExternalColumnId());
-            });
+            columnSelection.getColumns().forEach(cm -> columns.add(cm.getExternalColumnId()));
         }
         return columns;
     }

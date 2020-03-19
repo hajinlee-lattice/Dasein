@@ -120,6 +120,16 @@
     "historyEnabled": true
   },
   {
+    "attrName": "LDC_Name",
+    "displayName": "Lattice Account Name",
+    "entity": "Account",
+    "javaClass": "String",
+    "externalSystemName": "LinkedIn",
+    "standardField": true,
+    "exportEnabled": true,
+    "historyEnabled": true
+  },
+  {
     "attrName": "SFDC_ACCOUNT_ID",
     "displayName": "SFDC Account ID",
     "entity": "Account",
@@ -248,6 +258,16 @@
     "standardField": true,
     "exportEnabled": true,
     "historyEnabled": false
+  },
+  {
+      "attrName":"LDC_Domain",
+      "displayName":"Lattice Account Domain",
+      "entity":"Account",
+      "javaClass":"String",
+      "externalSystemName":"LinkedIn",
+      "standardField":true,
+      "exportEnabled":true,
+      "historyEnabled":false
   },
   {
     "attrName": "DESTINATION_SYS_NAME",

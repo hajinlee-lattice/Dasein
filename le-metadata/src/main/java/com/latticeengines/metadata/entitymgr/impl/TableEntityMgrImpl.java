@@ -110,11 +110,11 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
-    @Value("${camille.zk.pod.id:Default}")
-    private String podId;
-
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
+
+    @Value("${common.le.environment}")
+    private String leEnv;
 
     private static final int NUM_THREADS = 8;
 
@@ -515,9 +515,13 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     RedshiftDataUnit redshiftDataUnit = (RedshiftDataUnit) unit;
                     String redshiftTable = redshiftDataUnit.getRedshiftTable();
                     try {
-                        //FIXME: change to use corresponding partition
-                        RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
-                        redshiftService.dropTable(redshiftTable);
+                        String partition = redshiftDataUnit.getClusterPartition();
+                        if (redshiftPartitionService.getLegacyPartition().equals(partition)) {
+                            log.warn("Ignore table {} on legacy partition", tableName);
+                        } else {
+                            RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(partition);
+                            redshiftService.dropTable(redshiftTable);
+                        }
                     } catch (Exception e) {
                         log.error(String.format("Failed to drop table %s from redshift", redshiftTable), e);
                     }

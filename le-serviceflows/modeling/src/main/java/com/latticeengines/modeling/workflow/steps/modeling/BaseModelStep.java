@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
+import com.latticeengines.hadoop.exposed.service.ManifestService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -36,8 +38,11 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
 
     private static final Logger log = LoggerFactory.getLogger(BaseModelStep.class);
 
-    @Autowired
+    @Inject
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private ManifestService manifestService;
 
     protected Table getEventTable() {
         if (executionContext.containsKey(EVENT_TABLE)) {
@@ -210,6 +215,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .eventColumn(configuration.getEventColumn()) //
                 .setModelSummaryProvenance(configuration.getModelSummaryProvenance()) //
                 .dataCloudVersion(configuration.getDataCloudVersion()) //
+                .swlibVersion(manifestService.getLedpStackVersion(), manifestService.getLedsVersion()) //
                 .runTimeParams(configuration.getRunTimeParams());
         if (getPredefinedSelection() != null) {
             bldr = bldr.predefinedColumnSelection(getPredefinedSelection(), getPredefinedSelectionVersion());

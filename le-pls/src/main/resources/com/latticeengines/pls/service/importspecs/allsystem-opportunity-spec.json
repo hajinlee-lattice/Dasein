@@ -11,7 +11,6 @@
           "ID"
         ],
         "required": true,
-        "logicalDataType": "Id",
         "fundamentalType": "ALPHA",
         "approvedUsage": [
           "None"
@@ -32,7 +31,8 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "logicalDataType": "Date",
+        "fundamentalType": "DATE"
       },
       {
         "fieldName": "StageName",
@@ -62,7 +62,7 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "fundamentalType": "NUMERIC"
       },
       {
         "fieldName": "CampaignId",
@@ -92,7 +92,8 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "logicalDataType": "Date",
+        "fundamentalType": "DATE"
       },
       {
         "fieldName": "ContractId",
@@ -122,7 +123,8 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "logicalDataType": "Date",
+        "fundamentalType": "DATE"
       },
       {
         "fieldName": "CurrencyCode",
@@ -153,7 +155,7 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "fundamentalType": "NUMERIC"
       },
       {
         "fieldName": "Deleted",
@@ -168,7 +170,7 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "fundamentalType": "BOOLEAN"
       },
       {
         "fieldName": "Won",
@@ -183,7 +185,7 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "fundamentalType": "BOOLEAN"
       },
       {
         "fieldName": "Closed",
@@ -198,7 +200,7 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "fundamentalType": "BOOLEAN"
       },
       {
         "fieldName": "LastActivity",
@@ -259,7 +261,7 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "fundamentalType": "NUMERIC"
       },
       {
         "fieldName": "Quantity",
@@ -274,7 +276,7 @@
         "approvedUsage": [
           "None"
         ],
-        "fundamentalType": "ALPHA"
+        "fundamentalType": "NUMERIC"
       },
       {
         "fieldName": "CreatedBy",

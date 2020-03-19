@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.slf4j.Logger;
@@ -37,9 +38,10 @@ public class WatcherCache<K, V> {
     private Cache<K, V> cache;
     // To avoid congestion caused by simultaneously refresh
     private int waitBeforeRefreshInSec = 0;
+    private final Consumer<Object> onCacheInstantiated;
 
     WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity, int waitBeforeRefreshInSec,
-            Object... initKeys) {
+            Consumer<Object> onCacheInstantiated, Object... initKeys) {
         this.load = load;
         this.cacheName = cacheName;
         this.watcherName = watcherName;
@@ -48,6 +50,7 @@ public class WatcherCache<K, V> {
         this.refreshKeyResolver = (s, k) -> cache.asMap().keySet();
         this.evictKeyResolver = (s, k) -> Collections.emptyList();
         this.waitBeforeRefreshInSec = waitBeforeRefreshInSec;
+        this.onCacheInstantiated = onCacheInstantiated;
     }
 
     public static <K, V> Builder<K, V> builder() {
@@ -110,6 +113,9 @@ public class WatcherCache<K, V> {
                 caffeine.expireAfterWrite(expire, expireUnit);
             }
             cache = caffeine.build();
+            if (onCacheInstantiated != null) {
+                onCacheInstantiated.accept(cache);
+            }
             if (initKeys != null) {
                 log.info("Loading " + initKeys.length + " initial keys.");
                 Arrays.stream(initKeys).map(k -> (K) k).forEach(this::loadKey);
@@ -209,6 +215,7 @@ public class WatcherCache<K, V> {
         private Object[] initKeys;
         private int capacity = 10;
         private int waitBeforeRefreshInSec = 0;
+        private Consumer<Object> onCacheInstantiated;
 
         Builder() {
             this.watcherName = "Watcher-" + UUID.randomUUID().toString();
@@ -251,8 +258,14 @@ public class WatcherCache<K, V> {
             return this;
         }
 
+        public Builder onCacheInstantiated(Consumer<Object> onCacheInstantiated) {
+            this.onCacheInstantiated = onCacheInstantiated;
+            return this;
+        }
+
         public WatcherCache<K, V> build() {
-            return new WatcherCache<>(cacheName, watcherName, load, capacity, waitBeforeRefreshInSec, initKeys);
+            return new WatcherCache<>(cacheName, watcherName, load, capacity, waitBeforeRefreshInSec,
+                    onCacheInstantiated, initKeys);
         }
 
     }

@@ -13,8 +13,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
-import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.S3ImportTemplateDisplay;
@@ -94,13 +92,12 @@ public interface CDLService {
     /**
      *
      * @param customerSpace Identify current tenant
-     * @param streamName {@link AtlasStream#getName()} of target stream
-     * @param signature signature of metadata, if not provided, will use the signature
-     *      associated to current active version
+     * @param systemName {@link S3ImportSystem#getName()} of target S3ImportSystem
+     * @param entityType EntityType for current template.
      * @return map of dimensionName -> metadataValue, will not be {@code null}
      */
-    Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String streamName,
-                                                                String signature);
+    Map<String, List<Map<String, Object>>> getDimensionMetadataInStream(String customerSpace, String systemName,
+                                                                        EntityType entityType);
 
     /**
      *
@@ -109,12 +106,10 @@ public interface CDLService {
      * @param mimeType such as "application/csv"
      * @param fileName downloadCSV fileName
      * @param customerSpace Identify current tenant
-     * @param streamName {@link AtlasStream#getName()} of target stream
-     * @param signature signature of metadata, if not provided, will use the signature
-     *      associated to current active version
-     * @param dimensionName {@link StreamDimension#getName()} of target dimension
+     * @param systemName {@link S3ImportSystem#getName()} of target system
+     * @param entityType EntityType for current template.
      */
     void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
                                            String mimeType, String fileName, String customerSpace,
-                                           String streamName, String signature, String dimensionName);
+                                           String systemName, EntityType entityType);
 }

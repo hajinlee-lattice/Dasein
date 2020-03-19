@@ -52,6 +52,8 @@ public class RedshiftDataUnitService extends AbstractDataUnitRuntimeServiceImpl<
     private String getPartition(RedshiftDataUnit dataUnit) {
         String clusterPartition = dataUnit.getClusterPartition();
         if (StringUtils.isBlank(clusterPartition)) {
+            log.warn("Redshift data unit {} in {} is still in the legacy partition.",
+                    dataUnit.getName(), dataUnit.getTenant());
             return redshiftPartitionService.getLegacyPartition();
         } else {
             return clusterPartition;

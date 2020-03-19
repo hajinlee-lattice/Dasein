@@ -163,8 +163,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         EntityType entityType = EntityTypeUtils.matchFeedType(feedType);
         SchemaInterpretation schemaInterpretation;
         Table table;
+        S3ImportSystem s3ImportSystem = null;
         if (StringUtils.isNotEmpty(systemName) && entityType != null) {
-            S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+            s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
             schemaInterpretation = entityType.getSchemaInterpretation();
             table = SchemaRepository.instance().getSchema(s3ImportSystem.getSystemType(), entityType,
                     batonService.isEntityMatchEnabled(customerSpace));
@@ -192,7 +193,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             Table templateTable = dataFeedTask.getImportTemplate();
             FieldMappingDocument fieldMappingFromTemplate = getFieldMappingBaseOnTable(sourceFile, templateTable);
             if (StringUtils.isNotEmpty(systemName)) {
-                S3ImportSystem s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
                 if (s3ImportSystem != null) {
                     for (FieldMapping fieldMapping : fieldMappingFromTemplate.getFieldMappings()) {
                         if (InterfaceName.CustomerAccountId.name().equals(fieldMapping.getMappedField())) {
@@ -212,7 +213,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
                     templateTable, table);
         }
-        EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument);
+        EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument,
+                s3ImportSystem);
         return resultDocument;
     }
 
@@ -322,7 +324,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         });
         missedAttrs.forEach((key, value) -> {
             FieldMapping fieldMapping = new FieldMapping();
-            fieldMapping.setUserField(value.getDisplayName());
+            fieldMapping.setUserField(
+                    value.getSourceAttrName() == null ? value.getDisplayName() : value.getSourceAttrName());
             fieldMapping.setMappedField(value.getName());
             fieldMapping.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(value.getPhysicalDataType()));
             templateMapping.getExtraFieldMappingInfo().addMissedMapping(fieldMapping);
@@ -470,7 +473,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 // check lattice field can be mapped by user field, while not mapped by user
                 for (String userField : unmappedUserFields) {
                     if (!ignored.contains(userField)) { // skip if ignored by user
-                        if (userField.equals(latticeAttr.getDisplayName())
+                        if (userField.equals(latticeAttr.getSourceAttrName() == null ? latticeAttr.getDisplayName() :
+                                latticeAttr.getSourceAttrName())
                                 || resolver.isUserFieldMatchWithAttribute(userField, latticeAttr)) {
                             String message = String.format("Lattice field %s can be mapped to %s, while not",
                                     attrName, userField);
@@ -575,14 +579,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             if (templateAttrs.containsKey(attrEntry.getKey())) {
                 Attribute attr1 = attrEntry.getValue();
                 Attribute attr2 = templateAttrs.get(attrEntry.getKey());
+                String nameFromFile = attr2.getSourceAttrName() == null ? attr2.getDisplayName() :
+                        attr2.getSourceAttrName();
                 if (!attr1.getPhysicalDataType().equalsIgnoreCase(attr2.getPhysicalDataType())) {
                     String message = "Data type is not the same for attribute: " + attr1.getDisplayName();
-                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                    validations.add(createValidation(nameFromFile, attr2.getName(),
                             ValidationStatus.ERROR, message));
                 }
                 if (!attr1.getRequired().equals(attr2.getRequired())) {
                     String message = "Required flag is not the same for attribute: " + attr1.getDisplayName();
-                    validations.add(createValidation(attr2.getDisplayName(), attr2.getName(),
+                    validations.add(createValidation(nameFromFile, attr2.getName(),
                             ValidationStatus.ERROR, message));
                 }
             }

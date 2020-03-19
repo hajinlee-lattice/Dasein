@@ -245,7 +245,8 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
     }
 
     // streamId -> streamName
-    private Map<String, String> getStreamNameMap() {
+    @Override
+    public Map<String, String> getStreamNameMap() {
         List<AtlasStream> streams = streamEntityMgr.findByTenant(MultiTenantContext.getTenant());
         if (CollectionUtils.isEmpty(streams)) {
             return Collections.emptyMap();

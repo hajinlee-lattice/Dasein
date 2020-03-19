@@ -801,9 +801,11 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         if (playLaunch.getAccountsDuplicated() != null) {
             this.setAccountsDuplicated(playLaunch.getAccountsDuplicated());
         }
+        if (playLaunch.getLaunchType() != null) {
+            this.setLaunchType(playLaunch.getLaunchType());
+        }
 
         this.setLaunchCompletionPercent(playLaunch.getLaunchCompletionPercent());
-        this.setLaunchType(playLaunch.getLaunchType());
 
         // Contact stats
         if (playLaunch.getContactsSelected() != null) {

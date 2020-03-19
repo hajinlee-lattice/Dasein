@@ -2,6 +2,7 @@ package com.latticeengines.workflow.listener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -14,8 +15,8 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
@@ -50,8 +51,8 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     public void beforeJobExecution(JobExecution jobExecution) {
         Long executionId = jobExecution.getId();
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(executionId);
-        WorkflowConfiguration workflowConfig = workflowJob.getWorkflowConfiguration();
-        if (Boolean.TRUE.equals(workflowConfig.getEnableTempTable())) {
+        String workflowType = workflowJob.getType();
+        if (workflowTypesEnabledTempTable().contains(workflowType)) {
             metadataProxy.setEnableTempTables(true);
         }
     }
@@ -138,4 +139,11 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
         log.info("Listener will wait for LEJobCaller to be set");
         waitForCaller = true;
     }
+
+    private Set<String> workflowTypesEnabledTempTable() {
+        Set<String> workflowNames = new HashSet<>();
+        workflowNames.add(ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME);
+        return workflowNames;
+    }
+
 }

@@ -146,7 +146,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         }
 
         if (latest) {
-            Map<String, String> match = new HashMap<String, String>();
+            Map<String, String> match = new HashMap<>();
             queriedSummaries.stream().forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
                     if (!match.containsKey(launch.getPlayName())) {

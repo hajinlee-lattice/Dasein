@@ -71,7 +71,7 @@ public class RestrictionUtilsUnitTestNG {
             Assert.assertThrows(() -> RestrictionUtils.convertNumericalOrBooleanValues(vals, attrClz));
         } else {
             List<Object> newVals = RestrictionUtils.convertNumericalOrBooleanValues(vals, attrClz);
-            for (Object val: newVals) {
+            for (Object val : newVals) {
                 Assert.assertTrue(Number.class.isAssignableFrom(val.getClass()), JsonUtils.serialize(vals));
             }
         }
@@ -79,19 +79,14 @@ public class RestrictionUtilsUnitTestNG {
 
     @DataProvider(name = "numericalBuckets")
     public Object[][] provideNumericalBuckets() {
-        return new Object[][] {
-                { Arrays.asList("1", "2.5"), Integer.class, false },
-                { Arrays.asList("1.1", "2"), Long.class, false },
-                { Arrays.asList("1.2", "2"), Double.class, false },
-                { Arrays.asList("1", "2."), Float.class, false },
-                { Arrays.asList(1, "2"), Integer.class, false },
-                { Arrays.asList("1", 2), Long.class, false },
-                { Arrays.asList("1.2", 2), Double.class, false },
-                { Arrays.asList("1", 2.D), Float.class, false },
-                { Arrays.asList(">1", "2"), Integer.class, true }
+        return new Object[][] { { Arrays.asList("1", "2.5"), Integer.class, false },
+                { Arrays.asList("1.1", "2"), Long.class, false }, { Arrays.asList("1.2", "2"), Double.class, false },
+                { Arrays.asList("1", "2."), Float.class, false }, { Arrays.asList(1, "2"), Integer.class, false },
+                { Arrays.asList("1", 2), Long.class, false }, { Arrays.asList("1.2", 2), Double.class, false },
+                { Arrays.asList("1", 2.D), Float.class, false }, { Arrays.asList(">1", "2"), Integer.class, true },
+                { Arrays.asList("1, 2, 3", "4,5"), String.class, true } // PLS-15955
         };
     }
-
 
     @Test(groups = "unit")
     public void testConvertUnencodedBooleanBucket() {

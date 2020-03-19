@@ -39,8 +39,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         if (defaultMarketoExportFields.size() == 0) {
             createDefaultExportFields(CDLExternalSystemName.Marketo);
         } else {
-            defaultMarketoExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Marketo,
-                    defaultMarketoExportFields);
+            defaultMarketoExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Marketo);
         }
 
         defaultS3ExportFields = exportService.getAllAttributes(CDLExternalSystemName.AWS_S3);
@@ -48,7 +47,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         if (defaultS3ExportFields.size() == 0) {
             createDefaultExportFields(CDLExternalSystemName.AWS_S3);
         } else {
-            defaultS3ExportFields = updateFieldMetadataDefault(CDLExternalSystemName.AWS_S3, defaultS3ExportFields);
+            defaultS3ExportFields = updateFieldMetadataDefault(CDLExternalSystemName.AWS_S3);
         }
 
         defaultLinkedInExportFields = exportService.getAllAttributes(CDLExternalSystemName.LinkedIn);
@@ -56,8 +55,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         if (defaultLinkedInExportFields.size() == 0) {
             defaultLinkedInExportFields = createDefaultExportFields(CDLExternalSystemName.LinkedIn);
         } else {
-            defaultLinkedInExportFields = updateFieldMetadataDefault(CDLExternalSystemName.LinkedIn,
-                    defaultLinkedInExportFields);
+            defaultLinkedInExportFields = updateFieldMetadataDefault(CDLExternalSystemName.LinkedIn);
         }
 
         defaultFacebookExportFields = exportService.getAllAttributes(CDLExternalSystemName.Facebook);
@@ -65,8 +63,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         if (defaultFacebookExportFields.size() == 0) {
             defaultFacebookExportFields = createDefaultExportFields(CDLExternalSystemName.Facebook);
         } else {
-            defaultFacebookExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Facebook,
-                    defaultFacebookExportFields);
+            defaultFacebookExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Facebook);
         }
 
         defaultOutreachExportFields = exportService.getAllAttributes(CDLExternalSystemName.Outreach);
@@ -74,8 +71,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         if (defaultOutreachExportFields.size() == 0) {
             defaultOutreachExportFields = createDefaultExportFields(CDLExternalSystemName.Outreach);
         } else {
-            defaultOutreachExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Outreach,
-                    defaultOutreachExportFields);
+            defaultOutreachExportFields = updateFieldMetadataDefault(CDLExternalSystemName.Outreach);
         }
 
     }
@@ -149,20 +145,18 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
     public void testLinkedIn() {
         defaultLinkedInExportFields = exportService.getAllAttributes(CDLExternalSystemName.LinkedIn);
 
-        assertEquals(defaultLinkedInExportFields.size(), 41);
+        assertEquals(defaultLinkedInExportFields.size(), 43);
         assertEquals(
                 defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getHistoryEnabled).count(),
-                34);
+                35);
         List<ExportFieldMetadataDefaults> exportEnabledFields = defaultLinkedInExportFields.stream()
                 .filter(ExportFieldMetadataDefaults::getExportEnabled).collect((Collectors.toList()));
-        assertEquals(defaultLinkedInExportFields.stream().filter(ExportFieldMetadataDefaults::getExportEnabled).count(),
-                3);
+        assertEquals(exportEnabledFields.size(), 5);
 
         assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Account).count(),
-                2);
+                4);
         assertEquals(exportEnabledFields.stream().filter(field -> field.getEntity() == BusinessEntity.Contact).count(),
                 1);
-
     }
 
     //
@@ -202,8 +196,7 @@ public class ExportFieldMetadataServiceImplUnitTestNG extends CDLFunctionalTestN
         return defaultExportFields;
     }
 
-    private List<ExportFieldMetadataDefaults> updateFieldMetadataDefault(CDLExternalSystemName systemName,
-            List<ExportFieldMetadataDefaults> oldDefaultExportFields) {
+    private List<ExportFieldMetadataDefaults> updateFieldMetadataDefault(CDLExternalSystemName systemName) {
         String filePath = String.format("service/impl/%s_default_export_fields.json",
                 systemName.toString().toLowerCase());
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream(filePath);

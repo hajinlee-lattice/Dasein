@@ -10,11 +10,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
+import com.latticeengines.domain.exposed.query.TempListUtils;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.ValueLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -49,6 +52,13 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.DateRangeTranslator;
 import com.latticeengines.query.exposed.translator.DayRangeTranslator;
 import com.latticeengines.query.exposed.translator.MetricTranslator;
+import com.latticeengines.query.util.AttrRepoUtils;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.sql.SQLQuery;
 
 abstract class QueryTranslator {
 
@@ -136,7 +146,7 @@ abstract class QueryTranslator {
     }
 
     Restriction translateFrontEndRestriction(FrontEndRestriction frontEndRestriction, boolean translatePriorOnly) {
-        boolean useDepivotedPhTable = !SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
+        boolean useDepivotedPhTable = !isSparkQuery();
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction, translatePriorOnly,
                 useDepivotedPhTable);
         if (restriction == null) {
@@ -154,9 +164,7 @@ abstract class QueryTranslator {
         }
         Restriction restriction = translateBucketRestriction(frontEndRestriction.getRestriction().getDeepCopy(),
                 translatePriorOnly, useDepivotedPhTable);
-        if (!SPARK_BATCH_USER.equals(sqlUser)) {
-            translateBigListRestrictions(restriction);
-        }
+        translateBigListRestrictions(restriction);
         return RestrictionOptimizer.optimize(restriction);
     }
 
@@ -340,10 +348,52 @@ abstract class QueryTranslator {
             CollectionLookup collectionLookup = (CollectionLookup) restriction.getRhs();
             Collection<Object> vals = collectionLookup.getValues();
             if (CollectionUtils.size(vals) >= MAX_IN_LINE_COLLECTION_SIZE) {
-                String tempTableName = tempListService.createTempListIfNotExists(restriction, repository.getRedshiftPartition());
-                String attrName = ((AttributeLookup) restriction.getLhs()).getAttribute();
-                SubQuery subQuery = new SubQuery(tempTableName);
-                restriction.setRhs(new SubQueryAttrLookup(subQuery, attrName));
+                AttributeLookup attributeLookup = (AttributeLookup) restriction.getLhs();
+                ColumnMetadata cm = repository.getColumnMetadata(attributeLookup);
+                Class<?> fieldClz;
+                if (cm != null) {
+                    if (StringUtils.isBlank(cm.getJavaClass())) {
+                        fieldClz = String.class;
+                    } else {
+                        fieldClz = AvroUtils.getJavaType(AvroUtils.getAvroType(cm.getJavaClass()));
+                    }
+                } else {
+                    fieldClz = TempListUtils.getFieldClz(vals);
+                }
+                try {
+                    if (tempListService == null) {
+                        throw new NullPointerException("tempListService is null");
+                    }
+                    String tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz,
+                            repository.getRedshiftPartition());
+
+                    if (SPARK_BATCH_USER.equals(sqlUser)
+                            && ComparisonType.NOT_IN_COLLECTION.equals(restriction.getRelation())) {
+                        BusinessEntity entity = attributeLookup.getEntity();
+                        StringPath entityTable = AttrRepoUtils.getTablePath(repository, entity);
+                        String idAttrStr = entity.getServingStore().getPrimaryKey();
+                        EntityPath<String> tempTable = new PathBuilder<>(String.class, tempTableName);
+                        StringPath lhs = Expressions.stringPath(entityTable, attributeLookup.getAttribute());
+                        StringPath rhs = Expressions.stringPath(tempTable, TempListUtils.VALUE_COLUMN);
+                        BooleanExpression joinPredicate = lhs.eq(rhs);
+                        BooleanExpression filterPredicate = lhs.isNotNull().and(rhs.isNull());
+                        SQLQuery<?> query = queryFactory.getQuery(repository, sqlUser) //
+                                .select(Expressions.stringPath(idAttrStr)) //
+                                .from(entityTable) //
+                                .leftJoin(tempTable).on(joinPredicate) //
+                                .where(filterPredicate);
+                        SubQuery subQuery = new SubQuery();
+                        subQuery.setSubQueryExpression(query);
+                        restriction.setLhs(new AttributeLookup(entity, idAttrStr));
+                        restriction.setRelation(ComparisonType.IN_COLLECTION);
+                        restriction.setRhs(new SubQueryAttrLookup(subQuery));
+                    } else {
+                        SubQuery subQuery = new SubQuery(tempTableName);
+                        restriction.setRhs(new SubQueryAttrLookup(subQuery, TempListUtils.VALUE_COLUMN));
+                    }
+                } catch (NullPointerException e) {
+                    throw e;
+                }
             }
         }
     }
@@ -449,12 +499,16 @@ abstract class QueryTranslator {
             int rowSize = CollectionUtils.isNotEmpty(frontEndQuery.getLookups()) ? frontEndQuery.getLookups().size()
                     : 1;
             int maxRows = Math.floorDiv(MAX_CARDINALITY, rowSize);
-            if (frontEndQuery.getPageFilter().getNumRows() > maxRows) {
+            if (!isSparkQuery() && frontEndQuery.getPageFilter().getNumRows() > maxRows) {
                 log.warn(String.format("Refusing to accept a query requesting more than %s rows."
                         + " Currently specified page filter: %s", maxRows, frontEndQuery.getPageFilter()));
                 frontEndQuery.getPageFilter().setNumRows(maxRows);
             }
         }
+    }
+
+    protected boolean isSparkQuery() {
+        return SPARK_BATCH_USER.equalsIgnoreCase(sqlUser);
     }
 
 }

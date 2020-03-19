@@ -29,7 +29,7 @@ public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
 
     @Override
     public Map<String, Object> getByKeyPair(String tenantId, String tableName, Pair<String, String> keyPair) {
-        String id = contactKeys(tenantId, tableName, keyPair);
+        String id = concatenateKeys(tenantId, tableName, keyPair);
         Map<String, Object> result = null;
         if (id != null) {
             GenericTableEntity entity = internalEntityMgr.findByKey(id);
@@ -46,8 +46,8 @@ public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
         Map<String, Object> result = null;
         List<String> ids = new ArrayList<>();
         for (Map.Entry<String, List<String>> ent : tenantIdsAndTableNames.entrySet()) {
-            List<String> parts = ent.getValue().stream().map(tableName -> contactKeys(ent.getKey(), tableName, keyPair))
-                    .collect(Collectors.toList());
+            List<String> parts = ent.getValue().stream()
+                    .map(tableName -> concatenateKeys(ent.getKey(), tableName, keyPair)).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(parts)) {
                 ids.addAll(parts);
             }
@@ -70,9 +70,8 @@ public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
     public List<Map<String, Object>> getByKeyPairs(String tenantId, String tableName,
             List<Pair<String, String>> keyPairs) {
         List<Map<String, Object>> results = new ArrayList<>();
-        List<String> ids = keyPairs.stream().map(pair -> contactKeys(tenantId, tableName, pair))
+        List<String> ids = keyPairs.stream().map(pair -> concatenateKeys(tenantId, tableName, pair))
                 .collect(Collectors.toList());
-        System.out.println("ids = " + ids);
         if (CollectionUtils.isNotEmpty(ids)) {
             List<GenericTableEntity> entities = internalEntityMgr.batchFindByKey(ids);
             entities.forEach(entity -> {
@@ -87,7 +86,25 @@ public class GenericTableEntityMgrImpl implements GenericTableEntityMgr {
         return results;
     }
 
-    private String contactKeys(String tenantId, String tableName, Pair<String, String> keyPair) {
+    @Override
+    public List<Map<String, Object>> getAllByPartitionKey(String tenantId, String tableName, String partitionKeyValue) {
+        String partitionKey = String.format("%s_%s_%s", tenantId, tableName, partitionKeyValue);
+        Map<String, String> properties = new HashMap<>(); //
+        properties.put("PartitionKey", partitionKey);
+        List<GenericTableEntity> entities = internalEntityMgr.findByProperties(properties);
+        List<Map<String, Object>> results = new ArrayList<>();
+        entities.forEach(entity -> {
+            System.out.println(JsonUtils.serialize(entity));
+            if (entity == null) {
+                results.add(null);
+            } else {
+                results.add(entity.getAttributes());
+            }
+        });
+        return results;
+    }
+
+    private String concatenateKeys(String tenantId, String tableName, Pair<String, String> keyPair) {
         String concatenatedKey = "";
         if (keyPair != null) {
             String partitionKey = keyPair.getLeft();

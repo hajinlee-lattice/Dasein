@@ -7,4 +7,5 @@ public interface GlobalAuthSessionEntityMgr extends BaseEntityMgr<GlobalAuthSess
 
     GlobalAuthSession findByTicketId(Long ticketId);
 
+    GlobalAuthSession findByTicketIdAndTenantIdAndUserId(Long ticketId, Long tenantId, Long userId);
 }

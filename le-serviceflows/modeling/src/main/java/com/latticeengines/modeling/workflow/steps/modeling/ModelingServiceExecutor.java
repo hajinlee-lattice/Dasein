@@ -421,7 +421,7 @@ public class ModelingServiceExecutor {
         }
 
         String provenanceProperties = StringUtils.join(props, " ");
-        provenanceProperties += " " + ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
+        provenanceProperties += " " + resolveProperties();
         provenanceProperties += builder.modelSummaryProvenance.getProvenancePropertyString();
         if (builder.getJobId() != null) {
             provenanceProperties += " Workflow_Job_Id=" + Long.toString(builder.getJobId());
@@ -431,6 +431,13 @@ public class ModelingServiceExecutor {
         log.info("The model provenance property is: " + provenanceProperties);
 
         model.setProvenanceProperties(provenanceProperties);
+    }
+
+    private String resolveProperties() {
+        String properties = ProvenanceProperties.valueOf(builder.getProductType()).getResolvedProperties();
+        return properties.replace("ledp.version=latest", "ledp.version=" + builder.ledpVersion)
+                .replace("leds.version=latest",
+                        "leds.version=" + builder.ledsVersion);
     }
 
     private Algorithm getAlgorithm() {
@@ -537,6 +544,8 @@ public class ModelingServiceExecutor {
         private List<DataRule> dataRules;
         private Map<String, String> runTimeParams;
         private String dataCloudVersion;
+        private String ledpVersion;
+        private String ledsVersion;
         private String moduleName;
         private String eventColumn;
         private Map<String, Long> counterGroupResultMap;
@@ -818,6 +827,12 @@ public class ModelingServiceExecutor {
 
         public Builder dataCloudVersion(String dataCloudVersion) {
             this.dataCloudVersion = dataCloudVersion;
+            return this;
+        }
+
+        public Builder swlibVersion(String ledpVersion, String ledsVersion) {
+            this.ledpVersion = ledpVersion;
+            this.ledsVersion = ledsVersion;
             return this;
         }
 

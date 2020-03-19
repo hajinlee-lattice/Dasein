@@ -65,6 +65,12 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     }
 
     @Override
+    public List<Map<String, Object>> getRecommendationsByLaunchIds(List<String> launchIds, long start, int offset, int maximum, int originOffset) {
+        List<Map<String, Object>> data = recommendationEntityMgr.findRecommendationsAsMapByLaunchIds(launchIds, start, offset, maximum);
+        return postProcess(data, originOffset);
+    }
+
+    @Override
     public int getRecommendationCountByLaunchIds(List<String> launchIds, long start) {
         return recommendationEntityMgr.findRecommendationCountByLaunchIds(launchIds,start);
     }

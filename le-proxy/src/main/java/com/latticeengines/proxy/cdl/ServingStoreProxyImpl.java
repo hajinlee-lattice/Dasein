@@ -17,11 +17,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -58,10 +61,10 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     /**
-     * deflateDisplayName means prepend sub-category in front of display name In "My
-     * Data" page we can use sub-category to show hierarchical display name of
-     * attributes But in other cases, such as TalkingPoint, we have to concatenate
-     * sub-category and display name together
+     * deflateDisplayName means prepend sub-category in front of display name In
+     * "My Data" page we can use sub-category to show hierarchical display name
+     * of attributes But in other cases, such as TalkingPoint, we have to
+     * concatenate sub-category and display name together
      */
     private List<ColumnMetadata> getDecoratedMetadataWithDeflatedDisplayNamesFromCache(String customerSpace,
             Collection<BusinessEntity> entities, Collection<ColumnSelection.Predefined> groups) {
@@ -91,6 +94,16 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     @Override
+    public Map<String, Boolean> getAttrsUsage(String customerSpace, BusinessEntity entity, @NotNull Predefined group,
+            Set<String> attributes, Version version) {
+        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/attrs-usage", //
+                shortenCustomerSpace(customerSpace), entity);
+        url += getVersionGroupFilterParam(version, Collections.singleton(group), null);
+        Map<?, ?> rawMap = post("getAttrsUsage", url, attributes, Map.class);
+        return JsonUtils.convertMap(rawMap, String.class, Boolean.class);
+    }
+
+    @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             List<ColumnSelection.Predefined> groups) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
@@ -114,7 +127,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
 
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-             List<ColumnSelection.Predefined> groups, Version version, StoreFilter filter) {
+            List<ColumnSelection.Predefined> groups, Version version, StoreFilter filter) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
                 shortenCustomerSpace(customerSpace), entity);
         url += getVersionGroupFilterParam(version, groups, filter);
@@ -127,7 +140,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     private String getVersionGroupFilterParam(DataCollection.Version version,
-                                              Collection<ColumnSelection.Predefined> groups, StoreFilter filter) {
+            Collection<ColumnSelection.Predefined> groups, StoreFilter filter) {
         StringBuilder url = new StringBuilder();
         boolean firstParam = true;
         if (version != null) {

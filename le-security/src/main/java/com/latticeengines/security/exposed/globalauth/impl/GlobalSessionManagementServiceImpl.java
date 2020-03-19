@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
@@ -125,7 +126,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         ticketData.setLastAccessDate(now);
         gaTicketEntityMgr.update(ticketData);
 
-        Session session = new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
+        Session session = new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
         session.setExternalSession(ticketData.getExternalSession());
         return session;
     }
@@ -229,7 +230,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         if (sessionData != null) {
             if (sessionData.getTenantId() == tenantData.getPid()) {
-                return new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
+                return new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
             } else {
                 gaSessionEntityMgr.delete(sessionData);
             }
@@ -240,13 +241,13 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         sessionData.setUserId(ticketData.getUserId());
         sessionData.setTicketId(ticketData.getPid());
         gaSessionEntityMgr.create(sessionData);
-        return new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
+        return new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
     }
 
     static class SessionBuilder {
 
         @SuppressWarnings("unused")
-        public Session build(GlobalAuthUser userData, GlobalAuthSession sessionData, GlobalAuthTenant tenantData,
+        public Session build(GlobalAuthTicket ticketData, GlobalAuthUser userData, GlobalAuthSession sessionData, GlobalAuthTenant tenantData,
                 List<GlobalAuthUserTenantRight> userTenantRightData) {
 
             Tenant tenant = new Tenant();
@@ -266,7 +267,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             session.setRights(rights);
             session.setTitle(userData.getTitle());
             session.setTenant(new TenantBuilder().build(tenantData));
-
+            session.setTicketCreationTime(ticketData.getCreationDate().getTime());
             if (session == null) {
                 throw new RuntimeException("Failed to attach ticket against GA.");
             }
@@ -307,7 +308,28 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
     }
 
     @Override
-    public List<GlobalAuthTicket> findByUserIdAndNotInTicket(Long userId, String ticket) {
-        return gaTicketEntityMgr.findByUserIdAndNotInTicketAndLastAccessDate(userId, ticket);
+    @CacheEvict(key = "#ticket.data")
+    public synchronized boolean discardSession(Ticket ticket, Long tenantId, Long ticketId, Long userId) {
+        try {
+            LOGGER.info("Discarding session with ticket id " + ticketId + ", tenant id " + tenantId + ", user id " + userId + "against Global Auth.");
+            return globalDiscard(tenantId, ticketId, userId);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18009, e, new String[]{ticket.toString()});
+        }
+    }
+
+    private boolean globalDiscard(Long tenantId, Long ticketId, Long userId) {
+        GlobalAuthSession globalAuthSession = gaSessionEntityMgr.findByTicketIdAndTenantIdAndUserId(ticketId, tenantId, userId);
+        if (globalAuthSession != null) {
+            gaSessionEntityMgr.delete(globalAuthSession);
+        } else {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public List<GlobalAuthTicket> findByUserIdAndTenantIdAndNotInTicket(Long tenantId, Long userId, String ticket) {
+        return gaTicketEntityMgr.findByUserAndTenantIdAndNotInTicketAndLastAccessDate(tenantId, userId, ticket);
     }
 }

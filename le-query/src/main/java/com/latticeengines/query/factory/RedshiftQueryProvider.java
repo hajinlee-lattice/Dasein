@@ -4,6 +4,8 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -18,6 +20,8 @@ import com.querydsl.sql.SQLTemplates;
 public class RedshiftQueryProvider extends QueryProvider {
     public static final String USER_SEGMENT = "segment";
     public static final String USER_BATCH = "batch";
+
+    private static final Logger log = LoggerFactory.getLogger(RedshiftQueryProvider.class);
 
     @Inject
     private RedshiftPartitionService redshiftPartitionService;
@@ -43,6 +47,8 @@ public class RedshiftQueryProvider extends QueryProvider {
     private String getRedshiftPartition(AttributeRepository attrRepo) {
         String partition = attrRepo.getRedshiftPartition();
         if (StringUtils.isBlank(partition)) {
+            log.warn("The attribute repository of {} is still in the legacy partition.",
+                    attrRepo.getCustomerSpace().getTenantId());
             return redshiftPartitionService.getLegacyPartition();
         } else {
             return partition;

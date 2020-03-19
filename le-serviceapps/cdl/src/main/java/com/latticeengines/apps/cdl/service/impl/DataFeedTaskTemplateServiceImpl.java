@@ -31,8 +31,8 @@ import com.latticeengines.apps.cdl.service.ActivityMetricsGroupService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskTemplateService;
-import com.latticeengines.apps.cdl.service.DropBoxService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -73,6 +73,7 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.OpportunityUtils;
 import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -297,6 +298,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
         String backupName = template.getName() + "_" + System.currentTimeMillis() + ".json";
         s3Service.uploadInputStream(customerBucket, backupPath + backupName, backupStream, true);
+        dropBoxService.removeTemplatePath(customerSpace, dataFeedTask.getFeedType());
         return backupName;
     }
 
@@ -324,6 +326,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                     dataFeedTaskService.updateDataFeedTask(customerSpace, dataFeedTask, false);
                 }
             }
+            dropBoxService.restoreTemplatePath(customerSpace, backupTask.getFeedType());
             return backupTask.getImportTemplate();
         } catch (Exception e) {
             log.error("Cannot deserialize backup file for task {}, backup file {}", uniqueTaskId, backupName);
@@ -342,7 +345,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         if (importSystem == null) {
             return false;
         }
-        return !(StringUtils.isEmpty(importSystem.getAccountSystemId()) && !validateGATenant(importSystem));
+        return StringUtils.isNotEmpty(importSystem.getAccountSystemId()) || isDefaultSystemInGATenant(importSystem);
     }
 
     @Override
@@ -355,8 +358,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask stageDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
         log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
-        String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
-        createOpportunityAtlas(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
+        String opportunityAtlasStreamName = OpportunityUtils.getStreamName(systemName);
+        createOpportunityMetadata(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
         return true;
     }
 
@@ -375,8 +378,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DataFeedTask stageDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
                 EntityType.OpportunityStageName, null);
         log.info("Stage dataFeedTask UniqueId is {}.", stageDataFeedTask.getUniqueId());
-        String opportunityAtlasStreamName = String.format("%s_%s", systemName, EntityType.Opportunity);
-        createOpportunityAtlas(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
+        String opportunityAtlasStreamName = OpportunityUtils.getStreamName(systemName);
+        createOpportunityMetadata(customerSpace, opportunityAtlasStreamName, opportunityDataFeedTask, stageDataFeedTask);
         return true;
     }
 
@@ -580,7 +583,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return s3ImportSystemService.getS3ImportSystem(customerSpace, DEFAULT_WEBSITE_SYSTEM);
     }
 
-    private void createOpportunityAtlas(String customerSpace, String opportunityAtlasStreamName,
+    private void createOpportunityMetadata(String customerSpace, String opportunityAtlasStreamName,
                                         DataFeedTask opportunityDataFeedTask, DataFeedTask stageDataFeedTask) {
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         AtlasStream opportunityAtlasStream =
@@ -611,11 +614,12 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         if (CollectionUtils.isEmpty(allSubFolder)) {
             throw new IllegalArgumentException(String.format("no subFolder, customerSpace is %s.", customerSpace));
         }
-        log.info("allSubFolder is {}", JsonUtils.serialize(allSubFolder));
         String folderName = S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName());
-        log.info("want create folderName is {}.", folderName);
+        log.info("customerSpace : {}, systemName {}, entityType {}, allSubFolder is {}, want create folderName is {}.",
+                customerSpace, systemName, entityType, allSubFolder, folderName);
         if (!allSubFolder.contains(folderName)) {
             dropBoxService.createSubFolder(customerSpace, systemName, entityType.getDefaultFeedTypeName(), null);
+            log.info("create folder {} success.", folderName);
         }
     }
 
@@ -652,7 +656,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
             // Only set the field name if it is blank, indicating this is the first time it is being updated.
             if (StringUtils.isBlank(matchIdDefinition.getFieldName()) && ACCOUNT_FIELD_NAME.equals(matchIdDefinition.getColumnName())) {
-                if (validateGATenant(importSystem)) {
+                if (isDefaultSystemInGATenant(importSystem) && StringUtils.isEmpty(importSystem.getAccountSystemId())) {
                     matchIdDefinition.setFieldName(InterfaceName.CustomerAccountId.name());
                 } else {
                     if (StringUtils.isBlank(importSystem.getAccountSystemId())) {
@@ -716,8 +720,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return reducer;
     }
 
-    private boolean validateGATenant(S3ImportSystem importSystem) {
+    private boolean isDefaultSystemInGATenant(S3ImportSystem importSystem) {
         return batonService.onlyEntityMatchGAEnabled(MultiTenantContext.getCustomerSpace())
-                && StringUtils.isEmpty(importSystem.getAccountSystemId()) && DEFAULTSYSTEM.equals(importSystem.getName());
+                 && DEFAULTSYSTEM.equals(importSystem.getName());
     }
 }

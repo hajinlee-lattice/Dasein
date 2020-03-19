@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.exposed.cdl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -29,6 +30,9 @@ public interface ServingStoreProxy {
 
     List<ColumnMetadata> getContactMetadata(String customerSpace, ColumnSelection.Predefined group,
             DataCollection.Version version);
+
+    Map<String, Boolean> getAttrsUsage(String customerSpace, BusinessEntity entity, ColumnSelection.Predefined group,
+            Set<String> attributes, DataCollection.Version version);
     // ========== END: Get Metadata Not From Cache ==========
 
     // ========== BEGIN: Get Metadata From Cache ==========

@@ -158,6 +158,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + ctx.getRetryCount() + ") get SparkSQL data.");
+                log.warn("Previous failure:", ctx.getLastThrowable());
             }
             return sparkSQLService.getData(customerSpace, livySession, sql, decodeMapping);
         });
@@ -173,6 +174,7 @@ public abstract class BaseSparkSQLStep<S extends BaseStepConfiguration> extends 
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + ctx.getRetryCount() + ") get SparkSQL data.");
+                log.warn("Previous failure:", ctx.getLastThrowable());
             }
             return sparkSQLService.getData(customerSpace, livySession, sql, Collections.emptyMap());
         });

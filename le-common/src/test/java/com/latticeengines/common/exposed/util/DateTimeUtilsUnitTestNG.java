@@ -23,4 +23,9 @@ public class DateTimeUtilsUnitTestNG {
         DateTimeUtils.convertToDateUTCISO8601("bad format");
     }
 
+    @Test(groups = "unit")
+    public void testDateIdToDateStr() {
+        Assert.assertEquals(DateTimeUtils.dayPeriodToDate(49278), "2018-05-30");
+        System.out.println(DateTimeUtils.dateToDayPeriod("2000-01-01"));
+    }
 }

@@ -41,7 +41,6 @@ public class WebVisitImportDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBa
         log.info("Running setup with ENABLE_ENTITY_MATCH enabled!");
         Map<String, Boolean> featureFlagMap = new HashMap<>();
         featureFlagMap.put(LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
-        featureFlagMap.put(LatticeFeatureFlag.ENABLE_MULTI_TEMPLATE_IMPORT.getName(), true);
         setupEnd2EndTestEnvironment(featureFlagMap);
         customerSpace = CustomerSpace.parse(mainCustomerSpace).getTenantId();
         log.info("Setup Complete!");

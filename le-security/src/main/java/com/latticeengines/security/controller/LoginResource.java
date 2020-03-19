@@ -99,9 +99,6 @@ public class LoginResource {
     @Inject
     private IDaaSService iDaaSService;
 
-    @Value("${security.login.clear.oldsession:false}")
-    private boolean clearOldSession;
-
     @PostMapping("/login")
     @ResponseBody
     @ApiOperation(value = "Login to Lattice external application")
@@ -141,9 +138,6 @@ public class LoginResource {
                 result.setTenants(tenants);
             }
             doc.setResult(result);
-            if (clearOldSession) {
-                userService.clearOldSessionForNewLogin(userData.getPid(), ticketData.getTicket());
-            }
         } catch (LedpException e) {
             doc.setErrors(Collections.singletonList(e.getCode().getMessage()));
         }

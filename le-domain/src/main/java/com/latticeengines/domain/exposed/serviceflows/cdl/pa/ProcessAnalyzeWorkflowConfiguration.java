@@ -355,6 +355,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder fullProfile(boolean fullProfile) {
+            processAccountWorkflowBuilder.fullProfile(fullProfile);
+            return this;
+        }
+
         public Builder skipPublishToS3(boolean skip) {
             processStepConfiguration.setSkipPublishToS3(skip);
             return this;
@@ -384,9 +389,6 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-
-            configuration.setEnableTempTable(true);
-
             configuration.add(processStepConfiguration);
             configuration.add(convertBatchStoreToDataTableWorkflowBuilder.build());
             configuration.add(legacyDeleteWorkFlowBuilder.build());

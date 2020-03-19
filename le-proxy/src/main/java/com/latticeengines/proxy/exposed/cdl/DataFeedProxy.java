@@ -182,6 +182,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return get("getDataFeedTaskById", url, DataFeedTask.class);
     }
 
+    public DataFeedTask getDataFeedTaskBySourceId(String customerSpace, String sourceId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/source/{sourceId}",
+                shortenCustomerSpace(customerSpace), sourceId);
+        return get("getDataFeedTaskById", url, DataFeedTask.class);
+    }
+
     public S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskId) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/getSystem",
                 shortenCustomerSpace(customerSpace), taskId);
@@ -319,5 +325,11 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace), entity, highestFirst);
         List<?> res = get("getTemplatesBySystemPriority", url, List.class);
         return JsonUtils.convertList(res, String.class);
+    }
+
+    public void setDataFeedTaskDeletedStatus(String customerSpace, Long pid, Boolean deleted) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{pid}/deleted/{deleted}",
+                shortenCustomerSpace(customerSpace), pid, deleted);
+        put("set DataFeedTask deleted status", url);
     }
 }
