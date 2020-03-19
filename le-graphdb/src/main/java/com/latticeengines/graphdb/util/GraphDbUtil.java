@@ -1,4 +1,4 @@
-package com.latticeengines.graphdb;
+package com.latticeengines.graphdb.util;
 
 import javax.annotation.PostConstruct;
 

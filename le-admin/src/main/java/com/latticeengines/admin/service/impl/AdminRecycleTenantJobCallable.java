@@ -99,7 +99,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
             }
         }
 
-        List<GlobalAuthUserTenantRight> tenantRights = userTenantRightEntityMgr.findByNonNullExprationDate();
+        List<GlobalAuthUserTenantRight> tenantRights = userTenantRightEntityMgr.findByNonNullExpirationDate();
         if (CollectionUtils.isNotEmpty(tenantRights)) {
             log.info("expired tenant right size is " + tenantRights.size());
             for (GlobalAuthUserTenantRight tenantRight : tenantRights) {

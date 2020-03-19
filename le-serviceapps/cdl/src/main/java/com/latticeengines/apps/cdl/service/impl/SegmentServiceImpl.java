@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
+import com.latticeengines.apps.cdl.entitymgr.impl.CDLDependencyChecker;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -66,7 +66,7 @@ public class SegmentServiceImpl implements SegmentService {
     private EntityProxy entityProxy;
 
     @Inject
-    private DependencyChecker dependencyChecker;
+    private CDLDependencyChecker dependencyChecker;
 
     @Override
     public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {

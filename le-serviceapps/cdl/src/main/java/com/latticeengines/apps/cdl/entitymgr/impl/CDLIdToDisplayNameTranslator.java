@@ -1,13 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +10,7 @@ import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
 import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
-import com.latticeengines.domain.exposed.graph.GraphConstants;
-import com.latticeengines.domain.exposed.graph.NameSpaceUtil;
+import com.latticeengines.domain.exposed.graph.IdToDisplayNameTranslator;
 import com.latticeengines.domain.exposed.graph.VertexType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -25,12 +18,9 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngine.ScoreType;
 
 @Component
-public class IdToDisplayNameTranslator {
+public class CDLIdToDisplayNameTranslator extends IdToDisplayNameTranslator {
 
     public static final String RATING_ATTRIBUTE = "Rating Attribute";
-    public static final String ID = "id";
-    public static final String DISPLAY_NAME = "displayName";
-    public static final String TYPE = "type";
 
     @Inject
     private SegmentEntityMgr segmentEntityMgr;
@@ -47,59 +37,7 @@ public class IdToDisplayNameTranslator {
     @Inject
     RatingAttributeNameParser ratingAttributeNameParser;
 
-    public Map<String, List<Map<String, String>>> translate(List<Map<String, String>> inputList) {
-        Map<String, List<Map<String, String>>> result = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(inputList)) {
-            inputList.stream() //
-                    .forEach(in -> {
-                        String objId = in.get(GraphConstants.OBJECT_ID_KEY);
-                        String objType = in.get(NameSpaceUtil.TYPE_KEY);
-                        String translatedType = translateType(objType);
-                        if (!result.containsKey(translatedType)) {
-                            result.put(translatedType, new ArrayList<>());
-                        }
-                        Map<String, String> objInfo = new HashMap<>();
-                        objInfo.put(ID, objId);
-                        objInfo.put(TYPE, objType);
-                        result.get(translatedType).add(objInfo);
-                    });
-            result.keySet().stream() //
-                    .forEach(type -> {
-                        result.get(type).stream() //
-                                .forEach(objInfo -> {
-                                    String objId = objInfo.get(ID);
-                                    String displayName = idToDisplayName(objInfo.get(TYPE), objId);
-                                    objInfo.put(DISPLAY_NAME, displayName);
-                                });
-                    });
-
-        }
-        return result;
-    }
-
-    public List<List<Map<String, String>>> translatePaths(List<List<Map<String, String>>> inputList) {
-        List<List<Map<String, String>>> result = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(inputList)) {
-            inputList.stream() //
-                    .forEach(path -> {
-                        List<Map<String, String>> pathInfo = new ArrayList<>();
-                        result.add(pathInfo);
-                        path.stream() //
-                                .forEach(in -> {
-                                    Map<String, String> objInfo = new HashMap<>();
-                                    String objId = in.get(GraphConstants.OBJECT_ID_KEY);
-                                    String objType = in.get(NameSpaceUtil.TYPE_KEY);
-                                    String translatedType = translateType(objType);
-                                    String displayName = idToDisplayName(objType, objId);
-                                    objInfo.put(DISPLAY_NAME, displayName);
-                                    objInfo.put(TYPE, translatedType);
-                                    pathInfo.add(objInfo);
-                                });
-                    });
-        }
-        return result;
-    }
-
+    @Override
     public String idToDisplayName(String type, String objId) {
         String displayName = objId;
         if (type.equals(VertexType.PLAY)) {
@@ -138,6 +76,7 @@ public class IdToDisplayNameTranslator {
         return displayName;
     }
 
+    @Override
     public String translateType(String vertexType) {
         String translatedType = vertexType;
         if (vertexType.equals(VertexType.PLAY)) {
@@ -156,6 +95,7 @@ public class IdToDisplayNameTranslator {
         return translatedType;
     }
 
+    @Override
     public String toVertexType(String objectType) {
         String translatedType = null;
         CDLObjectTypes type = CDLObjectTypes.valueOf(objectType);

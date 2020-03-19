@@ -170,8 +170,7 @@ public class DependenciesToGraphAction {
         graphEntityManager.dropVertex(tenantId, null, null, null, request);
     }
 
-    public List<Map<String, String>> checkDirectDependencies(String tenantId, String vertexId, String vertexType)
-            throws Exception {
+    public List<Map<String, String>> checkDirectDependencies(String tenantId, String vertexId, String vertexType) throws Exception {
         return graphEntityManager.checkDirectVertexDependencies(tenantId, null, null, null, vertexId, vertexType);
     }
 

@@ -21,8 +21,6 @@ public interface GlobalAuthTeamEntityMgr extends BaseEntityMgr<GlobalAuthTeam> {
 
     void deleteByTeamId(String teamId, Long tenantId);
 
-    void deleteByTenantId(Long tenantId);
-
     GlobalAuthTeam findByTeamIdAndTenantId(Long tenantId, String teamId, boolean inflate);
 
     boolean userBelongsToTeam(Long tenantId, String username, String teamId);

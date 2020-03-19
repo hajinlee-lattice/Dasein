@@ -1,6 +1,7 @@
 package com.latticeengines.security.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -50,6 +51,7 @@ public class TeamResource {
     @GetMapping(value = "/username/{username}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
+    @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getTeamsByUsername(HttpServletRequest request,
                                                @PathVariable(value = "username") String username) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
@@ -60,6 +62,7 @@ public class TeamResource {
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "List all teams")
+    @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getAllTeams(HttpServletRequest request) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
@@ -96,10 +99,18 @@ public class TeamResource {
     @DeleteMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Delete a team")
+    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean deleteTeam(@PathVariable("teamId") String teamId) {
         log.info("Delete team " + teamId);
         return true;
 
     }
 
+    @GetMapping(value = "/{teamId}/dependencies")
+    @ResponseBody
+    @ApiOperation(value = "Get all the dependencies")
+    public Map<String, List<String>> getDependencies(@PathVariable String teamId) throws Exception {
+        log.info(String.format("get all dependencies for teamId=%s", teamId));
+        return teamService.getDependencies(teamId);
+    }
 }

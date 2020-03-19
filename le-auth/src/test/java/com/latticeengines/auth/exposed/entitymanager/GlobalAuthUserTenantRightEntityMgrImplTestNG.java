@@ -43,7 +43,7 @@ public class GlobalAuthUserTenantRightEntityMgrImplTestNG extends AuthFunctional
         tenantRight2.setExpirationDate(System.currentTimeMillis());
         globalAuthUserTenantRightEntityMgr.create(tenantRight2);
 
-        List<GlobalAuthUserTenantRight> rights = globalAuthUserTenantRightEntityMgr.findByNonNullExprationDate();
+        List<GlobalAuthUserTenantRight> rights = globalAuthUserTenantRightEntityMgr.findByNonNullExpirationDate();
         Assert.assertEquals(rights.size() >= 1, true);
         for (GlobalAuthUserTenantRight right : rights) {
             Assert.assertNotNull(right.getExpirationDate());

@@ -16,7 +16,7 @@
 
     <bean id="globalAuthRetryAspect"
         class="com.latticeengines.auth.aspect.GlobalAuthRetryAspect" />
-    <bean id="dependencyGraphTenantAspect" class="com.latticeengines.auth.aspect.DependencyGraphTenantEntityMgrAspect"/>
+    <bean id="dependencyGraphTenantAspect" class="com.latticeengines.auth.aspect.DependencyGraphEntityMgrAspect"/>
 
 
 </beans>
