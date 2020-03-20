@@ -27,7 +27,7 @@ public class DCPComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
         return DCPComponent.componentName;
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testInstallation() {
         loginAD();
         // pls
