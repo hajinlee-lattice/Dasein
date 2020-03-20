@@ -54,7 +54,7 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     private String bucket;
 
     @JsonProperty("key")
-    @Column(name = "KEY", length = 3000, nullable = false)
+    @Column(name = "KEY", length = 500, nullable = false)
     private String key;
 
     @JsonProperty("feed_type")
