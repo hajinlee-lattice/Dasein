@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -148,4 +149,6 @@ public interface ActivityStoreService {
      * @return streamId -> streamName
      */
     Map<String, String> getStreamNameMap();
+
+    List<AtlasStream> getStreams(@NotNull String customerSpace);
 }

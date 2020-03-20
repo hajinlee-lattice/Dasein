@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -273,6 +274,14 @@ public class CDLResource {
             throw new LedpException(LedpCode.LEDP_18182, new String[]{"UpdateS3ImportStatus", e.getMessage()});
         }
     }
+
+    @PostMapping(value = "/soft-delete")
+    @ApiOperation(value = "Start cleanup job")
+    public Map<String, UIAction> softDelete(@RequestBody DeleteRequest deleteRequest) {
+        UIAction uiAction = cdlService.softDelete(deleteRequest);
+        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+    }
+
 
     @RequestMapping(value = "/cleanupbyupload", method = RequestMethod.POST)
     @ApiOperation(value = "Start cleanup job")

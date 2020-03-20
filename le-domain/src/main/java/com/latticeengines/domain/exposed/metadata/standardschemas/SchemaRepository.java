@@ -218,6 +218,10 @@ public class SchemaRepository {
         case DeleteTransactionTemplate:
             table = getDeleteTransactionTemplateSchema(enableEntityMatch);
             break;
+        case DeleteByContactTemplate:
+            table = getDeleteContactTemplateSchema(false);
+            break;
+        case DeleteByAccountTemplate:
         case RegisterDeleteDataTemplate:
             table = getDeleteAccountTemplateSchema(false);
             break;

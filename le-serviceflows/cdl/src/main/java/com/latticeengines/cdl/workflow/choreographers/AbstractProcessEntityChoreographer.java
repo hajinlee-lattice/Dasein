@@ -249,6 +249,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
+    boolean hasValidSoftDeleteActions(List<Action> softDeletes) {
+        return CollectionUtils.isNotEmpty(softDeletes);
+    }
+
     private void checkSchemaChange(AbstractStep<? extends BaseStepConfiguration> step) {
         List<BusinessEntity> entityList = step.getListObjectFromContext(ENTITIES_WITH_SCHEMA_CHANGE,
                 BusinessEntity.class);

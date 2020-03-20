@@ -2,11 +2,13 @@ package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,8 @@ import com.latticeengines.cdl.workflow.steps.merge.MergeContact;
 import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
 import com.latticeengines.cdl.workflow.steps.update.CloneContact;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -160,6 +164,14 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         return false;
+    }
+
+    @Override
+    boolean hasValidSoftDeleteActions(List<Action> softDeletes) {
+        return CollectionUtils.isNotEmpty(softDeletes) && softDeletes.stream().anyMatch(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            return configuration.hasEntity(BusinessEntity.Contact);
+        });
     }
 
 }

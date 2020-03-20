@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -155,6 +156,15 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         }
     }
 
+    void setOutputTablePrefix(List<TransformationStepConfig> steps) {
+        TransformationStepConfig lastStep = steps.get(steps.size() - 1);
+        setTargetTable(lastStep, batchStoreTablePrefix);
+        if (hasSystemStore()) {
+            TransformationStepConfig secondLastStep = steps.get(steps.size() - 2);
+            setTargetTable(secondLastStep, systemBatchStoreTablePrefix);
+        }
+    }
+
     protected String getBatchStoreName() {
         return TableUtils.getFullTableName(batchStoreTablePrefix, pipelineVersion);
     }
@@ -163,47 +173,65 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
         return TableUtils.getFullTableName(systemBatchStoreTablePrefix, pipelineVersion);
     }
 
-    TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions) {
+    List<Action> filterSoftDeleteActions(List<Action> softDeleteActions, BusinessEntity idEntity) {
+        return softDeleteActions.stream().filter(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            return configuration.hasEntity(entity) && idEntity.equals(configuration.getIdEntity());
+        }).collect(Collectors.toList());
+    }
+
+    TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions, String idColumn) {
+        return mergeSoftDelete(softDeleteActions, idColumn, -1);
+    }
+
+    TransformationStepConfig mergeSoftDelete(List<Action> softDeleteActions, String idColumn, int extraIdStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         softDeleteActions.forEach(action -> {
             DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
             addBaseTables(step, configuration.getDeleteDataTable());
         });
+        if (extraIdStep >= 0) {
+            step.setInputSteps(Collections.singletonList(extraIdStep));
+        }
         MergeImportsConfig config = new MergeImportsConfig();
         config.setDedupSrc(true);
-        config.setJoinKey(InterfaceName.AccountId.name());
+        config.setJoinKey(idColumn);
         config.setAddTimestamps(false);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
     TransformationStepConfig softDelete(int mergeSoftDeleteStep) {
-        return softDelete(mergeSoftDeleteStep, masterTable, null, batchStoreTablePrefix);
+        return softDelete(mergeSoftDeleteStep, masterTable, null);
     }
 
     TransformationStepConfig softDeleteSystemBatchStore(int mergeSoftDeleteStep) {
-        return softDelete(mergeSoftDeleteStep, systemMasterTable, InterfaceName.EntityId.name(),
-                systemBatchStoreTablePrefix);
+        return softDelete(mergeSoftDeleteStep, systemMasterTable, InterfaceName.EntityId.name());
     }
 
     TransformationStepConfig softDeleteSystemBatchStoreByContact(int mergeSoftDeleteStep) {
         return softDelete(mergeSoftDeleteStep, systemMasterTable, InterfaceName.ContactId.name(),
-                InterfaceName.EntityId.name(), systemBatchStoreTablePrefix);
+                InterfaceName.EntityId.name());
     }
 
-    private TransformationStepConfig softDelete(int mergeSoftDeleteStep, Table masterTable, String sourceIdColumn,
-            String tgtTablePrefix) {
-        return softDelete(mergeSoftDeleteStep, masterTable, InterfaceName.AccountId.name(), sourceIdColumn,
-                tgtTablePrefix);
+    boolean hasSystemStore() {
+        return systemMasterTable != null;
+    }
+
+    String getJoinColumn() {
+        return BusinessEntity.Contact.equals(entity) ? InterfaceName.ContactId.name() : InterfaceName.AccountId.name();
+    }
+
+    private TransformationStepConfig softDelete(int mergeSoftDeleteStep, Table masterTable, String sourceIdColumn) {
+        return softDelete(mergeSoftDeleteStep, masterTable, getJoinColumn(), sourceIdColumn);
     }
 
     private TransformationStepConfig softDelete(int mergeSoftDeleteStep, Table masterTable, String joinColumn,
-                                                String sourceIdColumn, String tgtTablePrefix) {
+                                                String sourceIdColumn) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
-        setTargetTable(step, tgtTablePrefix);
         if (masterTable != null) {
             log.info("Add masterTable=" + masterTable.getName());
             addBaseTables(step, masterTable.getName());

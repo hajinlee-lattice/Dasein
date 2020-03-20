@@ -32,6 +32,8 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.PAReportUtils;
 import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
@@ -386,5 +388,13 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected boolean skipsStepInSubWorkflow(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         return false;
+    }
+
+    @Override
+    boolean hasValidSoftDeleteActions(List<Action> softDeletes) {
+        return CollectionUtils.isNotEmpty(softDeletes) && softDeletes.stream().anyMatch(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            return configuration.hasEntity(BusinessEntity.Transaction);
+        });
     }
 }

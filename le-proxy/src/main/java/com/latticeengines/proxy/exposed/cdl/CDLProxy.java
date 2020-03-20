@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ConvertBatchStoreToImportRequest;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.MigrateDynamoRequest;
@@ -493,6 +494,20 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
         ResponseDocument<String> responseDoc = post("Register delete data", url, null, ResponseDocument.class);
 
+        if (responseDoc == null) {
+            return null;
+        }
+        if (responseDoc.isSuccess()) {
+            return ApplicationIdUtils.toApplicationIdObj(responseDoc.getResult());
+        } else {
+            throw new RuntimeException("Failed to register delete data: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
+    }
+
+    public ApplicationId registerDeleteData(String customerSpace, DeleteRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datacleanup/registerDeleteData",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<String> responseDoc = post("Register delete data", url, request, ResponseDocument.class);
         if (responseDoc == null) {
             return null;
         }

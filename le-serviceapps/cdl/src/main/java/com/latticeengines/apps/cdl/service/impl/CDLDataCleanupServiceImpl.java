@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -144,7 +145,8 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
     }
 
     @Override
-    public ApplicationId registerDeleteData(String customerSpace, boolean hardDelete, String sourceFileName, String user) {
+    public ApplicationId registerDeleteData(String customerSpace, DeleteRequest request) {
+        String sourceFileName = request.getFilename();
         SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileName);
         if (sourceFile == null) {
             log.error("Cannot find SourceFile with name: {}", sourceFileName);
@@ -154,8 +156,8 @@ public class CDLDataCleanupServiceImpl implements CDLDataCleanupService {
             log.error("SourceFile: {} does not have a table object!", sourceFileName);
             throw new RuntimeException(String.format("SourceFile: %s does not have a table object!", sourceFileName));
         }
-        return registerDeleteDataWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), hardDelete,
-                sourceFile, user, new WorkflowPidWrapper(-1L));
+        request.setSourceFile(sourceFile);
+        return registerDeleteDataWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace), request, new WorkflowPidWrapper(-1L));
     }
 
     private void verifyCleanupByDataRangeConfiguration(

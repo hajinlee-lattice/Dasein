@@ -6,6 +6,7 @@ import static com.latticeengines.pls.util.ImportWorkflowUtils.validateFieldDefin
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -242,16 +243,24 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "operationType") CleanupOperationType cleanupOperationType, //
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "outsizeFlag", required = false, defaultValue = "false") boolean outsizeFlag) {
-        if (schemaInterpretation != SchemaInterpretation.DeleteAccountTemplate
-                && schemaInterpretation != SchemaInterpretation.DeleteContactTemplate
-                && schemaInterpretation != SchemaInterpretation.DeleteTransactionTemplate
-                && schemaInterpretation != SchemaInterpretation.RegisterDeleteDataTemplate) {
+        if (!Arrays.asList( //
+                SchemaInterpretation.DeleteAccountTemplate, //
+                SchemaInterpretation.DeleteContactTemplate, //
+                SchemaInterpretation.DeleteTransactionTemplate, //
+                SchemaInterpretation.RegisterDeleteDataTemplate, //
+                SchemaInterpretation.DeleteByAccountTemplate, //
+                SchemaInterpretation.DeleteByContactTemplate //
+        ).contains(schemaInterpretation)) {
             throw new LedpException(LedpCode.LEDP_18173, new String[] { schemaInterpretation.name() });
         }
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (batonService.isEntityMatchEnabled(customerSpace) && !batonService.onlyEntityMatchGAEnabled(customerSpace)) {
-            if (schemaInterpretation != SchemaInterpretation.RegisterDeleteDataTemplate) {
-                throw new LedpException(LedpCode.LEDP_18235);
+            if (!Arrays.asList( //
+                    SchemaInterpretation.RegisterDeleteDataTemplate, //
+                    SchemaInterpretation.DeleteByAccountTemplate, //
+                    SchemaInterpretation.DeleteByContactTemplate //
+            ).contains(schemaInterpretation)) {
+                throw new LedpException(LedpCode.LEDP_18235, new String[] { schemaInterpretation.name() });
             }
         }
         SourceFile sourceFile = uploadFile("file_" + DateTime.now().getMillis() + ".csv", compressed, csvFileName,

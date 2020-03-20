@@ -6,20 +6,18 @@ ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.30
+    TOMCAT_VERSION=9.0.33
 
     sudo rm -rf ${CATALINA_HOME}
     sudo mkdir -p ${CATALINA_HOME} || true
     sudo chown -R ${USER} ${CATALINA_HOME} || true
 
     if [[ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]]; then
-        APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
-        TOMCAT_TGZ_URL="${APACHE_MIRROR}tomcat/tomcat-${TOMCAT_MAJOR}/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
         TOMCAT_TGZ_ARCHIVE_URL="https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
         TOMCAT_TGZ="${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
-	    # if active apache mirror cannot find the version, fall back to archive server
-        wget ${TOMCAT_TGZ_URL} -O ${TOMCAT_TGZ} || wget ${TOMCAT_TGZ_ARCHIVE_URL} -O ${TOMCAT_TGZ}
+        wget ${TOMCAT_TGZ_ARCHIVE_URL} -O ${TOMCAT_TGZ}
     fi
+
     rm -rf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION} || true
     tar xzf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C ${ARTIFACT_DIR}
     cp -rf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}/* ${CATALINA_HOME}

@@ -361,7 +361,7 @@ public enum LedpCode {
     LEDP_18233("Outreach connection requires {0} to be mapped"), //
     LEDP_18234("Failed to update import system: {0}"), //
     LEDP_18235(
-            "RegisterDeleteDataTemplate is the only supported schema for delete operation with entity match tenant!"), //
+            "RegisterDeleteDataTemplate is the only supported schema for delete operation with entity match tenant! Not {0}"), //
     LEDP_18236("PlayLaunch id is null"), //
     LEDP_18237("Audience name {0} with Audience Id {1} can not be set in a null PlayLaunchChannel"), //
     LEDP_18238("PlayLaunch id {0} has Play null {1} and PlayLaunchChannel null {2}"), //

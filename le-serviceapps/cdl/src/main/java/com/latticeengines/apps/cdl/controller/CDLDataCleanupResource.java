@@ -2,6 +2,8 @@ package com.latticeengines.apps.cdl.controller;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.CDLDataCleanupService;
 import com.latticeengines.apps.cdl.service.TenantCleanupService;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -54,13 +58,25 @@ public class CDLDataCleanupResource {
     @ResponseBody
     @ApiOperation(value = "Register delete data table")
     public ResponseDocument<String> registerDeleteData(@PathVariable String customerSpace,
-                                                       @RequestParam(value = "user") String user,
-                                                       @RequestParam(value = "filename") String filename,
+                                                       @RequestParam(value = "user", required = false) String user,
+                                                       @RequestParam(value = "filename", required = false) String filename,
                                                        @RequestParam(value = "hardDelete", required = false,
-                                                               defaultValue = "false") boolean hardDelete) {
+                                                               defaultValue = "false") boolean hardDelete,
+                                                       @RequestBody DeleteRequest request) {
         try {
-            return ResponseDocument.successResponse(cdlDataCleanupService.registerDeleteData(customerSpace,
-                    hardDelete, filename, user).toString());
+            if (request == null) {
+                request = new DeleteRequest();
+            }
+            if (StringUtils.isNotBlank(user)) {
+                request.setUser(user);
+            }
+            if (StringUtils.isNotBlank(filename)) {
+                request.setFilename(filename);
+            }
+            request.setHardDelete(hardDelete);
+            customerSpace = CustomerSpace.parse(customerSpace).toString();
+            ApplicationId applicationId = cdlDataCleanupService.registerDeleteData(customerSpace, request);
+            return ResponseDocument.successResponse(applicationId.toString());
         } catch (RuntimeException e) {
             log.error("Register delete data failed: {}", e.getMessage());
             return ResponseDocument.failedResponse(e);

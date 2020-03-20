@@ -256,7 +256,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
             playLaunchChannelService.updateAudience(audienceId, audienceName, playLaunchId);
             return playLaunch;
         }
-        throw new LedpException(LedpCode.LEDP_18235, new String[] {});
+        throw new LedpException(LedpCode.LEDP_18236);
     }
 
     private Map<String, List<LookupIdMap>> calculateUniqueLookupIdMapping(Long playId, List<LaunchState> launchStates,

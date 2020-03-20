@@ -24,12 +24,14 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
@@ -102,11 +104,16 @@ public class SoftDeleteActivityStoreDeploymentTestNG extends ProcessActivityStor
                 return fileName;
             }
         };
-        SourceFile sourceFile = uploadDeleteCSV(fileName, SchemaInterpretation.RegisterDeleteDataTemplate,
+        SourceFile sourceFile = uploadDeleteCSV(fileName, SchemaInterpretation.DeleteByAccountTemplate,
                 CleanupOperationType.BYUPLOAD_ID,
                 source);
-        ApplicationId appId = cdlProxy.registerDeleteData(customerSpace, MultiTenantContext.getEmailAddress(),
-                sourceFile.getName(), false);
+        DeleteRequest request = new DeleteRequest();
+        request.setUser(MultiTenantContext.getEmailAddress());
+        request.setFilename(sourceFile.getName());
+        request.setIdEntity(BusinessEntity.Account);
+        request.setDeleteEntities(null); // delete all entities
+        request.setHardDelete(false);
+        ApplicationId appId = cdlProxy.registerDeleteData(customerSpace, request);
         JobStatus status = waitForWorkflowStatus(appId.toString(), false);
         Assert.assertEquals(JobStatus.COMPLETED, status);
     }

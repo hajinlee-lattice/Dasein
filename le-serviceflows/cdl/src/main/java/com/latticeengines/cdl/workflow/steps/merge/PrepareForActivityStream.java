@@ -141,6 +141,7 @@ public class PrepareForActivityStream extends BaseWorkflowStep<ProcessActivitySt
         DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, inactive);
         status.setActivityStreamMap(currentStreams);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
         log.info("Save current activity streams {} to version {}", JsonUtils.serialize(currentStreams), inactive);
         dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace, status, inactive);
     }

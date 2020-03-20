@@ -22,6 +22,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -54,12 +55,13 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
     private SourceFileProxy sourceFileProxy;
 
     @WithWorkflowJobPid
-    public ApplicationId submit(CustomerSpace customerSpace, boolean hardDelete,
-                                SourceFile sourceFile, String user, WorkflowPidWrapper pidWrapper) {
+    public ApplicationId submit(CustomerSpace customerSpace, DeleteRequest request, WorkflowPidWrapper pidWrapper) {
+        SourceFile sourceFile = request.getSourceFile();
+        String user = request.getUser();
         if (!checkSourceFile(customerSpace, sourceFile)) {
             throw new RuntimeException("Cannot Register delete data due to Source File issue!");
         }
-        Action action = registerAction(customerSpace, sourceFile.getTableName(), hardDelete, user, pidWrapper.getPid());
+        Action action = registerAction(customerSpace, request, pidWrapper.getPid());
         RegisterDeleteDataWorkflowConfiguration configuration = generateConfig(customerSpace,
                 sourceFile.getTableName(), sourceFile.getPath(), user, action.getPid());
         return workflowJobService.submit(configuration, pidWrapper.getPid());
@@ -98,8 +100,8 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
         return true;
     }
 
-    private Action registerAction(CustomerSpace customerSpace, String tableName, boolean hardDelete, String user,
-                                  Long workflowPid) {
+    private Action registerAction(CustomerSpace customerSpace, DeleteRequest request, Long workflowPid) {
+        boolean hardDelete = Boolean.TRUE.equals(request.getHardDelete());
         Action action = new Action();
         if (hardDelete) {
             action.setType(ActionType.HARD_DELETE);
@@ -107,14 +109,17 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
             action.setType(ActionType.SOFT_DELETE);
         }
         action.setTrackingPid(workflowPid);
-        action.setActionInitiator(user);
+        action.setActionInitiator(request.getUser());
         Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
         if (tenant == null) {
             throw new NullPointerException(
                     String.format("Tenant with id=%s cannot be found", customerSpace.toString()));
         }
         DeleteActionConfiguration deleteActionConfiguration = new DeleteActionConfiguration();
-        deleteActionConfiguration.setDeleteDataTable(tableName);
+        deleteActionConfiguration.setDeleteDataTable(request.getSourceFile().getTableName());
+        deleteActionConfiguration.setIdEntity(request.getIdEntity());
+        deleteActionConfiguration.setDeleteEntities(request.getDeleteEntities());
+        deleteActionConfiguration.setDeleteStreamIds(request.getDeleteStreamIds());
         action.setActionConfiguration(deleteActionConfiguration);
         action.setTenant(tenant);
         if (tenant.getPid() != null) {
