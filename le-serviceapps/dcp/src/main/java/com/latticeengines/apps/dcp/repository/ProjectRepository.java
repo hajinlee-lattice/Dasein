@@ -9,4 +9,5 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
     Project findByProjectId(String projectId);
 
     Project findByImportSystem(S3ImportSystem importSystem);
+
 }

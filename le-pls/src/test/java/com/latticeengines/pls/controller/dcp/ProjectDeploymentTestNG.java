@@ -34,7 +34,7 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         attachProtectedProxy(testProjectProxy);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testCreateDCPProjectWithProjectId() throws Exception {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithProjectId(DISPLAY_NAME, PROJECT_ID, Project.ProjectType.Type1);
         assertNotNull(projectDetail);
@@ -42,15 +42,19 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         testProjectProxy.deleteProject(PROJECT_ID);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testCreateDCPProjectWithOutProjectId() throws Exception {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail);
         assertEquals(projectDetail.getProjectDisplayName(), DISPLAY_NAME);
         testProjectProxy.deleteProject(projectDetail.getProjectId());
+
+        projectDetail = testProjectProxy.getProjectByProjectId(projectDetail.getProjectId());
+        Assert.assertNotNull(projectDetail);
+        Assert.assertEquals(projectDetail.getDeleted(), Boolean.TRUE);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testGetAllDCPProject() throws Exception {
         ProjectDetails projectDetail1 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail1);
@@ -59,9 +63,13 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         List<Project> projectList = testProjectProxy.getAllProjects();
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
-        Assert.assertEquals(projectList.size(), 2);
+        Assert.assertEquals(projectList.size(), 4);
 
         testProjectProxy.deleteProject(projectDetail1.getProjectId());
         testProjectProxy.deleteProject(projectDetail2.getProjectId());
+
+        projectList = testProjectProxy.getAllProjects();
+        Assert.assertEquals(projectList.size(), 4);
+        projectList.forEach(project -> Assert.assertEquals(project.getDeleted(), Boolean.TRUE));
     }
 }

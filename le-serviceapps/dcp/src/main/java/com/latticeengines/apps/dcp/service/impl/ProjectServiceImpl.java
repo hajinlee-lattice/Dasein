@@ -85,7 +85,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project getProjectByProjectId(String customerSpace, String projectId) {
-        return getProjectByProjectIdWithRetry(projectId);
+        return projectEntityMgr.findByProjectId(projectId);
     }
 
     @Override
@@ -95,20 +95,22 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
-        Project project = getProjectByProjectIdWithRetry(projectId);
+        Project project = projectEntityMgr.findByProjectId(projectId);
         if (project == null) {
-            throw new RuntimeException(String.format("Get DCP Project %s failed!", projectId));
+            log.warn("No project found with id: " + projectId);
+            return null;
         }
         return getProjectDetails(customerSpace, project);
     }
 
     @Override
     public Boolean deleteProject(String customerSpace, String projectId) {
-        Project project = getProjectByProjectIdWithRetry(projectId);
+        Project project = projectEntityMgr.findByProjectId(projectId);
         if (project == null) {
             return false;
         }
-        projectEntityMgr.delete(project);
+        project.setDeleted(Boolean.TRUE);
+        projectEntityMgr.update(project);
         return true;
     }
 
@@ -140,6 +142,7 @@ public class ProjectServiceImpl implements ProjectService {
         details.setProjectDisplayName(project.getProjectDisplayName());
         details.setProjectRootPath(project.getRootPath());
         details.setDropFolderAccess(getDropBoxAccess());
+        details.setDeleted(project.getDeleted());
         if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
             details.setSources(new ArrayList<>());
             project.getS3ImportSystem().getTasks()
