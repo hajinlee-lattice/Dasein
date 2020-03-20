@@ -138,8 +138,8 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setDataDbDriver(dataDbDriver);
         deltaCampaignLaunchSparkContext.setDataDbUrl(dataDbUrl);
         deltaCampaignLaunchSparkContext.setDataDbUser(dataDbUser);
-        deltaCampaignLaunchSparkContext.setPublishRecommendationsForS3Launch(
-                campaignLaunchUtils.shouldPublishRecommendationsForS3Launch(customerSpace, playLaunch.getDestinationSysName()));
+        deltaCampaignLaunchSparkContext.setPublishRecommendationsForS3Launch(campaignLaunchUtils
+                .shouldPublishRecommendationsForS3Launch(customerSpace, playLaunch.getDestinationSysName()));
         String saltHint = CipherUtils.generateKey();
         deltaCampaignLaunchSparkContext.setSaltHint(saltHint);
         String encryptionKey = CipherUtils.generateKey();
@@ -157,7 +157,7 @@ public class DeltaCampaignLaunchInitStep
         deltaCampaignLaunchSparkContext.setCreateDeleteCsvDataFrame(createDeleteCsvDataFrame);
 
         sparkConfig.setDeltaCampaignLaunchSparkContext(deltaCampaignLaunchSparkContext);
-
+        log.info("sparkConfig=" + JsonUtils.serialize(sparkConfig));
         return sparkConfig;
     }
 
