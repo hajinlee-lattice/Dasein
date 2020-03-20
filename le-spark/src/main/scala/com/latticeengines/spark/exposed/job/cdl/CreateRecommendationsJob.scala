@@ -212,6 +212,7 @@ class CreateRecommendationsJob extends AbstractSparkJob[CreateRecommendationConf
     val bos: ByteArrayOutputStream = new ByteArrayOutputStream
     KryoUtils.write(bos, playLaunchContext)
     val serializedCtx = JsonUtils.serialize(playLaunchContext)
+    logSpark(s"serializedCtx is: $serializedCtx")
     val createRecFunc = (account: Row) => CreateRecommendationsJob.createRec(account, serializedCtx)
     val accountAndPlayLaunch = limitedAccountTable.rdd.map(createRecFunc)
 

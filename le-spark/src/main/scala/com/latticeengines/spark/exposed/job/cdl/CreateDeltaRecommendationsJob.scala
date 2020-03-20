@@ -289,6 +289,7 @@ class CreateDeltaRecommendationsJob extends AbstractSparkJob[CreateDeltaRecommen
       val bos: ByteArrayOutputStream = new ByteArrayOutputStream
       KryoUtils.write(bos, deltaCampaignLaunchSparkContext)
       val serializedCtx = JsonUtils.serialize(deltaCampaignLaunchSparkContext)
+      logSpark(s"serializedCtx is: $serializedCtx")
       val createRecFunc = (account: Row) => CreateRecommendationsJob.createRec(account, serializedCtx)
       val accountAndPlayLaunch = addAccountTable.rdd.map(createRecFunc)
 

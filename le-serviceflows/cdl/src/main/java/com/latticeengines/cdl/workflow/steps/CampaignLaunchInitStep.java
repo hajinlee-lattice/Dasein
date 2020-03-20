@@ -185,7 +185,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     }
 
     private SparkJobResult executeSparkJob(PlayLaunchContext playLaunchContext,
-                                           ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
+            ProcessedFieldMappingMetadata processedFieldMappingMetadata) {
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -201,10 +201,12 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 if (accountLimitFromUI != null && accountLimitFromUI > 0) {
                     campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountLimitFromUI);
                 } else {
-                    long accountsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Account));
+                    long accountsCount = getEntityQueryCount(
+                            buildFrontEndQuery(playLaunchContext, BusinessEntity.Account));
                     campaignLaunchUtils.checkCampaignLaunchAccountLimitation(accountsCount);
                     if (contactsDataExists) {
-                        long contactsCount = getEntityQueryCount(buildFrontEndQuery(playLaunchContext, BusinessEntity.Contact));
+                        long contactsCount = getEntityQueryCount(
+                                buildFrontEndQuery(playLaunchContext, BusinessEntity.Contact));
                         campaignLaunchUtils.checkCampaignLaunchContactLimitation(contactsCount);
                     }
                 }
@@ -236,7 +238,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 String encryptionKey = CipherUtils.generateKey();
                 playLaunchSparkContext.setEncryptionKey(encryptionKey);
                 playLaunchSparkContext.setDataDbPassword(CipherUtils.encrypt(dataDbPassword, encryptionKey, saltHint));
-
+                log.info("playLaunchSparkContext=" + JsonUtils.serialize(playLaunchSparkContext));
                 return executeSparkJob(CreateRecommendationsJob.class,
                         generateCreateRecommendationConfig(accountDataUnit, contactDataUnit, playLaunchSparkContext));
             } finally {
@@ -246,7 +248,7 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     }
 
     private CreateRecommendationConfig generateCreateRecommendationConfig(HdfsDataUnit accountDataUnit,
-                                                                          HdfsDataUnit contactDataUnit, PlayLaunchSparkContext playLaunchSparkContext) {
+            HdfsDataUnit contactDataUnit, PlayLaunchSparkContext playLaunchSparkContext) {
         CreateRecommendationConfig createRecConfig = new CreateRecommendationConfig();
         createRecConfig.setWorkspace(getRandomWorkspace());
         if (contactDataUnit != null) {
