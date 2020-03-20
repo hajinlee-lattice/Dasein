@@ -13,11 +13,11 @@ echo "Setting up LDC_ManagedDB"
 
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
-    sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL
+    sed -i '' 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
 else
     echo "You are on ${UNAME}"
     # Remove alter table drop foreign key statements from the script
-    sed -i 's/alter table .* drop foreign key .*;//g' $DDL
+    sed -i 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
 fi
 
 # 2.0.6 version is needed for some testing purpose, don't remove them

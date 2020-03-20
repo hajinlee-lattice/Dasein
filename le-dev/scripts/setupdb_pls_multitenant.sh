@@ -13,13 +13,14 @@ echo "Setting up PLS_Multitenant"
 
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
-    # Remove alter table drop foreign key statements from the script
-    sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL
+    # Remove alter table drop foreign key statements from the script, limit FK checks during session
+    sed -i '' 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
 else
     echo "You are on ${UNAME}"
-    # Remove alter table drop foreign key statements from the script
-    sed -i 's/alter table .* drop foreign key .*;//g' $DDL
+    # Remove alter table drop foreign key statements from the script, limit FK checks during session
+    sed -i 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
 fi
+
 
 rm -rf $WSHOME/le-dev/testartifacts/PLSMultiTenant_ManageDB/StringTemplate.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/PLSMultiTenant_ManageDB/StringTemplate.csv.gz > $WSHOME/le-dev/testartifacts/PLSMultiTenant_ManageDB/StringTemplate.csv
