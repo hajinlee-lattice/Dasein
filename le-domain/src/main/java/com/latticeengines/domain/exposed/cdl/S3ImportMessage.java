@@ -54,11 +54,11 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     private String bucket;
 
     @JsonProperty("key")
-    @Column(name = "KEY", nullable = false)
+    @Column(name = "KEY", length = 3000, nullable = false)
     private String key;
 
     @JsonProperty("feed_type")
-    @Column(name = "FEED_TYPE", nullable = false)
+    @Column(name = "FEED_TYPE")
     private String feedType;
 
     @JsonProperty("host_url")
@@ -66,7 +66,7 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     private String hostUrl;
 
     @JsonProperty("message_type")
-    @Column(name = "MESSAGE_TYPE")
+    @Column(name = "MESSAGE_TYPE", length = 25)
     @Enumerated(EnumType.STRING)
     private S3ImportMessageType messageType;
 
