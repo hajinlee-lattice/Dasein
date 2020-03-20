@@ -57,7 +57,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
             return null;
         }
         hardDeleteTableLists = getListObjectFromContext(HARD_DEELETE_ACTIONS, Action.class);
-        if (hardDeleteTableLists == null) {
+        if (CollectionUtils.isEmpty(hardDeleteTableLists)) {
             return null;
         }
         PipelineTransformationRequest request = generateRequest();
