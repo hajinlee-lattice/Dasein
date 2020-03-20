@@ -129,4 +129,10 @@ public class GlobalAuthTeamEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthTea
         }
         return globalAuthTeam;
     }
+
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean userBelongsToTeam(Long tenantId, String username, String teamId) {
+        return globalAuthTeamDao.userBelongsToTeam(tenantId, username, teamId);
+    }
 }

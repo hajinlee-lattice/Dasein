@@ -2,6 +2,7 @@ package com.latticeengines.auth.exposed.dao.impl;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
@@ -60,6 +61,20 @@ public class GlobalAuthTeamDaoImpl extends BaseDaoImpl<GlobalAuthTeam> implement
         Query query = session.createQuery(queryStr);
         query.setParameter("username", username);
         return query.list();
+    }
+
+    @Override
+    public boolean userBelongsToTeam(Long tenantId, String username, String teamId) {
+        Session session = sessionFactory.getCurrentSession();
+        Class<GlobalAuthTeam> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "select gat from %s as gat join gat.gaUserTenantRights as gaur where gaur.globalAuthUser.email = :username " +
+                        "and gat.teamId = :teamId and gat.globalAuthTenant.pid = %d", entityClz.getSimpleName(), tenantId);
+        Query query = session.createQuery(queryStr);
+        query.setParameter("teamId", teamId);
+        query.setParameter("username", username);
+        query.setMaxResults(1);
+        return CollectionUtils.isNotEmpty(query.list());
     }
 
     @Override
