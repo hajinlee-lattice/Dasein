@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.core.dao.impl;
 import static com.latticeengines.datacloud.core.util.PatchBookUtils.MAX_PID;
 import static com.latticeengines.datacloud.core.util.PatchBookUtils.MIN_PID;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class PatchBookDaoImpl
     public void updateField(@NotNull List<Long> pIds, @NotNull String fieldName, Object value) {
         Preconditions.checkNotNull(pIds);
         Preconditions.checkNotNull(fieldName);
+        Collections.sort(pIds);
         Session session = getCurrentSession();
         String queryStr = getUpdateFieldQueryStr(fieldName);
         Query<?> query = session.createQuery(queryStr);

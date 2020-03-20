@@ -213,8 +213,9 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     private long importToHdfs(List<PatchBook> books, String destDir, String fileName,
             PatchBookConfiguration patchConfig) throws Exception {
         if (CollectionUtils.isEmpty(books)) {
-            throw new RuntimeException("Nothing to ingest for patch type " + patchConfig.getBookType() + " in mode "
+            log.warn("Nothing to ingest for patch type " + patchConfig.getBookType() + " in mode "
                     + patchConfig.getPatchMode());
+            return 0;
         }
         List<Pair<String, Class<?>>> schema = constructSchema();
         Object[][] data = prepareData(books);
@@ -393,7 +394,9 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                postProcess(books, progress.getDataCloudVersion(), patchConfig, currentDate);
+                if (!CollectionUtils.isEmpty(books)) {
+                    postProcess(books, progress.getDataCloudVersion(), patchConfig, currentDate);
+                }
             }
         }
 
