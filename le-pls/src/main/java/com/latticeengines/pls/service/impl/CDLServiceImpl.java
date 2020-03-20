@@ -958,8 +958,8 @@ public class CDLServiceImpl implements CDLService {
                 dimensionMetadataMap.put(dimId, resetMetadataValue(metadata));
             });
             return dimensionMetadataMap;
-        } catch (NullPointerException e) {
-            log.error("NPE error. detail is {}.", e);
+        } catch (Exception e) {
+            log.error("getDimensionMetadataInStream error. detail is {}.", e);
             return new HashMap<>();
         }
     }
