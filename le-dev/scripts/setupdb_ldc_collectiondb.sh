@@ -13,11 +13,11 @@ echo "Setting up LDC_CollectionDB"
 
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
-    sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL
+    sed -i '' 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
 else
     echo "You are on ${UNAME}"
     # Remove alter table drop foreign key statements from the script
-    sed -i 's/alter table .* drop foreign key .*;//g' $DDL
+    sed -i 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
 fi
 source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 

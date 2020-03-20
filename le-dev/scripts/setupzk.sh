@@ -2,10 +2,10 @@
 
 echo "Setting up Zookeeper"
 
-if [ -d ${ANACONDA_HOME}/envs/p2 ]; then
-    source ${ANACONDA_HOME}/bin/activate p2
+if [ -d "${ANACONDA_HOME}/envs/p2" ]; then
+    source "${ANACONDA_HOME}/bin/activate" p2
 else
-    source ${ANACONDA_HOME}/bin/activate lattice
+    source "${ANACONDA_HOME}/bin/activate" lattice
 fi
 
 if [ -z `which zookeeper_import` ]; then
@@ -32,4 +32,4 @@ bootstrap_tenant LocalTest2
 DATA_FABRIC_POD="/Pods/FabricConnectors"
 $PYTHON -c "import zc.zk; zk = zc.zk.ZooKeeper('${ZK_HOST}');  print '${DATA_FABRIC_POD} exists' if zk.exists('${DATA_FABRIC_POD}') else zk.create_recursive('${DATA_FABRIC_POD}', '', zc.zk.OPEN_ACL_UNSAFE)"
 
-source ${ANACONDA_HOME}/bin/deactivate
+source "${ANACONDA_HOME}/bin/deactivate"
