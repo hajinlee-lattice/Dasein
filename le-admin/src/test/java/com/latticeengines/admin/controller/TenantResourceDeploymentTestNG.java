@@ -25,6 +25,9 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
+import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
+
 public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Inject
@@ -89,5 +92,37 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
 
         Assert.assertNotNull(result);
         Assert.assertTrue(result);
+    }
+
+    @Test(groups = "deployment")
+    public void testVboRequest() {
+        String fullTenantId = "LETest" + System.currentTimeMillis();
+        String url = getRestHostPort() + "/admin/tenants/vboadmin";
+
+        VboRequest req = new VboRequest();
+        VboRequest.Product pro = new VboRequest.Product();
+        VboRequest.User user = new VboRequest.User();
+        VboRequest.Name name = new VboRequest.Name();
+        name.setFirstName("test");
+        name.setLastName("test");
+        user.setName(name);
+        user.setEmailAddress("test@test.com");
+
+        pro.setUsers(new ArrayList<VboRequest.User>());
+        pro.getUsers().add(user);
+        req.setProduct(pro);
+        VboRequest.Subscriber sub = new VboRequest.Subscriber();
+        sub.setName(fullTenantId);
+        req.setSubscriber(sub);
+
+        VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getStatus(), "success");
+
+        try {
+            deleteTenant(fullTenantId, fullTenantId);
+        } catch (Exception ignore) {
+        }
     }
 }
