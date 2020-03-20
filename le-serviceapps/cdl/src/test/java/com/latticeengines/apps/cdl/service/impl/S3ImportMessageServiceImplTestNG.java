@@ -15,6 +15,7 @@ import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 
 public class S3ImportMessageServiceImplTestNG extends CDLFunctionalTestNGBase {
 
@@ -44,11 +45,11 @@ public class S3ImportMessageServiceImplTestNG extends CDLFunctionalTestNGBase {
         String key1 = String.format(KEY1, prefix, "file1.csv");
         String key2 = String.format(KEY2, prefix, "file2.csv");
         String key3 = String.format(KEY1, prefix, "file1_1.csv");
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key1, HOSTURL);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key1, HOSTURL, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key2, HOSTURL);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key2, HOSTURL, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
-        s3ImportMessageService.createOrUpdateMessage(BUCKET, key3, HOSTURL);
+        s3ImportMessageService.createOrUpdateMessage(BUCKET, key3, HOSTURL, S3ImportMessageType.Atlas);
         Thread.sleep(1000L);
         List<S3ImportMessage> messages = s3ImportMessageService.getMessageGroupByDropBox();
         messages = messages.stream().filter(message -> message.getDropBox().getDropBox().equals(prefix))

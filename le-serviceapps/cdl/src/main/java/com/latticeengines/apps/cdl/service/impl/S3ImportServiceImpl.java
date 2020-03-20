@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -48,9 +49,9 @@ public class S3ImportServiceImpl implements S3ImportService {
     private DataFeedProxy dataFeedProxy;
 
     @Override
-    public boolean saveImportMessage(String bucket, String key, String hostUrl) {
-        if (isValidKey(key)) {
-            S3ImportMessage message = s3ImportMessageService.createOrUpdateMessage(bucket, key, hostUrl);
+    public boolean saveImportMessage(String bucket, String key, String hostUrl, S3ImportMessageType messageType) {
+        if (isValidKey(key, messageType)) {
+            S3ImportMessage message = s3ImportMessageService.createOrUpdateMessage(bucket, key, hostUrl, messageType);
             return message != null;
         } else {
             log.warn(String.format("Not a valid import message for key: %s, skip save import message", key));
@@ -58,27 +59,33 @@ public class S3ImportServiceImpl implements S3ImportService {
         }
     }
 
-    private boolean isValidKey(String key) {
+    private boolean isValidKey(String key, S3ImportMessageType messageType) {
         if (StringUtils.isEmpty(key)) {
             return false;
         }
         String[] parts = key.split("/");
-        if (parts.length < 5) {
-            return false;
-        }
-        if (!DROPFOLDER.equals(parts[0])) {
-            return false;
-        }
-        if (parts.length == 5) {
-            if (!TEMPLATES.equals(parts[2])) {
+        if (S3ImportMessageType.Atlas.equals(messageType)) {
+            if (parts.length < 5) {
                 return false;
             }
-            return parts[4].toLowerCase().endsWith(".csv");
-        } else if (parts.length == 6) {
-            if (!TEMPLATES.equals(parts[3])) {
+            if (!DROPFOLDER.equals(parts[0])) {
                 return false;
             }
-            return parts[5].toLowerCase().endsWith(".csv");
+            if (parts.length == 5) {
+                if (!TEMPLATES.equals(parts[2])) {
+                    return false;
+                }
+                return parts[4].toLowerCase().endsWith(".csv");
+            } else if (parts.length == 6) {
+                if (!TEMPLATES.equals(parts[3])) {
+                    return false;
+                }
+                return parts[5].toLowerCase().endsWith(".csv");
+            } else {
+                return false;
+            }
+        } else if (S3ImportMessageType.DCP.equals(messageType)) {
+            return parts[parts.length - 1].toLowerCase().endsWith(".csv");
         } else {
             return false;
         }
@@ -95,29 +102,15 @@ public class S3ImportServiceImpl implements S3ImportService {
         for (S3ImportMessage message : messageList) {
             try {
                 log.info("Start processing : " + message.getKey());
-                String feedType = S3ImportMessageUtils.getFeedTypeFromKey(message.getKey());
-                log.info("FeedType: " + feedType);
-                Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
-                log.info("Tenant: " + tenant.getId());
-                String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
-                DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(tenantId, SOURCE, feedType);
-                if (dataFeedTask == null) {
-                    log.info(String.format("Template not exist for key: %s feedType %s", message.getKey(), feedType));
-                    continue;
-                }
-                if (DataFeedTask.S3ImportStatus.Pause.equals(dataFeedTask.getS3ImportStatus())) {
-                    log.info(String.format("Import paused for template: %s", dataFeedTask.getUniqueId()));
-                    continue;
-                }
                 if (dropBoxSet.contains(message.getDropBox().getDropBox())) {
                     log.info(String.format("Already submitted one import for dropBox: %s",
                             message.getDropBox().getDropBox()));
                     continue;
                 }
-                log.info(String.format("S3 import for %s / %s", message.getBucket(), message.getKey()));
-                if (submitApplication(tenantId, message.getBucket(), feedType, message.getKey(), message.getHostUrl())) {
-                    dropBoxSet.add(message.getDropBox().getDropBox());
-                    s3ImportMessageService.deleteMessage(message);
+                if (message.getMessageType() == null || S3ImportMessageType.Atlas.equals(message.getMessageType())) {
+                    submitAtlasImport(dropBoxSet, message);
+                } else if (S3ImportMessageType.DCP.equals(message.getMessageType())) {
+                    submitDCPImport(dropBoxSet, message);
                 }
             } catch (RuntimeException e) {
                 // Only log message instead of stack trace to reduce log.
@@ -129,7 +122,42 @@ public class S3ImportServiceImpl implements S3ImportService {
                 }
             }
         }
-        return false;
+        return true;
+    }
+
+    private void submitDCPImport(Set<String> dropBoxSet, S3ImportMessage message) {
+        log.info(String.format("DCP import for %s / %s", message.getBucket(), message.getKey()));
+        String projectId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.DCP,
+                S3ImportMessageUtils.KeyPart.PROJECT_ID);
+        String sourceId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.DCP,
+                S3ImportMessageUtils.KeyPart.PROJECT_ID);
+        String fileName = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.DCP,
+                S3ImportMessageUtils.KeyPart.PROJECT_ID);
+        log.info(String.format("Process DCP import with Project %s, Source %s, File %s", projectId, sourceId, fileName));
+        dropBoxSet.add(message.getDropBox().getDropBox());
+        s3ImportMessageService.deleteMessage(message);
+    }
+
+    private void submitAtlasImport(Set<String> dropBoxSet, S3ImportMessage message) {
+        String feedType = S3ImportMessageUtils.getFeedTypeFromKey(message.getKey());
+        log.info("FeedType: " + feedType);
+        Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
+        log.info("Tenant: " + tenant.getId());
+        String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(tenantId, SOURCE, feedType);
+        if (dataFeedTask == null) {
+            log.info(String.format("Template not exist for key: %s feedType %s", message.getKey(), feedType));
+            return;
+        }
+        if (DataFeedTask.S3ImportStatus.Pause.equals(dataFeedTask.getS3ImportStatus())) {
+            log.info(String.format("Import paused for template: %s", dataFeedTask.getUniqueId()));
+            return;
+        }
+        log.info(String.format("S3 import for %s / %s", message.getBucket(), message.getKey()));
+        if (submitApplication(tenantId, message.getBucket(), feedType, message.getKey(), message.getHostUrl())) {
+            dropBoxSet.add(message.getDropBox().getDropBox());
+            s3ImportMessageService.deleteMessage(message);
+        }
     }
 
     private boolean submitApplication(String tenantId, String bucket, String feedType, String key, String hostUrl) {

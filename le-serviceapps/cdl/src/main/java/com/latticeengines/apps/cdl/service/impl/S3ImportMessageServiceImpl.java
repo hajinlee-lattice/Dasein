@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.S3ImportMessageEntityMgr;
 import com.latticeengines.apps.cdl.service.S3ImportMessageService;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 
 @Component("s3ImportMessageService")
 public class S3ImportMessageServiceImpl implements S3ImportMessageService {
@@ -17,8 +18,8 @@ public class S3ImportMessageServiceImpl implements S3ImportMessageService {
     private S3ImportMessageEntityMgr s3ImportMessageEntityMgr;
 
     @Override
-    public S3ImportMessage createOrUpdateMessage(String bucket, String key, String hostUrl) {
-        return s3ImportMessageEntityMgr.createOrUpdateS3ImportMessage(bucket, key, hostUrl);
+    public S3ImportMessage createOrUpdateMessage(String bucket, String key, String hostUrl, S3ImportMessageType messageType) {
+        return s3ImportMessageEntityMgr.createOrUpdateS3ImportMessage(bucket, key, hostUrl, messageType);
     }
 
     @Override

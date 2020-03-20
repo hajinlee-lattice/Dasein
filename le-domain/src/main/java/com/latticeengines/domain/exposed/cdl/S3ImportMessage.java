@@ -6,6 +6,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -24,6 +26,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 
 @Entity
 @Table(name = "ATLAS_S3_IMPORT_MESSAGE", uniqueConstraints = {
@@ -51,16 +54,21 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
     private String bucket;
 
     @JsonProperty("key")
-    @Column(name = "KEY", nullable = false)
+    @Column(name = "KEY", length = 3000, nullable = false)
     private String key;
 
     @JsonProperty("feed_type")
-    @Column(name = "FEED_TYPE", nullable = false)
+    @Column(name = "FEED_TYPE")
     private String feedType;
 
     @JsonProperty("host_url")
     @Column(name = "HOST_URL", nullable = false)
     private String hostUrl;
+
+    @JsonProperty("message_type")
+    @Column(name = "MESSAGE_TYPE", length = 25)
+    @Enumerated(EnumType.STRING)
+    private S3ImportMessageType messageType;
 
     @JsonProperty("created")
     @Column(name = "CREATED", nullable = false)
@@ -123,6 +131,14 @@ public class S3ImportMessage implements HasPid, HasAuditingFields {
 
     public void setHostUrl(String hostUrl) {
         this.hostUrl = hostUrl;
+    }
+
+    public S3ImportMessageType getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(S3ImportMessageType messageType) {
+        this.messageType = messageType;
     }
 
     @Override
