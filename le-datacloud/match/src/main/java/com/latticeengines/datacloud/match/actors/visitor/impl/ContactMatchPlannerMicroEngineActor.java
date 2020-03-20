@@ -94,6 +94,7 @@ public class ContactMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
 
         matchStandardizationService.parseRecordForContact(inputRecord, keyPositionMap, entityMatchKeyRecord);
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createContactMatchKeyTuple(entityMatchKeyRecord);
+        matchKeyTuple = EntityMatchUtils.replaceInvalidMatchFieldCharacters(matchKeyTuple);
         Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(traveler.getMatchInput(),
                 Contact.name());
         // MatchKeyTuple.SystemIds is updated during parsing

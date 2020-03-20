@@ -18,12 +18,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -45,6 +50,11 @@ import com.latticeengines.domain.exposed.security.Tenant;
  */
 public final class EntityMatchUtils {
 
+    private static final BiMap<String, String> INVALID_CHARS_TOKENS = HashBiMap.create();
+    // # and : is recommended not to use by dynamo, || is our internal delimiter
+    private static final Pattern INVALID_MATCH_FILED_CHAR_PTN = Pattern.compile("(#|:|\\|\\|)");
+    private static final Pattern INVALID_CHAR_TOKEN_PTN = Pattern.compile("\\$>(PND|COLON|DPIPE)<");
+
     protected EntityMatchUtils() {
         throw new UnsupportedOperationException();
     }
@@ -61,6 +71,11 @@ public final class EntityMatchUtils {
         OUTPUT_NEW_ENTITY_MAP.put(Contact.name(), Sets.newHashSet(Account.name()));
         // currently only LDC ID in account match is first win, others are last win
         FIRST_WIN_ATTRIBUTES.put(Account.name(), Collections.singleton(InterfaceName.LatticeAccountId.name()));
+
+        // invalid char pattern -> placeholder token
+        INVALID_CHARS_TOKENS.put("#", "\\$>PND<");
+        INVALID_CHARS_TOKENS.put(":", "\\$>COLON<");
+        INVALID_CHARS_TOKENS.put("\\|\\|", "\\$>DPIPE<");
     }
 
     /**
@@ -356,5 +371,96 @@ public final class EntityMatchUtils {
 
         Map<MatchKey, List<String>> keyMap = input.getEntityKeyMaps().get(entity).getKeyMap();
         return keyMap == null ? new HashMap<>() : keyMap;
+    }
+
+    /**
+     * Replace all invalid characters in each match field with a placeholder token
+     *
+     * @param tuple
+     *            target match keys
+     * @return match key tuple with invalid characters replaced
+     */
+    public static MatchKeyTuple replaceInvalidMatchFieldCharacters(MatchKeyTuple tuple) {
+        if (tuple == null) {
+            return null;
+        }
+
+        tuple.setZipcode(replaceInvalidMatchFieldCharacters(tuple.getZipcode()));
+        tuple.setCity(replaceInvalidMatchFieldCharacters(tuple.getCity()));
+        tuple.setState(replaceInvalidMatchFieldCharacters(tuple.getState()));
+        tuple.setCountry(replaceInvalidMatchFieldCharacters(tuple.getCountry()));
+        tuple.setName(replaceInvalidMatchFieldCharacters(tuple.getName()));
+
+        tuple.setDomain(replaceInvalidMatchFieldCharacters(tuple.getDomain()));
+        tuple.setDuns(replaceInvalidMatchFieldCharacters(tuple.getDuns()));
+
+        tuple.setEmail(replaceInvalidMatchFieldCharacters(tuple.getEmail()));
+        tuple.setPhoneNumber(replaceInvalidMatchFieldCharacters(tuple.getPhoneNumber()));
+        if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
+            tuple.setSystemIds(tuple.getSystemIds() //
+                    .stream() //
+                    .map(pair -> Pair.of(replaceInvalidMatchFieldCharacters(pair.getKey()),
+                            replaceInvalidMatchFieldCharacters(pair.getValue()))) //
+                    .collect(Collectors.toList()));
+        }
+        return tuple;
+    }
+
+    /**
+     * Replace invalid characters in match field value with corresponding
+     * placeholder
+     *
+     * @param value
+     *            match field value
+     * @return replaced value without any invalid characters
+     */
+    public static String replaceInvalidMatchFieldCharacters(String value) {
+        return replaceAllPatterns(value, INVALID_CHARS_TOKENS, INVALID_MATCH_FILED_CHAR_PTN);
+    }
+
+    /**
+     * Restore all placeholder token back to original (invalid) character
+     *
+     * @param replacedValue
+     *            replaced match field value
+     * @return original match field value
+     */
+    public static String restoreInvalidMatchFieldCharacters(String replacedValue) {
+        return replaceAllPatterns(replacedValue, INVALID_CHARS_TOKENS.inverse(), INVALID_CHAR_TOKEN_PTN);
+    }
+
+    /**
+     * Restore all values (entity IDs) in map back to its original values
+     *
+     * @param entityIds
+     *            entity -> id map
+     * @return map of entity -> original ID value
+     */
+    public static Map<String, String> restoreInvalidMatchFieldCharacters(Map<String, String> entityIds) {
+        if (MapUtils.isEmpty(entityIds)) {
+            return entityIds;
+        }
+
+        return entityIds.entrySet() //
+                .stream() //
+                .map(entry -> Pair.of(entry.getKey(), restoreInvalidMatchFieldCharacters(entry.getValue()))) //
+                .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+    }
+
+    /*-
+     * if str matches matchingPtn,
+     * replace all ptn (keys in ptnTokenMap) with placeholder token (values in ptnTokenMap)
+     */
+    private static String replaceAllPatterns(String str, BiMap<String, String> ptnTokenMap, Pattern matchingPtn) {
+        if (StringUtils.isBlank(str)) {
+            return str;
+        }
+
+        if (matchingPtn.matcher(str).find()) {
+            for (String invalidStr : ptnTokenMap.keySet()) {
+                str = str.replaceAll(invalidStr, ptnTokenMap.get(invalidStr));
+            }
+        }
+        return str;
     }
 }

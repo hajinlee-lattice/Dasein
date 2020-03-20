@@ -163,6 +163,27 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     }
 
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
+    private void testInvalidCharacterMatchFields() {
+        Tenant tenant = newTestTenant();
+
+        String preferredIdWithInvalidChars = "|He#lL:O||";
+        List<Object> data = Arrays.asList("acct_1:", "mkto_1##", null, "GOOGLE||", "google#.com", "USA", "CA:",
+                "123456789||", preferredIdWithInvalidChars);
+        MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
+        String entityId = verifyAndGetEntityId(output);
+        Assert.assertEquals(entityId, preferredIdWithInvalidChars);
+
+        // publish for testing lookup
+        publishToServing(tenant, BusinessEntity.Account);
+
+        // test lookup, make sure we get the correct entity id with each match key
+        Assert.assertEquals(lookupAccount(tenant, "acct_1:", null, null, null, null, null, null, null), entityId);
+        Assert.assertEquals(lookupAccount(tenant, null, "mkto_1##", null, null, null, null, null, null), entityId);
+        Assert.assertEquals(lookupAccount(tenant, null, null, null, "GOOGLE||", null, "USA", null, null), entityId);
+        // invalid DUNS/Domain will be cleaned up so won't be able to lookup
+    }
+
+    @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testSpecificServingVersion() {
         Tenant tenant = newTestTenant();
 
@@ -211,7 +232,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     }
 
     @Test(groups = "functional", dataProvider = "invalidMatchField", retryAnalyzer = SimpleRetryAnalyzer.class)
-    private void testInvalidMatchFieldAllocation(String[] data, boolean hasInvalidField) {
+    private void testInvalidMatchFieldAllocation(String[] data, boolean errorOutRow) {
         Tenant tenant = newTestTenant();
 
         MatchOutput output = matchAccount(Arrays.asList(data), true, tenant, getEntityKeyMap(), FIELDS, null)
@@ -219,7 +240,7 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         String entityId = verifyAndGetEntityId(output);
 
         // error out the entire row when some match field is invalid
-        if (hasInvalidField) {
+        if (errorOutRow) {
             Assert.assertEquals(entityId, ENTITY_ANONYMOUS_ID);
         } else {
             Assert.assertNotEquals(entityId, ENTITY_ANONYMOUS_ID);
@@ -229,8 +250,8 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     private void testPreferredIdAllocate() {
         Tenant tenant = newTestTenant();
-        String preferredId = "legacy_entity_id";
-        String preferredId2 = "legacy_entity_id2";
+        String preferredId = "legacy_##:entity_||id";
+        String preferredId2 = "legacy_#:en:t#ity_id2";
 
         List<Object> data = Arrays.asList("acct_1", "mkto_1", null, "GOOGLE", null, "USA", null, null, preferredId);
         MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
@@ -1119,16 +1140,19 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     private Object[][] provideInvalidMatchFieldTestData() {
         return new Object[][] { //
                 /*-
-                 * invalid value in diff match fields
+                 * length too long, cannot handle
                  */
-                { new String[] { "caid:1", null, "eid_1", "google", "google.com", null, null, null, null }, true }, //
-                { new String[] { "caid#2", null, "eid||123", "hello:world", "google.com", null, null, null, null },
-                        true }, //
-                { new String[] { "caid3", null, "eid3", "google", "google.com", null, null, null,
-                        "invalid:preferred||id" }, true }, //
                 { new String[] { "caid3", null, "eid3", RandomStringUtils.randomAlphanumeric(1000), "google.com", null,
                         null, null, "account_123" }, true }, //
-                { new String[] { "caid3", "||:#", "eid3", null, null, null, null, null, "account_123" }, true }, //
+                /*-
+                 * invalid value in diff match fields should still be handled properly
+                 */
+                { new String[] { "caid:1", null, "eid_1", "google", "google.com", null, null, null, null }, false }, //
+                { new String[] { "caid#2", null, "eid||123", "hello:world", "google.com", null, null, null, null },
+                        false }, //
+                { new String[] { "caid3", null, "eid3", "google", "google.com", null, null, null,
+                        "invalid:preferred||id" }, false }, //
+                { new String[] { "caid3", "||:#", "eid3", null, null, null, null, null, "account_123" }, false }, //
                 /*-
                  * standardization on certain fields take care of invalid characters
                  */

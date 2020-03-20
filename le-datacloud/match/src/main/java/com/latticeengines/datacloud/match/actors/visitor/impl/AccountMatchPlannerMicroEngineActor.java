@@ -118,6 +118,7 @@ public class AccountMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
                 traveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
 
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createAccountMatchKeyTuple(entityMatchKeyRecord);
+        matchKeyTuple = EntityMatchUtils.replaceInvalidMatchFieldCharacters(matchKeyTuple);
 
         Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(traveler.getMatchInput(),
                 Account.name());

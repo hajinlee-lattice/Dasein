@@ -90,6 +90,39 @@ public class EntityMatchUtilsUnitTestNG {
         Assert.assertEquals(EntityMatchUtils.serialize(versionMap), expectedSerializedStr);
     }
 
+    @Test(groups = "unit", dataProvider = "replaceInvalidChars")
+    private void testReplaceInvalidMatchFieldChars(String input, String expectedResult) {
+        String replacedInput = EntityMatchUtils.replaceInvalidMatchFieldCharacters(input);
+        Assert.assertEquals(replacedInput, expectedResult);
+        // replace multiple times should get the same result
+        Assert.assertEquals(EntityMatchUtils.replaceInvalidMatchFieldCharacters(replacedInput), expectedResult);
+        // restored value should be the same as input
+        String restoredInput = EntityMatchUtils.restoreInvalidMatchFieldCharacters(replacedInput);
+        Assert.assertEquals(restoredInput, input);
+        // restore is idempotent as well
+        restoredInput = EntityMatchUtils.restoreInvalidMatchFieldCharacters(replacedInput);
+        Assert.assertEquals(restoredInput, input);
+    }
+
+    @DataProvider(name = "replaceInvalidChars")
+    private Object[][] replaceInvalidCharsTestData() {
+        return new Object[][] { //
+                { null, null }, //
+                { "", "" }, //
+                { "   ", "   " }, //
+                { "|", "|" }, //
+                { ";abc", ";abc" }, //
+                { "|abc|", "|abc|" }, //
+                { "||", "$>DPIPE<" }, //
+                { "||||", "$>DPIPE<$>DPIPE<" }, //
+                { "|:|", "|$>COLON<|" }, //
+                { "##", "$>PND<$>PND<" }, //
+                { ":c#ab", "$>COLON<c$>PND<ab" }, //
+                { "|||#aa:||", "$>DPIPE<|$>PND<aa$>COLON<$>DPIPE<" }, //
+                { "Abc115#|:c#:;ab", "Abc115$>PND<|$>COLON<c$>PND<$>COLON<;ab" }, //
+        };
+    }
+
     @DataProvider(name = "versionMap")
     private Object[][] versionMapTestData() {
         return new Object[][] { //

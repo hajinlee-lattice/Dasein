@@ -3,7 +3,6 @@ package com.latticeengines.common.exposed.util;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Preconditions;
@@ -18,8 +17,6 @@ public final class ValidationUtils {
     }
     private static final String DEFAULT_OBJECT_NAME = "Object";
     private static final int MATCH_FIELD_VALUE_LENGTH_LIMIT = 500;
-    // # and : is recommended not to use by dynamo, || is our internal delimiter
-    private static final Pattern INVALID_MATCH_FILED_CHAR_PTN = Pattern.compile("(#|:|\\|\\|)");
 
     /**
      * Helper to check if any input object is {@literal null}
@@ -68,6 +65,7 @@ public final class ValidationUtils {
      * Check whether given value from a match field is valid.
      *
      * @param value
+     *            input value of some match field
      * @return whether it is valid
      */
     public static boolean isValidMatchFieldValue(String value) {
@@ -76,7 +74,7 @@ public final class ValidationUtils {
             return true;
         }
 
-        // contains no invalid char and within length limit
-        return !INVALID_MATCH_FILED_CHAR_PTN.matcher(value).find() && value.length() <= MATCH_FIELD_VALUE_LENGTH_LIMIT;
+        // within length limit
+        return value.length() <= MATCH_FIELD_VALUE_LENGTH_LIMIT;
     }
 }

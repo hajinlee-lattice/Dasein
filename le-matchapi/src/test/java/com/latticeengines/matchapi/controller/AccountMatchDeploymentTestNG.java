@@ -406,27 +406,32 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             { "C15_06", "caid_6", "    ", FALSE.toString() }, //
             { "C15_07", "caid_7", null, FALSE.toString() },
             /*-
-             * IDs contains invalid character, ignored and allocate new ID
-             * TODO will be changed to skip the entire row later
+             * IDs contains invalid character, able to handle correctly
              */
-            { "C15_08", "caid_8", "abc123#", FALSE.toString() }, // hash tag
-            { "C15_09", "caid_9", "account:123:456", FALSE.toString() }, // colon
-            { "C15_10", "caid_10", "account||abc  ", FALSE.toString() }, // double pipe
-            { "C15_11", "caid_11", "a:b#C||4", FALSE.toString() }, // mix
+            { "C15_08", "caid_8", "abc123#", TRUE.toString() }, // hash tag
+            { "C15_09", "caid_9", "account:123:456", TRUE.toString() }, // colon
+            { "C15_10", "caid_10", "account||abc  ", TRUE.toString() }, // double pipe
+            { "C15_11", "caid_11", "a:b#C||4", TRUE.toString() }, // mix
+            /*-
+             * ID too long, ignored and allocate new ID
+             */
             { "C15_12", "caid_12", RandomStringUtils.randomAlphanumeric(1000), FALSE.toString() }, // too long
     };
 
-    // Schema: TestId, CustomerAccountId, CompanyName, HasInvalidValue
+    // Schema: TestId, CustomerAccountId, CompanyName, ErrorOutRow
     private static final Object[][] DATA_INVALID_VALUE = {
             /*-
              * invalid match field values
              */
-            { "C_16_01", "caid:1", "some_company_name", TRUE.toString() }, //
-            { "C_16_02", "caid#2", "some_company_name", TRUE.toString() }, //
-            { "C_16_03", "caid||3", "some_company_name", TRUE.toString() }, //
-            { "C_16_04", RandomStringUtils.randomAlphanumeric(1000), "some_company_name", TRUE.toString() }, //
-            { "C_16_05", "caid16_5", RandomStringUtils.randomAlphanumeric(1000), TRUE.toString() }, //
-            { "C_16_06", "caid:123#456||789", "some_company_name:123", TRUE.toString() }, //
+            { "C_16_01", "caid:1", "some_company_name", FALSE.toString() }, //
+            { "C_16_02", "caid#2", "some_company_name", FALSE.toString() }, //
+            { "C_16_03", "caid||3", "some_company_name", FALSE.toString() }, //
+            { "C_16_04", "caid:123#456||789", "some_company_name:123", FALSE.toString() }, //
+            /*-
+             * match field value too long
+             */
+            { "C_16_05", RandomStringUtils.randomAlphanumeric(1000), "some_company_name", TRUE.toString() }, //
+            { "C_16_06", "caid16_5", RandomStringUtils.randomAlphanumeric(1000), TRUE.toString() }, //
             /*-
              * company name cleanup deal with invalid characters
              */
@@ -927,6 +932,8 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             String entityId = record.get(ENTITY_ID_FIELD).toString();
             String hasInvalidValue = record.get(BOOL_FIELD).toString();
 
+            Object[] testInput = getTestInput(DATA_INVALID_VALUE, 0, testId);
+
             log.info("TestId={}, EntityId={}, HasInvalidValue={}", testId, entityId, hasInvalidValue);
 
             if (TRUE.toString().equalsIgnoreCase(hasInvalidValue)) {
@@ -934,10 +941,25 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
                         "Should get anonymous account when some match field values are invalid");
             } else {
                 Assert.assertNotEquals(entityId, ENTITY_ANONYMOUS_ID);
+                Assert.assertEquals(record.get(InterfaceName.CustomerAccountId.name()).toString(),
+                        (String) testInput[1]);
+                Assert.assertEquals(record.get(MatchKey.Name.name()).toString(), (String) testInput[2]);
             }
         }
         Assert.assertEquals(testIds.size(), DATA_INVALID_VALUE.length,
                 "Output records should have the same number as input data");
+    }
+
+    private Object[] getTestInput(Object[][] data, int testIdIdx, String testId) {
+        for (Object[] row : data) {
+            if (row[testIdIdx] instanceof String) {
+                String id = (String) row[testIdIdx];
+                if (testId.equals(id)) {
+                    return row;
+                }
+            }
+        }
+        return null;
     }
 
     /*-
@@ -970,7 +992,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
             Assert.assertEquals(accountId, entityId, "AccountId should be the same as EntityId");
             if (TRUE.toString().equalsIgnoreCase(usedPreferredIdForAllocation)) {
-                Assert.assertEquals(entityId, preferredEntityId,
+                Assert.assertEquals(entityId, preferredEntityId.trim(),
                         "valid preferredEntityId should be used to allocate new entity");
             } else {
                 Assert.assertTrue(StringUtils.isNotBlank(entityId),
