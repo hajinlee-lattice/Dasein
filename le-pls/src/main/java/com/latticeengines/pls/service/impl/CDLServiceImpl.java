@@ -948,15 +948,20 @@ public class CDLServiceImpl implements CDLService {
                 throw new IllegalArgumentException(String.format("getDimensionMetadata() Cannot support " +
                     "entityType %s", entityType.name()));
         }
-        Map<String, DimensionMetadata> metadataMap =
-                activityStoreProxy.getDimensionMetadataInStream(customerSpace, streamName, null);
-        log.info("customerSpace is {}, streamName is {}, signature is {}.", customerSpace, streamName, null);
-        Map<String, List<Map<String, Object>>> dimensionMetadataMap = new HashMap<>();
-        log.info("dimensionMetadataMap is {}.", JsonUtils.serialize(dimensionMetadataMap));
-        metadataMap.forEach((dimId, metadata) -> {
-            dimensionMetadataMap.put(dimId, resetMetadataValue(metadata));
-        });
-        return dimensionMetadataMap;
+        try {
+            Map<String, DimensionMetadata> metadataMap =
+                    activityStoreProxy.getDimensionMetadataInStream(customerSpace, streamName, null);
+            log.info("customerSpace is {}, streamName is {}, signature is {}.", customerSpace, streamName, null);
+            Map<String, List<Map<String, Object>>> dimensionMetadataMap = new HashMap<>();
+            log.info("dimensionMetadataMap is {}.", JsonUtils.serialize(dimensionMetadataMap));
+            metadataMap.forEach((dimId, metadata) -> {
+                dimensionMetadataMap.put(dimId, resetMetadataValue(metadata));
+            });
+            return dimensionMetadataMap;
+        } catch (Exception e) {
+            log.error("getDimensionMetadataInStream error. detail is {}.", e);
+            return new HashMap<>();
+        }
     }
 
     @Override
