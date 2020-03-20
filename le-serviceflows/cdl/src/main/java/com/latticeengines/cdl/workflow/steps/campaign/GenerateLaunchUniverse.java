@@ -151,7 +151,9 @@ public class GenerateLaunchUniverse extends BaseSparkSQLStep<GenerateLaunchUnive
             }
             try {
                 startSparkSQLSession(getHdfsPaths(attrRepo), false);
-                long userConfiguredLimit = frontEndQuery.getPageFilter().getNumRows();
+                long userConfiguredLimit = frontEndQuery.getPageFilter() != null
+                        ? frontEndQuery.getPageFilter().getNumRows()
+                        : 0;
 
                 if (frontEndQuery.getMainEntity() == BusinessEntity.Account) {
                     long accountsCount = getEntityQueryCount(buildFrontEndQuery(frontEndQuery, BusinessEntity.Account));
