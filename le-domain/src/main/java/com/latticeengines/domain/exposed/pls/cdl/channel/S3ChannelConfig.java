@@ -71,7 +71,12 @@ public class S3ChannelConfig implements ChannelConfig {
 
     @Override
     @JsonProperty("audienceType")
-    public AudienceType getAudienceType() { return audienceType; }
+    public AudienceType getAudienceType() {
+        if(audienceType == null){
+            audienceType=AudienceType.CONTACTS;
+        }
+        return audienceType;
+    }
 
     @Override
     public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) { return false; }
