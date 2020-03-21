@@ -26,7 +26,6 @@ import com.amazonaws.services.elasticmapreduce.model.ClusterState;
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterRequest;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterResult;
-import com.amazonaws.services.elasticmapreduce.model.Instance;
 import com.amazonaws.services.elasticmapreduce.model.InstanceFleet;
 import com.amazonaws.services.elasticmapreduce.model.InstanceFleetModifyConfig;
 import com.amazonaws.services.elasticmapreduce.model.InstanceFleetType;
@@ -40,8 +39,6 @@ import com.amazonaws.services.elasticmapreduce.model.ListInstanceFleetsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceFleetsResult;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceGroupsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListInstanceGroupsResult;
-import com.amazonaws.services.elasticmapreduce.model.ListInstancesRequest;
-import com.amazonaws.services.elasticmapreduce.model.ListInstancesResult;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceFleetRequest;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceFleetResult;
 import com.amazonaws.services.elasticmapreduce.model.ModifyInstanceGroupsRequest;
@@ -86,19 +83,21 @@ public class EMRServiceImpl implements EMRService {
                             return emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterId));
                         });
                         String masterDNS = cluster.getCluster().getMasterPublicDnsName();
-                        ListInstancesResult instances = retryTemplate.execute(context -> {
-                            if (context.getRetryCount() > 0) {
-                                log.info("(Attempt=" + (context.getRetryCount() + 1) + ") list instances in cluster " + clusterId);
-                            }
-                            return emr.listInstances(new ListInstancesRequest().withClusterId(clusterId));
-                        });
-                        for (Instance instance : instances.getInstances()) {
-                            String instancePublicDNS = instance.getPublicDnsName();
-                            String instancePrivateDNS = instance.getPrivateDnsName();
-                            if (masterDNS.equals(instancePublicDNS) || masterDNS.equals(instancePrivateDNS)) {
-                                masterIp = instance.getPrivateIpAddress();
-                            }
-                        }
+                        masterIp = convertDNSToIP(masterDNS);
+                        log.info("Found master DNS {}, converted it to ip {}", masterDNS, masterIp);
+//                        ListInstancesResult instances = retryTemplate.execute(context -> {
+//                            if (context.getRetryCount() > 0) {
+//                                log.info("(Attempt=" + (context.getRetryCount() + 1) + ") list instances in cluster " + clusterId);
+//                            }
+//                            return emr.listInstances(new ListInstancesRequest().withClusterId(clusterId));
+//                        });
+//                        for (Instance instance : instances.getInstances()) {
+//                            String instancePublicDNS = instance.getPublicDnsName();
+//                            String instancePrivateDNS = instance.getPrivateDnsName();
+//                            if (masterDNS.equals(instancePublicDNS) || masterDNS.equals(instancePrivateDNS)) {
+//                                masterIp = instance.getPrivateIpAddress();
+//                            }
+//                        }
                     }
                     if (StringUtils.isNotBlank(masterIp)) {
                         masterIpCache.putIfAbsent(clusterId, masterIp);
@@ -300,6 +299,10 @@ public class EMRServiceImpl implements EMRService {
                 throw e;
             }
         }
+    }
+
+    private String convertDNSToIP(String dnsName) {
+        return dnsName.split("\\.")[0].replace("ip-", "").replace("-", ".");
     }
 
 }
