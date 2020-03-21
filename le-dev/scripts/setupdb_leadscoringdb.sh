@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# colorize output
+RED="$(tput setaf 1)"
+YELLOW="$(tput setaf 3)"
+OFF="$(tput sgr0)"
+
 function version_gt() { test "$(echo "$@" | tr " " "\n" | sort | head -n 1)" != "$1"; }
 
 DDL="$WSHOME/ddl_leadscoringdb_mysql5innodb.sql"
@@ -41,5 +46,5 @@ if [[ -f "$DDL" ]]; then
 	sed "s|WSHOME|$WSHOME|g" "$WSHOME/le-dev/testartifacts/sql/data_leadscoringdb_mysql5innodb.sql" | eval $MYSQL_COMMAND
     fi
 else
-    echo "[WARNING]: Skipping $DDL . It was not generated."
+    echo "[${YELLOW}WARNING${OFF}] Skipping $DDL . File was not generated."
 fi

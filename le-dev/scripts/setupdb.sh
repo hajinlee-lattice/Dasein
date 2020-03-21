@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # colorize output
+RED="$(tput setaf 1)"
 YELLOW="$(tput setaf 3)"
-  BRED="$(tput setab 1)"
-   OFF="$(tput sgr0)"
+OFF="$(tput sgr0)"
 
 function sourceProcessErrors()
 {
@@ -13,7 +13,7 @@ function sourceProcessErrors()
     if [[ $? -ne 0 ]]
     then
 	# ProcessErrors (actually, just notify user)
-	echo "${YELLOW}${BRED}[ERROR]:${OFF} Failure in $file"
+	echo "[${RED}ERROR${OFF}] Failure in $file"
     fi
 }
 
