@@ -64,7 +64,7 @@ public class EMRScalingRunnable implements Runnable {
             RetryTemplate retry = RetryUtils.getRetryTemplate(5);
             metrics = retry.execute(context -> emrEnvService.getClusterMetrics(clusterId));
         } catch (Exception e) {
-            log.error("Failed to retrieve cluster metrics for emr cluster " + emrCluster);
+            log.error("Failed to retrieve cluster metrics for emr cluster " + emrCluster + " : " + clusterId);
             throw e;
         }
 
