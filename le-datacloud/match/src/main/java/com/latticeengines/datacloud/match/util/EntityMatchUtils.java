@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.match.util;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_PREFIX_SEED_ATTRIBUTES;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.MATCH_FIELD_LENGTH_LIMIT;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry.Mapping.MANY_TO_MANY;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
@@ -18,10 +19,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,6 +31,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -142,7 +144,7 @@ public final class EntityMatchUtils {
         // NOTE: assumption here is that the number of match keys will not be large, so
         // using iteration to check conflict is better than having separate map/set
         change.getLookupEntries().forEach(entry -> {
-            if (CollectionUtils.isNotEmpty(conflictEntries) && conflictEntries.contains(entry)) {
+            if (isNotEmpty(conflictEntries) && conflictEntries.contains(entry)) {
                 // conflict known prior to update, no need to merge
                 return;
             }
@@ -287,7 +289,7 @@ public final class EntityMatchUtils {
      */
     public static boolean hasEmailAccountInfoOnly(@NotNull MatchTraveler traveler) {
         MatchKeyTuple tuple = traveler.getMatchKeyTuple();
-        MatchKeyTuple accountTuple = traveler.getEntityMatchKeyTuple(BusinessEntity.Account.name());
+        MatchKeyTuple accountTuple = traveler.getEntityMatchKeyTuple(Account.name());
         if (tuple == null) {
             // be definsive for now, these two should not be null, maybe fail later
             return false;
@@ -298,7 +300,7 @@ public final class EntityMatchUtils {
         // no concept of "Email", thus we can only detect how many
         // domain fields are mapped
         return tuple.getEmail() != null
-                && (getValidEntityId(BusinessEntity.Account.name(), traveler) == null || (accountTuple != null
+                && (getValidEntityId(Account.name(), traveler) == null || (accountTuple != null
                         && accountTuple.hasDomainOnly() && !accountTuple.isDomainFromMultiCandidates()));
     }
 
@@ -344,7 +346,7 @@ public final class EntityMatchUtils {
         }
 
         String entityId = traveler.getEntityIds().get(entity);
-        if (StringUtils.isBlank(entityId) || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(entityId)) {
+        if (isBlank(entityId) || DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(entityId)) {
             return null;
         }
         return entityId;
@@ -385,24 +387,39 @@ public final class EntityMatchUtils {
             return null;
         }
 
-        tuple.setZipcode(replaceInvalidMatchFieldCharacters(tuple.getZipcode()));
-        tuple.setCity(replaceInvalidMatchFieldCharacters(tuple.getCity()));
-        tuple.setState(replaceInvalidMatchFieldCharacters(tuple.getState()));
-        tuple.setCountry(replaceInvalidMatchFieldCharacters(tuple.getCountry()));
-        tuple.setName(replaceInvalidMatchFieldCharacters(tuple.getName()));
+        processMatchKeyTuple(tuple, EntityMatchUtils::replaceInvalidMatchFieldCharacters);
+        return tuple;
+    }
 
-        tuple.setDomain(replaceInvalidMatchFieldCharacters(tuple.getDomain()));
-        tuple.setDuns(replaceInvalidMatchFieldCharacters(tuple.getDuns()));
-
-        tuple.setEmail(replaceInvalidMatchFieldCharacters(tuple.getEmail()));
-        tuple.setPhoneNumber(replaceInvalidMatchFieldCharacters(tuple.getPhoneNumber()));
-        if (CollectionUtils.isNotEmpty(tuple.getSystemIds())) {
-            tuple.setSystemIds(tuple.getSystemIds() //
-                    .stream() //
-                    .map(pair -> Pair.of(replaceInvalidMatchFieldCharacters(pair.getKey()),
-                            replaceInvalidMatchFieldCharacters(pair.getValue()))) //
-                    .collect(Collectors.toList()));
+    /**
+     * Whether input value is valid to be used as id of some {@link BusinessEntity}
+     *
+     * @param entityId
+     *            input value
+     * @return whether it is valid
+     */
+    public static boolean isValidEntityId(@NotNull String entityId) {
+        if (StringUtils.isBlank(entityId)) {
+            return false;
         }
+
+        // within limit and no invalid characters
+        return !INVALID_MATCH_FILED_CHAR_PTN.matcher(entityId).find() && entityId.length() <= MATCH_FIELD_LENGTH_LIMIT;
+    }
+
+    /**
+     * Hash long match key tuple to a shorter value
+     *
+     * @param tuple
+     *            target match keys
+     * @return processed tuple with all long field hashed
+     */
+    public static MatchKeyTuple hashLongMatchFields(MatchKeyTuple tuple) {
+        if (tuple == null) {
+            return null;
+        }
+
+        processMatchKeyTuple(tuple, EntityMatchUtils::hashIfLong);
         return tuple;
     }
 
@@ -447,12 +464,44 @@ public final class EntityMatchUtils {
                 .collect(Collectors.toMap(Pair::getKey, Pair::getValue));
     }
 
+    private static void processMatchKeyTuple(MatchKeyTuple tuple, Function<String, String> fn) {
+        if (tuple == null || fn == null) {
+            return;
+        }
+
+        tuple.setZipcode(fn.apply(tuple.getZipcode()));
+        tuple.setCity(fn.apply(tuple.getCity()));
+        tuple.setState(fn.apply(tuple.getState()));
+        tuple.setCountry(fn.apply(tuple.getCountry()));
+        tuple.setName(fn.apply(tuple.getName()));
+
+        tuple.setDomain(fn.apply(tuple.getDomain()));
+        tuple.setDuns(fn.apply(tuple.getDuns()));
+
+        tuple.setEmail(fn.apply(tuple.getEmail()));
+        tuple.setPhoneNumber(fn.apply(tuple.getPhoneNumber()));
+        if (isNotEmpty(tuple.getSystemIds())) {
+            tuple.setSystemIds(tuple.getSystemIds() //
+                    .stream() //
+                    .map(pair -> Pair.of(fn.apply(pair.getKey()), fn.apply(pair.getValue()))) //
+                    .collect(Collectors.toList()));
+        }
+    }
+
+    private static String hashIfLong(String val) {
+        if (StringUtils.length(val) <= DataCloudConstants.MATCH_FIELD_LENGTH_LIMIT) {
+            return val;
+        }
+
+        return HashUtils.getMD5CheckSum(val);
+    }
+
     /*-
      * if str matches matchingPtn,
      * replace all ptn (keys in ptnTokenMap) with placeholder token (values in ptnTokenMap)
      */
     private static String replaceAllPatterns(String str, BiMap<String, String> ptnTokenMap, Pattern matchingPtn) {
-        if (StringUtils.isBlank(str)) {
+        if (isBlank(str)) {
             return str;
         }
 

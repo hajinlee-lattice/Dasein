@@ -167,7 +167,8 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         Tenant tenant = newTestTenant();
 
         String preferredIdWithInvalidChars = "|He#lL:O||";
-        List<Object> data = Arrays.asList("acct_1:", "mkto_1##", null, "GOOGLE||", "google#.com", "USA", "CA:",
+        String longId = RandomStringUtils.randomAlphanumeric(1000);
+        List<Object> data = Arrays.asList("acct_1:", "mkto_1##", longId, "GOOGLE||", "google#.com", "USA", "CA:",
                 "123456789||", preferredIdWithInvalidChars);
         MatchOutput output = matchAccount(data, true, tenant, getEntityKeyMap(), FIELDS, null).getRight();
         String entityId = verifyAndGetEntityId(output);
@@ -176,9 +177,11 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         // publish for testing lookup
         publishToServing(tenant, BusinessEntity.Account);
 
-        // test lookup, make sure we get the correct entity id with each match key
+        // test lookup, make sure we get the correct entity id with invalid chars & long
+        // value
         Assert.assertEquals(lookupAccount(tenant, "acct_1:", null, null, null, null, null, null, null), entityId);
         Assert.assertEquals(lookupAccount(tenant, null, "mkto_1##", null, null, null, null, null, null), entityId);
+        Assert.assertEquals(lookupAccount(tenant, null, null, longId, null, null, null, null, null), entityId);
         Assert.assertEquals(lookupAccount(tenant, null, null, null, "GOOGLE||", null, "USA", null, null), entityId);
         // invalid DUNS/Domain will be cleaned up so won't be able to lookup
     }
@@ -1140,10 +1143,10 @@ public class AccountMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
     private Object[][] provideInvalidMatchFieldTestData() {
         return new Object[][] { //
                 /*-
-                 * length too long, cannot handle
+                 * length too long, hash it
                  */
                 { new String[] { "caid3", null, "eid3", RandomStringUtils.randomAlphanumeric(1000), "google.com", null,
-                        null, null, "account_123" }, true }, //
+                        null, null, "account_123" }, false }, //
                 /*-
                  * invalid value in diff match fields should still be handled properly
                  */

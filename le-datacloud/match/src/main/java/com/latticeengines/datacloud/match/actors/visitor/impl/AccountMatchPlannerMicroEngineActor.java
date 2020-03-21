@@ -118,7 +118,6 @@ public class AccountMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
                 traveler.getMatchInput().isPublicDomainAsNormalDomain(), entityMatchKeyRecord);
 
         MatchKeyTuple matchKeyTuple = MatchKeyUtils.createAccountMatchKeyTuple(entityMatchKeyRecord);
-        matchKeyTuple = EntityMatchUtils.replaceInvalidMatchFieldCharacters(matchKeyTuple);
 
         Map<MatchKey, List<String>> keyMap = EntityMatchUtils.getKeyMapForEntity(traveler.getMatchInput(),
                 Account.name());
@@ -133,6 +132,10 @@ public class AccountMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
         if (StringUtils.isNotBlank(domain)) {
             domainCollectService.enqueue(domain);
         }
+
+        // replace invalid characters and hash if any match value is too long
+        matchKeyTuple = EntityMatchUtils.replaceInvalidMatchFieldCharacters(matchKeyTuple);
+        matchKeyTuple = EntityMatchUtils.hashLongMatchFields(matchKeyTuple);
 
         matchKeyTuple
                 .setDomainFromMultiCandidates(matchStandardizationService.hasMultiDomain(inputRecord, keyPositionMap));

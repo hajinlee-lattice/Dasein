@@ -428,10 +428,11 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             { "C_16_03", "caid||3", "some_company_name", FALSE.toString() }, //
             { "C_16_04", "caid:123#456||789", "some_company_name:123", FALSE.toString() }, //
             /*-
-             * match field value too long
+             * long match field value is now handled by hashing
+             * when having an long preferredEntityId, will just ignore and not error out row
              */
-            { "C_16_05", RandomStringUtils.randomAlphanumeric(1000), "some_company_name", TRUE.toString() }, //
-            { "C_16_06", "caid16_5", RandomStringUtils.randomAlphanumeric(1000), TRUE.toString() }, //
+            { "C_16_05", RandomStringUtils.randomAlphanumeric(1000), "some_company_name", FALSE.toString() }, //
+            { "C_16_06", "caid16_5", RandomStringUtils.randomAlphanumeric(1000), FALSE.toString() }, //
             /*-
              * company name cleanup deal with invalid characters
              */

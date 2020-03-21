@@ -16,7 +16,6 @@ public final class ValidationUtils {
         throw new UnsupportedOperationException();
     }
     private static final String DEFAULT_OBJECT_NAME = "Object";
-    private static final int MATCH_FIELD_VALUE_LENGTH_LIMIT = 500;
 
     /**
      * Helper to check if any input object is {@literal null}
@@ -69,12 +68,8 @@ public final class ValidationUtils {
      * @return whether it is valid
      */
     public static boolean isValidMatchFieldValue(String value) {
-        if (value == null) {
-            // null is valid
-            return true;
-        }
-
-        // within length limit
-        return value.length() <= MATCH_FIELD_VALUE_LENGTH_LIMIT;
+        // TODO all previous invalid cases are all handled, reserve this
+        // for future invalid scenarios
+        return true;
     }
 }

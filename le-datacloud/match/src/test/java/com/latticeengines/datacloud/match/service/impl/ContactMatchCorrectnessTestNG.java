@@ -717,6 +717,9 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         matchAndVerify(testCase);
     }
 
+    /*
+     * able to handle invalid chars and long match field
+     */
     @DataProvider(name = "invalidMatchField")
     private Object[][] invalidMatchFieldTestData() {
         return new Object[][] { //
@@ -738,7 +741,7 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                 { new ContactMatchTestCase(null, //
                         new String[] { null, "john.doe@google.com", null, null, "C_AID_4",
                                 RandomStringUtils.randomAlphanumeric(1000), null, null }, //
-                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ANONYMOUS) }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
                 /*-
                  * Invalid account and contact match fields
                  */
