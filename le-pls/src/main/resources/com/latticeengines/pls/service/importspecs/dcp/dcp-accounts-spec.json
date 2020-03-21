@@ -2,7 +2,7 @@
     "systemType": "DCP",
     "systemObject": "Accounts",
     "fieldDefinitionsRecordsMap": {
-        "Unique ID": [
+        "Unique IDs": [
             {
                 "fieldName": "CustomerAccountId",
                 "fieldType": "TEXT",
@@ -15,6 +15,17 @@
                     "CUSTOMER ID",
                     "CUSTOMER ACCOUNT ID",
                     "EXTERNAL ID"
+                ],
+                "required": false
+            },
+            {
+                "fieldName": "InternalId",
+                "fieldType": "TEXT",
+                "screenName": "Internal ID",
+                "matchingColumnNames": [
+                    "INTERNAL ID",
+                    "MATCH ID",
+                    "ATLAS ID"
                 ],
                 "required": false
             }
