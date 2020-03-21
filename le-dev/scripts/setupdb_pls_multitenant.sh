@@ -13,12 +13,12 @@ echo "Setting up PLS_Multitenant"
 
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
-    # Remove alter table drop foreign key statements from the script, limit FK checks during session
-    sed -i '' 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
+    # Remove alter table drop foreign key statements from the script
+    sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL
 else
     echo "You are on ${UNAME}"
-    # Remove alter table drop foreign key statements from the script, limit FK checks during session
-    sed -i 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
+    # Remove alter table drop foreign key statements from the script
+    sed -i 's/alter table .* drop foreign key .*;//g' $DDL
 fi
 
 
