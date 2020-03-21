@@ -51,7 +51,6 @@ public class TeamResource {
     @GetMapping(value = "/username/{username}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
-    @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getTeamsByUsername(HttpServletRequest request,
                                                @PathVariable(value = "username") String username) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
@@ -62,7 +61,6 @@ public class TeamResource {
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "List all teams")
-    @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getAllTeams(HttpServletRequest request) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
