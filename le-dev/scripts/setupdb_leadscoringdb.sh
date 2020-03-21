@@ -14,13 +14,13 @@ echo "Setting up LeadScoringDB"
 if [[ -f "$DDL" ]]; then
     if [[ "${UNAME}" == 'Darwin' ]]; then
 	echo "You are on Mac"
-	# Remove alter table drop foreign key statements from the script, limit FK checks during session
-	sed -i '' 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' "$DDL"
+	# Remove alter table drop foreign key statements from the script
+	sed -i '' 's/alter table .* drop foreign key .*;//g' "$DDL"
 	sed -i '' 's/varchar(65535)/varchar(4000)/g' "$DDL"
     else
 	echo "You are on ${UNAME}"
-	# Remove alter table drop foreign key statements from the script, limit FK checks during session
-	sed -i 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' "$DDL"
+	# Remove alter table drop foreign key statements from the script
+	sed -i 's/alter table .* drop foreign key .*;//g' "$DDL"
 	sed -i 's/varchar(65535)/varchar(4000)/g' "$DDL"
     fi
 fi

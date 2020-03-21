@@ -13,10 +13,10 @@ echo "Setting up GlobalAuth"
 
 if [[ "${UNAME}" == 'Darwin' ]]; then
     echo "You are on Mac"
-    sed -i '' 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
+    sed -i '' 's/alter table .* drop foreign key .*;//g' $DDL
 else
     echo "You are on ${UNAME}"
-    sed -i 's/alter table .* drop foreign key .*;/set @@foreign_key_checks=0;/g' $DDL
+    sed -i 's/alter table .* drop foreign key .*;//g' $DDL
 fi
 
 # mv "$DDL" "${DDL%.*}.orig.sql"
