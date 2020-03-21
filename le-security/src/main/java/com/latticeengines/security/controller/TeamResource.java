@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
-import com.latticeengines.domain.exposed.auth.UpdateTeamUsersRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
@@ -31,7 +30,6 @@ import com.latticeengines.security.exposed.util.SecurityUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 @Api(value = "Team Management")
 @RestController
@@ -52,7 +50,6 @@ public class TeamResource {
     @GetMapping(value = "/username/{username}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
-    @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getTeamsByUsername(HttpServletRequest request,
                                                @PathVariable(value = "username") String username) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
@@ -63,7 +60,6 @@ public class TeamResource {
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "List all teams")
-    @PreAuthorize("hasRole('View_PLS_Teams')")
     public List<GlobalTeam> getAllTeams(HttpServletRequest request) {
         User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
         checkUser(loginUser);
@@ -83,7 +79,6 @@ public class TeamResource {
     @PutMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Update a team")
-    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean editTeam(@PathVariable("teamId") String teamId, //
                             @RequestBody GlobalTeamData globalTeamData, HttpServletRequest request) {
         log.info("Edit team {}.", teamId);
@@ -101,27 +96,10 @@ public class TeamResource {
     @DeleteMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Delete a team")
-    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean deleteTeam(@PathVariable("teamId") String teamId) {
         log.info("Delete team " + teamId);
-        teamService.deleteTeam(teamId);
         return true;
 
-    }
-
-    @PutMapping(value = "/teamId/{teamId}/users")
-    @ResponseBody
-    @ApiOperation(value = "Manager user by team")
-    @PreAuthorize("hasRole('Edit_PLS_Teams')")
-    public Boolean manageUserByTeam(@PathVariable("teamId") String teamId, //
-                                    @ApiParam(value = " Request to assign or remove users", required = true) //
-                                    @RequestBody UpdateTeamUsersRequest teamUsersRequest) {
-        if (teamUsersRequest == null) {
-            log.info("Team assignment is not specified...");
-            return true;
-        }
-        log.info("Manage members for team " + teamId);
-        return teamService.editTeam(teamId, teamUsersRequest);
     }
 
 }

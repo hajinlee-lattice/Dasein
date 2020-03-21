@@ -20,7 +20,6 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
-import com.latticeengines.domain.exposed.auth.UpdateTeamUsersRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
@@ -133,17 +132,6 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         }
     }
 
-    @Override
-    public void updateTeam(String teamId, UpdateTeamUsersRequest updateTeamUsersRequest) {
-        GlobalAuthTenant tenantData = getGlobalAuthTenant();
-        GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamIdAndTenantId(tenantData.getPid(), teamId);
-        if (globalAuthTeam == null) {
-            throw new IllegalArgumentException(String.format("cannot find globalAuthTeam using teamId %s.", teamId));
-        }
-        setUserRights(globalAuthTeam, tenantData, updateTeamUsersRequest.getUserToAssign());
-        globalAuthTeamEntityMgr.update(globalAuthTeam);
-    }
-
     private GlobalAuthTenant getGlobalAuthTenant() {
         String tenantId = MultiTenantContext.getTenant().getId();
         return getTenantData(tenantId);
@@ -154,5 +142,11 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         globalAuthTeamEntityMgr.deleteByTenantId(tenantData.getPid());
         return true;
+    }
+
+    @Override
+    public boolean userBelongsToTeam(String username, String teamId) {
+        GlobalAuthTenant tenantData = getGlobalAuthTenant();
+        return globalAuthTeamEntityMgr.userBelongsToTeam(tenantData.getPid(), username, teamId);
     }
 }

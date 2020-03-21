@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
@@ -18,7 +19,6 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
-import com.latticeengines.domain.exposed.auth.UpdateTeamUsersRequest;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -54,6 +54,15 @@ public class TeamServiceImpl implements TeamService {
     private boolean isExternalUser(User loginUser) {
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
         if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isNonAdminUser(User loginUser) {
+        AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
+        if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.INTERNAL_USER)) {
             return true;
         } else {
             return false;
@@ -125,6 +134,9 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Boolean editTeam(User loginUser, String teamId, GlobalTeamData globalTeamData) {
+        if (isNonAdminUser(loginUser) && !globalTeamManagementService.userBelongsToTeam(loginUser.getEmail(), teamId)) {
+            throw new AccessDeniedException("Access denied.");
+        }
         if (CollectionUtils.isNotEmpty(globalTeamData.getTeamMembers()) && isExternalUser(loginUser)) {
             // add the internal users into team member list if internal user exists in the edit team
             GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
@@ -144,12 +156,6 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public Boolean editTeam(String teamId, UpdateTeamUsersRequest updateTeamUsersRequest) {
-        globalTeamManagementService.updateTeam(teamId, updateTeamUsersRequest);
-        return true;
-    }
-
-    @Override
     public Boolean deleteTeam(String teamId) {
         globalTeamManagementService.deleteTeamByTeamId(teamId);
         return true;
@@ -158,6 +164,11 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void deleteTeamByTenantId() {
         globalTeamManagementService.deleteTeamByTenantId();
+    }
+
+    @Override
+    public boolean userBelongsToTeam(String username, String teamId) {
+        return globalTeamManagementService.userBelongsToTeam(username, teamId);
     }
 
 }

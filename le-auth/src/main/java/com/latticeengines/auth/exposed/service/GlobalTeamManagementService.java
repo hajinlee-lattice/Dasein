@@ -3,7 +3,6 @@ package com.latticeengines.auth.exposed.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
-import com.latticeengines.domain.exposed.auth.UpdateTeamUsersRequest;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 
 public interface GlobalTeamManagementService {
@@ -22,7 +21,7 @@ public interface GlobalTeamManagementService {
 
     Boolean deleteTeamByTeamId(String teamId);
 
-    void updateTeam(String teamId, UpdateTeamUsersRequest updateTeamUsersRequest);
-
     Boolean deleteTeamByTenantId();
+
+    boolean userBelongsToTeam(String username, String teamId);
 }

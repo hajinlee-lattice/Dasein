@@ -39,7 +39,6 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.EDIT_PLS_REFINE_CLONE, //
             GrantedRight.VIEW_S3_CREDENTIAL, //
-            GrantedRight.VIEW_PLS_TEAMS, //
             GrantedRight.VIEW_PLS_USERS
     ) //
     ), //
@@ -82,7 +81,6 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SSO_CONFIG, //
             GrantedRight.VIEW_DCP_PROJECTS, //
             GrantedRight.EDIT_DCP_PROJECTS, //
-            GrantedRight.VIEW_PLS_TEAMS, //
             GrantedRight.EDIT_PLS_TEAMS //
     ) //
     ), //
@@ -116,7 +114,6 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.CREATE_PLS_RATING_ENGINES, //
             GrantedRight.VIEW_PLS_REMODEL, //
             GrantedRight.VIEW_PLS_SPEC, //
-            GrantedRight.VIEW_PLS_TEAMS, //
             GrantedRight.VIEW_PLS_USERS
     ) //
     ), //
@@ -163,7 +160,6 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SPEC, //
             GrantedRight.VIEW_DCP_PROJECTS, //
             GrantedRight.EDIT_DCP_PROJECTS, //
-            GrantedRight.VIEW_PLS_TEAMS, //
             GrantedRight.EDIT_PLS_TEAMS //
     )), //
     SUPER_ADMIN(Arrays.asList(GrantedRight.VIEW_PLS_REPORTS, //
@@ -211,7 +207,6 @@ public enum AccessLevel implements GrantedAuthority {
             GrantedRight.VIEW_PLS_SPEC, //
             GrantedRight.VIEW_DCP_PROJECTS, //
             GrantedRight.EDIT_DCP_PROJECTS, //
-            GrantedRight.VIEW_PLS_TEAMS, //
             GrantedRight.EDIT_PLS_TEAMS
     )); //
 
