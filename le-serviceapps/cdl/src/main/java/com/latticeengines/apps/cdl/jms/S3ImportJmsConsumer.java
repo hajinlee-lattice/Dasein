@@ -80,7 +80,7 @@ public class S3ImportJmsConsumer {
     @Value("${cdl.app.public.url}")
     private String appPublicUrl;
 
-    @Value("${dcp.app.public.url")
+    @Value("${dcp.app.public.url}")
     private String dcpPublicUrl;
 
     @Value("${common.le.stack}")
