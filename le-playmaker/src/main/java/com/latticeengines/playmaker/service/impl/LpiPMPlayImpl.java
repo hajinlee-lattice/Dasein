@@ -1,7 +1,6 @@
 package com.latticeengines.playmaker.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -300,7 +299,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<Play> plays = getPlayList(start, playgroupIds, syncDestination, orgInfo);
         int count = 0;
         if (CollectionUtils.isNotEmpty(plays)) {
-            count = new Long( //
+            count = Long.valueOf( //
                     plays.stream() //
                             .filter(p -> secondsFromEpoch(p) >= start) //
                             .count()) //
