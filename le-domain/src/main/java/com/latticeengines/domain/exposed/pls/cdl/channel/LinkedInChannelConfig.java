@@ -79,7 +79,13 @@ public class LinkedInChannelConfig implements ChannelConfig {
     }
 
     @Override
-    public AudienceType getAudienceType() { return audienceType; }
+    @JsonProperty("audienceType")
+    public AudienceType getAudienceType() {
+        if(audienceType == null){
+            audienceType=AudienceType.CONTACTS;
+        }
+        return audienceType;
+    }
 
     public void setAudienceType(AudienceType audienceType) {
         this.audienceType = audienceType;

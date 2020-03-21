@@ -105,9 +105,9 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         List<LaunchSummary> summaries = getLaunchSummariesFromDashboard(latest, start, playIds, syncDestination,
                 orgInfo);
         if (CollectionUtils.isEmpty(summaries)) {
-            return Collections.EMPTY_LIST;
+            return new ArrayList<>();
         }
-        return summaries.stream().map(launchSummary -> launchSummary.getLaunchId()).collect(Collectors.toList());
+        return summaries.stream().map(LaunchSummary::getLaunchId).collect(Collectors.toList());
     }
 
     @Override
@@ -136,7 +136,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         }
         List<LaunchSummary> queriedSummaries = dashboard.getLaunchSummaries();
 
-        Map<String, String> activePlays = new HashMap<String, String>();
+        Map<String, String> activePlays = new HashMap<>();
         if (CollectionUtils.isNotEmpty(playIds)) {
             playIds.forEach(playId -> {
                 if (!activePlays.containsKey(playId)) {
@@ -147,7 +147,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
         if (latest) {
             Map<String, String> match = new HashMap<>();
-            queriedSummaries.stream().forEach(launch -> {
+            queriedSummaries.forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
                     if (!match.containsKey(launch.getPlayName())) {
                         if (CollectionUtils.isNotEmpty(playIds)) {
@@ -163,7 +163,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
                 }
             });
         } else {
-            queriedSummaries.stream().forEach(launch -> {
+            queriedSummaries.forEach(launch -> {
                 if (StringUtils.isNotBlank(launch.getLaunchId())) {
                     if (CollectionUtils.isNotEmpty(playIds)) {
                         if (activePlays.containsKey(launch.getPlayName())) {

@@ -43,7 +43,6 @@ import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.yarn.exposed.service.JobService;
 
-
 @Component("exportToDynamo")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfiguration> {
@@ -72,6 +71,9 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
     @Value("${eai.export.dynamo.num.mappers}")
     private int numMappers;
 
+    @Value("${eai.export.dynamo.signature}")
+    private String signature;
+
     @Override
     public void execute() {
         List<DynamoExportConfig> configs = getExportConfigs();
@@ -94,8 +96,8 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
 
     private boolean relinkDynamo(DynamoExportConfig config) {
         String customerSpace = configuration.getCustomerSpace().toString();
-        DynamoDataUnit dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace, config.getLinkTableName(),
-                DataUnit.StorageType.Dynamo);
+        DynamoDataUnit dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
+                config.getLinkTableName(), DataUnit.StorageType.Dynamo);
         if (dataUnit == null) {
             log.warn("Cannot find dynamo data unit with name: " + config.getLinkTableName());
             return false;
@@ -164,8 +166,10 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             String tenantId = CustomerSpace.shortenCustomerSpace(configuration.getCustomerSpace().toString());
 
             Map<String, String> properties = new HashMap<>();
-            properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, CipherUtils.encrypt(awsAccessKey));
-            properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED, CipherUtils.encrypt(awsSecretKey));
+            properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
+                    CipherUtils.encrypt(awsAccessKey));
+            properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED,
+                    CipherUtils.encrypt(awsSecretKey));
             properties.put(HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME, recordClass);
             properties.put(HdfsToDynamoConfiguration.CONFIG_REPOSITORY, "GenericTable");
             properties.put(HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE, recordType);
@@ -192,7 +196,8 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             DynamoDataUnit unit = new DynamoDataUnit();
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
             if (configuration.getMigrateTable() == null || BooleanUtils.isFalse(configuration.getMigrateTable())) {
-                String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName() : config.getTableName();
+                String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName()
+                        : config.getTableName();
                 unit.setName(srcTbl);
                 if (!unit.getName().equals(config.getTableName())) {
                     unit.setLinkedTable(config.getTableName());
@@ -201,6 +206,7 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
                 if (StringUtils.isNotBlank(config.getSortKey())) {
                     unit.setSortKey(config.getSortKey());
                 }
+                unit.setSignature(configuration.getDynamoSignature());
                 DataUnit created = dataUnitProxy.create(customerSpace, unit);
                 log.info("Registered DataUnit: " + JsonUtils.pprint(created));
             } else {
@@ -211,6 +217,5 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             }
         }
     }
-
 
 }
