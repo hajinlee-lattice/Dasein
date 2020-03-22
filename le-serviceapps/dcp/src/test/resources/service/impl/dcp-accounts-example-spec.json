@@ -2,166 +2,86 @@
     "systemType": "DCP",
     "systemObject": "Accounts",
     "fieldDefinitionsRecordsMap": {
-        "Unique ID": [
+        "Unique IDs": [
             {
                 "fieldName": "CustomerAccountId",
                 "fieldType": "TEXT",
-                "screenName": "Customer Account ID",
-                "columnName": "CustomerAccountId",
-                "matchingColumnNames": [
-                    "ID",
-                    "ACCOUNT",
-                    "ACCOUNT ID",
-                    "ACCOUNT NUMBER",
-                    "CUSTOMER ID",
-                    "CUSTOMER ACCOUNT ID",
-                    "EXTERNAL ID"
-                ],
-                "required": false
+                "columnName": "Customer Account ID",
+                "inCurrentImport": true
+            },
+            {
+                "fieldName": "InternalId",
+                "fieldType": "TEXT",
+                "columnName": "Internal ID",
+                "inCurrentImport": true
             }
         ],
         "Matching Fields": [
             {
                 "fieldName": "CompanyName",
                 "fieldType": "TEXT",
-                "screenName": "Company Name",
-                "columnName": "CompanyName",
-                "matchingColumnNames": [
-                    "NAME",
-                    "COMPANY",
-                    "COMPANY NAME",
-                    "ACCOUNT NAME",
-                    "DISPLAY NAME"
-                ],
-                "required": false
+                "columnName": "Company Name",
+                "inCurrentImport": true
             },
             {
                 "fieldName": "Address_Street_1",
                 "fieldType": "TEXT",
-                "screenName": "Street Address Line 1",
-                "columnName": "Street Address",
-                "matchingColumnNames": [
-                    "ADDRESS LINE 1",
-                    "BILLING ADDRESS LINE 1",
-                    "STREET ADDRESS LINE 1",
-                    "BILLING STREET ADDRESS LINE 1"
-                ],
-                "required": false
+                "columnName": "Street Address Line 1",
+                "inCurrentImport": true
             },
             {
                 "fieldName": "Address_Street_2",
                 "fieldType": "TEXT",
-                "screenName": "Street Address Line 2",
-                "columnName": "Street Address 2",
-                "matchingColumnNames": [
-                    "ADDRESS LINE 2",
-                    "BILLING ADDRESS LINE 2",
-                    "STREET ADDRESS LINE 2",
-                    "BILLING STREET ADDRESS LINE 2"
-                ],
-                "required": false
+                "columnName": "Street Address Line 2",
+                "inCurrentImport": true
             },
             {
                 "fieldName": "City",
                 "fieldType": "TEXT",
-                "screenName": "City",
                 "columnName": "City",
-                "matchingColumnNames": [
-                    "CITY",
-                    "BILLING CITY"
-                ],
-                "required": false
+                "inCurrentImport": true
             },
             {
                 "fieldName": "State",
                 "fieldType": "TEXT",
-                "screenName": "State",
                 "columnName": "State",
-                "matchingColumnNames": [
-                    "STATE",
-                    "PROVINCE",
-                    "STATE PROVINCE",
-                    "PROVINCE STATE",
-                    "BILLING STATE",
-                    "BILLING PROVINCE"
-                ],
-                "required": false
+                "inCurrentImport": true
             },
             {
                 "fieldName": "PostalCode",
                 "fieldType": "TEXT",
-                "screenName": "Postal Code",
-                "columnName": "ZIP",
-                "matchingColumnNames": [
-                    "ZIP",
-                    "ZIP CODE",
-                    "POSTAL CODE",
-                    "BILLING ZIP",
-                    "BILLING ZIP CODE",
-                    "BILLING POSTAL CODE"
-                ],
-                "required": false
+                "columnName": "Postal Code",
+                "inCurrentImport": true
             },
-
             {
                 "fieldName": "Country",
                 "fieldType": "TEXT",
-                "screenName": "Country",
                 "columnName": "Country",
-                "matchingColumnNames": [
-                    "COUNTRY",
-                    "COUNTRY CODE",
-                    "BILLING COUNTRY",
-                    "BILLING COUNTRY CODE"
-                ],
-                "required": true
+                "inCurrentImport": true
             },
             {
                 "fieldName": "PhoneNumber",
                 "fieldType": "TEXT",
-                "screenName": "Phone Number",
-                "columnName": "Phone",
-                "matchingColumnNames": [
-                    "PHONE",
-                    "PHONE NUMBER"
-                ],
-                "required": false
+                "columnName": "Phone Number",
+                "inCurrentImport": true
             },
             {
                 "fieldName": "Website",
                 "fieldType": "TEXT",
-                "screenName": "Website",
                 "columnName": "Website",
-                "matchingColumnNames": [
-                    "WEBSITE",
-                    "DOMAIN"
-                ],
-                "required": false
+                "inCurrentImport": true
             },
             {
                 "fieldName": "DUNS",
                 "fieldType": "TEXT",
-                "screenName": "D-U-N-S",
-                "columnName": "DUNS",
-                "matchingColumnNames": [
-                    "DUNS",
-                    "D-U-N-S",
-                    "DUNS NUMBER"
-                ],
-                "required": false
+                "columnName": "DUNS Number",
+                "inCurrentImport": true
             },
             {
                 "fieldName": "NationalId",
                 "fieldType": "TEXT",
-                "screenName": "National ID",
                 "columnName": "National ID",
-                "matchingColumnNames": [
-                    "NATIONAL ID",
-                    "FEDERAL ID",
-                    "TAX ID",
-                    "FEDERAL TAX ID"
-                ],
-                "required": false
+                "inCurrentImport": true
             }
         ],
         "Standard Fields": [],
