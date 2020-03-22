@@ -30,7 +30,7 @@ sourceProcessErrors "$WSHOME/le-dev/scripts/setupzk.sh"
 
 # delete existing ddl files
 printf "%s\n" "Removing ddl_*.sql files from WSHOME: $WSHOME"
-rm -f "$WSHOME/ddl_*.sql"	# -f to avoid errors if no files
+rm -f "$WSHOME"/ddl_*.sql	# -f to avoid errors if no files
 
 # Compile
 mvn -T6 -f "$WSHOME/db-pom.xml" -DskipTests clean install
