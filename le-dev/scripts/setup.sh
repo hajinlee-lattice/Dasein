@@ -1,10 +1,16 @@
 #!/bin/bash
 
+# colorize output
+RED="$(tput setaf 1)"
+YELLOW="$(tput setaf 3)"
+GREEN="$(tput setaf 2)"
+OFF="$(tput sgr0)"
+
 function processErrors
 {
   if [[ $? -ne 0 ]]
   then
-      echo "Error!"
+      echo "[${RED}ERROR${OFF}]"
       cat /tmp/errors.txt
       exit 1
   fi
@@ -22,15 +28,15 @@ echo "You are using this java: ${JAVA_HOME}"
 echo "Expanding aliases."
 shopt -s expand_aliases
 echo "Sourcing aliases file"
-source $WSHOME/le-dev/aliases
+source "$WSHOME/le-dev/aliases"
 
 # Top-level compile
 echo "Changing dir into workspace"
-cd $WSHOME
+cd "$WSHOME"
 
-OLD_JAVA_HOME=${JAVA_HOME}
+OLD_JAVA_HOME="${JAVA_HOME}"
 if [[ -n "${J11_HOME}" ]]; then
-    export JAVA_HOME=${J11_HOME}
+    export JAVA_HOME="${J11_HOME}"
 fi
 
 echo "Top-level compile"
@@ -45,7 +51,7 @@ echo "" > /tmp/errors.txt
 
 hdfs dfs -rm -r -f /app/${LE_STACK}/$(leversion) || true
 hdfs dfs -mkdir -p /app/${LE_STACK} || true
-pushd ${WSHOME}/le-dataplatform
+pushd "${WSHOME}/le-dataplatform"
 mvn -Ppkg-shaded -DskipTests package &&
 echo "Deploying artifacts to hdfs ..."
 hdfs dfs -copyFromLocal target/dist /app/${LE_STACK}/$(leversion)
@@ -55,25 +61,23 @@ echo "deploy properties file"
 cfgdpl 2> /tmp/errors.txt
 processErrors
 
-bash ${WSHOME}/le-dev/scripts/deploy_leds.sh
+bash "${WSHOME}/le-dev/scripts/deploy_leds.sh"
 
-if [[ -n `${ANACONDA_HOME}/bin/conda env list | grep p2` ]]; then
-    source ${ANACONDA_HOME}/bin/activate p2
+if [[ -n `"${ANACONDA_HOME}/bin/conda" env list | grep p2` ]]; then
+    source "${ANACONDA_HOME}/bin/activate" p2
 else
-    source ${ANACONDA_HOME}/bin/activate lattice
+    source "${ANACONDA_HOME}/bin/activate" lattice
 fi
 
 if [[ "${USE_QA_RTS}" == "true" ]]; then
-    ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py --qa-source-dbs
+    ${PYTHON} "$WSHOME/le-dev/scripts/setup_zk.py" --qa-source-dbs
 else
-    ${PYTHON} $WSHOME/le-dev/scripts/setup_zk.py
+    ${PYTHON} "$WSHOME/le-dev/scripts/setup_zk.py"
 fi
-source ${ANACONDA_HOME}/bin/deactivate
+source "${ANACONDA_HOME}/bin/deactivate"
 
 echo "Clean up old test tenants"
-export JAVA_HOME=${OLD_JAVA_HOME}
+export JAVA_HOME="${OLD_JAVA_HOME}"
 runtest testframework -g cleanup -t GlobalAuthCleanupTestNG
 
-echo "Success!!!"
-
-
+echo "${GREEN}Success!!!${OFF}"
