@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,6 +29,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.BatchUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.datacloud.core.entitymgr.PatchBookEntityMgr;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
@@ -58,6 +61,12 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
     @Value("${datacloud.patcher.ingest.concurrent.batch.cnt.max}")
     private int maxConcurrentBatchCnt;
 
+    @Value("${datacloud.patcher.ingest.concurrent.thread.cnt:4}")
+    private int threadCount;
+
+    @Value("${datacloud.patcher.ingest.transaction.batch.max:20000}")
+    private int trxBatchMax;
+
     @Inject
     private PatchBookEntityMgr patchBookEntityMgr;
 
@@ -72,7 +81,6 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
     @Inject
     private IngestionVersionService ingestionVersionService;
-
 
     @Override
     public void ingest(IngestionProgress progress) throws Exception {
@@ -120,12 +128,12 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         int[] batches = BatchUtils.divideBatches(totalSize, batchCnt);
 
         List<Ingester> ingesters = initializeIngester(patchConfig, currentDate, progress, batches);
-        ThreadPoolUtils.runInParallel(ingesters, (int) TimeUnit.DAYS.toMinutes(1), 10);
+        ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("PatchBookPool", threadCount);
+        ThreadPoolUtils.runInParallel(executorService, ingesters, (int) TimeUnit.DAYS.toMinutes(1), 10);
 
         updateCurrentVersion(ingestion, progress.getVersion());
 
-        progress = ingestionProgressService.updateProgress(progress).size(totalSize)
-                .status(ProgressStatus.FINISHED)
+        progress = ingestionProgressService.updateProgress(progress).size(totalSize).status(ProgressStatus.FINISHED)
                 .commit(true);
         log.info("Ingestion finished. Progress: " + progress.toString());
     }
@@ -136,23 +144,22 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         Preconditions.checkNotNull(patchConfig.getMinPid());
         long minPid = patchConfig.getMinPid();
         for (int i = 0; i < batches.length; i++) {
-            Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i],
-                    minPid);
+            Ingester ingester = new Ingester(patchConfig, currentDate, progress, i, batches[i], minPid);
             minPid += batches[i];
             ingesters.add(ingester);
         }
         return ingesters;
     }
 
-    private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate, long minPid,
-            long maxPid) {
+    private List<PatchBook> getActiveBooks(List<PatchBook> books, Date currentDate, long minPid, long maxPid) {
         return books.stream() //
-                .filter(book -> !PatchBookUtils.isEndOfLife(book, currentDate)
-                        && book.getPid() >= minPid && book.getPid() < maxPid) //
+                .filter(book -> !PatchBookUtils.isEndOfLife(book, currentDate) && book.getPid() >= minPid
+                        && book.getPid() < maxPid) //
                 .collect(Collectors.toList());
     }
 
-    private void postProcess(List<PatchBook> books, String dataCloudVersion, PatchBookConfiguration patchConfig, Date currentDate) {
+    private void postProcess(List<PatchBook> books, String dataCloudVersion, PatchBookConfiguration patchConfig,
+            Date currentDate) {
         List<Long> pidsToClearHotFix = new ArrayList<>();
         List<Long> pidsToSetEOL = new ArrayList<>();
         List<Long> pidsToClearEOL = new ArrayList<>();
@@ -162,7 +169,8 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         books.forEach(book -> {
             // For hot-fixed items, need to reset HotFix flag to be false
             if (PatchMode.HotFix.equals(patchConfig.getPatchMode())) {
-                pidsToClearHotFix.add(book.getPid()); // books are already filtered by HotFix flag
+                pidsToClearHotFix.add(book.getPid()); // books are already
+                                                      // filtered by HotFix flag
             }
             // For items with EOL flag not in sync with EffectiveSince and
             // ExpireAfter, need to update EOL flag
@@ -190,24 +198,68 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
                 pidsToClearExpireAfter.add(book.getPid());
             }
         });
-        if (CollectionUtils.isNotEmpty(pidsToClearHotFix)) {
-            patchBookEntityMgr.setHotFix(pidsToClearHotFix, false);
+        updateDB(dataCloudVersion, pidsToClearHotFix, pidsToSetEOL, pidsToClearEOL, pidsToSetEffectiveSince,
+                pidsToSetExpireAfter, pidsToClearExpireAfter);
+    }
+
+    private void updateDB(String dataCloudVersion, List<Long> pidsToClearHotFix, List<Long> pidsToSetEOL,
+            List<Long> pidsToClearEOL, List<Long> pidsToSetEffectiveSince, List<Long> pidsToSetExpireAfter,
+            List<Long> pidsToClearExpireAfter) {
+
+        doUpate(pidsToClearHotFix, (pids) -> {
+            log.info("setHotFix=" + pids.size());
+            patchBookEntityMgr.setHotFix(pids, false);
+        });
+        doUpate(pidsToSetEOL, (pids) -> {
+            log.info("pidsToSetEOL=" + pids.size());
+            patchBookEntityMgr.setEndOfLife(pids, true);
+        });
+        doUpate(pidsToClearEOL, (pids) -> {
+            log.info("pidsToClearEOL=" + pids.size());
+            patchBookEntityMgr.setEndOfLife(pids, false);
+        });
+        doUpate(pidsToClearEOL, (pids) -> {
+            log.info("pidsToClearEOL=" + pids.size());
+            patchBookEntityMgr.setEffectiveSinceVersion(pids, dataCloudVersion);
+        });
+        doUpate(pidsToSetExpireAfter, (pids) -> {
+            log.info("pidsToSetExpireAfter=" + pids.size());
+            patchBookEntityMgr.setExpireAfterVersion(pids, dataCloudVersion);
+        });
+        doUpate(pidsToClearExpireAfter, (pids) -> {
+            log.info("pidsToClearExpireAfter=" + pids.size());
+            patchBookEntityMgr.setExpireAfterVersion(pids, null);
+        });
+
+    }
+
+    private void doUpate(List<Long> pids, Consumer<List<Long>> consumer) {
+        List<Long> pidList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(pids)) {
+            for (Long pid : pids) {
+                pidList.add(pid);
+                if (pidList.size() == trxBatchMax) {
+                    retryDoUpdate(consumer, pidList);
+                }
+            }
+            if (!pidList.isEmpty()) {
+                retryDoUpdate(consumer, pidList);
+            }
         }
-        if (CollectionUtils.isNotEmpty(pidsToSetEOL)) {
-            patchBookEntityMgr.setEndOfLife(pidsToSetEOL, true);
+    }
+
+    private void retryDoUpdate(Consumer<List<Long>> consumer, List<Long> pidList) {
+        for (int i = 0; i < 3; i++) {
+            try {
+                consumer.accept(pidList);
+                pidList.clear();
+                return;
+            } catch (Exception ex) {
+                log.warn("Did not update for single transaction.", ex);
+                SleepUtils.sleep(2000L);
+            }
         }
-        if (CollectionUtils.isNotEmpty(pidsToClearEOL)) {
-            patchBookEntityMgr.setEndOfLife(pidsToClearEOL, false);
-        }
-        if (CollectionUtils.isNotEmpty(pidsToSetEffectiveSince)) {
-            patchBookEntityMgr.setEffectiveSinceVersion(pidsToSetEffectiveSince, dataCloudVersion);
-        }
-        if (CollectionUtils.isNotEmpty(pidsToSetExpireAfter)) {
-            patchBookEntityMgr.setExpireAfterVersion(pidsToSetExpireAfter, dataCloudVersion);
-        }
-        if (CollectionUtils.isNotEmpty(pidsToClearExpireAfter)) {
-            patchBookEntityMgr.setExpireAfterVersion(pidsToClearExpireAfter, null);
-        }
+        throw new RuntimeException("Failed to do update.");
     }
 
     private long importToHdfs(List<PatchBook> books, String destDir, String fileName,
@@ -330,7 +382,7 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
         private final long minPid;
 
         Ingester(PatchBookConfiguration patchConfig, Date currentDate, IngestionProgress progress, int batchSeq,
-                 int batchSize, long minPid) {
+                int batchSize, long minPid) {
             this.patchConfig = patchConfig;
             this.currentDate = currentDate;
             this.progress = progress;
@@ -350,10 +402,8 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         private void validate() {
             try (PerformanceTimer timer = new PerformanceTimer(
-                    String.format(
-                            "Validated PatchBook with type=%s, mode=%s, minPid=%d, maxPid(exclusive)=%d",
-                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
-                            maxPid))) {
+                    String.format("Validated PatchBook with type=%s, mode=%s, minPid=%d, maxPid(exclusive)=%d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid))) {
                 PatchRequest patchRequest = new PatchRequest();
                 patchRequest.setMode(patchConfig.getPatchMode());
                 patchRequest.setDataCloudVersion(progress.getDataCloudVersion());
@@ -372,16 +422,12 @@ public class IngestionPatchBookProviderServiceImpl extends IngestionProviderServ
 
         private void ingest() {
             try (PerformanceTimer timer = new PerformanceTimer(
-                    String.format(
-                            "Imported PatchBook with type=%s, mode=%s, minPid=%d, maxPid = %d",
-                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid,
-                            maxPid))) {
-                log.info(String.format(
-                        "Importing PatchBook with type=%s, mode=%s, minPid=%d, maxPid= %d",
+                    String.format("Imported PatchBook with type=%s, mode=%s, minPid=%d, maxPid = %d",
+                            patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid))) {
+                log.info(String.format("Importing PatchBook with type=%s, mode=%s, minPid=%d, maxPid= %d",
                         patchConfig.getBookType(), patchConfig.getPatchMode(), minPid, maxPid));
-                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(
-                        minPid, maxPid, patchConfig.getBookType(),
-                        PatchMode.HotFix.equals(patchConfig.getPatchMode()));
+                List<PatchBook> books = patchBookEntityMgr.findByTypeAndHotFixWithPaginNoSort(minPid, maxPid,
+                        patchConfig.getBookType(), PatchMode.HotFix.equals(patchConfig.getPatchMode()));
                 List<PatchBook> activeBooks = getActiveBooks(books, currentDate, minPid, maxPid);
                 String fileName = "part-" + batchSeq + ".avro";
                 try {
