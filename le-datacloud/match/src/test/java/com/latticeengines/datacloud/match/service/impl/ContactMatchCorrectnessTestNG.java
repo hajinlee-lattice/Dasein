@@ -229,11 +229,11 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                 // key cases as matched AccountId doesn't take effect in Contact
                 // match if CustomerContactId is provided)
                 { new ContactMatchTestCase( //
-                        new String[][] { { "C_CID_1", null, null, null, "C_AID_1", null, null, null } }, //
-                        new String[] { "C_CID_2", null, null, null, "C_AID_1", null, null, null }) }, //
+                        new String[][] { { "C_CID_1", null, null, null, "C_AID_1||", null, null, null } }, //
+                        new String[] { "C_CID_2", null, null, null, "C_AID_1||", null, null, null }) }, //
                 { new ContactMatchTestCase( //
-                        new String[][] { { "C_CID_1", null, null, null, "C_AID_1", null, null, null } }, //
-                        new String[] { "C_CID_2", "j.reese@google.com", "John Reese", "999-999-9999", "C_AID_1",
+                        new String[][] { { "C_CID_1", null, null, null, "C_AID#1", null, null, null } }, //
+                        new String[] { "C_CID_2", "j.reese@google.com", "John Reese", "999-999-9999", "C_AID#1",
                                 "Google", "USA", "CA" }) }, //
                 { new ContactMatchTestCase( //
                         new String[][] { { "C_CID_1", "j.reese@google.com", "John Reese", "999-999-9999", "C_AID_1",
@@ -247,8 +247,8 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
 
                 // Contact: Email + AID; Account: CAID
                 { new ContactMatchTestCase( //
-                        new String[][] { { null, "l.torvalds@google.com", null, null, "C_AID_1", null, null, null } }, //
-                        new String[] { null, "j.reese@google.com", "John Reese", "999-999-9999", "C_AID_1", null, null,
+                        new String[][] { { null, "l.torvalds@google.com", null, null, "C_AID_1#", null, null, null } }, //
+                        new String[] { null, "j.reese@google.com", "John Reese", "999-999-9999", "C_AID_1#", null, null,
                                 null }) }, //
                 { new ContactMatchTestCase( //
                         new String[][] { { null, "l.torvalds@google.com", null, null, "C_AID_1",
@@ -277,8 +277,10 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                         new String[] { null, "j.reese@google.com", null, null, null, null, "USA",
                                 null }) }, //
                 { new ContactMatchTestCase( //
-                        new String[][] { { null, "l.torvalds@google.com", null, null, null, "Google", "USA", "CA" } }, //
-                        new String[] { null, "j.reese@google.com", "John Reese", "999-999-9999", null, "Google", "USA",
+                        new String[][] {
+                                { null, "l.torvalds@google.com", null, null, null, "||Google:#", "USA", "CA" } }, //
+                        new String[] { null, "j.reese@google.com", "John Reese", "999-999-9999", null, "||Google:#",
+                                "USA",
                                 "CA" }) }, //
                 { new ContactMatchTestCase( //
                         new String[][] { { null, "l.torvalds@google.com", "Linus Torvalds", "111-111-1111", null,
@@ -334,12 +336,12 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                 // key cases as matched AccountId doesn't take effect in Contact
                 // match if CustomerContactId is provided)
                 { new ContactMatchTestCase( //
-                        new String[][] { { "C_CID_1", null, null, null, "C_AID_1", null, null, null } }, //
-                        new String[] { "C_CID_1", null, null, null, "C_AID_2", null, null, null }) }, //
+                        new String[][] { { ":C_CID_1||", null, null, null, "C_AID_1", null, null, null } }, //
+                        new String[] { ":C_CID_1||", null, null, null, "#C_AID_2", null, null, null }) }, //
                 { new ContactMatchTestCase( //
-                        new String[][] { { "C_CID_1", null, null, null, "C_AID_1", null, null, null } }, //
-                        new String[] { "C_CID_1", "j.reese@google.com", "John Reese", "999-999-9999", "C_AID_2",
-                                "Google", "USA", "CA" }) }, //
+                        new String[][] { { ":::C_CID_1", null, null, null, "C_AID_1", null, null, null } }, //
+                        new String[] { ":::C_CID_1", "j.reese##@google.com", "John:Reese", "||999-999-9999",
+                                "C_AI:D_2||", "Google##", "USA", "CA" }) }, //
         };
     }
 
@@ -715,6 +717,9 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
         matchAndVerify(testCase);
     }
 
+    /*
+     * able to handle invalid chars and long match field
+     */
     @DataProvider(name = "invalidMatchField")
     private Object[][] invalidMatchFieldTestData() {
         return new Object[][] { //
@@ -723,30 +728,30 @@ public class ContactMatchCorrectnessTestNG extends EntityMatchFunctionalTestNGBa
                  */
                 { new ContactMatchTestCase(null, //
                         new String[] { "C_CID#1", "j.reese@google.com", null, null, "C_AID_1", null, null, null }, //
-                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
                 { new ContactMatchTestCase(null, //
                         new String[] { null, null, "John:Doe", "999-333-1234", "C_AID_4", null, null, null }, //
-                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
                 /*-
                  * Valid contact match fields, invalid account match fields
                  */
                 { new ContactMatchTestCase(null, //
                         new String[] { "C_CID_1", "j.reese@google.com", null, null, "C_AID||2", null, null, null }, //
-                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
                 { new ContactMatchTestCase(null, //
                         new String[] { null, "john.doe@google.com", null, null, "C_AID_4",
                                 RandomStringUtils.randomAlphanumeric(1000), null, null }, //
-                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
                 /*-
                  * Invalid account and contact match fields
                  */
                 { new ContactMatchTestCase(null, //
                         new String[] { "C_CID_:3||ab#", null, null, null, "C_AID||3", null, null, null }, //
-                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
                 { new ContactMatchTestCase(null, //
                         new String[] { "C_CID_:5||ab#", null, "John:Doe", "333-444-1234", "C_AID3",
                                 "Invalid:Company#Name", null, null }, //
-                        EntityMatchStatus.ANONYMOUS, EntityMatchStatus.ANONYMOUS) }, //
+                        EntityMatchStatus.ALLOCATE_NEW, EntityMatchStatus.ALLOCATE_NEW) }, //
                 /*-
                  * no match fields provided, just in case
                  */

@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.core.service.NameLocationService;
 import com.latticeengines.datacloud.match.service.MatchStandardizationService;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.domain.exposed.datacloud.match.Contact;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -264,8 +265,13 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                     } else {
                         return null;
                     }
-                }).filter(StringUtils::isNotBlank) // keep original case for preferred entity ID
-                .map(origId -> Pair.of(origId, StringStandardizationUtils.getStandardizedSystemId(origId, true))) //
+                }) //
+                .filter(StringUtils::isNotBlank) // keep original case for preferred entity ID
+                .map(origId -> {
+                    String stdId = StringStandardizationUtils.getStandardizedSystemId(origId, true);
+                    return Pair.of(origId, EntityMatchUtils.replaceInvalidMatchFieldCharacters(stdId));
+                }) //
+                .filter(pair -> EntityMatchUtils.isValidEntityId(pair.getValue())) //
                 .collect(Collectors.toList());
         Optional<Pair<String, String>> chosenId = standardizedIds.stream() //
                 .filter(pair -> StringUtils.isNotBlank(pair.getRight())) // find first non-blank id

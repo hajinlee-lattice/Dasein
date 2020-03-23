@@ -102,6 +102,10 @@ public class ContactMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
         matchStandardizationService.parseRecordForPreferredEntityId(Contact.name(), inputRecord, keyPositionMap,
                 entityMatchKeyRecord);
 
+        // replace invalid characters and hash if any match value is too long
+        matchKeyTuple = EntityMatchUtils.replaceInvalidMatchFieldCharacters(matchKeyTuple);
+        matchKeyTuple = EntityMatchUtils.hashLongMatchFields(matchKeyTuple);
+
         traveler.setMatchKeyTuple(matchKeyTuple);
         traveler.addEntityMatchKeyTuple(Contact.name(), matchKeyTuple);
     }

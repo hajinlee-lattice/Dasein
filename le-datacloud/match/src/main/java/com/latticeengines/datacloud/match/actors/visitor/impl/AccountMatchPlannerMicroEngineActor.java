@@ -133,6 +133,10 @@ public class AccountMatchPlannerMicroEngineActor extends PlannerMicroEngineActor
             domainCollectService.enqueue(domain);
         }
 
+        // replace invalid characters and hash if any match value is too long
+        matchKeyTuple = EntityMatchUtils.replaceInvalidMatchFieldCharacters(matchKeyTuple);
+        matchKeyTuple = EntityMatchUtils.hashLongMatchFields(matchKeyTuple);
+
         matchKeyTuple
                 .setDomainFromMultiCandidates(matchStandardizationService.hasMultiDomain(inputRecord, keyPositionMap));
         traveler.setMatchKeyTuple(matchKeyTuple);

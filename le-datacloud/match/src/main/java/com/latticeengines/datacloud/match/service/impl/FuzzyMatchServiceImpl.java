@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.datacloud.match.util.EntityMatchUtils.restoreInvalidMatchFieldCharacters;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENTITY_ANONYMOUS_ID;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import com.latticeengines.datacloud.match.metric.FuzzyMatchHistory;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.datacloud.match.service.MatchMetricService;
+import com.latticeengines.datacloud.match.util.EntityMatchUtils;
 import com.latticeengines.datacloud.match.util.MatchHistoryUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
@@ -167,12 +169,14 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
     private void populateEntityMatchRecordWithTraveler(MatchTraveler traveler, String result,
                                                        InternalOutputRecord matchRecord) {
-        matchRecord.setEntityId(result);
+        // restore if result/entityIds has invalid chars and transformed into
+        // placeholder tokens
+        matchRecord.setEntityId(EntityMatchUtils.restoreInvalidMatchFieldCharacters(result));
         if (MapUtils.isNotEmpty(traveler.getNewEntityIds())) {
             // copy new entity IDs map
-            matchRecord.setNewEntityIds(traveler.getNewEntityIds());
+            matchRecord.setNewEntityIds(restoreInvalidMatchFieldCharacters(traveler.getNewEntityIds()));
         }
-        matchRecord.setEntityIds(traveler.getEntityIds());
+        matchRecord.setEntityIds(restoreInvalidMatchFieldCharacters(traveler.getEntityIds()));
         if (MapUtils.isNotEmpty(traveler.getEntityIds()) && matchRecord.getLatticeAccountId() == null) {
             String latticeAccountId = traveler.getEntityIds().get(BusinessEntity.LatticeAccount.name());
             matchRecord.setLatticeAccountId(latticeAccountId);

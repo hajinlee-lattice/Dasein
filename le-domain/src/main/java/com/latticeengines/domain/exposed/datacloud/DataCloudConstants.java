@@ -232,4 +232,5 @@ public final class DataCloudConstants {
      * Matcher Behavior
      ***********************************/
     public static final int REAL_TIME_MATCH_RECORD_LIMIT = 200;
+    public static final int MATCH_FIELD_LENGTH_LIMIT = 500;
 }
