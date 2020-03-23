@@ -75,7 +75,6 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                 launch = queueNewLaunch();
             }
 
-            // TODO: Remove when delta & delta launch workflows are unified
             Long launchWorkflowPid = playProxy.kickoffWorkflowForLaunch(configuration.getCustomerSpace().toString(),
                     configuration.getPlayId(), launch.getLaunchId());
             log.info("Kicked off delta launch workflow for the new Launch: " + launch.getId() + " with workflow PID ="
@@ -102,7 +101,8 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
         launch.setRemoveAccountsTable(getObjectFromContext(REMOVED_ACCOUNTS_DELTA_TABLE, String.class));
         launch.setAddContactsTable(getObjectFromContext(ADDED_CONTACTS_DELTA_TABLE, String.class));
         launch.setRemoveContactsTable(getObjectFromContext(REMOVED_CONTACTS_DELTA_TABLE, String.class));
-        launch.setParentDeltaWorkflowId(jobId);
+        long deltaPid = workflowJobEntityMgr.findByWorkflowId(jobId).getPid();
+        launch.setParentDeltaWorkflowId(deltaPid);
         launch = playProxy.createNewLaunchByPlayAndChannel(configuration.getCustomerSpace().toString(),
                 configuration.getPlayId(), configuration.getChannelId(), true, launch);
         log.info("Queued New Launch: " + launch.getId() + " with delta tables (" + getDeltaTables() + ")");
