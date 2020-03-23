@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.auth;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,9 @@ public class GlobalTeam {
 
     @JsonProperty("CreatedBy")
     private User createdByUser;
+
+    @JsonProperty("created")
+    private Date created;
 
     @JsonProperty("TeamMembers")
     private List<User> teamMembers;
@@ -64,5 +68,13 @@ public class GlobalTeam {
 
     public List<User> getTeamMembers() {
         return teamMembers;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }

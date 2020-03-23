@@ -115,6 +115,7 @@ public class TeamServiceImpl implements TeamService {
         GlobalTeam globalTeam = new GlobalTeam();
         globalTeam.setTeamName(globalAuthTeam.getName());
         globalTeam.setTeamId(globalAuthTeam.getTeamId());
+        globalTeam.setCreated(globalAuthTeam.getCreationDate());
         globalTeam.setCreatedByUser(userMap.get(globalAuthTeam.getCreatedByUser()));
         if (withTeamMember) {
             List<User> teamMembers = new ArrayList<>();
