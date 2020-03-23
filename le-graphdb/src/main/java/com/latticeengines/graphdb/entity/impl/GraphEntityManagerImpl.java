@@ -24,9 +24,9 @@ import com.latticeengines.domain.exposed.graph.LabelUtil;
 import com.latticeengines.domain.exposed.graph.NameSpaceUtil;
 import com.latticeengines.domain.exposed.graph.VertexCreationRequest;
 import com.latticeengines.domain.exposed.graph.VertexDeletionRequest;
-import com.latticeengines.graphdb.GraphDbUtil;
 import com.latticeengines.graphdb.entity.BaseGraphEntityManager;
 import com.latticeengines.graphdb.entity.GraphEntityManager;
+import com.latticeengines.graphdb.util.GraphDbUtil;
 
 @Component
 public class GraphEntityManagerImpl extends BaseGraphEntityManagerImpl

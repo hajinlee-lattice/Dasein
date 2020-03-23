@@ -15,10 +15,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
+import com.latticeengines.auth.exposed.service.impl.GlobalAuthDependencyChecker;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.cdl.CDLObjectTypes;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -36,6 +38,9 @@ public class TeamServiceImpl implements TeamService {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private GlobalAuthDependencyChecker dependencyChecker;
 
     @Override
     public List<GlobalTeam> getTeams(User loginUser) {
@@ -162,8 +167,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public void deleteTeamByTenantId() {
-        globalTeamManagementService.deleteTeamByTenantId();
+    public Map<String, List<String>> getDependencies(String teamId) throws Exception {
+        return dependencyChecker.getDependencies(teamId, CDLObjectTypes.Team.name());
     }
 
     @Override

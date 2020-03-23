@@ -22,9 +22,9 @@ import com.latticeengines.domain.exposed.graph.NameSpaceUtil;
 import com.latticeengines.domain.exposed.graph.VertexCreationRequest;
 import com.latticeengines.domain.exposed.graph.VertexDeletionRequest;
 import com.latticeengines.domain.exposed.graph.VertexType;
-import com.latticeengines.graphdb.GraphDbUtil;
 import com.latticeengines.graphdb.entity.BaseGraphEntityManager;
 import com.latticeengines.graphdb.service.GraphDbService;
+import com.latticeengines.graphdb.util.GraphDbUtil;
 
 @Component
 public class GraphDbServiceImpl implements GraphDbService {

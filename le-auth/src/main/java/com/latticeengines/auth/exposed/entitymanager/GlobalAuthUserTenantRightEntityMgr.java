@@ -29,7 +29,7 @@ public interface GlobalAuthUserTenantRightEntityMgr extends
 
     boolean isRedundant(String email);
 
-    List<GlobalAuthUserTenantRight> findByNonNullExprationDate();
+    List<GlobalAuthUserTenantRight> findByNonNullExpirationDate();
 
     List<GlobalAuthUserTenantRight> findByEmailsAndTenantId(Set<String> emails, Long tenantId);
 

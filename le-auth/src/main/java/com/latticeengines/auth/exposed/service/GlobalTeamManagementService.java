@@ -21,7 +21,6 @@ public interface GlobalTeamManagementService {
 
     Boolean deleteTeamByTeamId(String teamId);
 
-    Boolean deleteTeamByTenantId();
-
     boolean userBelongsToTeam(String username, String teamId);
+
 }

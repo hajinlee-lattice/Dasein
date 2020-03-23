@@ -27,8 +27,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.graph.GraphConstants;
 import com.latticeengines.graphdb.BootstrapContext;
 import com.latticeengines.graphdb.ConnectionManager;
-import com.latticeengines.graphdb.GraphDbUtil;
 import com.latticeengines.graphdb.entity.BaseGraphEntityManager;
+import com.latticeengines.graphdb.util.GraphDbUtil;
 
 public class BaseGraphEntityManagerImpl implements BaseGraphEntityManager {
 

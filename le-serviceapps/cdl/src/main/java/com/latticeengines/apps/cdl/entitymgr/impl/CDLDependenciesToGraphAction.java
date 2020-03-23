@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.graphdb.DependenciesToGraphAction;
+import com.latticeengines.graphdb.util.DependencyUtils;
 
 @Component
 public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
@@ -56,7 +57,7 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
     private AIModelEntityMgr aiModelEntityMgr;
 
     @Inject
-    private IdToDisplayNameTranslator nameTranslator;
+    private CDLIdToDisplayNameTranslator nameTranslator;
 
     public void createSegmentVertex(MetadataSegment metadataSegment) throws Exception {
         ParsedDependencies parsedDependencies = segmentEntityMgr.parse(metadataSegment, null);
@@ -172,8 +173,8 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
                                                     .forEach(v -> {
                                                         sb.append(String.format("%s%s '%s'", //
                                                                 firstTime.get() == 1 ? "" : " -> ", //
-                                                                v.get(IdToDisplayNameTranslator.TYPE), //
-                                                                v.get(IdToDisplayNameTranslator.DISPLAY_NAME)));
+                                                                v.get(CDLIdToDisplayNameTranslator.TYPE), //
+                                                                v.get(CDLIdToDisplayNameTranslator.DISPLAY_NAME)));
                                                         firstTime.incrementAndGet();
                                                     });
                                             sb.append("]\n");
@@ -251,22 +252,7 @@ public class CDLDependenciesToGraphAction extends DependenciesToGraphAction {
         List<Map<String, String>> dependencies = //
                 checkDirectDependencies(MultiTenantContext.getTenant().getId(), //
                         vertexId, vertexType);
-
-        if (CollectionUtils.isNotEmpty(dependencies)) {
-            Map<String, List<Map<String, String>>> translatedDependenciesWithId = nameTranslator
-                    .translate(dependencies);
-            Map<String, List<String>> translatedDependencies = new HashMap<>();
-            translatedDependenciesWithId.keySet().stream() //
-                    .filter(type -> CollectionUtils.isNotEmpty(translatedDependenciesWithId.get(type))) //
-                    .forEach(type -> {
-                        translatedDependencies.put(type, new ArrayList<>());
-                        translatedDependenciesWithId.get(type).stream().forEach(dep -> {
-                            translatedDependencies.get(type) //
-                                    .add(dep.get(IdToDisplayNameTranslator.DISPLAY_NAME));
-                        });
-                    });
-            throw new LedpException(LedpCode.LEDP_40042, new String[] { JsonUtils.serialize(translatedDependencies) });
-        }
+        DependencyUtils.checkDeleteSafety(dependencies, nameTranslator, vertexId, vertexType);
     }
 
     public void deleteRatingAttributeVertices(RatingEngine ratingEngine) throws Throwable {

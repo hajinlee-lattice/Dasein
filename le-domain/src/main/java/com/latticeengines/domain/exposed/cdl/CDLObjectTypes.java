@@ -6,7 +6,8 @@ import java.util.Map;
 public enum CDLObjectTypes {
     Segment("Segment"), //
     Model("Model"), // i.e. RatingEngine
-    Play("Play"); //
+    Play("Play"), //
+    Team("Team"); //
 
     private static Map<String, CDLObjectTypes> map = new HashMap<>();
 

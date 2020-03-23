@@ -33,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.KryoUtils;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -137,6 +138,14 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Transient
     @ApiModelProperty("segment attributes")
     private Set<AttributeLookup> segmentAttributes;
+
+    @Column(name = "TEAM_ID")
+    @JsonProperty("teamId")
+    private String teamId;
+
+    @JsonProperty("team")
+    @Transient
+    private GlobalTeam team;
 
     @JsonIgnore
     @Transient
@@ -446,4 +455,19 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         return KryoUtils.read(bis, MetadataSegment.class);
     }
 
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
+    }
+
+    public GlobalTeam getTeam() {
+        return team;
+    }
+
+    public void setTeam(GlobalTeam team) {
+        this.team = team;
+    }
 }

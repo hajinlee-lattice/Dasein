@@ -130,7 +130,7 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<GlobalAuthUserTenantRight> findByNonNullExprationDate() {
+    public List<GlobalAuthUserTenantRight> findByNonNullExpirationDate() {
         return gaUserTenantRightDao.findByNonNullExpirationDate();
     }
 

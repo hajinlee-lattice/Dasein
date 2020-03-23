@@ -7,6 +7,7 @@ public final class VertexType {
     }
     public static final String TENANT = "TEN";
     public static final String SEGMENT = "SEG";
+    public static final String TEAM = "TEAM";
     public static final String PLAY = "PLY";
     public static final String RATING_ENGINE = "REN";
     public static final String RATING_ATTRIBUTE = "ATR.REN.BKT";

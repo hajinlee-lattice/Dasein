@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.impl.DependencyChecker;
+import com.latticeengines.apps.cdl.entitymgr.impl.CDLDependencyChecker;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.AIModelService;
@@ -159,7 +159,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private ServingStoreService servingStoreService;
 
     @Inject
-    private DependencyChecker dependencyChecker;
+    private CDLDependencyChecker dependencyChecker;
 
     @Value("${cdl.model.delete.propagate:false}")
     private Boolean shouldPropagateDelete;

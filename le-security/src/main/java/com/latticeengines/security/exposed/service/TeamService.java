@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
@@ -20,7 +21,7 @@ public interface TeamService {
 
     Boolean deleteTeam(String teamId);
 
-    void deleteTeamByTenantId();
+    Map<String, List<String>> getDependencies(String teamId) throws Exception;
 
     boolean userBelongsToTeam(String username, String teamId);
 }

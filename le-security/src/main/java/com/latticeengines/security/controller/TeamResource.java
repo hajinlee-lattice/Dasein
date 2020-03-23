@@ -1,6 +1,7 @@
 package com.latticeengines.security.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -96,10 +97,18 @@ public class TeamResource {
     @DeleteMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Delete a team")
+    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean deleteTeam(@PathVariable("teamId") String teamId) {
         log.info("Delete team " + teamId);
         return true;
 
     }
 
+    @GetMapping(value = "/{teamId}/dependencies")
+    @ResponseBody
+    @ApiOperation(value = "Get all the dependencies")
+    public Map<String, List<String>> getDependencies(@PathVariable String teamId) throws Exception {
+        log.info(String.format("get all dependencies for teamId=%s", teamId));
+        return teamService.getDependencies(teamId);
+    }
 }
