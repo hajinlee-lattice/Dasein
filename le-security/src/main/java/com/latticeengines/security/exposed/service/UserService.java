@@ -3,7 +3,6 @@ package com.latticeengines.security.exposed.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -66,6 +65,6 @@ public interface UserService {
     RegistrationResult registerUserWithNoTenant(UserRegistration userReg);
 
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-                              Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams);
+                              Long expirationDate, boolean createUser, boolean clearSession, List<String> userTeams);
 
 }
