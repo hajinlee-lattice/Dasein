@@ -188,6 +188,10 @@ public class CheckpointService {
         this.precedingCheckpoints = precedingCheckpoints;
     }
 
+    public List<String> getPrecedingCheckpoints() {
+        return this.precedingCheckpoints;
+    }
+
     public void enableCopyToS3() {
         copyToS3 = true;
     }

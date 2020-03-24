@@ -51,6 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
+import com.latticeengines.apps.cdl.service.impl.CheckpointNewService;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
@@ -419,6 +420,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     protected CheckpointService checkpointService;
 
     @Inject
+    protected CheckpointNewService checkpointNewService;
+
+    @Inject
     private TestArtifactService testArtifactService;
 
     @Inject
@@ -475,12 +479,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (!isLocalEnvironment()) {
             log.info("Enable copying checkpoint to S3");
             checkpointService.enableCopyToS3();
+            checkpointNewService.enableCopyToS3();
         }
     }
 
     @AfterClass(groups = { "end2end", "precheckin" })
     protected void cleanup() throws Exception {
-        checkpointService.cleanup();
+//        checkpointService.cleanup();
     }
 
     @BeforeMethod(groups = "end2end")
@@ -1169,17 +1174,28 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     void resumeCrossSellCheckpoint(String checkpoint) throws IOException {
-        checkpointService.resumeCheckpoint(checkpoint, S3_CROSS_SELL_CHECKPOINTS_VERSION);
+        checkpointNewService.resumeCheckpoint(checkpoint, S3_CROSS_SELL_CHECKPOINTS_VERSION);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
     }
 
     void resumeCheckpoint(String checkpoint) throws IOException {
-        checkpointService.resumeCheckpoint(checkpoint, S3_CHECKPOINTS_VERSION);
+        checkpointNewService.resumeCheckpoint(checkpoint, S3_CHECKPOINTS_VERSION);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
     }
 
     void saveCheckpoint(String checkpointName) throws IOException {
-        checkpointService.saveCheckpoint(checkpointName, String.valueOf(S3_CHECKPOINTS_VERSION + 1), mainCustomerSpace);
+        saveCheckpoint(checkpointName, false);
+    }
+
+    void saveCheckpoint(String checkpointName, boolean autoUpload) throws IOException {
+        if (autoUpload) {
+            if (CollectionUtils.isNotEmpty(checkpointService.getPrecedingCheckpoints())) {
+                checkpointNewService.setPrecedingCheckpoints(checkpointService.getPrecedingCheckpoints());
+            }
+            checkpointNewService.saveCheckpoint(checkpointName, String.valueOf(S3_CHECKPOINTS_VERSION + 1), mainCustomerSpace);
+        } else {
+            checkpointService.saveCheckpoint(checkpointName, String.valueOf(S3_CHECKPOINTS_VERSION + 1), mainCustomerSpace);
+        }
     }
 
     private List<Report> retrieveReport(String appId) {

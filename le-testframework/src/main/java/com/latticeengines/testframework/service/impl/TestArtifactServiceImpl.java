@@ -20,10 +20,12 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
@@ -34,6 +36,7 @@ public class TestArtifactServiceImpl implements TestArtifactService {
     private static final Logger log = LoggerFactory.getLogger(TestArtifactServiceImpl.class);
 
     private static final String S3_BUCKET = "latticeengines-test-artifacts";
+    private static final CannedAccessControlList ACL = CannedAccessControlList.BucketOwnerFullControl;
 
     private static final String DOWNLOAD_DIR = "s3downloads";
     private static final int BUFFER_SIZE = 1024 * 1024; // 1M
@@ -159,6 +162,13 @@ public class TestArtifactServiceImpl implements TestArtifactService {
             }
         }
         return outputFile;
+    }
+
+    @Override
+    public synchronized void uploadFileToS3(String objectDir, String version, File file) {
+        String targetPath = String.format("%s/%s/", objectDir, version).replace("//", "/");
+        PutObjectRequest request = new PutObjectRequest(S3_BUCKET, targetPath, file).withCannedAcl(ACL);
+        S3.putObject(request);
     }
 
     private void downloadS3Object(S3Object s3Object, File outputFile) {
