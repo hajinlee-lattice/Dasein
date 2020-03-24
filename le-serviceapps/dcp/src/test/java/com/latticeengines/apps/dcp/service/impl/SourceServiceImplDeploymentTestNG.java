@@ -84,16 +84,16 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertNotNull(dropBoxSummary);
         s3Service.objectExist(dropBoxSummary.getBucket(),
-                dropBoxService.getDropBoxPrefix() + "/" + source.getFullPath());
+                dropBoxService.getDropBoxPrefix() + "/" + source.getRelativePathUnderDropfolder());
 
         // create another source under same project
         Source source2 = sourceService.createSource(mainCustomerSpace, "TestSource2", projectId,
                 fieldDefinitionsRecord);
         Assert.assertNotEquals(source.getSourceId(), source2.getSourceId());
         s3Service.objectExist(dropBoxSummary.getBucket(),
-                dropBoxService.getDropBoxPrefix() + "/" + source2.getFullPath() + "drop/");
+                dropBoxService.getDropBoxPrefix() + "/" + source2.getRelativePathUnderDropfolder() + "drop/");
         s3Service.objectExist(dropBoxSummary.getBucket(),
-                dropBoxService.getDropBoxPrefix() + "/" + source2.getFullPath() + "upload/");
+                dropBoxService.getDropBoxPrefix() + "/" + source2.getRelativePathUnderDropfolder() + "upload/");
 
     }
 

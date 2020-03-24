@@ -40,6 +40,7 @@ public class SourceServiceImpl implements SourceService {
     private static final String RANDOM_SOURCE_ID_PATTERN = "Source_%s";
     private static final String TEMPLATE_NAME = "%s_Template";
     private static final String FEED_TYPE_PATTERN = "%s_%s"; // SystemName_SourceId;
+    private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project+source path}
 
     @Inject
     private ProjectService projectService;
@@ -80,9 +81,10 @@ public class SourceServiceImpl implements SourceService {
                 displayName, sourceId);
         Source source = convertToSource(customerSpace, dataFeedTask);
         if (StringUtils.isNotBlank(source.getFullPath())) {
-            dropBoxService.createFolderUnderDropFolder(source.getFullPath());
-            dropBoxService.createFolderUnderDropFolder(source.getFullPath() + DROP_FOLDER);
-            dropBoxService.createFolderUnderDropFolder(source.getFullPath() + UPLOAD_FOLDER);
+            String relativePathUnderDropfolder = source.getRelativePathUnderDropfolder();
+            dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder);
+            dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + DROP_FOLDER);
+            dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + UPLOAD_FOLDER);
         }
         return source;
     }
@@ -136,7 +138,8 @@ public class SourceServiceImpl implements SourceService {
             S3ImportSystem s3ImportSystem = cdlProxy.getS3ImportSystem(customerSpace,
                     dataFeedTask.getImportSystemName());
             Project project = projectService.getProjectByImportSystem(customerSpace, s3ImportSystem);
-            source.setFullPath(project.getRootPath() + dataFeedTask.getRelativePath());
+            source.setFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
+                    dropBoxService.getDropBoxPrefix(), project.getRootPath() + dataFeedTask.getRelativePath()));
         }
         return source;
     }

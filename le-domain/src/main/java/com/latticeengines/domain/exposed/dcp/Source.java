@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.dcp;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 
@@ -50,6 +53,18 @@ public class Source {
 
     public void setFullPath(String fullPath) {
         this.fullPath = fullPath;
+    }
+
+    @JsonIgnore
+    public String getRelativePathUnderDropfolder() {
+        if (StringUtils.isEmpty(fullPath)) {
+            return null;
+        }
+        String relativePath = fullPath.startsWith("/") ? fullPath.substring(1) : fullPath;
+        for (int i = 0; i < 3; i++) {
+            relativePath = relativePath.substring(relativePath.indexOf("/") + 1);
+        }
+        return relativePath;
     }
 
     public DataFeedTask.S3ImportStatus getImportStatus() {
