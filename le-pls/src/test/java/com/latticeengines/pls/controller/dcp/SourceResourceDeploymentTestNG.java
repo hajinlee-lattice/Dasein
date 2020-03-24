@@ -24,16 +24,22 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestSourceProxy;
+import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
-    private static final String SPEC_FILE_LOCAL_PATH = "com/latticeengines/pls/controller/dcp-accounts-example-spec.json";
+    private static final String TEST_TEMPLATE_DIR = "le-serviceapps/dcp/deployment/template";
+    private static final String TEST_TEMPLATE_NAME = "dcp-accounts-hard-coded.json";
+    private static final String TEST_TEMPLATE_VERSION = "1";
 
     @Inject
     private TestProjectProxy testProjectProxy;
 
     @Inject
     private TestSourceProxy testSourceProxy;
+
+    @Inject
+    private TestArtifactService testArtifactService;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -50,7 +56,7 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(projectDetail);
         String projectId = projectDetail.getProjectId();
 
-        InputStream specStream = ClassLoader.getSystemResourceAsStream(SPEC_FILE_LOCAL_PATH);
+        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
 
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
 
