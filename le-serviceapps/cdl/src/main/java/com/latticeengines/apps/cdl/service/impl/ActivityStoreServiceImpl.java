@@ -211,7 +211,7 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         if (StringUtils.isBlank(signature)) {
             signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
         }
-        Map<String, String> streamNameMap = getStreamNameMap();
+        Map<String, String> streamNameMap = getStreamNameMap(customerSpace);
 
         Map<String, Map<String, DimensionMetadata>> metadata = dimensionMetadataService.getMetadata(signature);
 
@@ -256,12 +256,12 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
 
     // streamId -> streamName
     @Override
-    public Map<String, String> getStreamNameMap() {
+    @WithCustomerSpace
+    public Map<String, String> getStreamNameMap(@NotNull String customerSpace) {
         List<AtlasStream> streams = streamEntityMgr.findByTenant(MultiTenantContext.getTenant());
         if (CollectionUtils.isEmpty(streams)) {
             return Collections.emptyMap();
         }
-
         return streams.stream()
                 .collect(Collectors.toMap(AtlasStream::getStreamId, AtlasStream::getName, (v1, v2) -> v1));
     }
