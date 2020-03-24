@@ -55,8 +55,9 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
     @Override
     public void delete(String entityId) {
         Tenant tenant = getTenant();
-        IdentityProvider identityProvider = identityProviderEntityMgr.findByEntityId(entityId);
-        if (!identityProvider.getGlobalAuthTenant().getId().equals(tenant.getId())) {
+        GlobalAuthTenant gaTenant = globalAuthTenantEntityMgr.findByTenantId(tenant.getId());
+        IdentityProvider identityProvider = identityProviderEntityMgr.findByGATenantAndEntityId(gaTenant, entityId);
+        if (identityProvider == null) {
             throw new AccessDeniedException("Unauthorized");
         }
 
@@ -66,7 +67,8 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
     @Override
     public IdentityProvider find(String entityId) {
         Tenant tenant = getTenant();
-        IdentityProvider identityProvider = identityProviderEntityMgr.findByEntityId(entityId);
+        GlobalAuthTenant gaTenant = globalAuthTenantEntityMgr.findByTenantId(tenant.getId());
+        IdentityProvider identityProvider = identityProviderEntityMgr.findByGATenantAndEntityId(gaTenant, entityId);
         if (identityProvider == null) {
             return null;
         }

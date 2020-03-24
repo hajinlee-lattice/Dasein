@@ -100,7 +100,9 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "testCreateAgain")
     public void testCascadeDelete() {
         tenantService.discardTenant(samlFunctionalTestBed.getGlobalAuthTestBed().getMainTestTenant());
-        IdentityProvider retrieved = identityProviderEntityMgr.findByEntityId(identityProvider.getEntityId());
+        IdentityProvider retrieved =
+                identityProviderEntityMgr.findByGATenantAndEntityId(identityProvider.getGlobalAuthTenant(),
+                        identityProvider.getEntityId());
         assertNull(retrieved);
     }
 }
