@@ -582,7 +582,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
                 Assert.assertNotNull(entry.getLaunchId());
                 Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
                 Assert.assertNotNull(entry.getLaunchState());
-                Assert.assertNotNull(entry.getLaunchStateDisplayString());
+                Assert.assertNotNull(entry.getUiLaunchState());
                 Assert.assertNotNull(entry.getLaunchTime());
                 Assert.assertNotNull(entry.getPlayName());
                 Assert.assertNotNull(entry.getPlayDisplayName());

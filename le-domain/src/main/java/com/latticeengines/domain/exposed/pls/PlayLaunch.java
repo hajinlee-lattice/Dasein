@@ -378,9 +378,9 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.launchState = launchState;
     }
 
-    @JsonProperty("launchStateDisplayString")
-    public String getLaunchStateDisplayString() {
-        return launchState != null ? launchState.toDisplayString(destinationSysName) : null;
+    @JsonProperty("uiLaunchState")
+    public String getUILaunchState() {
+        return launchState != null ? launchState.toUILaunchState(destinationSysName) : null;
     }
 
     public Play getPlay() {
