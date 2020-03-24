@@ -13,9 +13,9 @@ public interface MetadataSegmentService {
 
     MetadataSegment getSegmentByName(String name);
 
-    MetadataSegment getSegmentByName(String name, boolean shouldTransateForFrontend);
+    MetadataSegment getSegmentByName(String name, boolean shouldTranslateForFrontend);
 
-    MetadataSegmentDTO getSegmentDTOByName(String name, boolean shouldTransateForFrontend);
+    MetadataSegmentDTO getSegmentDTOByName(String name, boolean shouldTranslateForFrontend);
 
     MetadataSegment createOrUpdateSegment(MetadataSegment segment);
 

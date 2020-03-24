@@ -97,7 +97,6 @@ public class TeamResource {
     @DeleteMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Delete a team")
-    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean deleteTeam(@PathVariable("teamId") String teamId) {
         log.info("Delete team " + teamId);
         return true;

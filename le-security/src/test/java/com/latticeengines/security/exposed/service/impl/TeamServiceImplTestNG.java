@@ -84,6 +84,8 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         MultiTenantContext.setTenant(tenant);
         String teamId = teamService.createTeam(username1InTenant, getGlobalTeamData(teamName1InTenant, Sets.newHashSet(username1InTenant, username2InTenant)));
         assertNotNull(teamId);
+        GlobalTeam globalTeam = teamService.getTeamByTeamId(teamId, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
+        validateTeamInfo(globalTeam, teamName1InTenant, username2InTenant, 2);
         // create
         teamService.createTeam(username2InTenant, getGlobalTeamData(teamName2InTenant, Sets.newHashSet(username1InTenant)));
         List<GlobalTeam> globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));

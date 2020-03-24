@@ -7,11 +7,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -26,6 +28,8 @@ import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
+import com.latticeengines.security.exposed.service.TeamService;
+import com.latticeengines.security.exposed.util.TeamUtils;
 
 @Service("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {
@@ -43,23 +47,28 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private final GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
+    private final TeamService teamService;
+
     @Inject
     public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ServingStoreCacheService servingStoreCacheService,
-            GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
+                                      GraphDependencyToUIActionUtil graphDependencyToUIActionUtil, TeamService teamService) {
         this.segmentProxy = segmentProxy;
         this.servingStoreCacheService = servingStoreCacheService;
         this.graphDependencyToUIActionUtil = graphDependencyToUIActionUtil;
+        this.teamService = teamService;
     }
+
 
     @Override
     public List<MetadataSegment> getSegments() {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         List<MetadataSegment> backendSegments = segmentProxy.getMetadataSegments(customerSpace);
-        if (backendSegments == null) {
-            return null;
+        if (CollectionUtils.isEmpty(backendSegments)) {
+            return backendSegments;
         } else {
+            Map<String, GlobalTeam> globalTeamMap = TeamUtils.getGlobalTeamMap(teamService, MultiTenantContext.getUser());
             return backendSegments.stream() //
-                    .map(this::translateForFrontend)
+                    .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId())))
                     .sorted((seg1, seg2) -> Boolean.compare( //
                             Boolean.TRUE.equals(seg1.getMasterSegment()), //
                             Boolean.TRUE.equals(seg2.getMasterSegment()) //
@@ -74,21 +83,21 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     @Override
-    public MetadataSegment getSegmentByName(String name, boolean shouldTransateForFrontend) {
+    public MetadataSegment getSegmentByName(String name, boolean shouldTranslateForFrontend) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, name);
-        if (shouldTransateForFrontend) {
-            segment = translateForFrontend(segment);
+        if (shouldTranslateForFrontend && segment != null) {
+            segment = translateForFrontend(segment, TeamUtils.getGlobalTeam(teamService, segment.getTeamId()));
         }
         return segment;
     }
 
     @Override
-    public MetadataSegmentDTO getSegmentDTOByName(String name, boolean shouldTransateForFrontend) {
+    public MetadataSegmentDTO getSegmentDTOByName(String name, boolean shouldTranslateForFrontend) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(customerSpace, name);
-        if (shouldTransateForFrontend) {
-            segmentDTO.setMetadataSegment(translateForFrontend(segmentDTO.getMetadataSegment()));
+        if (shouldTranslateForFrontend) {
+            segmentDTO.setMetadataSegment(translateForFrontend(segmentDTO.getMetadataSegment(), null));
         }
         return segmentDTO;
     }
@@ -117,7 +126,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             }
         }
 
-        MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegment);
+        MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegment, null);
         clearRatingCache();
         return createdOrUpdatedSegment;
     }
@@ -204,11 +213,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         return segment;
     }
 
-    private MetadataSegment translateForFrontend(MetadataSegment segment) {
+    private MetadataSegment translateForFrontend(MetadataSegment segment, GlobalTeam globalTeam) {
         if (segment == null) {
             return null;
         }
         try {
+            segment.setTeam(globalTeam);
             Restriction accountRestriction = segment.getAccountRestriction();
             if (accountRestriction == null) {
                 segment.setAccountFrontEndRestriction(emptyFrontEndRestriction());

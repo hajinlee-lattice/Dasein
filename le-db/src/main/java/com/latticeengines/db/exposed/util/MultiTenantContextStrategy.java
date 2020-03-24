@@ -2,6 +2,7 @@ package com.latticeengines.db.exposed.util;
 
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 
 public interface MultiTenantContextStrategy {
 
@@ -12,4 +13,6 @@ public interface MultiTenantContextStrategy {
     void setTenant(Tenant tenant);
 
     void clear();
+
+    User getUser();
 }

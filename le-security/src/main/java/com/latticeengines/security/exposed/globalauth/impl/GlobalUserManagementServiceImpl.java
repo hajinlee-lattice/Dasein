@@ -719,32 +719,46 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
 
     @Override
     public List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId) {
-        return getAllUsersOfTenant(tenantId, false);
+        return getAllUsersOfTenant(tenantId, null, false);
     }
 
     @Override
     public List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId, boolean withTeam) {
         try {
             log.info(String.format("Getting all users and their rights for tenant %s.", tenantId));
-            return globalFindAllUserRightsByTenant(tenantId, withTeam);
+            return globalFindAllUserRightsByTenant(tenantId, null, withTeam);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18016, e, new String[]{tenantId});
+        }
+    }
+
+    @Override
+    public List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights,
+                                                                                 boolean withTeam) {
+        try {
+            log.info(String.format("Getting all users and their rights for tenant %s.", tenantId));
+            return globalFindAllUserRightsByTenant(tenantId, globalAuthUserTenantRights, withTeam);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18016, e, new String[]{tenantId});
         }
     }
 
     private List<AbstractMap.SimpleEntry<User, List<String>>> globalFindAllUserRightsByTenant(
-            String tenantId, boolean withTeam) throws Exception {
+            String tenantId, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights, boolean withTeam) throws Exception {
         List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = new ArrayList<>();
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
             throw new Exception("Unable to find the tenant requested: " + tenantId);
         }
-        List<GlobalAuthUserTenantRight> userRightDatas =
-                gaUserTenantRightEntityMgr.findByTenantId(tenantData.getPid(), withTeam);
+        List<GlobalAuthUserTenantRight> userRightDatas;
+        if (CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
+            userRightDatas = globalAuthUserTenantRights;
+        } else {
+            userRightDatas = gaUserTenantRightEntityMgr.findByTenantId(tenantData.getPid(), withTeam);
+        }
         if (CollectionUtils.isEmpty(userRightDatas)) {
             return userRightsList;
         }
-
         HashMap<Long, String> userIdToUsername = gaUserEntityMgr.findUserInfoByTenant(tenantData);
 
         HashMap<String, List<GlobalAuthTeam>> teamMap = new HashMap<>();
@@ -925,7 +939,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     }
 
     @Override
-    public boolean userExpireIntenant(String email, String tenantId) {
+    public boolean userExpireInTenant(String email, String tenantId) {
         log.info(String.format("Check  user expire in this tenant %s with email %s.", tenantId, email));
         List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthGetRightsDetail(email, tenantId);
         long currentTime = System.currentTimeMillis();

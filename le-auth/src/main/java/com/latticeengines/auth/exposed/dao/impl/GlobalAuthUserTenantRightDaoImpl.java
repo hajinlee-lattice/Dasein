@@ -126,13 +126,18 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
     @SuppressWarnings("unchecked")
     @Override
     public List<GlobalAuthUserTenantRight> findByEmail(String email) {
+        Query<?> query = getQueryByEmail(email);
+        return (List<GlobalAuthUserTenantRight>) query.list();
+    }
+
+    private Query<?> getQueryByEmail(String email) {
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
         String queryPattern = "from %s where globalAuthUser.email = :email";
         String queryStr = String.format(queryPattern, entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("email", email);
-        return (List<GlobalAuthUserTenantRight>) query.list();
+        return query;
     }
 
     @SuppressWarnings("unchecked")
@@ -150,12 +155,7 @@ public class GlobalAuthUserTenantRightDaoImpl extends BaseDaoImpl<GlobalAuthUser
 
     @Override
     public boolean existsByEmail(String email) {
-        Session session = sessionFactory.getCurrentSession();
-        Class<GlobalAuthUserTenantRight> entityClz = getEntityClass();
-        String queryPattern = "from %s where globalAuthUser.email = :email";
-        String queryStr = String.format(queryPattern, entityClz.getSimpleName());
-        Query<?> query = session.createQuery(queryStr);
-        query.setParameter("email", email);
+        Query<?> query = getQueryByEmail(email);
         query.setMaxResults(1);
         return CollectionUtils.isNotEmpty(query.list());
     }

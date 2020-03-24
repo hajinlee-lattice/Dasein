@@ -58,12 +58,15 @@ public interface GlobalUserManagementService {
 
     String addUserAccessLevel(String userName, String emails, AccessLevel level);
 
-    boolean userExpireIntenant(String email, String tenantId);
+    boolean userExpireInTenant(String email, String tenantId);
 
     Long getIdByUsername(String username);
 
     List<GlobalAuthUserTenantRight> getUserRightsByUsername(String username, String tenantId, boolean inflate);
 
     List<String> getRights(List<GlobalAuthUserTenantRight> rightsData);
+
+    List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(
+            String tenantId, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights, boolean withTeam);
 
 }
