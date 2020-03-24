@@ -129,9 +129,10 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                 latestLaunchFlag = true;
             }
         }
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
-        if (CollectionUtils.isNotEmpty(launchIds)) {
-            return lpiPMRecommendation.getRecommendationCountByLaunchIds(launchIds, start);
+        List<LaunchSummary> launchSummaries = lpiPMPlay.getLaunchSummariesFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
+        if (CollectionUtils.isNotEmpty(launchSummaries)) {
+            return launchSummaries.stream().map(launchSummary ->
+                    launchSummary.getStats().getRecommendationsLaunched()).reduce(0L, Long::sum).longValue();
         }
         else {
             return 0;
