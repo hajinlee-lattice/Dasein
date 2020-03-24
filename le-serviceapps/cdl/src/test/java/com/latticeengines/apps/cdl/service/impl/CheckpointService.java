@@ -184,6 +184,10 @@ public class CheckpointService {
         this.mainTestTenant = mainTestTenant;
     }
 
+    public Tenant getMainTestTenant() {
+        return this.mainTestTenant;
+    }
+
     public void setPrecedingCheckpoints(List<String> precedingCheckpoints) {
         this.precedingCheckpoints = precedingCheckpoints;
     }

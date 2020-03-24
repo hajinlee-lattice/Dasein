@@ -1192,6 +1192,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             if (CollectionUtils.isNotEmpty(checkpointService.getPrecedingCheckpoints())) {
                 checkpointNewService.setPrecedingCheckpoints(checkpointService.getPrecedingCheckpoints());
             }
+            checkpointNewService.setMainTestTenant(checkpointService.getMainTestTenant());
             checkpointNewService.saveCheckpoint(checkpointName, String.valueOf(S3_CHECKPOINTS_VERSION + 1), mainCustomerSpace);
         } else {
             checkpointService.saveCheckpoint(checkpointName, String.valueOf(S3_CHECKPOINTS_VERSION + 1), mainCustomerSpace);
