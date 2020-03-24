@@ -79,9 +79,24 @@ public class ActivityMetricDecorator implements Decorator {
 
     @Override
     public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
-        MultiTenantContext.setTenant(tenant);
+        getStreamsNeedSystemNames();
+        return metadata.map(this::filter);
+    }
+
+    @Override
+    public ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata) {
+        getStreamsNeedSystemNames();
+        return metadata.map(this::filter);
+    }
+
+    @Override
+    public String getName() {
+        return "activity-metric-attrs";
+    }
+
+    private void getStreamsNeedSystemNames() {
         Set<String> opportunityStreamNames = new HashSet<>();
-        activityStoreService.getStreamNameMap().values().forEach(streamName -> {
+        activityStoreService.getStreamNameMap(tenant.getId()).values().forEach(streamName -> {
             if (streamName.endsWith(EntityType.Opportunity.name())) {
                 opportunityStreamNames.add(streamName);
             }
@@ -89,17 +104,6 @@ public class ActivityMetricDecorator implements Decorator {
         if (opportunityStreamNames.size() > 1) {
             streamsNeedSystemName.set(opportunityStreamNames);
         }
-        return metadata.map(this::filter);
-    }
-
-    @Override
-    public ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata) {
-        return metadata.map(this::filter);
-    }
-
-    @Override
-    public String getName() {
-        return "activity-metric-attrs";
     }
 
     private ColumnMetadata filter(ColumnMetadata cm) {

@@ -144,11 +144,11 @@ public interface ActivityStoreService {
     Map<String, String> getDimensionIds(@NotNull String tenantId, @NotNull Set<String> dimensionValues);
 
     /**
-     * get all streams' ID and names of a tenant
+     * get all streams' IDs and names of a tenant
      *
      * @return streamId -> streamName
      */
-    Map<String, String> getStreamNameMap();
+    Map<String, String> getStreamNameMap(@NotNull String customerSpace);
 
     List<AtlasStream> getStreams(@NotNull String customerSpace);
 }
