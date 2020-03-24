@@ -249,7 +249,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-            Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams) {
+            Long expirationDate, boolean createUser, boolean clearSession, List<String> userTeamIds) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
@@ -281,10 +281,9 @@ public class UserServiceImpl implements UserService {
         if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
                 List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
-                if (userTeams == null && CollectionUtils.isNotEmpty(rightsData)) {
+                if (userTeamIds == null && CollectionUtils.isNotEmpty(rightsData)) {
                     globalAuthTeams = rightsData.get(0).getGlobalAuthTeams();
-                } else if (CollectionUtils.isNotEmpty(userTeams)) {
-                    List<String> userTeamIds = userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
+                } else if (CollectionUtils.isNotEmpty(userTeamIds)) {
                     globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
@@ -469,8 +468,12 @@ public class UserServiceImpl implements UserService {
         }
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
+            List<String> userTeamIds = null;
+            if (user.getUserTeams() != null) {
+                userTeamIds = user.getUserTeams().stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
+            }
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
-                    user.getExpirationDate(), true, false, user.getUserTeams());
+                    user.getExpirationDate(), true, false, userTeamIds);
         }
 
         String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
