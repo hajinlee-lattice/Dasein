@@ -485,7 +485,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     @AfterClass(groups = { "end2end", "precheckin" })
     protected void cleanup() throws Exception {
-//        checkpointService.cleanup();
+        checkpointService.cleanup();
     }
 
     @BeforeMethod(groups = "end2end")
