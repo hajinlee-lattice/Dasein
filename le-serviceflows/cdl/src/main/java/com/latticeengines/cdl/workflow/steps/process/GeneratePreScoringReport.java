@@ -29,6 +29,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsType;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
@@ -107,6 +108,7 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         cloneInactiveServingStores();
+        updateStreamCounts();
         registerReport();
         registerCollectionTables();
     }
@@ -123,6 +125,8 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                 }
             }
         });
+        TableRoleInCollection streamRole = TableRoleInCollection.ConsolidatedActivityStream;
+        cloneTableService.linkToInactiveTableWithSignature(streamRole);
     }
 
     private void registerCollectionTables() {
@@ -417,6 +421,34 @@ public class GeneratePreScoringReport extends BaseWorkflowStep<ProcessStepConfig
                         exc);
             }
         });
+    }
+
+    private void updateStreamCounts() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Map<String, AtlasStream> streamMap = status.getActivityStreamMap();
+        if (MapUtils.isNotEmpty(streamMap)) {
+            TableRoleInCollection batchStore = TableRoleInCollection.ConsolidatedActivityStream;
+            Map<String, String> tableNames = dataCollectionProxy.getTableNamesWithSignatures(customerSpace.toString(), batchStore, inactive, null);
+            log.info("Raw stream tables: " + JsonUtils.serialize(tableNames));
+            for (String streamId : streamMap.keySet()) {
+                streamMap.get(streamId).setTenant(null);
+                if (tableNames.containsKey(streamId)) {
+                    String tableName = tableNames.get(streamId);
+                    Table summary = metadataProxy.getTableSummary(customerSpace.toString(), tableName);
+                    try {
+                        Long count = summary.getExtracts().get(0).getProcessedRecords();
+                        streamMap.get(streamId).setCount(count);
+                        log.info("Update the count of stream {} to {}", streamId, count);
+                    } catch (Exception e) {
+                        log.warn("Failed to update count for stream {}", streamId, e);
+                    }
+                } else {
+                    log.warn("Not table for stream {}", streamId);
+                }
+            }
+        }
+        status.setActivityStreamMap(streamMap);
+        putObjectInContext(CDL_COLLECTION_STATUS, status);
     }
 
     private Map<BusinessEntity, Long> getDeletedCount() {

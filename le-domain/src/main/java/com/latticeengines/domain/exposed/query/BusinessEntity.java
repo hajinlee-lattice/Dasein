@@ -44,6 +44,7 @@ public enum BusinessEntity implements GraphNode {
     Account, //
     Contact, //
     Product, //
+    ProductHierarchy, //
     Transaction, //
     PeriodTransaction, //
     PurchaseHistory, //
@@ -64,14 +65,12 @@ public enum BusinessEntity implements GraphNode {
 
     // Lattice Data Cloud
     LatticeAccount, //
-    ProductHierarchy, //
 
-    // WebActivity
     ActivityStream, //
     Catalog, //
-    WebVisitProfile,
 
-    //Opportunity Data Stream
+    // Activity Stream Serving Entities
+    WebVisitProfile,
     Opportunity;
 
 

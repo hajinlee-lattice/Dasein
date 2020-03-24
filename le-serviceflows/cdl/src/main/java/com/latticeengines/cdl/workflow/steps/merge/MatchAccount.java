@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,7 +16,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -35,9 +32,6 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     static final String BEAN_NAME = "matchAccount";
 
     private String matchTargetTablePrefix = null;
-
-    @Inject
-    private BatonService batonService;
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -81,15 +75,9 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             steps.add(merge);
         }
 
-        if (shouldExcludeDataCloudAttrs()) {
-            // use latest step as output, no need to match
-            TransformationStepConfig lastStep = steps.get(steps.size() - 1);
-            setTargetTable(lastStep, matchTargetTablePrefix);
-        } else {
-            TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
-                    convertBatchStoreTableName);
-            steps.add(match);
-        }
+        TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
+                convertBatchStoreTableName);
+        steps.add(match);
 
         log.info("steps are {}.", steps);
         request.setSteps(steps);
@@ -162,11 +150,6 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             Set<String> columnNames = getInputTableColumnNames(0);
             return MatchUtils.getLegacyMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames);
         }
-    }
-
-    private boolean shouldExcludeDataCloudAttrs() {
-        String tenantId = configuration.getCustomerSpace().getTenantId();
-        return batonService.shouldExcludeDataCloudAttrs(tenantId);
     }
 
 }

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 
 public interface CDLDataCleanupService {
 
@@ -14,5 +15,5 @@ public interface CDLDataCleanupService {
 
     void createLegacyDeleteDateRangeAction(String customerSpace, CleanupOperationConfiguration configuration);
 
-    ApplicationId registerDeleteData(String customerSpace, boolean hardDelete, String sourceFileName, String user);
+    ApplicationId registerDeleteData(String customerSpace, DeleteRequest request);
 }

@@ -244,6 +244,16 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         return dimensionMetadataService.getDimensionIds(MultiTenantContext.getShortTenantId(), dimensionValues);
     }
 
+    @Override
+    public List<AtlasStream> getStreams(String customerSpace) {
+        List<AtlasStream> streams = streamEntityMgr.findByTenant(MultiTenantContext.getTenant());
+        for (AtlasStream stream: streams) {
+            stream.setTenant(null);
+            stream.setDimensions(null);
+        }
+        return streams;
+    }
+
     // streamId -> streamName
     @Override
     public Map<String, String> getStreamNameMap() {

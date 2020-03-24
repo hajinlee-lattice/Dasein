@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -36,6 +37,8 @@ public interface CDLService {
     ApplicationId submitS3ImportOnlyData(String customerSpace, String taskId, String dataFileName);
 
     void importFileToS3(String customerSpace, String templateFileName, String s3Path);
+
+    UIAction softDelete(DeleteRequest deleteRequest);
 
     UIAction cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
                      CleanupOperationType cleanupOperationType);

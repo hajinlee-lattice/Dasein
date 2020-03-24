@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -61,6 +62,13 @@ public class ActivityStoreResource {
             @PathVariable(value = "customerSpace") String customerSpace, //
             @PathVariable(value = "catalogName") String catalogName) {
         return activityStoreService.findCatalogByTenantAndName(customerSpace, catalogName);
+    }
+
+    @GetMapping("/streams")
+    @ResponseBody
+    @ApiOperation("Get all streams under current tenant")
+    public List<AtlasStream> getStreams(@PathVariable(value = "customerSpace") String customerSpace) {
+        return activityStoreService.getStreams(customerSpace);
     }
 
     @PostMapping("/streams")

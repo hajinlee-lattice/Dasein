@@ -18,7 +18,8 @@ public enum SchemaInterpretation {
     TransactionRaw, //
     TransactionDailyAggregation, //
     TransactionPeriodAggregation, DeleteAccountTemplate, DeleteContactTemplate, DeleteTransactionTemplate,
-    RegisterDeleteDataTemplate,
+    RegisterDeleteDataTemplate, //
+    DeleteByAccountTemplate, DeleteByContactTemplate, //
     ContactEntityMatch,
     WebVisit, WebVisitPathPattern, WebVisitSourceMedium,
     Opportunity, OpportunityStageName;

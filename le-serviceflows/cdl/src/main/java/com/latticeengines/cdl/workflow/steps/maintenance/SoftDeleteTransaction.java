@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -25,6 +26,8 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
@@ -54,37 +57,49 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
     @Override
     protected PipelineTransformationRequest getConsolidateRequest() {
 
-        PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("SoftDeleteTransaction");
+        List<Action> actions = filterSoftDeleteActions(softDeleteActions, BusinessEntity.Account);
+        if (CollectionUtils.isEmpty(actions)) {
+            log.info("No suitable delete actions for Transaction. Skip this step.");
+            return null;
+        } else {
+            PipelineTransformationRequest request = new PipelineTransformationRequest();
+            request.setName("SoftDeleteTransaction");
 
-        List<TransformationStepConfig> steps = new ArrayList<>();
+            List<TransformationStepConfig> steps = new ArrayList<>();
 
-        int softDeleteMergeStep = 0;
-        int softDeleteStep = softDeleteMergeStep + 1;
-        int collectRawStep = softDeleteStep + 1;
-        int cleanupRawStep = collectRawStep + 1;
-        int dayPeriodStep = cleanupRawStep + 1;
+            int softDeleteMergeStep = 0;
+            int softDeleteStep = softDeleteMergeStep + 1;
+            int collectRawStep = softDeleteStep + 1;
+            int cleanupRawStep = collectRawStep + 1;
+            int dayPeriodStep = cleanupRawStep + 1;
 
-        TransformationStepConfig softDeleteMerge = mergeSoftDelete(softDeleteActions);
-        TransformationStepConfig softDelete = softDelete(softDeleteMergeStep);
-        TransformationStepConfig collectRaw = collectRaw();
-        TransformationStepConfig cleanupRaw = cleanupRaw(rawTable, collectRawStep);
-        TransformationStepConfig dayPeriods = collectDays(softDeleteStep);
-        TransformationStepConfig dailyPartition = partitionDaily(dayPeriodStep, softDeleteStep);
-        steps.add(softDeleteMerge);
-        steps.add(softDelete);
-        steps.add(collectRaw);
-        steps.add(cleanupRaw);
-        steps.add(dayPeriods);
-        steps.add(dailyPartition);
+            TransformationStepConfig softDeleteMerge = mergeSoftDelete(actions, InterfaceName.AccountId.name());
+            TransformationStepConfig softDelete = softDelete(softDeleteMergeStep);
+            TransformationStepConfig collectRaw = collectRaw();
+            TransformationStepConfig cleanupRaw = cleanupRaw(rawTable, collectRawStep);
+            TransformationStepConfig dayPeriods = collectDays(softDeleteStep);
+            TransformationStepConfig dailyPartition = partitionDaily(dayPeriodStep, softDeleteStep);
+            steps.add(softDeleteMerge);
+            steps.add(softDelete);
+            steps.add(collectRaw);
+            steps.add(cleanupRaw);
+            steps.add(dayPeriods);
+            steps.add(dailyPartition);
 
-        request.setSteps(steps);
-        return request;
+            request.setSteps(steps);
+            return request;
+        }
     }
 
     @Override
     protected boolean skipRegisterBatchStore() {
         return true;
+    }
+
+    @Override
+    String getJoinColumn() {
+        // delete by account id
+        return InterfaceName.AccountId.name();
     }
 
     private TransformationStepConfig partitionDaily(int dayPeriodStep, int softDeleteStep) {
@@ -117,12 +132,6 @@ public class SoftDeleteTransaction extends BaseSingleEntitySoftDelete<ProcessTra
         step.setInputSteps(Collections.singletonList(softDeleteStep));
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
-
-//        TargetTable targetTable = new TargetTable();
-//        targetTable.setCustomerSpace(customerSpace);
-//        targetTable.setNamePrefix(diffTablePrefix);
-//        step.setTargetTable(targetTable);
-
         step.setConfiguration(appendEngineConf(config, heavyMemoryEngineConfig()));
         return step;
     }

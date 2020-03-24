@@ -20,6 +20,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Fetch;
@@ -135,6 +136,10 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
     @Type(type = "json")
     @Column(name = "REDUCER", columnDefinition = "'JSON'")
     private ActivityRowReducer reducer;
+
+    @JsonProperty("count")
+    @Transient
+    private Long count;
 
     @Override
     public Long getPid() {
@@ -265,6 +270,14 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
 
     public void setReducer(ActivityRowReducer reducer) {
         this.reducer = reducer;
+    }
+
+    public Long getCount() {
+        return count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
     }
 
     private void instantiateTaskIfNull() {

@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.latticeengines.cdl.workflow.steps.merge.BaseActivityStreamStep;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -29,6 +31,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamStepConfiguration>
         extends BaseActivityStreamStep<T> {
@@ -41,15 +44,19 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
 
+    @Inject
+    protected MetadataProxy metadataProxy;
+
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
     protected BusinessEntity entity;
     protected TableRoleInCollection batchStore;
 
     protected abstract List<Action> deleteActions();
-    protected abstract String getBeanName();
-    protected abstract Boolean needPartition();
 
+    protected abstract String getBeanName();
+
+    protected abstract Boolean needPartition();
 
     @Override
     protected void initializeConfiguration() {
@@ -82,21 +89,59 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
 
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        int softDeleteMergeStep = 0;
-        TransformationStepConfig mergeSoftDelete = mergeDeleteActions(deleteActions());
-        steps.add(mergeSoftDelete);
         configuration.getActiveRawStreamTables().forEach((streamId, tableName) -> {
-            String rawStreamTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
-            TransformationStepConfig softDelete = softDelete(softDeleteMergeStep, tableName, rawStreamTablePrefix);
-            steps.add(softDelete);
-            rawStreamTablePrefixes.put(streamId, rawStreamTablePrefix);
+            int initialSteps = steps.size();
+            List<TransformationStepConfig> accountSteps = softDeleteSteps(streamId, tableName, BusinessEntity.Account);
+            steps.addAll(accountSteps);
+            List<TransformationStepConfig> contactSteps = softDeleteSteps(streamId, tableName, BusinessEntity.Contact);
+            steps.addAll(contactSteps);
+            if (steps.size() > initialSteps) {
+                TransformationStepConfig lastStep = steps.get(steps.size() - 1);
+                setTargetTable(lastStep, String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId));
+            }
         });
-        request.setSteps(steps);
 
-        return request;
+        if (steps.isEmpty()) {
+            log.info("No suitable delete actions for any stream.");
+            return null;
+        } else {
+            request.setSteps(steps);
+            return request;
+        }
     }
 
-    TransformationStepConfig mergeDeleteActions(List<Action> deleteActions) {
+    private List<TransformationStepConfig> softDeleteSteps(String streamId, String tableName,
+            BusinessEntity idEntity) {
+        List<TransformationStepConfig> steps = new ArrayList<>();
+
+        String idColumn = BusinessEntity.Account.equals(idEntity) ? InterfaceName.AccountId.name()
+                : InterfaceName.ContactId.name();
+        List<Action> validActions = deleteActions().stream().filter(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            return configuration.hasStream(streamId) && idEntity.equals(configuration.getIdEntity());
+        }).collect(Collectors.toList());
+
+        if (CollectionUtils.isNotEmpty(validActions)) {
+            List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace.toString(), tableName);
+            boolean hasId = cms.stream().anyMatch(cm -> idColumn.equals(cm.getAttrName()));
+            if (hasId) {
+                TransformationStepConfig mergeSoftDelete = mergeDeleteActions(validActions, idColumn);
+                steps.add(mergeSoftDelete);
+                int mergeDeleteStep = steps.size() - 1;
+                TransformationStepConfig softDelete = softDelete(mergeDeleteStep, tableName, idColumn);
+                steps.add(softDelete);
+                log.info("Add steps to delete from stream {} via {}", streamId, idColumn);
+            } else {
+                log.warn("Stream {} does not have the deletion id {}", streamId, idColumn);
+            }
+        } else {
+            log.info("No suitable delete actions for stream {}", streamId);
+        }
+
+        return steps;
+    }
+
+    TransformationStepConfig mergeDeleteActions(List<Action> deleteActions, String joinKey) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         deleteActions.forEach(action -> {
@@ -105,17 +150,16 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
         });
         MergeImportsConfig config = new MergeImportsConfig();
         config.setDedupSrc(true);
-        config.setJoinKey(InterfaceName.AccountId.name());
+        config.setJoinKey(joinKey);
         config.setAddTimestamps(false);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
 
-    TransformationStepConfig softDelete(int mergeDeleteStep, String batchTableName, String targetPrefix) {
+    TransformationStepConfig softDelete(int mergeDeleteStep, String batchTableName, String idColumn) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Collections.singletonList(mergeDeleteStep));
-        setTargetTable(step, targetPrefix);
         if (StringUtils.isNotEmpty(batchTableName)) {
             log.info("Add masterTable=" + batchTableName);
             addBaseTables(step, ImmutableList.of(RAWSTREAM_PARTITION_KEYS), batchTableName);
@@ -124,7 +168,7 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
         }
         SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
         softDeleteConfig.setDeleteSourceIdx(0);
-        softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
+        softDeleteConfig.setIdColumn(idColumn); // id column in delete file and stream file
         softDeleteConfig.setPartitionKeys(RAWSTREAM_PARTITION_KEYS);
         softDeleteConfig.setNeedPartitionOutput(needPartition());
         step.setTargetPartitionKeys(RAWSTREAM_PARTITION_KEYS);

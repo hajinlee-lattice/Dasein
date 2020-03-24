@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -233,6 +234,37 @@ public class CDLServiceImpl implements CDLService {
             throw new IllegalArgumentException("Cannot find source file: " + templateFileName);
         }
         dropBoxProxy.importS3file(customerSpace, s3Path, sourceFile.getPath(), sourceFile.getDisplayName());
+    }
+
+    @Override
+    public UIAction softDelete(DeleteRequest deleteRequest) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        UIAction uiAction = new UIAction();
+        if (!batonService.isEntityMatchEnabled(customerSpace)) {
+            uiAction.setTitle(DELETE_FAIL_TITLE);
+            uiAction.setView(View.Modal);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(generateDeleteResultMsg( //
+                    "<p>Cleaning up by entity ids requires entity match.</p>"));
+            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
+        }
+        try {
+            String email = MultiTenantContext.getEmailAddress();
+            deleteRequest.setUser(email);
+            deleteRequest.setHardDelete(false);
+            cdlProxy.registerDeleteData(customerSpace.toString(), deleteRequest);
+        } catch (RuntimeException e) {
+            uiAction.setTitle(DELETE_FAIL_TITLE);
+            uiAction.setView(View.Modal);
+            uiAction.setStatus(Status.Error);
+            uiAction.setMessage(generateDeleteResultMsg(e.getMessage()));
+            throw new UIActionException(uiAction, LedpCode.LEDP_18182);
+        }
+        uiAction.setTitle(DELETE_SUCCESS_TITLE);
+        uiAction.setView(View.Banner);
+        uiAction.setStatus(Status.Success);
+        uiAction.setMessage(generateDeleteResultMsg(DELETE_SUCCESSE_MSG));
+        return uiAction;
     }
 
     @Override

@@ -6,6 +6,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -28,6 +29,8 @@ import com.latticeengines.cdl.workflow.steps.rebuild.ProfileAccount;
 import com.latticeengines.cdl.workflow.steps.reset.ResetAccount;
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.DeleteActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -246,4 +249,13 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
 
         return tables.values().stream().anyMatch(StringUtils::isNotBlank);
     }
+
+    @Override
+    boolean hasValidSoftDeleteActions(List<Action> softDeletes) {
+        return CollectionUtils.isNotEmpty(softDeletes) && softDeletes.stream().anyMatch(action -> {
+            DeleteActionConfiguration configuration = (DeleteActionConfiguration) action.getActionConfiguration();
+            return configuration.hasEntity(BusinessEntity.Account);
+        });
+    }
+
 }
