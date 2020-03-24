@@ -102,7 +102,7 @@ public enum LaunchState {
         }
     }
 
-    public String toDisplayString(CDLExternalSystemName channel) {
+    public String toUILaunchState(CDLExternalSystemName channel) {
         switch (this) {
         case UnLaunched:
             return UNLAUNCHED;
