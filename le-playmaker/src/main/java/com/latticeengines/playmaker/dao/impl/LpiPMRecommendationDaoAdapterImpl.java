@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,6 +19,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
@@ -61,11 +63,63 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
                                                         List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
-        Pair<Long, List<String>> result = getQueryOffsetAndIds(start, offset, maximum, syncDestination, playIds, orgInfo, appId);
+        Pair<Long, List<QueryParam>> result = getQueryOffsetAndIds(start, offset, maximum, syncDestination, playIds, orgInfo, appId);
         if (CollectionUtils.isNotEmpty(result.getRight())) {
-            return lpiPMRecommendation.getRecommendationsByLaunchIds(result.getRight(), start, result.getLeft().intValue(), maximum, offset);
+            List<QueryParam> queryParams = result.getRight();
+            if (queryParams.size() == 1) {
+                return queryRecommendations(queryParams.stream().map(QueryParam::getLaunchId).collect(Collectors.toList()),
+                        start, result.getLeft().intValue(), maximum, offset);
+            } else {
+                return queryHeadRecommendation(queryParams, result.getLeft().intValue(), start, offset);
+            }
         } else {
             return new ArrayList<>();
+        }
+    }
+
+    private List<Map<String, Object>> queryHeadRecommendation(List<QueryParam> queryParams, int queryOffset, long start, int offset) {
+        QueryParam headParam = queryParams.get(0);
+        int headCount = (int) headParam.getCount();
+        List<Map<String, Object>> head = queryRecommendations(
+                Lists.newArrayList(queryParams.get(0).getLaunchId()), start, queryOffset, headCount, offset);
+        int middleCount = 0;
+        if (queryParams.size() > 2) {
+            List<QueryParam> queryParamsInQuery = queryParams.subList(1, queryParams.size() - 1);
+            middleCount = queryParamsInQuery.stream().mapToInt(queryParam -> (int) queryParam.getCount()).sum();
+            List<Map<String, Object>> middle =
+                    queryRecommendations(queryParamsInQuery.stream().map(QueryParam::getLaunchId).collect(Collectors.toList()), start,
+                            0, middleCount, offset);
+            head.addAll(middle);
+        }
+        QueryParam tailParam = queryParams.get(queryParams.size() - 1);
+        List<Map<String, Object>> tail = queryRecommendations(
+                Lists.newArrayList(tailParam.getLaunchId()), start, 0, (int) tailParam.getCount(), offset);
+        head.addAll(tail);
+        return head;
+    }
+
+    private List<Map<String, Object>> queryRecommendations(List<String> launchIds, long start, int queryOffset, int maximum, int offset) {
+        return lpiPMRecommendation.getRecommendationsByLaunchIds(launchIds, start, queryOffset, maximum, offset);
+    }
+
+    public class QueryParam {
+        private String launchId;
+        private long count;
+
+        public String getLaunchId() {
+            return launchId;
+        }
+
+        public void setLaunchId(String launchId) {
+            this.launchId = launchId;
+        }
+
+        public long getCount() {
+            return count;
+        }
+
+        public void setCount(long count) {
+            this.count = count;
         }
     }
 
@@ -80,10 +134,10 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
     }
 
     @VisibleForTesting
-    public Pair<Long, List<String>> getQueryOffsetAndIds(long start, int offset, int maximum, int syncDestination,
+    public Pair<Long, List<QueryParam>> getQueryOffsetAndIds(long start, int offset, int maximum, int syncDestination,
                                                          List<String> playIds, Map<String, String> orgInfo, Map<String, String> appId) {
         boolean latestLaunchFlag = getLatestLaunchFlag(appId);
-        List<String> launchIdsToQuery = new ArrayList<>();
+        List<QueryParam> launchIdsToQuery = new ArrayList<>();
         int totalLaunchedSoFar = 0;
         long queryOffset = -1L;
         List<LaunchSummary> summaries = lpiPMPlay.getLaunchSummariesFromDashboard(latestLaunchFlag, start, playIds, syncDestination, orgInfo);
@@ -98,22 +152,36 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                 return summary1.getLaunchId().compareTo(summary2.getLaunchId());
             }
         });
+        int offsetInQueryParam = -1;
         for (LaunchSummary launchSummary : summaries) {
             long recsLaunchedByCurrentLaunch = launchSummary.getStats().getRecommendationsLaunched();
             totalLaunchedSoFar += recsLaunchedByCurrentLaunch;
             if (totalLaunchedSoFar == offset) {
                 queryOffset = 0;
             } else if (totalLaunchedSoFar > offset) {
+                long countInQueryParam;
                 if (queryOffset < 0) {
                     queryOffset = offset - totalLaunchedSoFar + recsLaunchedByCurrentLaunch;
                 }
-                launchIdsToQuery.add(launchSummary.getLaunchId());
+                if (offsetInQueryParam < 0) {
+                    offsetInQueryParam = (int) queryOffset;
+                    countInQueryParam = totalLaunchedSoFar - offset;
+                } else {
+                    offsetInQueryParam += (int) recsLaunchedByCurrentLaunch;
+                    countInQueryParam = recsLaunchedByCurrentLaunch;
+                }
+                QueryParam queryParam = new QueryParam();
+                queryParam.setLaunchId(launchSummary.getLaunchId());
+                queryParam.setCount(countInQueryParam);
+                launchIdsToQuery.add(queryParam);
             }
             if (totalLaunchedSoFar >= offset + maximum) {
+                QueryParam queryParam = launchIdsToQuery.get(launchIdsToQuery.size() - 1);
+                queryParam.setCount(offset + maximum - (totalLaunchedSoFar - recsLaunchedByCurrentLaunch));
                 break;
             }
         }
-        Pair<Long, List<String>> pair = Pair.of(queryOffset, launchIdsToQuery);
+        Pair<Long, List<QueryParam>> pair = Pair.of(queryOffset, launchIdsToQuery);
         Pair<String, String> effectiveOrgInfo = LookupIdMapUtils.getEffectiveOrgInfo(orgInfo);
         log.info("Query offset and launch id in query will be {}, and its org info is {}.",
                 JsonUtils.serialize(pair), JsonUtils.serialize(effectiveOrgInfo));
@@ -129,9 +197,10 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                 latestLaunchFlag = true;
             }
         }
-        List<String> launchIds = lpiPMPlay.getLaunchIdsFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
-        if (CollectionUtils.isNotEmpty(launchIds)) {
-            return lpiPMRecommendation.getRecommendationCountByLaunchIds(launchIds, start);
+        List<LaunchSummary> launchSummaries = lpiPMPlay.getLaunchSummariesFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
+        if (CollectionUtils.isNotEmpty(launchSummaries)) {
+            return launchSummaries.stream().map(launchSummary ->
+                    launchSummary.getStats().getRecommendationsLaunched()).reduce(0L, Long::sum).longValue();
         }
         else {
             return 0;

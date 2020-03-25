@@ -167,7 +167,8 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
 
     private void validateRecommendations(long start, int offset, int maximum, int syncDestination, List<String> playIds,
                                          Map<String, String> orgInfo, Map<String, String> appId, int queryOffset, int queryIdSize, int recommendationSize) {
-        Pair<Long, List<String>> queryOffsetAndIds = lpiReDaoAdapter.getQueryOffsetAndIds(start, offset, maximum, syncDestination, playIds, orgInfo, appId);
+        Pair<Long, List<LpiPMRecommendationDaoAdapterImpl.QueryParam>> queryOffsetAndIds = lpiReDaoAdapter.getQueryOffsetAndIds(start, offset, maximum,
+                syncDestination, playIds, orgInfo, appId);
         Assert.assertEquals(queryOffsetAndIds.getLeft().intValue(), queryOffset);
         Assert.assertEquals(queryOffsetAndIds.getRight().size(), queryIdSize);
         List<Map<String, Object>> result = lpiReDaoAdapter.getRecommendations(start, offset, maximum, syncDestination, playIds, orgInfo, appId);
