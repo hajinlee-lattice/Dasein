@@ -265,18 +265,15 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + ", modelSummaryId AS " + PlaymakerConstants.ModelSummaryId //
                 + " ) " //
                 + "FROM %s " //
-                + "WHERE deleted = :deleted " //
-                + "AND launchId IN (:launchIds) " //
+                + "where launchId IN (:launchIds) " //
                 + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp " //
-                + "ORDER BY lastUpdatedTimestamp ";
+                + "ORDER BY pid ";
 
         queryStr = String.format(queryStr, entityClz.getSimpleName());
-
         @SuppressWarnings("rawtypes")
         Query query = session.createQuery(queryStr);
         query.setMaxResults(max);
         query.setFirstResult(offset);
-        query.setParameter("deleted", Boolean.FALSE);
         query.setParameterList("launchIds", launchIds);
         query.setParameter("lastUpdatedTimestamp", start);
         return query.list();
