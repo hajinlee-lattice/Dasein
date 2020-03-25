@@ -48,31 +48,31 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         UploadConfig config = new UploadConfig();
         config.setDropFilePath("/drop");
-        config.setErrorFilePath("/error");
+        config.setUploadImportedErrorFilePath("/error");
         Upload upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
         UploadConfig returnedConfig = upload.getUploadConfig();
         Assert.assertEquals(returnedConfig.getDropFilePath(), "/drop");
-        Assert.assertEquals(returnedConfig.getErrorFilePath(), "/error");
-        Assert.assertNull(returnedConfig.getProcessedFilePath());
-        Assert.assertNull(returnedConfig.getUploadFilePath());
+        Assert.assertEquals(returnedConfig.getUploadImportedErrorFilePath(), "/error");
+        Assert.assertNull(returnedConfig.getUploadImportedFilePath());
+        Assert.assertNull(returnedConfig.getUploadRawFilePath());
 
 
         // update config
-        config.setProcessedFilePath("/processed");
-        config.setUploadFilePath("/uploaded");
-        uploadProxy.updateConfig(mainCustomerSpace, upload.getPid(), config);
+        config.setUploadImportedFilePath("/processed");
+        config.setUploadTSPrefix("2020-03-20");
+        uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getPid(), config);
         List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         Upload retrievedUpload = uploads.get(0);
         UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
-        Assert.assertEquals(retrievedConfig.getProcessedFilePath(), "/processed");
-        Assert.assertEquals(retrievedConfig.getUploadFilePath(), "/uploaded");
+        Assert.assertEquals(retrievedConfig.getUploadImportedFilePath(), "/processed");
+        Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), "2020-03-20");
         Assert.assertEquals(retrievedConfig.getDropFilePath(), "/drop");
-        Assert.assertEquals(retrievedConfig.getErrorFilePath(), "/error");
+        Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), "/error");
 
-        uploadProxy.updateStatus(mainCustomerSpace, upload.getPid(), Upload.Status.MATCH_STARTED);
+        uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getPid(), Upload.Status.MATCH_STARTED);
         uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
