@@ -101,6 +101,17 @@ public class TestArtifactServiceImpl implements TestArtifactService {
     }
 
     @Override
+    public void copyTestArtifactFile(String baseDir, String version, String fileName, String targetBucket,
+                                     String targetKey) {
+        String sourceKey = objectKey(baseDir, version, fileName);
+        if (S3.doesObjectExist(S3_BUCKET, sourceKey)) {
+            S3.copyObject(S3_BUCKET, sourceKey, targetBucket, targetKey);
+        } else {
+            throw new RuntimeException(String.format("Test file object %s not exists!", sourceKey));
+        }
+    }
+
+    @Override
     public synchronized File downloadTestArtifact(String objectDir, String version, String fileName) {
         String objectKey = objectKey(objectDir, version, fileName);
         GetObjectRequest getObjectRequest = new GetObjectRequest(S3_BUCKET, objectKey);

@@ -15,4 +15,6 @@ public interface TestArtifactService {
 
     void copyTestArtifactFolder(String baseDir, String version, String folder, String targetBucket,
             String targetPrefix);
+
+    void copyTestArtifactFile(String baseDir, String version, String fileName, String targetBucket, String targetKey);
 }

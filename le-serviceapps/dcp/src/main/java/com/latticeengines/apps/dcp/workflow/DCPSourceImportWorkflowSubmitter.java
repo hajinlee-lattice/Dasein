@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
-import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
@@ -27,16 +26,6 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
     private static final Logger log = LoggerFactory.getLogger(DCPSourceImportWorkflowSubmitter.class);
 
     private static final String DEFAULT_DCP_S3_USER = "Default_DCP_S3_User";
-
-    // TODO: Need Action?
-//    @Inject
-//    private TenantService tenantService;
-//
-//    @Inject
-//    private ActionService actionService;
-
-    @Inject
-    private SourceService sourceService;
 
     @Inject
     private UploadService uploadService;
