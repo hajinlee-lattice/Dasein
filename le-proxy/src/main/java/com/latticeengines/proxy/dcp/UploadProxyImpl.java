@@ -49,7 +49,7 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
 
     @Override
     public void updateUploadConfig(String customerSpace, Long uploadPid, UploadConfig uploadConfig) {
-        String baseUrl = "/customerspaces/{customerSpace}/upload/update/{uploadPid}/config";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadPid}/config";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid);
         log.info("Update config for Upload " + uploadPid);
         put("update Upload config", url, uploadConfig);
@@ -57,7 +57,7 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
 
     @Override
     public void updateUploadStatus(String customerSpace, Long uploadPid, Upload.Status status) {
-        String baseUrl = "/customerspaces/{customerSpace}/upload/update/{uploadPid}/status/{status}";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadPid}/status/{status}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid, status);
         log.info("Update status for Upload " + uploadPid + " to " + status);
         put("update Upload status", url);
