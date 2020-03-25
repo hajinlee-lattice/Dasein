@@ -176,7 +176,7 @@ public class ProjectServiceImpl implements ProjectService {
         String systemName = String.format(SYSTEM_NAME_PATTERN, projectId);
         system.setName(systemName);
         system.setDisplayName(displayName);
-        system.setSystemType(S3ImportSystem.SystemType.ProjectSystem);
+        system.setSystemType(S3ImportSystem.SystemType.DCP);
         cdlProxy.createS3ImportSystem(customerSpace, system);
         system = cdlProxy.getS3ImportSystem(customerSpace, systemName);
         int retry = 0;

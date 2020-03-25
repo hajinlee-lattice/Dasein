@@ -361,14 +361,14 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
                 return "Default_Website_System";
             }
         },
-        ProjectSystem {
+        DCP {
             @Override
             public Collection<EntityType> getEntityTypes() {
                 return Collections.emptyList();
             }
             @Override
             public String getDefaultSystemName() {
-                return "Default_Project_System";
+                return "Default_DCP_System";
             }
         },
         Other;

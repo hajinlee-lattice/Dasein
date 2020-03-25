@@ -1,7 +1,7 @@
 package com.latticeengines.domain.exposed.dcp;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -19,9 +19,9 @@ public class SourceRequest {
     @ApiModelProperty(value = "sourceId")
     private String sourceId;
 
-    @JsonProperty("simple_template_metadata")
-    @ApiModelProperty(value = "simpleTemplateMetadata")
-    private SimpleTemplateMetadata simpleTemplateMetadata;
+    @JsonProperty("field_definitions_record")
+    @ApiModelProperty(required = true, value = "fieldDefinitionsRecord")
+    private FieldDefinitionsRecord fieldDefinitionsRecord;
 
     public String getDisplayName() {
         return displayName;
@@ -47,11 +47,11 @@ public class SourceRequest {
         this.sourceId = sourceId;
     }
 
-    public SimpleTemplateMetadata getSimpleTemplateMetadata() {
-        return simpleTemplateMetadata;
+    public FieldDefinitionsRecord getFieldDefinitionsRecord() {
+        return fieldDefinitionsRecord;
     }
 
-    public void setSimpleTemplateMetadata(SimpleTemplateMetadata simpleTemplateMetadata) {
-        this.simpleTemplateMetadata = simpleTemplateMetadata;
+    public void setFieldDefinitionsRecord(FieldDefinitionsRecord fieldDefinitionsRecord) {
+        this.fieldDefinitionsRecord = fieldDefinitionsRecord;
     }
 }

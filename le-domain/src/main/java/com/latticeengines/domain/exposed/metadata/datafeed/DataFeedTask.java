@@ -256,6 +256,9 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     }
 
     public String getImportSystemName() {
+        if (importSystem != null) {
+            importSystemName = importSystem.getName();
+        }
         return importSystemName;
     }
 

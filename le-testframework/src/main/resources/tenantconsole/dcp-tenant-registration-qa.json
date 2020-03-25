@@ -59,6 +59,11 @@
           "Data": "v2"
         }
       ]
+    },
+    {
+      "RootPath": "/DCP",
+      "Nodes": [
+      ]
     }
   ],
   "CustomerSpaceInfo": {
