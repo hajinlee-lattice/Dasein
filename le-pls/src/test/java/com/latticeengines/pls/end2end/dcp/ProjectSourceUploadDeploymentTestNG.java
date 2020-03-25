@@ -1,5 +1,6 @@
 package com.latticeengines.pls.end2end.dcp;
 
+import java.io.InputStream;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -9,20 +10,25 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
 import com.latticeengines.pls.service.dcp.ProjectService;
 import com.latticeengines.pls.service.dcp.SourceService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -41,6 +47,11 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     @Inject
     private SourceService sourceService;
 
+    @Inject
+    private S3Service s3Service;
+
+    @Inject
+    private DropBoxProxy dropBoxProxy;
 
     @Inject
     private CDLProxy cdlProxy;
@@ -54,6 +65,10 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
     @Test(groups = "deployment")
     public void testFlow() {
+        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
+
+        FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
+
         ProjectRequest projectRequest = new ProjectRequest();
         projectRequest.setDisplayName(PROJECT_NAME);
         projectRequest.setProjectId(PROJECT_ID);
@@ -61,13 +76,14 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         ProjectDetails details = projectService.createProject(customerSpace, projectRequest,
                 MultiTenantContext.getEmailAddress());
         Assert.assertEquals(PROJECT_NAME, details.getProjectDisplayName());
+        GrantDropBoxAccessResponse response = details.getDropFolderAccess();
 
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName(SOURCE_NAME);
         sourceRequest.setProjectId(PROJECT_ID);
         SimpleTemplateMetadata simpleTemplateMetadata = new SimpleTemplateMetadata();
         simpleTemplateMetadata.setEntityType(EntityType.Accounts);
-        sourceRequest.setSimpleTemplateMetadata(simpleTemplateMetadata);
+        sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
         Source accountSource = sourceService.createSource(sourceRequest);
         Assert.assertNotNull(accountSource);
 
@@ -76,6 +92,8 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         simpleTemplateMetadata.setEntityType(EntityType.Contacts);
         Source contactSource = sourceService.createSource(sourceRequest);
         Assert.assertNotNull(contactSource);
+
+      //  s3Service.objectExist(response.getBucket(), );
         
         // TODO(penglong) drop file to s3 to trigger flow
 
