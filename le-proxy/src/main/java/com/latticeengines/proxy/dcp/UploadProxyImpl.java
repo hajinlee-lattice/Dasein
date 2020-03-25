@@ -19,7 +19,7 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
 
     @Override
     public Upload createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
-        String baseUrl = "/customerspaces/{customerSpace}/upload/sourceId/{sourceId}";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
         String url = constructUrl(baseUrl, customerSpace, sourceId);
 
         return post("create upload", url, uploadConfig, Upload.class);
@@ -27,7 +27,7 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
 
     @Override
     public List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status) {
-        String baseUrl = "/customerspaces/{customerSpace}/upload/sourceId/{sourceId}";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
         String url = constructUrl(baseUrl, customerSpace, sourceId);
         if (status != null) {
             url = url + "?status=" + status;
@@ -37,7 +37,7 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
 
     @Override
     public void updateConfig(String customerSpace, Long uploadId, UploadConfig uploadConfig) {
-        String baseUrl = "/customerspaces/{customerSpace}/upload/uploadId/{uploadId}/config";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}/config";
         String url = constructUrl(baseUrl, customerSpace, uploadId);
         put("update config", url, uploadConfig, Void.class);
 
@@ -45,7 +45,7 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
 
     @Override
     public void updateStatus(String customerSpace, Long uploadId, Upload.Status status) {
-        String baseUrl = "/customerspaces/{customerSpace}/upload/uploadId/{uploadId}/status/{status}";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}/status/{status}";
         String url = constructUrl(baseUrl, customerSpace, uploadId, status);
         put("update status", url);
 

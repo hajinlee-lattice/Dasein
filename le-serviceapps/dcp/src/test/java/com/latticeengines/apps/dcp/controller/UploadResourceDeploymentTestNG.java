@@ -11,7 +11,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;

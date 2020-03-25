@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(value = "Upload", description = "REST resource for upload")
 @RestController
-@RequestMapping(value = "/customerspaces/{customerSpace}/upload")
+@RequestMapping(value = "/customerspaces/{customerSpace}/uploads")
 public class UploadResource {
 
     @Inject
