@@ -20,6 +20,7 @@ import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.util.S3ImportMessageUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
+import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
@@ -27,6 +28,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.dcp.DCPProxy;
 
 @Component("s3ImportService")
 public class S3ImportServiceImpl implements S3ImportService {
@@ -133,9 +135,16 @@ public class S3ImportServiceImpl implements S3ImportService {
                 S3ImportMessageUtils.KeyPart.PROJECT_ID);
         String fileName = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.DCP,
                 S3ImportMessageUtils.KeyPart.PROJECT_ID);
-        log.info(String.format("Process DCP import with Project %s, Source %s, File %s", projectId, sourceId, fileName));
-        dropBoxSet.add(message.getDropBox().getDropBox());
-        s3ImportMessageService.deleteMessage(message);
+
+        Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
+        String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
+        log.info(String.format("Process DCP import with Tenant %s, Project %s, Source %s, File %s", tenantId, projectId,
+                sourceId, fileName));
+
+        if (submitDCPImport(tenantId, projectId, sourceId, message.getKey(), message.getHostUrl())) {
+            dropBoxSet.add(message.getDropBox().getDropBox());
+            s3ImportMessageService.deleteMessage(message);
+        }
     }
 
     private void submitAtlasImport(Set<String> dropBoxSet, S3ImportMessage message) {
@@ -177,5 +186,22 @@ public class S3ImportServiceImpl implements S3ImportService {
             log.error("Failed to submit s3 import job.", e);
             return false;
         }
+    }
+
+    private boolean submitDCPImport(String tenantId, String projectId, String sourceId, String key, String hostUrl) {
+        DCPImportRequest request = new DCPImportRequest();
+        request.setProjectId(projectId);
+        request.setSourceId(sourceId);
+        request.setS3FileKey(key);
+        try {
+            DCPProxy dcpProxy = new DCPProxy(hostUrl);
+            ApplicationId applicationId = dcpProxy.startImport(tenantId, request);
+            log.info("Start DCP file import by applicationId : " + applicationId.toString());
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to submit dcp import job.", e);
+            return false;
+        }
+
     }
 }

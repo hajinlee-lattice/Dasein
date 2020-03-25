@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessS
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSBatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.ParallelBlockExecutionConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.UseConfiguredModelingAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
@@ -60,6 +61,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = EntityMatchMigrateStepConfiguration.class, name = "EntityMatchMigrateStepConfiguration"),
         @Type(value = ImportTemplateMigrateStepConfiguration.class, name = "ImportTemplateMigrateStepConfiguration"),
         @Type(value = WriteOutputStepConfiguration.class, name = "WriteOutputStepConfiguration"),
+        @Type(value = ImportSourceStepConfiguration.class, name = "ImportSourceStepConfiguration"),
         @Type(value = ImportDeltaArtifactsFromS3Configuration.class, name = "ImportDeltaArtifactsFromS3Configuration") })
 public class MicroserviceStepConfiguration extends BaseStepConfiguration {
 

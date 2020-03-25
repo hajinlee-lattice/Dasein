@@ -7,4 +7,5 @@
     <aop:aspectj-autoproxy proxy-target-class="true"/>
     <bean id="resourceAspect" class="com.latticeengines.apps.core.aspect.ResourceAspect"/>
     <bean id="saMultiTenantAspect" class="com.latticeengines.apps.core.aspect.ServiceAppsMultiTenantEntityMgrAspect"/>
+    <bean id="workflowGetPidAspect" class="com.latticeengines.apps.core.infrastructure.GetWorkflowPidAspect"/>
 </beans>

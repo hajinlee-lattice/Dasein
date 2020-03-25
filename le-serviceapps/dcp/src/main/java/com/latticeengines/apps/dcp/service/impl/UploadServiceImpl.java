@@ -12,6 +12,7 @@ import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadStats;
 
 @Service("uploadService")
 public class UploadServiceImpl implements UploadService {
@@ -27,6 +28,11 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status) {
         return uploadEntityMgr.findBySourceIdAndStatus(sourceId, status);
+    }
+
+    @Override
+    public Upload getUpload(String customerSpace, Long pid) {
+        return uploadEntityMgr.findByPid(pid);
     }
 
     @Override
@@ -51,6 +57,16 @@ public class UploadServiceImpl implements UploadService {
             throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
         }
         upload.setUploadConfig(uploadConfig);
+        uploadEntityMgr.update(upload);
+    }
+
+    @Override
+    public void updateUploadStats(String customerSpace, Long uploadPid, UploadStats uploadStats) {
+        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+        if (upload == null) {
+            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+        }
+        upload.setUploadStats(uploadStats);
         uploadEntityMgr.update(upload);
     }
 

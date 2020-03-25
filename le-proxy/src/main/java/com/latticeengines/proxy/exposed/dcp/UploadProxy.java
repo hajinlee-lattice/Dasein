@@ -10,9 +10,10 @@ public interface UploadProxy {
 
     List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status);
 
-    void updateConfig(String customerSpace, Long uploadId, UploadConfig uploadConfig);
+    Upload getUpload(String customerSpace, Long uploadPid);
 
-    void updateStatus(String customerSpace, Long uploadId, Upload.Status status);
+    void updateUploadConfig(String customerSpace, Long uploadPid, UploadConfig uploadConfig);
 
+    void updateUploadStatus(String customerSpace, Long uploadPid, Upload.Status status);
 
 }
