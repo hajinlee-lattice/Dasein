@@ -28,13 +28,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
-
-    private static final String TEST_TEMPLATE_DIR = "le-serviceapps/dcp/deployment/template";
-    private static final String TEST_TEMPLATE_NAME = "dcp-accounts-hard-coded.json";
-    private static final String TEST_TEMPLATE_VERSION = "1";
 
     @Inject
     private ProjectService projectService;
@@ -47,9 +42,6 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Inject
     private DropBoxService dropBoxService;
-
-    @Inject
-    private TestArtifactService testArtifactService;
 
     @Inject
     private CDLProxy cdlProxy;
@@ -67,7 +59,6 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
         String projectId = details.getProjectId();
 
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
-
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
         Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId, fieldDefinitionsRecord);
 

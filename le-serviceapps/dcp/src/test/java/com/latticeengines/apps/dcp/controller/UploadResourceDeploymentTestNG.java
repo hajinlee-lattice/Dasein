@@ -1,5 +1,6 @@
 package com.latticeengines.apps.dcp.controller;
 
+import java.io.InputStream;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -11,13 +12,13 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
-import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
-import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 
 public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
@@ -41,9 +42,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
                 Project.ProjectType.Type1, "test@dnb.com");
         String projectId = details.getProjectId();
 
-        SimpleTemplateMetadata simpleTemplateMetadata = new SimpleTemplateMetadata();
-        simpleTemplateMetadata.setEntityType(EntityType.Accounts);
-        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId, simpleTemplateMetadata);
+        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
+        FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
+        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId, fieldDefinitionsRecord);
 
         UploadConfig config = new UploadConfig();
         config.setDropFilePath("/drop");
@@ -77,10 +78,5 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(uploads.size(), 1);
         retrievedUpload = uploads.get(0);
         Assert.assertEquals(retrievedUpload.getStatus(), Upload.Status.MATCH_STARTED);
-
-
-
-
-
     }
 }
