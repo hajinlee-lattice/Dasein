@@ -171,7 +171,13 @@ public class SourceFileServiceImpl implements SourceFileService {
             SourceFile file = new SourceFile();
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
-            file.setSchemaInterpretation(SchemaInterpretation.getByName(entity));
+            SchemaInterpretation schemaInterpretation;
+            try {
+                schemaInterpretation = SchemaInterpretation.getByName(entity);
+            } catch (IllegalArgumentException e) {
+                schemaInterpretation = null;
+            }
+            file.setSchemaInterpretation(schemaInterpretation);
             file.setBusinessEntity(BusinessEntity.getByName(entity));
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(fileProperty.getFileName());
