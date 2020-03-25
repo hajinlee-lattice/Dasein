@@ -420,7 +420,7 @@ public class CheckpointNewService {
 
     private void saveAtlasStreamsIfExists(String checkpointName) throws IOException {
         List<AtlasStream> atlasStreams = atlasStreamEntityMgr.findByTenant(mainTestTenant);
-        if (CollectionUtils.isNotEmpty(atlasStreams) && atlasStreams.get(0) == null) {
+        if (CollectionUtils.isNotEmpty(atlasStreams) && atlasStreams.get(0) != null) {
             String localDir = "checkpoints/" + checkpointName + "/AtlasData";
             FileUtils.deleteQuietly(new File(localDir));
             FileUtils.forceMkdirParent(new File(localDir));
@@ -434,7 +434,7 @@ public class CheckpointNewService {
 
     private void saveCatalogsIfExists(String checkpointName) throws IOException {
         List<Catalog> catalogs = catalogEntityMgr.findByTenant(mainTestTenant);
-        if (CollectionUtils.isNotEmpty(catalogs) && catalogs.get(0) == null) {
+        if (CollectionUtils.isNotEmpty(catalogs) && catalogs.get(0) != null) {
             String jsonFile = String.format("checkpoints/%s/AtlasData/Catalogs.json", checkpointName);
             om.writeValue(new File(jsonFile), catalogs);
             log.info("Save all Catalogs to file {}.", jsonFile);
@@ -445,7 +445,7 @@ public class CheckpointNewService {
 
     private void saveAtlasDimensionsIfExists(String checkpointName) throws IOException {
         List<StreamDimension> dimensions = streamDimensionEntityMgr.findByTenant(mainTestTenant);
-        if (CollectionUtils.isNotEmpty(dimensions) && dimensions.get(0) == null) {
+        if (CollectionUtils.isNotEmpty(dimensions) && dimensions.get(0) != null) {
             String jsonFile = String.format("checkpoints/%s/AtlasData/StreamDimensions.json", checkpointName);
             Map<String, StreamDimension> dimensionMap = new HashMap<>();
             for (StreamDimension dimension : dimensions) {
@@ -460,7 +460,7 @@ public class CheckpointNewService {
 
     private void saveActivityMetricGroupIfExists(String checkpointName) throws IOException {
         List<ActivityMetricsGroup> metricsGroups = activityMetricsGroupEntityMgr.findByTenant(mainTestTenant);
-        if (CollectionUtils.isNotEmpty(metricsGroups) && metricsGroups.get(0) == null) {
+        if (CollectionUtils.isNotEmpty(metricsGroups) && metricsGroups.get(0) != null) {
             String jsonFile = String.format("checkpoints/%s/AtlasData/ActivityMetricGroups.json", checkpointName);
             Map<String, List<ActivityMetricsGroup>> activityMetricsGroupMap = new HashMap<>();
             for (ActivityMetricsGroup metricsGroup : metricsGroups) {
@@ -480,6 +480,10 @@ public class CheckpointNewService {
     }
 
     private void saveDimensionMetadatasIfExists(String checkpointName, String customerSpace, String signature) throws IOException {
+        if (StringUtils.isBlank(signature)) {
+            log.info("Can't find signature.");
+            return;
+        }
         Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap =
                 activityStoreService.getDimensionMetadata(customerSpace,
                         signature);
@@ -1110,6 +1114,10 @@ public class CheckpointNewService {
         Map<String, String> oldDataFeedTaskNameIdMaps = new HashMap<>();
         if (CollectionUtils.isNotEmpty(dataFeedTaskList) && dataFeedTaskList.get(0) != null) {
             Map<String, Table> templateTableMaps = parseTemplateTable(checkpoint);
+            if (MapUtils.isEmpty(templateTableMaps)) {
+                log.info("Can't find templateTables, skip find DataFeedTask.");
+                return dataFeedTaskUniqueIdMaps;
+            }
             for (DataFeedTask dataFeedTask : dataFeedTaskList) {
                 DataFeedTask newDataFeedTask = new DataFeedTask();
                 String templateName = NamingUtils.timestamp(dataFeedTask.getEntity());
@@ -1149,6 +1157,10 @@ public class CheckpointNewService {
 
     private Map<String, AtlasStream> uploadAtlasStream(String checkpoint, String customerSpace,
                                               Map<String, DataFeedTask> dataFeedTaskIdMaps) throws IOException {
+        if (MapUtils.isEmpty(dataFeedTaskIdMaps)) {
+            log.info("Can't find dataFeedTaskMaps. skip find AtlasStreams.");
+            return null;
+        }
         String jsonFile = String.format("checkpoints/%s/AtlasData/AtlasStreams.json", checkpoint);
         if (!new File(jsonFile).exists()) {
             log.error("Can't find AtlasStreamInfos.");
@@ -1183,6 +1195,10 @@ public class CheckpointNewService {
 
     private Map<String, Catalog> uploadCatalog(String checkpoint,String customerSpace,
                                                Map<String, DataFeedTask> dataFeedTaskIdMaps) throws IOException {
+        if (MapUtils.isEmpty(dataFeedTaskIdMaps)) {
+            log.info("Can't find dataFeedTaskMaps. skip find Catalog.");
+            return null;
+        }
         String jsonFile = String.format("checkpoints/%s/AtlasData/Catalogs.json", checkpoint);
         if (!new File(jsonFile).exists()) {
             log.error("Can't find catalogs.");
@@ -1206,6 +1222,10 @@ public class CheckpointNewService {
 
     private void uploadStreamDimension(String checkpoint, Map<String, AtlasStream> atlasStreamIdMaps, Map<String,
             Catalog> catalogMap) throws IOException {
+        if (MapUtils.isEmpty(atlasStreamIdMaps) || MapUtils.isEmpty(catalogMap)) {
+            log.info("Can't find atlasStreamMap/catalogMap. skip find StreamDimensions.");
+            return;
+        }
         String jsonFile = String.format("checkpoints/%s/AtlasData/StreamDimensions.json", checkpoint);
         if (!new File(jsonFile).exists()) {
             log.error("Can't find StreamDimensions.");
@@ -1235,6 +1255,10 @@ public class CheckpointNewService {
     }
 
     private void uploadActivityMetricGroup(String checkpoint, Map<String, AtlasStream> atlasStreamIdMaps) throws IOException {
+        if (MapUtils.isEmpty(atlasStreamIdMaps)) {
+            log.info("Can't find atlasStreamMap. skip find ActivityMetricGroups.");
+            return;
+        }
         String jsonFile = String.format("checkpoints/%s/AtlasData/ActivityMetricGroups.json", checkpoint);
         if (!new File(jsonFile).exists()) {
             log.error("Can't find ActivityMetricGroups.");
@@ -1278,6 +1302,10 @@ public class CheckpointNewService {
 
     private String uploadDimensionMetadata(String checkpoint,
                                          String customerSpace, Map<String, AtlasStream> atlasStreamMap) throws IOException {
+        if (MapUtils.isEmpty(atlasStreamMap)) {
+            log.info("Can't find atlasStreamMap. skip find dimensionMetadata.");
+            return null;
+        }
         String jsonFile = String.format("checkpoints/%s/AtlasData/DimensionMetadatas.json", checkpoint);
         if (!new File(jsonFile).exists()) {
             log.error("Can't find DimensionMetadatas.");

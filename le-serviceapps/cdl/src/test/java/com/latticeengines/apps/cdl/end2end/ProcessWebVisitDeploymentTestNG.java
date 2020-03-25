@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.end2end;
 
 import static com.latticeengines.domain.exposed.cdl.S3ImportSystem.SystemType.Website;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,9 +22,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -37,7 +40,9 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.ActivityStoreProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class ProcessWebVisitDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
@@ -56,6 +61,12 @@ public class ProcessWebVisitDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
     @Inject
     private ActivityStoreProxy activityStoreProxy;
 
+    @Inject
+    private DropBoxProxy dropBoxProxy;
+
+    @Inject
+    private S3Service s3Service;
+
     private String templateFeedType;
     private DataFeedTask webVisitStreamTask;
 
@@ -72,6 +83,7 @@ public class ProcessWebVisitDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
         createWebVisitTemplate();
         createSourceMediumTemplate();
         createWebVisitPatternTemplate();
+        s3Import();
         importData();
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         if (isLocalEnvironment()) {
@@ -87,14 +99,6 @@ public class ProcessWebVisitDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
         mockCSVImport(BusinessEntity.Account, 1, "DefaultSystem_AccountData");
         Thread.sleep(1100);
-        mockCSVImport(BusinessEntity.Contact, 1, "DefaultSystem_ContactData");
-        Thread.sleep(1100);
-        mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
-        Thread.sleep(1100);
-        mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
-        Thread.sleep(1100);
-        mockCSVImport(BusinessEntity.Product, 3, "ProductVDB");
-        Thread.sleep(2000);
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
     }
 
@@ -238,6 +242,18 @@ public class ProcessWebVisitDeploymentTestNG extends CDLEnd2EndDeploymentTestNGB
         metadata.setCustomerAttributes(customerList);
         metadata.setStandardAttributes(standardList);
         return metadata;
+    }
+
+    public void s3Import() {
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
+        Assert.assertNotNull(dropBoxSummary);
+        String path = S3PathBuilder.getUiDisplayS3Dir(dropBoxSummary.getBucket(), dropBoxSummary.getDropBox(),
+                templateFeedType);
+        Assert.assertNotNull(path);
+        String key = path.substring(dropBoxSummary.getBucket().length() + 1) + "TestWebVisit.csv";
+        InputStream testFile = ClassLoader.getSystemResourceAsStream("service/impl/cdlImportWebVisit.csv");
+        s3Service.uploadInputStream(dropBoxSummary.getBucket(), key, testFile, true);
+
     }
 
     private String saveToCheckPoint() {
