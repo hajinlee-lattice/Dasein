@@ -266,7 +266,6 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + " ) " //
                 + "FROM %s " //
                 + "where launchId IN (:launchIds) " //
-                + "AND UNIX_TIMESTAMP( lastUpdatedTimestamp ) >= :lastUpdatedTimestamp " //
                 + "ORDER BY pid ";
 
         queryStr = String.format(queryStr, entityClz.getSimpleName());
@@ -275,7 +274,6 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setMaxResults(max);
         query.setFirstResult(offset);
         query.setParameterList("launchIds", launchIds);
-        query.setParameter("lastUpdatedTimestamp", start);
         return query.list();
     }
 
