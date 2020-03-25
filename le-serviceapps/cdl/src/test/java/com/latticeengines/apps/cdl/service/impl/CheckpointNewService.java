@@ -88,6 +88,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.util.TypeConversionUtil;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -1324,11 +1325,54 @@ public class CheckpointNewService {
                         DimensionMetadata.class);
                 newDimensionMetadaMap.put(atlasStream.getStreamId(), metadataMap);
             }
+            allocateDimensionIdsAndOverrideMap(customerSpace, newDimensionMetadaMap);
             return activityStoreService.saveDimensionMetadata(customerSpace, null, newDimensionMetadaMap);
         } else {
             log.error("dimensionMetadata is empty.");
             return null;
         }
+    }
+
+    // generate short ID for each unique dimension value and update corresponding
+    // map
+    private void allocateDimensionIdsAndOverrideMap(String customerSpace, Map<String,
+                                                    Map<String, DimensionMetadata>> dimensionMetadataMap) {
+
+        Set<String> values = dimensionMetadataMap //
+                .values() //
+                .stream() //
+                .flatMap(dims -> dims.entrySet().stream().flatMap(dimMetadata -> {
+                    String dimName = dimMetadata.getKey();
+                    return dimMetadata.getValue().getDimensionValues().stream().map(attrs -> attrs.get(dimName))
+                            .map(TypeConversionUtil::toString);
+                })) //
+                .filter(StringUtils::isNotBlank) //
+                .collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(values)) {
+            return;
+        }
+
+        // allocate short ID
+        Map<String, String> valueIdMap = activityStoreService.allocateDimensionId(customerSpace, values);
+
+        log.info("DimensionValueIdMap = {}", valueIdMap);
+
+        // update metadata
+        dimensionMetadataMap.forEach((streamId, dims) -> {
+            dims.forEach((dimName, metadata) -> {
+                if (CollectionUtils.isEmpty(metadata.getDimensionValues())) {
+                    return;
+                }
+
+                metadata.getDimensionValues().forEach(attrs -> {
+                    String value = TypeConversionUtil.toString(attrs.get(dimName));
+                    if (valueIdMap.containsKey(value)) {
+                        // override with short ID
+                        attrs.put(dimName, valueIdMap.get(value));
+                    }
+                });
+            });
+        });
     }
 
     private String getGroupId(String groupName) {
