@@ -422,9 +422,8 @@ public class CheckpointNewService {
     private void saveAtlasStreamsIfExists(String checkpointName) throws IOException {
         List<AtlasStream> atlasStreams = atlasStreamEntityMgr.findByTenant(mainTestTenant);
         if (CollectionUtils.isNotEmpty(atlasStreams) && atlasStreams.get(0) != null) {
-            String localDir = "checkpoints/" + checkpointName + "/AtlasData";
-            FileUtils.deleteQuietly(new File(localDir));
-            FileUtils.forceMkdirParent(new File(localDir));
+            String localDir = String.format("checkpoints/%s/AtlasData", checkpointName);
+            FileUtils.forceMkdir(new File(localDir));
             String jsonFile = String.format("checkpoints/%s/AtlasData/AtlasStreams.json", checkpointName);
             om.writeValue(new File(jsonFile), atlasStreams);
             log.info("Save all AtlasStreams to file {}.", jsonFile);
