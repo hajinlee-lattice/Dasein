@@ -1,17 +1,30 @@
 package com.latticeengines.pls.end2end.dcp;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -22,6 +35,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
@@ -32,6 +46,10 @@ import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase {
 
+
+    private static final Logger log = LoggerFactory.getLogger(ProjectSourceUploadDeploymentTestNG.class);
+
+    private static final String FILE_NAME = "dcp.html";
 
     private static final String PROJECT_NAME = "testProjectName";
 
@@ -63,7 +81,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         MultiTenantContext.setTenant(mainTestTenant);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testFlow() {
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
 
@@ -77,6 +95,9 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
                 MultiTenantContext.getEmailAddress());
         Assert.assertEquals(PROJECT_NAME, details.getProjectDisplayName());
         GrantDropBoxAccessResponse response = details.getDropFolderAccess();
+        Assert.assertNotNull(response);
+        String bucket = response.getBucket();
+        Assert.assertTrue(StringUtils.isNotBlank(bucket));
 
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName(SOURCE_NAME);
@@ -85,15 +106,14 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         simpleTemplateMetadata.setEntityType(EntityType.Accounts);
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
         Source accountSource = sourceService.createSource(sourceRequest);
-        Assert.assertNotNull(accountSource);
+        verifySourceAndAccess(accountSource, response, true);
+
 
         // create another source with id under same project
         sourceRequest.setSourceId(SOURCE_ID);
         simpleTemplateMetadata.setEntityType(EntityType.Contacts);
         Source contactSource = sourceService.createSource(sourceRequest);
-        Assert.assertNotNull(contactSource);
-
-      //  s3Service.objectExist(response.getBucket(), );
+        verifySourceAndAccess(contactSource, response, true);
         
         // TODO(penglong) drop file to s3 to trigger flow
 
@@ -102,7 +122,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testFlow")
+    @Test(groups = "deployment", dependsOnMethods = "testFlow", enabled = false)
     public void testGetAndDelete() {
         List<Project> projects = projectService.getAllProjects(customerSpace);
         Assert.assertNotNull(projects);
@@ -113,11 +133,13 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         Assert.assertEquals(details.getProjectId(), PROJECT_ID);
         Assert.assertEquals(details.getProjectDisplayName(), PROJECT_NAME);
 
+        GrantDropBoxAccessResponse response = details.getDropFolderAccess();
         List<Source> sources = details.getSources();
         Assert.assertNotNull(sources);
         Assert.assertEquals(sources.size(), 2);
         List<Source> sources2 = sourceService.getSourceList(PROJECT_ID);
         Assert.assertEquals(sources2.size(), 2);
+        sources.forEach(s -> verifySourceAndAccess(s, response,false));
 
         // delete one source
         sourceService.deleteSource(SOURCE_ID);
@@ -154,5 +176,56 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         Assert.assertTrue(CollectionUtils.isEmpty(sourceService.getSourceList(PROJECT_ID)));
     }
 
+    /**
+     * check the path from source and upload file to S3 to verify access
+     * @param source
+     * @param response
+     * @param upload
+     */
+    private void verifySourceAndAccess(Source source, GrantDropBoxAccessResponse response, boolean upload) {
+        Assert.assertNotNull(source);
+        String bucket = response.getBucket();
+        String fullPath = source.getFullPath();
+        Assert.assertTrue(StringUtils.isNotBlank(source.getRelativePath()));
+        Assert.assertTrue(StringUtils.isNotBlank(fullPath));
+        String object = fullPath.substring(fullPath.indexOf(bucket) + StringUtils.length(bucket) + 1);
+        String prefix = object + "drop/";
+        Assert.assertTrue(s3Service.objectExist(bucket, object));
+        Assert.assertTrue(s3Service.objectExist(bucket, prefix));
+        Assert.assertTrue(s3Service.objectExist(bucket, object + "upload/"));
 
+        BasicAWSCredentialsProvider creds = //
+                new BasicAWSCredentialsProvider(response.getAccessKey(), response.getSecretKey());
+
+
+        AmazonS3 s3Client = AmazonS3ClientBuilder.standard() //
+                .withCredentials(creds).withRegion(response.getRegion()).build();
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AmazonS3Exception.class), null);
+        retry.execute(context -> {
+            int count = context.getRetryCount();
+            if (count > 3) {
+                log.info("Verify access, attempt=" + count);
+            }
+            String objectKey = prefix  + FILE_NAME;
+            if (upload) {
+                uploadFile(s3Client, bucket, objectKey);
+            }
+            Assert.assertTrue(s3Client.doesObjectExist(bucket, objectKey));
+            List<FileProperty> result = dropBoxProxy.getFileListForPath(customerSpace, prefix, null);
+            Assert.assertTrue(result.size() > 0);
+            return true;
+        });
+
+    }
+
+    private void uploadFile(AmazonS3 s3Client, String bucket, String objectKey) {
+        InputStream inputStream = Thread.currentThread().getContextClassLoader() //
+                .getResourceAsStream(SOURCE_FILE_LOCAL_PATH + FILE_NAME);
+        ObjectMetadata om = new ObjectMetadata();
+        om.setSSEAlgorithm("AES256");
+        PutObjectRequest request = new PutObjectRequest(bucket, objectKey, inputStream, om)
+                .withCannedAcl(CannedAccessControlList.BucketOwnerRead);
+        s3Client.putObject(request);
+    }
 }
