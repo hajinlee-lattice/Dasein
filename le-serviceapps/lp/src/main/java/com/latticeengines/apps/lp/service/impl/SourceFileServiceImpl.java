@@ -172,6 +172,7 @@ public class SourceFileServiceImpl implements SourceFileService {
             file.setName(outputFileName);
             file.setPath(outputPath + "/" + outputFileName);
             SchemaInterpretation schemaInterpretation;
+            //TODO: SchemaInterpretation cannot match all BusinessEntity, need fix later.
             try {
                 schemaInterpretation = SchemaInterpretation.getByName(entity);
             } catch (IllegalArgumentException e) {
