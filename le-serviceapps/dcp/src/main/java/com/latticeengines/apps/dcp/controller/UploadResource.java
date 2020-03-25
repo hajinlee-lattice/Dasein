@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.UploadService;
+import com.latticeengines.apps.dcp.workflow.DCPSourceImportWorkflowSubmitter;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 
@@ -31,6 +35,9 @@ public class UploadResource {
 
     @Inject
     private UploadService uploadService;
+
+    @Inject
+    private DCPSourceImportWorkflowSubmitter importSubmitter;
 
     private static final Logger log = LoggerFactory.getLogger(UploadResource.class);
 
@@ -60,24 +67,40 @@ public class UploadResource {
         }
     }
 
+    @GetMapping("/{pid}")
+    @ResponseBody
+    @ApiOperation(value = "Get upload record by pid")
+    private Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return uploadService.getUpload(customerSpace, pid);
+    }
 
-    @PutMapping("/uploadId/{uploadId}/config")
+    @PutMapping("/update/{uploadPid}/config")
     @ResponseBody
     @ApiOperation(value = "update the upload config")
     public void updateConfig(@PathVariable String customerSpace,
-                             @PathVariable Long uploadId,
+                             @PathVariable Long uploadPid,
                              @RequestBody UploadConfig uploadConfig) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        uploadService.updateUploadConfig(customerSpace, uploadId, uploadConfig);
+        uploadService.updateUploadConfig(customerSpace, uploadPid, uploadConfig);
     }
 
-    @PutMapping("/uploadId/{uploadId}/status/{status}")
+    @PutMapping("/update/{uploadPid}/status/{status}")
     @ResponseBody
     @ApiOperation(value = "update the upload status")
     public void updateStatus(@PathVariable String customerSpace,
-                             @PathVariable Long uploadId,
+                             @PathVariable Long uploadPid,
                              @PathVariable Upload.Status status) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        uploadService.updateUploadStatus(customerSpace, uploadId, status);
+        uploadService.updateUploadStatus(customerSpace, uploadPid, status);
+    }
+
+    @PostMapping("/startimport")
+    @ResponseBody
+    @ApiOperation(value = "Invoke DCP import workflow. Returns the job id.")
+    public String startImport(@PathVariable String customerSpace, @RequestBody DCPImportRequest request) {
+        ApplicationId appId = importSubmitter.submit(CustomerSpace.parse(customerSpace), request,
+                new WorkflowPidWrapper(-1L));
+        return appId.toString();
     }
 }

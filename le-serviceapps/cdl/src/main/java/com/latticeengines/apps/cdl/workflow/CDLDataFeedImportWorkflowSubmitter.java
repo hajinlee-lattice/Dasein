@@ -56,6 +56,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private BatonService batonService;
+
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
                                 CSVImportFileInfo csvImportFileInfo, PrepareImportConfiguration prepareImportConfig,
@@ -69,8 +70,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
                 connectorConfig, csvImportFileInfo, prepareImportConfig, action.getPid(),
                 s3ImportEmail, emailInfo, enableEntityMatch, enableEntityMatchGA);
 
-        ApplicationId appId = workflowJobService.submit(configuration, pidWrapper.getPid());
-        return appId;
+        return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
     @VisibleForTesting

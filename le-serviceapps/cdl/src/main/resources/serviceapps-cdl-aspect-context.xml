@@ -11,6 +11,6 @@
     <bean id="cdlMultiTenancyAspect" class="com.latticeengines.apps.cdl.entitymgr.impl.CDLMultiTenantEntityMgrAspect"/>
     <bean id="cdlJobSetTenantAspect" class="com.latticeengines.apps.cdl.infrastructure.SetTenantAspect" />
     <bean id="resetActionContextAspect" class="com.latticeengines.apps.cdl.infrastructure.ResetActionContextAspect" />
-    <bean id="workflowGetPidAspect" class="com.latticeengines.apps.cdl.infrastructure.GetWorkflowPidAspect"/>
+    <bean id="workflowGetPidAspect" class="com.latticeengines.apps.core.infrastructure.GetWorkflowPidAspect"/>
     <bean id="dependencyGraphAspect" class="com.latticeengines.apps.cdl.entitymgr.impl.DependencyGraphEntityMgrAspect"/>
 </beans>

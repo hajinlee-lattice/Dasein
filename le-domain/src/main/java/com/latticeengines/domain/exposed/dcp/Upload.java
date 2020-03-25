@@ -65,9 +65,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     private Status status;
 
     @JsonProperty("upload_config")
-    @Column(name = "UPLOAD_CONFIG", columnDefinition = "'JSON'")
+    @Column(name = "UPLOAD_CONFIG", columnDefinition = "'JSON'", length = 8000)
     @Type(type = "json")
     private UploadConfig uploadConfig;
+
+    @JsonProperty("upload_stats")
+    @Column(name = "UPLOAD_STATS", columnDefinition = "'JSON'", length = 8000)
+    @Type(type = "json")
+    private UploadStats uploadStats;
 
     @Override
     public Long getPid() {
@@ -131,6 +136,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     public void setUploadConfig(UploadConfig uploadConfig) {
         this.uploadConfig = uploadConfig;
+    }
+
+    public UploadStats getUploadStats() {
+        return uploadStats;
+    }
+
+    public void setUploadStats(UploadStats uploadStats) {
+        this.uploadStats = uploadStats;
     }
 
     // TODO: more specific status.

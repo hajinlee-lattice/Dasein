@@ -13,14 +13,17 @@ public class UploadConfig {
     @JsonProperty("drop_file_path")
     private String dropFilePath;
 
-    @JsonProperty("upload_file_path")
-    private String uploadFilePath;
+    @JsonProperty("upload_ts_prefix")
+    private String uploadTSPrefix;
 
-    @JsonProperty("processed_file_path")
-    private String processedFilePath;
+    @JsonProperty("upload_raw_file_path")
+    private String uploadRawFilePath;
 
-    @JsonProperty("error_file_path")
-    private String errorFilePath;
+    @JsonProperty("upload_imported_file_path")
+    private String uploadImportedFilePath;
+
+    @JsonProperty("upload_imported_error_file_path")
+    private String uploadImportedErrorFilePath;
 
     public String getDropFilePath() {
         return dropFilePath;
@@ -30,27 +33,35 @@ public class UploadConfig {
         this.dropFilePath = dropFilePath;
     }
 
-    public String getUploadFilePath() {
-        return uploadFilePath;
+    public String getUploadTSPrefix() {
+        return uploadTSPrefix;
     }
 
-    public void setUploadFilePath(String uploadFilePath) {
-        this.uploadFilePath = uploadFilePath;
+    public void setUploadTSPrefix(String uploadTSPrefix) {
+        this.uploadTSPrefix = uploadTSPrefix;
     }
 
-    public String getProcessedFilePath() {
-        return processedFilePath;
+    public String getUploadRawFilePath() {
+        return uploadRawFilePath;
     }
 
-    public void setProcessedFilePath(String processedFilePath) {
-        this.processedFilePath = processedFilePath;
+    public void setUploadRawFilePath(String uploadRawFilePath) {
+        this.uploadRawFilePath = uploadRawFilePath;
     }
 
-    public String getErrorFilePath() {
-        return errorFilePath;
+    public String getUploadImportedFilePath() {
+        return uploadImportedFilePath;
     }
 
-    public void setErrorFilePath(String errorFilePath) {
-        this.errorFilePath = errorFilePath;
+    public void setUploadImportedFilePath(String uploadImportedFilePath) {
+        this.uploadImportedFilePath = uploadImportedFilePath;
+    }
+
+    public String getUploadImportedErrorFilePath() {
+        return uploadImportedErrorFilePath;
+    }
+
+    public void setUploadImportedErrorFilePath(String uploadImportedErrorFilePath) {
+        this.uploadImportedErrorFilePath = uploadImportedErrorFilePath;
     }
 }

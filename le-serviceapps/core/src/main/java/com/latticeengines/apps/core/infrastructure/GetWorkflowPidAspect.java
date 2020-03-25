@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.infrastructure;
+package com.latticeengines.apps.core.infrastructure;
 
 import javax.inject.Inject;
 
