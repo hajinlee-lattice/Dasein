@@ -412,15 +412,14 @@ public class CheckpointNewService {
     }
 
     private void saveAtlasStreamMetadataIfExists(String checkpointName, String customerSpace, String signature) throws IOException {
-        saveAtlasStreamsIfExists(checkpointName);
-        saveAtlasDimensionsIfExists(checkpointName);
+        saveAtlasStreamsAndDimensionIfExists(checkpointName);
         saveCatalogsIfExists(checkpointName);
         saveActivityMetricGroupIfExists(checkpointName);
         saveDimensionMetadatasIfExists(checkpointName, customerSpace, signature);
     }
 
-    private void saveAtlasStreamsIfExists(String checkpointName) throws IOException {
-        List<AtlasStream> atlasStreams = atlasStreamEntityMgr.findByTenant(mainTestTenant);
+    private void saveAtlasStreamsAndDimensionIfExists(String checkpointName) throws IOException {
+        List<AtlasStream> atlasStreams = atlasStreamEntityMgr.findByTenant(mainTestTenant, true);
         if (CollectionUtils.isNotEmpty(atlasStreams) && atlasStreams.get(0) != null) {
             String localDir = String.format("checkpoints/%s/AtlasData", checkpointName);
             FileUtils.forceMkdir(new File(localDir));
@@ -440,21 +439,6 @@ public class CheckpointNewService {
             log.info("Save all Catalogs to file {}.", jsonFile);
         } else {
             log.error("Failed to get Catalogs");
-        }
-    }
-
-    private void saveAtlasDimensionsIfExists(String checkpointName) throws IOException {
-        List<StreamDimension> dimensions = streamDimensionEntityMgr.findByTenant(mainTestTenant);
-        if (CollectionUtils.isNotEmpty(dimensions) && dimensions.get(0) != null) {
-            String jsonFile = String.format("checkpoints/%s/AtlasData/StreamDimensions.json", checkpointName);
-            Map<String, StreamDimension> dimensionMap = new HashMap<>();
-            for (StreamDimension dimension : dimensions) {
-                dimensionMap.put(dimension.getStream().getStreamId(), dimension);
-            }
-            om.writeValue(new File(jsonFile), dimensionMap);
-            log.info("Save all StreamDimensions to file {}.", jsonFile);
-        } else {
-            log.error("Failed to get StreamDimensions");
         }
     }
 
@@ -1021,9 +1005,8 @@ public class CheckpointNewService {
         if (MapUtils.isEmpty(dataFeedTaskMap)) {
             return null;
         }
-        Map<String,AtlasStream> atlasStreamMap = uploadAtlasStream(checkpoint, customerSpace, dataFeedTaskMap);
         Map<String, Catalog> catalogMap = uploadCatalog(checkpoint, customerSpace, dataFeedTaskMap);
-        uploadStreamDimension(checkpoint, atlasStreamMap, catalogMap);
+        Map<String,AtlasStream> atlasStreamMap = uploadAtlasStream(checkpoint, customerSpace, dataFeedTaskMap, catalogMap);
         uploadActivityMetricGroup(checkpoint, atlasStreamMap);
         return uploadDimensionMetadata(checkpoint, customerSpace, atlasStreamMap);
     }
@@ -1156,7 +1139,7 @@ public class CheckpointNewService {
     }
 
     private Map<String, AtlasStream> uploadAtlasStream(String checkpoint, String customerSpace,
-                                              Map<String, DataFeedTask> dataFeedTaskIdMaps) throws IOException {
+                                              Map<String, DataFeedTask> dataFeedTaskIdMaps, Map<String, Catalog> catalogMap) throws IOException {
         if (MapUtils.isEmpty(dataFeedTaskIdMaps)) {
             log.info("Can't find dataFeedTaskMaps. skip find AtlasStreams.");
             return null;
@@ -1185,6 +1168,7 @@ public class CheckpointNewService {
                 newAtlasStream.setDateAttribute(atlasStream.getDateAttribute());
                 AtlasStream createdStream = activityStoreService.createStream(customerSpace, newAtlasStream);
                 atlasStreamIdMaps.put(atlasStream.getStreamId(), createdStream);
+                uploadStreamDimension(createdStream, atlasStream.getDimensions(), catalogMap);
             }
 
         } else {
@@ -1220,37 +1204,23 @@ public class CheckpointNewService {
         return catalogMap;
     }
 
-    private void uploadStreamDimension(String checkpoint, Map<String, AtlasStream> atlasStreamIdMaps, Map<String,
-            Catalog> catalogMap) throws IOException {
-        if (MapUtils.isEmpty(atlasStreamIdMaps) || MapUtils.isEmpty(catalogMap)) {
-            log.info("Can't find atlasStreamMap/catalogMap. skip find StreamDimensions.");
+    private void uploadStreamDimension(AtlasStream stream, List<StreamDimension> dimensions, Map<String,
+            Catalog> catalogMap) {
+        if (CollectionUtils.isEmpty(dimensions) || MapUtils.isEmpty(catalogMap)) {
+            log.info("Can't find dimensions/catalogMap. skip upload StreamDimensions.");
             return;
         }
-        String jsonFile = String.format("checkpoints/%s/AtlasData/StreamDimensions.json", checkpoint);
-        if (!new File(jsonFile).exists()) {
-            log.error("Can't find StreamDimensions.");
-            return;
-        }
-        Map<?, ?> dimensionMapObjects = JsonUtils.deserialize(new FileInputStream(jsonFile), Map.class);
-        Map<String, StreamDimension> dimensionMap = JsonUtils.convertMap(dimensionMapObjects, String.class,
-                StreamDimension.class);
-        if (dimensionMap != null && !dimensionMap.isEmpty()) {
-            for (Map.Entry<String, StreamDimension> entry : dimensionMap.entrySet()) {
-                StreamDimension streamDimension = entry.getValue();
-                String oldStreamId = entry.getKey();
-                StreamDimension newDimension = new StreamDimension();
-                newDimension.setCalculator(streamDimension.getCalculator());
-                newDimension.setName(streamDimension.getName());
-                newDimension.setDisplayName(streamDimension.getDisplayName());
-                newDimension.setGenerator(streamDimension.getGenerator());
-                newDimension.setStream(atlasStreamIdMaps.get(oldStreamId));
-                Catalog oldCatalog = streamDimension.getCatalog();
-                newDimension.setCatalog(catalogMap.get(oldCatalog.getCatalogId()));
-                newDimension.setUsages(streamDimension.getUsages());
-                streamDimensionEntityMgr.create(newDimension);
-            }
-        } else {
-            log.error("StreamDimension list is empty.");
+        for (StreamDimension streamDimension : dimensions) {
+            StreamDimension newDimension = new StreamDimension();
+            newDimension.setCalculator(streamDimension.getCalculator());
+            newDimension.setName(streamDimension.getName());
+            newDimension.setDisplayName(streamDimension.getDisplayName());
+            newDimension.setGenerator(streamDimension.getGenerator());
+            newDimension.setStream(stream);
+            Catalog oldCatalog = streamDimension.getCatalog();
+            newDimension.setCatalog(catalogMap.get(oldCatalog.getCatalogId()));
+            newDimension.setUsages(streamDimension.getUsages());
+            streamDimensionEntityMgr.create(newDimension);
         }
     }
 
