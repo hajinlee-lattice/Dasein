@@ -5,8 +5,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class DomainUtils {
+
+    private static final Logger log = LoggerFactory.getLogger(DomainUtils.class);
 
     protected DomainUtils() {
         throw new UnsupportedOperationException();
@@ -53,9 +57,15 @@ public final class DomainUtils {
             return null;
         }
         email = email.replaceAll("\\s", "");
-        if (emailValidator.isValid(email)) {
-            return email;
-        } else {
+        try {
+            if (emailValidator.isValid(email)) {
+                return email;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            String msg = String.format("Error when validating email %s", email);
+            log.warn(msg, e);
             return null;
         }
     }
