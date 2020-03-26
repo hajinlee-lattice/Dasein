@@ -134,9 +134,8 @@ public class SessionServiceImpl implements SessionService {
             retryInterval = Double.valueOf(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
             SleepUtils.sleep(retryInterval);
         }
-        Date now = new Date(System.currentTimeMillis());
-        validateSession(now, session);
         if (session != null) {
+            validateSession(session);
             session.setAuthenticationRoute(AUTH_ROUTE_GA);
         }
         return setTenantPid(session);
@@ -184,7 +183,8 @@ public class SessionServiceImpl implements SessionService {
         return false;
     }
 
-    private void validateSession(Date now, Session session) {
+    private void validateSession(Session session) {
+        Date now = new Date(System.currentTimeMillis());
         Long timeElapsed = now.getTime() - session.getTicketCreationTime();
         if ((int) (timeElapsed / (1000 * 60)) > SessionUtils.TicketTimeoutInMinute) {
             throw new LedpException(LedpCode.LEDP_19016);
@@ -209,8 +209,9 @@ public class SessionServiceImpl implements SessionService {
             retryInterval = Double.valueOf(retryInterval * (1 + 1.0 * random.nextInt(1000) / 1000)).longValue();
             SleepUtils.sleep(retryInterval);
         }
-        Date now = new Date(System.currentTimeMillis());
-        validateSession(now, session);
+        if (session != null) {
+            validateSession(session);
+        }
         return setTenantPid(session);
     }
 
