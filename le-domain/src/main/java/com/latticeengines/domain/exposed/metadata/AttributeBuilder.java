@@ -30,6 +30,11 @@ public class AttributeBuilder {
         return this;
     }
 
+    public AttributeBuilder sourceAttrName(String sourceAttrName) {
+        attribute.setSourceAttrName(sourceAttrName);
+        return this;
+    }
+
     public AttributeBuilder secondaryDisplayName(String secondaryDisplayName) {
         attribute.setSecondaryDisplayName(secondaryDisplayName);
         return this;

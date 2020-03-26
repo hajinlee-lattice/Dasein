@@ -47,7 +47,7 @@ public final class ImportWorkflowSpecUtils {
         table.setName(StringUtils.isNotBlank(tableName) ? tableName : schemaInterpretationString);
         table.setDisplayName(schemaInterpretationString);
 
-        if (record == null || MapUtils.isEmpty(record.getFieldDefinitionsRecordsMap())) {
+        if (MapUtils.isEmpty(record.getFieldDefinitionsRecordsMap())) {
             log.warn("getTableFromFieldDefinitionsRecord provided with null record or empty record map");
             return table;
         }
@@ -116,6 +116,7 @@ public final class ImportWorkflowSpecUtils {
         return new AttributeBuilder()
                 .name(attrName)
                 .displayName(definition.getColumnName())
+                .sourceAttrName(definition.getColumnName())
                 // Tag and nullable seem to be set the same way for all Atlas Attributes.
                 // TODO(jwinter): Do we need to set the tag?  Looks like it is only for legacy systems.
                 //.tag(Tag.INTERNAL.toString()) //
