@@ -14,4 +14,6 @@ public interface SourceProxy {
     List<Source> getSourceList(String customerSpace, String projectId);
 
     Boolean deleteSource(String customerSpace, String sourceId);
+
+    Boolean pauseSource(String customerSpace, String sourceId);
 }

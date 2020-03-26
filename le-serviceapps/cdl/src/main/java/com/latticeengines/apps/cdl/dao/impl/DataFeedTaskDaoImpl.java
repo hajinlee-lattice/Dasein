@@ -82,5 +82,16 @@ public class DataFeedTaskDaoImpl extends BaseDaoImpl<DataFeedTask> implements Da
         query.executeUpdate();
     }
 
-
+    @Override
+    public void updateS3ImportStatusBySource(Long pid, DataFeedTask.S3ImportStatus status) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<DataFeedTask> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s datafeedtask set s3ImportStatus=:s3ImportStatus where datafeedtask.pid=:pid",
+                entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("pid", pid);
+        query.setParameter("s3ImportStatus", status);
+        query.executeUpdate();
+    }
 }

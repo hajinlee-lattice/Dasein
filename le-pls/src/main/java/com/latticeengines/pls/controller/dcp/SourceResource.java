@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -78,6 +79,13 @@ public class SourceResource {
     @ApiOperation("Get sources by projectId")
     public List<Source> getSourceUnderProduct(@PathVariable String projectId) {
         return sourceService.getSourceList(projectId);
+    }
+
+    @PutMapping(value = "/sourceId/{sourceId}/pause")
+    @ResponseBody
+    @ApiOperation("Pause source by sourceId")
+    public Boolean pauseSource(@PathVariable String sourceId) {
+        return sourceService.pauseSource(sourceId);
     }
 
 }

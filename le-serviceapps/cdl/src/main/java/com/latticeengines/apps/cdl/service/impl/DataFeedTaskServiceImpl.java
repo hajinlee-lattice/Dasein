@@ -312,6 +312,10 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         dataFeedTaskEntityMgr.setDeleted(pid, deleted);
     }
 
+    @Override
+    public void setDataFeedTaskS3ImportStatus(String customerSpace, Long pid, DataFeedTask.S3ImportStatus status) {
+        dataFeedTaskEntityMgr.setS3ImportStatusBySource(pid, status);
+    }
     private String getSystemNameFromFeedType(String feedType) {
         if (StringUtils.isNotEmpty(feedType) && feedType.contains(SYSTEM_SPLITTER)) {
             return feedType.substring(0, feedType.lastIndexOf(SYSTEM_SPLITTER));

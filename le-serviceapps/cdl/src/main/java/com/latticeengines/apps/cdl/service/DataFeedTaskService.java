@@ -62,4 +62,6 @@ public interface DataFeedTaskService {
     DataFeedTask getDataFeedTaskBySource(String customerSpace, String sourceId);
 
     void setDataFeedTaskDelete(String customerSpace, Long pid, Boolean deleted);
+
+    void setDataFeedTaskS3ImportStatus(String customerSpace, Long pid, DataFeedTask.S3ImportStatus status);
 }

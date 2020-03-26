@@ -473,4 +473,10 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     public void setDeleted(Long pid, Boolean deleted) {
         datafeedTaskDao.updateDeleted(pid, deleted);
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void setS3ImportStatusBySource(Long pid, DataFeedTask.S3ImportStatus status) {
+        datafeedTaskDao.updateS3ImportStatusBySource(pid, status);
+    }
 }

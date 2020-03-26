@@ -332,4 +332,11 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace), pid, deleted);
         put("set DataFeedTask deleted status", url);
     }
+
+
+    public void setDataFeedTaskS3ImportStatus(String customerSpace, Long pid, DataFeedTask.S3ImportStatus status) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{pid}/S3Import/status/{status}",
+                shortenCustomerSpace(customerSpace), pid, status);
+        put("set DataFeedTask S3 import status", url);
+    }
 }

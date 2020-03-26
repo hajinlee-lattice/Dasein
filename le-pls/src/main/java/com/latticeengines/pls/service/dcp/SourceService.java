@@ -15,4 +15,6 @@ public interface SourceService {
 
     Boolean deleteSource(String sourceId);
 
+    Boolean pauseSource(String sourceId);
+
 }

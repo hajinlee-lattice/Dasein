@@ -57,4 +57,16 @@ public class SourceProxyImpl extends MicroserviceRestApiProxy implements SourceP
             return false;
         }
     }
+
+    @Override
+    public Boolean pauseSource(String customerSpace, String sourceId) {
+        String baseUrl = "/customerspaces/{customerSpace}/source/sourceId/{sourceId}/pause";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), sourceId);
+        try {
+            put("pause source", url);
+            return Boolean.TRUE;
+        } catch (RuntimeException e) {
+            return Boolean.FALSE;
+        }
+    }
 }

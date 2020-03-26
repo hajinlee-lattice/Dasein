@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
@@ -66,6 +67,7 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
         Source source = testSourceProxy.createSource(sourceRequest);
         Assert.assertNotNull(source);
+        Assert.assertEquals(source.getImportStatus(), DataFeedTask.S3ImportStatus.Active);
         Assert.assertFalse(StringUtils.isBlank(source.getSourceId()));
         Assert.assertFalse(StringUtils.isBlank(source.getFullPath()));
 
@@ -74,9 +76,11 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         Assert.assertNotEquals(source.getSourceId(), source2.getSourceId());
 
+        testSourceProxy.pauseSourceById(source.getSourceId());
         Source getSource = testSourceProxy.getSource(source.getSourceId());
         Assert.assertNotNull(getSource);
         Assert.assertEquals(getSource.getSourceId(), source.getSourceId());
+        Assert.assertEquals(getSource.getImportStatus(), DataFeedTask.S3ImportStatus.Pause);
 
         List<Source> allSources = testSourceProxy.getSourcesByProject(projectDetail.getProjectId());
         Assert.assertNotNull(allSources);
