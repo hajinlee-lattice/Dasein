@@ -35,7 +35,11 @@ import com.latticeengines.admin.service.ServiceService;
 import com.latticeengines.admin.service.TenantService;
 import com.latticeengines.admin.tenant.batonadapter.DefaultConfigOverwriter;
 import com.latticeengines.admin.tenant.batonadapter.LatticeComponent;
+import com.latticeengines.admin.tenant.batonadapter.cdl.CDLComponent;
 import com.latticeengines.admin.tenant.batonadapter.dante.DanteComponent;
+import com.latticeengines.admin.tenant.batonadapter.datacloud.DataCloudComponent;
+import com.latticeengines.admin.tenant.batonadapter.dcp.DCPComponent;
+import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
@@ -65,12 +69,16 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinitionMap;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.lifecycle.ContractInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.ContractProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
+import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -596,6 +604,78 @@ public class TenantServiceImpl implements TenantService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean createVboTenant(VboRequest vboRequest, String userName) {
+        String tenantName = vboRequest.getSubscriber().getName();
+
+        List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
+
+        // TenantInfo
+        TenantProperties tenantProperties = new TenantProperties();
+        tenantProperties.description = "A tenant created by vbo request";
+        tenantProperties.displayName = tenantName;
+        TenantInfo tenantInfo = new TenantInfo(tenantProperties);
+
+        // FeatureFlags
+        FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
+        FeatureFlagValueMap defaultValueMap = new FeatureFlagValueMap();
+        definitionMap.forEach((flagId, flagDef) -> {
+            if(flagDef.getAvailableProducts() != null) {
+                for(LatticeProduct product : flagDef.getAvailableProducts()) {
+                    if (productList.contains(product)) {
+                        boolean defaultVal = flagDef.getDefaultValue();
+                        defaultValueMap.put(flagId, defaultVal);
+                        break;
+                    }
+                }
+            } else{
+                boolean defaultVal = flagDef.getDefaultValue();
+                defaultValueMap.put(flagId, defaultVal);
+            }
+        });
+
+        // SpaceInfo
+        CustomerSpaceProperties spaceProperties = new CustomerSpaceProperties();
+        spaceProperties.description = tenantProperties.description;
+        spaceProperties.displayName = tenantProperties.displayName;
+
+        CustomerSpaceInfo spaceInfo = new CustomerSpaceInfo(spaceProperties, JsonUtils.serialize(defaultValueMap));
+
+        // SpaceConfiguration
+        SpaceConfiguration spaceConfiguration = getDefaultSpaceConfig();
+        spaceConfiguration.setProducts(productList);
+
+        List<String> services = Arrays.asList(PLSComponent.componentName, CDLComponent.componentName, DataCloudComponent.componentName, DCPComponent.componentName);
+
+        List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
+
+        for (String component : services) {
+            SerializableDocumentDirectory componentConfig = serviceService.getDefaultServiceConfig(component);
+            if(component.equalsIgnoreCase(PLSComponent.componentName)){
+                for (SerializableDocumentDirectory.Node node : componentConfig.getNodes()) {
+                    if (node.getNode().contains("ExternalAdminEmails")) {
+                        List<String> mailList = JsonUtils.convertList(JsonUtils.deserialize(node.getData(), List.class), String.class);
+                        for(VboRequest.User user : vboRequest.getProduct().getUsers()) {
+                            mailList.add(user.getEmailAddress());
+                        }
+                        node.setData(JsonUtils.serialize(mailList));
+                    }
+                }
+            }
+            componentConfig.setRootPath("/" + component);
+            configDirs.add(componentConfig);
+        }
+
+        TenantRegistration registration = new TenantRegistration();
+        registration.setContractInfo(new ContractInfo(new ContractProperties()));
+        registration.setSpaceConfig(spaceConfiguration);
+        registration.setSpaceInfo(spaceInfo);
+        registration.setTenantInfo(tenantInfo);
+        registration.setConfigDirectories(configDirs);
+
+        return createTenant(tenantName.trim(), tenantName.trim(), registration, userName);
     }
 
     private boolean danteIsEnabled(TenantDocument tenant) {

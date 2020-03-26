@@ -210,6 +210,9 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     @Override
     public IDaaSUser createIDaaSUser(IDaaSUser user) {
+        user.setAppName(DCP_PRODUCT);
+        user.setSource(DCP_PRODUCT);
+        user.setRequestor(DCP_PRODUCT);
         if (enabled) {
             initialize();
             String email = user.getEmailAddress();

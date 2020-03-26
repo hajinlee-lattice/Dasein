@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
+import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 
 public interface TenantService {
 
@@ -44,4 +45,6 @@ public interface TenantService {
     boolean danteIsEnabled(String contracId, String tenantId);
 
     boolean updateTenantInfo(String contractId, String tenantId, TenantInfo tenantInfo);
+
+    boolean createVboTenant(VboRequest vboRequest, String userName);
 }
