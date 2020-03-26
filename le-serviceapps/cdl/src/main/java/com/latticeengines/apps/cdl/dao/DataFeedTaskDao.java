@@ -21,4 +21,6 @@ public interface DataFeedTaskDao extends BaseDao<DataFeedTask> {
     List<DataFeedTask> findByEntityAndDataFeedExcludeOne(String entity, DataFeed datafeed,
                                                          String excludeSource, String excludeFeedType);
 
+    void updateS3ImportStatusBySource(Long pid, DataFeedTask.S3ImportStatus status);
+
 }

@@ -56,4 +56,13 @@ public class SourceServiceImpl implements SourceService {
         }
         return sourceProxy.deleteSource(customerSpace.toString(), sourceId);
     }
+
+    @Override
+    public Boolean pauseSource(String sourceId) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return sourceProxy.pauseSource(customerSpace.toString(), sourceId);
+    }
 }

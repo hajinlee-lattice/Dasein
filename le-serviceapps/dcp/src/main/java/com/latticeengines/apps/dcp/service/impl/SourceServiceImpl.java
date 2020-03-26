@@ -106,6 +106,16 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
+    public Boolean pauseSource(String customerSpace, String sourceId) {
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
+        if (dataFeedTask == null || dataFeedTask.getPid() == null) {
+            throw new RuntimeException(String.format("Cannot find source %s for update!", sourceId));
+        }
+        dataFeedProxy.setDataFeedTaskS3ImportStatus(customerSpace, dataFeedTask.getPid(), DataFeedTask.S3ImportStatus.Pause);
+        return true;
+    }
+
+    @Override
     public List<Source> getSourceList(String customerSpace, String projectId) {
         ProjectDetails projectDetail = projectService.getProjectDetailByProjectId(customerSpace, projectId);
         return projectDetail.getSources();

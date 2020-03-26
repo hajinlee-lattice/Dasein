@@ -60,4 +60,6 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     void setDeleted(Long pid, Boolean deleted);
 
+    void setS3ImportStatusBySource(Long pid, DataFeedTask.S3ImportStatus status);
+
 }

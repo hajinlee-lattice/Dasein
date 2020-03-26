@@ -214,4 +214,11 @@ public class DataFeedTaskResource {
         dataFeedTaskService.setDataFeedTaskDelete(customerSpace, pid, deleted);
     }
 
+    @PutMapping(value = "/{pid}/S3Import/status/{status}")
+    @ApiOperation(value = "Set data feed task s3 import status")
+    public void setDataFeedTaskS3ImportStatus(@PathVariable String customerSpace, @PathVariable Long pid,
+                                            @PathVariable DataFeedTask.S3ImportStatus status) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.setDataFeedTaskS3ImportStatus(customerSpace, pid, status);
+    }
 }

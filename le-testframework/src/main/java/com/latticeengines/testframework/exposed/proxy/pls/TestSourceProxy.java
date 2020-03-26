@@ -35,4 +35,9 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
         String url = constructUrl("/sourceId/{sourceId}", sourceId);
         delete("delete source", url);
     }
+
+    public void pauseSourceById(String sourceId) {
+        String url = constructUrl("/sourceId/{sourceId}/pause", sourceId);
+        put("pause source", url);
+    }
 }
