@@ -1,9 +1,11 @@
 package com.latticeengines.apps.dcp.end2end;
 
 import java.io.InputStream;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
@@ -43,7 +45,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private String s3FileKey;
 
     @BeforeClass(groups = {"deployment", "end2end"})
-    public void setup() throws Exception {
+    public void setup() {
         setupTestEnvironment();
     }
 
@@ -58,6 +60,18 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         ApplicationId applicationId = dcpProxy.startImport(mainCustomerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+
+        List<Upload> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
+        Assert.assertNotNull(uploadList);
+        Assert.assertEquals(uploadList.size(), 1);
+        upload = uploadList.get(0);
+    }
+
+    private void validateImport() {
+        Assert.assertNotNull(upload);
+        Assert.assertNotNull(upload.getStatus());
+        Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
+        Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
     }
 
     private void prepareTenant() {
@@ -71,6 +85,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName("ImportEnd2EndSource");
+        sourceRequest.setProjectId(projectDetails.getProjectId());
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
         source = sourceProxy.createSource(mainCustomerSpace, sourceRequest);
         // Copy test file to drop folder
