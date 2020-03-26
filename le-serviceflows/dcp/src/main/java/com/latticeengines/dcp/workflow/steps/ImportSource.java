@@ -32,7 +32,7 @@ import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-@Component("startImportSource")
+@Component("importSource")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration> {
 
