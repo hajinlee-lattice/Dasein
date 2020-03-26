@@ -636,6 +636,7 @@ public class UserServiceImpl implements UserService {
 
     private void clearSession(String tenantId, Long userId) {
         if (userId != null) {
+            LOGGER.info(String.format("Will clear sessions for user %d in %s.", userId, tenantId));
             clearSessionService.submit(() -> {
                 GlobalAuthTenant tenantData = globalTenantManagementService.findByTenantId(tenantId);
                 List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService
@@ -643,6 +644,10 @@ public class UserServiceImpl implements UserService {
                 discardTickets(globalAuthTickets, tenantData.getPid());
             });
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(String.format("Will clear user %d's Session in %s.", 1l, "tenantId"));
     }
 
     private void discardTickets(List<GlobalAuthTicket> globalAuthTickets, Long tenantId) {
