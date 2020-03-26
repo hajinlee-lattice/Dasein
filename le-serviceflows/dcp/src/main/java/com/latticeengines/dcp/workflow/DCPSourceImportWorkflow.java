@@ -16,9 +16,9 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
+@Component("dcpSourceImportWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Component("dcpSourceImportWorkflow")
 public class DCPSourceImportWorkflow extends AbstractWorkflow<DCPSourceImportWorkflowConfiguration> {
 
     @Inject
