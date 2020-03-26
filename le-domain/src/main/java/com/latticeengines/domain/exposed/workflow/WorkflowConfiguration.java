@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.dcp.BaseDCPWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.BaseLPWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.BaseModelingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflowConfiguration;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflo
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
 @JsonSubTypes({
         @Type(value = BaseCDLWorkflowConfiguration.class, name = "BaseCDLWorkflowConfiguration"),
+        @Type(value = BaseDCPWorkflowConfiguration.class, name = "BaseDCPWorkflowConfiguration"),
         @Type(value = BaseDataCloudWorkflowConfiguration.class, name = "BaseDataCloudWorkflowConfiguration"),
         @Type(value = BaseLPWorkflowConfiguration.class, name = "BaseLPWorkflowConfiguration"),
         @Type(value = BaseModelingWorkflowConfiguration.class, name = "BaseModelingWorkflowConfiguration"),
