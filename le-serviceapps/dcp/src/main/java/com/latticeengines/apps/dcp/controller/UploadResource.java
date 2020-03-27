@@ -70,7 +70,7 @@ public class UploadResource {
     @GetMapping("/{pid}")
     @ResponseBody
     @ApiOperation(value = "Get upload record by pid")
-    private Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {
+    public Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         log.info(String.format("Get upload for customer %s, with pid %d", customerSpace, pid));
         if (uploadService == null) {

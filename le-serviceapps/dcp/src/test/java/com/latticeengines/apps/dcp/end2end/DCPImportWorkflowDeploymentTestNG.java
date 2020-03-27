@@ -44,12 +44,12 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private Upload upload;
     private String s3FileKey;
 
-    @BeforeClass(groups = {"deployment", "end2end"})
+    @BeforeClass(groups = {"deployment"})
     public void setup() {
         setupTestEnvironment();
     }
 
-    @Test(groups = "end2end")
+    @Test(groups = "deployment")
     public void testImport() {
         prepareTenant();
 
