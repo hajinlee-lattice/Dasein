@@ -42,7 +42,7 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
 
     @Override
     public Upload getUpload(String customerSpace, Long uploadPid) {
-        String baseUrl = "/customerspaces/{customerSpace}/upload/{pid}";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/{pid}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid);
         return get("Get Upload by Pid", url, Upload.class);
     }

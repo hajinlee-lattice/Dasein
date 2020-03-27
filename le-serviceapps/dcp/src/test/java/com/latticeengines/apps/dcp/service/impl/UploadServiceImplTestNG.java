@@ -54,5 +54,9 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
                 Assert.assertEquals(upload.getStatus(), Upload.Status.IMPORT_STARTED);
             }
         });
+
+        Upload uploadx = uploadService.getUpload(mainCustomerSpace, upload1.getPid());
+        Assert.assertNotNull(uploadx);
+        Assert.assertEquals(uploadx.getPid(), upload1.getPid());
     }
 }

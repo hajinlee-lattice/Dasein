@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 
 public interface UploadProxy {
+
     Upload createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig);
 
     List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status);

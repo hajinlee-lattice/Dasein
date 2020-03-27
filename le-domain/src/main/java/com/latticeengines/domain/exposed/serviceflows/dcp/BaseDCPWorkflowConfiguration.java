@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "name")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = DCPSourceImportWorkflowConfiguration.class, name = "DCPSourceImportWorkflowConfiguration")})
 public class BaseDCPWorkflowConfiguration extends WorkflowConfiguration {

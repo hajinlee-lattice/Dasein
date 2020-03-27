@@ -28,18 +28,18 @@ import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "Upload", description = "REST resource for upload")
+@Api(value = "Upload")
 @RestController
 @RequestMapping(value = "/customerspaces/{customerSpace}/uploads")
 public class UploadResource {
+
+    private static final Logger log = LoggerFactory.getLogger(UploadResource.class);
 
     @Inject
     private UploadService uploadService;
 
     @Inject
     private DCPSourceImportWorkflowSubmitter importSubmitter;
-
-    private static final Logger log = LoggerFactory.getLogger(UploadResource.class);
 
     @PostMapping("/sourceId/{sourceId}")
     @ResponseBody
@@ -70,8 +70,9 @@ public class UploadResource {
     @GetMapping("/{pid}")
     @ResponseBody
     @ApiOperation(value = "Get upload record by pid")
-    private Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {
+    public Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
+        log.info(String.format("Get upload for customer %s, with pid %d", customerSpace, pid));
         return uploadService.getUpload(customerSpace, pid);
     }
 

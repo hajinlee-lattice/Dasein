@@ -21,7 +21,7 @@ public class DCPProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     public ApplicationId startImport(String customerSpace, DCPImportRequest request) {
-        String baseUrl = "/customerspaces/{customerSpace}/upload/startimport";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/startimport";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
         String appIdStr = post("Start DCP import", url, request, String.class);
         return ApplicationId.fromString(appIdStr);

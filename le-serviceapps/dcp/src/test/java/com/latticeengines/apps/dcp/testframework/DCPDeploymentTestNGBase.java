@@ -27,6 +27,9 @@ import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
+import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
+import com.latticeengines.proxy.exposed.dcp.SourceProxy;
+import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.service.impl.ContextResetTestListener;
@@ -41,14 +44,26 @@ public abstract class DCPDeploymentTestNGBase extends AbstractTestNGSpringContex
     private static final Logger log = LoggerFactory.getLogger(DCPDeploymentTestNGBase.class);
 
     protected static final String TEST_TEMPLATE_DIR = "le-serviceapps/dcp/deployment/template";
+    protected static final String TEST_DATA_DIR = "le-serviceapps/dcp/deployment/testdata";
     protected static final String TEST_TEMPLATE_NAME = "dcp-accounts-hard-coded.json";
     protected static final String TEST_TEMPLATE_VERSION = "1";
+    protected static final String TEST_DATA_VERSION = "1";
+    protected static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
 
     @Resource(name = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed testBed;
 
     @Inject
     private WorkflowProxy workflowProxy;
+
+    @Inject
+    protected ProjectProxy projectProxy;
+
+    @Inject
+    protected SourceProxy sourceProxy;
+
+    @Inject
+    protected UploadProxy uploadProxy;
 
     @Inject
     protected TestArtifactService testArtifactService;
