@@ -11,7 +11,6 @@ import org.springframework.util.StringUtils;
 
 import com.latticeengines.apps.dcp.entitymgr.UploadEntityMgr;
 import com.latticeengines.apps.dcp.service.UploadService;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
@@ -38,10 +37,7 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public Upload getUpload(String customerSpace, Long pid) {
         log.info("Try find upload in " + customerSpace + " with pid " + pid);
-        Upload upload = uploadEntityMgr.findByPid(pid);
-        log.info("Find upload with pid " + pid);
-        log.info(JsonUtils.serialize(upload));
-        return upload;
+        return uploadEntityMgr.findByPid(pid);
     }
 
     @Override

@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "Upload", description = "REST resource for upload")
+@Api(value = "Upload")
 @RestController
 @RequestMapping(value = "/customerspaces/{customerSpace}/uploads")
 public class UploadResource {
@@ -73,10 +73,6 @@ public class UploadResource {
     public Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         log.info(String.format("Get upload for customer %s, with pid %d", customerSpace, pid));
-        if (uploadService == null) {
-            log.error("Upload service is null!!");
-            return null;
-        }
         return uploadService.getUpload(customerSpace, pid);
     }
 
