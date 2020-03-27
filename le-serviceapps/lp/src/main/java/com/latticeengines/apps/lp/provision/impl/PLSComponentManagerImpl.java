@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.util.ValidateEnrichAttributesUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 @Component("lpComponentManager")
 public class PLSComponentManagerImpl implements PLSComponentManager {
@@ -286,6 +287,16 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
         log.info("maxPremiumEnrichAttributesStr is " + maxPremiumEnrichAttributesStr);
         ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumEnrichAttributesStr);
+
+        String usersInJson ;
+        try {
+            usersInJson = configDir.get("/IDaaSUsers").getDocument().getData();
+        } catch (Exception e) {
+            usersInJson = "";
+        }
+        List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
+                IDaaSUser.class);
+
         String emailListInJson;
         try {
             emailListInJson = configDir.get("/SuperAdminEmails").getDocument().getData();
