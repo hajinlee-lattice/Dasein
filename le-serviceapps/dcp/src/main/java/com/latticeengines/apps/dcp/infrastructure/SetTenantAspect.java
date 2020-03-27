@@ -23,6 +23,12 @@ public class SetTenantAspect {
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
 
+    @Before("execution(* com.latticeengines.apps.dcp.service.impl.SourceServiceImpl.*(..))")
+    public void allSourceService(JoinPoint joinPoint) {
+        String customerSpace = (String) joinPoint.getArgs()[0];
+        setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
+    }
+
     @Before("execution(* com.latticeengines.apps.dcp.service.impl.UploadServiceImpl.*(..))")
     public void allUploadService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];

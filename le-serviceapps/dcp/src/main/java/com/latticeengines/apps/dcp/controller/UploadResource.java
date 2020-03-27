@@ -73,6 +73,10 @@ public class UploadResource {
     private Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         log.info(String.format("Get upload for customer %s, with pid %d", customerSpace, pid));
+        if (uploadService == null) {
+            log.error("Upload service is null!!");
+            return null;
+        }
         return uploadService.getUpload(customerSpace, pid);
     }
 
