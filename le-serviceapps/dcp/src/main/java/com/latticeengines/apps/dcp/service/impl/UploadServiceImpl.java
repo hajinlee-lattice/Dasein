@@ -4,11 +4,14 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.latticeengines.apps.dcp.entitymgr.UploadEntityMgr;
 import com.latticeengines.apps.dcp.service.UploadService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
@@ -16,6 +19,8 @@ import com.latticeengines.domain.exposed.dcp.UploadStats;
 
 @Service("uploadService")
 public class UploadServiceImpl implements UploadService {
+
+    private static final Logger log = LoggerFactory.getLogger(UploadServiceImpl.class);
 
     @Inject
     private UploadEntityMgr uploadEntityMgr;
@@ -32,7 +37,11 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public Upload getUpload(String customerSpace, Long pid) {
-        return uploadEntityMgr.findByPid(pid);
+        log.info("Try find upload in " + customerSpace + " with pid " + pid);
+        Upload upload = uploadEntityMgr.findByPid(pid);
+        log.info("Find upload with pid " + pid);
+        log.info(JsonUtils.serialize(upload));
+        return upload;
     }
 
     @Override

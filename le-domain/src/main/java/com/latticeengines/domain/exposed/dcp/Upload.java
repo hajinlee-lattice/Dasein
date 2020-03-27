@@ -22,6 +22,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "DCP_UPLOAD", indexes = { @Index(name = "IX_SOURCE_ID", columnList = "SOURCE_ID") })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     @Id
