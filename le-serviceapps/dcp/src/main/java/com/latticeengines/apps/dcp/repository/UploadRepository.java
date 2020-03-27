@@ -12,4 +12,7 @@ public interface UploadRepository extends BaseJpaRepository<Upload, Long> {
     List<Upload> findBySourceIdAndStatus(String sourceId, Upload.Status status);
 
     Upload findByPid(Long pid);
+
+
+
 }

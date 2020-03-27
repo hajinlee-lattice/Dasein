@@ -22,6 +22,9 @@ public class UploadConfig {
     @JsonProperty("upload_imported_file_path")
     private String uploadImportedFilePath;
 
+    @JsonProperty("upload_math_result_prefix")
+    private String uploadMatchResultPrefix;
+
     @JsonProperty("upload_imported_error_file_path")
     private String uploadImportedErrorFilePath;
 
@@ -55,6 +58,22 @@ public class UploadConfig {
 
     public void setUploadImportedFilePath(String uploadImportedFilePath) {
         this.uploadImportedFilePath = uploadImportedFilePath;
+    }
+
+    public String getUploadMatchResultPrefix() {
+        return uploadMatchResultPrefix;
+    }
+
+    public void setUploadMatchResultPrefix(String uploadMatchResultPrefix) {
+        this.uploadMatchResultPrefix = uploadMatchResultPrefix;
+    }
+
+    public String getUploadMatchResultAccepted() {
+        return uploadMatchResultPrefix + "accepted.csv";
+    }
+
+    public String getUploadMatchResultRejected() {
+        return uploadMatchResultPrefix + "rejected.csv";
     }
 
     public String getUploadImportedErrorFilePath() {

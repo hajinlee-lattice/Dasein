@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.dcp.provision.DCPComponentManager;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.config.bootstrap.ServiceWarden;
 import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.domain.exposed.camille.bootstrap.CustomerSpaceServiceDestroyer;
@@ -19,6 +18,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.ServiceProperties;
 public class DCPComponent {
 
     private final DCPComponentManager componentManager;
+    private final BatonService batonService;
 
     public static final String componentName = "DCP";
     private static final String versionString = "2.0";
@@ -26,16 +26,16 @@ public class DCPComponent {
     private DCPDestroyer destroyer = new DCPDestroyer();
 
     @Inject
-    public DCPComponent(DCPComponentManager componentManager) {
+    public DCPComponent(DCPComponentManager componentManager, BatonService batonService) {
         this.componentManager = componentManager;
+        this.batonService = batonService;
     }
 
     private static String getVersionString() { return versionString; }
 
     @PostConstruct
-    private void registerBootStrapper() {
+    private void postConstruct() {
         if (BeanFactoryEnvironment.Environment.WebApp.equals(BeanFactoryEnvironment.getEnvironment())) {
-            BatonService batonService = new BatonServiceImpl();
             if (!batonService.getRegisteredServices().contains(componentName)) {
                 ServiceProperties serviceProps = new ServiceProperties();
                 serviceProps.dataVersion = 1;

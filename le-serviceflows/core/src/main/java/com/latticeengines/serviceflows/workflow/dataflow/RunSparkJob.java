@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,6 +13,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.util.ReflectionUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -87,6 +89,15 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
             SparkJobStepConfiguration sparkJobStepConfiguration = (SparkJobStepConfiguration) stepConfiguration;
             return CustomerSpace.parse(sparkJobStepConfiguration.getCustomer());
         } else {
+            Method method = ReflectionUtils.findMethod(stepConfiguration.getClass(), "getCustomerSpace");
+            if (method != null) {
+                if (CustomerSpace.class.equals(method.getReturnType())) {
+                    return (CustomerSpace) ReflectionUtils.invokeMethod(method, stepConfiguration);
+                } else if (String.class.equals(method.getReturnType())) {
+                    String customerSpaceStr = (String) ReflectionUtils.invokeMethod(method, stepConfiguration);
+                    return CustomerSpace.parse(customerSpaceStr);
+                }
+            }
             throw new UnsupportedOperationException("Do not know how to parse customer space from a " //
                     + stepConfiguration.getClass().getCanonicalName());
         }

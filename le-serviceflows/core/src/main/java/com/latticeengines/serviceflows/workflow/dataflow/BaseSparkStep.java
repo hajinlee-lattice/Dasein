@@ -1,5 +1,8 @@
 package com.latticeengines.serviceflows.workflow.dataflow;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,13 +11,19 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.support.RetryTemplate;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
@@ -57,6 +66,9 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     @Resource(name = "yarnConfiguration")
     protected Configuration yarnConfiguration;
+
+    @Inject
+    private S3Service s3Service;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -180,5 +192,41 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
     protected void setSparkMaxResultSize(String maxResultSize) {
         this.sparkMaxResultSize = maxResultSize;
         log.info("Adjust sparkMaxResultSize to " + this.sparkMaxResultSize);
+    }
+
+    protected String getFirstCsvFilePath(HdfsDataUnit dataUnit) {
+        String outputDir = dataUnit.getPath();
+        try {
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, outputDir, //
+                    (HdfsUtils.HdfsFilenameFilter) filename -> //
+                            filename.endsWith(".csv.gz") || filename.endsWith(".csv"));
+            return files.get(0);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read " + outputDir);
+        }
+    }
+
+    protected void copyToS3(String hdfsPath, String s3Path) throws IOException {
+        copyToS3(hdfsPath, s3Path, null, null);
+    }
+
+    protected void copyToS3(String hdfsPath, String s3Path, String tag, String tagValue) throws IOException {
+        log.info("Copy from " + hdfsPath + " to " + s3Path);
+        long fileSize = HdfsUtils.getFileSize(yarnConfiguration, hdfsPath);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AmazonS3Exception.class), null);
+        retry.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info(String.format("(Attempt=%d) Retry copying file from hdfs://%s to s3://%s/%s", //
+                        context.getRetryCount() + 1, hdfsPath, s3Bucket, s3Path));
+            }
+            try (InputStream stream = HdfsUtils.getInputStream(yarnConfiguration, hdfsPath)) {
+                s3Service.uploadInputStreamMultiPart(s3Bucket, s3Path, stream, fileSize);
+                if (StringUtils.isNotBlank(tag) && StringUtils.isNotBlank(tagValue)) {
+                    s3Service.addTagToObject(s3Bucket, s3Path, tag, tagValue);
+                }
+            }
+            return true;
+        });
     }
 }

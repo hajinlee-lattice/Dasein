@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.metadata.annotation.AttributePropertyBag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
@@ -293,7 +294,6 @@ public final class AttributeUtils {
             metadata.removeApprovedUsageList();
         }
 
-
         if (CollectionUtils.isNotEmpty(attr.getGroupsAsList())) {
             Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
             attr.getGroupsAsList().forEach(g -> map.put(g, true));
@@ -306,6 +306,9 @@ public final class AttributeUtils {
         metadata.setBitOffset(attr.getBitOffset());
         metadata.setNumBits(attr.getNumOfBits());
         metadata.setPhysicalName(attr.getPhysicalName());
+        if (CollectionUtils.isNotEmpty(attr.getTags())) {
+            metadata.setTagList(attr.getTags().stream().map(Tag::fromName).collect(Collectors.toList()));
+        }
         if (CollectionUtils.isNotEmpty(attr.getApprovedUsage())) {
             metadata.setApprovedUsageList(attr.getApprovedUsage().stream().map(ApprovedUsage::fromName)
                     .collect(Collectors.toList()));

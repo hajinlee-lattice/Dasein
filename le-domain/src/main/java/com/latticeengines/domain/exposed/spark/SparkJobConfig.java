@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
 import com.latticeengines.domain.exposed.spark.common.MultiCopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
+import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig;
 
 import reactor.core.publisher.Flux;
 
@@ -99,7 +100,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CountOrphanTransactionsConfig.class, name = CountOrphanTransactionsConfig.NAME),
         @JsonSubTypes.Type(value = LegacyDeleteJobConfig.class, name = LegacyDeleteJobConfig.NAME),
         @JsonSubTypes.Type(value = SelectByColumnConfig.class, name = SelectByColumnConfig.NAME), //
-        @JsonSubTypes.Type(value = MergeCSVConfig.class, name = MergeCSVConfig.NAME)
+        @JsonSubTypes.Type(value = MergeCSVConfig.class, name = MergeCSVConfig.NAME), //
+        @JsonSubTypes.Type(value = SplitImportMatchResultConfig.class, name = SplitImportMatchResultConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 

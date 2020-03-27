@@ -78,7 +78,7 @@ PRESETS = {
                  'quartz', 'sqoop']
     },
     'dcp': {
-        'apps': ['admin', 'pls', 'lp', 'cdl', 'dcp', 'matchapi', 'metadata',
+        'apps': ['admin', 'pls', 'lp', 'cdl', 'dcp', 'matchapi', 'metadata', 'modeling',
                  'dataflowapi', 'workflowapi', 'eai', 'datacloudapi']
     },
     'benchmark': {
