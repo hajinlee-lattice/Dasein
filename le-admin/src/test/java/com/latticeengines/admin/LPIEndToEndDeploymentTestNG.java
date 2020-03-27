@@ -43,6 +43,8 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
+import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
@@ -84,7 +86,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     /**
      * In setup, orchestrateForInstall a full tenant.
      **/
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment")
     public void setup() {
         tenantId = testContract + tenantId + System.currentTimeMillis();
         contractId = tenantId;
@@ -95,7 +97,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
     }
 
-    @AfterClass(groups = "deployment", enabled = false)
+    @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         cleanup();
     }
@@ -119,6 +121,42 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         Thread.sleep(10000);
         log.info("Uninstall again and again with wiping out ZK.");
         deleteTenant(contractId, tenantId);
+    }
+
+    @Test(groups = "deployment")
+    public void testVboEnd2End() throws Exception {
+        provisionEndToEndVboTestTenants();
+        log.info("Verify installation");
+        verifyZKState();
+        verifyPLSTenantExists();
+
+        log.info("Uninstall again with wiping out ZK.");
+        deleteTenant(contractId, tenantId);
+    }
+
+    private void provisionEndToEndVboTestTenants() {
+        String url = getRestHostPort() + "/admin/tenants/vboadmin";
+
+        VboRequest req = new VboRequest();
+        VboRequest.Product pro = new VboRequest.Product();
+        VboRequest.User user = new VboRequest.User();
+        VboRequest.Name name = new VboRequest.Name();
+        name.setFirstName("test");
+        name.setLastName("test");
+        user.setName(name);
+        user.setEmailAddress("test@test.com");
+
+        pro.setUsers(new ArrayList<VboRequest.User>());
+        pro.getUsers().add(user);
+        req.setProduct(pro);
+        VboRequest.Subscriber sub = new VboRequest.Subscriber();
+        sub.setName(tenantId);
+        req.setSubscriber(sub);
+
+        VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getStatus(), "success");
     }
 
     // ==================================================
@@ -225,8 +263,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<String> lp3ServiceNames = new ArrayList<>();
         for (String serviceName : serviceNames) {
             if (!(serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
-                    || (plsSkipped && serviceName.equals(PLSComponent.componentName)))) {
-                lp3ServiceNames.add(serviceName);
+                    || (plsSkipped && serviceName.equals(PLSComponent.componentName)))) { lp3ServiceNames.add(serviceName);
             }
         }
 
