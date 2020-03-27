@@ -43,7 +43,6 @@ public enum LatticeFeatureFlag {
     ADVANCED_MODELING("AdvancedModeling", "Allow advanced modeling"), //
     MIGRATION_TENANT("MigrationTenant", "Allows features created only for playmaker migration tenants"), //
     ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
-    ENABLE_LINKEDIN_INTEGRATION("EnableLinkedInIntegration", "Enable LinkedIn integration"), //
     ENABLE_OUTREACH_INTEGRATION("EnableOutreachIntegration", "Enable Outreach integration"), //
     ENABLE_GOOGLE_INTEGRATION("EnableGoogleIntegration", "Enable Google integration"), //
     ENABLE_DELTA_CALCULATION("EnableDeltaCalculation", "Enable Delta Calculation"), //
@@ -83,7 +82,9 @@ public enum LatticeFeatureFlag {
     @Deprecated
     ENABLE_TARGET_SCORE_DERIVATION(true, "EnableTargetScoreDerivation", "Enable Target Score Derivation"), //
     @Deprecated
-    ALWAYS_ON_CAMPAIGNS(true, "AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns");
+    ALWAYS_ON_CAMPAIGNS(true, "AlwaysOnCampaigns", "Allow updated Campagin Dashboard UI for Always On Campaigns"), //
+    @Deprecated
+    ENABLE_LINKEDIN_INTEGRATION(true, "EnableLinkedInIntegration", "Enable LinkedIn integration");
 
     private static Set<String> names;
 
