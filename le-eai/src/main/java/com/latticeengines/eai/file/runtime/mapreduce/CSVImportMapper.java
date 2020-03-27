@@ -192,12 +192,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     }
 
     private String getFileName(String fileName, String fileType, int fileIndex) {
-        StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(fileName);
-        stringBuffer.append(UNDERSCORE);
-        stringBuffer.append(fileIndex);
-        stringBuffer.append(fileType);
-        return stringBuffer.toString();
+        return fileName + UNDERSCORE + fileIndex + fileType;
     }
 
     private void handleProcess(int index) throws IOException {
@@ -234,7 +229,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         if (!uploadAvroRecord) {
             File file = new File(avroFileName);
-            file.delete();
+            if (!file.delete()) {
+                LOG.error("Cannot delete file " + avroFileName);
+            }
         }
     }
 
@@ -276,7 +273,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         return path;
     }
 
-    private void process(Context context) throws IOException {
+    private void process(Context context) {
         if (StringUtils.isEmpty(table.getName())) {
             avroFile = "file";
         } else {
@@ -328,7 +325,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
                 finishReading = true;
                 // wait for all the threads done
-                CompletableFuture.allOf(futures.stream().toArray(CompletableFuture[]::new)).join();
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
                 service.shutdown();
             }
         } catch (Exception e) {
@@ -463,12 +460,14 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 File errorFileToUpload = new File(ImportProperty.ERROR_FILE);
                 try {
                     if (!errorFileToUpload.exists()) {
-                        errorFileToUpload.createNewFile();
+                        if (!errorFileToUpload.createNewFile()) {
+                            LOG.error("Cannot create error log file!");
+                        }
                     }
                     try (FileOutputStream fileOutputStream = new FileOutputStream(errorFileToUpload)) {
                         fileOutputStream.write(StringUtils.join(ImportProperty.ERROR_HEADER, ",").getBytes());
                         fileOutputStream.write(CRLF.getBytes());
-                        Arrays.asList(errorFiles).sort(File::compareTo);
+                        Arrays.sort(errorFiles, File::compareTo);
                         for (File errorFile : errorFiles) {
                             try (FileInputStream inputStream = new FileInputStream(errorFile)) {
                                 IOUtils.copy(inputStream, fileOutputStream);
@@ -519,7 +518,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
         private boolean hasErrorRecord = false;
 
-        ConvertCSVToAvro(CSVPrinter csvFilePrinter, DataFileWriter dataFileWriter) {
+        ConvertCSVToAvro(CSVPrinter csvFilePrinter, DataFileWriter<GenericRecord> dataFileWriter) {
             this.avroRecord = new GenericData.Record(schema);
             this.csvFilePrinter = csvFilePrinter;
             this.dataFileWriter = dataFileWriter;
@@ -567,7 +566,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         private GenericRecord toGenericRecord(CSVRecord csvRecord, long lineNum) {
-            Map<String, String> headerCaseMapping = headers.stream().collect(Collectors.toMap(header -> header.toLowerCase(),
+            Map<String, String> headerCaseMapping = headers.stream().collect(Collectors.toMap(String::toLowerCase,
                     header -> header));
             for (Attribute attr : table.getAttributes()) {
                 Object avroFieldValue = null;
@@ -642,8 +641,18 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     }
                 }
             }
-            avroRecord.put(InterfaceName.InternalId.name(), lineNum);
+            avroRecord.put(InterfaceName.InternalId.name(), getInternalIdObj(lineNum));
             return avroRecord;
+        }
+
+        private Object getInternalIdObj(long lineNum) {
+            if (table.getAttribute(InterfaceName.InternalId.name()) != null) {
+                Attribute attr = table.getAttribute(InterfaceName.InternalId.name());
+                Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
+                return toAvro(String.valueOf(lineNum), avroType, attr, true);
+            } else {
+                return lineNum;
+            }
         }
 
         private Object toAvro(String fieldCsvValue, Type avroType, Attribute attr, boolean trimInput) {
@@ -655,11 +664,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
                 switch (avroType) {
                     case DOUBLE:
-                        return new Double(parseStringToNumber(fieldCsvValue).doubleValue());
+                        return parseStringToNumber(fieldCsvValue).doubleValue();
                     case FLOAT:
-                        return new Float(parseStringToNumber(fieldCsvValue).floatValue());
+                        return parseStringToNumber(fieldCsvValue).floatValue();
                     case INT:
-                        return new Integer(parseStringToNumber(fieldCsvValue).intValue());
+                        return parseStringToNumber(fieldCsvValue).intValue();
                     case LONG:
                         if (isEmptyString(fieldCsvValue)) {
                             return null;
@@ -669,7 +678,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             // DP-11078 Add Time Zone Validation to Import Workflow
                             //　timezone is ISO 8601, value should be in T&Z format
                             checkTimeZoneValidity(fieldCsvValue, attr.getTimezone());
-                            Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
+                            long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue, attr.getDateFormatString(),
                                     attr.getTimeFormatString(), attr.getTimezone());
                             if (timestamp < 0) {
                                 // In order to support the requirements of:
@@ -686,7 +695,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                             }
                             return timestamp;
                         } else {
-                            return new Long(parseStringToNumber(fieldCsvValue).longValue());
+                            return parseStringToNumber(fieldCsvValue).longValue();
                         }
                     case STRING:
                         if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
@@ -698,7 +707,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                                 return fieldCsvValue;
                             }
                             try {
-                                Long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue);
+                                long timestamp = TimeStampConvertUtils.convertToLong(fieldCsvValue);
                                 if (timestamp < 0) {
                                     throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
                                             " using conversion library");
@@ -709,7 +718,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                                 //LOG.warn(String.format("Error parsing date using TimeStampConvertUtils for column %s with " +
                                 //        "value %s.", attr.getName(), fieldCsvValue));
                                 DateTimeFormatter dtf = ISODateTimeFormat.dateTimeParser();
-                                Long timestamp = dtf.parseDateTime(fieldCsvValue).getMillis();
+                                long timestamp = dtf.parseDateTime(fieldCsvValue).getMillis();
                                 if (timestamp < 0) {
                                     throw new IllegalArgumentException("Cannot parse: " + fieldCsvValue +
                                             " using conversion library or ISO 8601 Format");
