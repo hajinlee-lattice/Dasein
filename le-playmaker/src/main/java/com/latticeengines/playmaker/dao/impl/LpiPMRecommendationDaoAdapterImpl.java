@@ -142,6 +142,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
         long queryOffset = -1L;
         List<LaunchSummary> summaries = lpiPMPlay.getLaunchSummariesFromDashboard(latestLaunchFlag, start, playIds, syncDestination, orgInfo);
         if (CollectionUtils.isEmpty(summaries)) {
+            log.info("No launch summaries returned from getPlayLaunchDashboard.");
             return Pair.of(queryOffset, launchIdsToQuery);
         }
         summaries.sort((summary1, summary2) -> {
