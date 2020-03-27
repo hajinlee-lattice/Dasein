@@ -1,5 +1,6 @@
 package com.latticeengines.pls.end2end.dcp;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
@@ -49,8 +50,6 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
     private static final Logger log = LoggerFactory.getLogger(ProjectSourceUploadDeploymentTestNG.class);
 
-    private static final String FILE_NAME = "dcp.html";
-
     private static final String PROJECT_NAME = "testProjectName";
 
     private static final String PROJECT_ID = "testProjectId";
@@ -84,7 +83,6 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     @Test(groups = "deployment", enabled = false)
     public void testFlow() {
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
-
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
 
         ProjectRequest projectRequest = new ProjectRequest();
@@ -207,7 +205,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
             if (count > 3) {
                 log.info("Verify access, attempt=" + count);
             }
-            String objectKey = prefix  + FILE_NAME;
+            String objectKey = prefix  + "test";
             if (upload) {
                 uploadFile(s3Client, bucket, objectKey);
             }
@@ -220,8 +218,8 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     }
 
     private void uploadFile(AmazonS3 s3Client, String bucket, String objectKey) {
-        InputStream inputStream = Thread.currentThread().getContextClassLoader() //
-                .getResourceAsStream(SOURCE_FILE_LOCAL_PATH + FILE_NAME);
+        String content = "this is one test";
+        InputStream inputStream = new ByteArrayInputStream(content.getBytes());
         ObjectMetadata om = new ObjectMetadata();
         om.setSSEAlgorithm("AES256");
         PutObjectRequest request = new PutObjectRequest(bucket, objectKey, inputStream, om)
