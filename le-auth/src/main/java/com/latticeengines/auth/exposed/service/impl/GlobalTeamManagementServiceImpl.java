@@ -1,5 +1,6 @@
 package com.latticeengines.auth.exposed.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -129,6 +130,8 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
                     globalAuthUserTenantRightEntityMgr.findByEmailsAndTenantId(teamMembers,
                             tenantData.getPid());
             globalAuthTeam.setUserTenantRights(globalAuthUserTenantRights);
+        } else {
+            globalAuthTeam.setUserTenantRights(new ArrayList<>());
         }
     }
 

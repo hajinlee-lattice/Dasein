@@ -11,6 +11,8 @@
 
     <bean id="plsMultiTenancyAspect" class="com.latticeengines.pls.entitymanager.impl.PlsMultiTenantEntityMgrAspect" />
 
+	<bean id="plsValidateTeamMemberRightsAspect" class="com.latticeengines.pls.service.impl.PlsValidateTeamMemberRightsAspect" />
+
 	<bean id="setGAMultiTenantStrategyInPls" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetClass" value="com.latticeengines.db.exposed.util.MultiTenantContext" />
 		<property name="targetMethod" value="setStrategy" />
