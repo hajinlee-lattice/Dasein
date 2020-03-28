@@ -233,6 +233,7 @@ public class SourceColumn implements HasPid, Serializable {
         STANDARD_DOMAIN, //
         CONVERT_TYPE, //
         BIT_ENCODE, //
-        STORE_DEFAULT;
+        MOCK_UP,  //
+        DEPRECATED;
     }
 }

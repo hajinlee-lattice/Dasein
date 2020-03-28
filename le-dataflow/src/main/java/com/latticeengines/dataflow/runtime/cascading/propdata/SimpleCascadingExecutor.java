@@ -66,8 +66,7 @@ public class SimpleCascadingExecutor {
     }
 
     public void transformCsvToAvro(CsvToAvroFieldMapping fieldMapping, String uncompressedFilePath, String avroDirPath,
-            String delimiter, String qualifier, String charset, boolean treatEqualQuoteSpecial,
-            Map<String, String> columnDefaultValueMapping) throws IOException {
+            String delimiter, String qualifier, String charset, boolean treatEqualQuoteSpecial) throws IOException {
         delimiter = delimiter == null ? CSV_DELIMITER : delimiter;
         log.info(String.format("Delimiter: %s, Qualifier: %s", delimiter, qualifier));
 
@@ -83,12 +82,6 @@ public class SimpleCascadingExecutor {
 
         Tap<?, ?, ?> csvTap = new Hfs(textDelimited, uncompressedFilePath);
         Tap<?, ?, ?> avroTap = new Hfs(avroScheme, avroDirPath, SinkMode.REPLACE);
-
-        // check if we need to fill in default values for null cells
-        if ((columnDefaultValueMapping != null) && (columnDefaultValueMapping.size() != 0)) {
-            // replace the source tap with the updated tap which has default values
-            csvTap = fillInDefaultValue(csvTap, uncompressedFilePath, columnDefaultValueMapping);
-        }
 
         Pipe csvToAvroPipe = new Pipe(CSV_TO_AVRO_PIPE);
 

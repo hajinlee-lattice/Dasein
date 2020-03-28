@@ -27,9 +27,6 @@ public class IngestedFileToSourceParameters extends TransformationFlowParameters
     @JsonProperty("CompressType")
     private CompressType compressType;
 
-    @JsonProperty("EnableDefaultValue")
-    private boolean enableDefaultValue;
-
     @JsonIgnore
     private String applicationId;
 
@@ -95,13 +92,5 @@ public class IngestedFileToSourceParameters extends TransformationFlowParameters
 
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
-    }
-
-    public boolean isEnableDefaultValue() {
-        return enableDefaultValue;
-    }
-
-    public void setEnableDefaultValue(boolean enableDefaultValue) {
-        this.enableDefaultValue = enableDefaultValue;
     }
 }

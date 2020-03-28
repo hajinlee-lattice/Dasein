@@ -23,9 +23,6 @@ public class IngestedFileToSourceTransformerConfig extends TransformerConfig {
     @JsonProperty("CompressType")
     private CompressType compressType;
 
-    @JsonProperty("EnableDefaultValue")
-    private boolean enableDefaultValue;
-
     public String getQualifier() {
         return qualifier;
     }
@@ -76,13 +73,5 @@ public class IngestedFileToSourceTransformerConfig extends TransformerConfig {
 
     public enum CompressType {
         GZ, ZIP
-    }
-
-    public boolean isEnableDefaultValue() {
-        return enableDefaultValue;
-    }
-
-    public void setEnableDefaultValue(boolean enableDefaultValue) {
-        this.enableDefaultValue = enableDefaultValue;
     }
 }
