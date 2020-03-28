@@ -2,9 +2,8 @@ package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -38,6 +37,7 @@ import com.latticeengines.dataflow.runtime.cascading.propdata.SimpleCascadingExe
 import com.latticeengines.domain.exposed.datacloud.EngineConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.source.IngestedFileToSourceParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn;
+import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.source.IngestedFileToSourceTransformerConfig.CompressType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -59,11 +59,17 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
     @Inject
     protected SourceColumnEntityMgr sourceColumnEntityMgr;
 
-    Map<String, String> columnDefaultValueMapping = null;
-
     public void executeDataFlow(Source source, String workflowDir, String baseVersion,
             IngestedFileToSourceParameters parameters) {
-        CsvToAvroFieldMappingImpl fieldTypeMapping = new CsvToAvroFieldMappingImpl(parameters.getColumns());
+        List<SourceColumn> columns = new LinkedList<>();
+        // For IngestFileToSource flow, the target columns should all have
+        // COLUMN_NAME_MAPPING calculation type
+        for (SourceColumn column : parameters.getColumns()) {
+            if (column.getCalculation() == Calculation.COLUMN_NAME_MAPPING) {
+                columns.add(column);
+            }
+        }
+        CsvToAvroFieldMappingImpl fieldTypeMapping = new CsvToAvroFieldMappingImpl(columns);
         String ingestionDir = hdfsPathBuilder.constructIngestionDir(parameters.getIngestionName(), baseVersion)
                 .toString();
         log.info("Ingestion Directory: " + ingestionDir);
@@ -100,13 +106,6 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
             Path path = new Path(files.get(0));
             String searchWildCard = new Path(path.getParent(), "*" + parameters.getFileNameOrExtension()).toString();
             log.info("SearchWildCard: " + searchWildCard);
-
-            boolean enableDefaultValue = parameters.isEnableDefaultValue();
-            // If enableDefaultValue set to true, get the column and default value mapping
-            // from SourceColumn
-            if (enableDefaultValue) {
-                columnDefaultValueMapping = getColumnDefaultValueMapping();
-            }
 
             convertCsvToAvro(fieldTypeMapping, searchWildCard, workflowDir, parameters);
             if (HdfsUtils.isDirectory(yarnConfiguration, uncompressedDir.toString())) {
@@ -231,22 +230,7 @@ public class IngestedFileToSourceDataFlowService extends AbstractTransformationD
     private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping, String inputPath, String outputPath,
             IngestedFileToSourceParameters parameters) throws IOException {
         simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, inputPath, outputPath, parameters.getDelimiter(),
-                parameters.getQualifier(), parameters.getCharset(), false, columnDefaultValueMapping);
-    }
-
-    private Map<String, String> getColumnDefaultValueMapping() {
-        Map<String, String> columnDefaultValueMapping = new HashMap<>();
-        List<SourceColumn> columns = sourceColumnEntityMgr.getSourceColumns("DnBCacheSeedDefault");
-        for (SourceColumn column : columns) {
-            if ((column.getCalculation() == SourceColumn.Calculation.STORE_DEFAULT) && (!column.getArguments().equalsIgnoreCase("NULL"))){
-                columnDefaultValueMapping.put(column.getColumnName(), column.getArguments());
-            }
-        }
-        log.info("Columns with default values are: ");
-        for (String key : columnDefaultValueMapping.keySet()) {
-            log.info("Column name: " + key + ", default value: " + columnDefaultValueMapping.get(key));
-        }
-        return columnDefaultValueMapping;
+                parameters.getQualifier(), parameters.getCharset(), false);
     }
 
     private void sendUncompressFailureNotification(String file, String applicationId) {

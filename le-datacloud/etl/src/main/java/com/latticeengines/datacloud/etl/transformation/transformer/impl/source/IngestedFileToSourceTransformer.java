@@ -79,7 +79,6 @@ public class IngestedFileToSourceTransformer
         parameters.setFileNameOrExtension(config.getFileNameOrExtension());
         parameters.setCompressedFileNameOrExtension(config.getCompressedFileNameOrExtension());
         parameters.setCompressType(config.getCompressType());
-        parameters.setEnableDefaultValue(config.isEnableDefaultValue());
     }
 
     @Override

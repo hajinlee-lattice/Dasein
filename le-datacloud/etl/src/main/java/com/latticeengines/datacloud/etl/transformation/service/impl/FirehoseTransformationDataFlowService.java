@@ -38,9 +38,8 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
     private CsvToAvroFieldMapping fieldTypeMapping;
 
-    public void executeDataProcessing(Source source, String workflowDir, String baseVersion,
-                                      String uid, String dataFlowBean,
-                                      TransformationConfiguration transformationConfiguration) {
+    public void executeDataProcessing(Source source, String workflowDir, String baseVersion, String uid,
+            String dataFlowBean, TransformationConfiguration transformationConfiguration) {
         if (StringUtils.isEmpty(dataFlowBean) || fieldTypeMapping == null) {
             throw new LedpException(LedpCode.LEDP_25012,
                     new String[] { source.getSourceName(),
@@ -50,15 +49,13 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
 
         FileInputSourceConfig inputConfig = null;
         try {
-            inputConfig = (FileInputSourceConfig) transformationConfiguration
-                    .getInputSourceConfig();
+            inputConfig = (FileInputSourceConfig) transformationConfiguration.getInputSourceConfig();
         } catch (UnsupportedOperationException e1) {
             throw new LedpException(LedpCode.LEDP_25022, e1);
         }
 
         if (source instanceof DataImportedFromHDFS) {
-            String inputDir = ((DataImportedFromHDFS) source).getHDFSPathToImportFrom()
-                    .append(baseVersion).toString();
+            String inputDir = ((DataImportedFromHDFS) source).getHDFSPathToImportFrom().append(baseVersion).toString();
             log.info("Ingestion DIR: " + inputDir);
             List<String> gzHdfsPaths = null;
 
@@ -72,8 +69,7 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
                 for (int i = 0; i < gzHdfsPaths.size(); i++) {
                     String gzHdfsPath = gzHdfsPaths.get(i);
                     String uncompressedFilePath = new Path(workflowDir,
-                            UNCOMPRESSED_FILE + String.format("%04d", i) + EngineConstants.CSV)
-                                    .toString();
+                            UNCOMPRESSED_FILE + String.format("%04d", i) + EngineConstants.CSV).toString();
                     log.info("UncompressedFilePath: " + uncompressedFilePath);
                     untarGZFile(gzHdfsPath, uncompressedFilePath);
                 }
@@ -83,44 +79,10 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
                 String uncompressedFilePathWildcard = new Path(workflowDir,
                         UNCOMPRESSED_FILE + "*" + EngineConstants.CSV).toString();
                 log.info("uncompressedFilePathWildcard: " + uncompressedFilePathWildcard);
-                convertCsvToAvro(fieldTypeMapping, uncompressedFilePathWildcard, avroDirPath,
-                        inputConfig);
+                convertCsvToAvro(fieldTypeMapping, uncompressedFilePathWildcard, avroDirPath, inputConfig);
             } catch (IOException e) {
                 throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
             }
-
-            /*
-            for (int i = 0; i < gzHdfsPaths.size(); i++) {
-                String gzHdfsPath = gzHdfsPaths.get(i);
-                String uncompressedFilePath = new Path(workflowDir,
-                        UNCOMPRESSED_FILE + String.format("%04d", i) + EngineConstants.CSV)
-                                .toString();
-                log.info("UncompressedFilePath: " + uncompressedFilePath);
-                String avroDirPath = new Path(workflowDir, new Path(AVRO_DIR_FOR_CONVERSION,
-                        UNCOMPRESSED_FILE + String.format("%04d", i))).toString();
-                log.info("AvroDirPath: " + avroDirPath);
-
-                try {
-                    untarGZFile(gzHdfsPath, uncompressedFilePath);
-                    convertCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath,
-                            inputConfig);
-                    List<String> avroFilePaths = scanDir(avroDirPath, EngineConstants.AVRO);
-                    for (String avroFilePath : avroFilePaths) {
-                        Path srcAvroFilePath = new Path(avroFilePath);
-                        Path dstAvroFilePath = new Path(
-                                new Path(workflowDir, AVRO_DIR_FOR_CONVERSION),
-                                UNCOMPRESSED_FILE + String.format("%04d", i) + "-"
-                                        + srcAvroFilePath.getName());
-                        HdfsUtils.moveFile(yarnConfiguration, avroFilePath,
-                                dstAvroFilePath.toString());
-                        log.info("SrcAvroFilePath: " + srcAvroFilePath.toString());
-                        log.info("DstAvroFilePath: " + dstAvroFilePath.toString());
-                    }
-                } catch (IOException e) {
-                    throw new LedpException(LedpCode.LEDP_25012, source.getSourceName(), e);
-                }
-            }
-            */
         }
     }
 
@@ -154,11 +116,10 @@ public class FirehoseTransformationDataFlowService extends AbstractTransformatio
         HdfsUtils.uncompressGZFileWithinHDFS(yarnConfiguration, gzHdfsPath, uncompressedFilePath);
     }
 
-    private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping,
-            String uncompressedFilePath, String avroDirPath, FileInputSourceConfig inputConfig)
-                    throws IOException {
+    private void convertCsvToAvro(CsvToAvroFieldMapping fieldTypeMapping, String uncompressedFilePath,
+            String avroDirPath, FileInputSourceConfig inputConfig) throws IOException {
         simpleCascadingExecutor.transformCsvToAvro(fieldTypeMapping, uncompressedFilePath, avroDirPath,
-                inputConfig.getDelimiter(), inputConfig.getQualifier(), inputConfig.getCharset(), true, null);
+                inputConfig.getDelimiter(), inputConfig.getQualifier(), inputConfig.getCharset(), true);
     }
 
     public void setFieldTypeMapping(CsvToAvroFieldMapping fieldTypeMapping) {
