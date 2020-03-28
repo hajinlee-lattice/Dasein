@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.auth.exposed.service.impl.GlobalAuthDependencyChecker;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
@@ -193,13 +194,17 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public List<GlobalTeam> getTeamsInContext() {
         User loginUser = MultiTenantContext.getUser();
-        return getTeams(loginUser);
+        try (PerformanceTimer timer = new PerformanceTimer(String.format("User %s requests to query teams.", loginUser.getEmail()))) {
+            return getTeams(loginUser);
+        }
     }
 
     @Override
     public GlobalTeam getTeamInContext(String teamId) {
         if (StringUtils.isNotEmpty(teamId)) {
-            return getTeamByTeamId(teamId, MultiTenantContext.getUser());
+            try (PerformanceTimer timer = new PerformanceTimer(String.format("Get team with teamId %s.", teamId))) {
+                return getTeamByTeamId(teamId, MultiTenantContext.getUser());
+            }
         } else {
             return null;
         }
