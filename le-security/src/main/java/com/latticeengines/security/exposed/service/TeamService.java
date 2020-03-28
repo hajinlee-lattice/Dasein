@@ -19,9 +19,15 @@ public interface TeamService {
 
     Boolean editTeam(User loginUser, String teamId, GlobalTeamData globalTeamData);
 
+    Boolean editTeam(String teamId, GlobalTeamData globalTeamData);
+
     Boolean deleteTeam(String teamId);
 
     Map<String, List<String>> getDependencies(String teamId) throws Exception;
 
     boolean userBelongsToTeam(String username, String teamId);
+
+    List<GlobalTeam> getTeamsInContext();
+
+    GlobalTeam getTeamInContext(String teamId);
 }

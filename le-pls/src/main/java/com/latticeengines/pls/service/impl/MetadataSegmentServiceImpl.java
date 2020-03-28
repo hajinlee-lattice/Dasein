@@ -29,7 +29,6 @@ import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.security.exposed.service.TeamService;
-import com.latticeengines.security.exposed.util.TeamUtils;
 
 @Service("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {
@@ -66,7 +65,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         if (CollectionUtils.isEmpty(backendSegments)) {
             return backendSegments;
         } else {
-            Map<String, GlobalTeam> globalTeamMap = TeamUtils.getGlobalTeamMap(teamService, MultiTenantContext.getUser());
+            Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext()
+                    .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
             return backendSegments.stream() //
                     .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId())))
                     .sorted((seg1, seg2) -> Boolean.compare( //
@@ -87,7 +87,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace, name);
         if (shouldTranslateForFrontend && segment != null) {
-            segment = translateForFrontend(segment, TeamUtils.getGlobalTeam(teamService, segment.getTeamId()));
+            segment = translateForFrontend(segment, teamService.getTeamInContext(segment.getTeamId()));
         }
         return segment;
     }

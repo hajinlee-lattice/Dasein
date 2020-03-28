@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -169,6 +170,11 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
+    public Boolean editTeam(String teamId, GlobalTeamData globalTeamData) {
+        return editTeam(MultiTenantContext.getUser(), teamId, globalTeamData);
+    }
+
+    @Override
     public Boolean deleteTeam(String teamId) {
         globalTeamManagementService.deleteTeamByTeamId(teamId);
         return true;
@@ -184,4 +190,18 @@ public class TeamServiceImpl implements TeamService {
         return globalTeamManagementService.userBelongsToTeam(username, teamId);
     }
 
+    @Override
+    public List<GlobalTeam> getTeamsInContext() {
+        User loginUser = MultiTenantContext.getUser();
+        return getTeams(loginUser);
+    }
+
+    @Override
+    public GlobalTeam getTeamInContext(String teamId) {
+        if (StringUtils.isNotEmpty(teamId)) {
+            return getTeamByTeamId(teamId, MultiTenantContext.getUser());
+        } else {
+            return null;
+        }
+    }
 }

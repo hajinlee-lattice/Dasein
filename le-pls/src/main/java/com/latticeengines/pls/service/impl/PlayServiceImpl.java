@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,7 +23,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.PlayService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.security.exposed.service.TeamService;
-import com.latticeengines.security.exposed.util.TeamUtils;
 
 @Component("playService")
 public class PlayServiceImpl implements PlayService {
@@ -42,7 +42,8 @@ public class PlayServiceImpl implements PlayService {
         shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
         Tenant tenant = MultiTenantContext.getTenant();
         List<Play> plays = playProxy.getPlays(tenant.getId(), shouldLoadCoverage, ratingEngineId);
-        Map<String, GlobalTeam> globalTeamMap = TeamUtils.getGlobalTeamMap(teamService, MultiTenantContext.getUser());
+        Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext()
+                .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
         for (Play play : plays) {
             inflateSegment(play, globalTeamMap.get(play.getTargetSegment().getTeamId()));
         }
@@ -54,7 +55,7 @@ public class PlayServiceImpl implements PlayService {
         Tenant tenant = MultiTenantContext.getTenant();
         Play play = playProxy.getPlay(tenant.getId(), playName);
         if (play != null) {
-            inflateSegment(play, TeamUtils.getGlobalTeam(teamService, play.getTargetSegment().getTeamId()));
+            inflateSegment(play, teamService.getTeamInContext(play.getTargetSegment().getTeamId()));
         }
         return play;
 

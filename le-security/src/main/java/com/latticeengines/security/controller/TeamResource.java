@@ -19,15 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.security.User;
-import com.latticeengines.security.exposed.service.SessionService;
 import com.latticeengines.security.exposed.service.TeamService;
-import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.security.exposed.util.SecurityUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,39 +38,27 @@ public class TeamResource {
     @Inject
     private TeamService teamService;
 
-    @Inject
-    private SessionService sessionService;
-
-    @Inject
-    private UserService userService;
-
     @GetMapping(value = "/username/{username}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
-    public List<GlobalTeam> getTeamsByUsername(HttpServletRequest request,
-                                               @PathVariable(value = "username") String username) {
-        User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
-        checkUser(loginUser);
+    public List<GlobalTeam> getTeamsByUsername(@PathVariable(value = "username") String username) {
+        User loginUser = MultiTenantContext.getUser();
         return teamService.getTeamsByUserName(username, loginUser);
     }
 
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "List all teams")
-    public List<GlobalTeam> getAllTeams(HttpServletRequest request) {
-        User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
-        checkUser(loginUser);
-        return teamService.getTeams(loginUser);
+    public List<GlobalTeam> getAllTeams() {
+        return teamService.getTeamsInContext();
     }
 
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Create a new team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
-    public String createTeam(@RequestBody GlobalTeamData globalTeamData, HttpServletRequest request) {
-        User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
-        checkUser(loginUser);
-        return teamService.createTeam(loginUser.getUsername(), globalTeamData);
+    public String createTeam(@RequestBody GlobalTeamData globalTeamData) {
+        return teamService.createTeam(MultiTenantContext.getUser().getUsername(), globalTeamData);
     }
 
     @PutMapping(value = "/teamId/{teamId}")
@@ -83,15 +67,7 @@ public class TeamResource {
     public Boolean editTeam(@PathVariable("teamId") String teamId, //
                             @RequestBody GlobalTeamData globalTeamData, HttpServletRequest request) {
         log.info("Edit team {}.", teamId);
-        User loginUser = SecurityUtils.getUserFromRequest(request, sessionService, userService);
-        checkUser(loginUser);
-        return teamService.editTeam(loginUser, teamId, globalTeamData);
-    }
-
-    private void checkUser(User user) {
-        if (user == null) {
-            throw new LedpException(LedpCode.LEDP_18221);
-        }
+        return teamService.editTeam(teamId, globalTeamData);
     }
 
     @DeleteMapping(value = "/teamId/{teamId}")
