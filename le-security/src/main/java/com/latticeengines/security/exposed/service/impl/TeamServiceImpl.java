@@ -46,8 +46,10 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<GlobalTeam> getTeams(User loginUser) {
-        List<GlobalAuthTeam> globalAuthTeams = globalTeamManagementService.getTeams(true);
-        return getGlobalTeams(globalAuthTeams, true, loginUser);
+        try (PerformanceTimer timer = new PerformanceTimer(String.format("User %s requests to query teams.", loginUser.getEmail()))) {
+            List<GlobalAuthTeam> globalAuthTeams = globalTeamManagementService.getTeams(true);
+            return getGlobalTeams(globalAuthTeams, true, loginUser);
+        }
     }
 
     private UserFilter getFilter(User loginUser) {
@@ -94,19 +96,21 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public GlobalTeam getTeamByTeamId(String teamId, User loginUser) {
-        GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
-        GlobalTeam globalTeam = null;
-        List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
-        if (CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
-            List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser),
-                    globalAuthUserTenantRights, false);
-            Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
-            globalTeam = getGlobalTeam(globalAuthTeam, true, userMap);
+        try (PerformanceTimer timer = new PerformanceTimer(String.format("Get team with teamId %s.", teamId))) {
+            GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
+            GlobalTeam globalTeam = null;
+            List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
+            if (CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
+                List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser),
+                        globalAuthUserTenantRights, false);
+                Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
+                globalTeam = getGlobalTeam(globalAuthTeam, true, userMap);
+            }
+            if (globalAuthTeam != null) {
+                log.warn("There is no team with id {}", teamId);
+            }
+            return globalTeam;
         }
-        if (globalAuthTeam != null) {
-            log.warn("There is no team with id {}", teamId);
-        }
-        return globalTeam;
     }
 
     private List<GlobalTeam> getGlobalTeams(List<GlobalAuthTeam> globalAuthTeams, boolean withTeamMember, User loginUser) {
@@ -194,17 +198,13 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public List<GlobalTeam> getTeamsInContext() {
         User loginUser = MultiTenantContext.getUser();
-        try (PerformanceTimer timer = new PerformanceTimer(String.format("User %s requests to query teams.", loginUser.getEmail()))) {
-            return getTeams(loginUser);
-        }
+        return getTeams(loginUser);
     }
 
     @Override
     public GlobalTeam getTeamInContext(String teamId) {
         if (StringUtils.isNotEmpty(teamId)) {
-            try (PerformanceTimer timer = new PerformanceTimer(String.format("Get team with teamId %s.", teamId))) {
-                return getTeamByTeamId(teamId, MultiTenantContext.getUser());
-            }
+            return getTeamByTeamId(teamId, MultiTenantContext.getUser());
         } else {
             return null;
         }
