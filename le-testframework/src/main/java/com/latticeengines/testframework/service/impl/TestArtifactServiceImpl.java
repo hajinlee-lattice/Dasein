@@ -25,7 +25,6 @@ import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
@@ -162,13 +161,6 @@ public class TestArtifactServiceImpl implements TestArtifactService {
             }
         }
         return outputFile;
-    }
-
-    @Override
-    public synchronized void uploadFileToS3(String objectDir, String version, File file) {
-        String targetPath = String.format("%s/%s/", objectDir, version).replace("//", "/");
-        PutObjectRequest request = new PutObjectRequest(S3_BUCKET, targetPath, file).withCannedAcl(ACL);
-        S3.putObject(request);
     }
 
     private void downloadS3Object(S3Object s3Object, File outputFile) {
