@@ -20,7 +20,6 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
@@ -35,7 +34,6 @@ public class TestArtifactServiceImpl implements TestArtifactService {
     private static final Logger log = LoggerFactory.getLogger(TestArtifactServiceImpl.class);
 
     private static final String S3_BUCKET = "latticeengines-test-artifacts";
-    private static final CannedAccessControlList ACL = CannedAccessControlList.BucketOwnerFullControl;
 
     private static final String DOWNLOAD_DIR = "s3downloads";
     private static final int BUFFER_SIZE = 1024 * 1024; // 1M
