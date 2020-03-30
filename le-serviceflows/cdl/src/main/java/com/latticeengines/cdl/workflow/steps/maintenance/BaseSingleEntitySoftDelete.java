@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -122,6 +123,19 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
                 Long.class);
     }
 
+    private void enrichTableSchema(Table table, Table inheritTable) {
+        Map<String, Attribute> attrsToInherit = new HashMap<>();
+        if (inheritTable != null) {
+            inheritTable.getAttributes().forEach(attr -> attrsToInherit.putIfAbsent(attr.getName(), attr));
+        }
+        List<Attribute> newAttrs = table.getAttributes()
+                .stream()
+                .map(attr -> attrsToInherit.getOrDefault(attr.getName(), attr))
+                .collect(Collectors.toList());
+        table.setAttributes(newAttrs);
+        metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+    }
+
     protected <V> void updateEntityValueMapInContext(String key, V value, Class<V> clz) {
         updateEntityValueMapInContext(entity, key, value, clz);
     }
@@ -142,6 +156,7 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
                 log.warn("Did not generate new table for " + batchStore);
                 dataCollectionProxy.unlinkTables(customerSpace.toString(), batchStore, inactive);
             } else {
+                enrichTableSchema(table, masterTable);
                 dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
             }
         }
@@ -151,6 +166,7 @@ public abstract class BaseSingleEntitySoftDelete<T extends BaseProcessEntityStep
                 log.warn("Did not generate new table for " + systemBatchStore);
                 dataCollectionProxy.unlinkTables(customerSpace.toString(), systemBatchStore, inactive);
             } else {
+                enrichTableSchema(table, systemMasterTable);
                 dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), systemBatchStore, inactive);
             }
         }
