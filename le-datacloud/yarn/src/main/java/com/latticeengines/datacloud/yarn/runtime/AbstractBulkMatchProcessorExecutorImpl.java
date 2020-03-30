@@ -23,6 +23,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -284,7 +285,17 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         // generate avro records for newly allocated entities
         // [ entity, entityId ]
         List<GenericRecord> records = new ArrayList<>();
+        Map<String, Integer> newEntityFieldIdxMap = new HashMap<>();
+        MatchInput input = processorContext.getOriginalInput();
+        if (CollectionUtils.isNotEmpty(input.getNewEntityFields())) {
+            newEntityFieldIdxMap.putAll(input.getNewEntityFields().stream() //
+                    .map(field -> Pair.of(field, input.getFields().indexOf(field))) //
+                    .collect(Collectors.toMap(Pair::getKey, Pair::getValue)));
+        }
+        log.info("Field indices included in newly allocated entity output = {}", newEntityFieldIdxMap);
+
         Schema schema = processorContext.getNewEntitySchema();
+        log.info("Newly allocated entity output schema = {}", schema);
         for (OutputRecord outputRecord : outputRecords) {
             if (outputRecord == null || MapUtils.isEmpty(outputRecord.getNewEntityIds())) {
                 continue;
@@ -296,7 +307,21 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                     // filter out the entities that we don't need to output
                     .filter(entry -> EntityMatchUtils.shouldOutputNewEntity(processorContext.getOriginalInput(),
                             entry.getKey())) //
-                    .map(entry -> Arrays.<Object> asList(entry.getKey(), entry.getValue())) //
+                    .map(entry -> {
+                        List<Object> row = new ArrayList<>();
+                        row.add(entry.getKey());
+                        row.add(entry.getValue());
+
+                        if (MapUtils.isNotEmpty(newEntityFieldIdxMap)) {
+                            // add input specified fields to output (first 2 will be entity & entityId
+                            schema.getFields().stream().skip(2).forEach(field -> {
+                                int i = newEntityFieldIdxMap.get(field.name());
+                                row.add(outputRecord.getInput().get(i));
+                            });
+                        }
+
+                        return row;
+                    }) //
                     .collect(Collectors.toList());
             records.addAll(values.stream().map(row -> {
                 // generate avro records

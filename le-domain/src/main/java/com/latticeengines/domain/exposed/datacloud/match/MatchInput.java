@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -226,6 +227,11 @@ public class MatchInput implements Fact, Dimension {
     // applies to bulk match with allocateId mode.
     @JsonProperty("OutputNewEntities")
     private boolean outputNewEntities;
+
+    // fields to be included in newly allocated entity output, ignored if
+    // OutputNewEntities=false
+    @JsonProperty("NewEntityFields")
+    private Set<String> newEntityFields;
 
     // Temporary flag for entity bulk match test. Will remove after we have
     // workflow for testing
@@ -652,6 +658,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setOutputNewEntities(boolean outputNewEntities) {
         this.outputNewEntities = outputNewEntities;
+    }
+
+    public Set<String> getNewEntityFields() {
+        return newEntityFields;
+    }
+
+    public void setNewEntityFields(Set<String> newEntityFields) {
+        this.newEntityFields = newEntityFields;
     }
 
     public boolean bumpupEntitySeedVersion() {

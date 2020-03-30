@@ -14,6 +14,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.PhoneNumb
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.State;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -61,7 +63,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
             .addAll(new String[] { InterfaceName.EntityId.name(), InterfaceName.ContactId.name(),
                     InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name() }, DEFAULT_FIELDS);
     private static final String[] NEW_ENTITY_FIELDS = new String[] { MatchConstants.ENTITY_NAME_FIELD,
-            MatchConstants.ENTITY_ID_FIELD };
+            MatchConstants.ENTITY_ID_FIELD, CompanyName.name(), Country.name() };
 
     private static final Object[][] EXISTING_DATA = { //
             // Google
@@ -90,7 +92,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
                     "C_CID_05", "s.groves@google.com", "Samantha Groves", "555-555-5555", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
-               // Facebook
+               // netflix
             { //
                     "C0_11", //
                     "C_CID_11", "j.greer@netflix.com", "John Greer", "444-444-4444", //
@@ -133,7 +135,8 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
 
     @Test(groups = "deployment", priority = 1)
     private void populateExistingData() throws Exception {
-        MatchInput input = prepareBulkMatchInput(prepareStringData("existing_data", DEFAULT_FIELDS, EXISTING_DATA));
+        MatchInput input = prepareBulkMatchInput(prepareStringData("existing_data", DEFAULT_FIELDS, EXISTING_DATA),
+                Sets.newHashSet(Country.name(), CompanyName.name()));
 
         MatchCommand result = runAndVerifyBulkMatch(input, getPodId());
         Assert.assertNotNull(result);
@@ -148,8 +151,8 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         logNewEntities(newEntities, getNewEntityPath(result));
         // verify match result & new entities
         verifyMatchResultForExistingData(matchResults);
-        // should only have two new accounts
-        Set<String> accountEntityIds = verifyNewAccounts(newEntities, 2);
+        // should only have two new accounts (Google & Netflix)
+        Set<String> accountEntityIds = verifyNewAccounts(newEntities, 2, Sets.newHashSet("Google", "Netflix"));
 
         Assert.assertEquals(new HashSet<>(accountEntityIdMap.values()), accountEntityIds,
                 "AccountIds in match result should match ids in new entity list");
@@ -180,7 +183,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         boolean hasNewAccount = expectedCAIds.values().stream().anyMatch(Objects::isNull);
 
         MatchInput input = prepareBulkMatchInput(
-                prepareStringData(String.format("contact_import_1_group_%s", testGroupId), DEFAULT_FIELDS, data));
+                prepareStringData(String.format("contact_import_1_group_%s", testGroupId), DEFAULT_FIELDS, data), null);
 
         MatchCommand result = runAndVerifyBulkMatch(input, getPodId());
         Assert.assertNotNull(result);
@@ -195,7 +198,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
                 "Match result row count does not match existing data row count");
         if (hasNewAccount) {
             Assert.assertFalse(newEntities.isEmpty(), "Should have newly allocated accounts");
-            verifyNewAccounts(newEntities, -1);
+            verifyNewAccounts(newEntities, -1, null);
         } else {
             Assert.assertTrue(newEntities.isEmpty(), "Should not have newly allocated accounts");
         }
@@ -387,22 +390,39 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
     }
 
     // if expectedSize = -1, do not verify size
-    private Set<String> verifyNewAccounts(@NotNull List<GenericRecord> records, int expectedSize) {
+    // if expectedCompanyNames == null, do not verify company name
+    private Set<String> verifyNewAccounts(@NotNull List<GenericRecord> records, int expectedSize,
+            Set<String> expectedCompanyNames) {
         if (expectedSize != -1) {
             Assert.assertEquals(records.size(), expectedSize,
                     "Number of newly allocated accounts does not match the expected number");
         }
         Set<String> newEntityIds = new HashSet<>();
+        Set<String> companyNames = new HashSet<>();
+        Set<String> countries = new HashSet<>();
         for (int i = 0; i < records.size(); i++) {
             GenericRecord record = records.get(i);
             String entityId = getStrValue(record, MatchConstants.ENTITY_ID_FIELD);
             String entityName = getStrValue(record, MatchConstants.ENTITY_NAME_FIELD);
+            String companyName = getStrValue(record, CompanyName.name());
+            String country = getStrValue(record, Country.name());
             Assert.assertNotNull(entityId,
                     String.format("Should have non-null EntityId for newly allocated account. Index=%d, Record=%s", i,
                             toString(record, NEW_ENTITY_FIELDS)));
             Assert.assertEquals(entityName, BusinessEntity.Account.name(),
                     String.format("Got newly allocated entity that is not Account at index=%d", i));
             newEntityIds.add(entityId);
+            if (companyName != null) {
+                companyNames.add(companyName);
+            }
+            if (country != null) {
+                countries.add(country);
+            }
+        }
+        if (expectedCompanyNames != null) {
+            Assert.assertEquals(companyNames, expectedCompanyNames,
+                    "Company names in newly allocated entity does not match the expected ones");
+            Assert.assertEquals(countries, Collections.singleton("USA"), "Should only have USA as country");
         }
         return newEntityIds;
     }
@@ -433,7 +453,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         return getOutputPath(command).replace("Output", "NewEntities");
     }
 
-    private MatchInput prepareBulkMatchInput(InputBuffer buffer) {
+    private MatchInput prepareBulkMatchInput(InputBuffer buffer, Set<String> newEntityFields) {
         MatchInput input = new MatchInput();
         input.setTenant(testTenant);
         input.setDataCloudVersion(currentDataCloudVersion);
@@ -444,6 +464,9 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         input.setTargetEntity(BusinessEntity.Contact.name());
         input.setAllocateId(true);
         input.setOutputNewEntities(true);
+        if (CollectionUtils.isNotEmpty(newEntityFields)) {
+            input.setNewEntityFields(newEntityFields);
+        }
         input.setEntityKeyMaps(getDefaultKeyMaps());
         input.setInputBuffer(buffer);
         input.setUseDnBCache(true);

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -162,6 +163,28 @@ public final class MatchInputValidator {
             validateAccountMatchKeys(keyMap, input.isFetchOnly(), input.getOperationalMode());
         }
         validatePreferredEntityIdMatchKey(input);
+        validateNewEntityFields(input);
+    }
+
+    /*-
+     * Make sure user specified fields (to be included in newly allocated
+     * entity output) are all in input fields
+     */
+    private static void validateNewEntityFields(@NotNull MatchInput input) {
+        if (CollectionUtils.isEmpty(input.getNewEntityFields())) {
+            return;
+        }
+
+        List<String> notExistAttrs = input.getNewEntityFields() //
+                .stream() //
+                .filter(field -> !input.getFields().contains(field)) //
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(notExistAttrs)) {
+            String msg = String.format("Field %s specified to include in new entity output does not exist in input",
+                    String.join(",", notExistAttrs));
+            log.error(msg);
+            throw new IllegalArgumentException(msg);
+        }
     }
 
     /*
