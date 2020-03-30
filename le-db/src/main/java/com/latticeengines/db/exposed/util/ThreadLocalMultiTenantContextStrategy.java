@@ -2,6 +2,7 @@ package com.latticeengines.db.exposed.util;
 
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 
 public class ThreadLocalMultiTenantContextStrategy implements MultiTenantContextStrategy {
 
@@ -25,6 +26,11 @@ public class ThreadLocalMultiTenantContextStrategy implements MultiTenantContext
     @Override
     public void clear() {
         tenantInContext.set(null);
+    }
+
+    @Override
+    public User getUser() {
+        return null;
     }
 
 }

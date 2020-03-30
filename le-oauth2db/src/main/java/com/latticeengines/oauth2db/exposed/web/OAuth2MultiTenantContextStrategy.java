@@ -8,6 +8,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContextStrategy;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 
 public class OAuth2MultiTenantContextStrategy implements MultiTenantContextStrategy {
 
@@ -36,5 +37,10 @@ public class OAuth2MultiTenantContextStrategy implements MultiTenantContextStrat
     @Override
     public void clear() {
         SecurityContextHolder.getContext().setAuthentication(null);
+    }
+
+    @Override
+    public User getUser() {
+        return null;
     }
 }

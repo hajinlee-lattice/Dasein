@@ -5,8 +5,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContextStrategy;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.TenantToken;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
@@ -46,6 +49,19 @@ public class GlobalAuthMultiTenantContextStrategy implements MultiTenantContextS
             }
         }
         return null;
+    }
+
+    @Override
+    public User getUser() {
+        Session session = getSession();
+        if (session == null) {
+            throw new LedpException(LedpCode.LEDP_18221);
+        }
+        User user = new User();
+        user.setEmail(session.getEmailAddress());
+        user.setUsername(session.getEmailAddress());
+        user.setAccessLevel(session.getAccessLevel());
+        return user;
     }
 
     @Override

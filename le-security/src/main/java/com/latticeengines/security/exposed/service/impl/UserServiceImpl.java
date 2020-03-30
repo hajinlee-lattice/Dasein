@@ -358,11 +358,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getUsers(String tenantId, UserFilter filter, boolean withTeam) {
+    public List<User> getUsers(String tenantId, UserFilter filter, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights, boolean withTeam) {
         List<User> users = new ArrayList<>();
         try {
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
-                    .getAllUsersOfTenant(tenantId, withTeam);
+                    .getAllUsersOfTenant(tenantId, globalAuthUserTenantRights, withTeam);
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
                 AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());
@@ -379,8 +379,12 @@ public class UserServiceImpl implements UserService {
                 throw new LoginException(e);
             }
         }
-
         return users;
+    }
+
+    @Override
+    public List<User> getUsers(String tenantId, UserFilter filter, boolean withTeam) {
+        return getUsers(tenantId, filter, null, withTeam);
     }
 
     @Override
@@ -544,7 +548,7 @@ public class UserServiceImpl implements UserService {
         String email = newUser.getEmail();
         User oldUser = findByEmail(email);
         if (oldUser != null) {
-            if (globalUserManagementService.userExpireIntenant(oldUser.getEmail(), tenantId)) {
+            if (globalUserManagementService.userExpireInTenant(oldUser.getEmail(), tenantId)) {
                 deleteUser(tenantId, oldUser.getUsername());
             }
         }

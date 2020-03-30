@@ -7,6 +7,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.security.User;
 
 public final class MultiTenantContext {
 
@@ -85,6 +86,10 @@ public final class MultiTenantContext {
             return null;
         }
         return session.getEmailAddress();
+    }
+
+    public static User getUser() {
+        return strategy.getUser();
     }
 
 }

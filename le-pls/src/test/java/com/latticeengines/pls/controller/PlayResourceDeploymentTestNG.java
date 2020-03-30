@@ -311,9 +311,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(name);
         List<TalkingPointDTO> createTPResponse = restTemplate.postForObject( //
-                getRestAPIHostPort() + "/pls/dante/talkingpoints", //
-                tps, //
-                List.class);
+                getRestAPIHostPort() + "/pls/dante/talkingpoints", tps, List.class);
         Assert.assertNotNull(createTPResponse);
 
         Play createdPlay2 = createDefaultPlay();

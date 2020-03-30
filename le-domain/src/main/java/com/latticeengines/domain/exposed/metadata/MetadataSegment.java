@@ -147,6 +147,10 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Transient
     private GlobalTeam team;
 
+    @JsonProperty("viewOnly")
+    @Transient
+    private boolean viewOnly;
+
     @JsonIgnore
     @Transient
     private boolean skipAuditing;
@@ -469,5 +473,13 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setTeam(GlobalTeam team) {
         this.team = team;
+    }
+
+    public boolean isViewOnly() {
+        return viewOnly;
+    }
+
+    public void setViewOnly(boolean viewOnly) {
+        this.viewOnly = viewOnly;
     }
 }
