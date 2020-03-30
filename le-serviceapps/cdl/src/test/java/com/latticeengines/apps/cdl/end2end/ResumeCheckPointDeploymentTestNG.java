@@ -15,7 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.CheckpointConfiguration;
+import com.latticeengines.domain.exposed.cdl.End2EndTestConfiguration;
 import com.latticeengines.domain.exposed.cdl.MockImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.EntityType;
@@ -32,44 +32,44 @@ public class ResumeCheckPointDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
     @Inject
     private S3Service s3Service;
 
-    private CheckpointConfiguration checkpointConfiguration;
+    private End2EndTestConfiguration end2EndTestConfiguration;
 
     @BeforeClass(groups = {"end2end"})
     @Override
     public void setup() throws Exception {
         readCheckpointConfigFile();
-        if (checkpointConfiguration == null) {
-            throw new IllegalArgumentException("can't read correct checkpointConfiguration file.");
+        if (end2EndTestConfiguration == null) {
+            throw new IllegalArgumentException("can't read correct end2EndTestConfiguration file.");
         }
-        setupEnd2EndTestEnvironment(checkpointConfiguration.getFeatureFlagMap());
+        setupEnd2EndTestEnvironment(end2EndTestConfiguration.getFeatureFlagMap());
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Test(groups = {"end2end"})
     public void runtest() throws Exception {
-        if (StringUtils.isNotEmpty(checkpointConfiguration.getResumeCheckpointName())) {
+        if (StringUtils.isNotEmpty(end2EndTestConfiguration.getResumeCheckpointName())) {
             log.info("resume checkpoint name is {}, version is {}.",
-                    checkpointConfiguration.getResumeCheckpointName(), checkpointConfiguration.getResumeCheckpointVersion());
-            resumeCheckpoint(checkpointConfiguration.getResumeCheckpointName(), checkpointConfiguration.getResumeCheckpointVersion());
+                    end2EndTestConfiguration.getResumeCheckpointName(), end2EndTestConfiguration.getResumeCheckpointVersion());
+            resumeCheckpoint(end2EndTestConfiguration.getResumeCheckpointName(), end2EndTestConfiguration.getResumeCheckpointVersion());
         }
         importFile();
-        if (checkpointConfiguration.isRunPA()) {
+        if (end2EndTestConfiguration.isRunPA()) {
             if (isLocalEnvironment()) {
                 processAnalyzeSkipPublishToS3();
             } else {
-                processAnalyze(checkpointConfiguration.getProcessAnalyzeRequest());
+                processAnalyze(end2EndTestConfiguration.getProcessAnalyzeRequest());
             }
         }
-        if (StringUtils.isNotEmpty(checkpointConfiguration.getCheckpointName())) {
-            log.info("save checkpoint name is {}, version is {}.", checkpointConfiguration.getCheckpointName(),
-                    checkpointConfiguration.getCheckpointVersion());
-            saveCheckpoint(checkpointConfiguration.getCheckpointName(),
-                    checkpointConfiguration.getCheckpointVersion(), checkpointConfiguration.isAuto());
+        if (StringUtils.isNotEmpty(end2EndTestConfiguration.getCheckpointName())) {
+            log.info("save checkpoint name is {}, version is {}.", end2EndTestConfiguration.getCheckpointName(),
+                    end2EndTestConfiguration.getCheckpointVersion());
+            saveCheckpoint(end2EndTestConfiguration.getCheckpointName(),
+                    end2EndTestConfiguration.getCheckpointVersion(), end2EndTestConfiguration.isAuto());
         }
     }
 
     private void importFile() throws Exception {
-        List<MockImport> mockImports = checkpointConfiguration.getImports();
+        List<MockImport> mockImports = end2EndTestConfiguration.getImports();
         if (CollectionUtils.isNotEmpty(mockImports)) {
             dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
             for (MockImport mockImport : mockImports) {
@@ -86,12 +86,12 @@ public class ResumeCheckPointDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
     }
 
     private void readCheckpointConfigFile() {
-        if (StringUtils.isBlank(System.getenv(CHECK_POINT_CONFIG_FILE))) {
+        if (StringUtils.isBlank(System.getProperty(CHECK_POINT_CONFIG_FILE))) {
             throw new IllegalArgumentException("before run this test, we need set checkpointConfigFile at ENV");
         }
-        String checkpointConfigFileName = System.getenv(CHECK_POINT_CONFIG_FILE);
+        String checkpointConfigFileName = System.getProperty(CHECK_POINT_CONFIG_FILE);
         String objectKey = S3_CHECKPOINT_CONFIG_FILES_DIR + checkpointConfigFileName;
         InputStream inputStream = s3Service.readObjectAsStream(S3_BUCKET, objectKey);
-        checkpointConfiguration = JsonUtils.deserialize(inputStream, CheckpointConfiguration.class);
+        end2EndTestConfiguration = JsonUtils.deserialize(inputStream, End2EndTestConfiguration.class);
     }
 }

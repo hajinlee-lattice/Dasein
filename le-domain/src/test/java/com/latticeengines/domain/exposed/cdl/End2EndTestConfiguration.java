@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CheckpointConfiguration {
+public class End2EndTestConfiguration {
 
     @JsonProperty("checkpoint_name")
     private String checkpointName;
