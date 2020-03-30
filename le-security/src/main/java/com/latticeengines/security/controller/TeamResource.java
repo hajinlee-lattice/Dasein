@@ -58,7 +58,7 @@ public class TeamResource {
     @ApiOperation(value = "Create a new team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public String createTeam(@RequestBody GlobalTeamData globalTeamData) {
-        return teamService.createTeam(MultiTenantContext.getUser().getUsername(), globalTeamData);
+        return teamService.createTeam(MultiTenantContext.getUser().getEmail(), globalTeamData);
     }
 
     @PutMapping(value = "/teamId/{teamId}")

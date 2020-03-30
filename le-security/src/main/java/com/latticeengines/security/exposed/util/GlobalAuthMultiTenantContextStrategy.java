@@ -59,6 +59,7 @@ public class GlobalAuthMultiTenantContextStrategy implements MultiTenantContextS
         }
         User user = new User();
         user.setEmail(session.getEmailAddress());
+        user.setUsername(session.getEmailAddress());
         user.setAccessLevel(session.getAccessLevel());
         return user;
     }
