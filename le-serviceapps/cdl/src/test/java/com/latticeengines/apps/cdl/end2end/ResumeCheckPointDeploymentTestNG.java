@@ -28,6 +28,7 @@ public class ResumeCheckPointDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
     private static final String CHECK_POINT_CONFIG_FILE = "CHECK_POINT_CONFIG_FILE";
     protected static final String S3_CHECKPOINT_CONFIG_FILES_DIR = "le-serviceapps/cdl/end2end/checkpointConfigFiles/";
     protected static final String S3_BUCKET = "latticeengines-test-artifacts";
+    protected static final String SUFFIX = ".json";
 
     @Inject
     private S3Service s3Service;
@@ -90,8 +91,16 @@ public class ResumeCheckPointDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
             throw new IllegalArgumentException("before run this test, we need set checkpointConfigFile at ENV");
         }
         String checkpointConfigFileName = System.getProperty(CHECK_POINT_CONFIG_FILE);
-        String objectKey = S3_CHECKPOINT_CONFIG_FILES_DIR + checkpointConfigFileName;
+        String objectKey = S3_CHECKPOINT_CONFIG_FILES_DIR + addSuffix(checkpointConfigFileName);
         InputStream inputStream = s3Service.readObjectAsStream(S3_BUCKET, objectKey);
         end2EndTestConfiguration = JsonUtils.deserialize(inputStream, End2EndTestConfiguration.class);
+    }
+
+    private String addSuffix(String fileName) {
+        if (fileName.endsWith(SUFFIX)) {
+            return fileName;
+        } else {
+            return fileName + SUFFIX;
+        }
     }
 }
