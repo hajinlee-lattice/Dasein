@@ -192,7 +192,10 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public boolean userBelongsToTeam(String username, String teamId) {
-        return globalTeamManagementService.userBelongsToTeam(username, teamId);
+        try (PerformanceTimer timer = new PerformanceTimer(String.format("Call userBelongsToTeam with username %s and" +
+                " teamId %s.", username, teamId))) {
+            return globalTeamManagementService.userBelongsToTeam(username, teamId);
+        }
     }
 
     @Override

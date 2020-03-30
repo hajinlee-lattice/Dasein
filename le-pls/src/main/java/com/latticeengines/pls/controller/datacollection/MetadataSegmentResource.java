@@ -84,8 +84,7 @@ public class MetadataSegmentResource {
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "Create or update a segment by name")
-    public MetadataSegment createOrUpdateSegmentWithName(@RequestBody MetadataSegment metadataSegment,
-                                                         @RequestParam(value = "ignoreValidateTeam", required = false, defaultValue = "true") Boolean ignoreValidateTeam) {
+    public MetadataSegment createOrUpdateSegmentWithName(@RequestBody MetadataSegment metadataSegment) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal != null) {
             String email = principal.toString();

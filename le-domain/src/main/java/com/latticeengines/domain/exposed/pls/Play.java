@@ -177,6 +177,10 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
     @Column(name = "CLEANUP_DONE", nullable = false)
     private Boolean isCleanupDone = Boolean.FALSE;
 
+    @JsonProperty("viewOnly")
+    @Transient
+    private boolean viewOnly;
+
     public Play() {
     }
 
@@ -384,5 +388,13 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields, So
 
     public String generateNameStr() {
         return String.format(PLAY_NAME_FORMAT, PLAY_NAME_PREFIX, UUID.randomUUID().toString());
+    }
+
+    public boolean isViewOnly() {
+        return viewOnly;
+    }
+
+    public void setViewOnly(boolean viewOnly) {
+        this.viewOnly = viewOnly;
     }
 }
