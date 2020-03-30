@@ -106,8 +106,8 @@ public class MetadataMigrateDynamoServiceImpl implements MetadataMigrateDynamoSe
 
     @Override
     public Boolean migrateDynamo() {
-        log.info("Migrate dynamo table task started.");
         List<DataUnit> dataUnits = dataUnitService.findByStorageType(DataUnit.StorageType.Dynamo);
+        log.info("Migrate dynamo table task started and total dynamo data unit count is %d.", dataUnits.size());
         Map<String, Tenant> tenantMap = new HashMap<>();
         Map<String, List<Job>> jobMap = new HashMap<>();
         Map<String, List<String>> tableMap = new HashMap<>();
