@@ -4,8 +4,10 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.C
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -23,6 +25,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -57,6 +60,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
     private DataUnitProxy dataUnitProxy;
 
     private TableRoleInCollection batchStore;
+    private Table masterTable;
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
@@ -72,7 +76,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
                 ? ConsolidatedRawTransaction : stepConfiguration.getEntity().getBatchStore();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        Table masterTable = dataCollectionProxy.getTable(stepConfiguration.getCustomer(), batchStore, active);
+        masterTable = dataCollectionProxy.getTable(stepConfiguration.getCustomer(), batchStore, active);
         Map<BusinessEntity, HdfsDataUnit> mergeDeleteTables = getMapObjectFromContext(LEGACY_DELETE_MERGE_TABLENAMES,
                 BusinessEntity.class, HdfsDataUnit.class);
         if (mergeDeleteTables == null) {
@@ -105,6 +109,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
             return;
         }
         if (batchStore.equals(TableRoleInCollection.ConsolidatedRawTransaction)) {
+            enrichTableSchema(cleanupTable);
             return;
         }
         if (getTableDataLines(cleanupTable) <= 0) {
@@ -130,6 +135,7 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
                 dataUnit.setName(cleanupTableName);
             }
         }
+        enrichTableSchema(cleanupTable);
         dataCollectionProxy.upsertTable(customerSpace.toString(), cleanupTableName, batchStore, inactive);
         if (dataUnit != null) {
             dataUnitProxy.create(customerSpace.toString(), dataUnit);
@@ -172,6 +178,19 @@ public class LegacyDeleteByUpload extends RunSparkJob<LegacyDeleteSparkStepConfi
                 break;
         }
         return joinedColumns;
+    }
+
+    private void enrichTableSchema(Table table) {
+        Map<String, Attribute> attrsToInherit = new HashMap<>();
+        if (masterTable != null) {
+            masterTable.getAttributes().forEach(attr -> attrsToInherit.putIfAbsent(attr.getName(), attr));
+        }
+        List<Attribute> newAttrs = table.getAttributes()
+                .stream()
+                .map(attr -> attrsToInherit.getOrDefault(attr.getName(), attr))
+                .collect(Collectors.toList());
+        table.setAttributes(newAttrs);
+        metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
     }
 
     private Long getTableDataLines(Table table) {
