@@ -442,6 +442,7 @@ public class CDLResource {
             DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, source, templateDisplay);
             boolean enableEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
             EntityType entityType = EntityTypeUtils.matchFeedType(templateDisplay.getFeedType());
+            log.info("1. Get standard template");
             Table standardTable;
             if (entityType != null && templateDisplay.getS3ImportSystem() != null) {
                 standardTable = SchemaRepository.instance().getSchema(templateDisplay.getS3ImportSystem().getSystemType(),
@@ -455,8 +456,9 @@ public class CDLResource {
             if (CollectionUtils.isEmpty(fieldPreviews)) {
                 return fieldPreviews;
             }
-
+            log.info("2. Get System list");
             List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(customerSpace.toString());
+            log.info("3. Update Match Id field");
             updateUniqueAndMatchIdField(fieldPreviews, systemList, entityType);
             Map<String, String> standardNameMapping =
                     standardTable.getAttributes()
@@ -480,9 +482,10 @@ public class CDLResource {
     }
 
     private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, List<S3ImportSystem> s3ImportSystem, EntityType entityType) {
-        if (CollectionUtils.isEmpty(s3ImportSystem)) {
+        if (CollectionUtils.isEmpty(s3ImportSystem) || entityType == null) {
             return;
         }
+        log.info("Update UniqueId Preview.");
         Set<String> accountSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getAccountSystemId)
                 .collect(Collectors.toSet());
         Set<String> contactSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getContactSystemId)
