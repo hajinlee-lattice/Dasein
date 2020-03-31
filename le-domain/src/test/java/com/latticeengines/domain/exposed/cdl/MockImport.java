@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MockImport {
 
-    @JsonProperty("feed_Type")
+    @JsonProperty("feed_type")
     private String feedType;
 
     @JsonProperty("suffix")
