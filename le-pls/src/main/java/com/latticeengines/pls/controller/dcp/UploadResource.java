@@ -45,5 +45,10 @@ public class UploadResource {
         }
     }
 
-
+    @GetMapping(value = "/uploadId/{uploadId}")
+    @ResponseBody
+    @ApiOperation("Get sources by sourceId")
+    public void getSource(@PathVariable String uploadId) {
+        uploadService.downloadUpload(uploadId);
+    }
 }

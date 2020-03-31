@@ -30,4 +30,8 @@ public class UploadServiceImpl implements UploadService {
         return uploadProxy.getUpload(customerSpace, uploadPid);
     }
 
+    @Override
+    public void downloadUpload(String uploadId) {
+
+    }
 }

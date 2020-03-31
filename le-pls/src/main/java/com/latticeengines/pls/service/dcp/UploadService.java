@@ -10,4 +10,5 @@ public interface UploadService {
 
     Upload getByUploadId(long uploadPid);
 
+    void downloadUpload(String uploadId);
 }
