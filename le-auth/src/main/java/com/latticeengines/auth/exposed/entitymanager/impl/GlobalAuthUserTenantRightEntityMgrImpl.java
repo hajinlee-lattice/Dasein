@@ -40,7 +40,7 @@ public class GlobalAuthUserTenantRightEntityMgrImpl extends
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<GlobalAuthUserTenantRight> findByUserIdAndTenantId(Long userId, Long tenantId, boolean inflate) {
         List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = gaUserTenantRightDao.findByUserIdAndTenantId(userId, tenantId);
-        if (CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
+        if (inflate && CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
             for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
                 inflateUserTenantRight(globalAuthUserTenantRight);
             }
