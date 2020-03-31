@@ -462,8 +462,6 @@ public class CDLResource {
                     standardTable.getAttributes()
                             .stream()
                             .collect(Collectors.toMap(Attribute::getName, Attribute::getDisplayName));
-            BusinessEntity entity = entityType == null ?
-                    BusinessEntity.getByName(dataFeedTask.getEntity()) : entityType.getEntity();
             Map<String, String> nameMapping = cdlService.getDecoratedDisplayNameMapping(customerSpace.toString(), entityType);
             fieldPreviews.forEach(preview -> {
                 if (nameMapping.containsKey(preview.getNameInTemplate())) {
@@ -476,15 +474,18 @@ public class CDLResource {
             });
             return fieldPreviews;
         } catch (RuntimeException e) {
-            log.error("Get template preview Failed: " + e.getMessage());
+            log.error("Get template preview Failed: " + e.toString());
             throw new LedpException(LedpCode.LEDP_18218, new String[]{e.getMessage()});
         }
     }
 
     private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, List<S3ImportSystem> s3ImportSystem, EntityType entityType) {
-        Set<String> accountSystemIdList = s3ImportSystem.stream().map(system-> system.getAccountSystemId())
+        if (CollectionUtils.isEmpty(s3ImportSystem)) {
+            return;
+        }
+        Set<String> accountSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getAccountSystemId)
                 .collect(Collectors.toSet());
-        Set<String> contactSystemIdList = s3ImportSystem.stream().map(system-> system.getContactSystemId())
+        Set<String> contactSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getContactSystemId)
                 .collect(Collectors.toSet());
         for (TemplateFieldPreview fieldPreview : fieldPreviews) {
             switch (entityType) {
