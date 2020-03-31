@@ -35,12 +35,15 @@ import org.testng.annotations.Test;
 import org.testng.util.Strings;
 
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.InputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -135,6 +138,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
 
     @Test(groups = "deployment", priority = 1)
     private void populateExistingData() throws Exception {
+        int expectedAccounts = 2;
         MatchInput input = prepareBulkMatchInput(prepareStringData("existing_data", DEFAULT_FIELDS, EXISTING_DATA),
                 Sets.newHashSet(Country.name(), CompanyName.name()));
 
@@ -147,19 +151,30 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
                 "Match result row count does not match existing data row count");
         Assert.assertFalse(newEntities.isEmpty(), "Should have newly allocated entities");
 
+        // verify newly allocated entity stats
+        MatchOutput matchOutput = readMatchOutputFile(result.getRootOperationUid());
+        log.error("MatchOutput = {}", JsonUtils.serialize(matchOutput));
+        Assert.assertNotNull(matchOutput);
+        Assert.assertNotNull(matchOutput.getStatistics());
+        Map<String, Long> expectedNewEntityCnt = new HashMap<>();
+        expectedNewEntityCnt.put(BusinessEntity.Account.name(), (long) expectedAccounts);
+        expectedNewEntityCnt.put(BusinessEntity.Contact.name(), (long) EXISTING_DATA.length);
+        Assert.assertEquals(matchOutput.getStatistics().getNewEntityCount(), expectedNewEntityCnt);
+
         logMatchResult(matchResults, getOutputPath(result));
         logNewEntities(newEntities, getNewEntityPath(result));
         // verify match result & new entities
         verifyMatchResultForExistingData(matchResults);
         // should only have two new accounts (Google & Netflix)
-        Set<String> accountEntityIds = verifyNewAccounts(newEntities, 2, Sets.newHashSet("Google", "Netflix"));
+        Set<String> accountEntityIds = verifyNewAccounts(newEntities, expectedAccounts, Sets.newHashSet("Google", "Netflix"));
 
         Assert.assertEquals(new HashSet<>(accountEntityIdMap.values()), accountEntityIds,
                 "AccountIds in match result should match ids in new entity list");
 
         int numAccounts = publishEntity(BusinessEntity.Account.name());
         int numContacts = publishEntity(BusinessEntity.Contact.name());
-        Assert.assertEquals(numAccounts, 2, "Number of published accounts does not match the expected value");
+        Assert.assertEquals(numAccounts, expectedAccounts,
+                "Number of published accounts does not match the expected value");
         Assert.assertEquals(numContacts, EXISTING_DATA.length,
                 "Number of published contacts does not match the expected value");
     }
@@ -390,13 +405,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
     }
 
     // if expectedSize = -1, do not verify size
-    // if expectedCompanyNames == null, do not verify company name
-    private Set<String> verifyNewAccounts(@NotNull List<GenericRecord> records, int expectedSize,
-            Set<String> expectedCompanyNames) {
-        if (expectedSize != -1) {
-            Assert.assertEquals(records.size(), expectedSize,
-                    "Number of newly allocated accounts does not match the expected number");
-        }
+    private Set<String> verifyNewAccounts(@NotNull List<GenericRecord> records, int expectedSize) {
         Set<String> newEntityIds = new HashSet<>();
         Set<String> companyNames = new HashSet<>();
         Set<String> countries = new HashSet<>();
@@ -424,7 +433,19 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
                     "Company names in newly allocated entity does not match the expected ones");
             Assert.assertEquals(countries, Collections.singleton("USA"), "Should only have USA as country");
         }
+        if (expectedSize != -1) {
+            Assert.assertEquals(newEntityIds.size(), expectedSize,
+                    "Number of newly allocated accounts does not match the expected number");
+        }
         return newEntityIds;
+    }
+
+    private MatchOutput readMatchOutputFile(@NotNull String rootOperationUid) throws Exception {
+        String matchOutputPath = hdfsPathBuilder.constructMatchOutputFile(rootOperationUid).toString();
+        log.info("Reading match output (RootOperationUID={}), output file path = {}", rootOperationUid,
+                matchOutputPath);
+        String content = HdfsUtils.getHdfsFileContents(yarnConfiguration, matchOutputPath);
+        return JsonUtils.deserialize(content, MatchOutput.class);
     }
 
     private void logMatchResult(@NotNull List<GenericRecord> records, @NotNull String path) {

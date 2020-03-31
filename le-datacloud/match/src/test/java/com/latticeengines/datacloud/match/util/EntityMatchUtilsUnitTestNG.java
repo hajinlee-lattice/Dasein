@@ -253,7 +253,7 @@ public class EntityMatchUtilsUnitTestNG {
                 { newEntityMatchInput(Account.name()), Transaction.name(), false }, //
                 // for contact match, only output newly created account
                 { newEntityMatchInput(Contact.name()), Account.name(), true }, //
-                { newEntityMatchInput(Contact.name()), Contact.name(), false }, //
+                { newEntityMatchInput(Contact.name()), Contact.name(), true }, //
                 { newEntityMatchInput(Contact.name()), Transaction.name(), false }, //
         };
     }

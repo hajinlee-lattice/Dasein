@@ -2,11 +2,13 @@ package com.latticeengines.datacloud.match.exposed.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 
@@ -49,6 +51,8 @@ public final class MatchUtils {
         mergedStats.setMatchedByMatchKeyCount(stats.getMatchedByMatchKeyCount() + newStats.getMatchedByMatchKeyCount());
         mergedStats.setMatchedByAccountIdCount(stats.getMatchedByAccountIdCount()
                 + newStats.getMatchedByAccountIdCount());
+        mergeNewEntityCnt(mergedStats.getNewEntityCount(), stats.getNewEntityCount());
+        mergeNewEntityCnt(mergedStats.getNewEntityCount(), newStats.getNewEntityCount());
 
         log.debug("Merged Match Statistics");
         log.debug("   Merged Stats Rows Matched: " + mergedStats.getRowsMatched());
@@ -57,6 +61,19 @@ public final class MatchUtils {
         log.debug("   Merged Stats Matched By MatchKey: " + mergedStats.getMatchedByMatchKeyCount());
         log.debug("   Merged Stats Matched By Account ID: " + mergedStats.getMatchedByAccountIdCount());
         return mergedStats;
+    }
+
+    /*-
+     * merge newEntityCnt (entity->count map) into accumulated one
+     */
+    private static void mergeNewEntityCnt(@NotNull Map<String, Long> accNewEntityCnt,
+            @NotNull Map<String, Long> newEntityCnt) {
+        for (String entity : accNewEntityCnt.keySet()) {
+            accNewEntityCnt.put(entity, accNewEntityCnt.get(entity) + newEntityCnt.getOrDefault(entity, 0L));
+        }
+        for (String entity : newEntityCnt.keySet()) {
+            accNewEntityCnt.putIfAbsent(entity, newEntityCnt.get(entity));
+        }
     }
 
     public static String toAvroGlobs(String avroDirOrFile) {

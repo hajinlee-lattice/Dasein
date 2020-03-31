@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -209,6 +210,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         long orphanedUnmatchedAccountIdCount = 0L;
         long matchedByMatchKeyCount = 0L;
         long matchedByAccountIdCount = 0L;
+        Map<String, Long> newEntityCnt = new HashMap<>();
 
         boolean isEntityMatch = OperationalMode.isEntityMatch(matchContext.getInput().getOperationalMode());
         if (isEntityMatch) {
@@ -343,6 +345,17 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             }
             internalRecord.setOutput(output);
 
+            // count newly allocated entities
+            if (MapUtils.isNotEmpty(internalRecord.getNewEntityIds())) {
+                for (Map.Entry<String, String> entry : internalRecord.getNewEntityIds().entrySet()) {
+                    String entity = entry.getKey();
+                    String entityId = entry.getValue();
+                    if (StringUtils.isNotBlank(entityId)) {
+                        newEntityCnt.put(entity, newEntityCnt.getOrDefault(entity, 0L) + 1);
+                    }
+                }
+            }
+
             // For LDC and Entity match, IsMatched flag is marked in
             // FuzzyMatchServiceImpl.fetchIdResult
             if (internalRecord.isMatched()) {
@@ -390,12 +403,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         matchContext.getOutput().getStatistics().setRowsMatched(totalMatched);
         log.debug("TotalMatched: " + totalMatched);
         if (isEntityMatch) {
+            matchContext.getOutput().getStatistics().setNewEntityCount(newEntityCnt);
             matchContext.getOutput().getStatistics().setOrphanedNoMatchCount(orphanedNoMatchCount);
             matchContext.getOutput().getStatistics()
                     .setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
             matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
             matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
 
+            log.debug("NewEntityCnt: {}", newEntityCnt);
             log.debug("OrphanedNoMatchCount: " + orphanedNoMatchCount);
             log.debug("OrphanedUnmatchedAccountIdCount: " + orphanedUnmatchedAccountIdCount);
             log.debug("MatchedByMatchKeyCount: " + matchedByMatchKeyCount);

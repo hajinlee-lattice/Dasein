@@ -70,7 +70,7 @@ public final class EntityMatchUtils {
 
     static {
         OUTPUT_NEW_ENTITY_MAP.put(Account.name(), Sets.newHashSet(Account.name()));
-        OUTPUT_NEW_ENTITY_MAP.put(Contact.name(), Sets.newHashSet(Account.name()));
+        OUTPUT_NEW_ENTITY_MAP.put(Contact.name(), Sets.newHashSet(Account.name(), Contact.name()));
         // currently only LDC ID in account match is first win, others are last win
         FIRST_WIN_ATTRIBUTES.put(Account.name(), Collections.singleton(InterfaceName.LatticeAccountId.name()));
 

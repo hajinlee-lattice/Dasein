@@ -302,6 +302,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         addBaseTables(step, matchTargetTable);
         ExtractEmbeddedEntityTableConfig config = new ExtractEmbeddedEntityTableConfig();
         config.setEntity(BusinessEntity.Account.name());
+        config.setFilterByEntity(true);
         config.setEntityIdFld(InterfaceName.AccountId.name());
         List<String> systemIds = new ArrayList<>();
         systemIds.add(InterfaceName.CustomerAccountId.name());
