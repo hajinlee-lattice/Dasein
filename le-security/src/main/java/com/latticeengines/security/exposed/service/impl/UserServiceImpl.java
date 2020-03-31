@@ -283,7 +283,8 @@ public class UserServiceImpl implements UserService {
         if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
                 List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
-                List<String> userTeamIds = userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
+                List<String> userTeamIds =
+                        userTeams == null ? new ArrayList() : userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
                 if (userTeams == null && CollectionUtils.isNotEmpty(rightsData)) {
                     globalAuthTeams = rightsData.get(0).getGlobalAuthTeams();
                 } else if (CollectionUtils.isNotEmpty(userTeams)) {
@@ -291,11 +292,13 @@ public class UserServiceImpl implements UserService {
                 }
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
                         createdByUser, expirationDate, globalAuthTeams);
-                if (result && clearSession) {
-                    AccessLevel originalLevel = AccessLevel.findAccessLevel(originalRights);
+                if (result) {
                     Long userId = findIdByUsername(username);
-                    if (!isSuperior(accessLevel, originalLevel)) {
-                        clearSession(tenantId, Collections.singletonList(userId));
+                    if (clearSession) {
+                        AccessLevel originalLevel = AccessLevel.findAccessLevel(originalRights);
+                        if (!isSuperior(accessLevel, originalLevel)) {
+                            clearSession(tenantId, Collections.singletonList(userId));
+                        }
                     } else {
                         if (userTeams != null) {
                             List<String> orgTeamIds = globalUserManagementService.getTeamIds(rightsData);
@@ -662,7 +665,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void clearSession(boolean expireSession, String tenantId, List<Long> userIds) {
         if (CollectionUtils.isNotEmpty(userIds)) {
-            LOGGER.info(String.format("Will clear sessions for user ids %d in %s.", userIds, tenantId));
+            LOGGER.info(String.format("Will clear sessions for user ids %s in %s.", userIds, tenantId));
             clearSessionService.submit(() -> {
                 GlobalAuthTenant tenantData = globalTenantManagementService.findByTenantId(tenantId);
                 List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService
