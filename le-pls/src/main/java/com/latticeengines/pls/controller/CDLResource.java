@@ -480,7 +480,7 @@ public class CDLResource {
     }
 
     private void updateUniqueAndMatchIdField(List<TemplateFieldPreview> fieldPreviews, List<S3ImportSystem> s3ImportSystem, EntityType entityType) {
-        if (CollectionUtils.isEmpty(s3ImportSystem)) {
+        if (CollectionUtils.isEmpty(s3ImportSystem) || entityType == null) {
             return;
         }
         Set<String> accountSystemIdList = s3ImportSystem.stream().map(S3ImportSystem::getAccountSystemId)
