@@ -251,7 +251,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-            Long expirationDate, boolean createUser, boolean clearSession, List<String> userTeamIds) {
+            Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
@@ -283,9 +283,10 @@ public class UserServiceImpl implements UserService {
         if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
                 List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
-                if (userTeamIds == null && CollectionUtils.isNotEmpty(rightsData)) {
+                List<String> userTeamIds = userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
+                if (userTeams == null && CollectionUtils.isNotEmpty(rightsData)) {
                     globalAuthTeams = rightsData.get(0).getGlobalAuthTeams();
-                } else if (CollectionUtils.isNotEmpty(userTeamIds)) {
+                } else if (CollectionUtils.isNotEmpty(userTeams)) {
                     globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
@@ -296,7 +297,7 @@ public class UserServiceImpl implements UserService {
                     if (!isSuperior(accessLevel, originalLevel)) {
                         clearSession(tenantId, Collections.singletonList(userId));
                     } else {
-                        if (userTeamIds != null) {
+                        if (userTeams != null) {
                             List<String> orgTeamIds = globalUserManagementService.getTeamIds(rightsData);
                             if (teamIdsChanged(userTeamIds, orgTeamIds)) {
                                 clearSession(false, tenantId, Collections.singletonList(userId));
@@ -492,12 +493,8 @@ public class UserServiceImpl implements UserService {
         }
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
-            List<String> userTeamIds = null;
-            if (user.getUserTeams() != null) {
-                userTeamIds = user.getUserTeams().stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
-            }
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
-                    user.getExpirationDate(), true, false, userTeamIds);
+                    user.getExpirationDate(), true, false, user.getUserTeams());
         }
 
         String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.security.EntityAccessRightsData;
 
 public class UserUpdateData {
@@ -13,7 +14,7 @@ public class UserUpdateData {
     private Map<String, EntityAccessRightsData> rights;
     private String accessLevel;
     private Long expirationDate;
-    private List<String> userTeams;
+    private List<GlobalTeam> userTeams;
 
     @JsonProperty("OldPassword")
     public String getOldPassword() {
@@ -78,12 +79,12 @@ public class UserUpdateData {
     }
 
     @JsonProperty("UserTeams")
-    public List<String> getUserTeams() {
+    public List<GlobalTeam> getUserTeams() {
         return userTeams;
     }
 
     @JsonProperty("UserTeams")
-    public void setUserTeams(List<String> userTeams) {
+    public void setUserTeams(List<GlobalTeam> userTeams) {
         this.userTeams = userTeams;
     }
 }
