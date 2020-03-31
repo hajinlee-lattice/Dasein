@@ -71,6 +71,7 @@ public class ResumeCheckPointDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
 
     private void importFile() throws Exception {
         List<MockImport> mockImports = end2EndTestConfiguration.getImports();
+        log.info("Mock imports is {}.", JsonUtils.serialize(mockImports));
         if (CollectionUtils.isNotEmpty(mockImports)) {
             dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
             for (MockImport mockImport : mockImports) {
@@ -94,6 +95,7 @@ public class ResumeCheckPointDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         String objectKey = S3_CHECKPOINT_CONFIG_FILES_DIR + addSuffix(checkpointConfigFileName);
         InputStream inputStream = s3Service.readObjectAsStream(S3_BUCKET, objectKey);
         end2EndTestConfiguration = JsonUtils.deserialize(inputStream, End2EndTestConfiguration.class);
+        log.info("configuration file is {}.", JsonUtils.serialize(end2EndTestConfiguration));
     }
 
     private String addSuffix(String fileName) {
