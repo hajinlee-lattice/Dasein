@@ -200,7 +200,8 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private List<Long> getUserIds(GlobalAuthTeam globalAuthTeam) {
-        return globalAuthTeam.getUserTenantRights().stream().map(GlobalAuthUserTenantRight::getPid).collect(Collectors.toList());
+        return globalAuthTeam.getUserTenantRights().stream()
+                .map(globalAuthUserTenantRight -> globalAuthUserTenantRight.getGlobalAuthUser().getPid()).collect(Collectors.toList());
     }
 
     private List<Long> getChangedUserNames(List<Long> orgUserIds, List<Long> newUserIds) {

@@ -292,13 +292,11 @@ public class UserServiceImpl implements UserService {
                 }
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
                         createdByUser, expirationDate, globalAuthTeams);
-                if (result) {
+                if (result && clearSession) {
+                    AccessLevel originalLevel = AccessLevel.findAccessLevel(originalRights);
                     Long userId = findIdByUsername(username);
-                    if (clearSession) {
-                        AccessLevel originalLevel = AccessLevel.findAccessLevel(originalRights);
-                        if (!isSuperior(accessLevel, originalLevel)) {
-                            clearSession(tenantId, Collections.singletonList(userId));
-                        }
+                    if (!isSuperior(accessLevel, originalLevel)) {
+                        clearSession(tenantId, Collections.singletonList(userId));
                     } else {
                         if (userTeams != null) {
                             List<String> orgTeamIds = globalUserManagementService.getTeamIds(rightsData);
@@ -670,7 +668,9 @@ public class UserServiceImpl implements UserService {
                 GlobalAuthTenant tenantData = globalTenantManagementService.findByTenantId(tenantId);
                 List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService
                         .findTicketsByUserIdsAndTenant(userIds, tenantData);
-                discardTickets(expireSession, globalAuthTickets, tenantData.getPid());
+                if (CollectionUtils.isNotEmpty(globalAuthTickets)) {
+                    discardTickets(expireSession, globalAuthTickets, tenantData.getPid());
+                }
             });
         }
     }
