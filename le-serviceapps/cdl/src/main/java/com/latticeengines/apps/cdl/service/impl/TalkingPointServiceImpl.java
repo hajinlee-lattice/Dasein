@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -118,6 +119,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         return findAllByPlayName(playName, false);
     }
 
+    @Override
     public List<TalkingPointDTO> findAllByPlayName(String playName, boolean publishedOnly) {
         try {
             return publishedOnly //
@@ -166,6 +168,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     public void publish(String playName) {
         String customerSpace = MultiTenantContext.getCustomerSpace().getTenantId();
         try {
+            Play play = playService.getPlayByName(playName, false);
             List<TalkingPoint> tps = talkingPointEntityMgr.findAllByPlayName(playName);
             log.info("Publishing " + (CollectionUtils.isNotEmpty(tps) ? tps.size() : 0) + " Talkingpoints for play "
                     + playName + " for public api availablility");
@@ -174,10 +177,11 @@ public class TalkingPointServiceImpl implements TalkingPointService {
             for (PublishedTalkingPoint ptp : toBeDeleted) {
                 publishedTalkingPointEntityMgr.delete(ptp);
             }
-
             for (TalkingPoint tp : tps) {
                 publishedTalkingPointEntityMgr.createOrUpdate(convertToPublished(tp));
             }
+            play.setUpdated(new Date(System.currentTimeMillis()));
+            playService.createOrUpdate(play, false, MultiTenantContext.getTenant().getId());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38014, e, new String[] { playName, customerSpace });
         }
@@ -217,6 +221,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         return findAllByPlayName(playName);
     }
 
+    @Override
     public List<TalkingPointDTO> findAllPublishedByTenant(String customerSpace) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant != null && tenant.getPid() != null && tenant.getPid() > 0) {

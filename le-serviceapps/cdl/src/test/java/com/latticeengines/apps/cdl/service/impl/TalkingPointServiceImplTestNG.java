@@ -59,7 +59,7 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "testEmptyTalkingPointsSave")
-    public void testTalkingPointsOperations() {
+    public void testTalkingPointsOperations() throws InterruptedException {
         List<TalkingPointDTO> tps = new ArrayList<>();
 
         TalkingPointDTO tp = new TalkingPointDTO();
@@ -122,13 +122,19 @@ public class TalkingPointServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(), tp.getName());
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID(), tp2.getName());
 
+        Play play = playService.getPlayByName(tp.getPlayName(), true);
+        Date previousUpdateDate = play.getUpdated();
+        Thread.sleep(1000L);
         talkingPointService.publish(tp.getPlayName());
+        play = playService.getPlayByName(tp.getPlayName(), true);
+        Date nextUpdatedDate = play.getUpdated();
         List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), tps.size());
         Assert.assertEquals(dtps.get(0).getName(), tp.getName());
         Assert.assertEquals(dtps.get(1).getName(), tp2.getName());
         Assert.assertEquals(dtps.get(0).getPlayName(), tp.getPlayName());
+        Assert.assertEquals((nextUpdatedDate.compareTo(previousUpdateDate) > 0), true);
 
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(tp2.getName());
