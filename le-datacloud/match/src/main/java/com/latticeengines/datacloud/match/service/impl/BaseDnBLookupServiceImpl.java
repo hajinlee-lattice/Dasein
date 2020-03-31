@@ -126,14 +126,14 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         }
     }
 
-    protected Object retrieveJsonValueFromResponse(String jsonPath, String body, boolean raiseException) {
+    protected Object retrieveJsonValueFromResponse(String jsonPath, String body, boolean fieldRequired) {
         try {
             return JsonPath.parse(body).read(jsonPath);
         } catch (Exception e) {
-            if (raiseException) {
+            if (fieldRequired) {
                 throw e;
             } else {
-                log.error(String.format("Fail to extract json property with path %s from response %s", jsonPath, body),
+                log.warn(String.format("Optional field (json path %s) not exist in response %s", jsonPath, body),
                         e);
                 return null;
             }
