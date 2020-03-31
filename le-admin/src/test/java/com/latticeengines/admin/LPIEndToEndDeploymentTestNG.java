@@ -49,12 +49,16 @@ import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSUser;
+
 public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private static final String tenantName = "Global Test Tenant" + System.currentTimeMillis();
     private static final Logger log = LoggerFactory.getLogger(LPIEndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
+    private static String userEmail = "test@test.com";
 
     private static final String HDFS_POD_PATH = "/Pods/%s/Contracts/%s";
     private static final String HDFS_MODELING_BASE_PATH = "/user/s-analytics/customers";
@@ -70,6 +74,9 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     @Inject
     private PLSComponentDeploymentTestNG plsComponentDeploymentTestNG;
@@ -129,9 +136,15 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         log.info("Verify installation");
         verifyZKState();
         verifyPLSTenantExists();
+        verifyIDaasUserExists();
 
         log.info("Uninstall again with wiping out ZK.");
         deleteTenant(contractId, tenantId);
+    }
+
+    private void verifyIDaasUserExists() {
+        IDaaSUser user = iDaaSService.getIDaaSUser(userEmail);
+        Assert.assertNotNull(user);
     }
 
     private void provisionEndToEndVboTestTenants() {
@@ -144,7 +157,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         name.setFirstName("test");
         name.setLastName("test");
         user.setName(name);
-        user.setEmailAddress("test@test.com");
+        user.setEmailAddress(userEmail);
 
         pro.setUsers(new ArrayList<VboRequest.User>());
         pro.getUsers().add(user);
