@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.service.MetadataSegmentService;
-import com.latticeengines.security.exposed.service.SessionService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,7 +44,7 @@ public class MetadataSegmentResource {
 
     @Inject
     public MetadataSegmentResource(MetadataSegmentService metadataSegmentService,
-            MetadataSegmentExportService metadataSegmentExportService, SessionService sessionService) {
+            MetadataSegmentExportService metadataSegmentExportService) {
         this.metadataSegmentService = metadataSegmentService;
         this.metadataSegmentExportService = metadataSegmentExportService;
     }
@@ -55,6 +54,15 @@ public class MetadataSegmentResource {
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments() {
         return metadataSegmentService.getSegments().stream() //
+                .filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())) //
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/username/{username}")
+    @ResponseBody
+    @ApiOperation(value = "Get all segments")
+    public List<MetadataSegment> getSegmentsByUsername(@PathVariable(value = "username") String username) {
+        return metadataSegmentService.getSegmentsByUsername(username).stream() //
                 .filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())) //
                 .collect(Collectors.toList());
     }

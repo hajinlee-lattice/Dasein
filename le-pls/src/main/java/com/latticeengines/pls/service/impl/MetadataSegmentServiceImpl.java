@@ -78,6 +78,11 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     }
 
     @Override
+    public List<MetadataSegment> getSegmentsByUsername(String username) {
+        return null;
+    }
+
+    @Override
     public MetadataSegment getSegmentByName(String name) {
         return getSegmentByName(name, true);
     }

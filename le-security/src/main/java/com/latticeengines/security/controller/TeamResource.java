@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,9 +41,10 @@ public class TeamResource {
     @GetMapping(value = "/username/{username}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
-    public List<GlobalTeam> getTeamsByUsername(@PathVariable(value = "username") String username) {
+    public List<GlobalTeam> getTeamsByUsername(@PathVariable(value = "username") String username,
+                                               @RequestParam(value = "withTeamMember", required = false, defaultValue = "false") boolean withTeamMember) {
         User loginUser = MultiTenantContext.getUser();
-        return teamService.getTeamsByUserName(username, loginUser);
+        return teamService.getTeamsByUserName(username, loginUser, withTeamMember);
     }
 
     @GetMapping(value = "")
@@ -65,7 +66,7 @@ public class TeamResource {
     @ResponseBody
     @ApiOperation(value = "Update a team")
     public Boolean editTeam(@PathVariable("teamId") String teamId, //
-                            @RequestBody GlobalTeamData globalTeamData, HttpServletRequest request) {
+                            @RequestBody GlobalTeamData globalTeamData) {
         log.info("Edit team {}.", teamId);
         return teamService.editTeam(teamId, globalTeamData);
     }

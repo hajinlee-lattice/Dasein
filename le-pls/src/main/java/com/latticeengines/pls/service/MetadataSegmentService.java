@@ -11,6 +11,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public interface MetadataSegmentService {
     List<MetadataSegment> getSegments();
 
+    List<MetadataSegment> getSegmentsByUsername(String username);
+
     MetadataSegment getSegmentByName(String name);
 
     MetadataSegment getSegmentByName(String name, boolean shouldTranslateForFrontend);

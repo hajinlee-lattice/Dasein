@@ -13,7 +13,7 @@ public interface GlobalSessionManagementService {
 
     Session attach(Ticket ticket);
 
-    List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenant);
+    List<GlobalAuthTicket> findTicketsByUserIdsAndTenant(List<Long> userIds, GlobalAuthTenant tenant);
 
     List<GlobalAuthTicket> findTicketsByEmailAndExternalIssuer(String email, String issuer);
 
@@ -21,5 +21,5 @@ public interface GlobalSessionManagementService {
 
     List<GlobalAuthTicket> findByUserIdAndTenantIdAndNotInTicket(Long tenantId, Long userId, String ticket);
 
-    boolean discardSession(Ticket ticket, Long tenantId, Long ticketId, Long userId);
+    boolean discardSession(boolean expireSession, Ticket ticket, Long tenantId, Long ticketId, Long userId);
 }

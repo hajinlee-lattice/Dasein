@@ -9,13 +9,13 @@ public interface GlobalTeamManagementService {
 
     String createTeam(String createdByUser, GlobalTeamData globalTeamData);
 
-    void updateTeam(String teamId, GlobalTeamData globalTeamData);
+    GlobalAuthTeam updateTeam(String teamId, GlobalTeamData globalTeamData);
 
-    List<GlobalAuthTeam> getTeams(boolean withTenantMember);
+    List<GlobalAuthTeam> getTeams(boolean withTeamMember);
 
     List<GlobalAuthTeam> getTeamsByTeamIds(List<String> teamIds, boolean withTeamMember);
 
-    List<GlobalAuthTeam> getTeamsByUserName(String username, boolean withTenantMember);
+    List<GlobalAuthTeam> getTeamsByUserName(String username, boolean withTeamMember);
 
     GlobalAuthTeam getTeamById(String teamId, boolean withTeamMember);
 

@@ -39,6 +39,8 @@ public interface UserService {
 
     boolean deleteUser(String tenantId, String username);
 
+    void clearSession(boolean expireSession, String tenantId, List<Long> userIds);
+
     List<User> getUsers(String tenantId);
 
     List<User> getUsers(String tenantId, UserFilter filter);

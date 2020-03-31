@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
@@ -15,6 +16,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthSessionEntityMgr;
+import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTeamEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
@@ -23,6 +25,7 @@ import com.latticeengines.auth.exposed.util.SessionUtils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthExternalSession;
 import com.latticeengines.domain.exposed.auth.GlobalAuthSession;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
@@ -55,6 +58,9 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
     @Inject
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
+
+    @Inject
+    private GlobalAuthTeamEntityMgr globalAuthTeamEntityMgr;
 
     @Inject
     private GlobalAuthUserTenantRightEntityMgr gaUserTenantRightEntityMgr;
@@ -117,7 +123,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         }
 
         List<GlobalAuthUserTenantRight> userTenantRightData = gaUserTenantRightEntityMgr
-                .findByUserIdAndTenantId(userData.getPid(), sessionData.getTenantId());
+                .findByUserIdAndTenantId(userData.getPid(), sessionData.getTenantId(), true);
 
         if (userTenantRightData == null || userTenantRightData.size() == 0) {
             throw new Exception("Unable to find the rights for the user-tenant requested.");
@@ -125,7 +131,6 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
         ticketData.setLastAccessDate(now);
         gaTicketEntityMgr.update(ticketData);
-
         Session session = new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
         session.setExternalSession(ticketData.getExternalSession());
         return session;
@@ -176,8 +181,8 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
     }
 
     @Override
-    public List<GlobalAuthTicket> findTicketsByUserIdAndTenant(Long userId, GlobalAuthTenant tenant) {
-        return gaTicketEntityMgr.findTicketsByUserIdAndLastAccessDateAndTenant(userId, tenant);
+    public List<GlobalAuthTicket> findTicketsByUserIdsAndTenant(List<Long> userIds, GlobalAuthTenant tenant) {
+        return gaTicketEntityMgr.findTicketsByUserIdsAndLastAccessDateAndTenant(userIds, tenant);
     }
 
     @Override
@@ -219,7 +224,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         }
 
         List<GlobalAuthUserTenantRight> userTenantRightData = gaUserTenantRightEntityMgr
-                .findByUserIdAndTenantId(userData.getPid(), tenantData.getPid());
+                .findByUserIdAndTenantId(userData.getPid(), tenantData.getPid(), true);
         if (userTenantRightData == null || userTenantRightData.size() == 0) {
             throw new Exception("Unable to find the rights for the user-tenant requested.");
         }
@@ -227,7 +232,6 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         GlobalAuthSession sessionData = gaSessionEntityMgr.findByTicketId(ticketData.getPid());
         ticketData.setLastAccessDate(now);
         gaTicketEntityMgr.update(ticketData);
-
         if (sessionData != null) {
             if (sessionData.getTenantId() == tenantData.getPid()) {
                 return new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
@@ -241,6 +245,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         sessionData.setUserId(ticketData.getUserId());
         sessionData.setTicketId(ticketData.getPid());
         gaSessionEntityMgr.create(sessionData);
+
         return new SessionBuilder().build(ticketData, userData, sessionData, tenantData, userTenantRightData);
     }
 
@@ -249,16 +254,20 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         @SuppressWarnings("unused")
         public Session build(GlobalAuthTicket ticketData, GlobalAuthUser userData, GlobalAuthSession sessionData, GlobalAuthTenant tenantData,
                 List<GlobalAuthUserTenantRight> userTenantRightData) {
-
             Tenant tenant = new Tenant();
             tenant.setId(tenantData.getId());
             tenant.setName(tenantData.getName());
-
             List<String> rights = new ArrayList<String>();
+            List<String> teamIds = new ArrayList<>();
             for (GlobalAuthUserTenantRight userTenantRight : userTenantRightData) {
                 rights.add(userTenantRight.getOperationName());
+                List<GlobalAuthTeam> globalAuthTeams = userTenantRight.getGlobalAuthTeams();
+                if (CollectionUtils.isNotEmpty(globalAuthTeams)) {
+                    for (GlobalAuthTeam globalAuthTeam : globalAuthTeams) {
+                        teamIds.add(globalAuthTeam.getTeamId());
+                    }
+                }
             }
-
             Session session = new Session();
             session.setIdentifier(userData.getPid().toString());
             session.setDisplayName(userData.getFirstName() + " " + userData.getLastName());
@@ -267,6 +276,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             session.setRights(rights);
             session.setTitle(userData.getTitle());
             session.setTenant(new TenantBuilder().build(tenantData));
+            session.setTeamIds(teamIds);
             session.setTicketCreationTime(ticketData.getCreationDate().getTime());
             if (session == null) {
                 throw new RuntimeException("Failed to attach ticket against GA.");
@@ -309,9 +319,13 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
 
     @Override
     @CacheEvict(key = "#ticket.data")
-    public synchronized boolean discardSession(Ticket ticket, Long tenantId, Long ticketId, Long userId) {
+    public synchronized boolean discardSession(boolean expireSession, Ticket ticket, Long tenantId, Long ticketId, Long userId) {
         try {
             LOGGER.info("Discarding session with ticket id " + ticketId + ", tenant id " + tenantId + ", user id " + userId + "against Global Auth.");
+            // only clear redis cache and let next request to rebuild session cache data
+            if (!expireSession) {
+                return true;
+            }
             return globalDiscard(tenantId, ticketId, userId);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18009, e, new String[]{ticket.toString()});
@@ -322,10 +336,10 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         GlobalAuthSession globalAuthSession = gaSessionEntityMgr.findByTicketIdAndTenantIdAndUserId(ticketId, tenantId, userId);
         if (globalAuthSession != null) {
             gaSessionEntityMgr.delete(globalAuthSession);
+            return true;
         } else {
             return false;
         }
-        return true;
     }
 
     @Override

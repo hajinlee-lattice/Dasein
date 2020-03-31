@@ -4,6 +4,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -67,7 +68,8 @@ public class GlobalSessionManagementServiceImplTestNG extends SecurityFunctional
         GlobalAuthTenant tenant = globalAuthTenantEntityMgr.findByTenantId(adminTenantName);
         assertNotNull(tenant);
         Long userId = globalUserManagementService.getIdByUsername(adminUsername);
-        List<GlobalAuthTicket> tickets = globalSessionManagementService.findTicketsByUserIdAndTenant(userId, tenant);
+        List<GlobalAuthTicket> tickets =
+                globalSessionManagementService.findTicketsByUserIdsAndTenant(Collections.singletonList(userId), tenant);
         assertTrue(tickets.size() > 0);
         assertEquals(tickets.get(0).getTicket(), ticket.getData());
     }

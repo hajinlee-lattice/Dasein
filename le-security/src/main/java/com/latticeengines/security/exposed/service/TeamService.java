@@ -11,6 +11,8 @@ public interface TeamService {
 
     List<GlobalTeam> getTeams(User loginUser);
 
+    List<GlobalTeam> getTeamsByUserName(String username, User loginUser, boolean withTeamMember);
+
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser);
 
     GlobalTeam getTeamByTeamId(String teamId, User loginUser);
@@ -30,4 +32,6 @@ public interface TeamService {
     List<GlobalTeam> getTeamsInContext();
 
     GlobalTeam getTeamInContext(String teamId);
+
+    GlobalTeam getTeamByTeamId(String teamId, User loginUser, boolean withTeamMember);
 }
