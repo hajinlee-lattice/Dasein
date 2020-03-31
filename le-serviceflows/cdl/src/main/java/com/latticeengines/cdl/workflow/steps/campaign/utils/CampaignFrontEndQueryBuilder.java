@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
+import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 
 public class CampaignFrontEndQueryBuilder {
 
@@ -178,16 +179,24 @@ public class CampaignFrontEndQueryBuilder {
         campaignFrontEndQuery.getAccountRestriction().setRestriction(accountRestrictionWithNonNullLookupId);
     }
 
+    /***
+     * The below approach is a bit convoluted.
+     * If FrontEndQuery's MainEntity is Contact, Accounts with no contacts
+     * automatically get filtered. So to retain accounts without contacts, setting
+     * FrontEndQuery's MainEntity to Account and looking up ContactIds from contact
+     * gets us all accounts with and without contacts. Important to note this
+     * approach only applies when there are no contact filters, since with contact
+     * filters we want to filter out accounts without contacts. Also this is the
+     * reason, this should always be done right before returning the front end query
+     */
     private void filterAccountsWithoutContacts() {
-        // Bit hacky approach, If FrontEndQuery's MainEntity is Contact, Accounts with
-        // no contacts automatically get filtered.
-        // So set FrontEndQuery's MainEntity to Account when filtering isn't needed
-        // Also this is the reason, this should always be done right before returning
-        // the front end query
+
         if (isSuppressAccountsWithoutContacts) {
             campaignFrontEndQuery.setMainEntity(BusinessEntity.Contact);
         } else {
-            campaignFrontEndQuery.setMainEntity(BusinessEntity.Account);
+            if (campaignFrontEndQuery.getContactRestriction() != null && RestrictionOptimizer
+                    .optimize(campaignFrontEndQuery.getContactRestriction().getRestriction()) == null)
+                campaignFrontEndQuery.setMainEntity(BusinessEntity.Account);
         }
     }
 
