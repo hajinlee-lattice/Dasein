@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -275,6 +276,36 @@ public abstract class AdminAbstractTestNGBase extends AbstractTestNGSpringContex
         return false;
     }
 
+    protected void waitForTenantInstallation(String tenantId, String contractId) {
+        Long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10L);
+        BootstrapState state = BootstrapState.createInitialState();
+        while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
+                && System.currentTimeMillis() <= timeout) {
+            try {
+                String url = String.format("%s/admin/tenants/%s?contractId=%s", getRestHostPort(),
+                        tenantId, contractId);
+                TenantDocument tenantDoc = restTemplate.getForObject(url, TenantDocument.class);
+                BootstrapState newState = tenantDoc.getBootstrapState();
+                log.info("BootstrapState from tenant console: " + (newState == null ? null : newState.state));
+                state = newState == null ? state : newState;
+                if (BootstrapState.State.OK.equals(state.state) || BootstrapState.State.ERROR.equals(state.state)) {
+                    return;
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to query tenant installation state", e);
+            } finally {
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+        }
+
+        if (!BootstrapState.State.OK.equals(state.state)) {
+            throw new IllegalArgumentException("The tenant state is not OK after " + TimeUnit.MINUTES.toMillis(10L) + " msec.");
+        }
+    }
     public void clearDatastore(String dataStoreOption, String permStoreOption, String visiDBServerName, String tenant) {
         // setup magic rest template
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);

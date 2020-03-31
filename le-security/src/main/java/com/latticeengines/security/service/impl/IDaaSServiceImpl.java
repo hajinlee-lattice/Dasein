@@ -32,6 +32,9 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.auth.IDaaSExternalSession;
+import com.latticeengines.domain.exposed.dcp.idaas.IDaaSResponse;
+import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
+import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
@@ -46,8 +49,8 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private static final Logger log = LoggerFactory.getLogger(IDaaSServiceImpl.class);
 
-    private static final String DCP_PRODUCT = "Data Cloud Portal";
-    private static final String DCP_ROLE = "DATA_CLOUD_PORTAL_ACCESS";
+    public static final String DCP_PRODUCT = "Data Cloud Portal";
+    public static final String DCP_ROLE = "DATA_CLOUD_PORTAL_ACCESS";
 
     private RestTemplate restTemplate = HttpClientUtils.newJsonRestTemplate();
 
@@ -179,7 +182,6 @@ public class IDaaSServiceImpl implements IDaaSService {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public IDaaSUser updateIDaaSUser(IDaaSUser user) {
         if (enabled) {
             initialize();
@@ -189,7 +191,7 @@ public class IDaaSServiceImpl implements IDaaSService {
                 RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
                 returnedUser = retryTemplate.execute(ctx -> {
                     try (PerformanceTimer timer = new PerformanceTimer("update user in IDaaS.")) {
-                        HttpEntity entity = new HttpEntity(user);
+                        HttpEntity<IDaaSUser> entity = new HttpEntity<>(user);
                         ResponseEntity<IDaaSUser> responseEntity = restTemplate.exchange(userUri(email),
                                 HttpMethod.PUT, entity, IDaaSUser.class);
                         return responseEntity.getBody();
@@ -236,6 +238,65 @@ public class IDaaSServiceImpl implements IDaaSService {
             return returnedUser;
         } else {
             return user;
+        }
+    }
+
+    @Override
+    public IDaaSResponse addProductAccessToUser(ProductRequest request) {
+        if (enabled) {
+            initialize();
+            IDaaSResponse response = null;
+            String email = request.getEmailAddress();
+            try {
+                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+                response = retryTemplate.execute(ctx -> {
+                    try (PerformanceTimer timer = new PerformanceTimer("add product access to user.")){
+                        HttpEntity<ProductRequest> entity = new HttpEntity<>(request);
+                        ResponseEntity<IDaaSResponse> responseEntity =
+                                restTemplate.exchange(addProductUri(email), HttpMethod.PUT, entity,
+                                        IDaaSResponse.class);
+                        return responseEntity.getBody();
+                    } catch (Exception e) {
+                        // TODO re-evaluate this part after network is setup
+                        log.warn("Failed to execute api", e);
+                        return null;
+                    }
+                });
+            } catch (Exception e) {
+                log.warn("Failed to add product access to user {}", email);
+            }
+            return response;
+        } else {
+            return new IDaaSResponse();
+        }
+    }
+
+    @Override
+    public IDaaSResponse addRoleToUser(RoleRequest request) {
+        if (enabled) {
+            initialize();
+            IDaaSResponse response = null;
+            String email = request.getEmailAddress();
+            try {
+                RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
+                response = retryTemplate.execute(ctx -> {
+                    try (PerformanceTimer timer = new PerformanceTimer("add role to user.")){
+                        HttpEntity<RoleRequest> entity = new HttpEntity<>(request);
+                        ResponseEntity<IDaaSResponse> responseEntity = restTemplate.exchange(addRoleUri(email),
+                                HttpMethod.PUT, entity, IDaaSResponse.class);
+                        return responseEntity.getBody();
+                    } catch (Exception e) {
+                        // TODO re-evaluate this part after network is setup
+                        log.warn("Failed to execute api", e);
+                        return null;
+                    }
+                });
+            } catch (Exception e) {
+                log.warn("Failed to add role to user {}", email);
+            }
+            return response;
+        } else {
+            return new IDaaSResponse();
         }
     }
 
@@ -306,6 +367,14 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private URI createUserUri() {
         return URI.create(apiUrl + "/user");
+    }
+
+    private URI addProductUri(String email) {
+        return URI.create(apiUrl + String.format("/user/%s/product", email));
+    }
+
+    private URI addRoleUri(String email) {
+        return URI.create(apiUrl + String.format("/user/%s/role", email));
     }
 
 }

@@ -623,7 +623,7 @@ public class TenantServiceImpl implements TenantService {
         FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
         FeatureFlagValueMap defaultValueMap = new FeatureFlagValueMap();
         definitionMap.forEach((flagId, flagDef) -> {
-            if(flagDef.getAvailableProducts() != null) {
+            if (flagDef.getAvailableProducts() != null) {
                 for(LatticeProduct product : flagDef.getAvailableProducts()) {
                     if (productList.contains(product)) {
                         boolean defaultVal = flagDef.getDefaultValue();
@@ -653,7 +653,7 @@ public class TenantServiceImpl implements TenantService {
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
 
         // generate email list to be added and IDaaS user list
-        List<String> vboEmails = new ArrayList();
+        List<String> vboEmails = new ArrayList<>();
         List<IDaaSUser> users = new ArrayList<>();
         for(VboRequest.User user : vboRequest.getProduct().getUsers()) {
             vboEmails.add(user.getEmailAddress());
@@ -662,7 +662,7 @@ public class TenantServiceImpl implements TenantService {
 
         for (String component : services) {
             SerializableDocumentDirectory componentConfig = serviceService.getDefaultServiceConfig(component);
-            if(component.equalsIgnoreCase(PLSComponent.componentName)){
+            if(component.equalsIgnoreCase(PLSComponent.componentName)) {
                 for (SerializableDocumentDirectory.Node node : componentConfig.getNodes()) {
                     if (node.getNode().contains("ExternalAdminEmails")) {
                         List<String> mailList = JsonUtils.convertList(JsonUtils.deserialize(node.getData(), List.class), String.class);
@@ -670,12 +670,17 @@ public class TenantServiceImpl implements TenantService {
                         node.setData(JsonUtils.serialize(mailList));
                     }
                 }
+                // add users node
+                if (CollectionUtils.isNotEmpty(users)) {
+                    SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
+                    node.setNode("IDaaSUsers");
+                    node.setData(JsonUtils.serialize(users));
+                    componentConfig.getNodes().add(node);
+                }
+                // set null as document dir and serializable document dir are not consistent, document directory will
+                // be newly constructed from serializable document dir when needed
+                componentConfig.setDocumentDirectory(null);
             }
-            // add users node
-            SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
-            node.setNode("IDaaSUsers");
-            node.setData(JsonUtils.serialize(users));
-            componentConfig.getNodes().add(node);
             componentConfig.setRootPath("/" + component);
             configDirs.add(componentConfig);
         }
@@ -698,7 +703,6 @@ public class TenantServiceImpl implements TenantService {
         iDaasuser.setUserName(user.getUserId());
         iDaasuser.setPhoneNumber(user.getTelephoneNumber());
         iDaasuser.setLanguage(language);
-//        iDaaSService.createIDaaSUser(iDaasuser);
         return iDaasuser;
     }
 
