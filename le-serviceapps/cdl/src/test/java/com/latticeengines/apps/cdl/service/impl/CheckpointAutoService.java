@@ -395,6 +395,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
         Map<String, String> redshiftTablesToClone = new HashMap<>();
         Set<String> uploadedTables = new HashSet<>();
         RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
+        String signature = null;
         for (DataCollection.Version version : DataCollection.Version.values()) {
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 List<Table> tables = parseCheckpointTable(checkpoint, role.name(), version, tenantNames);
@@ -444,13 +445,14 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             if (statisticsContainer != null) {
                 dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
             }
+            if (version.equals(activeVersion)) {
+                signature = parseSystemInfos(checkpoint, CustomerSpace.parse(mainTestTenant.getId()).toString());
+
+            }
             DataCollectionStatus dataCollectionStatus = parseDataCollectionStatus(checkpoint, version);
             if (dataCollectionStatus != null) {
-                if (version.equals(activeVersion)) {
-                    String signature = parseSystemInfos(checkpoint, CustomerSpace.parse(mainTestTenant.getId()).toString());
-                    if (StringUtils.isNotBlank(signature)) {
-                        dataCollectionStatus.setDimensionMetadataSignature(signature);
-                    }
+                if (StringUtils.isNotBlank(signature) && version.equals(activeVersion)) {
+                    dataCollectionStatus.setDimensionMetadataSignature(signature);
                 }
                 dataCollectionProxy.saveOrUpdateDataCollectionStatus(mainTestTenant.getId(), dataCollectionStatus,
                         version);
@@ -498,17 +500,17 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                     hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 }
             }
-            log.info("Parse extract path " + hdfsPath);
-            Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
+            log.info("Parse extract path {}.", hdfsPath);
+            Pattern pattern = Pattern.compile(PATH_PATTERN);
             Matcher matcher = pattern.matcher(hdfsPath);
             String str = JsonUtils.serialize(json);
-            str = str.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
-            str = str.replaceAll("/Pods/QA/", "/Pods/" + podId + "/");
+            str = str.replaceAll(POD_DEFAULT, String.format(POD_PATTERN, podId));
+            str = str.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
             if (matcher.find()) {
                 tenantNames[0] = matcher.group(1);
-                log.info("Found tenant name " + tenantNames[0] + " in json.");
+                log.info("Found tenant name {} in json.", tenantNames[0]);
             } else {
-                log.info("Cannot find tenant for " + tenantNames[0]);
+                log.info("Cannot find tenant for {}.", tenantNames[0]);
             }
 
             if (tenantNames[0] != null) {
@@ -549,7 +551,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
 
     private void updateImportSystemInfos(String checkpoint, String customerSpace)
             throws IOException {
-        String jsonFile = String.format("%s/%s/S3ImportSystems.json", checkpointDir, checkpoint);
+        String jsonFile = String.format(S3IMPORT_SYSTEM_JSONFILE_FORMAT, checkpointDir, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find S3ImportSystemInfos.");
             return;
@@ -600,7 +602,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     }
 
     private Map<String, Table> parseTemplateTable(String checkpoint) throws IOException {
-        String jsonFile = String.format("checkpoints/%s/DataFeed/templateTables.json", checkpoint);
+        String jsonFile = String.format(TEMPLATE_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find TemplateInfos.");
             return null;
@@ -620,7 +622,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     }
 
     private Map<String, DataFeedTask> uploadDataFeedTasks(String checkpoint, String customerSpace) throws IOException {
-        String jsonFile = String.format("checkpoints/%s/DataFeed/DataFeedTasks.json", checkpoint);
+        String jsonFile = String.format(DATAFEEDTASK_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find DataFeedTaskInfos.");
             return null;
@@ -681,7 +683,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             log.info("Can't find dataFeedTaskMaps. skip find AtlasStreams.");
             return null;
         }
-        String jsonFile = String.format("checkpoints/%s/AtlasData/AtlasStreams.json", checkpoint);
+        String jsonFile = String.format(ATLASSTREAM_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find AtlasStreamInfos.");
             return null;
@@ -720,7 +722,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             log.info("Can't find dataFeedTaskMaps. skip find Catalog.");
             return null;
         }
-        String jsonFile = String.format("checkpoints/%s/AtlasData/Catalogs.json", checkpoint);
+        String jsonFile = String.format(CATALOG_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find catalogs.");
             return null;
@@ -769,7 +771,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             log.info("Can't find atlasStreamMap. skip find ActivityMetricGroups.");
             return;
         }
-        String jsonFile = String.format("checkpoints/%s/AtlasData/ActivityMetricGroups.json", checkpoint);
+        String jsonFile = String.format(METRICGROUP_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find ActivityMetricGroups.");
             return;
@@ -816,7 +818,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             log.info("Can't find atlasStreamMap. skip find dimensionMetadata.");
             return null;
         }
-        String jsonFile = String.format("checkpoints/%s/AtlasData/DimensionMetadatas.json", checkpoint);
+        String jsonFile = String.format(DIMENSION_METADATA_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find DimensionMetadatas.");
             return null;

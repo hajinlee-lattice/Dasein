@@ -63,7 +63,7 @@ public class CheckpointService extends CheckpointServiceBase {
                 if (CollectionUtils.isNotEmpty(tables)) {
                     for (Table table : tables) {
                         if (table != null) {
-                            log.info("Creating table " + table.getName() + " for " + role + " in version " + version);
+                            log.info("Creating table {} for {} in version {}.", table.getName(), role, version);
                             if (!uploadedTables.contains(table.getName())) {
                                 metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                                 uploadedTables.add(table.getName());
@@ -127,20 +127,20 @@ public class CheckpointService extends CheckpointServiceBase {
         copyEntitySeedTables(checkpoint, checkpointVersion);
 
         dataCollectionProxy.switchVersion(mainTestTenant.getId(), activeVersion);
-        log.info("Switch active version to " + activeVersion);
+        log.info("Switch active version to {}.", activeVersion);
     }
 
     private List<Table> parseCheckpointTable(String checkpoint, String roleName, DataCollection.Version version,
             String[] tenantNames) throws IOException {
         String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
                 roleName);
-        log.info("Checking table json file path " + jsonFilePath);
+        log.info("Checking table json file path {}.", jsonFilePath);
         File jsonFile = new File(jsonFilePath);
         if (!jsonFile.exists()) {
             return null;
         }
 
-        log.info("Parse check point " + checkpoint + " table " + roleName + " of version " + version.name());
+        log.info("Parse check point {} table {} of version {}.", checkpoint, roleName, version.name());
         List<Table> tables = new ArrayList<>();
         ArrayNode arrNode = (ArrayNode) om.readTree(jsonFile);
         Iterator<JsonNode> iter = arrNode.elements();
@@ -153,17 +153,17 @@ public class CheckpointService extends CheckpointServiceBase {
                     hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
                 }
             }
-            log.info("Parse extract path " + hdfsPath);
-            Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
+            log.info("Parse extract path {}.", hdfsPath);
+            Pattern pattern = Pattern.compile(PATH_PATTERN);
             Matcher matcher = pattern.matcher(hdfsPath);
             String str = JsonUtils.serialize(json);
-            str = str.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
-            str = str.replaceAll("/Pods/QA/", "/Pods/" + podId + "/");
+            str = str.replaceAll(POD_DEFAULT, String.format(POD_PATTERN, podId));
+            str = str.replaceAll(POD_QA, String.format(POD_PATTERN, podId));
             if (matcher.find()) {
                 tenantNames[0] = matcher.group(1);
-                log.info("Found tenant name " + tenantNames[0] + " in json.");
+                log.info("Found tenant name {} in json.", tenantNames[0]);
             } else {
-                log.info("Cannot find tenant for " + tenantNames[0]);
+                log.info("Cannot find tenant for {}.", tenantNames[0]);
             }
 
             if (tenantNames[0] != null) {
@@ -188,7 +188,7 @@ public class CheckpointService extends CheckpointServiceBase {
     }
 
     public void saveCheckpoint(String checkpointName, String checkpointVersion) throws IOException {
-        String rootDir = "checkpoints/" + checkpointName;
+        String rootDir = String.format("%s/%s", LOCAL_CHECKPOINT_DIR, checkpointName);
         FileUtils.deleteQuietly(new File(rootDir));
         FileUtils.forceMkdirParent(new File(rootDir));
 
@@ -196,7 +196,7 @@ public class CheckpointService extends CheckpointServiceBase {
 
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            String tablesDir = "checkpoints/" + checkpointName + "/" + version.name() + "/tables";
+            String tablesDir = String.format(TABLE_DIR, LOCAL_CHECKPOINT_DIR, checkpointName, version.name());
             FileUtils.forceMkdir(new File(tablesDir));
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 saveTableIfExists(role, version, checkpointName);
@@ -216,7 +216,7 @@ public class CheckpointService extends CheckpointServiceBase {
 
     public void saveCheckpoint(String checkpointName, String checkpointVersion, String customerSpace)
             throws IOException {
-        String rootDir = "checkpoints/" + checkpointName;
+        String rootDir = String.format("%s/%s", LOCAL_CHECKPOINT_DIR, checkpointName);
         FileUtils.deleteQuietly(new File(rootDir));
         FileUtils.forceMkdirParent(new File(rootDir));
 
@@ -224,7 +224,7 @@ public class CheckpointService extends CheckpointServiceBase {
 
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            String tablesDir = "checkpoints/" + checkpointName + "/" + version.name() + "/tables";
+            String tablesDir = String.format(TABLE_DIR, LOCAL_CHECKPOINT_DIR, checkpointName, version.name());
             FileUtils.forceMkdir(new File(tablesDir));
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 saveTableIfExists(role, version, checkpointName);
@@ -247,9 +247,10 @@ public class CheckpointService extends CheckpointServiceBase {
     private void saveDataCollectionStatus(DataCollection.Version version, String checkpoint) throws IOException {
         DataCollectionStatus dataCollectionStatus = dataCollectionProxy
                 .getOrCreateDataCollectionStatus(mainTestTenant.getId(), version);
-        String jsonFile = String.format("checkpoints/%s/%s/data_collection_status.json", checkpoint, version.name());
+        String jsonFile = String.format(DATA_COLLECTION_STATUS_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint,
+                version.name());
         om.writeValue(new File(jsonFile), dataCollectionStatus);
-        log.info("Save DataCollection Status at version " + version + " to " + jsonFile);
+        log.info("Save DataCollection Status at version {} to {}.", version, jsonFile);
     }
 
     private void printSaveRedshiftStatements(String checkpointName, String checkpointVersion) {

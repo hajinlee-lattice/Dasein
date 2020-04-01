@@ -105,6 +105,10 @@ public abstract class CheckpointServiceBase {
     protected static final String CATALOG_JSONFILE_FORMAT ="%s/%s/AtlasData/Catalogs.json";
     protected static final String METRICGROUP_JSONFILE_FORMAT = "%s/%s/AtlasData/ActivityMetricGroups.json";
     protected static final String DIMENSION_METADATA_JSONFILE_FORMAT = "%s/%s/AtlasData/DimensionMetadatas.json";
+    protected static final String PATH_PATTERN = "/Contracts/(.*)/Tenants/";
+    protected static final String POD_DEFAULT = "/Pods/Default/";
+    protected static final String POD_QA = "/Pods/QA/";
+    protected static final String POD_PATTERN = "/Pods/%s/";
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
