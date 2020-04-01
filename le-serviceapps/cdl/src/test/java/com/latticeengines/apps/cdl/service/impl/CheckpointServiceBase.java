@@ -368,6 +368,7 @@ public abstract class CheckpointServiceBase {
         String jsonFile = String.format(DATA_COLLECTION_STATUS_JSONFILE_FORMAT, checkpointDir, checkpoint,
                 version.name());
         if (!new File(jsonFile).exists()) {
+            log.info("Can't find dataCollectionStatus in version {}.", version.name());
             return null;
         }
         DataCollectionStatus status = JsonUtils.deserialize(new FileInputStream(jsonFile), DataCollectionStatus.class);
