@@ -43,6 +43,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private int maxIdleTime = -1;
     private int maxIdleTimeExcessConnections = -1;
     private int numHelperThreads = -1;
+    private int unreturnedConnectionTimeout = -1;
 
     @Override
     public DataSource getObject() {
@@ -161,7 +162,11 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
             if (Environment.AppMaster == currentEnv) {
                 timeoutInSeconds = 120;
             }
-            cpds.setUnreturnedConnectionTimeout(timeoutInSeconds);
+            if (unreturnedConnectionTimeout > 0) {
+                cpds.setUnreturnedConnectionTimeout(unreturnedConnectionTimeout);
+            } else {
+                cpds.setUnreturnedConnectionTimeout(timeoutInSeconds);
+            }
             cpds.setDebugUnreturnedConnectionStackTraces(true);
         }
 
@@ -379,5 +384,13 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
     public void setNumHelperThreads(int numHelperThreads) {
         this.numHelperThreads = numHelperThreads;
+    }
+
+    public int getUnreturnedConnectionTimeout() {
+        return unreturnedConnectionTimeout;
+    }
+
+    public void setUnreturnedConnectionTimeout(int unreturnedConnectionTimeout) {
+        this.unreturnedConnectionTimeout = unreturnedConnectionTimeout;
     }
 }
