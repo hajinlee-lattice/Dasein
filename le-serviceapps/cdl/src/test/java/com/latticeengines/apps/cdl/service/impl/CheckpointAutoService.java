@@ -123,10 +123,12 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 if (active.equals(version)) {
                     saveRedshiftTableIfExists(role, version);
                     saveDynamoTableIfExists(checkpointName, role, version);
-                    dimensionMetadataSignature = saveDataCollectionStatus(version, checkpointName);
-                } else {
-                    saveDataCollectionStatus(version, checkpointName);
                 }
+            }
+            if (active.equals(version)) {
+                dimensionMetadataSignature = saveDataCollectionStatus(version, checkpointName);
+            } else {
+                saveDataCollectionStatus(version, checkpointName);
             }
             saveStatsIfExists(version, checkpointName);
         }
