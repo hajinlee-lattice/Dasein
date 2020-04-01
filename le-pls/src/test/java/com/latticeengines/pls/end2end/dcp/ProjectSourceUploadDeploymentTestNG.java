@@ -30,7 +30,6 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
-import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -38,7 +37,6 @@ import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
-import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
 import com.latticeengines.pls.service.dcp.ProjectService;
 import com.latticeengines.pls.service.dcp.SourceService;
@@ -100,8 +98,6 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName(SOURCE_NAME);
         sourceRequest.setProjectId(PROJECT_ID);
-        SimpleTemplateMetadata simpleTemplateMetadata = new SimpleTemplateMetadata();
-        simpleTemplateMetadata.setEntityType(EntityType.Accounts);
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
         Source accountSource = sourceService.createSource(sourceRequest);
         verifySourceAndAccess(accountSource, response, true);
@@ -109,7 +105,6 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
         // create another source with id under same project
         sourceRequest.setSourceId(SOURCE_ID);
-        simpleTemplateMetadata.setEntityType(EntityType.Contacts);
         Source contactSource = sourceService.createSource(sourceRequest);
         verifySourceAndAccess(contactSource, response, true);
         
