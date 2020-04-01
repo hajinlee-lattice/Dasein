@@ -110,14 +110,18 @@ public class AccountAttrsDecorator implements Decorator {
             cm.disableGroup(TalkingPoint);
             cm.disableGroup(CompanyProfile);
             cm.disableGroup(Model);
+            if (InterfaceName.CustomerAccountId.name().equals(cm.getAttrName())) {
+                // do not use CustomerAccountId in segment, as there will always be a system id that can be used
+                cm.setCanSegment(false);
+            } else {
+                cm.setCanSegment(true);
+            }
             cm.setCanModel(false);
             cm.setCanEnrich(true);
             if (onlyEntityMatchGAEnabled) {
                 cm.enableGroup(Segment);
-                cm.setCanSegment(true);
             } else {
                 cm.disableGroup(Segment);
-                cm.setCanSegment(false);
             }
             return cm;
         }
