@@ -116,7 +116,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
         String dimensionMetadataSignature = "";
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            String tablesDir = "checkpoints/" + checkpointName + "/" + version.name() + "/tables";
+            String tablesDir = String.format(TABLE_DIR, LOCAL_CHECKPOINT_DIR, checkpointName, checkpointVersion);
             FileUtils.forceMkdir(new File(tablesDir));
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 saveTableIfExists(role, version, checkpointName);
@@ -187,7 +187,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             request.setBumpupVersion(false);
             requests.add(request);
         }
-        log.info("Start copying entity match table for " + entity + " using request: " + JsonUtils.serialize(requests));
+        log.info("Start copying entity match table for {} using request: {}.", entity, JsonUtils.serialize(requests));
         List<EntityPublishStatistics> entityPublishStatistics = matchProxy.publishEntity(requests);
         for (EntityPublishStatistics stats : entityPublishStatistics) {
             log.info("Copied {} {} seeds and {} {} lookup entries to tenant {}", stats.getSeedCount(),
@@ -213,9 +213,9 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     private void saveImportSystemIfExists(String checkpointName, String customerSpace) throws IOException {
         List<S3ImportSystem> importSystemList = s3ImportSystemService.getAllS3ImportSystem(customerSpace);
         if (CollectionUtils.isNotEmpty(importSystemList) && importSystemList.get(0) != null) {
-            String jsonFile = String.format("checkpoints/%s/S3ImportSystems.json", checkpointName);
+            String jsonFile = String.format(S3IMPORT_SYSTEM_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             om.writeValue(new File(jsonFile), importSystemList);
-            log.info("Save S3ImportSystems to " + jsonFile);
+            log.info("Save S3ImportSystems to {}.", jsonFile);
         } else {
             log.info("Failed to get importSystems");
         }
@@ -225,14 +225,15 @@ public class CheckpointAutoService extends CheckpointServiceBase {
         // Get the workflow ID from the customer space using DataFeed.
         DataFeed dataFeed = dataFeedService.getDefaultDataFeed(customerSpace);
         DataFeedExecution dataFeedExecution = dataFeed.getActiveExecution();
-        Long workflowId = dataFeedExecution.getWorkflowId();
-        ExecutionContext executionContext = workflowJobService.getExecutionContextByWorkflowId(customerSpace,
-                workflowId);
-        saveWorkflowExecutionContext(checkpointName, executionContext);
-
+        if (dataFeedExecution != null) {
+            Long workflowId = dataFeedExecution.getWorkflowId();
+            ExecutionContext executionContext = workflowJobService.getExecutionContextByWorkflowId(customerSpace,
+                    workflowId);
+            saveWorkflowExecutionContext(checkpointName, executionContext);
+        }
         List<DataFeedTask> dataFeedTaskList = dataFeed.getTasks();
         if (CollectionUtils.isNotEmpty(dataFeedTaskList) && dataFeedTaskList.get(0) != null) {
-            String dataFeedDir = String.format("checkpoints/%s/DataFeed", checkpointName);
+            String dataFeedDir = String.format(DATAFEED_DIR_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             FileUtils.forceMkdir(new File(dataFeedDir));
             saveDataFeedTaskIfExists(checkpointName, dataFeedTaskList);
         } else {
@@ -253,9 +254,9 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                     executionContextMap.remove(mapEntry);
                 }
             }
-            String jsonFile = String.format("checkpoints/%s/workflow_execution_context.json", checkpointName);
+            String jsonFile = String.format(EXECUTION_CONTEXT_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             om.writeValue(new File(jsonFile), executionContextMap);
-            log.info("Save Workflow Execution Context to " + jsonFile);
+            log.info("Save Workflow Execution Context to {}.", jsonFile);
         }
     }
 
@@ -267,13 +268,13 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                     return templateTable;
                 }).collect(Collectors.toList()));
         saveTemplateTableIfExists(checkpointName, templateTables);
-        String jsonFile = String.format("checkpoints/%s/DataFeed/DataFeedTasks.json", checkpointName);
+        String jsonFile = String.format(DATAFEEDTASK_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
         om.writeValue(new File(jsonFile), dataFeedTasks);
         log.info("Save all dataFeedTasks to file {}.", jsonFile);
     }
 
     private void saveTemplateTableIfExists(String checkpointName, List<Table> templateTables) throws IOException {
-        String jsonFile = String.format("checkpoints/%s/DataFeed/templateTables.json", checkpointName);
+        String jsonFile = String.format(TEMPLATE_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
         om.writeValue(new File(jsonFile), templateTables);
         log.info("Save all templateTables to file {}.", jsonFile);
     }
@@ -288,9 +289,9 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     private void saveAtlasStreamsAndDimensionIfExists(String checkpointName) throws IOException {
         List<AtlasStream> atlasStreams = atlasStreamEntityMgr.findByTenant(mainTestTenant, true);
         if (CollectionUtils.isNotEmpty(atlasStreams) && atlasStreams.get(0) != null) {
-            String localDir = String.format("checkpoints/%s/AtlasData", checkpointName);
+            String localDir = String.format(ATLAS_DIR, LOCAL_CHECKPOINT_DIR, checkpointName);
             FileUtils.forceMkdir(new File(localDir));
-            String jsonFile = String.format("checkpoints/%s/AtlasData/AtlasStreams.json", checkpointName);
+            String jsonFile = String.format(ATLASSTREAM_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             om.writeValue(new File(jsonFile), atlasStreams);
             log.info("Save all AtlasStreams to file {}.", jsonFile);
         } else {
@@ -301,7 +302,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     private void saveCatalogsIfExists(String checkpointName) throws IOException {
         List<Catalog> catalogs = catalogEntityMgr.findByTenant(mainTestTenant);
         if (CollectionUtils.isNotEmpty(catalogs) && catalogs.get(0) != null) {
-            String jsonFile = String.format("checkpoints/%s/AtlasData/Catalogs.json", checkpointName);
+            String jsonFile = String.format(CATALOG_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             om.writeValue(new File(jsonFile), catalogs);
             log.info("Save all Catalogs to file {}.", jsonFile);
         } else {
@@ -312,7 +313,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     private void saveActivityMetricGroupIfExists(String checkpointName) throws IOException {
         List<ActivityMetricsGroup> metricsGroups = activityMetricsGroupEntityMgr.findByTenant(mainTestTenant);
         if (CollectionUtils.isNotEmpty(metricsGroups) && metricsGroups.get(0) != null) {
-            String jsonFile = String.format("checkpoints/%s/AtlasData/ActivityMetricGroups.json", checkpointName);
+            String jsonFile = String.format(METRICGROUP_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             Map<String, List<ActivityMetricsGroup>> activityMetricsGroupMap = new HashMap<>();
             for (ActivityMetricsGroup metricsGroup : metricsGroups) {
                 String streamId = metricsGroup.getStream().getStreamId();
@@ -340,7 +341,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 activityStoreService.getDimensionMetadata(customerSpace,
                         signature);
         if (!dimensionMetadataMap.isEmpty()) {
-            String jsonFile = String.format("checkpoints/%s/AtlasData/DimensionMetadatas.json", checkpointName);
+            String jsonFile = String.format(DIMENSION_METADATA_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             om.writeValue(new File(jsonFile), dimensionMetadataMap);
             log.info("Save dimensionMetadataMap to file {}.", jsonFile);
         } else {
@@ -349,12 +350,12 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     }
 
     public void zipCheckpointAndUploadToS3(String checkpointName, String checkpointVersion) {
-        String rootDir = "checkpoints/" + checkpointName;
+        String rootDir = String.format("%s/%s", LOCAL_CHECKPOINT_DIR, checkpointName);
         try {
             File outputFile = new File(String.format("%s.zip", rootDir));
             log.info("outputFile path is {}.", outputFile.getAbsolutePath());
             if (outputFile.exists()) {
-                log.info(outputFile.getAbsolutePath() + " already exists. Deleting.");
+                log.info("{} already exists. Deleting.", outputFile.getAbsolutePath());
                 outputFile.delete();
             }
             ZipFile output = new ZipFile(outputFile);
@@ -378,9 +379,10 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     private String saveDataCollectionStatus(DataCollection.Version version, String checkpoint) throws IOException {
         DataCollectionStatus dataCollectionStatus = dataCollectionProxy
                 .getOrCreateDataCollectionStatus(mainTestTenant.getId(), version);
-        String jsonFile = String.format("checkpoints/%s/%s/data_collection_status.json", checkpoint, version.name());
+        String jsonFile = String.format(DATA_COLLECTION_STATUS_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint,
+                version.name());
         om.writeValue(new File(jsonFile), dataCollectionStatus);
-        log.info("Save DataCollection Status at version " + version + " to " + jsonFile);
+        log.info("Save DataCollection Status at version {} to {}.", version, jsonFile);
         return dataCollectionStatus.getDimensionMetadataSignature();
     }
 
@@ -400,7 +402,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 if (CollectionUtils.isNotEmpty(tables)) {
                     for (Table table : tables) {
                         if (table != null) {
-                            log.info("Creating table " + table.getName() + " for " + role + " in version " + version);
+                            log.info("Creating table {} for {} in version {}.", table.getName(), role, version);
                             if (!uploadedTables.contains(table.getName())) {
                                 metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                                 uploadedTables.add(table.getName());
@@ -422,7 +424,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                                     dynamoDataUnit.setName(table.getName());
                                     dynamoDataUnit
                                             .setTenant(CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
-                                    log.info("Creating data unit " + JsonUtils.serialize(dynamoDataUnit));
+                                    log.info("Creating data unit {}.", JsonUtils.serialize(dynamoDataUnit));
                                     dataUnitProxy.create(mainTestTenant.getId(), dynamoDataUnit);
                                 }
                             }
@@ -470,20 +472,20 @@ public class CheckpointAutoService extends CheckpointServiceBase {
         copyEntitySeedTables(checkpoint, checkpointVersion);
 
         dataCollectionProxy.switchVersion(mainTestTenant.getId(), activeVersion);
-        log.info("Switch active version to " + activeVersion);
+        log.info("Switch active version to {}.", activeVersion);
     }
 
     private List<Table> parseCheckpointTable(String checkpoint, String roleName, DataCollection.Version version,
                                              String[] tenantNames) throws IOException {
-        String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
+        String jsonFilePath = String.format(TABLE_JSONFILE_FORMAT, checkpointDir, checkpoint, version.name(),
                 roleName);
-        log.info("Checking table json file path " + jsonFilePath);
+        log.info("Checking table json file path {}.", jsonFilePath);
         File jsonFile = new File(jsonFilePath);
         if (!jsonFile.exists()) {
             return null;
         }
 
-        log.info("Parse check point " + checkpoint + " table " + roleName + " of version " + version.name());
+        log.info("Parse check point {} table {} of version {}.", checkpoint, roleName, version.name());
         List<Table> tables = new ArrayList<>();
         ArrayNode arrNode = (ArrayNode) om.readTree(jsonFile);
         Iterator<JsonNode> iter = arrNode.elements();
@@ -661,6 +663,8 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             }
             List<DataFeedTask> dataFeedTasks = dataFeedTaskService.getDataFeedTaskByUniqueIds(customerSpace,
                     new ArrayList<>(oldDataFeedTaskNameIdMaps.keySet()));
+            //FIXME
+            log.info("new DataFeedTask is {}.", JsonUtils.serialize(dataFeedTasks));
             for (DataFeedTask existingTask : dataFeedTasks) {
                 dataFeedTaskUniqueIdMaps.put(oldDataFeedTaskNameIdMaps.get(existingTask.getUniqueId()),
                         existingTask);

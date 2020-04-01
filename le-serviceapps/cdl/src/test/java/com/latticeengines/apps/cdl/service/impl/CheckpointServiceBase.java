@@ -87,6 +87,24 @@ public abstract class CheckpointServiceBase {
 
     protected static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
     protected static final String S3_BUCKET = "latticeengines-test-artifacts";
+    protected static final String LOCAL_CHECKPOINT_DIR = "checkpoints";//create checkpoint dir.use to zip and upload S3
+    protected static final String HDFS_LOCAL_DIR_FORMAT = "%s/%s/hdfs/Data";
+    protected static final String DYNAMO_JSONFILE_FORMAT = "%s/%s/%s/%s_Dynamo.json";
+    protected static final String VERSION_JSONFILE_FORMAT = "%s/%s/_VERSION_";
+    protected static final String STATS_JSONFILE_FORMAT = "%s/%s/%s/stats_container.json";
+    protected static final String DATA_COLLECTION_STATUS_JSONFILE_FORMAT = "%s/%s/%s/data_collection_status.json";
+    protected static final String TABLE_JSONFILE_FORMAT = "%s/%s/%s/tables/%s.json";
+    protected static final String TABLE_DIR = "%s/%s/%s/tables";
+    protected static final String EXECUTION_CONTEXT_JSONFILE_FORMAT ="%s/%s/workflow_execution_context.json";
+    protected static final String S3IMPORT_SYSTEM_JSONFILE_FORMAT = "%s/%s/S3ImportSystems.json";
+    protected static final String DATAFEED_DIR_FORMAT = "%s/%s/DataFeed";
+    protected static final String DATAFEEDTASK_JSONFILE_FORMAT = "%s/%s/DataFeed/DataFeedTasks.json";
+    protected static final String TEMPLATE_JSONFILE_FORMAT = "%s/%s/DataFeed/templateTables.json";
+    protected static final String ATLAS_DIR = "%s/%s/AtlasData";
+    protected static final String ATLASSTREAM_JSONFILE_FORMAT = "%s/%s/AtlasData/AtlasStreams.json";
+    protected static final String CATALOG_JSONFILE_FORMAT ="%s/%s/AtlasData/Catalogs.json";
+    protected static final String METRICGROUP_JSONFILE_FORMAT = "%s/%s/AtlasData/ActivityMetricGroups.json";
+    protected static final String DIMENSION_METADATA_JSONFILE_FORMAT = "%s/%s/AtlasData/DimensionMetadatas.json";
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -212,7 +230,7 @@ public abstract class CheckpointServiceBase {
             ThreadPoolUtils.doInParallel(redshiftTablesToClone.entrySet(), entry -> {
                 String src = entry.getKey();
                 String tgt = entry.getValue();
-                String msg = "Clone redshift table " + src + " to " + tgt;
+                String msg = String.format("Clone redshift table %s to %s.", src, tgt);
                 try (PerformanceTimer timer = new PerformanceTimer(msg)) {
                     redshiftService.cloneTable(src, tgt);
                     RedshiftDataUnit dataUnit = new RedshiftDataUnit();
@@ -237,7 +255,7 @@ public abstract class CheckpointServiceBase {
             ZipFile zipFile = new ZipFile(zipFilePath);
             zipFile.extractAll(checkpointDir);
         } catch (ZipException e) {
-            throw new IOException("Failed to unzip checkpoint archive " + zipFilePath, e);
+            throw new IOException(String.format("Failed to unzip checkpoint archive %s", zipFilePath), e);
         }
         log.info(String.format("Unzip checkpoint archive %s to local dir %s", zipFilePath, checkpointDir));
     }
@@ -250,11 +268,11 @@ public abstract class CheckpointServiceBase {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         List<Table> tables = dataCollectionProxy.getTables(customerSpace.toString(), role, version);
         if (CollectionUtils.isEmpty(tables)) {
-            Assert.fail("Cannot find table in role " + role);
+            Assert.fail(String.format("Cannot find table in role %s.", role));
         }
         return tables.stream().mapToLong(table -> {
-            log.info("countRole " + role.name() + " Table " + table.getName() + " Path "
-                    + table.getExtracts().get(0).getPath());
+            log.info("countRole {}, Table {}, Path {}.", role.name(), table.getName(),
+                    table.getExtracts().get(0).getPath());
             String path = table.getExtracts().get(0).getPath();
             String globPath = AvroParquetUtils.toParquetOrAvroGlob(yarnConfiguration, path);
             return AvroParquetUtils.countParquetOrAvro(yarnConfiguration, globPath);
@@ -282,23 +300,23 @@ public abstract class CheckpointServiceBase {
         if (buckets != null) {
             Assert.assertNotNull(buckets.getType());
             Assert.assertFalse(buckets.getBucketList() == null || buckets.getBucketList().isEmpty(),
-                    "Bucket list for " + attrName + " is empty.");
+                    String.format("Bucket list for %s is empty.", attrName));
             Long sum = buckets.getBucketList().stream().mapToLong(Bucket::getCount).sum();
             Assert.assertEquals(sum, attributeStats.getNonNullCount());
         }
     }
 
     protected void uploadCheckpointHdfs(String checkpoint) throws IOException {
-        log.info("Start uploading checkpoint " + checkpoint + " to hdfs.");
-        String localDir = checkpointDir + "/" + checkpoint + "/hdfs/Data";
+        log.info("Start uploading checkpoint {} to hdfs.", checkpoint);
+        String localDir = String.format(HDFS_LOCAL_DIR_FORMAT, checkpointDir, checkpoint);
         CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
         String targetPath = PathBuilder.buildDataPath(podId, cs).toString();
         HdfsUtils.copyFromLocalDirToHdfs(yarnConfiguration, localDir, targetPath);
-        log.info("Upload checkpoint to hdfs path " + targetPath);
+        log.info("Upload checkpoint to hdfs path {}.", targetPath);
     }
 
     protected void uploadCheckpointS3(String checkpoint) {
-        log.info("Start uploading checkpoint " + checkpoint + " to S3.");
+        log.info("Start uploading checkpoint {} to S3.", checkpoint);
         CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         String s3Prefix = pathBuilder.getS3AtlasDataPrefix(s3CustomerBucket, cs.getTenantId());
@@ -306,12 +324,12 @@ public abstract class CheckpointServiceBase {
             log.info("S3 prefix {} already exists, delete first.", s3Prefix);
             s3Service.cleanupPrefix(s3CustomerBucket, s3Prefix);
         }
-        String localDir = checkpointDir + "/" + checkpoint + "/hdfs/Data";
+        String localDir = String.format(HDFS_LOCAL_DIR_FORMAT, checkpointDir, checkpoint);
         s3Service.uploadLocalDirectory(s3CustomerBucket, s3Prefix, localDir, true);
     }
 
     protected DataCollection.Version getCheckpointVersion(String checkpoint) throws IOException {
-        String versionFile = String.format("%s/%s/_VERSION_", checkpointDir, checkpoint);
+        String versionFile = String.format(VERSION_JSONFILE_FORMAT, checkpointDir, checkpoint);
         String version = FileUtils.readFileToString(new File(versionFile), "UTF-8").trim();
         return DataCollection.Version.valueOf(version);
     }
@@ -319,11 +337,11 @@ public abstract class CheckpointServiceBase {
     protected DynamoDataUnit parseDynamoDataUnit(String checkpoint, String roleName, DataCollection.Version version)
             throws IOException {
         DynamoDataUnit dynamoDataUnit = null;
-        String jsonFilePath = String.format("%s/%s/%s/%s_Dynamo.json", checkpointDir, checkpoint, version.name(),
+        String jsonFilePath = String.format(DYNAMO_JSONFILE_FORMAT, checkpointDir, checkpoint, version.name(),
                 roleName);
         File jsonFile = new File(jsonFilePath);
         if (jsonFile.exists()) {
-            log.info("Found dynamo data unit for " + roleName + " in " + version);
+            log.info("Found dynamo data unit for {} in {}.", roleName, version);
             dynamoDataUnit = om.readValue(jsonFile, DynamoDataUnit.class);
         }
         return dynamoDataUnit;
@@ -331,7 +349,7 @@ public abstract class CheckpointServiceBase {
 
     protected StatisticsContainer parseCheckpointStatistics(String checkpoint, DataCollection.Version version)
             throws IOException {
-        String statsFile = String.format("%s/%s/%s/stats_container.json", checkpointDir, checkpoint, version.name());
+        String statsFile = String.format(STATS_JSONFILE_FORMAT, checkpointDir, checkpoint, version.name());
         if (!new File(statsFile).exists()) {
             return null;
         }
@@ -343,7 +361,7 @@ public abstract class CheckpointServiceBase {
 
     protected DataCollectionStatus parseDataCollectionStatus(String checkpoint, DataCollection.Version version)
             throws IOException {
-        String jsonFile = String.format("%s/%s/%s/data_collection_status.json", checkpointDir, checkpoint,
+        String jsonFile = String.format(DATA_COLLECTION_STATUS_JSONFILE_FORMAT, checkpointDir, checkpoint,
                 version.name());
         if (!new File(jsonFile).exists()) {
             return null;
@@ -438,8 +456,8 @@ public abstract class CheckpointServiceBase {
             List<String> redshiftTables = redshiftService.getTables(tableName);
             if (CollectionUtils.isNotEmpty(redshiftTables)) {
                 if (redshiftTables.size() != 1) {
-                    throw new IllegalStateException("There are " + redshiftTables.size()
-                            + " redshift tables prefixed by " + tableName + ": " + redshiftTables);
+                    throw new IllegalStateException(String.format("There are %d redshift tables prefixed by %s : %s."
+                            , redshiftTables.size(), tableName, redshiftTables));
                 }
                 String oldTable = redshiftTables.get(0);
                 String newTable = String.format("%s_%s", TestFrameworkUtils.generateTenantName(), role.name());
@@ -459,10 +477,10 @@ public abstract class CheckpointServiceBase {
                     DataUnit.StorageType.Dynamo);
             if (dataUnit != null) {
                 DynamoDataUnit dynamoDataUnit = (DynamoDataUnit) dataUnit;
-                String jsonFile = String.format("checkpoints/%s/%s/%s_Dynamo.json", checkpoint, version.name(),
-                        role.name());
+                String jsonFile = String.format(DYNAMO_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint,
+                        version.name(), role.name());
                 om.writeValue(new File(jsonFile), dynamoDataUnit);
-                log.info("Save DynamoDataUnit for " + role + " at version " + version + " to " + jsonFile);
+                log.info(String.format("Save DynamoDataUnit for %s at version %s to %s", role, version, jsonFile));
             }
         }
     }
@@ -470,28 +488,28 @@ public abstract class CheckpointServiceBase {
     protected void saveStatsIfExists(DataCollection.Version version, String checkpoint) throws IOException {
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId(), version);
         if (statisticsContainer != null) {
-            String jsonFile = String.format("checkpoints/%s/%s/stats_container.json", checkpoint, version.name());
+            String jsonFile = String.format(STATS_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint, version.name());
             om.writeValue(new File(jsonFile), statisticsContainer);
-            log.info("Save stats at version " + version + " to " + jsonFile);
+            log.info("Save stats at version {} to {}.", version, jsonFile);
         } else {
-            log.info("There is no stats at version " + version);
+            log.info("There is no stats at version {}.", version);
         }
     }
 
     protected void saveCheckpointVersion(String checkpoint) throws IOException {
-        String versionFile = "checkpoints/" + checkpoint + "/_VERSION_";
+        String versionFile = String.format(VERSION_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         FileUtils.write(new File(versionFile), version.name(), "UTF-8");
     }
 
     protected void downloadHdfsData(String checkpoint) throws IOException {
-        String localDir = "checkpoints/" + checkpoint + "/hdfs/Data";
+        String localDir = String.format(HDFS_LOCAL_DIR_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
         FileUtils.deleteQuietly(new File(localDir));
         FileUtils.forceMkdirParent(new File(localDir));
         CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
         String targetPath = PathBuilder.buildCustomerSpacePath(podId, cs).append("Data").toString();
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, targetPath, localDir);
-        log.info("Downloaded HDFS path " + targetPath + " to " + localDir);
+        log.info("Downloaded HDFS path {} to {}.", targetPath, localDir);
         Collection<File> crcFiles = FileUtils.listFiles(new File(localDir), new String[] { "crc" }, true);
         crcFiles.forEach(FileUtils::deleteQuietly);
     }
@@ -505,12 +523,12 @@ public abstract class CheckpointServiceBase {
             tables.add(dataCollectionProxy.getTable(mainTestTenant.getId(), role, version));
         }
         if (CollectionUtils.isNotEmpty(tables) && tables.get(0) != null) {
-            String jsonFile = String.format("checkpoints/%s/%s/tables/%s.json", checkpoint, version.name(),
+            String jsonFile = String.format(TABLE_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint, version.name(),
                     role.name());
             om.writeValue(new File(jsonFile), tables);
-            log.info("Save " + role + " at version " + version + " to " + jsonFile);
+            log.info("Save {} at version {} to {}.", role, version, jsonFile);
         } else {
-            log.info("There is no " + role + " table at version " + version);
+            log.info("There is no {} table at version {}.", role, version);
         }
     }
 
@@ -539,9 +557,9 @@ public abstract class CheckpointServiceBase {
                     executionContextMap.remove(mapEntry);
                 }
             }
-            String jsonFile = String.format("checkpoints/%s/workflow_execution_context.json", checkpoint);
+            String jsonFile = String.format(EXECUTION_CONTEXT_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
             om.writeValue(new File(jsonFile), executionContextMap);
-            log.info("Save Workflow Execution Context to " + jsonFile);
+            log.info("Save Workflow Execution Context to {}.", jsonFile);
         }
     }
 
@@ -567,7 +585,7 @@ public abstract class CheckpointServiceBase {
         request.setDestEnv(EntityMatchEnvironment.SERVING);
         request.setDestTTLEnabled(true);
         request.setBumpupVersion(false);
-        log.info("Start copying entity match table for " + entity + " using request: " + JsonUtils.serialize(request));
+        log.info("Start copying entity match table for {} using request: {}.", entity, JsonUtils.serialize(request));
         EntityPublishStatistics stats = matchProxy.publishEntity(request);
         log.info("Copied {} {} seeds and {} {} lookup entries from tenant {} to tenant {}", stats.getSeedCount(),
                 entity, //
@@ -577,7 +595,7 @@ public abstract class CheckpointServiceBase {
     }
 
     public static String getCheckPointTenantId(String checkpoint, String checkpointVersion, String entity) {
-        return "cdlend2end_" + checkpoint + "_" + entity.toLowerCase() + "_" + checkpointVersion;
+        return String.format("cdlend2end_%s_%s_%s", checkpoint, entity.toLowerCase(), checkpointVersion);
     }
 
     @VisibleForTesting

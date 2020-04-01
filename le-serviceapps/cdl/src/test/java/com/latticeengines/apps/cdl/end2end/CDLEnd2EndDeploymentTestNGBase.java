@@ -736,6 +736,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         String templateName = NamingUtils.timestamp(entity.name());
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(),
                 feedType, entity.name());
+        //FIXME
+        log.info("datafeedTask is {}, customerSpace is {}.", JsonUtils.serialize(dataFeedTask), customerSpace);
         if (dataFeedTask == null) {
             dataFeedTask = new DataFeedTask();
             Table importTemplate = getMockTemplate(entity, suffix, feedType);
