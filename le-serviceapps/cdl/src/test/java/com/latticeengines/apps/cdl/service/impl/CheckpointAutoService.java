@@ -391,6 +391,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
         String[] tenantNames = new String[1];
 
         DataCollection.Version activeVersion = getCheckpointVersion(checkpoint);
+        log.info("activeVersion is {}.", activeVersion);
 
         Map<String, String> redshiftTablesToClone = new HashMap<>();
         Set<String> uploadedTables = new HashSet<>();
@@ -445,7 +446,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             if (statisticsContainer != null) {
                 dataCollectionProxy.upsertStats(mainTestTenant.getId(), statisticsContainer);
             }
-            if (version.equals(activeVersion)) {
+            if (activeVersion.equals(version)) {
                 signature = parseSystemInfos(checkpoint, CustomerSpace.parse(mainTestTenant.getId()).toString());
 
             }
