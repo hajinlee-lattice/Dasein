@@ -603,7 +603,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     }
 
     private Map<String, Table> parseTemplateTable(String checkpoint) throws IOException {
-        String jsonFile = String.format(TEMPLATE_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
+        String jsonFile = String.format(TEMPLATE_JSONFILE_FORMAT, checkpointDir, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find TemplateInfos.");
             return null;
@@ -623,7 +623,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
     }
 
     private Map<String, DataFeedTask> uploadDataFeedTasks(String checkpoint, String customerSpace) throws IOException {
-        String jsonFile = String.format(DATAFEEDTASK_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
+        String jsonFile = String.format(DATAFEEDTASK_JSONFILE_FORMAT, checkpointDir, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find DataFeedTaskInfos.");
             return null;
@@ -684,7 +684,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             log.info("Can't find dataFeedTaskMaps. skip find AtlasStreams.");
             return null;
         }
-        String jsonFile = String.format(ATLASSTREAM_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
+        String jsonFile = String.format(ATLASSTREAM_JSONFILE_FORMAT, checkpointDir, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find AtlasStreamInfos.");
             return null;
@@ -723,7 +723,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             log.info("Can't find dataFeedTaskMaps. skip find Catalog.");
             return null;
         }
-        String jsonFile = String.format(CATALOG_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
+        String jsonFile = String.format(CATALOG_JSONFILE_FORMAT, checkpointDir, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find catalogs.");
             return null;
@@ -772,7 +772,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             log.info("Can't find atlasStreamMap. skip find ActivityMetricGroups.");
             return;
         }
-        String jsonFile = String.format(METRICGROUP_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
+        String jsonFile = String.format(METRICGROUP_JSONFILE_FORMAT, checkpointDir, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find ActivityMetricGroups.");
             return;
@@ -819,7 +819,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             log.info("Can't find atlasStreamMap. skip find dimensionMetadata.");
             return null;
         }
-        String jsonFile = String.format(DIMENSION_METADATA_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpoint);
+        String jsonFile = String.format(DIMENSION_METADATA_JSONFILE_FORMAT, checkpointDir, checkpoint);
         if (!new File(jsonFile).exists()) {
             log.info("Can't find DimensionMetadatas.");
             return null;
