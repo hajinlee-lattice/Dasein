@@ -116,7 +116,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
         String dimensionMetadataSignature = "";
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         for (DataCollection.Version version : DataCollection.Version.values()) {
-            String tablesDir = String.format(TABLE_DIR, LOCAL_CHECKPOINT_DIR, checkpointName, checkpointVersion);
+            String tablesDir = String.format(TABLE_DIR, LOCAL_CHECKPOINT_DIR, checkpointName, version.name());
             FileUtils.forceMkdir(new File(tablesDir));
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 saveTableIfExists(role, version, checkpointName);
