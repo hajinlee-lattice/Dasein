@@ -16,6 +16,7 @@
         <property name="maxPoolSize" value="${datadb.datasource.poolsize.max}"/>
         <property name="maxPoolSizeForWebApp" value="${datadb.datasource.poolsize.max.webapp}"/>
         <property name="maxPoolSizeForAppMaster" value="${datadb.datasource.poolsize.max.appmaster}"/>
+        <property name="unreturnedConnectionTimeout" value="${datadb.datasource.unreturned.timeout}"/>
     </bean>
 	
 	<!-- Hibernate session factory -->
