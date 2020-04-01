@@ -122,7 +122,7 @@ public class StartMigrate extends BaseWorkflowStep<EntityMatchMigrateStepConfigu
                 if (dataFeedTaskMap.containsKey(BusinessEntity.Contact)) {
                     importSystem.setMapToLatticeContact(Boolean.TRUE);
                     if (StringUtils.isEmpty(importSystem.getContactSystemId())) {
-                        importSystem.setContactSystemId(importSystem.getContactSystemId());
+                        importSystem.setContactSystemId(importSystem.generateContactSystemId());
                     }
                 }
                 cdlProxy.updateS3ImportSystem(customerSpace.toString(), importSystem);
