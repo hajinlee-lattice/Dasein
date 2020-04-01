@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +51,8 @@ public class UploadResource {
     @GetMapping(value = "/uploadId/{uploadId}")
     @ResponseBody
     @ApiOperation("Get sources by sourceId")
-    public void getSource(@PathVariable String uploadId) {
-        uploadService.downloadUpload(uploadId);
+    public void getSource(@PathVariable String uploadId, HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Content-Encoding", "gzip");
+        uploadService.downloadUpload(uploadId, request, response);
     }
 }
