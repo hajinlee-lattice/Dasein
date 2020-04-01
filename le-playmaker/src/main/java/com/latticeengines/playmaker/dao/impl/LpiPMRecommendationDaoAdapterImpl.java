@@ -70,14 +70,14 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
                 return queryRecommendations(queryParams.stream().map(QueryParam::getLaunchId).collect(Collectors.toList()),
                         start, result.getLeft().intValue(), maximum, offset);
             } else {
-                return queryHeadRecommendation(queryParams, result.getLeft().intValue(), start, offset);
+                return queryRecommendations(queryParams, result.getLeft().intValue(), start, offset);
             }
         } else {
             return new ArrayList<>();
         }
     }
 
-    private List<Map<String, Object>> queryHeadRecommendation(List<QueryParam> queryParams, int queryOffset, long start, int offset) {
+    private List<Map<String, Object>> queryRecommendations(List<QueryParam> queryParams, int queryOffset, long start, int offset) {
         QueryParam headParam = queryParams.get(0);
         int headCount = (int) headParam.getCount();
         List<Map<String, Object>> head = queryRecommendations(
