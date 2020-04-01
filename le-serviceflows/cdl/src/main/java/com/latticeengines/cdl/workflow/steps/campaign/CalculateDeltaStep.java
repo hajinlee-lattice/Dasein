@@ -114,8 +114,8 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
         SparkJobResult deltaCalculationResult = executeSparkJob(currentLaunchUniverse, previousLaunchUniverse,
                 channel.getChannelConfig().getAudienceType().getInterfaceName(),
-                channel.getChannelConfig().isSuppressAccountsWithoutContacts()
-                        && channel.getChannelConfig().getAudienceType() == AudienceType.CONTACTS
+                channel.getChannelConfig().getAudienceType() == AudienceType.CONTACTS
+                        && !channel.getChannelConfig().isSuppressAccountsWithoutContacts()
                                 ? AudienceType.ACCOUNTS.getInterfaceName()
                                 : null,
                 channel.getChannelConfig().isSuppressAccountsWithoutContacts());
