@@ -13,5 +13,5 @@ public interface UploadService {
 
     Upload getByUploadId(long uploadPid);
 
-    void downloadUpload(String uploadId, HttpServletRequest request, HttpServletResponse response);
+    void downloadUpload(String uploadId, HttpServletRequest request, HttpServletResponse response) throws Exception;
 }

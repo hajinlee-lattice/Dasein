@@ -536,7 +536,6 @@
         <security:intercept-url pattern="/pls/uploads/**" access="hasRole('View_DCP_Projects')"/>
     </security:http>
 
-
 </beans>
 
 
