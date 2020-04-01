@@ -115,10 +115,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       df1.join(df2, Seq(entityIdColName), "fullouter")
     })
 
-    val missingEntitiesAppended: DataFrame = group.getEntity match {
-      case BusinessEntity.Account => appendMissingAccount(joined)
-      case _ => throw new UnsupportedOperationException(s"entity ${group.getEntity} is not supported for activity store")
-    }
+    val missingEntitiesAppended: DataFrame = unifyBatchStore(joined, group.getEntity)
 
     // replace null values with defined method
     val replaceNull: DataFrame = group.getNullImputation match {
@@ -155,8 +152,14 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val entityIdColName: String = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(group.getEntity)
     val rollupDimNames: Seq[String] = group.getRollupDimensions.split(",") :+ entityIdColName
     val pivotCols: Seq[String] = group.getRollupDimensions.split(",")
+    var preprocessed: DataFrame = df
 
-    val rolledUp: DataFrame = df.rollup(rollupDimNames.head, rollupDimNames.tail: _*).agg(DeriveAttrsUtils.getAggr(df, deriver))
+    if (group.getStream.getAggrEntities.contains(BusinessEntity.Contact.name) && BusinessEntity.Account.equals(group.getEntity)) {
+      // for contact stream expecting account metrics, need to join with contact batch store for more accurate accountId
+      preprocessed = preprocessContactStream(df)
+    }
+
+    val rolledUp: DataFrame = preprocessed.rollup(rollupDimNames.head, rollupDimNames.tail: _*).agg(DeriveAttrsUtils.getAggr(df, deriver))
 
     val excludeNull: DataFrame = rolledUp.na.drop // only required columns exist at this stage. drop all null
 
@@ -226,17 +229,36 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     details
   }
 
-  def appendMissingAccount(df: DataFrame): DataFrame = {
-    if (!hasAccountBatchStore) {
-      df
-    } else {
-      val entityIdCol: String = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(BusinessEntity.Account)
-      df.join(accountBatchStoreTable.select(entityIdCol), Seq(entityIdCol), "fullouter")
+  def unifyBatchStore(df: DataFrame, entity: BusinessEntity): DataFrame = {
+    // remove entities not in batch store, append entities missing from batch store
+    val entityIdCol: String = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(entity)
+    val batchStore =  entity match {
+      case BusinessEntity.Account => accountBatchStoreTable
+      case BusinessEntity.Contact => contactBatchStoreTable
+      case _ => throw new UnsupportedOperationException(s"entity $entity is not supported for activity store")
     }
+    df.join(batchStore.select(entityIdCol), Seq(entityIdCol), "right")
   }
 
   def shouldSkipGroup(group: ActivityMetricsGroup, dimensionMetadataMap: util.Map[String, DimensionMetadata]): Boolean = {
-    val rollupDimensionNames: Seq[String] = group.getRollupDimensions.split(",")
-    rollupDimensionNames.exists(name => dimensionMetadataMap.get(name).getCardinality <= 0)
+    rollupDimensionEmpty(group, dimensionMetadataMap) || missingBatchStore(group.getEntity)
+  }
+
+  def rollupDimensionEmpty(group: ActivityMetricsGroup, dimensionMetadataMap: util.Map[String, DimensionMetadata]): Boolean = {
+    group.getRollupDimensions.split(",").exists(name => dimensionMetadataMap.get(name).getCardinality <= 0)
+  }
+
+  def missingBatchStore(entity: BusinessEntity): Boolean = {
+    entity match {
+      case BusinessEntity.Account => !hasAccountBatchStore
+      case BusinessEntity.Contact => !hasContactBatchStore
+      case _ => throw new UnsupportedOperationException(s"$entity should not have batch store check")
+    }
+  }
+
+  def preprocessContactStream(df: DataFrame): DataFrame = {
+    val accountIdCol = InterfaceName.AccountId.name
+    val contactIdCol = InterfaceName.ContactId.name
+    df.drop(accountIdCol).join(contactBatchStoreTable.select(accountIdCol, contactIdCol), Seq(contactIdCol), "inner")
   }
 }

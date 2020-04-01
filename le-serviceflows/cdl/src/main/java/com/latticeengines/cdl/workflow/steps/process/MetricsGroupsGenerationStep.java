@@ -83,6 +83,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
                 .filter(s -> !skippedStreams.contains(s.getStreamId())).collect(Collectors.toList());
         List<ActivityMetricsGroup> groups = stepConfiguration.getActivityMetricsGroupMap().values().stream()
                 .filter(g -> !skippedStreams.contains(g.getStream().getStreamId())).collect(Collectors.toList());
+        Set<BusinessEntity> requiredBatchStoreEntities = groups.stream().map(ActivityMetricsGroup::getEntity).collect(Collectors.toSet());
         for (ActivityMetricsGroup group : groups) {
             log.info("Retrieved group {}", group.getGroupId());
         }
@@ -134,7 +135,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             config.activityMetricsGroups = groups;
             config.evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
             config.streamMetadataMap = streamMetadataCache;
-            appendAccountBatchStore(inputs, inputMetadata);
+            requiredBatchStoreEntities.forEach(entity -> appendBatchStore(entity, inputs, inputMetadata));
             config.setInput(inputs);
             config.inputMetadata = inputMetadata;
             config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
@@ -142,19 +143,21 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
         }
     }
 
-    private void appendAccountBatchStore(List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata) {
-        Table batchStoreTable = getAccountBatchStore();
+    private void appendBatchStore(BusinessEntity entity, List<DataUnit> inputs, ActivityStoreSparkIOMetadata inputMetadata) {
+        Table batchStoreTable = getBatchStoreTable(entity);
         if (batchStoreTable != null) {
             inputs.add(batchStoreTable.toHdfsDataUnit(BusinessEntity.Account.name()));
             Details accountBatchStoreDetails = new Details();
             accountBatchStoreDetails.setStartIdx(inputs.size() - 1);
-            inputMetadata.getMetadata().put(BusinessEntity.Account.name(), accountBatchStoreDetails);
+            inputMetadata.getMetadata().put(entity.name(), accountBatchStoreDetails);
+        } else {
+            log.warn("{} batch store is missing. Groups for this entity will be skipped", entity);
         }
     }
 
-    private Table getAccountBatchStore() {
+    private Table getBatchStoreTable(BusinessEntity entity) {
         String batchStoreName;
-        TableRoleInCollection batchStore = BusinessEntity.Account.getBatchStore();
+        TableRoleInCollection batchStore = entity.getBatchStore();
         batchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive);
         if (StringUtils.isBlank(batchStoreName)) {
             batchStoreName = dataCollectionProxy.getTableName(customerSpace.toString(), batchStore, inactive.complement());

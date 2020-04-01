@@ -1180,6 +1180,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         strippedStream.setStreamId(originStream.getStreamId());
         strippedStream.setPeriods(originStream.getPeriods());
         strippedStream.setName(originStream.getName());
+        strippedStream.setAggrEntities(originStream.getAggrEntities());
         group.setStream(strippedStream);
     }
 
