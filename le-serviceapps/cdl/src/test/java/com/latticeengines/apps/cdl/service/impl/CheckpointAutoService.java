@@ -666,8 +666,6 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             }
             List<DataFeedTask> dataFeedTasks = dataFeedTaskService.getDataFeedTaskByUniqueIds(customerSpace,
                     new ArrayList<>(oldDataFeedTaskNameIdMaps.keySet()));
-            //FIXME
-            log.info("new DataFeedTask is {}.", JsonUtils.serialize(dataFeedTasks));
             for (DataFeedTask existingTask : dataFeedTasks) {
                 dataFeedTaskUniqueIdMaps.put(oldDataFeedTaskNameIdMaps.get(existingTask.getUniqueId()),
                         existingTask);
@@ -804,6 +802,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                         newMetricGroup.setJavaClass(activityMetricsGroup.getJavaClass());
                         newMetricGroup.setNullImputation(activityMetricsGroup.getNullImputation());
                         newMetricGroup.setReducer(activityMetricsGroup.getReducer());
+                        log.info("newMetricGroup is {}", JsonUtils.serialize(newMetricGroup));
                         activityMetricsGroupEntityMgr.create(newMetricGroup);
                     }
                 }
