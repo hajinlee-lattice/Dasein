@@ -1,9 +1,8 @@
 package com.latticeengines.cdl.workflow.steps.validations.service.impl;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -16,7 +15,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +29,12 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.EntityValidationSummary;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.validations.service.impl.CatalogFileValidationConfiguration;
+import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 
 @Component("catalogFileValidationService")
 @Lazy(value = false)
 public class CatalogFileValidationService extends InputFileValidationService<CatalogFileValidationConfiguration>{
     private static final Logger log = LoggerFactory.getLogger(CatalogFileValidationService.class);
-
-    private static final Pattern PATH_PATTERN = Pattern.compile("^([-\\w:@&?=+,.!/~*'%$_;\\(\\)]*)?$");
 
     @Override
     public EntityValidationSummary validate(CatalogFileValidationConfiguration catalogFileValidationServiceConfiguration,
@@ -51,7 +48,6 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         if (totalRows > InputFileValidator.CATALOG_RECORDS_LIMIT) {
             skipCheck = true;
         }
-        UrlValidator urlValidator = new UrlValidator();
         InterfaceName pathPattern = InterfaceName.PathPattern;
         long errorLine = 0L;
         try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ImportProperty.ERROR_FILE, true), format)) {
@@ -79,18 +75,16 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
                                     if (!skipCheck) {
                                         String pathStr = getFieldValue(record, pathPattern.name());
                                         if (StringUtils.isNotBlank(pathStr)) {
-                                            // 1. full URLs
-                                            // 2. URLs with parameters
-                                            // 3. relative URLs (ie. /app/solutions)
-                                            // 4. URLs with Wildcards
-                                            // validate url or path, isValid check 1,2,4; isValidPath check 3
-                                            if (!urlValidator.isValid(pathStr) && !isValidPath(pathStr)) {
+                                            // after activity store custom modification, need to be a valid regex
+                                            String regexStr = ActivityStoreUtils.modifyPattern(pathStr);
+                                            if (!isValidRegex(regexStr)) {
                                                 rowError = true;
                                                 fileError = true;
                                                 errorInPath++;
                                                 errorLine++;
-                                                csvFilePrinter.printRecord(lineId, "", String.format("invalid path " +
-                                                        "\"%s\" found in this row", pathStr));
+                                                csvFilePrinter.printRecord(lineId, "", String.format(
+                                                        "invalid pattern \"%s\" found (expanded into regex \"%s\"",
+                                                        pathStr, regexStr));
                                             }
                                         }
                                     } else {
@@ -139,38 +133,12 @@ public class CatalogFileValidationService extends InputFileValidationService<Cat
         return summary;
     }
 
-    // this part was referenced from org.apache.commons.validator.routines.UrlValidator#isValidPath, its basic thought:
-    // first check if the regex can parse the input, then try to generate the URI object, then get the normalized path,
-    // finally make sure the generated path not contain double slash
-    private boolean isValidPath(String path) {
-        if (path == null) {
+    private boolean isValidRegex(String regex) {
+        try {
+            Pattern.compile(regex);
+            return true;
+        } catch (Exception e) {
             return false;
-        } else if (!PATH_PATTERN.matcher(path).matches()) {
-            return false;
-        } else {
-            try {
-                new URI((String)null, (String)null, path, (String)null);
-            } catch (URISyntaxException var4) {
-                return false;
-            }
-
-            int slash2Count = countToken("//", path);
-            return slash2Count == 0;
         }
-    }
-
-    private int countToken(String token, String target) {
-        int tokenIndex = 0;
-        int count = 0;
-
-        while(tokenIndex != -1) {
-            tokenIndex = target.indexOf(token, tokenIndex);
-            if (tokenIndex > -1) {
-                ++tokenIndex;
-                ++count;
-            }
-        }
-
-        return count;
     }
 }
