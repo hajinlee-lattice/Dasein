@@ -17,6 +17,7 @@ import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -76,8 +77,10 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         provisionDropBox(space);
 
         if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
-            s3ImportSystemService.createDefaultImportSystem(space.toString());
-            dropBoxService.createTenantDefaultFolder(space.toString());
+            if (!batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_ENTITY_MATCH)) {
+                s3ImportSystemService.createDefaultImportSystem(space.toString());
+                dropBoxService.createTenantDefaultFolder(space.toString());
+            }
             if (configDir.get("/ExportCronExpression") != null) {
                 String exportCron = configDir.get("/ExportCronExpression").getDocument().getData();
                 log.info(String.format("Export Cron for tenant %s is: %s", customerSpace, exportCron));
