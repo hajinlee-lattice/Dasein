@@ -57,11 +57,17 @@ public class ServingStoreServiceImplEntityMatchGADeploymentTestNG extends Servin
                 .withCategory(Category.ACCOUNT_ATTRIBUTES) //
                 .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
                 .withGroups(ColumnSelection.Predefined.Enrichment, ColumnSelection.Predefined.Segment) //
+                .canEnrich(Boolean.TRUE) //
+                .canSegment(Boolean.FALSE) //
+                .canModel(Boolean.TRUE) //
                 .build());
         cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.AccountId.name()) //
                 .withCategory(Category.ACCOUNT_ATTRIBUTES) //
                 .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
+                .canEnrich(Boolean.FALSE) //
+                .canSegment(Boolean.FALSE) //
+                .canModel(Boolean.FALSE)
                 .build());
         return cms;
     }
@@ -76,6 +82,9 @@ public class ServingStoreServiceImplEntityMatchGADeploymentTestNG extends Servin
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory(Category.SUB_CAT_OTHER) //
                 .withGroups(ColumnSelection.Predefined.Enrichment, ColumnSelection.Predefined.Segment) //
+                .canEnrich(Boolean.TRUE) //
+                .canSegment(Boolean.TRUE) //
+                .canModel(Boolean.TRUE) //
                 .build());
         cms.put(InterfaceName.CustomerAccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.CustomerAccountId.name()) //
@@ -86,6 +95,9 @@ public class ServingStoreServiceImplEntityMatchGADeploymentTestNG extends Servin
                 .withAttrName(InterfaceName.ContactId.name()) //
                 .withCategory(Category.CONTACT_ATTRIBUTES) //
                 .withSubcategory(Category.SUB_CAT_OTHER) //
+                .canEnrich(Boolean.FALSE) //
+                .canSegment(Boolean.FALSE) //
+                .canModel(Boolean.FALSE) //
                 .build());
         return cms;
     }

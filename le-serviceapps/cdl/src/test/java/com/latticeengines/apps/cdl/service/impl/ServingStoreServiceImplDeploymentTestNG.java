@@ -117,6 +117,7 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
                 .withSubcategory("Other") //
                 .withGroups(ColumnSelection.Predefined.TalkingPoint, ColumnSelection.Predefined.Enrichment,
                         ColumnSelection.Predefined.Segment) //
+                .canModel(Boolean.FALSE) //
                 .build());
         cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.ContactId.name()) //

@@ -175,6 +175,9 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
     private void verifyColumnMetadata(ColumnMetadata cm, ColumnMetadata cmExpected) {
         Assert.assertEquals(cm.getCategory(), cmExpected.getCategory());
         Assert.assertEquals(cm.getSubcategory(), cmExpected.getSubcategory());
+        Assert.assertEquals(cm.getCanEnrich(), cmExpected.getCanEnrich());
+        Assert.assertEquals(cm.getCanSegment(), cmExpected.getCanSegment());
+        Assert.assertEquals(cm.getCanModel(), cmExpected.getCanModel());
         List<ColumnSelection.Predefined> enabledGroups = cm.getEnabledGroups();
         List<ColumnSelection.Predefined> enabledGroupsExpected = cmExpected.getEnabledGroups();
         if (enabledGroupsExpected == null) {
@@ -229,6 +232,21 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
             for (ColumnSelection.Predefined group : groups) {
                 cm.enableGroup(group);
             }
+            return this;
+        }
+
+        ColumnMetadataBuilder canSegment(Boolean canSegment) {
+            cm.setCanSegment(canSegment);
+            return this;
+        }
+
+        ColumnMetadataBuilder canEnrich(Boolean canEnrich) {
+            cm.setCanEnrich(canEnrich);
+            return this;
+        }
+
+        ColumnMetadataBuilder canModel(Boolean canModel) {
+            cm.setCanModel(canModel);
             return this;
         }
 

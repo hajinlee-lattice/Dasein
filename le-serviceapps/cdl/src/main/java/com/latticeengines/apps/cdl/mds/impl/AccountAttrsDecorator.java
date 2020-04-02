@@ -104,18 +104,30 @@ public class AccountAttrsDecorator implements Decorator {
 
         // PLS-15406 setting for attributes corresponds to mappings in section
         // Unique ID, Other IDs, Match IDs, only enable for usage export
-        if ((InterfaceName.CustomerAccountId.name().equals(cm.getAttrName()) ||
-                attrNameInOtherIDAndMatchID.contains(cm.getAttrName())) && entityMatchEnabled) {
+        if (InterfaceName.CustomerAccountId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
             cm.enableGroup(Enrichment);
             cm.disableGroup(TalkingPoint);
             cm.disableGroup(CompanyProfile);
             cm.disableGroup(Model);
-            if (InterfaceName.CustomerAccountId.name().equals(cm.getAttrName())) {
-                // do not use CustomerAccountId in segment, as there will always be a system id that can be used
-                cm.setCanSegment(false);
+            // do not use CustomerAccountId in segment, as there will always be a system id that can be used
+            cm.setCanSegment(false);
+            cm.setCanModel(true);
+            cm.setCanEnrich(true);
+            if (onlyEntityMatchGAEnabled) {
+                cm.enableGroup(Segment);
             } else {
-                cm.setCanSegment(true);
+                cm.disableGroup(Segment);
             }
+
+            return cm;
+        }
+
+        if (attrNameInOtherIDAndMatchID.contains(cm.getAttrName()) && entityMatchEnabled) {
+            cm.enableGroup(Enrichment);
+            cm.disableGroup(TalkingPoint);
+            cm.disableGroup(CompanyProfile);
+            cm.disableGroup(Model);
+            cm.setCanSegment(true);
             cm.setCanModel(true);
             cm.setCanEnrich(true);
             if (onlyEntityMatchGAEnabled) {

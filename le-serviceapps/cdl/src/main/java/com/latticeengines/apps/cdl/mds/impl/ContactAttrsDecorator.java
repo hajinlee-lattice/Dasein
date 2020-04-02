@@ -90,11 +90,7 @@ public class ContactAttrsDecorator implements Decorator {
                 return cm;
             }
 
-            // PLS-15406  setting for attributes corresponds to mappings in section Unique ID, Other IDs, Match IDs,
-            // only enable for usage export
-            // InterfaceName.CustomerAccountId belongs to system attrs
-            if ((InterfaceName.CustomerContactId.name().equals(cm.getAttrName()) ||
-                    attrNameInOtherIDAndMatchID.contains(cm.getAttrName())) && entityMatchEnabled) {
+            if (InterfaceName.CustomerContactId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
                 cm.enableGroup(Enrichment);
                 cm.disableGroup(TalkingPoint);
                 cm.disableGroup(CompanyProfile);
@@ -109,6 +105,26 @@ public class ContactAttrsDecorator implements Decorator {
                 }
                 return cm;
             }
+
+            // PLS-15406  setting for attributes corresponds to mappings in section Unique ID,
+            // Other IDs, Match IDs, only enable for usage export
+            // InterfaceName.CustomerAccountId belongs to system attrs
+            if (attrNameInOtherIDAndMatchID.contains(cm.getAttrName()) && entityMatchEnabled) {
+                cm.enableGroup(Enrichment);
+                cm.disableGroup(TalkingPoint);
+                cm.disableGroup(CompanyProfile);
+                cm.disableGroup(Model);
+                cm.setCanSegment(true);
+                cm.setCanModel(true);
+                cm.setCanEnrich(true);
+                if (onlyEntityMatchGAEnabled) {
+                    cm.enableGroup(Segment);
+                } else {
+                    cm.disableGroup(Segment);
+                }
+                return cm;
+            }
+
             cm.enableGroup(Segment);
             // enable some attributes for Export
             if (exportAttrs.contains(cm.getAttrName())) {
