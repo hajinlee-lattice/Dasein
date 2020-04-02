@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
@@ -35,6 +37,17 @@ public final class MatchUtils {
 
     private static final Logger log = LoggerFactory.getLogger(MatchUtils.class);
 
+    /*-
+     * helper to determine whether there are newly allocated target entity
+     */
+    static boolean hasNewEntity(Map<String, Long> newEntityCounts, @NotNull String entity) {
+        if (MapUtils.isEmpty(newEntityCounts)) {
+            return false;
+        }
+
+        return newEntityCounts.getOrDefault(entity, 0L) > 0;
+    }
+
     static String getLegacyMatchConfigForAccount(String customer, MatchInput baseMatchInput, Set<String> columnNames) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
@@ -47,16 +60,20 @@ public final class MatchUtils {
     }
 
     static String getAllocateIdMatchConfigForAccount(String customer, MatchInput baseMatchInput,
-            Set<String> columnNames, List<String> systemIds, String newAccountTableName, boolean hasConvertBatchStore) {
+            Set<String> columnNames, List<String> systemIds, String newEntitiesTableName, boolean hasConvertBatchStore,
+            String rootOperationUid) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
         baseMatchInput.setTargetEntity(Account.name());
         baseMatchInput.setAllocateId(true);
-        if (StringUtils.isNotEmpty(newAccountTableName)) {
+        if (StringUtils.isNotEmpty(newEntitiesTableName)) {
             baseMatchInput.setOutputNewEntities(true);
-            config.setNewEntitiesTableName(newAccountTableName);
+            config.setNewEntitiesTableName(newEntitiesTableName);
         } else {
             baseMatchInput.setOutputNewEntities(false);
+        }
+        if (StringUtils.isNotBlank(rootOperationUid)) {
+            config.setRootOperationUid(rootOperationUid);
         }
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
@@ -72,16 +89,20 @@ public final class MatchUtils {
 
     static String getAllocateIdMatchConfigForContact(String customer, MatchInput baseMatchInput,
             Set<String> columnNames, List<String> accountSystemIds, List<String> contactSystemIds,
-            String newAccountTableName, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey) {
+            String newEntitiesTableName, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey,
+            String rootOperationUid) {
         MatchTransformerConfig config = new MatchTransformerConfig();
         baseMatchInput.setOperationalMode(OperationalMode.ENTITY_MATCH);
         baseMatchInput.setTargetEntity(Contact.name());
         baseMatchInput.setAllocateId(true);
-        if (StringUtils.isNotBlank(newAccountTableName)) {
+        if (StringUtils.isNotBlank(newEntitiesTableName)) {
             baseMatchInput.setOutputNewEntities(true);
-            config.setNewEntitiesTableName(newAccountTableName);
+            config.setNewEntitiesTableName(newEntitiesTableName);
         } else {
             baseMatchInput.setOutputNewEntities(false);
+        }
+        if (StringUtils.isNotBlank(rootOperationUid)) {
+            config.setRootOperationUid(rootOperationUid);
         }
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));

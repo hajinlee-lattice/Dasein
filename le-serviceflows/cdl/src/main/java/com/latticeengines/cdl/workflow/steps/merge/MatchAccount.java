@@ -143,7 +143,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 setRematchVersions(matchInput);
             }
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    getSystemIds(BusinessEntity.Account), null, hasConvertBatchStoreTableName);
+                    getSystemIds(BusinessEntity.Account), null, hasConvertBatchStoreTableName, null);
         } else {
             // for non-entity match, schema for all imports are the same (only one
             // template). thus checking the first table is enough

@@ -3,21 +3,28 @@ package com.latticeengines.datacloud.dataflow.transformation.atlas;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.curator.shaded.com.google.common.collect.ImmutableMap;
 import org.apache.flink.util.Preconditions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
@@ -28,7 +35,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.E
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 /**
  * This transformer is only used in PA match step. If there is an entity
@@ -60,17 +66,27 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
 
     // Entity -> Required fields from embedded entity table (Configurable
     // EntityId fields are not included)
-    private static final Map<String, List<String>> REQUIRED_FLDS = ImmutableMap.of(
-            BusinessEntity.Account.name(),
-            Collections.singletonList(InterfaceName.LatticeAccountId.name())
-            );
+    private static final Map<String, List<String>> REQUIRED_FLDS = new HashMap<>();
 
     // Entity -> Optional fields from embedded entity table (Configurable
     // SystemId fields are not included)
-    private static final Map<String, List<String>> OPTIONAL_FLDS = ImmutableMap.of(
-            BusinessEntity.Account.name(),
-            new ArrayList<>(MatchKey.LDC_MATCH_KEY_STD_FLDS.values())
-            );
+    private static final Map<String, List<String>> OPTIONAL_FLDS = new HashMap<>();
+
+    static {
+        // account fields
+        REQUIRED_FLDS.put(Account.name(), Collections.singletonList(LatticeAccountId.name()));
+        OPTIONAL_FLDS.put(Account.name(), new ArrayList<>(MatchKey.LDC_MATCH_KEY_STD_FLDS.values()));
+
+        // contact fields
+        REQUIRED_FLDS.put(Contact.name(), Arrays.asList(AccountId.name(), LatticeAccountId.name()));
+        List<String> ctkOptFields = new ArrayList<>(MatchKey.LDC_MATCH_KEY_STD_FLDS.values());
+        ctkOptFields.add(InterfaceName.Email.name());
+        ctkOptFields.add(InterfaceName.ContactName.name());
+        ctkOptFields.add(InterfaceName.FirstName.name());
+        ctkOptFields.add(InterfaceName.LastName.name());
+        ctkOptFields.add(InterfaceName.PhoneNumber.name());
+        OPTIONAL_FLDS.put(Contact.name(), ctkOptFields);
+    }
 
     private static final String ENTITYID_JOIN = "EntityId_Join";
 
@@ -96,7 +112,7 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
 
     private void validateConfig() {
         // Currently only support Account entity
-        Preconditions.checkArgument(BusinessEntity.Account.name().equals(config.getEntity()),
+        Preconditions.checkArgument(Account.name().equals(config.getEntity()),
                 "Currently only support Account entity, but asked for entity " + config.getEntity());
         if (config.getSystemIdFlds() == null) {
             config.setSystemIdFlds(new ArrayList<>());
@@ -119,17 +135,31 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
     private Node validatePrepareEntityIdsNode(Node entityIds) {
         Preconditions.checkNotNull(entityIds.getSchema(ENTITY_ID_FIELD),
                 "Input source of EntityIds doesn't have EntityId field");
-        entityIds = entityIds.retain(ENTITY_ID_FIELD);
-        if (BusinessEntity.Account.name().equals(config.getEntity())) {
-            entityIds = entityIds.apply(ENTITY_ID_FIELD, //
-                    new FieldList(entityIds.getFieldNames()), //
-                    new FieldMetadata(InterfaceName.AccountId.name(), String.class));
+        List<String> retainFields = new ArrayList<>();
+        retainFields.add(ENTITY_ID_FIELD);
+        // TODO retain system/template fields
+        if (Account.name().equals(config.getEntity())) {
+            entityIds = copyEntityId(entityIds, AccountId.name(), retainFields);
+        } else if (Contact.name().equals(config.getEntity())) {
+            entityIds = copyEntityId(entityIds, ContactId.name(), retainFields);
+        } else {
+            String msg = String.format("Extracting embedded %s is not supported", config.getEntity());
+            throw new UnsupportedOperationException(msg);
         }
         if (config.isFilterByEntity()) {
             entityIds = entityIds.filter(
                     String.format("\"%s\".equals(%s)", config.getEntity(), ENTITY_NAME_FIELD),
                     new FieldList(ENTITY_NAME_FIELD));
         }
+        entityIds = entityIds.retain(retainFields.toArray(new String[0]));
+        return entityIds;
+    }
+
+    private Node copyEntityId(@NotNull Node entityIds, @NotNull String tgtField, @NotNull List<String> retainFields) {
+        entityIds = entityIds.apply(ENTITY_ID_FIELD, //
+                new FieldList(entityIds.getFieldNames()), //
+                new FieldMetadata(tgtField, String.class));
+        retainFields.add(tgtField);
         return entityIds;
     }
 

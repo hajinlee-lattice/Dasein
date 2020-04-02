@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -80,7 +79,10 @@ public class EntityMatchCheckpoint extends BaseWorkflowStep<ProcessStepConfigura
             }
 
             // match tables stored as map in ctx (key -> tableName)
-            for (String contextKey : Collections.singletonList(ENTITY_MATCH_STREAM_TARGETTABLE)) {
+            for (String contextKey : Arrays.asList( //
+                    ENTITY_MATCH_STREAM_TARGETTABLE, //
+                    ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE, //
+                    ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE)) {
                 exportMapToS3AndAddToTempList(contextKey);
             }
 

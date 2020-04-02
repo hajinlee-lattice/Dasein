@@ -403,7 +403,8 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
     }
 
     // if expectedSize = -1, do not verify size
-    private Set<String> verifyNewAccounts(@NotNull List<GenericRecord> records, int expectedSize) {
+    private Set<String> verifyNewAccounts(@NotNull List<GenericRecord> records, int expectedSize,
+            Set<String> expectedCompanyNames) {
         Set<String> newEntityIds = new HashSet<>();
         Set<String> companyNames = new HashSet<>();
         Set<String> countries = new HashSet<>();
@@ -411,13 +412,14 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
             GenericRecord record = records.get(i);
             String entityId = getStrValue(record, MatchConstants.ENTITY_ID_FIELD);
             String entityName = getStrValue(record, MatchConstants.ENTITY_NAME_FIELD);
+            if (!BusinessEntity.Account.name().equals(entityName)) {
+                continue;
+            }
             String companyName = getStrValue(record, CompanyName.name());
             String country = getStrValue(record, Country.name());
             Assert.assertNotNull(entityId,
                     String.format("Should have non-null EntityId for newly allocated account. Index=%d, Record=%s", i,
                             toString(record, NEW_ENTITY_FIELDS)));
-            Assert.assertEquals(entityName, BusinessEntity.Account.name(),
-                    String.format("Got newly allocated entity that is not Account at index=%d", i));
             newEntityIds.add(entityId);
             if (companyName != null) {
                 companyNames.add(companyName);

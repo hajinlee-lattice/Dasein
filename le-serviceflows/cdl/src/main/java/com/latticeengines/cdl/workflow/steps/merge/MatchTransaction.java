@@ -120,10 +120,12 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
         log.info("matchInput is {}.", matchInput);
         if (configuration.isEntityMatchGAOnly()) {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), null, hasConvertBatchStoreTableName);
+                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), null,
+                    hasConvertBatchStoreTableName, null);
         } else {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName, hasConvertBatchStoreTableName);
+                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName,
+                    hasConvertBatchStoreTableName, null);
         }
     }
 

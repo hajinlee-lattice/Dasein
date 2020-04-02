@@ -230,6 +230,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String CATALOG_TABLE_NAME = "CATALOG_TABLE_NAME";
     protected static final String ENTITY_MATCH_STREAM_TARGETTABLE = "ENTITY_MATCH_STREAM_TARGETTABLE";
     public static final String ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE";
+    public static final String ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE = "ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE";
     protected static final String RAW_ACTIVITY_STREAM_TABLE_NAME = "RAW_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME = "AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
@@ -329,8 +330,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     protected static final Set<String> TABLE_NAME_MAPS_FOR_PA_RETRY = Sets.newHashSet(REMATCH_TABLE_NAME,
             DELETED_TABLE_NAME, CATALOG_TABLE_NAME, ENTITY_MATCH_STREAM_TARGETTABLE,
-            ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE, RAW_ACTIVITY_STREAM_TABLE_NAME,
-            AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, METRICS_GROUP_TABLE_NAME, MERGED_METRICS_GROUP_TABLE_NAME,
+            ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE, ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE,
+            RAW_ACTIVITY_STREAM_TABLE_NAME, AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, METRICS_GROUP_TABLE_NAME,
+            MERGED_METRICS_GROUP_TABLE_NAME,
             PERIOD_STORE_TABLE_NAME);
 
     // extra context keys to be carried over in restarted PA, beyond table names
@@ -637,7 +639,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return getTableSummary(customer, tableName);
     }
 
-    private Table getTableSummary(String customer, String tableName) {
+    protected Table getTableSummary(String customer, String tableName) {
         if (StringUtils.isNotBlank(tableName)) {
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             return retry.execute(ctx -> metadataProxy.getTableSummary(customer, tableName));

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -45,6 +47,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransf
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateDataTransformerConfig.ConsolidateDataTxmfrConfigBuilder;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ConsolidateReportConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ExtractEmbeddedEntityTableConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -674,6 +677,107 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                 break;
         }
         return false;
+    }
+
+    /**
+     * Add transformation steps to extract target entities created by matching
+     * activity stream
+     *
+     * @param extracts
+     *            a list that generated steps will be added to
+     * @param extractSteps
+     *            a list that generated step indices will be added to
+     * @param entity
+     *            target entity
+     * @param newEntityTableCtxKey
+     *            context key to a map of entity -> new entities table names
+     * @param extractNewEntitiesStepFactory
+     *            factory of extract embedded entity config generation function
+     */
+    protected void addEmbeddedEntitiesFromActivityStream(@NotNull List<TransformationStepConfig> extracts,
+            @NotNull List<Integer> extractSteps, @NotNull BusinessEntity entity, @NotNull String newEntityTableCtxKey,
+            @NotNull BiFunction<String, String, TransformationStepConfig> extractNewEntitiesStepFactory) {
+        if (!hasKeyInContext(newEntityTableCtxKey)) {
+            return;
+        }
+        Map<String, String> newEntityTablesFromStream = getMapObjectFromContext(newEntityTableCtxKey, String.class,
+                String.class);
+        Map<String, String> streamMatchTables = getMapObjectFromContext(ENTITY_MATCH_STREAM_TARGETTABLE, String.class,
+                String.class);
+        if (MapUtils.isEmpty(newEntityTablesFromStream)) {
+            return;
+        }
+        for (Map.Entry<String, String> newEntityEntry : newEntityTablesFromStream.entrySet()) {
+            String streamId = newEntityEntry.getKey();
+            String newEntityTableName = newEntityEntry.getValue();
+            String streamMatchTableName = streamMatchTables.get(streamId);
+            extracts.add(extractNewEntitiesStepFactory.apply(newEntityTableName, streamMatchTableName));
+            extractSteps.add(extractSteps.size());
+
+            log.info("Extracting new {} from table {} with matched stream table {} for stream {}", entity.name(),
+                    newEntityTableName, streamMatchTableName, streamId);
+        }
+    }
+
+    /**
+     * Higher order function that return another function which create
+     * transformation config to extract target embedded entity
+     *
+     * @param entity
+     *            target entity
+     * @param entityIdField
+     *            primary ID column for this entity
+     * @param systemIds
+     *            all match IDs that should be extracted from the matched input
+     *            table
+     * @return function that generate extract embedded entity transformation config
+     */
+    protected BiFunction<String, String, TransformationStepConfig> getExtractNewEntitiesStepFactory(
+            @NotNull BusinessEntity entity, @NotNull InterfaceName entityIdField, @NotNull List<String> systemIds) {
+        return (newEntityTable, matchTargetTable) -> {
+            TransformationStepConfig step = new TransformationStepConfig();
+            step.setTransformer(TRANSFORMER_EXTRACT_EMBEDDED_ENTITY);
+            addBaseTables(step, newEntityTable);
+            addBaseTables(step, matchTargetTable);
+            ExtractEmbeddedEntityTableConfig config = new ExtractEmbeddedEntityTableConfig();
+            config.setEntity(entity.name());
+            config.setFilterByEntity(true);
+            config.setEntityIdFld(entityIdField.name());
+            // SystemIds which don't exist in match target table are ignored in
+            // dataflow
+            config.setSystemIdFlds(systemIds);
+            if (hasSystemBatch) {
+                config.setTemplate(SystemBatchTemplateName.Embedded.name());
+            }
+            step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+            return step;
+        };
+    }
+
+    protected double getTableSize(@NotNull String tableCtxKey) {
+        Table tableSummary = getTableSummaryFromKey(customerSpace.toString(), tableCtxKey);
+        return tableSummary == null ? 0 : ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
+    }
+
+    protected double sumTableSizeFromMapCtx(@NotNull String mapCtxKey) {
+        if (!hasKeyInContext(mapCtxKey)) {
+            return 0.0;
+        }
+
+        double totalSize = 0.0;
+        Map<String, String> tables = getMapObjectFromContext(mapCtxKey, String.class, String.class);
+        if (MapUtils.isEmpty(tables)) {
+            return totalSize;
+        }
+
+        List<Table> summaries = getTableSummaries(customerSpace.toString(), new ArrayList<>(tables.values()));
+        for (Table summary : summaries) {
+            if (summary == null) {
+                continue;
+            }
+            totalSize += ScalingUtils.getTableSizeInGb(yarnConfiguration, summary);
+        }
+        return totalSize;
     }
 
 }
