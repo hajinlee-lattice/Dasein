@@ -120,6 +120,9 @@ public class MigrateImportService
                 if (StringUtils.isNotEmpty(importSystem.getContactSystemId())) {
                     dupMap.put(InterfaceName.ContactId.name(), importSystem.getContactSystemId());
                 }
+                if (StringUtils.isNotEmpty(importSystem.getAccountSystemId())) {
+                    dupMap.put(InterfaceName.AccountId.name(), importSystem.getAccountSystemId());
+                }
                 break;
             case Transaction:
                 break;
@@ -238,7 +241,7 @@ public class MigrateImportService
     }
 
     @Override
-    public List<String> getAttributes(String customerSpace, Table templateTable, 
+    public List<String> getAttributes(String customerSpace, Table templateTable,
                                       Table masterTable,
                                       List<String> discardFields, MigrateImportServiceConfiguration config) {
         return templateTable.getAttributes().stream()

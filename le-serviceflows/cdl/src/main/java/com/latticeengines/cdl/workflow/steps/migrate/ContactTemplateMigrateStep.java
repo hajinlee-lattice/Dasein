@@ -47,6 +47,7 @@ public class ContactTemplateMigrateStep extends BaseImportTemplateMigrateStep<Co
             }
             templateTable.removeAttribute(InterfaceName.AccountId.name());
             templateTable.addAttribute(getCustomerAccountId(accountId.getDisplayName()));
+            templateTable.addAttribute(getSystemId(s3ImportSystem.getAccountSystemId(), accountId.getDisplayName()));
         }
         Attribute contactId = templateTable.getAttribute(InterfaceName.ContactId);
         if (contactId != null) {
