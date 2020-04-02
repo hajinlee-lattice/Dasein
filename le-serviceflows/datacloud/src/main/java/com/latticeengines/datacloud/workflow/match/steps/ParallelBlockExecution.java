@@ -265,6 +265,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     .resultLocation(avroDir) //
                     .dnbCommands() //
                     .rowsMatched(count.intValue()) //
+                    .newEntityCounts(matchOutput.getStatistics().getNewEntityCount()) //
                     .matchResults(entityMatchResultMap) //
                     .status(MatchStatus.FINISHED) //
                     .progress(1f) //

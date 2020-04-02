@@ -90,6 +90,10 @@ public class MatchCommand implements HasPid {
     @org.hibernate.annotations.Type(type = "json")
     private Map<EntityMatchResult, Long> matchResults;
 
+    @Column(name = "NewEntityCounts", columnDefinition = "'JSON'")
+    @org.hibernate.annotations.Type(type = "json")
+    private Map<String, Long> newEntityCounts;
+
     @Column(name = "RowsToDnB")
     private Integer rowsToDnb = 0;
 
@@ -165,6 +169,16 @@ public class MatchCommand implements HasPid {
     @JsonProperty("MatchResults")
     public void setMatchResults(Map<EntityMatchResult, Long> matchResults) {
         this.matchResults = matchResults;
+    }
+
+    @JsonProperty("NewEntityCounts")
+    public Map<String, Long> getNewEntityCounts() {
+        return newEntityCounts;
+    }
+
+    @JsonProperty("NewEntityCounts")
+    public void setNewEntityCounts(Map<String, Long> newEntityCounts) {
+        this.newEntityCounts = newEntityCounts;
     }
 
     @JsonProperty("RowsToDnB")

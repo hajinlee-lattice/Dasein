@@ -152,14 +152,12 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         Assert.assertFalse(newEntities.isEmpty(), "Should have newly allocated entities");
 
         // verify newly allocated entity stats
-        MatchOutput matchOutput = readMatchOutputFile(result.getRootOperationUid());
-        log.error("MatchOutput = {}", JsonUtils.serialize(matchOutput));
-        Assert.assertNotNull(matchOutput);
-        Assert.assertNotNull(matchOutput.getStatistics());
+        Assert.assertNotNull(result);
+        Assert.assertNotNull(result.getNewEntityCounts());
         Map<String, Long> expectedNewEntityCnt = new HashMap<>();
         expectedNewEntityCnt.put(BusinessEntity.Account.name(), (long) expectedAccounts);
         expectedNewEntityCnt.put(BusinessEntity.Contact.name(), (long) EXISTING_DATA.length);
-        Assert.assertEquals(matchOutput.getStatistics().getNewEntityCount(), expectedNewEntityCnt);
+        Assert.assertEquals(result.getNewEntityCounts(), expectedNewEntityCnt);
 
         logMatchResult(matchResults, getOutputPath(result));
         logNewEntities(newEntities, getNewEntityPath(result));

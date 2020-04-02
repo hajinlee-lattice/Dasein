@@ -79,7 +79,9 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
     }
 
     private MatchCommand match(MatchInput input, String outputAvroPath, MatchTransformerConfig config) {
-        MatchCommand matchCommand = matchProxy.matchBulk(input, HdfsPodContext.getHdfsPodId());
+        MatchCommand matchCommand = StringUtils.isNotBlank(config.getRootOperationUid())
+                ? matchProxy.matchBulk(input, HdfsPodContext.getHdfsPodId(), config.getRootOperationUid())
+                : matchProxy.matchBulk(input, HdfsPodContext.getHdfsPodId());
         matchCommand = waitForMatchCommand(matchCommand);
         saveResult(matchCommand, outputAvroPath);
         if (input.isOutputNewEntities() && StringUtils.isNotBlank(config.getNewEntitiesTableName())) {
