@@ -1,10 +1,17 @@
 package com.latticeengines.apps.dcp.controller;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -70,6 +77,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String timeStamp = "2020-03-20";
         String errorPath = uploadDirKey + timeStamp + "/error/file1.csv";
         String importedFilePath = uploadDirKey + timeStamp + "/processed/file2.csv";
+        String rawPath = uploadDirKey + timeStamp + "/raw/file3.csv";
         config.setUploadImportedErrorFilePath(errorPath);
         Upload upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
@@ -79,6 +87,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNull(returnedConfig.getUploadRawFilePath());
 
         // update config
+        config.setUploadRawFilePath(rawPath);
         config.setUploadImportedFilePath(importedFilePath);
         config.setUploadTSPrefix(timeStamp);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getPid(), config);
@@ -90,6 +99,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(retrievedConfig.getUploadImportedFilePath(), importedFilePath);
         Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), timeStamp);
         Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
+        Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
 
         uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getPid(), Upload.Status.MATCH_STARTED);
         uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED);
@@ -116,6 +126,22 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         StringInputStream sis2 = new StringInputStream("file2");
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadImportedFilePath(), sis2, true);
+
+        StringInputStream sis3 = new StringInputStream("file3");
+        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadRawFilePath(), sis3, true);
+
+        RestTemplate template = testBed.getRestTemplate();
+        String url = String.format("%s/pls/uploads/uploadId/%s/download", deployedHostPort, upload.getPid().toString());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = template.exchange(url, HttpMethod.GET, entity, byte[].class);
+        String fileName = response.getHeaders().getFirst("Content-Disposition");
+        Assert.assertTrue(fileName.contains(".zip"));
+        byte[] contents = response.getBody();
+        Assert.assertNotNull(contents);
+        Assert.assertTrue(contents.length > 0);
 
     }
 
