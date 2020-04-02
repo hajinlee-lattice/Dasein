@@ -105,7 +105,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
                         context.getRetryCount() + 1, dropBoxSummary.getBucket(), sourceKey,
                         dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath()));
             }
-            s3Service.copyObject(dropBoxSummary.getBucket(), sourceKey, dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath());
+            s3Service.copyLargeObjects(dropBoxSummary.getBucket(), sourceKey, dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath());
             return true;
         });
 

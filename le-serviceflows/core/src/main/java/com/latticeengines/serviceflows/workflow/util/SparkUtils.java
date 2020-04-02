@@ -47,6 +47,7 @@ public final class SparkUtils {
         String srcPath = hdfsDataUnit.getPath();
         String tgtPath = PathBuilder.buildDataTablePath(podId, customerSpace).append(tableName).toString();
         try {
+            log.info("Moving file from {} to {}", srcPath, tgtPath);
             HdfsUtils.moveFile(yarnConfiguration, srcPath, tgtPath);
         } catch (IOException e) {
             throw new RuntimeException("Failed to move data from " + srcPath + " to " + tgtPath);

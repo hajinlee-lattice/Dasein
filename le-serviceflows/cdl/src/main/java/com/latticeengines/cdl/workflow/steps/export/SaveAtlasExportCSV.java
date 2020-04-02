@@ -5,7 +5,6 @@ import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.EX
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,7 +19,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -377,9 +375,9 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
                             + ". Previous error: ", ctx.getLastThrowable());
                 }
                 if (dropFolderFlag) {
-                    copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath, dropFolderTag, dropFolderTagValue);
+                    copyToS3(csvGzFilePath, finalTargetPath, dropFolderTag, dropFolderTagValue);
                 } else {
-                    copyToS3(yarnConfiguration, csvGzFilePath, finalTargetPath, systemFolderTag, systemFolderTagValue);
+                    copyToS3(csvGzFilePath, finalTargetPath, systemFolderTag, systemFolderTagValue);
                 }
                 return true;
             });
@@ -404,16 +402,6 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         List<String> deletePathList = getDeletePath();
         atlasExportProxy.addFileToDropFolder(customerSpaceStr, exportRecord.getUuid(), fileName, deletePathList);
         cleanUpTempPath(deletePathList);
-    }
-
-    private void copyToS3(Configuration configuration, String hdfsPath, String s3Path, String tag, String tagValue)
-            throws IOException {
-        log.info("Copy from " + hdfsPath + " to " + s3Path);
-        long fileSize = HdfsUtils.getFileSize(configuration, hdfsPath);
-        try (InputStream stream = HdfsUtils.getInputStream(configuration, hdfsPath)) {
-            s3Service.uploadInputStreamMultiPart(s3Bucket, s3Path, stream, fileSize);
-            s3Service.addTagToObject(s3Bucket, s3Path, tag, tagValue);
-        }
     }
 
     private void saveToLocalForTesting(ExportEntity exportEntity, String csvGzFilePath) {

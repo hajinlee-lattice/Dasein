@@ -11,6 +11,7 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     public static final String LDC = "LDC";
     public static final String CDL = "CDL";
+    public static final String DCP = "DCP";
 
     private String dbUrl;
 

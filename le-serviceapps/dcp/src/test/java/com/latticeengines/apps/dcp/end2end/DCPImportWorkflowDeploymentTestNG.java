@@ -13,6 +13,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
@@ -22,11 +23,13 @@ import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.DCPProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -36,12 +39,18 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     private DCPProxy dcpProxy;
 
+    @Inject
+    private MetadataProxy metadataProxy;
+
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @Inject
+    private S3Service s3Service;
+
     private ProjectDetails projectDetails;
     private Source source;
-    private Upload upload;
+    private long uploadId;
     private String s3FileKey;
 
     @BeforeClass(groups = {"deployment"})
@@ -64,14 +73,23 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         List<Upload> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploadList);
         Assert.assertEquals(uploadList.size(), 1);
-        upload = uploadList.get(0);
+        Upload upload = uploadList.get(0);
+        uploadId = upload.getPid();
+
+        verifyImport();
     }
 
-    private void validateImport() {
+    private void verifyImport() {
+        Upload upload = uploadProxy.getUpload(mainCustomerSpace, uploadId);
         Assert.assertNotNull(upload);
         Assert.assertNotNull(upload.getStatus());
+
+        // to be changed after adding profile steps
+        Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_FINISHED);
+
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
+        verifyMatchResult(upload);
     }
 
     private void prepareTenant() {
@@ -94,6 +112,27 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         dropPath = UploadS3PathBuilderUtils.combinePath(false, true,
                 UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
         s3FileKey = dropPath + TEST_ACCOUNT_DATA_FILE;
-        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket, s3FileKey);
+        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, "2", TEST_ACCOUNT_DATA_FILE, s3Bucket, s3FileKey);
     }
+
+    private void verifyMatchResult(Upload upload) {
+        String matchResultName = upload.getMatchResultName();
+        Assert.assertNotNull(matchResultName);
+        Table matchResult = metadataProxy.getTableSummary(mainCustomerSpace, matchResultName);
+        Assert.assertNotNull(matchResult);
+        Assert.assertEquals(matchResult.getExtracts().size(), 1);
+
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
+        String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
+        String acceptedPath = UploadS3PathBuilderUtils.combinePath(false, false,
+                dropFolder, upload.getUploadConfig().getUploadMatchResultAccepted());
+        String rejectedPath = UploadS3PathBuilderUtils.combinePath(false, false,
+                dropFolder, upload.getUploadConfig().getUploadMatchResultRejected());
+        String bucket = dropBoxSummary.getBucket();
+        System.out.println("acceptedPath=" + acceptedPath);
+        System.out.println("rejectedPath=" + rejectedPath);
+        Assert.assertTrue(s3Service.objectExist(bucket, acceptedPath));
+        Assert.assertTrue(s3Service.objectExist(bucket, rejectedPath));
+    }
+
 }

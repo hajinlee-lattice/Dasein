@@ -13,24 +13,28 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "DCP_UPLOAD", indexes = { @Index(name = "IX_SOURCE_ID", columnList = "SOURCE_ID") })
+@javax.persistence.Table(name = "DCP_UPLOAD", indexes = { @Index(name = "IX_SOURCE_ID", columnList = "SOURCE_ID") })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Upload implements HasPid, HasTenant, HasAuditingFields {
@@ -65,6 +69,15 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "STATUS")
     @JsonProperty("status")
     private Status status;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_MATCH_RESULT")
+    private Table matchResult;
+
+    @JsonProperty("match_result")
+    @Transient
+    private String matchResultName;
 
     @JsonProperty("upload_config")
     @Column(name = "UPLOAD_CONFIG", columnDefinition = "'JSON'", length = 8000)
@@ -146,6 +159,28 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     public void setUploadStats(UploadStats uploadStats) {
         this.uploadStats = uploadStats;
+    }
+
+    private Table getMatchResult() {
+        return matchResult;
+    }
+
+    public void setMatchResult(Table matchResult) {
+        this.matchResult = matchResult;
+        if (matchResult != null) {
+            this.matchResultName = matchResult.getName();
+        }
+    }
+
+    public String getMatchResultName() {
+        if (StringUtils.isBlank(matchResultName) && this.matchResult != null) {
+            matchResultName = this.matchResult.getName();
+        }
+        return matchResultName;
+    }
+
+    private void setMatchResultName(String matchResultName) {
+        this.matchResultName = matchResultName;
     }
 
     // TODO: more specific status.

@@ -1,13 +1,17 @@
 package com.latticeengines.domain.exposed.serviceflows.datacloud;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.PrepareMatchDataConfiguration;
@@ -91,6 +95,14 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
                 String selectionVersion) {
             match.setPredefinedColumnSelection(predefinedColumnSelection);
             match.setPredefinedSelectionVersion(selectionVersion);
+            return this;
+        }
+
+        public Builder matchColumnSelection(List<String> columnIds) {
+            List<Column> columns = columnIds.stream().map(c -> new Column(c, c)).collect(Collectors.toList());
+            ColumnSelection columnSelection = new ColumnSelection();
+            columnSelection.setColumns(columns);
+            match.setCustomizedColumnSelection(columnSelection);
             return this;
         }
 

@@ -12,9 +12,15 @@ import org.springframework.util.StringUtils;
 import com.latticeengines.apps.dcp.entitymgr.UploadEntityMgr;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
+import com.latticeengines.metadata.service.MetadataService;
 
 @Service("uploadService")
 public class UploadServiceImpl implements UploadService {
@@ -23,6 +29,9 @@ public class UploadServiceImpl implements UploadService {
 
     @Inject
     private UploadEntityMgr uploadEntityMgr;
+
+    @Inject
+    private MetadataService metadataService;
 
     @Override
     public List<Upload> getUploads(String customerSpace, String sourceId) {
@@ -53,6 +62,30 @@ public class UploadServiceImpl implements UploadService {
         uploadEntityMgr.create(upload);
 
         return upload;
+    }
+
+    @Override
+    public void registerMatchResult(String customerSpace, long uploadPid, String tableName) {
+        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+        if (upload == null) {
+            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+        }
+        Table table = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
+        if (table == null) {
+            throw new RuntimeException("Cannot find Upload match result table with name: " + tableName);
+        }
+        String oldTableName = upload.getMatchResultName();
+        Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
+        boolean hasOldTable = oldTable != null;
+        upload.setMatchResult(table);
+        uploadEntityMgr.update(upload);
+        if (hasOldTable) {
+            log.info("There was an old match result table {}, going to be marked as temporary.", oldTableName);
+            RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
+            metadataService.updateTableRetentionPolicy(CustomerSpace.parse(customerSpace), oldTableName, retentionPolicy);
+        } else {
+            log.info("There was no old match result table.");
+        }
     }
 
     @Override

@@ -1,39 +1,41 @@
 USE `PLS_MultiTenant`;
 
 CREATE PROCEDURE `CreateDCPUploadTable`()
-  BEGIN
-    CREATE TABLE `DCP_UPLOAD`
-      (
-         `PID`           BIGINT NOT NULL auto_increment,
-         `CREATED`       DATETIME NOT NULL,
-         `SOURCE_ID`     VARCHAR(255) NOT NULL,
-         `STATUS`        INTEGER,
-         `UPDATED`       DATETIME NOT NULL,
-         `UPLOAD_CONFIG` JSON,
-         `FK_TENANT_ID`  BIGINT NOT NULL,
-         PRIMARY KEY (`PID`)
-      )
-    engine=InnoDB;
+BEGIN
+    create table `DCP_UPLOAD`
+    (
+        `PID`                 bigint       not null auto_increment,
+        `CREATED`             datetime     not null,
+        `SOURCE_ID`           varchar(255) not null,
+        `STATUS`              integer,
+        `UPDATED`             datetime     not null,
+        `UPLOAD_CONFIG`       JSON,
+        `UPLOAD_STATS`        JSON,
+        `FK_MATCH_RESULT`     bigint,
+        `FK_TENANT_ID`        bigint       not null,
+        primary key (`PID`)
+    ) engine = InnoDB;
+
 
     CREATE INDEX IX_SOURCE_ID ON `DCP_UPLOAD` (`SOURCE_ID`);
 
     ALTER TABLE `DCP_UPLOAD`
-      ADD CONSTRAINT `FK_DCPUPLOAD_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
-      REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
-  END;
+        ADD CONSTRAINT `FK_DCPUPLOAD_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
+            REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
+END;
 
 CREATE PROCEDURE `UpdateImportMessageTable`()
-  BEGIN
-      ALTER TABLE `ATLAS_S3_IMPORT_MESSAGE`
-        ADD COLUMN `MESSAGE_TYPE` VARCHAR(25),
+BEGIN
+    ALTER TABLE `ATLAS_S3_IMPORT_MESSAGE`
+        ADD COLUMN `MESSAGE_TYPE`             VARCHAR(25),
         CHANGE COLUMN `FEED_TYPE` `FEED_TYPE` VARCHAR(255) NULL,
-        CHANGE COLUMN `KEY` `KEY` VARCHAR(500) NOT NULL;
-  END;
+        CHANGE COLUMN `KEY` `KEY`             VARCHAR(500) NOT NULL;
+END;
 
 CREATE PROCEDURE `UpdatePLSTables`()
-  BEGIN
+BEGIN
     ALTER TABLE `METADATA_SEGMENT`
         ADD COLUMN `TEAM_ID` VARCHAR(255);
-  END;
+END;
 
 DELIMITER;

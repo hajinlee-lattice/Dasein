@@ -63,6 +63,12 @@ public final class UploadS3PathBuilderUtils {
         return String.format(uploadImportDir, projectId, sourceId, timestamp);
     }
 
+    public static String getUploadMatchResultDir(String projectId, String sourceId, String timestamp) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
+        Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
+        Preconditions.checkArgument(StringUtils.isNotBlank(timestamp));
+        return String.format(uploadMatchDir, projectId, sourceId, timestamp);
+    }
 
     public static String combinePath(boolean withHeadingSlash, boolean withTailingSlash, String... pathParts) {
         for (String path : pathParts) {

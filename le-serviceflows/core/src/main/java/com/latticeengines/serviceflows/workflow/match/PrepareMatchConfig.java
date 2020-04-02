@@ -189,7 +189,8 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
         matchInput.setExcludePublicDomain(getConfiguration().isExcludePublicDomain());
         matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
-        if (MatchStepConfiguration.LDC.equals(getConfiguration().getMatchType())) {
+        if (MatchStepConfiguration.LDC.equals(getConfiguration().getMatchType()) ||
+                MatchStepConfiguration.DCP.equals(getConfiguration().getMatchType())) {
             matchInput.setDataCloudOnly(true);
         }
 

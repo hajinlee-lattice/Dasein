@@ -16,6 +16,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -143,6 +144,7 @@ public class FinalJobListener extends LEJobListener implements LEJobCallerRegist
     private Set<String> workflowTypesEnabledTempTable() {
         Set<String> workflowNames = new HashSet<>();
         workflowNames.add(ProcessAnalyzeWorkflowConfiguration.WORKFLOW_NAME);
+        workflowNames.add(DCPSourceImportWorkflowConfiguration.WORKFLOW_NAME);
         return workflowNames;
     }
 
