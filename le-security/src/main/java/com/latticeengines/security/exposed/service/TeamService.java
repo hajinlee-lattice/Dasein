@@ -2,6 +2,7 @@ package com.latticeengines.security.exposed.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
@@ -12,6 +13,8 @@ public interface TeamService {
     List<GlobalTeam> getTeams(User loginUser);
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser, boolean withTeamMember);
+
+    List<GlobalTeam> getTeamsFromSession(boolean withTeamMember);
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser);
 
@@ -34,4 +37,7 @@ public interface TeamService {
     GlobalTeam getTeamInContext(String teamId);
 
     GlobalTeam getTeamByTeamId(String teamId, User loginUser, boolean withTeamMember);
+
+    Set<String> getTeamIdsInContext();
+
 }

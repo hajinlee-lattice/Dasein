@@ -58,11 +58,11 @@ public class MetadataSegmentResource {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/username/{username}")
+    @GetMapping("/context")
     @ResponseBody
-    @ApiOperation(value = "Get all segments")
-    public List<MetadataSegment> getSegmentsByUsername(@PathVariable(value = "username") String username) {
-        return metadataSegmentService.getSegmentsByUsername(username).stream() //
+    @ApiOperation(value = "Get all segments in session context")
+    public List<MetadataSegment> getSegmentsInContext() {
+        return metadataSegmentService.getSegmentsInContext().stream() //
                 .filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())) //
                 .collect(Collectors.toList());
     }

@@ -9,9 +9,10 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface MetadataSegmentService {
+
     List<MetadataSegment> getSegments();
 
-    List<MetadataSegment> getSegmentsByUsername(String username);
+    List<MetadataSegment> getSegmentsInContext();
 
     MetadataSegment getSegmentByName(String name);
 

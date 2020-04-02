@@ -2,14 +2,15 @@ package com.latticeengines.pls.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
@@ -45,7 +46,7 @@ public class PlayServiceImpl implements PlayService {
         Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext()
                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
         for (Play play : plays) {
-            inflateSegment(play, globalTeamMap.get(play.getTargetSegment().getTeamId()));
+            inflateSegment(play, globalTeamMap.get(play.getTargetSegment().getTeamId()), teamService.getTeamIdsInContext());
         }
         return plays;
     }
@@ -55,14 +56,19 @@ public class PlayServiceImpl implements PlayService {
         Tenant tenant = MultiTenantContext.getTenant();
         Play play = playProxy.getPlay(tenant.getId(), playName);
         if (play != null) {
-            inflateSegment(play, teamService.getTeamInContext(play.getTargetSegment().getTeamId()));
+            inflateSegment(play, teamService.getTeamInContext(play.getTargetSegment().getTeamId()), teamService.getTeamIdsInContext());
         }
         return play;
 
     }
 
-    private void inflateSegment(Play play, GlobalTeam globalTeam) {
+    private void inflateSegment(Play play, GlobalTeam globalTeam, Set<String> teamIds) {
         MetadataSegment metadataSegment = play.getTargetSegment();
+        String teamId = metadataSegment.getTeamId();
+        if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
+            play.setViewOnly(true);
+            metadataSegment.setViewOnly(true);
+        }
         metadataSegment.setTeam(globalTeam);
     }
 

@@ -92,19 +92,35 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public List<GlobalTeam> getTeamsByUserName(String username, User loginUser, boolean withTeamMember) {
-        List<GlobalAuthTeam> globalAuthTeams;
-        if (loginUser.getEmail().equals(username)) {
-            Session session = MultiTenantContext.getSession();
-            // session only exists in GlobalAuthMultiTenantContextStrategy
-            if (session != null) {
-                globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(session.getTeamIds(), withTeamMember);
+        try (PerformanceTimer timer = new PerformanceTimer(String.format("Get teams by username %s.", username))) {
+            List<GlobalAuthTeam> globalAuthTeams;
+            if (loginUser.getEmail().equals(username)) {
+                Session session = MultiTenantContext.getSession();
+                // session only exists in GlobalAuthMultiTenantContextStrategy
+                if (session != null) {
+                    globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(session.getTeamIds(), withTeamMember);
+                } else {
+                    globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
+                }
             } else {
                 globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
             }
-        } else {
-            globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
+            return getGlobalTeams(globalAuthTeams, withTeamMember, loginUser);
         }
-        return getGlobalTeams(globalAuthTeams, withTeamMember, loginUser);
+    }
+
+    @Override
+    public List<GlobalTeam> getTeamsFromSession(boolean withTeamMember) {
+        try (PerformanceTimer timer = new PerformanceTimer("Get teams in session context.")) {
+            List<GlobalAuthTeam> globalAuthTeams;
+            Session session = MultiTenantContext.getSession();
+            if (session != null) {
+                globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(session.getTeamIds(), withTeamMember);
+            } else {
+                globalAuthTeams = new ArrayList<>();
+            }
+            return getGlobalTeams(globalAuthTeams, withTeamMember, MultiTenantContext.getUser());
+        }
     }
 
     @Override
@@ -114,7 +130,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public GlobalTeam getTeamByTeamId(String teamId, User loginUser, boolean withTeamMember) {
-        try (PerformanceTimer timer = new PerformanceTimer(String.format("Get team with teamId %s.", teamId))) {
+        try (PerformanceTimer timer = new PerformanceTimer(String.format("Get team by teamId %s.", teamId))) {
             GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, withTeamMember);
             GlobalTeam globalTeam = null;
             List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
@@ -251,6 +267,16 @@ public class TeamServiceImpl implements TeamService {
             return getTeamByTeamId(teamId, MultiTenantContext.getUser());
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public Set<String> getTeamIdsInContext() {
+        Session session = MultiTenantContext.getSession();
+        if (session != null) {
+            return session.getTeamIds().stream().collect(Collectors.toSet());
+        } else {
+            return new HashSet<>();
         }
     }
 }
