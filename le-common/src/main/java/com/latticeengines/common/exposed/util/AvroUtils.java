@@ -1510,7 +1510,7 @@ public final class AvroUtils {
         return value;
     }
 
-    private static Type getFieldType(Field field) {
+    public static Type getFieldType(Field field) {
         Type fieldType = field.schema().getType();
 
         // if the field is of type union, we must loop to get the correct type

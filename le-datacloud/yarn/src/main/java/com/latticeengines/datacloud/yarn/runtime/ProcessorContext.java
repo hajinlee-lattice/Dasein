@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -513,16 +514,33 @@ public class ProcessorContext {
     }
 
     Schema getNewEntitySchema() {
+        Schema inputSchema = getInputSchema();
+        MatchInput matchInput = getOriginalInput();
         Map<String, Class<?>> fieldMap = new LinkedHashMap<>();
         fieldMap.put(ENTITY_NAME_FIELD, String.class);
         fieldMap.put(ENTITY_ID_FIELD, String.class);
+
+        if (CollectionUtils.isNotEmpty(matchInput.getNewEntityFields())) {
+            matchInput.getNewEntityFields().forEach(fieldName -> {
+                Schema.Field field = inputSchema.getField(fieldName);
+                Preconditions.checkNotNull(field,
+                        String.format("New entity field %s does not exist in input schema", fieldName));
+                Schema.Type type = AvroUtils.getFieldType(field);
+                Preconditions.checkNotNull(type,
+                        String.format("New entity field %s has null type in input schema", fieldName));
+                Class<?> javaType = AvroUtils.getJavaType(type);
+
+                fieldMap.put(fieldName, javaType);
+            });
+        }
+
         Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
-        String inputSchemaName = getInputSchema().getName();
+        String inputSchemaName = inputSchema.getName();
         return AvroUtils.constructSchemaWithProperties(inputSchemaName, fieldMap, propertiesMap);
     }
 
     private Map<String, Map<String, String>> getPropertiesMap(Set<String> keySet) {
-        Map<String, Map<String, String>> propertiesMap = new HashMap<String, Map<String, String>>();
+        Map<String, Map<String, String>> propertiesMap = new HashMap<>();
         Map<String, String> properties = new HashMap<>();
         properties.put("ApprovedUsage", "[None]");
         for (String key : keySet) {
