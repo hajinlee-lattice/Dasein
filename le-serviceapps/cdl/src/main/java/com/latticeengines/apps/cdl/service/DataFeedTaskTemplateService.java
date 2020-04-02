@@ -67,4 +67,35 @@ public interface DataFeedTaskTemplateService {
      */
     boolean createOpportunityTemplate(String customerSpace, String systemName, EntityType entityType,
                                            SimpleTemplateMetadata simpleTemplateMetadata);
+
+    /**
+     *
+     * @param customerSpace target tenant
+     * @param systemName The user defined name for the system for which a template is being created
+     * @param systemType choose use Marketo spec or eloqua spec
+     * @param entityType using to create Template
+     * @return true if validate pass.
+     */
+    boolean validationMarketing(String customerSpace, String systemName, String systemType, EntityType entityType);
+
+    /**
+     *
+     * @param customerSpace target tenant
+     * @param systemName The user defined name for the system for which a template is being created
+     * @param systemType choose use Marketo spec or eloqua spec
+     * @return true if success
+     */
+    boolean createDefaultMarketingTemplate(String customerSpace, String systemName, String systemType);
+
+    /**
+     *
+     * @param customerSpace target tenant
+     * @param systemName The user defined name for the system for which a template is being created
+     * @param systemType choose use Marketo spec or eloqua spec
+     * @param entityType using to create Template
+     * @param simpleTemplateMetadata EntityType.Opportunity Template description.
+     * @return true if success
+     */
+    boolean createMarketingTemplate(String customerSpace, String systemName, String systemType, EntityType entityType,
+                                    SimpleTemplateMetadata simpleTemplateMetadata);
 }

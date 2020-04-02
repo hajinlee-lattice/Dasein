@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.metadata.standardschemas;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_1;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Address_Street_2;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Amount;
@@ -31,6 +33,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadSourc
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadStatus;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LeadType;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Longitude;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.Name;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfEmployees;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.OpportunityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.OrderId;
@@ -116,6 +119,9 @@ public class SchemaRepositoryUnitTestNG {
 
     private static final List<InterfaceName> OPPORTUNITY = Arrays.asList(LastModifiedDate, OpportunityId, StageName);
     private static final List<InterfaceName> OPPORTUNITY_STAGE = Collections.singletonList(StageName);
+
+    private static final List<InterfaceName> MARKETING = Arrays.asList(ActivityDate, ActivityType);
+    private static final List<InterfaceName> MARKETING_ACTIVITY_TYPE = Arrays.asList(Name, ActivityType);
     /**
      * Currently only covers testing Account & Contact schema with
      * enableEntityMatch turned on and off
@@ -216,6 +222,8 @@ public class SchemaRepositoryUnitTestNG {
                 { S3ImportSystem.SystemType.Other, EntityType.WebVisitSourceMedium, true, WEBVISIT_SOURCE_MEDIUM }, //
                 { S3ImportSystem.SystemType.Other, EntityType.Opportunity, true, OPPORTUNITY }, //
                 { S3ImportSystem.SystemType.Other, EntityType.OpportunityStageName, true, OPPORTUNITY_STAGE }, //
+                { S3ImportSystem.SystemType.Other, EntityType.Marketing, true, MARKETING}, //
+                { S3ImportSystem.SystemType.Other, EntityType.MarketingActivityType, true, MARKETING_ACTIVITY_TYPE}, //
         };
     }
 }

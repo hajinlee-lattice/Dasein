@@ -1,0 +1,104 @@
+{
+  "systemObject": "Marketing",
+  "fieldDefinitionsRecordsMap": {
+    "General": [
+      {
+        "fieldName": "ActivityDate",
+        "fieldType": "DATE",
+        "columnName": "ActivityDate",
+        "screenName": "ActivityDate",
+        "matchingColumnNames": [
+          "ActivityDate",
+          "Activity_Date",
+          "activityDate",
+          "ACTIVITY DATE"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "logicalDataType": "Date",
+        "fundamentalType": "DATE"
+      },
+      {
+        "fieldName": "ActivityType",
+        "fieldType": "TEXT",
+        "columnName": "ActivityType",
+        "screenName": "ActivityType",
+        "matchingColumnNames": [
+          "ActivityType",
+          "Activity Type",
+          "ACTIVITY TYPE"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "CampaignId",
+        "fieldType": "TEXT",
+        "columnName": "CampaignId",
+        "screenName": "CampaignId",
+        "matchingColumnNames": [
+          "CampaignId",
+          "CAMPAIGN ID"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "ContactCookieId",
+        "fieldType": "TEXT",
+        "columnName": "VisitorExternalId",
+        "screenName": "VisitorExternalId",
+        "matchingColumnNames": [
+          "ContactCookieId",
+          "VisitorExternalId"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ],
+    "Custom Fields": [
+      {
+        "fieldName": "ActivityTypeId",
+        "fieldType": "TEXT",
+        "columnName": "activityTypeId",
+        "screenName": "activityTypeId",
+        "matchingColumnNames": [
+          "ActivityTypeId",
+          "activityTypeId"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ],
+    "Match to Contacts - ID": [
+      {
+        "fieldType": "TEXT",
+        "columnName": "ContactId",
+        "screenName": "ContactId",
+        "matchingColumnNames": [
+          "ContactId",
+          "leadId"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ]
+  }
+}

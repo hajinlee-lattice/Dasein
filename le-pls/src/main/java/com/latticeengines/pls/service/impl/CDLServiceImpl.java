@@ -840,6 +840,11 @@ public class CDLServiceImpl implements CDLService {
         return cdlProxy.createDefaultOpportunityTemplate(customerSpace, systemName);
     }
 
+    @Override
+    public boolean createDefaultMarketingTemplate(String customerSpace, String systemName, String systemType) {
+        return cdlProxy.createDefaultMarketingTemplate(customerSpace, systemName, systemType);
+    }
+
     private void applyUserPrefix(FieldMapping fieldMapping) {
         if (fieldMapping != null && StringUtils.isEmpty(fieldMapping.getMappedField())) {
             if (!fieldMapping.getUserField().startsWith(MetadataResolver.USER_PREFIX)) {

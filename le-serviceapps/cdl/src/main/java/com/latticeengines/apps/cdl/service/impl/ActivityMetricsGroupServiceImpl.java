@@ -41,9 +41,12 @@ import com.latticeengines.domain.exposed.util.WebVisitUtils;
 public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupService {
 
     private static final String OPPORTUNITY_STAGE_GROUPNAME = "Opportunity By Stage";
+    private static final String MARKETING_TYPE_ACCOUNT_GROUPNAME = "Marketing By ActivityType And AccountID";
+    private static final String MARKETING_TYPE_CONTACT_GROUPNAME = "Marketing By ActivityType And ContactID";
     private static final String DIM_NAME_PATH_PATTERN = InterfaceName.PathPatternId.name();
     private static final String DIM_NAME_SOURCEMEDIUM = InterfaceName.SourceMediumId.name();
     private static final String DIM_NAME_STAGE = InterfaceName.StageNameId.name();
+    private static final String DIM_NAME_ACTIVITYTYPE = InterfaceName.ActivityTypeId.name();
 
     private static Map<String, StringTemplate> templateCache = new HashMap<>();
 
@@ -88,6 +91,19 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         ActivityMetricsGroup stage = setupDefaultStageGroup(tenant, stream);
         activityMetricsGroupEntityMgr.create(stage);
         return stage;
+    }
+
+    @Override
+    public List<ActivityMetricsGroup> setupDefaultMarketingProfile(String customerSpace, String streamName) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
+        ActivityMetricsGroup accountActivityType = setupDefaultMarketingTypeGroup(tenant, stream,
+                BusinessEntity.Account, MARKETING_TYPE_ACCOUNT_GROUPNAME);
+        ActivityMetricsGroup contactActivityType = setupDefaultMarketingTypeGroup(tenant, stream,
+                BusinessEntity.Contact, MARKETING_TYPE_CONTACT_GROUPNAME);
+        activityMetricsGroupEntityMgr.create(accountActivityType);
+        activityMetricsGroupEntityMgr.create(contactActivityType);
+        return Arrays.asList(accountActivityType, contactActivityType);
     }
 
     private ActivityMetricsGroup setupDefaultTotalVisitGroup(Tenant tenant, AtlasStream stream) {
@@ -152,6 +168,28 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         stage.setNullImputation(NullMetricsImputation.ZERO);
         stage.setReducer(prepareReducer());
         return stage;
+    }
+
+    private ActivityMetricsGroup setupDefaultMarketingTypeGroup(Tenant tenant, AtlasStream atlasStream,
+                                                                BusinessEntity entity, String groupName) {
+        ActivityMetricsGroup marketingType = new ActivityMetricsGroup();
+        marketingType.setTenant(tenant);
+        marketingType.setStream(atlasStream);
+        marketingType.setGroupId(getGroupId(groupName));
+        marketingType.setGroupName(groupName);
+        marketingType.setJavaClass(Long.class.getSimpleName());
+        marketingType.setEntity(entity);
+        marketingType.setActivityTimeRange(WebVisitUtils.defaultTimeRange());
+        marketingType.setRollupDimensions(DIM_NAME_ACTIVITYTYPE);
+        marketingType.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
+                InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
+        marketingType.setCategory(Category.MARKETING_PROFILE);
+        marketingType.setSubCategoryTmpl(getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_SUBCATEGORY));
+        marketingType.setDisplayNameTmpl(getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_DISPLAYNAME));
+        marketingType.setDescriptionTmpl(getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_DESCRIPTION));
+        marketingType.setNullImputation(NullMetricsImputation.ZERO);
+        marketingType.setSecondarySubCategoryTmpl(getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_SECONDARY_SUBCATEGORY));
+        return marketingType;
     }
 
     private ActivityRowReducer prepareReducer() {

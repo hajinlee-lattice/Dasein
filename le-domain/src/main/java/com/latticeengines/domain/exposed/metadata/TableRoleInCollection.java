@@ -51,6 +51,7 @@ public enum TableRoleInCollection {
 
     WebVisitProfile, //
     OpportunityProfile, //
+    MarketingProfile, //
     PeriodStores, //
     MetricsGroup, //
 
@@ -129,6 +130,11 @@ public enum TableRoleInCollection {
         OpportunityProfile.distKey = InterfaceName.AccountId;
         OpportunityProfile.partitionKey = InterfaceName.AccountId;
         OpportunityProfile.hasSignature = true;
+
+        MarketingProfile.primaryKey = InterfaceName.ContactId;
+        MarketingProfile.partitionKey = InterfaceName.AccountId;
+        MarketingProfile.rangeKey = InterfaceName.ContactId;
+        MarketingProfile.hasSignature = true;
 
         PeriodStores.hasSignature = true;
         MetricsGroup.hasSignature = true;

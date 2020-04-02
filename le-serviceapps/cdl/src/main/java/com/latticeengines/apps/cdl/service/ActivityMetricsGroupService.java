@@ -14,4 +14,6 @@ public interface ActivityMetricsGroupService {
     List<ActivityMetricsGroup> setupDefaultWebVisitProfile(String customerSpace, String streamName);
 
     ActivityMetricsGroup setUpDefaultOpportunityProfile(String customerSpace, String streamName);
+
+    List<ActivityMetricsGroup> setupDefaultMarketingProfile(String customerSpace, String streamName);
 }

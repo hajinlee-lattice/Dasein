@@ -22,14 +22,18 @@ public enum EntityType {
             SchemaInterpretation.WebVisitPathPattern), //
     WebVisitSourceMedium(BusinessEntity.Catalog, SubType.SourceMedium, "Visit Source", "WebVisitSourceMedium",
             SchemaInterpretation.WebVisitSourceMedium),
-    Opportunity(BusinessEntity.Opportunity, null, "Opportunity", "OpportunityData", SchemaInterpretation.Opportunity),
+    Opportunity(BusinessEntity.ActivityStream, null, "Opportunity", "OpportunityData", SchemaInterpretation.Opportunity),
     OpportunityStageName(BusinessEntity.Catalog, SubType.StageName, "Opportunity Stage", "OpportunityStageName",
-            SchemaInterpretation.OpportunityStageName);
+            SchemaInterpretation.OpportunityStageName),
+    Marketing(BusinessEntity.ActivityStream, null, "Marketing", "MarketingData", SchemaInterpretation.Marketing),
+    MarketingActivityType(BusinessEntity.Catalog, null, "Marketing Type", "MarketingActivityType",
+            SchemaInterpretation.MarketingActivityType);
 
     private static final Set<EntityType> STANDARD_ENTITY_TYPES =
             ImmutableSet.of(Accounts, Contacts, Leads, ProductPurchases, ProductBundles, ProductHierarchy);
     private static final Set<EntityType> STREAM_ENTITY_TYPES =
-            ImmutableSet.of(WebVisit, WebVisitPathPattern, WebVisitSourceMedium);
+            ImmutableSet.of(WebVisit, WebVisitPathPattern, WebVisitSourceMedium, Opportunity, OpportunityStageName,
+                    Marketing, MarketingActivityType);
 
 
     private BusinessEntity entity;

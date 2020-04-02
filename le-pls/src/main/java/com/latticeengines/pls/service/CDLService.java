@@ -84,6 +84,8 @@ public interface CDLService {
 
     boolean createDefaultOpportunityTemplate(String customerSpace, String systemName);
 
+    boolean createDefaultMarketingTemplate(String customerSpace, String systemName, String systemType);
+
     /**
      *
      * @param customerSpace Identify current tenant

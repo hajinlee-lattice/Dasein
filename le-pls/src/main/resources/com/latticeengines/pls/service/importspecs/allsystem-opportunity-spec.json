@@ -5,7 +5,7 @@
       {
         "fieldName": "OpportunityId",
         "fieldType": "TEXT",
-        "columnName": "OpportunityId",
+        "columnName": "Id",
         "screenName": "Id",
         "matchingColumnNames": [
           "ID"
