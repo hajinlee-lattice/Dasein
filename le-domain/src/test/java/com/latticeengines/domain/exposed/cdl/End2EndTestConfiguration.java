@@ -6,6 +6,23 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * this configuration is used to run loadTesting.
+ *
+ * checkpointName & checkpointVersion: this is we used to saveCheckpoint, if you won't save checkpoint, can set null
+ * resumeCheckpointName & resumeCheckpointVersion: identify which checkpoint you want to resume from.
+ * tips: if you set checkpointName/resumeCheckpointName, haven't set version, will use the default version.
+ *
+ * isAuto: if true, will save all systemInfo(about s3ImportSystem, datafeedTask, TemplateTable, AtlasStream, Catalog,
+ * metricGroup, dimensionMetadata.
+ *
+ * runPA:if true, will run PA after all import finished.
+ * processAnalyzeRequest: will use this request to run PA.
+ *
+ * imports: used in MockCSVImport() method to import data.
+ *
+ * featureFlagMap: use to create test tenant.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class End2EndTestConfiguration {
 
