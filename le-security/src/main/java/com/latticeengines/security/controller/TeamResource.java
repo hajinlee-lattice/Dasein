@@ -48,7 +48,7 @@ public class TeamResource {
         return teamService.getTeamsByUserName(username, loginUser, withTeamMember);
     }
 
-    @GetMapping(value = "/session}")
+    @GetMapping(value = "/session")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsFromSession(
