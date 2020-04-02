@@ -51,8 +51,11 @@ public class TeamResource {
     @GetMapping(value = "/session}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
-    public List<GlobalTeam> getTeamsFromSession(@RequestParam(value = "withTeamMember", required = false, defaultValue = "false") boolean withTeamMember) {
-        return teamService.getTeamsFromSession(withTeamMember);
+    public List<GlobalTeam> getTeamsFromSession(
+            @RequestParam(value = "withTeamMember", required = false, defaultValue = "false") boolean withTeamMember,
+            @RequestParam(value = "appendGlobalTeam", required = false, defaultValue = "true") boolean appendGlobalTeam) {
+        List<GlobalTeam> globalTeams = teamService.getTeamsFromSession(withTeamMember, appendGlobalTeam);
+        return globalTeams;
     }
 
     @GetMapping(value = "")

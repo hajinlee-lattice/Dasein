@@ -46,6 +46,8 @@ public class TeamServiceImpl implements TeamService {
     @Inject
     private GlobalAuthDependencyChecker dependencyChecker;
 
+    private static String GLOBAL_TEAM = "Global Team";
+
     @Override
     public List<GlobalTeam> getTeams(User loginUser) {
         try (PerformanceTimer timer = new PerformanceTimer(String.format("User %s requests to query teams.", loginUser.getEmail()))) {
@@ -110,7 +112,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     @Override
-    public List<GlobalTeam> getTeamsFromSession(boolean withTeamMember) {
+    public List<GlobalTeam> getTeamsFromSession(boolean withTeamMember, boolean appendGlobalTeam) {
         try (PerformanceTimer timer = new PerformanceTimer("Get teams in session context.")) {
             List<GlobalAuthTeam> globalAuthTeams;
             Session session = MultiTenantContext.getSession();
@@ -119,7 +121,7 @@ public class TeamServiceImpl implements TeamService {
             } else {
                 globalAuthTeams = new ArrayList<>();
             }
-            return getGlobalTeams(globalAuthTeams, withTeamMember, MultiTenantContext.getUser());
+            return getGlobalTeams(appendGlobalTeam, globalAuthTeams, withTeamMember, MultiTenantContext.getUser());
         }
     }
 
@@ -152,16 +154,33 @@ public class TeamServiceImpl implements TeamService {
         return getTeamByTeamId(teamId, loginUser, true);
     }
 
-    private List<GlobalTeam> getGlobalTeams(List<GlobalAuthTeam> globalAuthTeams, boolean withTeamMember, User loginUser) {
+
+    // generate a Global Team with teamId null, display for UI
+    private GlobalTeam getGlobalTeam() {
+        GlobalTeam globalTeam = new GlobalTeam();
+        globalTeam.setTeamName(GLOBAL_TEAM);
+        globalTeam.setTeamMembers(new ArrayList<>());
+        return globalTeam;
+    }
+
+    private List<GlobalTeam> getGlobalTeams(boolean appendGlobalTeam,
+                                            List<GlobalAuthTeam> globalAuthTeams, boolean withTeamMember, User loginUser) {
         List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser), false);
         Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
         List<GlobalTeam> globalTeams = new ArrayList<>();
+        if (appendGlobalTeam) {
+            globalTeams.add(getGlobalTeam());
+        }
         if (CollectionUtils.isNotEmpty(globalAuthTeams)) {
             for (GlobalAuthTeam globalAuthTeam : globalAuthTeams) {
                 globalTeams.add(getGlobalTeam(globalAuthTeam, withTeamMember, userMap));
             }
         }
         return globalTeams;
+    }
+
+    private List<GlobalTeam> getGlobalTeams(List<GlobalAuthTeam> globalAuthTeams, boolean withTeamMember, User loginUser) {
+        return getGlobalTeams(false, globalAuthTeams, withTeamMember, loginUser);
     }
 
     private GlobalTeam getGlobalTeam(GlobalAuthTeam globalAuthTeam, boolean withTeamMember, Map<String, User> userMap) {

@@ -14,7 +14,7 @@ public interface TeamService {
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser, boolean withTeamMember);
 
-    List<GlobalTeam> getTeamsFromSession(boolean withTeamMember);
+    List<GlobalTeam> getTeamsFromSession(boolean withTeamMember, boolean appendGlobalTeam);
 
     List<GlobalTeam> getTeamsByUserName(String username, User loginUser);
 
