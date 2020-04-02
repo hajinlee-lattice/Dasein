@@ -235,12 +235,9 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         return query.list();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, long start, int offset,
-            int max) {
+    public List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, long start, int offset, int max) {
         Session session = getSessionFactory().getCurrentSession();
-
         Class<Recommendation> entityClz = getEntityClass();
         String queryStr = "SELECT new map " //
                 + "( " //
@@ -265,14 +262,15 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + ", modelSummaryId AS " + PlaymakerConstants.ModelSummaryId //
                 + " ) " //
                 + "FROM %s " //
-                + "where launchId IN (:launchIds) " //
-                + "ORDER BY pid ";
-
+                + "WHERE deleted = :deleted " //
+                + "AND launchId IN (:launchIds) " //
+                + "ORDER BY lastUpdatedTimestamp ";
         queryStr = String.format(queryStr, entityClz.getSimpleName());
         @SuppressWarnings("rawtypes")
         Query query = session.createQuery(queryStr);
         query.setMaxResults(max);
         query.setFirstResult(offset);
+        query.setParameter("deleted", Boolean.FALSE);
         query.setParameterList("launchIds", launchIds);
         return query.list();
     }
