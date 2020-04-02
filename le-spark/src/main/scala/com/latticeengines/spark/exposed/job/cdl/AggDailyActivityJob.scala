@@ -4,6 +4,7 @@ import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Cal
 import com.latticeengines.domain.exposed.cdl.activity.{DimensionCalculator, DimensionCalculatorRegexMode, DimensionGenerator}
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{__Row_Count__, __StreamDate, __StreamDateId}
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig
+import com.latticeengines.domain.exposed.util.ActivityStoreUtils
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
@@ -124,8 +125,7 @@ object DimensionValueHelper extends Serializable {
      * NOTE use negative lookbehind to exclude replacing existing .*
      */
     val metadataWithPtn = dimValues
-      .map(valueMap => (valueMap(ptnAttr).asInstanceOf[String]
-        .replaceAll("(?<!\\.)\\*", ".*").r.pattern, valueMap))
+      .map(valueMap => (ActivityStoreUtils.modifyPattern(valueMap(ptnAttr).asInstanceOf[String]).r.pattern, valueMap))
 
     // can match multiple patterns
     df.flatMap(row => {
