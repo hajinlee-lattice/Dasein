@@ -1,5 +1,5 @@
 {
-  "systemObject": "Eloqua",
+  "systemObject": "Marketing Activity",
   "fieldDefinitionsRecordsMap": {
     "General": [
       {
@@ -52,21 +52,6 @@
         "fundamentalType": "ALPHA"
       },
       {
-        "fieldName": "ActivityTypeId",
-        "fieldType": "TEXT",
-        "columnName": "activityTypeId",
-        "screenName": "activityTypeId",
-        "matchingColumnNames": [
-          "ActivityTypeId",
-          "activityTypeId"
-        ],
-        "required": false,
-        "approvedUsage": [
-          "None"
-        ],
-        "fundamentalType": "ALPHA"
-      },
-      {
         "fieldName": "ContactCookieId",
         "fieldType": "TEXT",
         "columnName": "VisitorExternalId",
@@ -82,7 +67,22 @@
         "fundamentalType": "ALPHA"
       }
     ],
-    "Custom Fields": [],
+    "Custom Fields": [
+      {
+        "fieldType": "TEXT",
+        "columnName": "activityTypeId",
+        "screenName": "activityTypeId",
+        "matchingColumnNames": [
+          "ActivityTypeId",
+          "activityTypeId"
+        ],
+        "required": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ],
     "Match to Contacts - ID": [
       {
         "fieldType": "TEXT",

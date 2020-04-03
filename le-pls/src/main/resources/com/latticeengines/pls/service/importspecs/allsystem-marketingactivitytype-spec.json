@@ -1,0 +1,39 @@
+{
+  "systemObject": "Marketing ActivityType",
+  "fieldDefinitionsRecordsMap": {
+    "General": [
+      {
+        "fieldName": "ActivityType",
+        "fieldType": "TEXT",
+        "columnName": "ActivityType",
+        "screenName": "ActivityType",
+        "matchingColumnNames": [
+          "ActivityType",
+          "Activity Type",
+          "ACTIVITY TYPE"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
+        "fieldName": "Name",
+        "fieldType": "TEXT",
+        "columnName": "Name",
+        "screenName": "Name",
+        "matchingColumnNames": [
+          "Name",
+          "name"
+        ],
+        "required": true,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      }
+    ],
+    "Custom Fields": []
+  }
+}

@@ -91,7 +91,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private static final String MATCH_TO_ACCOUNT_ID_SECTION = "Match to Accounts - ID";
     private static final String MATCH_TO_CONTACT_ID_SECTION = "Match to Contacts - ID";
     private static final String ACCOUNT_FIELD_NAME = "AccountId";
-    private static final List<String> CONTACT_FIELD_NAME = Arrays.asList("ContactId", "LeadId");
+    private static final List<String> CONTACT_FIELD_NAME = Arrays.asList("ContactId", "leadId");
     private static final String DEFAULTSYSTEM = "DefaultSystem";
     private static final String STREAM_NAME_FORMAT = "%s_%s";
 
@@ -356,12 +356,14 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     @Override
     public boolean validationMarketing(String customerSpace, String systemName,
                                        String systemType, EntityType entityType) {
-        if (!EntityType.Marketing.equals(entityType) && !EntityType.MarketingActivityType.equals(entityType)) {
-            log.warn("entityType isn't match Marketing/MarketingActivityType, entityType is {}.", entityType);
+        if (!EntityType.MarketingActivity.equals(entityType) && !EntityType.MarketingActivityType.equals(entityType)) {
+            log.warn("entityType isn't match Marketing/MarketingActivityType, customerSpace is {}, systemName is {}, " +
+                            "systemType is {}, entityType is {}.", customerSpace, systemName, systemType, entityType);
             return false;
         }
-        if (!S3ImportSystem.SystemType.Eloqua.name().equalsIgnoreCase(systemType) && !S3ImportSystem.SystemType.Marketo.name().equalsIgnoreCase(systemName)) {
-            log.warn("systemType isn't match eloqua/marketo, systemType is {}.", systemType);
+        if (!S3ImportSystem.SystemType.Eloqua.name().equalsIgnoreCase(systemType) && !S3ImportSystem.SystemType.Marketo.name().equalsIgnoreCase(systemType)) {
+            log.warn("systemType isn't match eloqua/marketo, customerSpace is {}, systemName is {}, systemType is {}," +
+                    " entityType is {}.", customerSpace, systemName, systemType, entityType);
             return false;
         }
         S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
@@ -412,31 +414,31 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     public boolean createDefaultMarketingTemplate(String customerSpace, String systemName, String systemType) {
         log.info("setup marketing data for tenant {}, systemName {}, use {} systemType spec ", customerSpace, systemName, systemType);
         DataFeedTask marketingDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
-                EntityType.Marketing, null);
+                EntityType.MarketingActivity, null);
         log.info("marketing dataFeedTask unique id is {}.", marketingDataFeedTask.getUniqueId());
         DataFeedTask marketingTypeDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
                 EntityType.MarketingActivityType, null);
         log.info("MarketingType dataFeedTask UniqueId is {}.", marketingTypeDataFeedTask.getUniqueId());
-        String marketingAtlasStreamName = String.format(STREAM_NAME_FORMAT, systemName, EntityType.Marketing);
+        String marketingAtlasStreamName = String.format(STREAM_NAME_FORMAT, systemName, EntityType.MarketingActivity);
         createMarketingMetadata(customerSpace, marketingAtlasStreamName, marketingDataFeedTask, marketingTypeDataFeedTask);
         return true;
     }
 
     @Override
     public boolean createMarketingTemplate(String customerSpace, String systemName, String systemType, EntityType entityType, SimpleTemplateMetadata simpleTemplateMetadata) {
-        if (!EntityType.Marketing.equals(entityType)) {
+        if (!EntityType.MarketingActivity.equals(entityType)) {
             throw new IllegalArgumentException(String.format("createMarketingTemplate cannot support entityType %s" +
                     ".", entityType));
         }
         log.info("setup marketing data for tenant {}, systemName {}, use {} systemType spec, SimpleTemplateMetadata " +
                         "{}.", customerSpace, systemName, systemType, JsonUtils.serialize(simpleTemplateMetadata));
         DataFeedTask marketingDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
-                EntityType.Marketing, simpleTemplateMetadata);
+                EntityType.MarketingActivity, simpleTemplateMetadata);
         log.info("marketing dataFeedTask unique id is {}.", marketingDataFeedTask.getUniqueId());
         DataFeedTask marketingTypeDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
                 EntityType.MarketingActivityType, null);
         log.info("MarketingType dataFeedTask UniqueId is {}.", marketingTypeDataFeedTask.getUniqueId());
-        String marketingAtlasStreamName = String.format(STREAM_NAME_FORMAT, systemName, EntityType.Marketing);
+        String marketingAtlasStreamName = String.format(STREAM_NAME_FORMAT, systemName, EntityType.MarketingActivity);
         createMarketingMetadata(customerSpace, marketingAtlasStreamName, marketingDataFeedTask, marketingTypeDataFeedTask);
         return true;
     }
@@ -480,11 +482,15 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
             throw new IllegalStateException(String.format("S3ImportSystem cannot be null, systemName is %s," +
                     " tenant %s.", systemName, customerSpace));
         }
-        createDropFolder(customerSpace, systemName, EntityType.Marketing);
+        createDropFolder(customerSpace, systemName, EntityType.MarketingActivity);
         createDropFolder(customerSpace, systemName, EntityType.MarketingActivityType);
         ImportWorkflowSpec spec;
         try {
-            spec = importWorkflowSpecService.loadSpecFromS3(systemType, entityType.getDisplayName());
+            String filesystemType = systemType;
+            if (EntityType.MarketingActivityType.equals(entityType)) {
+                filesystemType = "allsystem";
+            }
+            spec = importWorkflowSpecService.loadSpecFromS3(filesystemType, entityType.getDisplayName());
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Could not create template for tenant %s, system type %s, and system object %s " +
@@ -492,7 +498,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                             entityType.getDisplayName()), e);
         }
         log.info("entityType is {}", entityType);
-        if (EntityType.Marketing.equals(entityType)) {
+        if (EntityType.MarketingActivity.equals(entityType)) {
             processMatchContactId(importSystem, spec);
         }
         Table standardTable = importWorkflowSpecService.tableFromRecord(null, true, spec);

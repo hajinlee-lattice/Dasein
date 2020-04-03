@@ -978,6 +978,7 @@ public class CDLServiceImpl implements CDLService {
             case WebVisit:
                 streamName = entityType.name();
                 break;
+            case MarketingActivity:
             case Opportunity:
                 streamName = systemName + "_" + entityType.name();
                 break;

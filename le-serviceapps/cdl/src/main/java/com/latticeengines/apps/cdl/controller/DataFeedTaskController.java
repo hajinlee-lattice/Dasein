@@ -305,7 +305,7 @@ public class DataFeedTaskController {
             return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
         }
         if (!dataFeedTaskTemplateService.validationMarketing(customerSpace, systemName, systemType,
-                EntityType.Marketing)) {
+                EntityType.MarketingActivity)) {
             return ResponseDocument.failedResponse(new IllegalStateException("Marketing by ActivityType cannot be " +
                     "created as the corresponding system Contact object does not have a Unique ID"));
         }

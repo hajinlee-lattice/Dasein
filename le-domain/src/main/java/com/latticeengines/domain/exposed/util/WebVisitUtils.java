@@ -3,10 +3,8 @@ package com.latticeengines.domain.exposed.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
@@ -17,7 +15,6 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityTimeRange;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
@@ -184,7 +181,7 @@ public final class WebVisitUtils {
         filterOptions.setLabel("Timeframe");
         List<FilterOptions.Option> options = new ArrayList<>();
         options.add(FilterOptions.Option.anyAttrOption());
-        options.addAll(ActivityMetricsGroupUtils.toTimeFilters(defaultTimeRange()) //
+        options.addAll(ActivityMetricsGroupUtils.toTimeFilters(ActivityStoreUtils.defaultTimeRange()) //
                 .stream() //
                 .map(timeFilter -> {
                     FilterOptions.Option option = new FilterOptions.Option();
@@ -218,23 +215,6 @@ public final class WebVisitUtils {
      */
     public static String defaultTimeFilterDisplayName() {
         return filterOptionDisplayName(UI_DEFAULT_TIME_FILTER);
-    }
-
-    /*-
-     * default time range for webvisit metrics group
-     * - last 2, 4, 8, 12 weeks
-     */
-    public static ActivityTimeRange defaultTimeRange() {
-        Set<List<Integer>> paramSet = new HashSet<>();
-        paramSet.add(Collections.singletonList(2));
-        paramSet.add(Collections.singletonList(4));
-        paramSet.add(Collections.singletonList(8));
-        paramSet.add(Collections.singletonList(12));
-        ActivityTimeRange timeRange = new ActivityTimeRange();
-        timeRange.setOperator(ComparisonType.WITHIN);
-        timeRange.setPeriods(Collections.singleton(PeriodStrategy.Template.Week.name()));
-        timeRange.setParamSet(paramSet);
-        return timeRange;
     }
 
     public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group, @NotNull String timeRange, @NotNull Map<String, Object> params) {

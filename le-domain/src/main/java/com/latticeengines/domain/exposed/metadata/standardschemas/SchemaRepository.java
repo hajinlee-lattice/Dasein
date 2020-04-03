@@ -1598,9 +1598,9 @@ public class SchemaRepository {
             schemaTable = createTable(SchemaInterpretation.OpportunityStageName);
             schemaTable.setAttributes(attrs);
             break;
-        case Marketing:
+        case MarketingActivity:
             attrs = new ArrayList<>(Arrays.asList(attrActivityType(), attrActivityDate()));
-            schemaTable = createTable(SchemaInterpretation.Marketing);
+            schemaTable = createTable(SchemaInterpretation.MarketingActivity);
             schemaTable.setAttributes(attrs);
             break;
         case MarketingActivityType:

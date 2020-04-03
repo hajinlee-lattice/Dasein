@@ -34,6 +34,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.zookeeper.ZooDefs;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -132,6 +133,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.util.ActivityMetricsTestUtils;
+import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.domain.exposed.workflow.FailingStep;
 import com.latticeengines.domain.exposed.workflow.Job;
@@ -143,6 +145,7 @@ import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
@@ -435,6 +438,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     @Inject
     private ActivityMetricsProxy activityMetricsProxy;
+
+    @Inject
+    private DropBoxProxy dropBoxProxy;
 
     @Inject
     private BatonService batonService;
@@ -818,6 +824,18 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return applicationId;
     }
 
+    void importOnlyDataFromS3(BusinessEntity entity, String s3FileName, DataFeedTask task) {
+        Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName), s3FileName);
+        log.info("Streaming S3 file " + s3FileName + " as a import file for " + entity);
+        String outputFileName = String.format("file_%d.csv", DateTime.now().getMillis());
+        SourceFile dataFile = fileUploadProxy.uploadFile(outputFileName, false, s3FileName, entity.name(),
+                csvResource, false);
+        ApplicationId applicationId =  submitS3ImportOnlyData(mainTestTenant.getId(), task, dataFile, INITIATOR);
+        JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+        log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
+    }
+
     void importData(BusinessEntity entity, List<String> s3FileName, String feedType, boolean compressed,
             boolean outsizeFlag) {
         List<ApplicationId> applicationIds = new ArrayList<>();
@@ -1018,6 +1036,18 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
+    private ApplicationId submitS3ImportOnlyData(String customerSpace, DataFeedTask dataFeedTask, SourceFile dataFile,
+                                          String email) {
+        log.info(String.format("The email of the s3 file upload initiator is %s", email));
+        if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
+            throw new IllegalArgumentException(
+                    String.format("Cannot find DataFeedTask %s or template is null!", dataFeedTask.getUniqueId()));
+        }
+        CSVImportConfig metaData = generateDataOnlyImportConfig(customerSpace,
+                dataFeedTask.getImportTemplate().getName(), dataFile, email);
+        return cdlProxy.submitImportJob(customerSpace, dataFeedTask.getUniqueId(), true, metaData);
+    }
+
     private ApplicationId submitImport(String customerSpace, String entity, String feedType,
             SourceFile templateSourceFile, SourceFile dataSourceFile, String email, String subType) {
         String source = SourceType.FILE.getName();
@@ -1047,6 +1077,27 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         CSVImportConfig csvImportConfig = new CSVImportConfig();
         csvImportConfig.setCsvToHdfsConfiguration(importConfig);
         csvImportConfig.setCSVImportFileInfo(importFileInfo);
+        return csvImportConfig;
+    }
+
+    private CSVImportConfig generateDataOnlyImportConfig(String customerSpace, String templateTableName,
+                                                 SourceFile dataSourceFile, String email) {
+        CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
+        if (StringUtils.isEmpty(templateTableName)) {
+            throw new RuntimeException("Template table name cannot be empty!");
+        }
+        importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        importConfig.setTemplateName(templateTableName);
+        importConfig.setFilePath(dataSourceFile.getPath());
+        importConfig.setFileSource("HDFS");
+        CSVImportFileInfo importFileInfo = new CSVImportFileInfo();
+        importFileInfo.setFileUploadInitiator(email);
+        importFileInfo.setReportFileDisplayName(dataSourceFile.getDisplayName());
+        importFileInfo.setReportFileName(dataSourceFile.getName());
+        CSVImportConfig csvImportConfig = new CSVImportConfig();
+        csvImportConfig.setCsvToHdfsConfiguration(importConfig);
+        csvImportConfig.setCSVImportFileInfo(importFileInfo);
+
         return csvImportConfig;
     }
 
@@ -1896,6 +1947,19 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         } catch (IOException e) {
             throw new RuntimeException("Failed to wipe out hdfs dir.", e);
         }
+    }
+
+    protected boolean createS3Folder(String systemName, List<EntityType> entityTypes) {
+        List<String> allSubFolders = dropBoxProxy.getAllSubFolders(mainTestTenant.getId(), systemName, null, null);
+        for (EntityType entityType : entityTypes) {
+            String folderName = S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName());
+            if (!allSubFolders.contains(folderName)) {
+                dropBoxProxy.createTemplateFolder(mainTestTenant.getId(), systemName, entityType.getDefaultFeedTypeName(),
+                        null);
+                log.info("create folder {} success.", folderName);
+            }
+        }
+        return true;
     }
 
 }

@@ -1,5 +1,5 @@
 {
-    "systemObject": "Marketing",
+    "systemObject": "Marketing Activity",
     "fieldDefinitionsRecordsMap": {
       "General": [
         {
@@ -70,7 +70,6 @@
       ],
       "Custom Fields": [
         {
-          "fieldName": "ActivityTypeId",
           "fieldType": "TEXT",
           "columnName": "activityTypeId",
           "screenName": "activityTypeId",

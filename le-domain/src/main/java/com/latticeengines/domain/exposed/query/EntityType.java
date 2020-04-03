@@ -25,15 +25,16 @@ public enum EntityType {
     Opportunity(BusinessEntity.ActivityStream, null, "Opportunity", "OpportunityData", SchemaInterpretation.Opportunity),
     OpportunityStageName(BusinessEntity.Catalog, SubType.StageName, "Opportunity Stage", "OpportunityStageName",
             SchemaInterpretation.OpportunityStageName),
-    Marketing(BusinessEntity.ActivityStream, null, "Marketing", "MarketingData", SchemaInterpretation.Marketing),
-    MarketingActivityType(BusinessEntity.Catalog, null, "Marketing Type", "MarketingActivityType",
+    MarketingActivity(BusinessEntity.ActivityStream, null, "Marketing Activity", "MarketingActivityData",
+            SchemaInterpretation.MarketingActivity),
+    MarketingActivityType(BusinessEntity.Catalog, null, "Marketing ActivityType", "MarketingActivityType",
             SchemaInterpretation.MarketingActivityType);
 
     private static final Set<EntityType> STANDARD_ENTITY_TYPES =
             ImmutableSet.of(Accounts, Contacts, Leads, ProductPurchases, ProductBundles, ProductHierarchy);
     private static final Set<EntityType> STREAM_ENTITY_TYPES =
             ImmutableSet.of(WebVisit, WebVisitPathPattern, WebVisitSourceMedium, Opportunity, OpportunityStageName,
-                    Marketing, MarketingActivityType);
+                    MarketingActivity, MarketingActivityType);
 
 
     private BusinessEntity entity;

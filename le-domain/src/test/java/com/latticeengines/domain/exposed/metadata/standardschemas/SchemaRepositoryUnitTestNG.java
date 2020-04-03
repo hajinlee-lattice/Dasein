@@ -120,7 +120,7 @@ public class SchemaRepositoryUnitTestNG {
     private static final List<InterfaceName> OPPORTUNITY = Arrays.asList(LastModifiedDate, OpportunityId, StageName);
     private static final List<InterfaceName> OPPORTUNITY_STAGE = Collections.singletonList(StageName);
 
-    private static final List<InterfaceName> MARKETING = Arrays.asList(ActivityDate, ActivityType);
+    private static final List<InterfaceName> MARKETING_ACTIVITY = Arrays.asList(ActivityDate, ActivityType);
     private static final List<InterfaceName> MARKETING_ACTIVITY_TYPE = Arrays.asList(Name, ActivityType);
     /**
      * Currently only covers testing Account & Contact schema with
@@ -222,7 +222,7 @@ public class SchemaRepositoryUnitTestNG {
                 { S3ImportSystem.SystemType.Other, EntityType.WebVisitSourceMedium, true, WEBVISIT_SOURCE_MEDIUM }, //
                 { S3ImportSystem.SystemType.Other, EntityType.Opportunity, true, OPPORTUNITY }, //
                 { S3ImportSystem.SystemType.Other, EntityType.OpportunityStageName, true, OPPORTUNITY_STAGE }, //
-                { S3ImportSystem.SystemType.Other, EntityType.Marketing, true, MARKETING}, //
+                { S3ImportSystem.SystemType.Other, EntityType.MarketingActivity, true, MARKETING_ACTIVITY}, //
                 { S3ImportSystem.SystemType.Other, EntityType.MarketingActivityType, true, MARKETING_ACTIVITY_TYPE}, //
         };
     }

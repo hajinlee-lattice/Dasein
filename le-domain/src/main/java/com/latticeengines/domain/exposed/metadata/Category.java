@@ -54,7 +54,9 @@ public enum Category {
         }
     }, //
     OPPORTUNITY_PROFILE("My Opportunities", 17),
-    MARKETING_PROFILE("My Marketing", 18); //
+    ACCOUNT_MARKETING_ACTIVITY_PROFILE("My Account Marketing Activity", 18), //
+    CONTACT_MARKETING_ACTIVITY_PROFILE("My Contact Marketing Activity", 19); //
+
 
 
     public static final String SUB_CAT_OTHER = "Other";

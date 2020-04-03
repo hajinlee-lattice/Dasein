@@ -23,7 +23,7 @@ public enum SchemaInterpretation {
     ContactEntityMatch,
     WebVisit, WebVisitPathPattern, WebVisitSourceMedium,
     Opportunity, OpportunityStageName,
-    Marketing, MarketingActivityType;
+    MarketingActivity, MarketingActivityType;
 
     public static SchemaInterpretation getByName(String interpretationName) {
         for (SchemaInterpretation interpretation : values()) {

@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputat
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.WebVisitUtils;
+import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 
 @Service("activityMetricsGroupService")
 public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupService {
@@ -98,9 +98,9 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         Tenant tenant = MultiTenantContext.getTenant();
         AtlasStream stream = atlasStreamEntityMgr.findByNameAndTenant(streamName, tenant);
         ActivityMetricsGroup accountActivityType = setupDefaultMarketingTypeGroup(tenant, stream,
-                BusinessEntity.Account, MARKETING_TYPE_ACCOUNT_GROUPNAME);
+                BusinessEntity.Account, MARKETING_TYPE_ACCOUNT_GROUPNAME, Category.ACCOUNT_MARKETING_ACTIVITY_PROFILE);
         ActivityMetricsGroup contactActivityType = setupDefaultMarketingTypeGroup(tenant, stream,
-                BusinessEntity.Contact, MARKETING_TYPE_CONTACT_GROUPNAME);
+                BusinessEntity.Contact, MARKETING_TYPE_CONTACT_GROUPNAME, Category.CONTACT_MARKETING_ACTIVITY_PROFILE);
         activityMetricsGroupEntityMgr.create(accountActivityType);
         activityMetricsGroupEntityMgr.create(contactActivityType);
         return Arrays.asList(accountActivityType, contactActivityType);
@@ -114,7 +114,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         totalVisit.setGroupName(TOTAL_VISIT_GROUPNAME);
         totalVisit.setJavaClass(Long.class.getSimpleName());
         totalVisit.setEntity(BusinessEntity.Account);
-        totalVisit.setActivityTimeRange(WebVisitUtils.defaultTimeRange());
+        totalVisit.setActivityTimeRange(ActivityStoreUtils.defaultTimeRange());
         totalVisit.setRollupDimensions(DIM_NAME_PATH_PATTERN);
         totalVisit.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
@@ -135,7 +135,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         sourceMedium.setGroupName(SOURCE_MEDIUM_GROUPNAME);
         sourceMedium.setJavaClass(Long.class.getSimpleName());
         sourceMedium.setEntity(BusinessEntity.Account);
-        sourceMedium.setActivityTimeRange(WebVisitUtils.defaultTimeRange());
+        sourceMedium.setActivityTimeRange(ActivityStoreUtils.defaultTimeRange());
         sourceMedium.setRollupDimensions(String.join(",", Arrays.asList(DIM_NAME_SOURCEMEDIUM, DIM_NAME_PATH_PATTERN)));
         sourceMedium.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
@@ -171,7 +171,8 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
     }
 
     private ActivityMetricsGroup setupDefaultMarketingTypeGroup(Tenant tenant, AtlasStream atlasStream,
-                                                                BusinessEntity entity, String groupName) {
+                                                                BusinessEntity entity, String groupName,
+                                                                Category category) {
         ActivityMetricsGroup marketingType = new ActivityMetricsGroup();
         marketingType.setTenant(tenant);
         marketingType.setStream(atlasStream);
@@ -179,11 +180,11 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
         marketingType.setGroupName(groupName);
         marketingType.setJavaClass(Long.class.getSimpleName());
         marketingType.setEntity(entity);
-        marketingType.setActivityTimeRange(WebVisitUtils.defaultTimeRange());
+        marketingType.setActivityTimeRange(ActivityStoreUtils.defaultTimeRange());
         marketingType.setRollupDimensions(DIM_NAME_ACTIVITYTYPE);
         marketingType.setAggregation(createAttributeDeriver(Collections.singletonList(InterfaceName.__Row_Count__.name()),
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
-        marketingType.setCategory(Category.MARKETING_PROFILE);
+        marketingType.setCategory(category);
         marketingType.setSubCategoryTmpl(getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_SUBCATEGORY));
         marketingType.setDisplayNameTmpl(getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_DISPLAYNAME));
         marketingType.setDescriptionTmpl(getTemplate(StringTemplateConstants.MARKETING_METRICS_GROUP_ACTIVITYTYPE_DESCRIPTION));
