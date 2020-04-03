@@ -264,7 +264,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + "FROM %s " //
                 + "WHERE deleted = :deleted " //
                 + "AND launchId IN (:launchIds) " //
-                + "ORDER BY lastUpdatedTimestamp ";
+                + "ORDER BY lastUpdatedTimestamp, pid ";
         queryStr = String.format(queryStr, entityClz.getSimpleName());
         @SuppressWarnings("rawtypes")
         Query query = session.createQuery(queryStr);
