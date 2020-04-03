@@ -86,6 +86,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 @Component("adminTenantService")
 public class TenantServiceImpl implements TenantService {
@@ -622,7 +623,7 @@ public class TenantServiceImpl implements TenantService {
         FeatureFlagDefinitionMap definitionMap = featureFlagService.getDefinitions();
         FeatureFlagValueMap defaultValueMap = new FeatureFlagValueMap();
         definitionMap.forEach((flagId, flagDef) -> {
-            if(flagDef.getAvailableProducts() != null) {
+            if (flagDef.getAvailableProducts() != null) {
                 for(LatticeProduct product : flagDef.getAvailableProducts()) {
                     if (productList.contains(product)) {
                         boolean defaultVal = flagDef.getDefaultValue();
@@ -651,18 +652,34 @@ public class TenantServiceImpl implements TenantService {
 
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
 
+        // generate email list to be added and IDaaS user list
+        List<String> vboEmails = new ArrayList<>();
+        List<IDaaSUser> users = new ArrayList<>();
+        for(VboRequest.User user : vboRequest.getProduct().getUsers()) {
+            vboEmails.add(user.getEmailAddress());
+            users.add(constructIDaaSUser(user, vboRequest.getSubscriber().getLanguage()));
+        }
+
         for (String component : services) {
             SerializableDocumentDirectory componentConfig = serviceService.getDefaultServiceConfig(component);
-            if(component.equalsIgnoreCase(PLSComponent.componentName)){
+            if(component.equalsIgnoreCase(PLSComponent.componentName)) {
                 for (SerializableDocumentDirectory.Node node : componentConfig.getNodes()) {
                     if (node.getNode().contains("ExternalAdminEmails")) {
                         List<String> mailList = JsonUtils.convertList(JsonUtils.deserialize(node.getData(), List.class), String.class);
-                        for(VboRequest.User user : vboRequest.getProduct().getUsers()) {
-                            mailList.add(user.getEmailAddress());
-                        }
+                        mailList.addAll(vboEmails);
                         node.setData(JsonUtils.serialize(mailList));
                     }
                 }
+                // add users node
+                if (CollectionUtils.isNotEmpty(users)) {
+                    SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
+                    node.setNode("IDaaSUsers");
+                    node.setData(JsonUtils.serialize(users));
+                    componentConfig.getNodes().add(node);
+                }
+                // set null as document dir and serializable document dir are not consistent, document directory will
+                // be newly constructed from serializable document dir when needed
+                componentConfig.setDocumentDirectory(null);
             }
             componentConfig.setRootPath("/" + component);
             configDirs.add(componentConfig);
@@ -676,6 +693,17 @@ public class TenantServiceImpl implements TenantService {
         registration.setConfigDirectories(configDirs);
 
         return createTenant(tenantName.trim(), tenantName.trim(), registration, userName);
+    }
+
+    private IDaaSUser constructIDaaSUser(VboRequest.User user, String language) {
+        IDaaSUser iDaasuser = new IDaaSUser();
+        iDaasuser.setFirstName(user.getName().getFirstName());
+        iDaasuser.setEmailAddress(user.getEmailAddress());
+        iDaasuser.setLastName(user.getName().getLastName());
+        iDaasuser.setUserName(user.getUserId());
+        iDaasuser.setPhoneNumber(user.getTelephoneNumber());
+        iDaasuser.setLanguage(language);
+        return iDaasuser;
     }
 
     private boolean danteIsEnabled(TenantDocument tenant) {

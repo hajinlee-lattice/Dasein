@@ -2,6 +2,7 @@ package com.latticeengines.apps.lp.provision.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
+import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -42,6 +44,9 @@ import com.latticeengines.domain.exposed.util.ValidateEnrichAttributesUtils;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSServiceImpl;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 @Component("lpComponentManager")
 public class PLSComponentManagerImpl implements PLSComponentManager {
@@ -60,6 +65,9 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     @Override
     public void provisionTenant(CustomerSpace space, InstallDocument installDocument) {
@@ -286,6 +294,18 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
         log.info("maxPremiumEnrichAttributesStr is " + maxPremiumEnrichAttributesStr);
         ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumEnrichAttributesStr);
+
+        String usersInJson ;
+        try {
+            usersInJson = configDir.get("/IDaaSUsers").getDocument().getData();
+        } catch (Exception e) {
+            usersInJson = "[]";
+        }
+        log.info("IDaaS users are: " + usersInJson);
+        List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
+                IDaaSUser.class);
+        OperateIDaaSUsers(iDaaSUsers);
+
         String emailListInJson;
         try {
             emailListInJson = configDir.get("/SuperAdminEmails").getDocument().getData();
@@ -355,4 +375,24 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             tenantService.discardTenant(tenant);
         }
     }
+
+    private void OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers) {
+        for (IDaaSUser user : iDaaSUsers) {
+            if (iDaaSService.getIDaaSUser(user.getEmailAddress()) == null) {
+                iDaaSService.createIDaaSUser(user);
+            }
+            // add product access and default role to user
+            iDaaSService.addProductAccessToUser(constructProductRequest(user.getEmailAddress()));
+        }
+
+    }
+
+    private ProductRequest constructProductRequest(String email) {
+        ProductRequest request = new ProductRequest();
+        request.setEmailAddress(email);
+        request.setRequestor(IDaaSServiceImpl.DCP_PRODUCT);
+        request.setProducts(Collections.singletonList(IDaaSServiceImpl.DCP_PRODUCT));
+        return request;
+    }
+
 }

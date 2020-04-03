@@ -120,6 +120,8 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getStatus(), "success");
 
+        waitForTenantInstallation(fullTenantId, fullTenantId);
+
         try {
             deleteTenant(fullTenantId, fullTenantId);
         } catch (Exception ignore) {
