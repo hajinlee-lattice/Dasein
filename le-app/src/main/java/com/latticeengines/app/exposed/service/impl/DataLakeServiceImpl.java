@@ -62,7 +62,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -240,68 +239,32 @@ public class DataLakeServiceImpl implements DataLakeService {
     public DataPage getAccountById(String accountId, ColumnSelection.Predefined predefined,
             Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        String internalAccountId = getInternalAccountId(accountId, orgInfo);
 
-        if (!StringUtils.isNotEmpty(accountId)) {
-            throw new LedpException(LedpCode.LEDP_39001, new String[] { accountId, customerSpace });
-        }
-
-        String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
-
-        // if has the AccountLookup table, which is the latest implementation,
-        // can skip both special cache and redshift,
-        // go straight to match api
         DataPage dataPage;
-        String internalAccountId;
-        if (Boolean.TRUE.equals(hasAccountLookupCache.get(customerSpace))) {
-            internalAccountId = matchProxy.lookupInternalAccountId(customerSpace, lookupIdColumn, accountId, null);
-        } else {
-            log.warn("Tenant " + customerSpace + " does not have AccountLookup table.");
-
-            internalAccountId = getInternalIdViaAccountCache(customerSpace, lookupIdColumn, accountId);
-
-            if (StringUtils.isBlank(internalAccountId)) {
-                List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
-                        Collections.singletonList(accountId), lookupIdColumn);
-                internalAccountId = CollectionUtils.isNotEmpty(internalAccountIds) ? internalAccountIds.get(0) : null;
+        if (StringUtils.isNotBlank(internalAccountId)) {
+            dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountId, predefined);
+            if (dataPage != null && dataPage.getData() != null && dataPage.getData().size() == 1) {
+                if (!dataPage.getData().get(0).containsKey(InterfaceName.AccountId.name())) {
+                    dataPage.getData().get(0).put(InterfaceName.AccountId.name(), internalAccountId);
+                }
             }
+        } else {
+            dataPage = createEmptyDataPage();
         }
 
+        return dataPage;
+    }
+
+    @Override
+    public DataPage getAccountById(String accountId, List<String> lookupAttributes, Map<String, String> orgInfo) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        String internalAccountId = getInternalAccountId(accountId, orgInfo);
+
+        DataPage dataPage;
         if (StringUtils.isNotBlank(internalAccountId)) {
-            dataPage = getAccountByIdViaMatchApi(customerSpace, Collections.singletonList(internalAccountId),
-                    predefined);
-
-            // TODO: attempt to remove the redshift fall back in M34
-
-            // if (dataPage == null || CollectionUtils.isEmpty(dataPage.getData())) {
-            // // if we didn't get any data from matchapi then it may be
-            // // because data is not published to dynamoDB for this tenant. So
-            // // for fallback mechanism we'll use original logic to get data
-            // // from redshift
-            //
-            // log.info("Falling back to old logic for extracting account data from Redshift
-            // for AccountId: "
-            // + internalAccountId + " of Tenant: " + customerSpace);
-            //
-            // List<String> attributes = getAttributesInPredefinedGroup(predefined).stream()
-            // //
-            // .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
-            // try {
-            // FrontEndQuery query =
-            // AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-            // Collections.singletonList(accountId), lookupIdColumn, attributes, null, true,
-            // batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
-            // dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
-            // } catch (Exception ex) {
-            // log.info("Ignoring error due to missing lookup id column. Trying without
-            // lookup id this time.", ex);
-            // FrontEndQuery query =
-            // AccountExtensionUtil.constructFrontEndQuery(customerSpace,
-            // Collections.singletonList(accountId), lookupIdColumn, attributes, null,
-            // false,
-            // batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));
-            // dataPage = entityProxy.getDataFromObjectApi(customerSpace, query);
-            // }
-            // }
+            dataPage = getAccountByIdViaMatchApi(customerSpace, internalAccountId,
+                    lookupAttributes.stream().map(Column::new).collect(Collectors.toList()));
 
             if (dataPage != null && dataPage.getData() != null && dataPage.getData().size() == 1) {
                 if (!dataPage.getData().get(0).containsKey(InterfaceName.AccountId.name())) {
@@ -356,6 +319,38 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
 
         return page;
+    }
+
+    private String getInternalAccountId(String accountId, Map<String, String> orgInfo) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        if (!StringUtils.isNotEmpty(accountId)) {
+            throw new LedpException(LedpCode.LEDP_39001, new String[] { accountId, customerSpace });
+        }
+
+        String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
+
+        // If AccountLookup table is populated for this tenant,
+        // skip both special cache and redshift, go straight to match api
+        // special cach lookup should be removed soon
+        String internalAccountId;
+        if (Boolean.TRUE.equals(hasAccountLookupCache.get(customerSpace))) {
+            internalAccountId = matchProxy.lookupInternalAccountId(customerSpace, lookupIdColumn, accountId, null);
+        } else {
+            log.warn("Tenant " + customerSpace + " does not have AccountLookup table, trying special lookupcache");
+
+            internalAccountId = getInternalIdViaAccountCache(customerSpace, lookupIdColumn, accountId);
+
+            if (StringUtils.isBlank(internalAccountId)) {
+                log.warn(String.format(
+                        "Failed to find LookupId:%s AccountId:%s for customerspace: %s in special cache. attempting redshift lookup.",
+                        lookupIdColumn, accountId, customerSpace));
+                List<String> internalAccountIds = getInternalAccountsIdViaObjectApi(customerSpace,
+                        Collections.singletonList(accountId), lookupIdColumn);
+                internalAccountId = CollectionUtils.isNotEmpty(internalAccountIds) ? internalAccountIds.get(0) : null;
+            }
+        }
+        return internalAccountId;
+
     }
 
     @Override
@@ -446,17 +441,17 @@ public class DataLakeServiceImpl implements DataLakeService {
         return AccountExtensionUtil.extractAccountIds(entityData);
     }
 
-    private DataPage getAccountByIdViaMatchApi(String customerSpace, List<String> internalAccountIds,
+    private DataPage getAccountByIdViaMatchApi(String customerSpace, String internalAccountId,
             ColumnSelection.Predefined predefined) {
 
         String dataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
         MatchInput matchInput;
         if (batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
-            matchInput = AccountExtensionUtil.constructEntityMatchInput(customerSpace, internalAccountIds, predefined,
-                    dataCloudVersion);
+            matchInput = AccountExtensionUtil.constructEntityMatchInput(customerSpace,
+                    Collections.singletonList(internalAccountId), predefined, dataCloudVersion);
         } else {
-            matchInput = AccountExtensionUtil.constructMatchInput(customerSpace, internalAccountIds, predefined,
-                    dataCloudVersion);
+            matchInput = AccountExtensionUtil.constructMatchInput(customerSpace,
+                    Collections.singletonList(internalAccountId), predefined, dataCloudVersion);
         }
         MatchOutput matchOutput = matchProxy.matchRealTime(matchInput);
 
@@ -569,23 +564,6 @@ public class DataLakeServiceImpl implements DataLakeService {
                         return StatsCubeUtils.sortByCategory(flux, statsCube);
                     }
                 });
-    }
-
-    @Deprecated
-    private List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
-        // Only return attributes for account now
-        String tenantId = MultiTenantContext.getShortTenantId();
-        List<ColumnMetadata> accountAttrs = _dataLakeService.getCachedServingMetadataForEntity(tenantId,
-                BusinessEntity.Account);
-        accountAttrs = accountAttrs.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
-        // Hack to limit attributes for talking points temporarily PLS-7065
-                && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
-                        || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
-                .collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(accountAttrs)) {
-            accountAttrs = new ArrayList<>();
-        }
-        return accountAttrs;
     }
 
     private void populateColumnMetadataMap(String customerSpace, Map<String, List<ColumnMetadata>> cmMap,
@@ -721,16 +699,5 @@ public class DataLakeServiceImpl implements DataLakeService {
         DynamoDataUnit dynamoDataUnit = //
                 dataCollectionProxy.getContactsByAccountLookupDataUnit(customerSpace, null);
         return dynamoDataUnit != null;
-    }
-
-    private ExecutorService getWorkers() {
-        if (workers == null) {
-            synchronized (this) {
-                if (workers == null) {
-                    workers = ThreadPoolUtils.getFixedSizeThreadPool("datalake-svc", 8);
-                }
-            }
-        }
-        return workers;
     }
 }

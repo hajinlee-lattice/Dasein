@@ -494,7 +494,6 @@ public class PlayServiceImpl implements PlayService {
 
     @Override
     public List<AttributeLookup> findDependingAttributes(List<Play> plays) {
-        Tenant tenant = MultiTenantContext.getTenant();
         Set<AttributeLookup> dependingAttributes = new HashSet<>();
         if (plays != null) {
             for (Play play : plays) {
