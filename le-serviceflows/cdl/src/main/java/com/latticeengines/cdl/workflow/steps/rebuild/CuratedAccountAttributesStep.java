@@ -3,7 +3,7 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
 import java.util.ArrayList;
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.NumberOfContactsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.CalculateStatsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -41,6 +40,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 // Description: Runs a Workflow Step to compute "curated" attributes which are derived from other attributes.  At this
@@ -262,8 +262,8 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     private TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(numberOfContactsStep));
-        step.setTransformer(TRANSFORMER_PROFILER);
-        ProfileConfig conf = new ProfileConfig();
+        step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
+        ProfileJobConfig conf = new ProfileJobConfig();
         conf.setEncAttrPrefix(CEAttr);
         String confStr = appendEngineConf(conf, lightEngineConfig());
         step.setConfiguration(confStr);

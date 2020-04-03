@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig
 import com.latticeengines.spark.aggregation.{NumberProfileAggregation, StringProfileAggregation}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.BitEncodeUtils
-import org.apache.spark.sql.functions.{col, explode}
+import org.apache.spark.sql.functions.{col, explode, lit}
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
@@ -17,6 +17,7 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
 
   private val STR_CHUNK_SIZE: Int = 1000
   private val NUM_CHUNK_SIZE: Int = 100
+  private val ATTR_DECSTRAT = DataCloudConstants.PROFILE_ATTR_DECSTRAT
   private val ATTR_ATTRNAME = DataCloudConstants.PROFILE_ATTR_ATTRNAME
   private val ATTR_BKTALGO = DataCloudConstants.PROFILE_ATTR_BKTALGO
 
@@ -34,6 +35,20 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
     val strProfile = profileStrAttrs(inputData, catAttrs, config.getMaxCat, config.getMaxCatLength)
 
     val result = numProfile.union(strProfile)
+            .withColumn(DataCloudConstants.PROFILE_ATTR_SRCATTR, lit(null).cast("string"))
+            .withColumn(DataCloudConstants.PROFILE_ATTR_DECSTRAT, lit(null).cast("string"))
+            .withColumn(DataCloudConstants.PROFILE_ATTR_ENCATTR, lit(null).cast("string"))
+            .withColumn(DataCloudConstants.PROFILE_ATTR_LOWESTBIT, lit(null).cast("integer"))
+            .withColumn(DataCloudConstants.PROFILE_ATTR_NUMBITS, lit(null).cast("integer"))
+            .select(List(
+              DataCloudConstants.PROFILE_ATTR_ATTRNAME,
+              DataCloudConstants.PROFILE_ATTR_SRCATTR,
+              DataCloudConstants.PROFILE_ATTR_DECSTRAT,
+              DataCloudConstants.PROFILE_ATTR_ENCATTR,
+              DataCloudConstants.PROFILE_ATTR_LOWESTBIT,
+              DataCloudConstants.PROFILE_ATTR_NUMBITS,
+              DataCloudConstants.PROFILE_ATTR_BKTALGO
+            ).map(col) : _*)
 
      lattice.output = result :: Nil
   }

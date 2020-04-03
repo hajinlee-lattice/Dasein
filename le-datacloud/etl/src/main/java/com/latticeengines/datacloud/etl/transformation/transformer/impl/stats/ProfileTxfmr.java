@@ -252,8 +252,9 @@ public class ProfileTxfmr extends ConfigurableSparkJobTxfmr<ProfileJobConfig> {
         }
 
         try {
-            List<String> avros = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*\\.avro$");
+            List<String> avros = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
             for (String path : avros) {
+                log.info("Removing avro file {}", path);
                 HdfsUtils.rmdir(yarnConfiguration, path);
             }
         } catch (Exception e) {
