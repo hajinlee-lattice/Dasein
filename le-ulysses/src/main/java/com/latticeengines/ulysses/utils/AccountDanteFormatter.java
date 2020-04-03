@@ -1,5 +1,6 @@
 package com.latticeengines.ulysses.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,10 +52,10 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
     }
 
     public Set<String> getUIRequiredProperties() {
-        List<String> toReturn = Arrays.asList(accountIdColumnName, lookupIdColumnName, InterfaceName.CompanyName.name(),
-                InterfaceName.SpendAnalyticsSegment.name(), DanteAccountSegmentProperty.IsSegment,
-                DanteAccountSegmentProperty.Segment1Name, DanteAccountSegmentProperty.Segment2Name,
-                DanteAccountSegmentProperty.Segment3Name);
+        List<String> toReturn = new ArrayList<>(Arrays.asList(accountIdColumnName, lookupIdColumnName,
+                InterfaceName.CompanyName.name(), InterfaceName.SpendAnalyticsSegment.name(),
+                DanteAccountSegmentProperty.IsSegment, DanteAccountSegmentProperty.Segment1Name,
+                DanteAccountSegmentProperty.Segment2Name, DanteAccountSegmentProperty.Segment3Name));
 
         if (isEntityMatchEnabled)
             toReturn.add(custAccountIdColumnName);

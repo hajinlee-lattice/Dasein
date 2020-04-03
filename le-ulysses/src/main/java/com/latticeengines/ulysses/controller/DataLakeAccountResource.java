@@ -221,7 +221,7 @@ public class DataLakeAccountResource {
             log.error("Failed to populate talkingpoints and accounts for " + customerSpace, le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
-            log.error("Failed to get spend analytics segments for customerSpace: " + customerSpace, e);
+            log.error("Failed to populate talkingpoints and accounts for " + customerSpace, e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }
