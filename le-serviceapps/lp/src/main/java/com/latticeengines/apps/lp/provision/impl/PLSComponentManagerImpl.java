@@ -378,9 +378,7 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     private void OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers) {
         for (IDaaSUser user : iDaaSUsers) {
-            if (iDaaSService.getIDaaSUser(user.getEmailAddress()) != null) {
-                iDaaSService.updateIDaaSUser(user);
-            } else {
+            if (iDaaSService.getIDaaSUser(user.getEmailAddress()) == null) {
                 iDaaSService.createIDaaSUser(user);
             }
             // add product access and default role to user
