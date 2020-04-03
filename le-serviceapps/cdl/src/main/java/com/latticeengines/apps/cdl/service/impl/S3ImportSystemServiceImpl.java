@@ -44,6 +44,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             throw new LedpException(LedpCode.LEDP_40066, new String[] {
                     "Already have import system with name: " + importSystem.getName()});
         }
+        log.info("Create S3Import System: " + importSystem.getName());
         List<S3ImportSystem> currentSystems = s3ImportSystemEntityMgr.findAll();
         if (CollectionUtils.isEmpty(currentSystems)) {
             importSystem.setPriority(1);

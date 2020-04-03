@@ -78,6 +78,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
 
         if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
             if (!batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_ENTITY_MATCH)) {
+                log.info("Create Default System for tenant: " + space.toString());
                 s3ImportSystemService.createDefaultImportSystem(space.toString());
                 dropBoxService.createTenantDefaultFolder(space.toString());
             }
