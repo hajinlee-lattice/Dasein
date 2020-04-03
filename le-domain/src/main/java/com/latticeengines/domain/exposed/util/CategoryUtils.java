@@ -27,6 +27,10 @@ public final class CategoryUtils {
                 return Collections.singletonList(BusinessEntity.WebVisitProfile);
             case OPPORTUNITY_PROFILE:
                 return Collections.singletonList(BusinessEntity.Opportunity);
+            case ACCOUNT_MARKETING_ACTIVITY_PROFILE:
+                return Collections.singletonList(BusinessEntity.AccountMarketingActivity);
+            case CONTACT_MARKETING_ACTIVITY_PROFILE:
+                return Collections.singletonList(BusinessEntity.ContactMarketingActivity);
             default:
                 return Collections.singletonList(BusinessEntity.Account);
         }
@@ -56,6 +60,12 @@ public final class CategoryUtils {
                 break;
             case Opportunity:
                 category = Category.OPPORTUNITY_PROFILE;
+                break;
+            case AccountMarketingActivity:
+                category = Category.ACCOUNT_MARKETING_ACTIVITY_PROFILE;
+                break;
+            case ContactMarketingActivity:
+                category = Category.CONTACT_MARKETING_ACTIVITY_PROFILE;
                 break;
             default:
                 category = Category.DEFAULT;

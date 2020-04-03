@@ -742,6 +742,8 @@ public final class StatsCubeUtils {
             return techTopBktComparator();
         case WEB_VISIT_PROFILE:
         case OPPORTUNITY_PROFILE:
+        case ACCOUNT_MARKETING_ACTIVITY_PROFILE:
+        case CONTACT_MARKETING_ACTIVITY_PROFILE:
             return firstNumValueTopBktComparator();
         case RATING:
             return ratingTopBktComparator();
@@ -891,6 +893,8 @@ public final class StatsCubeUtils {
             return techTopAttrComparator();
         case WEB_VISIT_PROFILE:
         case OPPORTUNITY_PROFILE:
+        case ACCOUNT_MARKETING_ACTIVITY_PROFILE:
+        case CONTACT_MARKETING_ACTIVITY_PROFILE:
             return firstNumValueTopAttrComparator();
         case RATING:
             return ratingTopAttrComparator(techTopAttrComparator(), defaultTopAttrComparator());

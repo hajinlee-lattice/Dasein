@@ -114,6 +114,12 @@ public class ActivityMetricDecorator implements Decorator {
             case Opportunity:
                 cm.setCategory(Category.OPPORTUNITY_PROFILE);
                 break;
+            case AccountMarketingActivity:
+                cm.setCategory(Category.ACCOUNT_MARKETING_ACTIVITY_PROFILE);
+                break;
+            case ContactMarketingActivity:
+                cm.setCategory(Category.CONTACT_MARKETING_ACTIVITY_PROFILE);
+                break;
             default:
         }
         if (systemAttrs.contains(cm.getAttrName())) {
