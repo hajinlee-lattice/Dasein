@@ -169,6 +169,9 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
                     config.getS3FilePath()).getContentLength()));
             context.setProperty(ImportProperty.S3_BUCKET, config.getS3Bucket());
             context.setProperty(ImportProperty.S3_OBJECT_KEY, config.getS3FilePath());
+            if (Boolean.TRUE.equals(config.getNeedDetailError())) {
+                context.setProperty(ImportProperty.NEED_DETAIL_ERROR, Boolean.TRUE.toString());
+            }
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
 
             if (dataFeedTask == null) {

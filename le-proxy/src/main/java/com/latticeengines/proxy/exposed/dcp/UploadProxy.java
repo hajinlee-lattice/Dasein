@@ -18,6 +18,8 @@ public interface UploadProxy {
 
     void updateUploadConfig(String customerSpace, Long uploadPid, UploadConfig uploadConfig);
 
+//    void updateUploadStats(String customerSpace, Long uploadPid, UploadStats uploadStats);
+
     void updateUploadStatus(String customerSpace, Long uploadPid, Upload.Status status);
 
     void updateStatsContent(String customerSpace, long uploadPid, long statsPid, UploadStats uploadStats);

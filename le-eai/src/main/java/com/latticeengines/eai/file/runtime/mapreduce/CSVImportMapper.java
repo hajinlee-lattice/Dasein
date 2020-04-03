@@ -14,8 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -140,7 +142,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private LongAdder rowErrorVal = new LongAdder();
 
-    private Set<String> headers;
+    private Map<String, Integer> headerMap;
 
     private String avroFile;
 
@@ -153,6 +155,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
     private volatile boolean finishReading = false;
 
     private volatile boolean uploadErrorRecord = false;
+
+    private boolean detailError = false;
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -172,6 +176,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
         outputPath = MapFileOutputFormat.getOutputPath(context);
         LOG.info("Path is:" + outputPath);
+        detailError = conf.getBoolean("eai.import.detail.error", false);
+        LOG.info("Detail Error: " + detailError);
         useS3Input = conf.getBoolean("eai.import.use.s3.input", false);
         if (useS3Input) {
             String region = conf.get("eai.import.aws.region");
@@ -286,7 +292,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 new BOMInputStream(getInputFileStream(context), false, ByteOrderMark.UTF_8,
                         ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
                         ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
-            headers = Sets.newHashSet(new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[]{}));
+//            headers = Sets.newHashSet(new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[]{}));
+            headerMap = parser.getHeaderMap();
             Iterator<CSVRecord> iter = parser.iterator();
             String ERROR_FILE = getFileName("error", ".csv", 0);
             try (CSVPrinter csvFilePrinter = new CSVPrinter(new FileWriter(ERROR_FILE),
@@ -465,7 +472,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         }
                     }
                     try (FileOutputStream fileOutputStream = new FileOutputStream(errorFileToUpload)) {
-                        fileOutputStream.write(StringUtils.join(ImportProperty.ERROR_HEADER, ",").getBytes());
+                        fileOutputStream.write(getErrorFileHeader().getBytes());
                         fileOutputStream.write(CRLF.getBytes());
                         Arrays.sort(errorFiles, File::compareTo);
                         for (File errorFile : errorFiles) {
@@ -479,6 +486,19 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     LOG.error(String.format("IOException happened during the process for merge file: %s.", e.getMessage()));
                 }
             }
+        }
+    }
+
+    private String getErrorFileHeader() {
+        if (detailError) {
+            List<Map.Entry<String, Integer>> headerLists = new LinkedList<>(headerMap.entrySet());
+            headerLists.sort(Map.Entry.comparingByValue());
+            List<String> headers = new ArrayList<>();
+            headerLists.forEach(header -> headers.add(header.getKey()));
+            Collections.addAll(headers, ImportProperty.ERROR_HEADER);
+            return StringUtils.join(headers, ",");
+        } else {
+            return StringUtils.join(ImportProperty.ERROR_HEADER, ",");
         }
     }
 
@@ -534,7 +554,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 importedRecords.increment();
             } else {
                 if (errorMap.size() > 0) {
-                    handleError(lineNum);
+                    handleError(lineNum, csvRecord);
                 }
                 if (duplicateMap.size() > 0) {
                     handleDuplicate(lineNum);
@@ -566,8 +586,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         }
 
         private GenericRecord toGenericRecord(CSVRecord csvRecord, long lineNum) {
-            Map<String, String> headerCaseMapping = headers.stream().collect(Collectors.toMap(String::toLowerCase,
-                    header -> header));
+            Map<String, String> headerCaseMapping = headerMap.keySet()
+                                                    .stream()
+                                                    .collect(Collectors.toMap(String::toLowerCase, header -> header));
             for (Attribute attr : table.getAttributes()) {
                 Object avroFieldValue = null;
                 String csvColumnNameInLowerCase = attr.getSourceAttrName() == null ?
@@ -754,7 +775,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             }
         }
 
-        private void handleError(long lineNumber) throws IOException {
+        private void handleError(long lineNumber, CSVRecord csvRecord) throws IOException {
             if (missingRequiredColValue) {
                 requiredFieldMissing.increment();
             } else if (fieldMalFormed) {
@@ -765,7 +786,16 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             ignoredRecords.increment();
             hasErrorRecord = true;
             id = id != null ? id : "";
-            csvFilePrinter.printRecord(lineNumber, id, errorMap.values().toString());
+            List<String> errorDetail  = new ArrayList<>();
+            if (detailError) {
+                while(csvRecord.iterator().hasNext()) {
+                    errorDetail.add(csvRecord.iterator().next());
+                }
+            }
+            errorDetail.add(String.valueOf(lineNumber));
+            errorDetail.add(String.valueOf(id));
+            errorDetail.add(String.valueOf(errorMap.values().toString()));
+            csvFilePrinter.printRecord(errorDetail);
             csvFilePrinter.flush();
             errorMap.clear();
         }
