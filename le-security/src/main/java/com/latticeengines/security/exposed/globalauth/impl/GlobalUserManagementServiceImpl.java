@@ -743,6 +743,23 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
         }
     }
 
+    @Override
+    public List<String> getTeamIds(List<GlobalAuthUserTenantRight> globalAuthUserTenantRights) {
+        List<String> teamIds = new ArrayList<>();
+        if (CollectionUtils.isEmpty(globalAuthUserTenantRights)) {
+            return teamIds;
+        }
+        for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
+            List<GlobalAuthTeam> globalAuthTeams = globalAuthUserTenantRight.getGlobalAuthTeams();
+            if (CollectionUtils.isNotEmpty(globalAuthTeams)) {
+                for (GlobalAuthTeam globalAuthTeam : globalAuthTeams) {
+                    teamIds.add(globalAuthTeam.getTeamId());
+                }
+            }
+        }
+        return teamIds;
+    }
+
     private List<AbstractMap.SimpleEntry<User, List<String>>> globalFindAllUserRightsByTenant(
             String tenantId, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights, boolean withTeam) throws Exception {
         List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = new ArrayList<>();

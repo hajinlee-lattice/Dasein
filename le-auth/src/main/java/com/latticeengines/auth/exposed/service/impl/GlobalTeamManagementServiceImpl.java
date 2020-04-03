@@ -72,7 +72,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     }
 
     @Override
-    public void updateTeam(String teamId, GlobalTeamData globalTeamData) {
+    public GlobalAuthTeam updateTeam(String teamId, GlobalTeamData globalTeamData) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamIdAndTenantId(tenantData.getPid(), teamId);
         if (globalAuthTeam == null) {
@@ -82,6 +82,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         globalAuthTeam.setName(globalTeamData.getTeamName());
         setUserRights(globalAuthTeam, tenantData, globalTeamData.getTeamMembers());
         globalAuthTeamEntityMgr.update(globalAuthTeam);
+        return globalAuthTeam;
     }
 
     private GlobalAuthTenant getTenantData(String tenantId) {

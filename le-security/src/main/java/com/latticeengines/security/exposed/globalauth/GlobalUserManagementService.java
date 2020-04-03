@@ -69,4 +69,5 @@ public interface GlobalUserManagementService {
     List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(
             String tenantId, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights, boolean withTeam);
 
+    List<String> getTeamIds(List<GlobalAuthUserTenantRight> globalAuthUserTenantRights);
 }

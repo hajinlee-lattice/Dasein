@@ -205,7 +205,7 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
             User testUser = users.get(0);
             //update user with global teams
             userService.assignAccessLevel(AccessLevel.EXTERNAL_ADMIN, testTenantId, testUser.getUsername(), null,
-                    null,false, true, globalTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList()));
+                    null,false, true, globalTeams);
             users = userService.getUsers(testTenantId, UserFilter.TRIVIAL_FILTER, true);
             userMap = users.stream().collect(Collectors.toMap(User::getUsername, User->User));
             targetUser = userMap.get(testUser.getUsername());

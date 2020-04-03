@@ -3,8 +3,10 @@ package com.latticeengines.security.exposed.service.impl;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -249,7 +251,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
-            Long expirationDate, boolean createUser, boolean clearSession, List<String> userTeamIds) {
+            Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams) {
         if (accessLevel == null) {
             return resignAccessLevel(tenantId, username);
         }
@@ -281,18 +283,27 @@ public class UserServiceImpl implements UserService {
         if (resignAccessLevel(tenantId, username, originalRights)) {
             try {
                 List<GlobalAuthTeam> globalAuthTeams = new ArrayList<>();
-                if (userTeamIds == null && CollectionUtils.isNotEmpty(rightsData)) {
+                List<String> userTeamIds =
+                        userTeams == null ? new ArrayList() : userTeams.stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
+                if (userTeams == null && CollectionUtils.isNotEmpty(rightsData)) {
                     globalAuthTeams = rightsData.get(0).getGlobalAuthTeams();
-                } else if (CollectionUtils.isNotEmpty(userTeamIds)) {
+                } else if (CollectionUtils.isNotEmpty(userTeams)) {
                     globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(userTeamIds, false);
                 }
                 boolean result = globalUserManagementService.grantRight(accessLevel.name(), tenantId, username,
                         createdByUser, expirationDate, globalAuthTeams);
                 if (result && clearSession) {
                     AccessLevel originalLevel = AccessLevel.findAccessLevel(originalRights);
+                    Long userId = findIdByUsername(username);
                     if (!isSuperior(accessLevel, originalLevel)) {
-                        Long userId = findIdByUsername(username);
-                        clearSession(tenantId, userId);
+                        clearSession(tenantId, Collections.singletonList(userId));
+                    } else {
+                        if (userTeams != null) {
+                            List<String> orgTeamIds = globalUserManagementService.getTeamIds(rightsData);
+                            if (teamIdsChanged(userTeamIds, orgTeamIds)) {
+                                clearSession(false, tenantId, Collections.singletonList(userId));
+                            }
+                        }
                     }
                 }
                 return result;
@@ -300,6 +311,17 @@ public class UserServiceImpl implements UserService {
                 LOGGER.warn(String.format("Error assigning access level %s to user %s.", accessLevel.name(), username));
                 return true;
             }
+        }
+        return false;
+    }
+
+    private boolean teamIdsChanged(List<String> newTeamIds, List<String> orgTeamIds) {
+        Set<String> oldIds = new HashSet<>(orgTeamIds);
+        Set<String> newIds = new HashSet<>(newTeamIds);
+        Set<String> diffIds1 = newIds.stream().filter(teamId -> !oldIds.contains(teamId)).collect(Collectors.toSet());
+        Set<String> diffIds2 = oldIds.stream().filter(teamId -> !newIds.contains(teamId)).collect(Collectors.toSet());
+        if (!diffIds1.isEmpty() || !diffIds2.isEmpty()) {
+            return true;
         }
         return false;
     }
@@ -472,12 +494,8 @@ public class UserServiceImpl implements UserService {
         }
 
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
-            List<String> userTeamIds = null;
-            if (user.getUserTeams() != null) {
-                userTeamIds = user.getUserTeams().stream().map(GlobalTeam::getTeamId).collect(Collectors.toList());
-            }
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
-                    user.getExpirationDate(), true, false, userTeamIds);
+                    user.getExpirationDate(), true, false, user.getUserTeams());
         }
 
         String tempPass = globalUserManagementService.resetLatticeCredentials(user.getUsername());
@@ -606,7 +624,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             Long userId = findIdByUsername(username);
-            clearSession(tenantId, userId);
+            clearSession(tenantId, Collections.singletonList(userId));
             return success;
         } else {
             return false;
@@ -638,29 +656,31 @@ public class UserServiceImpl implements UserService {
         return globalUserManagementService.getIdByUsername(username);
     }
 
-    private void clearSession(String tenantId, Long userId) {
-        if (userId != null) {
-            LOGGER.info(String.format("Will clear sessions for user %d in %s.", userId, tenantId));
+    private void clearSession(String tenantId, List<Long> userIds) {
+        clearSession(true, tenantId, userIds);
+    }
+
+    @Override
+    public void clearSession(boolean expireSession, String tenantId, List<Long> userIds) {
+        if (CollectionUtils.isNotEmpty(userIds)) {
+            LOGGER.info(String.format("Will clear sessions for user ids %s in %s.", userIds, tenantId));
             clearSessionService.submit(() -> {
                 GlobalAuthTenant tenantData = globalTenantManagementService.findByTenantId(tenantId);
                 List<GlobalAuthTicket> globalAuthTickets = globalSessionManagementService
-                        .findTicketsByUserIdAndTenant(userId, tenantData);
-                discardTickets(globalAuthTickets, tenantData.getPid());
+                        .findTicketsByUserIdsAndTenant(userIds, tenantData);
+                if (CollectionUtils.isNotEmpty(globalAuthTickets)) {
+                    discardTickets(expireSession, globalAuthTickets, tenantData.getPid());
+                }
             });
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(String.format("Will clear user %d's Session in %s.", 1l, "tenantId"));
-    }
-
-    private void discardTickets(List<GlobalAuthTicket> globalAuthTickets, Long tenantId) {
-        LOGGER.info(String.format("Ticket ids in %s will be deleted.",
-                globalAuthTickets.stream().map(GlobalAuthTicket::getPid).collect(Collectors.toList())));
+    private void discardTickets(boolean expireSession, List<GlobalAuthTicket> globalAuthTickets, Long tenantId) {
+        LOGGER.info(String.format("Ticket ids in %s will be deleted and expireSession value is %s.",
+                globalAuthTickets.stream().map(GlobalAuthTicket::getPid).collect(Collectors.toList()), expireSession));
         for (GlobalAuthTicket globalAuthTicket : globalAuthTickets) {
-            globalSessionManagementService.discardSession(new Ticket(globalAuthTicket.getTicket()), tenantId,
-                    globalAuthTicket.getPid(), globalAuthTicket.getUserId());
+            globalSessionManagementService.discardSession(expireSession, new Ticket(globalAuthTicket.getTicket()),
+                    tenantId, globalAuthTicket.getPid(), globalAuthTicket.getUserId());
         }
     }
-
 }

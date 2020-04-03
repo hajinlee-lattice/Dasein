@@ -22,16 +22,17 @@ public class GlobalAuthTicketDaoImpl extends BaseDaoImpl<GlobalAuthTicket> imple
     }
 
     @Override
-    public List<GlobalAuthTicket> findTicketsByUserIdAndLastAccessDateAndTenant(Long userId, GlobalAuthTenant tenantData) {
+    public List<GlobalAuthTicket> findTicketsByUserIdsAndLastAccessDateAndTenant(List<Long> userIds, GlobalAuthTenant tenantData) {
         Session session = sessionFactory.getCurrentSession();
         Class<GlobalAuthTicket> entityClz = getEntityClass();
         Class<GlobalAuthSession> sessionClz = GlobalAuthSession.class;
         long end = System.currentTimeMillis() / 1000 - SessionUtils.TicketInactivityTimeoutInMinute * 60;
-        String queryStr = String.format("from %s WHERE userId = %d AND UNIX_TIMESTAMP( lastAccessDate ) >= " +
-                        ":lastAccessDate and pid in (select ticketId from %s where tenantId=%d and userId=%d)",
-                entityClz.getSimpleName(), userId, sessionClz.getSimpleName(), tenantData.getPid(), userId);
+        String queryStr = String.format("from %s WHERE UNIX_TIMESTAMP( lastAccessDate ) >= " +
+                        ":lastAccessDate and pid in (select ticketId from %s where tenantId=%d and userId in (:userIds))",
+                entityClz.getSimpleName(), sessionClz.getSimpleName(), tenantData.getPid());
         Query query = session.createQuery(queryStr);
         query.setParameter("lastAccessDate", end);
+        query.setParameter("userIds", userIds);
         return query.list();
     }
 

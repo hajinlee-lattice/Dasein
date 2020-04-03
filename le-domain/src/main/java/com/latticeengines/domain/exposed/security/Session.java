@@ -14,6 +14,9 @@ public class Session {
     @JsonProperty("Rights")
     private List<String> rights;
 
+    @JsonProperty("TeamIds")
+    private List<String> teamIds;
+
     @JsonProperty("Ticket")
     private Ticket ticket;
 
@@ -143,5 +146,13 @@ public class Session {
 
     public void setTicketCreationTime(Long ticketCreationTime) {
         this.ticketCreationTime = ticketCreationTime;
+    }
+
+    public List<String> getTeamIds() {
+        return teamIds;
+    }
+
+    public void setTeamIds(List<String> teamIds) {
+        this.teamIds = teamIds;
     }
 }
