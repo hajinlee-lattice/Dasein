@@ -718,7 +718,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         Catalog marketingTypeCatalog = createCatalog(tenant, marketingAtlasStreamName, marketingTypeDataFeedTask);
         catalogEntityMgr.create(marketingTypeCatalog);
         log.info("marketingTypeCatalog is {}.", JsonUtils.serialize(marketingTypeCatalog));
-        StreamDimension dimension = createPathPatternDimension(marketingAtlasStream, marketingTypeCatalog,
+        StreamDimension dimension = createActivityTypeDimension(marketingAtlasStream, marketingTypeCatalog,
                 InterfaceName.ActivityTypeId.name(), StreamDimension.Usage.Pivot, InterfaceName.ActivityType.name(), InterfaceName.ActivityType.name());
         dimensionEntityMgr.create(dimension);
         log.info("dimension is {}.", JsonUtils.serialize(dimension));
@@ -871,9 +871,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return dim;
     }
 
-    private StreamDimension createPathPatternDimension(@NotNull AtlasStream stream, Catalog catalog,
+    private StreamDimension createActivityTypeDimension(@NotNull AtlasStream stream, Catalog catalog,
                                                        String dimensionName, StreamDimension.Usage usage,
-                                                       String attributeName, String pathPatternName) {
+                                                       String attributeName, String patternAttributeName) {
         StreamDimension dim = new StreamDimension();
         dim.setName(dimensionName);
         dim.setDisplayName(dim.getName());
@@ -884,7 +884,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
         // standardize and hash ptn name for dimension
         DimensionGenerator generator = new DimensionGenerator();
-        generator.setAttribute(pathPatternName);
+        generator.setAttribute(patternAttributeName);
         generator.setFromCatalog(true);
         generator.setOption(DimensionGenerator.DimensionGeneratorOption.HASH);
         dim.setGenerator(generator);
@@ -892,7 +892,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DimensionCalculatorRegexMode calculator = new DimensionCalculatorRegexMode();
         calculator.setName(attributeName);
         calculator.setAttribute(attributeName);
-        calculator.setPatternAttribute(pathPatternName);
+        calculator.setPatternAttribute(patternAttributeName);
         calculator.setPatternFromCatalog(true);
         dim.setCalculator(calculator);
         return dim;
