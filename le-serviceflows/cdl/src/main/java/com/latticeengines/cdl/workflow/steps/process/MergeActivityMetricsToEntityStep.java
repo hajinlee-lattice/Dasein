@@ -211,12 +211,13 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             HdfsDataUnit output = result.getTargets().get(details.getStartIdx());
             String tableName = customerSpace.getTenantId() + "_" + NamingUtils.timestamp(getServingStoreInLable(mergedTableLabel).name());
             Table mergedTable = toTable(tableName, output);
+            BusinessEntity entity = getEntityInLabel(mergedTableLabel);
             if (output.getCount() <= 0) {
                 // create dummy record with meaningless accountId, append to mergedDU
                 log.warn("Empty metrics found: {}. Append dummy record.", tableName);
-                appendDummyRecord(mergedTable);
+                appendDummyRecord(mergedTable, entity);
             } else {
-                enrichActivityAttributes(mergedTable, getEntityInLabel(mergedTableLabel), getServingStoreInLable(mergedTableLabel), new HashSet<>(details.getLabels())); // labels are attributes to be deprecated
+                enrichActivityAttributes(mergedTable, entity, getServingStoreInLable(mergedTableLabel), new HashSet<>(details.getLabels())); // labels are attributes to be deprecated
             }
             metadataProxy.createTable(customerSpace.toString(), tableName, mergedTable);
             TableRoleInCollection servingStore = getServingStoreInLable(mergedTableLabel);
@@ -398,8 +399,8 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         dateRangeEvaluatedSet.add(evaluatedDaterange);
     }
 
-    private void appendDummyRecord(Table targetTable) {
-        List<GenericRecord> dummyRecords = createDummyRecord();
+    private void appendDummyRecord(Table targetTable, BusinessEntity entity) {
+        List<GenericRecord> dummyRecords = createDummyRecord(entity);
         try {
             String targetPath = ExtractUtils.getSingleExtractPath(yarnConfiguration, targetTable);
             log.info("Retrieved extract path: {}", targetPath);
@@ -412,11 +413,12 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         }
     }
 
-    private List<GenericRecord> createDummyRecord() {
-        String dummySchemaStr = "{\"type\":\"record\",\"name\":\"topLevelRecord\",\"fields\":[{\"name\":\"" + InterfaceName.AccountId.name() + "\",\"type\":[\"string\",\"null\"]}]}";
+    private List<GenericRecord> createDummyRecord(BusinessEntity entity) {
+        String entityId = BusinessEntity.Account.equals(entity) ? InterfaceName.AccountId.name() : InterfaceName.ContactId.name();
+        String dummySchemaStr = "{\"type\":\"record\",\"name\":\"topLevelRecord\",\"fields\":[{\"name\":\"" + entityId + "\",\"type\":[\"string\",\"null\"]}]}";
         Schema.Parser parser = new Schema.Parser();
         GenericRecord record = new GenericData.Record(parser.parse(dummySchemaStr));
-        record.put(InterfaceName.AccountId.name(), DataCloudConstants.ENTITY_ANONYMOUS_ID);
+        record.put(entityId, DataCloudConstants.ENTITY_ANONYMOUS_ID);
         return Collections.singletonList(record);
     }
 
