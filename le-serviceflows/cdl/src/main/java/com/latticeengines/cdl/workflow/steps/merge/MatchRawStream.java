@@ -10,7 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -22,18 +25,18 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 @Component(MatchRawStream.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -49,18 +52,22 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     // rematched table of merged imports + active batch store
     private static final String RAWSTREAM_REMATCHED_TABLE_PREFIX_FORMAT = "ReMatched_RawStream_%s";
     private static final String RAWSTREAM_NEW_ACC_TABLE_PERFIX_FORMAT = "NewAcc_RawStream_%s";
-    private static final List<String> RAWSTREAM_PARTITION_KEYS = ImmutableList.of(InterfaceName.__StreamDateId.name());
 
     // streamId -> set of column names
     private final Map<String, Set<String>> streamImportColumnNames = new HashMap<>();
     // streamId -> table prefix of matched raw streams imports processed by
     // transformation request
     private final Map<String, String> matchedTablePrefixes = new HashMap<>();
-    // streamId -> table name of accounts created by matching raw stream
-    private final Map<String, String> newAccountTables = new HashMap<>();
+    // streamId -> root operation uid used for bulk match
+    private final Map<String, String> matchRootOperationUids = new HashMap<>();
+    // streamId -> table name of entities created by matching raw stream
+    private final Map<String, String> newEntitiesTables = new HashMap<>();
     private long paTimestamp;
 
     private Map<String, String> rawActivityStreamFromHardDelete;
+
+    @Inject
+    private MatchProxy matchProxy;
 
     @Override
     protected void initializeConfiguration() {
@@ -166,15 +173,36 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
     // add all new account tables that exist to context (means there are new
     // accounts)
     private void addNewAccountTablesToCtx() {
-        Map<String, String> newAccTablesWithData = newAccountTables.entrySet() //
+        Map<String, String> newAccTablesWithData = new HashMap<>();
+        Map<String, String> newContactTablesWithData = new HashMap<>();
+        newEntitiesTables.entrySet() //
                 .stream() //
                 .filter(entry -> {
                     Table newAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), entry.getValue());
                     return newAccountTable != null;
                 }) //
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .forEach(entry -> {
+                    String streamId = entry.getKey();
+                    if (!matchRootOperationUids.containsKey(streamId)) {
+                        return;
+                    }
+                    String uid = matchRootOperationUids.get(streamId);
+                    MatchCommand cmd = matchProxy.bulkMatchStatus(uid);
+                    Preconditions.checkNotNull(cmd, String.format(
+                            "Failed to retrieve match command. RootOperationUID=%s, streamId=%s", uid, streamId));
+                    log.info("Newly allocated entities = {}. streamId = {}, rootOperationUid = {}",
+                            cmd.getNewEntityCounts(), streamId, uid);
+                    if (MatchUtils.hasNewEntity(cmd.getNewEntityCounts(), Account.name())) {
+                        newAccTablesWithData.put(streamId, entry.getValue());
+                    }
+                    if (MatchUtils.hasNewEntity(cmd.getNewEntityCounts(), Contact.name())) {
+                        newContactTablesWithData.put(streamId, entry.getValue());
+                    }
+                });
         log.info("New account tables (with data) for raw stream = {}", newAccTablesWithData);
+        log.info("New contact tables (with data) for raw stream = {}", newContactTablesWithData);
         putObjectInContext(ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE, newAccTablesWithData);
+        putObjectInContext(ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE, newContactTablesWithData);
     }
 
     private Integer concatAndMatchStreamImports(@NotNull String streamId, @NotNull List<String> importTables,
@@ -203,16 +231,19 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
         if (isRematchMode) {
             setRematchVersions(baseMatchInput);
         }
-        // match entity TODO maybe support entity match GA?
+
+        String uid = UUID.randomUUID().toString();
+        matchRootOperationUids.put(stream.getStreamId(), uid);
+        // match entity
         if (stream.getMatchEntities().contains(Contact.name())) {
             // contact match
             matchConfig = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), baseMatchInput,
                     importTableColumns, getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact),
-                    newAccTableName, isRematchMode, false);
+                    newAccTableName, isRematchMode, false, uid);
         } else if (stream.getMatchEntities().contains(Account.name())) {
             // account match
             matchConfig = MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), baseMatchInput,
-                    importTableColumns, getSystemIds(BusinessEntity.Account), newAccTableName, isRematchMode);
+                    importTableColumns, getSystemIds(BusinessEntity.Account), newAccTableName, isRematchMode, uid);
         } else {
             log.error("Match entities {} in stream {} is not supported", stream.getMatchEntities(),
                     stream.getStreamId());
@@ -221,7 +252,7 @@ public class MatchRawStream extends BaseActivityStreamStep<ProcessActivityStream
         }
         // record the final table prefix for stream
         matchedTablePrefixes.put(stream.getStreamId(), matchedTablePrefix);
-        newAccountTables.put(stream.getStreamId(), newAccTableName);
+        newEntitiesTables.put(stream.getStreamId(), newAccTableName);
         steps.add(match(matchInputTableIdx, matchedTablePrefix, matchConfig));
     }
 

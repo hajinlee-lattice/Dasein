@@ -179,7 +179,8 @@ public class MatchResource {
             + "This parameter is mainly for testing purpose. "
             + "Leave it empty will result in using the pod id defined in camille environment.")
     public MatchCommand matchBulk(@RequestBody MatchInput input,
-            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod, //
+            @RequestParam(value = "rootuid", required = false) String rootOperationUid) {
         try {
             setDataCloudVersion(input, null);
             String datacloudVersion = input.getDataCloudVersion();
@@ -189,7 +190,7 @@ public class MatchResource {
                 entityMatchVersionService.bumpVersion(EntityMatchEnvironment.STAGING, input.getTenant());
             }
             BulkMatchService bulkMatchService = getBulkMatchService(datacloudVersion);
-            return bulkMatchService.match(input, hdfsPod);
+            return bulkMatchService.match(input, hdfsPod, StringUtils.defaultIfBlank(rootOperationUid, null));
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_25007, "PropData matchBulk failed: " + e.getMessage(), e);
         }

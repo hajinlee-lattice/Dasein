@@ -51,6 +51,11 @@ public class MatchProxy extends BaseRestApiProxy {
         return post("bulk_match", url, matchInput, MatchCommand.class);
     }
 
+    public MatchCommand matchBulk(MatchInput matchInput, String hdfsPod, String rootOperationUid) {
+        String url = constructUrl("/bulk?podid={pod}&rootuid={rootuid}", hdfsPod, rootOperationUid);
+        return post("bulk_match", url, matchInput, MatchCommand.class);
+    }
+
     public BulkMatchWorkflowConfiguration getBulkConfig(MatchInput matchInput, String hdfsPod) {
         String url = constructUrl("/bulkconf?podid={pod}", hdfsPod);
         return post("bulk_match_conf", url, matchInput, BulkMatchWorkflowConfiguration.class);

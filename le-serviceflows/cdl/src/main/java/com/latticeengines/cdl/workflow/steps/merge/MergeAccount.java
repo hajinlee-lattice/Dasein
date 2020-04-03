@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +9,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +16,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ExtractEmbeddedEntityTableConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -82,17 +77,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                     ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE)) {
                 newTableSize += getTableSize(key);
             }
-
-            for (String key : Collections.singletonList(ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE)) {
-                Map<String, String> tables = getMapObjectFromContext(key, String.class, String.class);
-                if (MapUtils.isEmpty(tables)) {
-                    continue;
-                }
-
-                for (String tableName : tables.values()) {
-                    newTableSize += getTableSize(tableName);
-                }
-            }
+            newTableSize += sumTableSizeFromMapCtx(ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE);
             double oldTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, masterTable);
             scalingMultiplier = ScalingUtils.getMultiplier(oldTableSize + newTableSize);
             log.info(String.format("Adjust scalingMultiplier=%d based on the size of two tables %.2f g.", //
@@ -137,7 +122,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                     getStringValueFromContext(ENTITY_MATCH_TXN_TARGETTABLE)));
             extractSteps.add(extractSteps.size());
         }
-        addNewAccountExtractStepsForActivityStream(extracts, extractSteps);
+        addEmbeddedEntitiesFromActivityStream(extracts, extractSteps, BusinessEntity.Account,
+                ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE, this::extractNewAccount);
 
         List<TransformationStepConfig> steps = new ArrayList<>(extracts);
 
@@ -187,30 +173,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         steps.add(report);
 
         return steps;
-    }
-
-    private void addNewAccountExtractStepsForActivityStream(@NotNull List<TransformationStepConfig> extracts,
-            @NotNull List<Integer> extractSteps) {
-        if (!hasKeyInContext(ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE)) {
-            return;
-        }
-        Map<String, String> newAccountTablesFromStream = getMapObjectFromContext(
-                ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE, String.class, String.class);
-        Map<String, String> streamMatchTables = getMapObjectFromContext(ENTITY_MATCH_STREAM_TARGETTABLE, String.class,
-                String.class);
-        if (MapUtils.isEmpty(newAccountTablesFromStream)) {
-            return;
-        }
-        for (Map.Entry<String, String> newAccEntry : newAccountTablesFromStream.entrySet()) {
-            String streamId = newAccEntry.getKey();
-            String newAccTableName = newAccEntry.getValue();
-            String streamMatchTableName = streamMatchTables.get(streamId);
-            extracts.add(extractNewAccount(newAccTableName, streamMatchTableName));
-            extractSteps.add(extractSteps.size());
-
-            log.info("Extracting new accounts from table {} with matched stream table {} for stream {}",
-                    newAccTableName, streamMatchTableName, streamId);
-        }
     }
 
     private List<TransformationStepConfig> legacySteps() {
@@ -296,29 +258,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     }
 
     private TransformationStepConfig extractNewAccount(String newAccountTable, String matchTargetTable) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(TRANSFORMER_EXTRACT_EMBEDDED_ENTITY);
-        addBaseTables(step, newAccountTable);
-        addBaseTables(step, matchTargetTable);
-        ExtractEmbeddedEntityTableConfig config = new ExtractEmbeddedEntityTableConfig();
-        config.setEntity(BusinessEntity.Account.name());
-        config.setEntityIdFld(InterfaceName.AccountId.name());
         List<String> systemIds = new ArrayList<>();
         systemIds.add(InterfaceName.CustomerAccountId.name());
         systemIds.addAll(getSystemIds(BusinessEntity.Account));
-        // SystemIds which don't exist in match target table are ignored in
-        // dataflow
-        config.setSystemIdFlds(systemIds);
-        if (hasSystemBatch) {
-            config.setTemplate(SystemBatchTemplateName.Embedded.name());
-        }
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
-        return step;
-    }
 
-    private double getTableSize(@NotNull String tableName) {
-        Table tableSummary = getTableSummaryFromKey(customerSpace.toString(), tableName);
-        return tableSummary == null ? 0 : ScalingUtils.getTableSizeInGb(yarnConfiguration, tableSummary);
+        return getExtractNewEntitiesStepFactory(BusinessEntity.Account, InterfaceName.AccountId, systemIds)
+                .apply(newAccountTable, matchTargetTable);
     }
 
 }

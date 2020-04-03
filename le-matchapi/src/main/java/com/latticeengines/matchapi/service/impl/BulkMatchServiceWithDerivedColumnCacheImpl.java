@@ -71,13 +71,15 @@ public class BulkMatchServiceWithDerivedColumnCacheImpl implements BulkMatchServ
     }
 
     @Override
-    public MatchCommand match(MatchInput input, String hdfsPodId) {
+    public MatchCommand match(MatchInput input, String hdfsPodId, String rootOperationUid) {
         DecisionGraph decisionGraph = OperationalMode.isEntityMatch(input.getOperationalMode())
                 ? matchDecisionGraphService.findDecisionGraph(input.getDecisionGraph())
                 : null;
         MatchInputValidator.validateBulkInput(input, yarnConfiguration, decisionGraph);
         input.setMatchEngine(MatchContext.MatchEngine.BULK.getName());
-        String rootOperationUid = UUID.randomUUID().toString();
+        if (StringUtils.isBlank(rootOperationUid)) {
+            rootOperationUid = UUID.randomUUID().toString();
+        }
         hdfsPodId = setPodId(hdfsPodId);
 
         return submitBulkMatchWorkflow(input, hdfsPodId, rootOperationUid);

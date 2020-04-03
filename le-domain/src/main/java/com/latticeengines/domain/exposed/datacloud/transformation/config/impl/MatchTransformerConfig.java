@@ -11,6 +11,9 @@ public class MatchTransformerConfig extends TransformerConfig {
     @JsonProperty("NewEntitiesTableName")
     private String newEntitiesTableName;
 
+    @JsonProperty("RootOperationUID")
+    private String rootOperationUid;
+
     public MatchInput getMatchInput() {
         return matchInput;
     }
@@ -25,5 +28,13 @@ public class MatchTransformerConfig extends TransformerConfig {
 
     public void setNewEntitiesTableName(String newEntitiesTableName) {
         this.newEntitiesTableName = newEntitiesTableName;
+    }
+
+    public String getRootOperationUid() {
+        return rootOperationUid;
+    }
+
+    public void setRootOperationUid(String rootOperationUid) {
+        this.rootOperationUid = rootOperationUid;
     }
 }

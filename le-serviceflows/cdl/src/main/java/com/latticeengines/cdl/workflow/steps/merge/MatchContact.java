@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,8 +20,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.ContactNameConcatenateConfig;
@@ -28,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
 @Component(MatchContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -42,6 +48,11 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
     @Value("${cdl.pa.contact.match.ignore.domain}")
     private boolean ignoreDomainMatchKeyInContact;
+
+    @Inject
+    private MatchProxy matchProxy;
+
+    private String matchRootOperationUid;
 
     @Override
     public PipelineTransformationRequest getConsolidateRequest() {
@@ -71,10 +82,20 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         mergeInputSchema(targetTableName);
         putStringValueInContext(ENTITY_MATCH_CONTACT_TARGETTABLE, targetTableName);
         addToListInContext(TEMPORARY_CDL_TABLES, targetTableName, String.class);
+
         Table newAccountTable = metadataProxy.getTableSummary(customerSpace.toString(), newAccountTableName);
-        if (newAccountTable != null) {
-            putStringValueInContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, newAccountTableName);
-            addToListInContext(TEMPORARY_CDL_TABLES, newAccountTableName, String.class);
+        log.info("match RootOperationUID = {}, newAccountTableName = {}, table exists = {}", matchRootOperationUid,
+                newAccountTableName, newAccountTable != null);
+        if (matchRootOperationUid != null && newAccountTable != null) {
+            MatchCommand cmd = matchProxy.bulkMatchStatus(matchRootOperationUid);
+            Preconditions.checkNotNull(cmd,
+                    String.format("Failed to retrieve match command for RootOperationUID %s", matchRootOperationUid));
+            log.info("Number of newly allocated entities = {}, RootOperationUID = {}", cmd.getNewEntityCounts(),
+                    matchRootOperationUid);
+            if (MatchUtils.hasNewEntity(cmd.getNewEntityCounts(), BusinessEntity.Account.name())) {
+                putStringValueInContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE, newAccountTableName);
+                addToListInContext(TEMPORARY_CDL_TABLES, newAccountTableName, String.class);
+            }
         }
     }
 
@@ -159,12 +180,14 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
             configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
                     columnNames, getSystemIds(BusinessEntity.Account),
                     getSystemIds(BusinessEntity.Contact), null, hasConvertBatchStoreTableName,
-                    ignoreDomainMatchKeyInContact);
+                    ignoreDomainMatchKeyInContact, null);
         } else {
+            matchRootOperationUid = UUID.randomUUID().toString();
             configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
                     columnNames, getSystemIds(BusinessEntity.Account),
                     getSystemIds(BusinessEntity.Contact), newAccountTableName, hasConvertBatchStoreTableName,
-                    ignoreDomainMatchKeyInContact);
+                    ignoreDomainMatchKeyInContact, matchRootOperationUid);
+            log.info("Set match RootOperationUID to {}", matchRootOperationUid);
         }
         step.setConfiguration(configStr);
         return step;

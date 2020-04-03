@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchW
 public interface BulkMatchService {
     boolean accept(String version);
 
-    MatchCommand match(MatchInput input, String hdfsPodId);
+    MatchCommand match(MatchInput input, String hdfsPodId, String rootOperationUid);
 
     MatchCommand status(String rootOperationUid);
 

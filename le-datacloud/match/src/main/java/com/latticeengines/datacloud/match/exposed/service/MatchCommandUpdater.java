@@ -13,6 +13,8 @@ public interface MatchCommandUpdater {
     MatchCommandUpdater errorMessage(String errorMessage);
     MatchCommandUpdater rowsRequested(Integer rowsSubmitted);
     MatchCommandUpdater rowsMatched(Integer rowsMatched);
+
+    MatchCommandUpdater newEntityCounts(Map<String, Long> newEntityCounts);
     MatchCommandUpdater matchResults(Map<EntityMatchResult, Long> matchResultMap);
     MatchCommandUpdater dnbCommands();
     MatchCommandUpdater resultLocation(String location);

@@ -321,6 +321,12 @@ public class MatchCommandServiceImpl implements MatchCommandService {
         }
 
         @Override
+        public MatchCommandUpdater newEntityCounts(Map<String, Long> newEntityCounts) {
+            matchCommand.setNewEntityCounts(newEntityCounts);
+            return this;
+        }
+
+        @Override
         public MatchCommandUpdaterImpl resultLocation(String location) {
             matchCommand.setResultLocation(location);
             return this;

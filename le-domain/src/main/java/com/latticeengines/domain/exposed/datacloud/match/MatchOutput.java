@@ -141,6 +141,7 @@ public class MatchOutput {
         if (getStatistics().getTimeElapsedInMsec() != null) {
             matchStatistics.setTimeElapsedInMsec(getStatistics().getTimeElapsedInMsec().longValue());
         }
+        matchStatistics.setNewEntityCount(getStatistics().getNewEntityCount());
 
         if (CollectionUtils.isNotEmpty(getStatistics().getColumnMatchCount())) {
             List<Integer> columnMatchCount = new ArrayList<>();

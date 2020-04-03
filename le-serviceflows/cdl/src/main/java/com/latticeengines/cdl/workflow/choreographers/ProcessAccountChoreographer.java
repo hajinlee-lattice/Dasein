@@ -7,14 +7,12 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -235,19 +233,6 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
         log.info("Found embedded account from contact: {}, from transaction: {}, from activity stream: {}",
                 hasInContact, hasInTrxn, hasInStream);
         return hasEmbeddedAccount;
-    }
-
-    private boolean hasTableInMapCtx(AbstractStep<? extends BaseStepConfiguration> step, String mapCtxKey) {
-        if (step == null || StringUtils.isBlank(mapCtxKey) || !step.hasKeyInContext(mapCtxKey)) {
-            return false;
-        }
-
-        Map<String, String> tables = step.getMapObjectFromContext(mapCtxKey, String.class, String.class);
-        if (MapUtils.isEmpty(tables)) {
-            return false;
-        }
-
-        return tables.values().stream().anyMatch(StringUtils::isNotBlank);
     }
 
     @Override

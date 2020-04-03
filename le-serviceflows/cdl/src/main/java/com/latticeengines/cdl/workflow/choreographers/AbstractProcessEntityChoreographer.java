@@ -127,6 +127,19 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return false;
     }
 
+    protected boolean hasTableInMapCtx(AbstractStep<? extends BaseStepConfiguration> step, String mapCtxKey) {
+        if (step == null || StringUtils.isBlank(mapCtxKey) || !step.hasKeyInContext(mapCtxKey)) {
+            return false;
+        }
+
+        Map<String, String> tables = step.getMapObjectFromContext(mapCtxKey, String.class, String.class);
+        if (MapUtils.isEmpty(tables)) {
+            return false;
+        }
+
+        return tables.values().stream().anyMatch(StringUtils::isNotBlank);
+    }
+
     private void saveDecisions(AbstractStep<? extends BaseStepConfiguration> step) {
         TreeSet<String> decisions = new TreeSet<>();
         decisions.add(reset ? "reset=true" : (update ? "update=true" : "rebuild=true"));

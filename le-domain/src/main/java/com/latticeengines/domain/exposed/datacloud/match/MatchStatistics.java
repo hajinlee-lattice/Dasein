@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.joda.time.Period;
@@ -14,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -28,6 +31,7 @@ public class MatchStatistics {
     private Integer rowsMatched = 0;
     private Long timeElapsedInMsec;
     private List<Integer> columnMatchCount;
+    private Map<String, Long> newEntityCount = new HashMap<>();
 
     private Long orphanedNoMatchCount = 0L;
     private Long orphanedUnmatchedAccountIdCount = 0L;
@@ -74,6 +78,21 @@ public class MatchStatistics {
     @JsonProperty("ColumnMatchCount")
     public void setColumnMatchCount(List<Integer> columnMatchCount) {
         this.columnMatchCount = columnMatchCount;
+    }
+
+    @JsonProperty("NewEntityCount")
+    public Map<String, Long> getNewEntityCount() {
+        return newEntityCount;
+    }
+
+    @JsonProperty("NewEntityCount")
+    public void setNewEntityCount(Map<String, Long> newEntityCount) {
+        this.newEntityCount = newEntityCount;
+    }
+
+    @JsonIgnore
+    public void addNewEntityCount(@NotNull String entity, long incr) {
+        newEntityCount.put(entity, newEntityCount.getOrDefault(entity, 0L) + incr);
     }
 
     public Long getOrphanedNoMatchCount() {

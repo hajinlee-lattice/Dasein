@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE;
 
 import java.util.List;
 import java.util.Set;
@@ -174,4 +175,14 @@ public class ProcessContactChoreographer extends AbstractProcessEntityChoreograp
         });
     }
 
+    @Override
+    protected boolean hasEmbeddedEntity(AbstractStep<? extends BaseStepConfiguration> step) {
+        if (step == null) {
+            return false;
+        }
+
+        boolean hasInStream = hasTableInMapCtx(step, ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE);
+        log.info("Found embedded account from activity stream: {}", hasInStream);
+        return hasInStream;
+    }
 }
