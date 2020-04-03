@@ -181,7 +181,8 @@ VALUES
   ('2.0.6', '2017-09-01', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.19', '2019-06-26', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
   ('2.0.20', '2019-11-27', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
-  ('2.0.21', '2019-12-23', '2.0', 'APPROVED', 'FULL', NOW(), '0');
+  ('2.0.21', '2019-12-23', '2.0', 'APPROVED', 'FULL', NOW(), '0'),
+  ('2.0.22', '2020-04-02', '2.0', 'APPROVED', 'FULL', NOW(), '0');
 
 UPDATE `DataCloudVersion`
 SET
@@ -215,5 +216,13 @@ SET
   `DunsGuideBookHdfsVersion` = '2019-11-23_17-48-04_UTC',
   `EnrichmentStatsVersion`   = '2019-12-22_17-30-04_UTC'
 WHERE `Version` = '2.0.21';
+
+UPDATE `DataCloudVersion`
+SET
+  `AccountMasterHdfsVersion` = '2020-03-31_23-00-43_UTC',
+  `AccountLookupHdfsVersion` = '2020-03-22_02-08-37_UTC',
+  `DunsGuideBookHdfsVersion` = '2020-03-24_17-47-31_UTC',
+  `EnrichmentStatsVersion`   = '2020-03-24_17-47-31_UTC'
+WHERE `Version` = '2.0.22';
 
 SET SQL_SAFE_UPDATES = 1;
