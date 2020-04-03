@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.component.InstallDocument;
 import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
-import com.latticeengines.domain.exposed.dcp.idaas.RoleRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -384,9 +383,8 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             } else {
                 iDaaSService.createIDaaSUser(user);
             }
-            // add product access and role to user
+            // add product access and default role to user
             iDaaSService.addProductAccessToUser(constructProductRequest(user.getEmailAddress()));
-            iDaaSService.addRoleToUser(constructRoleRequest(user.getEmailAddress()));
         }
 
     }
@@ -395,15 +393,6 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         ProductRequest request = new ProductRequest();
         request.setEmailAddress(email);
         request.setRequestor(IDaaSServiceImpl.DCP_PRODUCT);
-        request.setProducts(Collections.singletonList(IDaaSServiceImpl.DCP_PRODUCT));
-        return request;
-    }
-
-    private RoleRequest constructRoleRequest(String email) {
-        RoleRequest request = new RoleRequest();
-        request.setEmailAddress(email);
-        request.setRequestor(IDaaSServiceImpl.DCP_PRODUCT);
-        request.setRoles(Collections.singletonList(IDaaSServiceImpl.DCP_ROLE));
         request.setProducts(Collections.singletonList(IDaaSServiceImpl.DCP_PRODUCT));
         return request;
     }

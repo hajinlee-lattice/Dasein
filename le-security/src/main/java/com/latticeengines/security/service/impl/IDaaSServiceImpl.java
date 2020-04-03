@@ -50,7 +50,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     private static final Logger log = LoggerFactory.getLogger(IDaaSServiceImpl.class);
 
     public static final String DCP_PRODUCT = "Data Cloud Portal";
-    public static final String DCP_ROLE = "DATA_CLOUD_PORTAL_ACCESS";
+    private static final String DCP_ROLE = "DATA_CLOUD_PORTAL_ACCESS";
 
     private RestTemplate restTemplate = HttpClientUtils.newJsonRestTemplate();
 
