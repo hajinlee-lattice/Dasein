@@ -792,13 +792,21 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                         newMetricGroup.setGroupName(activityMetricsGroup.getGroupName());
                         newMetricGroup.setGroupId(getGroupId(activityMetricsGroup.getGroupName()));
                         newMetricGroup.setActivityTimeRange(activityMetricsGroup.getActivityTimeRange());
-                        newMetricGroup.setSubCategoryTmpl(activityMetricsGroup.getSubCategoryTmpl());
-                        newMetricGroup.setDescriptionTmpl(activityMetricsGroup.getDescriptionTmpl());
-                        newMetricGroup.setDisplayNameTmpl(activityMetricsGroup.getDisplayNameTmpl());
+                        if (StringUtils.isBlank(activityMetricsGroup.getSubCategoryTmpl().getName())) {
+                            newMetricGroup.setSubCategoryTmpl(getTemplate(activityMetricsGroup.getSubCategoryTmpl().getName()));
+                        }
+                        if (StringUtils.isBlank(activityMetricsGroup.getDescriptionTmpl().getName())) {
+                            newMetricGroup.setDescriptionTmpl(getTemplate(activityMetricsGroup.getDescriptionTmpl().getName()));
+                        }
+                        if (StringUtils.isBlank(activityMetricsGroup.getDisplayNameTmpl().getName())) {
+                            newMetricGroup.setDisplayNameTmpl(activityMetricsGroup.getDisplayNameTmpl());
+                        }
                         newMetricGroup.setRollupDimensions(activityMetricsGroup.getRollupDimensions());
                         newMetricGroup.setAggregation(activityMetricsGroup.getAggregation());
                         newMetricGroup.setEntity(activityMetricsGroup.getEntity());
-                        newMetricGroup.setSubCategoryTmpl(activityMetricsGroup.getSecondarySubCategoryTmpl());
+                        if (StringUtils.isBlank(activityMetricsGroup.getSecondarySubCategoryTmpl().getName())) {
+                            newMetricGroup.setSecondarySubCategoryTmpl(getTemplate(activityMetricsGroup.getSecondarySubCategoryTmpl().getName()));
+                        }
                         newMetricGroup.setJavaClass(activityMetricsGroup.getJavaClass());
                         newMetricGroup.setNullImputation(activityMetricsGroup.getNullImputation());
                         newMetricGroup.setReducer(activityMetricsGroup.getReducer());

@@ -29,6 +29,7 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.repository.reader.StringTemplateReaderRepository;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
 import com.latticeengines.aws.s3.S3Service;
@@ -52,6 +53,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -154,6 +156,9 @@ public abstract class CheckpointServiceBase {
 
     @Inject
     protected S3Service s3Service;
+
+    @Inject
+    private StringTemplateReaderRepository stringTemplateReaderRepository;
 
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
@@ -597,6 +602,14 @@ public abstract class CheckpointServiceBase {
                 stats.getLookupCount(), entity, //
                 CustomerSpace.shortenCustomerSpace(srcTenant.getId()), //
                 CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
+    }
+
+    protected StringTemplate getTemplate(String name) {
+        StringTemplate tmpl = stringTemplateReaderRepository.findByName(name);
+        if (tmpl == null) {
+            throw new IllegalStateException(String.format("Default template %s is not added to database", name));
+        }
+        return tmpl;
     }
 
     public static String getCheckPointTenantId(String checkpoint, String checkpointVersion, String entity) {
