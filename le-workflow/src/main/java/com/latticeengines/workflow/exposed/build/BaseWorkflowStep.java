@@ -118,6 +118,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String TRANSFORM_PIPELINE_VERSION = "TRANSFORM_PIPELINE_VERSION";
     protected static final String EVENT_COUNTER_MAP = "EVENT_COUNTER_MAP";
 
+    // DCP
+    protected static final String UPLOAD_STATS = "UPLOAD_STATS";
+
     // CDL
     public static final String CONSOLIDATE_INPUT_TEMPLATES = "CONSOLIDATE_INPUT_TEMPLATES";
     public static final String CONSOLIDATE_TEMPLATES_IN_ORDER = "CONSOLIDATE_TEMPLATES_IN_ORDER";

@@ -295,7 +295,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
          * FIXME re-enable or change this after UX finalized the behavior
         jobs.stream() //
                 .filter(Objects::nonNull) //
-                .filter(job -> exec.getWorkflowId().equals(job.getId())) //
+                .filter(job -> exec.getWorkflowPid().equals(job.getId())) //
                 .findAny() //
                 .ifPresent(job -> job.setJobStatus(JobStatus.PENDING_RETRY));
          */

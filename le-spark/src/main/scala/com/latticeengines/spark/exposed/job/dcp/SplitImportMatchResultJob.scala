@@ -1,6 +1,5 @@
 package com.latticeengines.spark.exposed.job.dcp
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -12,27 +11,26 @@ import scala.collection.JavaConverters._
 
 class SplitImportMatchResultJob extends AbstractSparkJob[SplitImportMatchResultConfig] {
 
-  val matchIndicator: String = InterfaceName.LatticeAccountId.name
-
   override def runJob(spark: SparkSession, lattice: LatticeContext[SplitImportMatchResultConfig]): Unit = {
     val config: SplitImportMatchResultConfig = lattice.config
     val input: DataFrame = lattice.input.head
 
+    val matchedDunsAttr: String = config.getMatchedDunsAttr
     val acceptedAttrs: Map[String, String] = config.getAcceptedAttrsMap.asScala.toMap
     val rejectedAttrs: Map[String, String] = config.getRejectedAttrsMap.asScala.toMap
 
-    val accepted = filterAccepted(input, acceptedAttrs)
-    val rejected = filterRejected(input, rejectedAttrs)
+    val acceptedCsv = filterAccepted(input, matchedDunsAttr, acceptedAttrs)
+    val rejectedCsv = filterRejected(input, matchedDunsAttr, rejectedAttrs)
 
-    lattice.output = accepted :: rejected :: Nil
+    lattice.output = acceptedCsv :: rejectedCsv :: Nil
   }
 
-  private def filterAccepted(input: DataFrame, acceptedAttrs: Map[String, String]): DataFrame = {
-    selectAndRename(input.filter(col(matchIndicator).isNotNull), acceptedAttrs)
+  private def filterAccepted(input: DataFrame, matchIndicator: String, acceptedAttrs: Map[String, String]): DataFrame = {
+    selectAndRename(input.filter(col(matchIndicator).isNotNull && col(matchIndicator) =!= ""), acceptedAttrs)
   }
 
-  private def filterRejected(input: DataFrame, rejectedAttrs: Map[String, String]): DataFrame = {
-    selectAndRename(input.filter(col(matchIndicator).isNull), rejectedAttrs)
+  private def filterRejected(input: DataFrame, matchIndicator: String, rejectedAttrs: Map[String, String]): DataFrame = {
+    selectAndRename(input.filter(col(matchIndicator).isNull || col(matchIndicator) === ""), rejectedAttrs)
   }
 
   private def selectAndRename(input: DataFrame, attrNames: Map[String, String]): DataFrame = {

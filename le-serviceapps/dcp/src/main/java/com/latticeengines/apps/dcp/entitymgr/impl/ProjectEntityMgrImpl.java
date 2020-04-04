@@ -60,12 +60,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Project findByProjectId(String projectId) {
-        Project project;
-        if(isReaderConnection()) {
-            project = projectReaderRepository.findByProjectId(projectId);
-        } else {
-            project = projectWriterRepository.findByProjectId(projectId);
-        }
+        Project project = getReadOrWriteRepository().findByProjectId(projectId);
         inflateSystem(project);
         return project;
     }
@@ -73,12 +68,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Project findByImportSystem(S3ImportSystem importSystem) {
-        Project project;
-        if (isReaderConnection()) {
-            project = projectReaderRepository.findByImportSystem(importSystem);
-        } else {
-            project = projectWriterRepository.findByImportSystem(importSystem);
-        }
+        Project project = getReadOrWriteRepository().findByImportSystem(importSystem);
         inflateSystem(project);
         return project;
     }
@@ -86,12 +76,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Project> findAll() {
-        List<Project> projectList;
-        if(isReaderConnection()) {
-            projectList = projectReaderRepository.findAll();
-        } else {
-            projectList = projectWriterRepository.findAll();
-        }
+        List<Project> projectList = getReadOrWriteRepository().findAll();
         if (CollectionUtils.isNotEmpty(projectList)) {
             projectList.forEach(this::inflateSystem);
         }

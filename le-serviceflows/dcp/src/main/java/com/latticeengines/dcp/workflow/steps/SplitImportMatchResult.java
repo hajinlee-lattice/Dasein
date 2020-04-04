@@ -20,9 +20,11 @@ import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -72,6 +74,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         HdfsDataUnit input = matchResult.toHdfsDataUnit("input");
         SplitImportMatchResultConfig jobConfig = new SplitImportMatchResultConfig();
         jobConfig.setInput(Collections.singletonList(input));
+
+        jobConfig.setMatchedDunsAttr(DataCloudConstants.ATTR_LDC_DUNS);
 
         List<ColumnMetadata> cms = matchResult.getColumnMetadata();
         log.info("InputSchema=" + JsonUtils.serialize(cms));
@@ -132,6 +136,17 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
             throw new RuntimeException(e);
         }
         uploadProxy.updateUploadStatus(customerSpace.toString(), uploadPid, Upload.Status.MATCH_FINISHED);
+
+        updateUploadStatistics(result);
+    }
+
+    private void updateUploadStatistics(SparkJobResult result) {
+        UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
+        UploadStats.MatchStats matchStats = new UploadStats.MatchStats();
+        matchStats.setAcceptedCnt(result.getTargets().get(0).getCount());
+        matchStats.setRejectedCnt(result.getTargets().get(1).getCount());
+        stats.setMatchStats(matchStats);
+        putObjectInContext(UPLOAD_STATS, stats);
     }
 
     private String getCsvFilePath(HdfsDataUnit dataUnit) {

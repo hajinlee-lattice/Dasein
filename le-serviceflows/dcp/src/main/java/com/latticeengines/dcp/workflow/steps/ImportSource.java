@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
@@ -74,11 +75,14 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
     @Value("${camille.zk.pod.id}")
     protected String podId;
 
+    private long uploadId;
+
     @Override
     public void execute() {
         log.info("Start import DCP file");
         CustomerSpace customerSpace = configuration.getCustomerSpace();
         Upload upload = uploadProxy.getUpload(customerSpace.toString(), configuration.getUploadPid());
+        uploadId = upload.getPid();
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace.toString(),
                 configuration.getSourceId());
         if (dataFeedTask == null) {
@@ -98,14 +102,27 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         dataFeedProxy.updateDataFeedTask(importConfig.getCustomerSpace().toString(), dataFeedTask, true);
         saveOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID, applicationId);
         waitForAppId(applicationId);
-        registerResultAsATable(applicationId);
+
+        EaiImportJobDetail jobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
+        updateUploadStatistics(jobDetail);
+        registerResultAsATable(jobDetail);
     }
 
-    private void registerResultAsATable(String applicationId) {
+    private void updateUploadStatistics(EaiImportJobDetail jobDetail) {
+        UploadStats.ImportStats importStats = new UploadStats.ImportStats();
+        long totalCnt = jobDetail.getTotalRows();
+        long errorCnt = jobDetail.getIgnoredRows() == null ? 0 : jobDetail.getIgnoredRows();
+        importStats.setSuccessCnt(totalCnt - errorCnt);
+        importStats.setErrorCnt(errorCnt);
+        UploadStats stats = new UploadStats();
+        stats.setImportStats(importStats);
+        putObjectInContext(UPLOAD_STATS, stats);
+    }
+
+    private void registerResultAsATable(EaiImportJobDetail jobDetail) {
         HdfsDataUnit result = new HdfsDataUnit();
         result.setDataFormat(DataUnit.DataFormat.AVRO);
 
-        EaiImportJobDetail jobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
         List<String> paths = JsonUtils.convertList((List<?>) jobDetail.getDetails().get("ExtractPathList"), String.class);
         if (CollectionUtils.isEmpty(paths) || paths.size() != 1) {
             throw new RuntimeException("Should have exactly one extract path, but found {}" + CollectionUtils.size(paths));

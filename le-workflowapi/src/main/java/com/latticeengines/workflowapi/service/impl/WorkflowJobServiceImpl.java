@@ -899,7 +899,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
 
             if (workflowJob.getWorkflowId() == null) {
-                log.warn("WorkflowJob.getWorkflowId() is null. Skip checking lastUpdateTime. WorkflowPid="
+                log.warn("WorkflowJob.getWorkflowPid() is null. Skip checking lastUpdateTime. WorkflowPid="
                         + workflowJob.getPid());
                 continue;
             }

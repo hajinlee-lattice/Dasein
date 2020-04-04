@@ -31,13 +31,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 
-@Api(value = "Sources")
+// to be removed: want to change /source to /sources
+@Api(value = "source")
 @RestController
-@RequestMapping("/sources")
+@RequestMapping("/source")
 @PreAuthorize("hasRole('View_DCP_Projects')")
-public class SourceResource {
+public class DeprecatedSourceResource {
 
-    private static final Logger log = LoggerFactory.getLogger(SourceResource.class);
+    private static final Logger log = LoggerFactory.getLogger(DeprecatedSourceResource.class);
 
     @Inject
     private SourceService sourceService;

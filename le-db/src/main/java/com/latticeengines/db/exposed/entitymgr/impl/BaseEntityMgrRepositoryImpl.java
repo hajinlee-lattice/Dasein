@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
 /**
  * @param <T>
  * @param <ID>
- * 
+ *
  *            We do not need to add @Transactional annotation in base class.
  *            Because SpringJpaRepository takes care of Transactional
  *            propogations.
@@ -20,7 +20,7 @@ public abstract class BaseEntityMgrRepositoryImpl<T extends HasPid, ID> extends 
     public BaseEntityMgrRepositoryImpl() {
     }
 
-    public abstract BaseJpaRepository<T, ID> getRepository();
+    protected abstract BaseJpaRepository<T, ID> getRepository();
 
     @Override
     public List<T> findAll() {

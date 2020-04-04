@@ -10,36 +10,87 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class UploadStats {
 
-    @JsonProperty("import_application_pid")
-    private Long importApplicationPid;
+    @JsonProperty("import")
+    private ImportStats importStats;
 
-    @JsonProperty("import_success_cnt")
-    private int importSuccessCnt;
+    @JsonProperty("match")
+    private MatchStats matchStats;
 
-    @JsonProperty("import_error_cnt")
-    private int importErrorCnt;
-
-    public Long getImportApplicationPid() {
-        return importApplicationPid;
+    public ImportStats getImportStats() {
+        return importStats;
     }
 
-    public void setImportApplicationPid(Long importApplicationPid) {
-        this.importApplicationPid = importApplicationPid;
+    public void setImportStats(ImportStats importStats) {
+        this.importStats = importStats;
     }
 
-    public int getImportSuccessCnt() {
-        return importSuccessCnt;
+    public MatchStats getMatchStats() {
+        return matchStats;
     }
 
-    public void setImportSuccessCnt(int importSuccessCnt) {
-        this.importSuccessCnt = importSuccessCnt;
+    public void setMatchStats(MatchStats matchStats) {
+        this.matchStats = matchStats;
     }
 
-    public int getImportErrorCnt() {
-        return importErrorCnt;
+    public static class ImportStats {
+
+        @JsonProperty("success_cnt")
+        private Long successCnt;
+
+        @JsonProperty("error_cnt")
+        private Long errorCnt;
+
+        public Long getSuccessCnt() {
+            return successCnt;
+        }
+
+        public void setSuccessCnt(Long successCnt) {
+            this.successCnt = successCnt;
+        }
+
+        public Long getErrorCnt() {
+            return errorCnt;
+        }
+
+        public void setErrorCnt(Long errorCnt) {
+            this.errorCnt = errorCnt;
+        }
     }
 
-    public void setImportErrorCnt(int importErrorCnt) {
-        this.importErrorCnt = importErrorCnt;
+    public static class MatchStats {
+
+        @JsonProperty("accepted_cnt")
+        private Long acceptedCnt;
+
+        @JsonProperty("pending_review_cnt")
+        private Long pendingReviewCnt;
+
+        @JsonProperty("rejected_cnt")
+        private Long rejectedCnt;
+
+        public Long getAcceptedCnt() {
+            return acceptedCnt;
+        }
+
+        public void setAcceptedCnt(Long acceptedCnt) {
+            this.acceptedCnt = acceptedCnt;
+        }
+
+        public Long getPendingReviewCnt() {
+            return pendingReviewCnt;
+        }
+
+        public void setPendingReviewCnt(Long pendingReviewCnt) {
+            this.pendingReviewCnt = pendingReviewCnt;
+        }
+
+        public Long getRejectedCnt() {
+            return rejectedCnt;
+        }
+
+        public void setRejectedCnt(Long rejectedCnt) {
+            this.rejectedCnt = rejectedCnt;
+        }
     }
+
 }

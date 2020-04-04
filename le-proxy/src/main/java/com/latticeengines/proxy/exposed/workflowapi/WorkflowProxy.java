@@ -153,14 +153,14 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         String baseUrl = "/yarnapps/id/{applicationId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
         url = constructUrl(url, applicationId);
-        return get("getWorkflowId", url, WorkflowExecutionId.class);
+        return get("getWorkflowPid", url, WorkflowExecutionId.class);
     }
 
     public WorkflowExecutionId getWorkflowId(String applicationId, String... params) {
         String baseUrl = "/yarnapps/id/{applicationId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url = constructUrl(url, applicationId);
-        return get("getWorkflowId", url, WorkflowExecutionId.class);
+        return get("getWorkflowPid", url, WorkflowExecutionId.class);
     }
 
     public Job getWorkflowJobFromApplicationId(String applicationId, String customerSpace) {

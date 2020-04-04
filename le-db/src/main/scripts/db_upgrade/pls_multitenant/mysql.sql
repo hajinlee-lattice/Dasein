@@ -4,18 +4,26 @@ CREATE PROCEDURE `CreateDCPUploadTable`()
 BEGIN
     create table `DCP_UPLOAD`
     (
-        `PID`                 bigint       not null auto_increment,
-        `CREATED`             datetime     not null,
-        `SOURCE_ID`           varchar(255) not null,
-        `STATUS`              integer,
-        `UPDATED`             datetime     not null,
-        `UPLOAD_CONFIG`       JSON,
-        `UPLOAD_STATS`        JSON,
-        `FK_MATCH_RESULT`     bigint,
-        `FK_TENANT_ID`        bigint       not null,
+        `PID`             bigint       not null auto_increment,
+        `CREATED`         datetime     not null,
+        `SOURCE_ID`       varchar(255) not null,
+        `STATUS`          integer,
+        `UPDATED`         datetime     not null,
+        `UPLOAD_CONFIG`   JSON,
+        `FK_MATCH_RESULT` bigint,
+        `FK_TENANT_ID`    bigint       not null,
         primary key (`PID`)
     ) engine = InnoDB;
 
+    create table `DCP_UPLOAD_STATISTICS`
+    (
+        `PID`          bigint not null auto_increment,
+        `IS_LATEST`    bit,
+        `STATISTICS`   JSON,
+        `WORKFLOW_PID` bigint,
+        `FK_UPLOAD_ID` bigint not null,
+        primary key (`PID`)
+    ) engine = InnoDB;
 
     CREATE INDEX IX_SOURCE_ID ON `DCP_UPLOAD` (`SOURCE_ID`);
 
