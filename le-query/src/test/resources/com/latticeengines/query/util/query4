@@ -1,0 +1,7 @@
+select 1 as Contact
+from Arcserve_Contact_2020_03_28_09_56_28_UTC as Contact
+where Contact.AccountId in (select Account.AccountId as AccountId
+from AccountExport_2020_03_28_08_58_55_UTC as Account
+left join Arcserve_PivotedRating_2020_03_28_10_48_01_UTC as Rating
+on Account.AccountId = Rating.AccountId
+where lower(Account.user_geo_region__c) = lower('NA') and lower(Rating.engine_bro9gp3mr_s9_d5r590qvq) = lower('A') and lower(Rating.engine_8eogqp73re2bcxnn_pqgva) in ('c', 'd') and lower(Rating.engine_nvp08i0er_cs4sxhqui2lq) in ('b', 'c') and lower(Account.Type) = lower('End User') and lower(Account.Industry) in ('manufacturing', 'manufacturing - durables', 'manufacturing & mining', 'manufacturing - non-durables', 'discrete manufacturing', 'manufactura', 'process manufacturing', 'division d: manufacturing', 'non-tech: manufacturing & process indust', 'tech: manufacturing - hardware/software', 'manufacturing - industrial (automative,', 'manufacturing - fmcg/discrete (non compu', 'manufacturing - non durables', 'manufacturing - process', 'it/hardware manufacturer', 'manufacturing: packaging/containers', 'manufacturing; industrial machinery & eq', 'manufacturing consumer goods', 'manufacturing/industrial (non-computer r') and not lower(Account.user_accountsource) = lower('Lattice') and Account.Website is not null and lower(Rating.engine_nvp08i0er_cs4sxhqui2lq) in ('b', 'c'))
