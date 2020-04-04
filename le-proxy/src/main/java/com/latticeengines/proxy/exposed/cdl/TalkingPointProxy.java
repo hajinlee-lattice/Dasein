@@ -24,8 +24,7 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     @SuppressWarnings("unchecked")
-    public List<TalkingPointDTO> createOrUpdate(String customerSpace,
-            List<TalkingPointDTO> talkingPoints) {
+    public List<TalkingPointDTO> createOrUpdate(String customerSpace, List<TalkingPointDTO> talkingPoints) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
         setErrorHandler(new PostResponseErrorHandler());
         return post("createOrUpdate", url, talkingPoints, List.class);
@@ -40,13 +39,10 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Proxy
         return findAllByPlayName(customerSpace, playName, false);
     }
 
-    @SuppressWarnings("unchecked")
-    public List<TalkingPointDTO> findAllByPlayName(String customerSpace, String playName,
-            boolean publishedOnly) {
-        String url =
-                constructUrl(URL_PREFIX + "/play/" + playName, shortenCustomerSpace(customerSpace))
-                        + "?publishedonly=" + publishedOnly;
-        return get("findAllByPlayName", url, List.class);
+    public List<TalkingPointDTO> findAllByPlayName(String customerSpace, String playName, boolean publishedOnly) {
+        String url = constructUrl(URL_PREFIX + "/play/" + playName, shortenCustomerSpace(customerSpace))
+                + "?publishedonly=" + publishedOnly;
+        return JsonUtils.convertList(get("findAllByPlayName", url, List.class), TalkingPointDTO.class);
     }
 
     public TalkingPointPreview getTalkingPointPreview(String customerSpace, String playName) {
@@ -56,8 +52,7 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public DantePreviewResources getPreviewResources(String customerSpace) {
-        String url =
-                constructUrl(URL_PREFIX + "/previewresources", shortenCustomerSpace(customerSpace));
+        String url = constructUrl(URL_PREFIX + "/previewresources", shortenCustomerSpace(customerSpace));
         return get("getPreviewResources", url, DantePreviewResources.class);
     }
 
@@ -79,10 +74,8 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Proxy
         return get("findByName", url, TalkingPointDTO.class);
     }
 
-    public List<AttributeLookup> getAttributesInTalkingPointOfPlay(String customerSpace,
-            String playName) {
-        String url = constructUrl(URL_PREFIX + "/attributes/" + playName,
-                shortenCustomerSpace(customerSpace));
+    public List<AttributeLookup> getAttributesInTalkingPointOfPlay(String customerSpace, String playName) {
+        String url = constructUrl(URL_PREFIX + "/attributes/" + playName, shortenCustomerSpace(customerSpace));
         List<?> list = get("getAttributesInTalkingPointOfPlay", url, List.class);
         return JsonUtils.convertList(list, AttributeLookup.class);
     }
