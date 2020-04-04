@@ -13,7 +13,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
 public class CDLComponentManagerImplDeploymentTestNG extends CDLDeploymentTestNGBase {
@@ -22,6 +25,9 @@ public class CDLComponentManagerImplDeploymentTestNG extends CDLDeploymentTestNG
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @BeforeClass(groups = "deployment")
     public void setup() {
@@ -34,6 +40,8 @@ public class CDLComponentManagerImplDeploymentTestNG extends CDLDeploymentTestNG
 
     @Test(groups = "deployment")
     public void testSystemInstallation() {
+        log.info("Feature flag in test");
+        log.info(JsonUtils.serialize(batonService.getFeatureFlags(CustomerSpace.parse(mainCustomerSpace))));
         Assert.assertTrue(CollectionUtils.isEmpty(cdlProxy.getS3ImportSystemList(mainCustomerSpace)));
     }
 }
