@@ -2,6 +2,7 @@ package com.latticeengines.testframework.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,7 +15,9 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -346,16 +349,30 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 && !featureFlagMap.get(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION.getName())) {
             payload = overWriteEncrptionFeatureFlagToFalse(ins);
         } else {
-            payload = IOUtils.toString(ins, "UTF-8");
+            payload = IOUtils.toString(ins, StandardCharsets.UTF_8);
         }
         payload = payload.replace(tenantToken, dlTenantName).replace(topologyToken, topology);
         TenantRegistration tenantRegistration = JsonUtils.deserialize(payload, TenantRegistration.class);
+        tenantRegistration.getSpaceInfo().featureFlags =
+                updateFeatureFlagMap(tenantRegistration.getSpaceInfo().featureFlags, featureFlagMap);
         log.info("Tenant Registration:\n" + JsonUtils.serialize(tenantRegistration));
         adminTenantProxy.createTenant(dlTenantName, tenantRegistration);
     }
 
+    private String updateFeatureFlagMap(String currentFeatureFlag, Map<String, Boolean> appendFeatureFlagMap) {
+        Map<String, Boolean> combinedMap = new HashMap<>();
+        if (StringUtils.isNotBlank(currentFeatureFlag)) {
+            Map<?, ?> map = JsonUtils.deserialize(currentFeatureFlag, Map.class);
+            combinedMap = JsonUtils.convertMap(map, String.class, Boolean.class);
+        }
+        if (MapUtils.isNotEmpty(appendFeatureFlagMap)) {
+            combinedMap.putAll(appendFeatureFlagMap);
+        }
+        return JsonUtils.serialize(combinedMap);
+    }
+
     private String overWriteEncrptionFeatureFlagToFalse(InputStream ins) throws IOException {
-        String input = IOUtils.toString(ins, "UTF-8");
+        String input = IOUtils.toString(ins, StandardCharsets.UTF_8);
         Pattern pattern = Pattern.compile("(\\\\\"EnableDataEncryption\\\\\")(:true)");
         Matcher matcher = pattern.matcher(input);
         StringBuffer result = new StringBuffer();
@@ -367,7 +384,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     private void waitForTenantConsoleInstallation(CustomerSpace customerSpace) {
-        Long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10L);
+        long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10L);
         BootstrapState state = BootstrapState.createInitialState();
         while (!BootstrapState.State.OK.equals(state.state) && !BootstrapState.State.ERROR.equals(state.state)
                 && System.currentTimeMillis() <= timeout) {
