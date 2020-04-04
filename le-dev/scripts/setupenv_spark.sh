@@ -46,16 +46,18 @@ cp -f "${WSHOME}/le-dev/spark/spark-defaults.conf" "${SPARK_HOME}/conf"
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping Livy ..."
 
-    LIVY_VERSION=0.6.0-incubating
+    LIVY_VERSION=0.7.0-incubating
 
     ARTIFACT_DIR="$WSHOME/le-dev/artifacts"
     ARTIFACT_NAME=apache-livy-${LIVY_VERSION}-bin
 
     if [[ ! -f "${ARTIFACT_DIR}/${ARTIFACT_NAME}.zip" ]]; then
-        APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
-        echo "Use apache mirror: ${APACHE_MIRROR}"
-        LIVY_TGZ_URL="${APACHE_MIRROR}/incubator/livy/${LIVY_VERSION}/${ARTIFACT_NAME}.zip"
-        wget ${LIVY_TGZ_URL} -O "${ARTIFACT_DIR}/${ARTIFACT_NAME}.zip"
+        ARTIFACT_URL="s3://latticeengines-test-artifacts/artifacts/livy/apache-livy-${LIVY_VERSION}-bin.zip"
+        aws s3 cp ${ARTIFACT_URL} ${ARTIFACT_DIR}/${ARTIFACT_NAME}.zip
+#        APACHE_MIRROR=$(curl -s 'https://www.apache.org/dyn/closer.cgi?as_json=1' | jq --raw-output '.preferred')
+#        echo "Use apache mirror: ${APACHE_MIRROR}"
+#        LIVY_TGZ_URL="${APACHE_MIRROR}/incubator/livy/${LIVY_VERSION}/${ARTIFACT_NAME}.zip"
+#        wget ${LIVY_TGZ_URL} -O "${ARTIFACT_DIR}/${ARTIFACT_NAME}.zip"
     fi
 
     if [[ -d "${ARTIFACT_DIR}/${ARTIFACT_NAME}" ]]; then
