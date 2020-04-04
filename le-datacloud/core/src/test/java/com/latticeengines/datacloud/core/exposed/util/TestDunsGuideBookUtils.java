@@ -140,11 +140,13 @@ public final class TestDunsGuideBookUtils {
                         "052267488", "151962479", //
                         "ManualMatch" //
                 }, //
+                /*
                 { //
                         newTuple("Valmont Newmark, Inc.", "USA", "NEBRASKA", null), //
                         "828616990", "007267214", //
                         "ManualMatch" //
                 }, //
+                */
                 { //
                         newTuple("G.I.A. Publications Inc", "USA", null, "Chicago"), //
                         "080935386", "062501705", //
