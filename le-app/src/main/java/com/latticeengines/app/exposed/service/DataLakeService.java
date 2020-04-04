@@ -29,10 +29,12 @@ public interface DataLakeService {
 
     List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity);
 
-    DataPage getAccountById(String accountID, Predefined predefined, Map<String, String> orgInf);
+    DataPage getAccountById(String accountID, Predefined predefined, Map<String, String> orgInfo);
 
-    DataPage getAccountById(String accountID, Predefined predefined, Map<String, String> orgInf,
+    DataPage getAccountById(String accountID, Predefined predefined, Map<String, String> orgInfo,
             List<String> requiredAttributes);
+
+    DataPage getAccountById(String accountId, List<String> lookupAttributes, Map<String, String> orgInfo);
 
     DataPage getContactsByAccountById(String accountId, Map<String, String> orgInfo);
 

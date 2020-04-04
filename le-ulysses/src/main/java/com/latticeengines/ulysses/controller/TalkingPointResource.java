@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -75,8 +74,7 @@ public class TalkingPointResource {
     @ApiOperation(value = "Get published talking points for the given play in danteformat")
     public FrontEndResponse<List<String>> getTalkingPointByPlayIdInDanteFormat(@PathVariable String playId) {
         try {
-            return new FrontEndResponse<>(talkingPointDanteFormatter
-                    .format(JsonUtils.convertList(getTalkingPointByPlayId(playId), TalkingPointDTO.class)));
+            return new FrontEndResponse<>(talkingPointDanteFormatter.format(getTalkingPointByPlayId(playId)));
         } catch (LedpException le) {
             log.error("Failed to get talking point data", le);
             return new FrontEndResponse<>(le.getErrorDetails());

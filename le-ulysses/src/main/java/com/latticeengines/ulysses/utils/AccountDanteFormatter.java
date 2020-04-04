@@ -1,8 +1,12 @@
 package com.latticeengines.ulysses.utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.context.annotation.Scope;
@@ -45,6 +49,18 @@ public class AccountDanteFormatter implements DanteFormatter<Map<String, Object>
         public static String Segment2Name = "Segment2Name";
         public static String Segment3Name = "Segment3Name";
         public static String DisplayName = "DisplayName";
+    }
+
+    public Set<String> getUIRequiredProperties() {
+        List<String> toReturn = new ArrayList<>(Arrays.asList(accountIdColumnName, lookupIdColumnName,
+                InterfaceName.CompanyName.name(), InterfaceName.SpendAnalyticsSegment.name(),
+                DanteAccountSegmentProperty.IsSegment, DanteAccountSegmentProperty.Segment1Name,
+                DanteAccountSegmentProperty.Segment2Name, DanteAccountSegmentProperty.Segment3Name));
+
+        if (isEntityMatchEnabled)
+            toReturn.add(custAccountIdColumnName);
+
+        return new HashSet<>(toReturn);
     }
 
     public void setIsEntityMatchEnabled(boolean isEntityMatchEnabled) {

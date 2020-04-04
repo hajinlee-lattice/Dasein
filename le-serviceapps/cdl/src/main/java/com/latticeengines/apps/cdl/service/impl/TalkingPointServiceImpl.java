@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -31,6 +29,7 @@ import com.latticeengines.domain.exposed.cdl.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.cdl.TalkingPoint;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
+import com.latticeengines.domain.exposed.cdl.util.TalkingPointUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -232,8 +231,7 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         if (talkingPoints != null) {
             for (TalkingPoint talkingPoint : talkingPoints) {
                 if (StringUtils.isNotBlank(talkingPoint.getContent())) {
-                    talkingPoint.setTPAttributes(findAttributeLookups(talkingPoint.getContent()));
-                    attributes.addAll(talkingPoint.getTPAttributes());
+                    attributes.addAll(TalkingPointUtils.extractAttributes(talkingPoint.getContent()));
                 }
             }
         }
@@ -246,26 +244,10 @@ public class TalkingPointServiceImpl implements TalkingPointService {
             return new HashSet<>();
         }
         List<String> playNames = talkingPointEntityMgr.findPlayDisplayNamesUsingGivenAttributes(attributes);
-        List<String> publishedPlayNames =
-                publishedTalkingPointEntityMgr.findPlayDisplayNamesUsingGivenAttributes(attributes);
+        List<String> publishedPlayNames = publishedTalkingPointEntityMgr
+                .findPlayDisplayNamesUsingGivenAttributes(attributes);
         playNames.addAll(publishedPlayNames);
         return new HashSet<>(playNames);
-    }
-
-    private Set<AttributeLookup> findAttributeLookups(String content) {
-        Pattern pattern = Pattern.compile("\\{!([A-Za-z0-9_]+)\\.([A-Za-z0-9_]+)}");
-        Matcher matcher = pattern.matcher(content);
-
-        Set<AttributeLookup> attributes = new HashSet<>();
-        while (matcher.find()) {
-            String attributeLookupStr = String.format("%s.%s", matcher.group(1), matcher.group(2));
-            AttributeLookup attributeLookup = AttributeLookup.fromString(attributeLookupStr);
-            if (attributeLookup != null) {
-                attributes.add(attributeLookup);
-            }
-        }
-
-        return attributes;
     }
 
     private TalkingPoint convertFromPublished(PublishedTalkingPoint ptp, Play play) {

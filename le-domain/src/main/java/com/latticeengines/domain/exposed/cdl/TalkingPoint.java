@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.util.Date;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -15,7 +14,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 import org.hibernate.annotations.Type;
 
@@ -25,7 +23,6 @@ import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 
 @Entity
 @Table(name = "DANTE_TALKINGPOINT")
@@ -70,10 +67,6 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
     @Column(name = "UPDATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
-
-    @JsonProperty("talkingpoint_attributes")
-    @Transient
-    private Set<AttributeLookup> tpAttributes;
 
     public TalkingPoint() {
         setName(generateNameStr());
@@ -149,13 +142,5 @@ public class TalkingPoint implements HasPid, HasName, HasAuditingFields {
 
     private String generateNameStr() {
         return String.format(TALKING_POINT_NAME_FORMAT, TALKING_POINT_NAME_PREFIX, UUID.randomUUID().toString());
-    }
-
-    public Set<AttributeLookup> getTPAttributes() {
-        return this.tpAttributes;
-    }
-
-    public void setTPAttributes(Set<AttributeLookup> attributes) {
-        this.tpAttributes = attributes;
     }
 }

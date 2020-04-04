@@ -9,15 +9,21 @@ import com.latticeengines.monitor.exposed.annotation.InvocationInstrument;
 public class UlyssesInstrument implements InvocationInstrument {
 
     private final ColumnSelection.Predefined attrGroup;
+    private final boolean allowWithoutAttrGroup;
 
     UlyssesInstrument(ColumnSelection.Predefined attrGroup) {
         this.attrGroup = attrGroup;
+        this.allowWithoutAttrGroup = false;
+    }
+
+    UlyssesInstrument(boolean allowWithoutAttrGroup) {
+        this.allowWithoutAttrGroup = allowWithoutAttrGroup;
+        this.attrGroup = null;
     }
 
     @Override
     public boolean accept(MethodSignature signature, Object[] args, Object toReturn, Throwable ex) {
-        ColumnSelection.Predefined attrGroup = (ColumnSelection.Predefined) args[2];
-        return this.attrGroup.equals(attrGroup);
+        return allowWithoutAttrGroup || this.attrGroup.equals(args[2]);
     }
 
     @Override
