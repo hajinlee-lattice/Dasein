@@ -188,7 +188,7 @@ public class DataLakeAccountResource {
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     @InvocationMeter(name = "customlist-dante", measurment = "ulysses", instrument = INSTRUMENT_CL)
-    public FrontEndResponse<List<String>> getAccountsAndTalkingpoints(RequestEntity<String> requestEntity,
+    public FrontEndResponse<String> getAccountsAndTalkingpoints(RequestEntity<String> requestEntity,
             @PathVariable String accountId, //
             @PathVariable String playId) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
@@ -213,10 +213,9 @@ public class DataLakeAccountResource {
                 return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
 
-            List<String> toReturn = talkingPointDanteFormatter
-                    .format(JsonUtils.convertList(tps, TalkingPointDTO.class));
-            toReturn.add(accountFormatter.format(accountRawData.getData().get(0)));
-            return new FrontEndResponse<>(toReturn);
+            List<String> toReturn = talkingPointDanteFormatter.format(JsonUtils.convertList(tps, TalkingPointDTO.class));
+            return new FrontEndResponse<>(JsonUtils.serialize(
+                    new AccountAndTalkingPoints(accountFormatter.format(accountRawData.getData().get(0)), toReturn)));
         } catch (LedpException le) {
             log.error("Failed to populate talkingpoints and accounts for " + customerSpace, le);
             return new FrontEndResponse<>(le.getErrorDetails());
