@@ -357,19 +357,22 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     public boolean validationMarketing(String customerSpace, String systemName,
                                        String systemType, EntityType entityType) {
         if (!EntityType.MarketingActivity.equals(entityType) && !EntityType.MarketingActivityType.equals(entityType)) {
-            log.warn("entityType isn't match Marketing/MarketingActivityType, customerSpace is {}, systemName is {}, " +
+            log.error("entityType isn't match Marketing/MarketingActivityType, customerSpace is {}, systemName is {}," +
+                    " " +
                             "systemType is {}, entityType is {}.", customerSpace, systemName, systemType, entityType);
             return false;
         }
         if (!S3ImportSystem.SystemType.Eloqua.name().equalsIgnoreCase(systemType) && !S3ImportSystem.SystemType.Marketo.name().equalsIgnoreCase(systemType)) {
-            log.warn("systemType isn't match eloqua/marketo, customerSpace is {}, systemName is {}, systemType is {}," +
+            log.error("systemType isn't match eloqua/marketo, customerSpace is {}, systemName is {}, systemType is " +
+                    "{}," +
                     " entityType is {}.", customerSpace, systemName, systemType, entityType);
             return false;
         }
         S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
                 systemName);
-        log.info("importSystem is {}.", JsonUtils.serialize(importSystem));
+        log.info("importSystem is {}. ", JsonUtils.serialize(importSystem));
         if (importSystem == null) {
+            log.error("import system is null when validate Marketing. customerSpace is {}.", customerSpace);
             return false;
         }
         return StringUtils.isNotEmpty(importSystem.getContactSystemId()) || isDefaultSystemInGATenant(importSystem);

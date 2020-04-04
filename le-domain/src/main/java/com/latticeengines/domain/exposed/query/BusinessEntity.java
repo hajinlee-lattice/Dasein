@@ -160,7 +160,7 @@ public enum BusinessEntity implements GraphNode {
         Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
 
         Contact.addRelationship(ContactMarketingActivity, Cardinality.ONE_TO_ONE, InterfaceName.ContactId);
-        Account.addRelationship(AccountMarketingActivity, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
+        Account.addRelationship(AccountMarketingActivity, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
 
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
         Product.addRelationship(PurchaseHistory, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);

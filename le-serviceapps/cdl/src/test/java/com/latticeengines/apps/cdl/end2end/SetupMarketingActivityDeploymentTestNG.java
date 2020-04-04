@@ -23,9 +23,9 @@ import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
-public class processMarketingActivityDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
+public class SetupMarketingActivityDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(processMarketingActivityDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(SetupMarketingActivityDeploymentTestNG.class);
     private static final String MARKETO_SYSTEM = "Default_Marketo_System";
     private static final String ELOQUA_SYSTEM = "Default_Eloqua_System";
 
