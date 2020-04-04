@@ -15,6 +15,7 @@ import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -78,6 +79,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
 
         if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
             if (!batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_ENTITY_MATCH)) {
+                log.info(JsonUtils.serialize(batonService.getFeatureFlags(space));
                 log.info("Create Default System for tenant: " + space.toString());
                 s3ImportSystemService.createDefaultImportSystem(space.toString());
                 dropBoxService.createTenantDefaultFolder(space.toString());
