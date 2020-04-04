@@ -15,17 +15,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DantePreviewResources;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.cdl.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.cdl.TalkingPointPreview;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
-import com.latticeengines.proxy.exposed.cdl.TalkingPointsAttributesProxy;
+import com.latticeengines.pls.service.TalkingPointService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,13 +31,7 @@ import io.swagger.annotations.ApiOperation;
 public class TalkingPointResource {
 
     @Inject
-    private TalkingPointProxy talkingPointProxy;
-
-    @Inject
-    private TalkingPointsAttributesProxy talkingPointsAttributesProxy;
-
-    @Inject
-    private PlayProxy playProxy;
+    private TalkingPointService talkingPointService;
 
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
@@ -51,55 +39,35 @@ public class TalkingPointResource {
     @ApiOperation(value = "Create a Talking Point")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public List<TalkingPointDTO> createOrUpdate(@RequestBody List<TalkingPointDTO> talkingPoints) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant == null) {
-            throw new LedpException(LedpCode.LEDP_38008);
-        }
-        return talkingPointProxy.createOrUpdate(tenant.getId(), talkingPoints);
+        return talkingPointService.createOrUpdate(talkingPoints);
     }
 
     @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get a Talking Point")
     public TalkingPointDTO findByName(@PathVariable String talkingPointName) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return talkingPointProxy.findByName(tenant.getId(), talkingPointName);
+        return talkingPointService.findByName(talkingPointName);
     }
 
     @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Find all Talking Points defined for the given play")
     public List<TalkingPointDTO> findAllByPlayName(@PathVariable String playName) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return talkingPointProxy.findAllByPlayName(tenant.getId(), playName);
+        return talkingPointService.findAllByPlayName(playName);
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get the resources needed to preview a Dante Talking Point")
     public DantePreviewResources getPreviewResources() {
-        Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant == null) {
-            throw new LedpException(LedpCode.LEDP_38008);
-        }
-        return talkingPointProxy.getPreviewResources(tenant.getId());
+        return talkingPointService.getPreviewResources();
     }
 
     @RequestMapping(value = "/preview", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get Talking Point Preview Data for a given Play")
     public TalkingPointPreview preview(@RequestParam("playName") String playName) {
-        try {
-            Tenant tenant = MultiTenantContext.getTenant();
-            if (tenant == null) {
-                throw new LedpException(LedpCode.LEDP_38008);
-            }
-            return talkingPointProxy.getTalkingPointPreview(tenant.getId(), playName);
-        } catch (LedpException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_38015, e, new String[] {playName, null});
-        }
+        return talkingPointService.preview(playName);
     }
 
     @RequestMapping(value = "/publish", method = RequestMethod.POST)
@@ -107,11 +75,7 @@ public class TalkingPointResource {
     @ApiOperation(value = "Publish given play's Talking Points to dante")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public void publish(@RequestParam("playName") String playName) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant == null) {
-            throw new LedpException(LedpCode.LEDP_38008);
-        }
-        playProxy.publishTalkingPoints(tenant.getId(), playName);
+        talkingPointService.publish(playName);
     }
 
     @RequestMapping(value = "/revert", method = RequestMethod.POST)
@@ -120,11 +84,7 @@ public class TalkingPointResource {
             value = "Revert the given play's talking points to the version last published to dante")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public List<TalkingPointDTO> revert(@RequestParam("playName") String playName) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant == null) {
-            throw new LedpException(LedpCode.LEDP_38008);
-        }
-        return talkingPointProxy.revert(tenant.getId(), playName);
+        return talkingPointService.revert(playName);
     }
 
     @RequestMapping(value = "/{talkingPointName}", method = RequestMethod.DELETE)
@@ -132,8 +92,7 @@ public class TalkingPointResource {
     @ApiOperation(value = "Delete a Dante Talking Point ")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public void delete(@PathVariable String talkingPointName) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        talkingPointProxy.deleteByName(tenant.getId(), talkingPointName);
+        talkingPointService.delete(talkingPointName);
     }
 
     @RequestMapping(value = "/attributes", method = RequestMethod.POST)
@@ -141,10 +100,6 @@ public class TalkingPointResource {
     @ApiOperation(value = "Get attributes for given notions")
     @PreAuthorize("hasRole('Edit_PLS_Plays')")
     public TalkingPointNotionAttributes getAttributesByNotions(@RequestBody List<String> notions) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant == null) {
-            throw new LedpException(LedpCode.LEDP_38008);
-        }
-        return talkingPointsAttributesProxy.getAttributesByNotions(tenant.getId(), notions);
+        return talkingPointService.getAttributesByNotions(notions);
     }
 }

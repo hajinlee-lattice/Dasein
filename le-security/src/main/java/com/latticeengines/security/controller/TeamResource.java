@@ -53,8 +53,8 @@ public class TeamResource {
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsFromSession(
             @RequestParam(value = "withTeamMember", required = false, defaultValue = "false") boolean withTeamMember,
-            @RequestParam(value = "appendGlobalTeam", required = false, defaultValue = "true") boolean appendGlobalTeam) {
-        List<GlobalTeam> globalTeams = teamService.getTeamsFromSession(withTeamMember, appendGlobalTeam);
+            @RequestParam(value = "appendDefaultGlobalTeam", required = false, defaultValue = "true") boolean appendDefaultGlobalTeam) {
+        List<GlobalTeam> globalTeams = teamService.getTeamsFromSession(withTeamMember, appendDefaultGlobalTeam);
         return globalTeams;
     }
 
@@ -62,7 +62,7 @@ public class TeamResource {
     @ResponseBody
     @ApiOperation(value = "List all teams")
     public List<GlobalTeam> getAllTeams() {
-        return teamService.getTeamsInContext();
+        return teamService.getTeamsInContext(true, false);
     }
 
     @PostMapping(value = "")

@@ -7,7 +7,7 @@ import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 
 public interface GlobalTeamManagementService {
 
-    String createTeam(String createdByUser, GlobalTeamData globalTeamData);
+    GlobalAuthTeam createTeam(String createdByUser, GlobalTeamData globalTeamData);
 
     GlobalAuthTeam updateTeam(String teamId, GlobalTeamData globalTeamData);
 
