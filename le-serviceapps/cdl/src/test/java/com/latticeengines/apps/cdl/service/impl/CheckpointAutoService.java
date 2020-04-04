@@ -792,19 +792,19 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                         newMetricGroup.setGroupName(activityMetricsGroup.getGroupName());
                         newMetricGroup.setGroupId(getGroupId(activityMetricsGroup.getGroupName()));
                         newMetricGroup.setActivityTimeRange(activityMetricsGroup.getActivityTimeRange());
-                        if (StringUtils.isBlank(activityMetricsGroup.getSubCategoryTmpl().getName())) {
+                        if (StringUtils.isNotBlank(activityMetricsGroup.getSubCategoryTmpl().getName())) {
                             newMetricGroup.setSubCategoryTmpl(getTemplate(activityMetricsGroup.getSubCategoryTmpl().getName()));
                         }
-                        if (StringUtils.isBlank(activityMetricsGroup.getDescriptionTmpl().getName())) {
+                        if (StringUtils.isNotBlank(activityMetricsGroup.getDescriptionTmpl().getName())) {
                             newMetricGroup.setDescriptionTmpl(getTemplate(activityMetricsGroup.getDescriptionTmpl().getName()));
                         }
-                        if (StringUtils.isBlank(activityMetricsGroup.getDisplayNameTmpl().getName())) {
+                        if (StringUtils.isNotBlank(activityMetricsGroup.getDisplayNameTmpl().getName())) {
                             newMetricGroup.setDisplayNameTmpl(activityMetricsGroup.getDisplayNameTmpl());
                         }
                         newMetricGroup.setRollupDimensions(activityMetricsGroup.getRollupDimensions());
                         newMetricGroup.setAggregation(activityMetricsGroup.getAggregation());
                         newMetricGroup.setEntity(activityMetricsGroup.getEntity());
-                        if (StringUtils.isBlank(activityMetricsGroup.getSecondarySubCategoryTmpl().getName())) {
+                        if (StringUtils.isNotBlank(activityMetricsGroup.getSecondarySubCategoryTmpl().getName())) {
                             newMetricGroup.setSecondarySubCategoryTmpl(getTemplate(activityMetricsGroup.getSecondarySubCategoryTmpl().getName()));
                         }
                         newMetricGroup.setJavaClass(activityMetricsGroup.getJavaClass());
