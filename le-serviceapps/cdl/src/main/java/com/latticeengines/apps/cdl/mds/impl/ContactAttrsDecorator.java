@@ -74,7 +74,7 @@ public class ContactAttrsDecorator implements Decorator {
 
             if (InterfaceName.ContactId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
                 cm.disableGroup(Segment);
-                cm.disableGroup(Enrichment);
+                cm.enableGroup(Enrichment);
                 cm.disableGroup(TalkingPoint);
                 cm.disableGroup(CompanyProfile);
                 cm.disableGroup(Model);
@@ -90,21 +90,41 @@ public class ContactAttrsDecorator implements Decorator {
                 return cm;
             }
 
-            // setting for attributes corresponds to mappings in section Unique ID, Other IDs, Match IDs, only enable for
-            // usage export
-            if ((InterfaceName.CustomerAccountId.name().equals(cm.getAttrName()) ||
-                    InterfaceName.CustomerContactId.name().equals(cm.getAttrName()) ||
-                    attrNameInOtherIDAndMatchID.contains(cm.getAttrName())) && entityMatchEnabled) {
-                cm.disableGroup(Segment);
+            if (InterfaceName.CustomerContactId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
                 cm.enableGroup(Enrichment);
                 cm.disableGroup(TalkingPoint);
                 cm.disableGroup(CompanyProfile);
                 cm.disableGroup(Model);
-                cm.setCanSegment(false);
-                cm.setCanModel(false);
+                cm.setCanSegment(true);
+                cm.setCanModel(true);
                 cm.setCanEnrich(true);
+                if (onlyEntityMatchGAEnabled) {
+                    cm.enableGroup(Segment);
+                } else {
+                    cm.disableGroup(Segment);
+                }
                 return cm;
             }
+
+            // PLS-15406  setting for attributes corresponds to mappings in section Unique ID,
+            // Other IDs, Match IDs, only enable for usage export
+            // InterfaceName.CustomerAccountId belongs to system attrs
+            if (attrNameInOtherIDAndMatchID.contains(cm.getAttrName()) && entityMatchEnabled) {
+                cm.enableGroup(Enrichment);
+                cm.disableGroup(TalkingPoint);
+                cm.disableGroup(CompanyProfile);
+                cm.disableGroup(Model);
+                cm.setCanSegment(true);
+                cm.setCanModel(true);
+                cm.setCanEnrich(true);
+                if (onlyEntityMatchGAEnabled) {
+                    cm.enableGroup(Segment);
+                } else {
+                    cm.disableGroup(Segment);
+                }
+                return cm;
+            }
+
             cm.enableGroup(Segment);
             // enable some attributes for Export
             if (exportAttrs.contains(cm.getAttrName())) {

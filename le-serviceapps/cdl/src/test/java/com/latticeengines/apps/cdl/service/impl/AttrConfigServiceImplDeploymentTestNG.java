@@ -160,7 +160,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 verifyFlags(config, cat, partition, //
                         state, false, //
                         false, false, //
-                        false, canChangeExport, //
+                        true, canChangeExport, //
                         false, canChangeExport, //
                         false, canChangeExport, //
                         false, false);
@@ -239,7 +239,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                 verifyFlags(config, cat, partition, //
                         state, false, //
                         false, false, //
-                        false, canChangeExport, //
+                        true, canChangeExport, //
                         false, canChangeExport, //
                         false, canChangeExport, //
                         false, false);
