@@ -15,17 +15,12 @@ import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.DropBox;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -82,18 +77,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         provisionDropBox(space);
 
         if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
-            Path path = PathBuilder.buildFeatureFlagPath(CamilleEnvironment.getPodId(),
-                    CustomerSpace.parse(customerSpace));
-            Camille camille = CamilleEnvironment.getCamille();
-            try {
-                if (camille.exists(path)){
-                    log.info("Current feature flag file:" + camille.get(path).getData());
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             if (!batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_ENTITY_MATCH)) {
-                log.info(JsonUtils.serialize(batonService.getFeatureFlags(space)));
                 log.info("Create Default System for tenant: " + space.toString());
                 s3ImportSystemService.createDefaultImportSystem(space.toString());
                 dropBoxService.createTenantDefaultFolder(space.toString());
