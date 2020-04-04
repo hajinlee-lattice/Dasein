@@ -596,6 +596,19 @@ public class CDLResource {
         return cdlService.createDefaultOpportunityTemplate(customerSpace.toString(), systemName);
     }
 
+    @PostMapping(value = "/s3import/template/create/marketing")
+    @ResponseBody
+    @ApiOperation("Create Marketing template")
+    public boolean createDefaultMarketing(@RequestParam("systemName") String systemName,
+                                          @RequestParam("systemType") String systemType) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+
+        return cdlService.createDefaultMarketingTemplate(customerSpace.toString(), systemName, systemType);
+    }
+
     @GetMapping(value = "/bundle/upload")
     @ResponseBody
     @ApiOperation("")

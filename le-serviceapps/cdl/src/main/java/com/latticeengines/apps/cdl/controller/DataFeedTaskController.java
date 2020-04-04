@@ -281,13 +281,67 @@ public class DataFeedTaskController {
         Preconditions.checkNotNull(simpleTemplateMetadata);
         if (!dataFeedTaskTemplateService.validationOpportunity(customerSpace, systemName, simpleTemplateMetadata.getEntityType())) {
             return ResponseDocument.failedResponse(new IllegalStateException("Opportunities by stage cannot be " +
-                    "created as the corresponding Salesforce Account object does not have a Unique ID"));
+                    "created as the corresponding Account object does not have a Unique ID"));
         }
         try {
             return ResponseDocument.successResponse(dataFeedTaskTemplateService.createOpportunityTemplate(customerSpace, systemName,
                     simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata));
         } catch (Exception e) {
-            log.error("Create Default Opportunity template failed with error: {}", e.toString());
+            log.error("Create Opportunity template failed with error: {}", e.toString());
+            String stacktrace = ExceptionUtils.getStackTrace(e);
+            log.error("Stack trace is: {}", stacktrace);
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping(value = "/setup/defaultMarketing")
+    @ResponseBody
+    @ApiOperation(value = "Create a default marketing template")
+    public ResponseDocument<Boolean> createDefaultMarketingTemplate(@PathVariable String customerSpace,
+                                                                      @RequestParam(value = "systemName") String systemName,
+                                                                      @RequestParam(value = "systemType") String systemType) {
+        log.info("systemName = {}.", systemName);
+        if (StringUtils.isEmpty(systemName)) {
+            return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
+        }
+        if (!dataFeedTaskTemplateService.validationMarketing(customerSpace, systemName, systemType,
+                EntityType.MarketingActivity)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("Marketing by ActivityType cannot be " +
+                    "created as the corresponding system Contact object does not have a Unique ID"));
+        }
+        try {
+            Boolean result = dataFeedTaskTemplateService.createDefaultMarketingTemplate(customerSpace, systemName, systemType);
+            return ResponseDocument.successResponse(result);
+        } catch (Exception e) {
+            log.error("Create Default Marketing template failed with error: {}", e.toString());
+            String stacktrace = ExceptionUtils.getStackTrace(e);
+            log.error("Stack trace is: {}", stacktrace);
+            return ResponseDocument.failedResponse(e);
+        }
+    }
+
+    @PostMapping(value = "/setup/marketing")
+    @ResponseBody
+    @ApiOperation(value = "Create a marketing template")
+    public ResponseDocument<Boolean> createMarketingTemplate(@PathVariable String customerSpace,
+                                                               @RequestParam(value = "systemName") String systemName,
+                                                               @RequestParam(value = "systemType") String systemType,
+                                                               @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata) {
+        log.info("systemName = {}.", systemName);
+        if (StringUtils.isEmpty(systemName)) {
+            return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
+        }
+        Preconditions.checkNotNull(simpleTemplateMetadata);
+        if (!dataFeedTaskTemplateService.validationMarketing(customerSpace, systemName, systemType,
+                simpleTemplateMetadata.getEntityType())) {
+            return ResponseDocument.failedResponse(new IllegalStateException("Marketing by ActivityType cannot be " +
+                    "created as the corresponding Contact object does not have a Unique ID"));
+        }
+        try {
+            return ResponseDocument.successResponse(dataFeedTaskTemplateService.createMarketingTemplate(customerSpace, systemName,
+                     systemType, simpleTemplateMetadata.getEntityType(), simpleTemplateMetadata));
+        } catch (Exception e) {
+            log.error("Create Marketing template failed with error: {}", e.toString());
             String stacktrace = ExceptionUtils.getStackTrace(e);
             log.error("Stack trace is: {}", stacktrace);
             return ResponseDocument.failedResponse(e);

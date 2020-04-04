@@ -33,10 +33,8 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
@@ -53,9 +51,6 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     @Inject
     private CDLProxy cdlProxy;
-
-    @Inject
-    private DropBoxProxy dropBoxProxy;
 
     @BeforeClass(groups = {"end2end"})
     @Override
@@ -201,19 +196,6 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         SimpleTemplateMetadata sm = new SimpleTemplateMetadata();
         sm.setEntityType(EntityType.WebVisitSourceMedium);
         cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(sm));
-    }
-
-    private boolean createS3Folder(String systemName, List<EntityType> entityTypes) {
-        List<String> allSubFolders = dropBoxProxy.getAllSubFolders(mainTestTenant.getId(), systemName, null, null);
-        for (EntityType entityType : entityTypes) {
-            String folderName = S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName());
-            if (!allSubFolders.contains(folderName)) {
-                dropBoxProxy.createTemplateFolder(mainTestTenant.getId(), systemName, entityType.getDefaultFeedTypeName(),
-                        null);
-                log.info("create folder {} success.", folderName);
-            }
-        }
-        return true;
     }
 
     protected List<String> getCandidateFailingSteps() {

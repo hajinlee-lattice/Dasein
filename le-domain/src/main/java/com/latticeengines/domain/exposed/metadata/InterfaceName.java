@@ -147,6 +147,9 @@ public enum InterfaceName {
     // Eloqua Activity
     ActivityType,
 
+    //Marketing Activity
+    ActivityDate, ActivityTypeId,
+
     OpportunityId,
 
     // Internal

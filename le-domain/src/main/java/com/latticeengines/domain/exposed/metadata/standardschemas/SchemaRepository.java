@@ -1598,8 +1598,48 @@ public class SchemaRepository {
             schemaTable = createTable(SchemaInterpretation.OpportunityStageName);
             schemaTable.setAttributes(attrs);
             break;
+        case MarketingActivity:
+            attrs = new ArrayList<>(Arrays.asList(attrActivityType(), attrActivityDate()));
+            schemaTable = createTable(SchemaInterpretation.MarketingActivity);
+            schemaTable.setAttributes(attrs);
+            break;
+        case MarketingActivityType:
+            attrs = new ArrayList<>(Arrays.asList(attrName(), attrActivityType()));
+            schemaTable = createTable(SchemaInterpretation.MarketingActivityType);
+            schemaTable.setAttributes(attrs);
+            break;
         }
         return schemaTable;
+    }
+
+    private Attribute attrName() {
+        return attr(InterfaceName.Name.name())
+                .allowedDisplayNames(Collections.singletonList("Name")).required()
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Name) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrActivityType() {
+        return attr(InterfaceName.ActivityType.name())
+                .allowedDisplayNames(Collections.singletonList("ActivityType")).required()
+                .physicalDataType(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.ActivityType) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build();
+    }
+
+    private Attribute attrActivityDate() {
+        return attr(InterfaceName.ActivityDate.name()).allowedDisplayNames(Arrays.asList("activityDate", "ActivityDate"))
+                .required().physicalDataType(Schema.Type.LONG)
+                .interfaceName(InterfaceName.ActivityDate)
+                .logicalDataType(LogicalDataType.Date) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(FundamentalType.DATE.getName()) //
+                .build();
     }
 
     private Attribute attrStageName() {

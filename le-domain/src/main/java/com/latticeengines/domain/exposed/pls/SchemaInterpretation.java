@@ -22,7 +22,8 @@ public enum SchemaInterpretation {
     DeleteByAccountTemplate, DeleteByContactTemplate, //
     ContactEntityMatch,
     WebVisit, WebVisitPathPattern, WebVisitSourceMedium,
-    Opportunity, OpportunityStageName;
+    Opportunity, OpportunityStageName,
+    MarketingActivity, MarketingActivityType;
 
     public static SchemaInterpretation getByName(String interpretationName) {
         for (SchemaInterpretation interpretation : values()) {

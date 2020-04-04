@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -50,6 +51,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
+import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -87,8 +89,11 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     private static final String USER_PREFIX = "user_";
     private static final String LATTICE_IDS_SECTION = "Lattice IDs";
     private static final String MATCH_TO_ACCOUNT_ID_SECTION = "Match to Accounts - ID";
+    private static final String MATCH_TO_CONTACT_ID_SECTION = "Match to Contacts - ID";
     private static final String ACCOUNT_FIELD_NAME = "AccountId";
+    private static final List<String> CONTACT_FIELD_NAME = Arrays.asList("ContactId", "leadId");
     private static final String DEFAULTSYSTEM = "DefaultSystem";
+    private static final String STREAM_NAME_FORMAT = "%s_%s";
 
     @Inject
     private S3ImportSystemService s3ImportSystemService;
@@ -349,6 +354,31 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
+    public boolean validationMarketing(String customerSpace, String systemName,
+                                       String systemType, EntityType entityType) {
+        if (!EntityType.MarketingActivity.equals(entityType) && !EntityType.MarketingActivityType.equals(entityType)) {
+            log.error("entityType isn't match Marketing/MarketingActivityType, customerSpace is {}, systemName is {}," +
+                    " " +
+                            "systemType is {}, entityType is {}.", customerSpace, systemName, systemType, entityType);
+            return false;
+        }
+        if (!S3ImportSystem.SystemType.Eloqua.name().equalsIgnoreCase(systemType) && !S3ImportSystem.SystemType.Marketo.name().equalsIgnoreCase(systemType)) {
+            log.error("systemType isn't match eloqua/marketo, customerSpace is {}, systemName is {}, systemType is " +
+                    "{}," +
+                    " entityType is {}.", customerSpace, systemName, systemType, entityType);
+            return false;
+        }
+        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
+                systemName);
+        log.info("importSystem is {}. ", JsonUtils.serialize(importSystem));
+        if (importSystem == null) {
+            log.error("import system is null when validate Marketing. customerSpace is {}.", customerSpace);
+            return false;
+        }
+        return StringUtils.isNotEmpty(importSystem.getContactSystemId()) || isDefaultSystemInGATenant(importSystem);
+    }
+
+    @Override
     public boolean createDefaultOpportunityTemplate(String customerSpace, String systemName) {
         log.info("setup opportunity data for tenant {}, systemName {}.", customerSpace, systemName);
         DataFeedTask opportunityDataFeedTask = createOpportunityTemplateOnly(customerSpace, systemName,
@@ -383,6 +413,39 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return true;
     }
 
+    @Override
+    public boolean createDefaultMarketingTemplate(String customerSpace, String systemName, String systemType) {
+        log.info("setup marketing data for tenant {}, systemName {}, use {} systemType spec ", customerSpace, systemName, systemType);
+        DataFeedTask marketingDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
+                EntityType.MarketingActivity, null);
+        log.info("marketing dataFeedTask unique id is {}.", marketingDataFeedTask.getUniqueId());
+        DataFeedTask marketingTypeDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
+                EntityType.MarketingActivityType, null);
+        log.info("MarketingType dataFeedTask UniqueId is {}.", marketingTypeDataFeedTask.getUniqueId());
+        String marketingAtlasStreamName = String.format(STREAM_NAME_FORMAT, systemName, EntityType.MarketingActivity);
+        createMarketingMetadata(customerSpace, marketingAtlasStreamName, marketingDataFeedTask, marketingTypeDataFeedTask);
+        return true;
+    }
+
+    @Override
+    public boolean createMarketingTemplate(String customerSpace, String systemName, String systemType, EntityType entityType, SimpleTemplateMetadata simpleTemplateMetadata) {
+        if (!EntityType.MarketingActivity.equals(entityType)) {
+            throw new IllegalArgumentException(String.format("createMarketingTemplate cannot support entityType %s" +
+                    ".", entityType));
+        }
+        log.info("setup marketing data for tenant {}, systemName {}, use {} systemType spec, SimpleTemplateMetadata " +
+                        "{}.", customerSpace, systemName, systemType, JsonUtils.serialize(simpleTemplateMetadata));
+        DataFeedTask marketingDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
+                EntityType.MarketingActivity, simpleTemplateMetadata);
+        log.info("marketing dataFeedTask unique id is {}.", marketingDataFeedTask.getUniqueId());
+        DataFeedTask marketingTypeDataFeedTask = createMarketingTemplateOnly(customerSpace, systemName, systemType,
+                EntityType.MarketingActivityType, null);
+        log.info("MarketingType dataFeedTask UniqueId is {}.", marketingTypeDataFeedTask.getUniqueId());
+        String marketingAtlasStreamName = String.format(STREAM_NAME_FORMAT, systemName, EntityType.MarketingActivity);
+        createMarketingMetadata(customerSpace, marketingAtlasStreamName, marketingDataFeedTask, marketingTypeDataFeedTask);
+        return true;
+    }
+
     private DataFeedTask createOpportunityTemplateOnly(String customerSpace, String systemName, EntityType entityType,
                                                        SimpleTemplateMetadata simpleTemplateMetadata) {
         S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
@@ -405,7 +468,41 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
         log.info("entityType is {}", entityType);
         if (EntityType.Opportunity.equals(entityType)) {
-            processMatchId(importSystem, spec);
+            processMatchAccountId(importSystem, spec);
+        }
+        Table standardTable = importWorkflowSpecService.tableFromRecord(null, true, spec);
+
+        return setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, importSystem,
+                standardTable);
+    }
+
+    private DataFeedTask createMarketingTemplateOnly(String customerSpace, String systemName, String systemType,
+                                                     EntityType entityType,
+                                                     SimpleTemplateMetadata simpleTemplateMetadata) {
+        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
+                systemName);
+        if (importSystem == null) {
+            throw new IllegalStateException(String.format("S3ImportSystem cannot be null, systemName is %s," +
+                    " tenant %s.", systemName, customerSpace));
+        }
+        createDropFolder(customerSpace, systemName, EntityType.MarketingActivity);
+        createDropFolder(customerSpace, systemName, EntityType.MarketingActivityType);
+        ImportWorkflowSpec spec;
+        try {
+            String filesystemType = systemType;
+            if (EntityType.MarketingActivityType.equals(entityType)) {
+                filesystemType = "allsystem";
+            }
+            spec = importWorkflowSpecService.loadSpecFromS3(filesystemType, entityType.getDisplayName());
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Could not create template for tenant %s, system type %s, and system object %s " +
+                                    "because the Spec failed to load", customerSpace, importSystem.getSystemType().name(),
+                            entityType.getDisplayName()), e);
+        }
+        log.info("entityType is {}", entityType);
+        if (EntityType.MarketingActivity.equals(entityType)) {
+            processMatchContactId(importSystem, spec);
         }
         Table standardTable = importWorkflowSpecService.tableFromRecord(null, true, spec);
 
@@ -609,6 +706,34 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         }
     }
 
+    private void createMarketingMetadata(String customerSpace, String marketingAtlasStreamName,
+                                         DataFeedTask marketingDataFeedTask, DataFeedTask marketingTypeDataFeedTask) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
+        AtlasStream marketingAtlasStream =
+                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(marketingDataFeedTask)
+                        .withName(marketingAtlasStreamName).withMatchEntities(Collections.singletonList(BusinessEntity.Contact.name()))
+                        .withAggrEntities(Arrays.asList(BusinessEntity.Contact.name(),
+                                BusinessEntity.Account.name())).withDateAttribute(InterfaceName.ActivityDate.name())
+                        .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).build();
+        marketingAtlasStream.setStreamId(AtlasStream.generateId());
+        streamEntityMgr.create(marketingAtlasStream);
+        log.info("marketingAtlasStream is {}.", JsonUtils.serialize(marketingAtlasStream));
+        Catalog marketingTypeCatalog = createCatalog(tenant, marketingAtlasStreamName, marketingTypeDataFeedTask);
+        catalogEntityMgr.create(marketingTypeCatalog);
+        log.info("marketingTypeCatalog is {}.", JsonUtils.serialize(marketingTypeCatalog));
+        StreamDimension dimension = createActivityTypeDimension(marketingAtlasStream, marketingTypeCatalog,
+                InterfaceName.ActivityTypeId.name(), StreamDimension.Usage.Pivot, InterfaceName.ActivityType.name(), InterfaceName.ActivityType.name());
+        dimensionEntityMgr.create(dimension);
+        log.info("dimension is {}.", JsonUtils.serialize(dimension));
+        List<ActivityMetricsGroup> defaultGroups =
+                activityMetricsGroupService.setupDefaultMarketingProfile(tenant.getId(),
+                marketingAtlasStream.getName());
+        if (CollectionUtils.isEmpty(defaultGroups)) {
+            throw new IllegalStateException(String.format(
+                    "Failed to setup marketing metric groups for tenant %s", customerSpace));
+        }
+    }
+
     private void createDropFolder(String customerSpace, String systemName, EntityType entityType) {
         List<String> allSubFolder = dropBoxService.getDropFoldersFromSystem(customerSpace, systemName);
         if (CollectionUtils.isEmpty(allSubFolder)) {
@@ -634,19 +759,19 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                 latticeIdDefinition.setColumnName(columnName);
                 record.addFieldDefinition(LATTICE_IDS_SECTION, latticeIdDefinition, false);
 
-                log.info("Creating new Lattice ID field " + fieldName + " for " + columnName);
+                log.info("Creating new Lattice ID field {} for {}.", fieldName, columnName);
             } else {
                 latticeIdDefinition.setColumnName(columnName);
-                log.info("Updating old Lattice ID field " + fieldName + " which columnName " + columnName);
+                log.info("Updating old Lattice ID field {} which columnName {}.",fieldName , columnName);
             }
         }
     }
 
     /*
-     * map to system UniqueId
+     * map to system Account UniqueId
      * for entitymatchGA tenant, under DefaultSystem, if no systemAccountId, map to AccountSystemId.
      */
-    private void processMatchId(S3ImportSystem importSystem, FieldDefinitionsRecord record) {
+    private void processMatchAccountId(S3ImportSystem importSystem, FieldDefinitionsRecord record) {
         List<FieldDefinition> fieldDefinitionList = record.getFieldDefinitionsRecords(MATCH_TO_ACCOUNT_ID_SECTION);
         log.info("fieldDefinitionList is {}.", JsonUtils.serialize(fieldDefinitionList));
         if (CollectionUtils.isEmpty(fieldDefinitionList)) {
@@ -674,6 +799,43 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                     matchIdDefinition.getFieldName());
             // map to global id.
             updateLatticeId(importSystem.isMapToLatticeAccount(), InterfaceName.CustomerAccountId.name(),
+                    matchIdDefinition.getColumnName(), record);
+        }
+    }
+
+    /*
+     * map to system Contact UniqueId
+     * for entitymatchGA tenant, under DefaultSystem, if no systemContactId, map to ContactSystemId.
+     */
+    private void processMatchContactId(S3ImportSystem importSystem, FieldDefinitionsRecord record) {
+        List<FieldDefinition> fieldDefinitionList = record.getFieldDefinitionsRecords(MATCH_TO_CONTACT_ID_SECTION);
+        log.info("fieldDefinitionList is {}.", JsonUtils.serialize(fieldDefinitionList));
+        if (CollectionUtils.isEmpty(fieldDefinitionList)) {
+            return;
+        }
+        for (FieldDefinition matchIdDefinition : fieldDefinitionList) {
+
+            // Only set the field name if it is blank, indicating this is the first time it is being updated.
+            if (StringUtils.isBlank(matchIdDefinition.getFieldName()) && CONTACT_FIELD_NAME.contains(matchIdDefinition.getColumnName())) {
+                if (isDefaultSystemInGATenant(importSystem) && StringUtils.isEmpty(importSystem.getContactSystemId())) {
+                    matchIdDefinition.setFieldName(InterfaceName.CustomerContactId.name());
+                } else {
+                    if (StringUtils.isBlank(importSystem.getContactSystemId())) {
+                        throw new IllegalStateException(String.format("Cannot assign column %s ID from system %s as " +
+                                        "match ID in section %s before that system has been set up.", matchIdDefinition.getColumnName(),
+                                importSystem.getName(), MATCH_TO_CONTACT_ID_SECTION));
+                    }
+                    matchIdDefinition.setFieldName(importSystem.getContactSystemId());
+                }
+            }
+
+            log.info("State|  section: {}  defSystem: {}  isMappedtoAccount:  {}  " +
+                            "isMappedToContact: {}  columnName: {}  fieldName: {}", MATCH_TO_CONTACT_ID_SECTION, importSystem.getName(),
+                    importSystem.isMapToLatticeAccount(),
+                    importSystem.isMapToLatticeContact(), matchIdDefinition.getColumnName(),
+                    matchIdDefinition.getFieldName());
+            // map to global id.
+            updateLatticeId(importSystem.isMapToLatticeContact(), InterfaceName.CustomerContactId.name(),
                     matchIdDefinition.getColumnName(), record);
         }
     }
@@ -708,6 +870,33 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         DimensionCalculator calculator = new DimensionCalculator();
         calculator.setName(attributeName);
         calculator.setAttribute(attributeName);
+        dim.setCalculator(calculator);
+        return dim;
+    }
+
+    private StreamDimension createActivityTypeDimension(@NotNull AtlasStream stream, Catalog catalog,
+                                                       String dimensionName, StreamDimension.Usage usage,
+                                                       String attributeName, String patternAttributeName) {
+        StreamDimension dim = new StreamDimension();
+        dim.setName(dimensionName);
+        dim.setDisplayName(dim.getName());
+        dim.setTenant(stream.getTenant());
+        dim.setStream(stream);
+        dim.setCatalog(catalog);
+        dim.addUsages(StreamDimension.Usage.Pivot);
+
+        // standardize and hash ptn name for dimension
+        DimensionGenerator generator = new DimensionGenerator();
+        generator.setAttribute(patternAttributeName);
+        generator.setFromCatalog(true);
+        generator.setOption(DimensionGenerator.DimensionGeneratorOption.HASH);
+        dim.setGenerator(generator);
+        // use url attr in stream to determine whether it matches catalog pattern
+        DimensionCalculatorRegexMode calculator = new DimensionCalculatorRegexMode();
+        calculator.setName(attributeName);
+        calculator.setAttribute(attributeName);
+        calculator.setPatternAttribute(patternAttributeName);
+        calculator.setPatternFromCatalog(true);
         dim.setCalculator(calculator);
         return dim;
     }

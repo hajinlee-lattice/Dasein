@@ -126,7 +126,7 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
     @Test(groups = "deployment-app", dependsOnMethods = "testCreateOpportunityTemplate")
     public void testS3Import() {
         String csvFileName = "importOpportunity.csv";
-        String entity = BusinessEntity.Opportunity.name();
+        String entity = BusinessEntity.ActivityStream.name();
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
                 SchemaInterpretation.valueOf(entity), entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));

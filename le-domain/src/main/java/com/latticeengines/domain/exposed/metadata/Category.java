@@ -53,7 +53,10 @@ public enum Category {
             return WebVisitUtils.defaultTimeFilterDisplayName();
         }
     }, //
-    OPPORTUNITY_PROFILE("My Opportunities", 17); //
+    OPPORTUNITY_PROFILE("My Opportunities", 17),
+    ACCOUNT_MARKETING_ACTIVITY_PROFILE("My Account Marketing Activity", 18), //
+    CONTACT_MARKETING_ACTIVITY_PROFILE("My Contact Marketing Activity", 19); //
+
 
 
     public static final String SUB_CAT_OTHER = "Other";
