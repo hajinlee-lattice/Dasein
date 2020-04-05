@@ -46,4 +46,18 @@ BEGIN
         ADD COLUMN `TEAM_ID` VARCHAR(255);
 END;
 
+CREATE PRODEDURE `CreateFileDownloadTable`()
+  BEGIN
+    create table `FILE_DOWNLOAD` 
+      (
+         `PID` bigint not null auto_increment,
+         `CREATION` bigint not null,
+         `FILE_DOWNLOAD_CONFIG` JSON,
+         `TOKEN` varchar(255) not null,
+         `TTL` integer not null,
+          primary key (`PID`)
+     )
+    engine=InnoDB;
+  END;
+
 DELIMITER;

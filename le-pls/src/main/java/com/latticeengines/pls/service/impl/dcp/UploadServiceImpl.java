@@ -27,13 +27,19 @@ import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.latticeengines.pls.service.AbstractFileDownloadService;
+import com.latticeengines.pls.service.FileDownloadService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 
 @Service
-public class UploadServiceImpl implements UploadService {
+public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDownloadConfig> implements UploadService {
 
     private static final Logger log = LoggerFactory.getLogger(UploadServiceImpl.class);
+
+    @Inject
+    private FileDownloadService fileDownloadService;
 
     @Inject
     private UploadProxy uploadProxy;
@@ -58,11 +64,14 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public void downloadUpload(String uploadId, HttpServletRequest request, HttpServletResponse response)
+    public void downloadByConfig(UploadFileDownloadConfig downloadConfig, HttpServletRequest request,
+                               HttpServletResponse response)
             throws Exception {
+        response.setHeader("Content-Encoding", "gzip");
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "upload.zip" + "\"");
         String tenantId = MultiTenantContext.getShortTenantId();
+        String uploadId = downloadConfig.getUploadId();
         Upload upload = uploadProxy.getUpload(tenantId, Long.parseLong(uploadId));
 
         UploadConfig config = upload.getUploadConfig();
@@ -72,7 +81,7 @@ public class UploadServiceImpl implements UploadService {
         Preconditions.checkState(index != -1, String.format("invalid upload config %s.", uploadId));
         String parentPath = rawPath.substring(0, rawPath.indexOf(uploadTSPrefix));
 
-        // search csv file from TSPrefix folder recursively, returned paths are absolute from protocol to file name
+        // search csv file under TSPrefix folder recursively, returned paths are absolute from protocol to file name
         final String filter = ".*.csv";
         List<String> paths = importFromS3Service.getFilesForDir(parentPath,
                 filename -> {
@@ -98,4 +107,12 @@ public class UploadServiceImpl implements UploadService {
         zipOut.finish();
         zipOut.close();
     }
+
+    @Override
+    public String generateToken(String uploadId) {
+        UploadFileDownloadConfig config = new UploadFileDownloadConfig();
+        config.setUploadId(uploadId);
+        return fileDownloadService.generateDownload(config);
+    }
+
 }

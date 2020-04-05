@@ -22,6 +22,7 @@ import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
@@ -131,12 +132,16 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadRawFilePath(), sis3, true);
 
         RestTemplate template = testBed.getRestTemplate();
-        String url = String.format("%s/pls/uploads/uploadId/%s/download", deployedHostPort, upload.getPid().toString());
+        String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
+                upload.getPid().toString());
+        String token = template.getForObject(tokenUrl, String.class);
+        SleepUtils.sleep(300);
+        String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.ALL));
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = template.exchange(url, HttpMethod.GET, entity, byte[].class);
+        ResponseEntity<byte[]> response = template.exchange(downloadUrl, HttpMethod.GET, entity, byte[].class);
         String fileName = response.getHeaders().getFirst("Content-Disposition");
         Assert.assertTrue(fileName.contains(".zip"));
         byte[] contents = response.getBody();

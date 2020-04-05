@@ -3,8 +3,6 @@ package com.latticeengines.pls.controller.dcp;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,18 +50,11 @@ public class UploadResource {
     }
 
 
-    @GetMapping(value = "/uploadId/{uploadId}/download", produces = "application/zip")
+    @GetMapping(value = "/uploadId/{uploadId}/token")
     @ResponseBody
-    @ApiOperation("Download process/import/error files by uploadId")
-    public void downloadUpload(@PathVariable String uploadId,
-    HttpServletRequest request, HttpServletResponse response) throws Exception {
-        response.setHeader("Content-Encoding", "gzip");
-        try {
-            uploadService.downloadUpload(uploadId, request, response);
-        } catch (Exception e) {
-            log.error("failed to download config: {}", e.getMessage());
-            throw e;
-        }
+    @ApiOperation("Generate token for upload")
+    public String getToken(@PathVariable String uploadId) {
+        return uploadService.generateToken(uploadId);
     }
 
 
