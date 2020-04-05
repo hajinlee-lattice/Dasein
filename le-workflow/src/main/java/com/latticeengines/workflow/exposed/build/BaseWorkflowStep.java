@@ -157,6 +157,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
+    protected static final String ENTITY_CHANGELIST_TABLES = "ENTITY_CHANGELIST_TABLES";
     protected static final String PROCESSED_DIFF_TABLES = "PROCESSED_DIFF_TABLES";
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
@@ -210,6 +211,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE";
     public static final String ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE";
     protected static final String ACCOUNT_DIFF_TABLE_NAME = "ACCOUNT_DIFF_TABLE_NAME";
+    protected static final String ACCOUNT_CHANGELIST_TABLE_NAME = "ACCOUNT_CHANGELIST_TABLE_NAME";
     protected static final String SYSTEM_ACCOUNT_MASTER_TABLE_NAME = "SYSTEM_ACCOUNT_MASTER_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
     protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
@@ -303,6 +305,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_TXN_TARGETTABLE, //
             ENTITY_MATCH_TXN_ACCOUNT_TARGETTABLE, //
             ACCOUNT_DIFF_TABLE_NAME, //
+            ACCOUNT_CHANGELIST_TABLE_NAME, //
             SYSTEM_ACCOUNT_MASTER_TABLE_NAME, //
             ACCOUNT_MASTER_TABLE_NAME, //
             FULL_ACCOUNT_TABLE_NAME, //

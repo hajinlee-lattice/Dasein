@@ -139,13 +139,17 @@ private[spark] object MergeUtils {
     }
   }
 
-  private def joinWithMarkers(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String]): DataFrame = {
+  def joinWithMarkers(lhs: DataFrame, rhs: DataFrame, joinKeys: Seq[String]): DataFrame = {
     val lhsWithMarker = lhs.withColumn(lhsMarker, lit(true))
     val rhsWithMarker = rhs.withColumn(rhsMarker, lit(true))
     lhsWithMarker.join(rhsWithMarker, joinKeys, "outer")
   }
 
-  private def getColPosOnBothSides(join: DataFrame): (Map[String, Int], Map[String, Int]) = {
+  def getJoinMarkers(): (String, String) = {
+    (lhsMarker, rhsMarker)
+  }
+  
+  def getColPosOnBothSides(join: DataFrame): (Map[String, Int], Map[String, Int]) = {
     val lhsMarkerPos = join.columns.indexOf(lhsMarker)
     val (lhsCols, rhsCols) = join.columns.splitAt(lhsMarkerPos + 1)
     val lhsColPos = lhsCols.view.zipWithIndex.toMap

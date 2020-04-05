@@ -40,6 +40,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private int diffStep;
 
     private String diffTableNameInContext;
+    private String changeListTableNameInContext;
     private String batchStoreNameInContext;
     private String systemBatchStoreNameInContext;
 
@@ -51,12 +52,14 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private String newAccountTableFromTxnMatch;
 
     private boolean noImports;
+    private boolean useChangeList = true; // TODO:
 
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
         List<String> accountTables = !hasSystemBatch ? Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME)
-                : Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, SYSTEM_ACCOUNT_MASTER_TABLE_NAME);
+                : Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, SYSTEM_ACCOUNT_MASTER_TABLE_NAME,
+                        ACCOUNT_CHANGELIST_TABLE_NAME);
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), accountTables);
         shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
         if (shortCutMode) {
@@ -65,7 +68,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             diffTableNameInContext = tablesInCtx.get(0).getName();
             batchStoreNameInContext = tablesInCtx.get(1).getName();
             systemBatchStoreNameInContext = tablesInCtx.size() > 2 ? tablesInCtx.get(2).getName() : null;
+            changeListTableNameInContext = tablesInCtx.size() > 3 ? tablesInCtx.get(3).getName() : null;
             diffTableName = diffTableNameInContext;
+            changeListTableName = changeListTableNameInContext;
         } else {
             matchedAccountTable = getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
             newAccountTableFromContactMatch = getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE);
@@ -171,6 +176,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         steps.add(upsert);
         steps.add(diff);
         steps.add(report);
+        if (useChangeList) {
+            steps.add(createChangeList(upsertStep));
+        }
 
         return steps;
     }
@@ -227,6 +235,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
         if (!noImports) {
+            exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
             exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
         }
         TableRoleInCollection role = TableRoleInCollection.ConsolidatedAccount;
@@ -254,6 +263,15 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             return diffTableNameInContext;
         } else {
             return TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
+        }
+    }
+
+    @Override
+    protected String getChangeListTableName() {
+        if (shortCutMode) {
+            return changeListTableNameInContext;
+        } else {
+            return TableUtils.getFullTableName(changeListTablePrefix, pipelineVersion);
         }
     }
 
