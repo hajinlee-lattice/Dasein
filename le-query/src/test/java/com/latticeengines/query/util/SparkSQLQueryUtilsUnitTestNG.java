@@ -48,6 +48,18 @@ public class SparkSQLQueryUtilsUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testExtractSubQueriesPLS16804() {
+        String sql = readSqlFromResource("query4");
+        List<List<String>> queries = SparkSQLQueryUtils.extractSubQueries(sql, "segment");
+        queries.forEach(l -> {
+            String alias = l.get(0);
+            String statement = l.get(1);
+            System.out.println("\n========== " + alias + " ==========");
+            System.out.println(statement);
+        });
+    }
+
+    @Test(groups = "unit")
     public void testExtractCTE() {
         String sql = "select t1.Id from Table1 as t1";
         sql += " where t1.Id in (select Id from Table2 where Attr = 'a')";

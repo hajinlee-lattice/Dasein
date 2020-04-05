@@ -30,6 +30,7 @@ public final class SparkSQLQueryUtils {
             Matcher matcher = Pattern.compile("with .* as ").matcher(sql);
             if (matcher.find()) {
                 String phrase = matcher.group();
+                System.out.println("Found " + phrase);
                 String name = phrase.split(" ")[1];
                 String projection = phrase.substring(("with " + name + " ").length());
                 if (projection.startsWith("(")) {
@@ -141,17 +142,25 @@ public final class SparkSQLQueryUtils {
     private static String extractInParenthesis(String str) {
         StringBuilder sb = new StringBuilder();
         int numOfOpenParenthesis = 1;
+        boolean escaped = false;
         for (int i = 1; i < str.length(); i++) {
             char c = str.charAt(i);
-            if (c == ')' && numOfOpenParenthesis == 1) {
-                break;
+            if (c == '\'' && (str.charAt(i - 1) != '\\')) {
+                escaped = !escaped;
+            }
+            if (!escaped) {
+                if (c == ')' && numOfOpenParenthesis == 1) {
+                    break;
+                } else {
+                    sb.append(c);
+                    if (c == '(') {
+                        numOfOpenParenthesis++;
+                    } else if (c == ')') {
+                        numOfOpenParenthesis--;
+                    }
+                }
             } else {
                 sb.append(c);
-                if (c == '(') {
-                    numOfOpenParenthesis++;
-                } else if (c == ')') {
-                    numOfOpenParenthesis--;
-                }
             }
         }
         return sb.toString();
