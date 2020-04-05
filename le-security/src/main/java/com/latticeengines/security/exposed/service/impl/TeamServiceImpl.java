@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.auth.exposed.service.impl.GlobalAuthDependencyChecker;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
@@ -142,12 +143,16 @@ public class TeamServiceImpl implements TeamService {
             GlobalTeam globalTeam = null;
             if (globalAuthTeam != null) {
                 List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
-                Map<String, User> userMap = new HashMap<>();
-                if (CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
-                    List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser),
-                            globalAuthUserTenantRights, false);
-                    userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
+                Map<String, User> userMap;
+                Set<String> emails = Sets.newHashSet(globalAuthTeam.getCreatedByUser());
+                if (withTeamMember && CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
+                    for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
+                        emails.add(globalAuthUserTenantRight.getGlobalAuthUser().getEmail());
+                    }
                 }
+                List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser),
+                        emails, false);
+                userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
                 globalTeam = getGlobalTeam(globalAuthTeam, withTeamMember, userMap);
             }
             return globalTeam;
