@@ -1,6 +1,7 @@
 package com.latticeengines.security.exposed.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -141,12 +142,13 @@ public class TeamServiceImpl implements TeamService {
             GlobalTeam globalTeam = null;
             if (globalAuthTeam != null) {
                 List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
+                Map<String, User> userMap = new HashMap<>();
                 if (CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
                     List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser),
                             globalAuthUserTenantRights, false);
-                    Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
-                    globalTeam = getGlobalTeam(globalAuthTeam, withTeamMember, userMap);
+                    userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
                 }
+                globalTeam = getGlobalTeam(globalAuthTeam, withTeamMember, userMap);
             }
             return globalTeam;
         }
