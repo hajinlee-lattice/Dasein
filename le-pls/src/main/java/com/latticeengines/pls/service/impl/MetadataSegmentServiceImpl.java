@@ -73,11 +73,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 return backendSegments;
             } else {
                 Map<String, GlobalTeam> globalTeamMap;
+                GlobalTeam defaultGlobalTeam = teamService.getDefaultGlobalTeam();
                 if (filter) {
                     globalTeamMap = teamService.getTeamsFromSession(false, true)
                             .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
                     return backendSegments.stream().filter(segment -> StringUtils.isEmpty(segment.getTeamId()) || globalTeamMap.containsKey(segment.getTeamId())) //
-                            .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()),
+                            .map(segment -> translateForFrontend(segment, globalTeamMap.getOrDefault(segment.getTeamId(), defaultGlobalTeam),
                                     teamService.getTeamIdsInContext()))
                             .sorted((seg1, seg2) -> Boolean.compare( //
                                     Boolean.TRUE.equals(seg1.getMasterSegment()), //
@@ -87,7 +88,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                     globalTeamMap = teamService.getTeamsInContext(true, true)
                             .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
                     return backendSegments.stream() //
-                            .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()),
+                            .map(segment -> translateForFrontend(segment, globalTeamMap.getOrDefault(segment.getTeamId(), defaultGlobalTeam),
                                     teamService.getTeamIdsInContext()))
                             .sorted((seg1, seg2) -> Boolean.compare( //
                                     Boolean.TRUE.equals(seg1.getMasterSegment()), //
