@@ -174,6 +174,9 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
                 // Transaction Entity Match (M29)
                 put(BusinessEntity.Transaction.name(),
                         Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxTxnConcurrentBlocks)); //
+                // Prime Match - DCP
+                put(BusinessEntity.PrimeAccount.name(),
+                        Triple.of(minFuzzyBlockSize, maxFuzzyBlockSize, maxAccountConcurrentBlocks)); //
             }
         };
 

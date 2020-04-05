@@ -346,6 +346,16 @@ public class MatchCommand implements HasPid {
         }
     }
 
+    @JsonIgnore
+    public String getCandidateLocation() {
+        String outputPath = getResultLocation();
+        if (StringUtils.isNotBlank(outputPath)) {
+            return outputPath.replace("Output", "Candidates");
+        } else {
+            return null;
+        }
+    }
+
     @JsonProperty("ResultLocation")
     public void setResultLocation(String resultLocation) {
         this.resultLocation = resultLocation;

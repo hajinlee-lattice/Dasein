@@ -33,6 +33,9 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
 
     private static final Logger log = LoggerFactory.getLogger(DnBBulkLookupStatusCheckerImpl.class);
 
+    @Inject
+    private DnBBulkLookupStatusCheckerImpl _self;
+
     @Value("${datacloud.dnb.bulk.getstatus.url.format}")
     private String urlFormat;
 
@@ -68,6 +71,11 @@ public class DnBBulkLookupStatusCheckerImpl extends BaseDnBLookupServiceImpl<Map
 
     @Inject
     private RateLimitingService rateLimitingService;
+
+    @Override
+    protected DnBBulkLookupStatusCheckerImpl self() {
+        return _self;
+    }
 
     @Override
     public List<DnBBatchMatchContext> checkStatus(List<DnBBatchMatchContext> batchContexts) {

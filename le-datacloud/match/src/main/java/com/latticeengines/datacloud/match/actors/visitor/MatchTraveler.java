@@ -20,6 +20,7 @@ import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
 import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchKeyRecord;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchType;
@@ -28,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
@@ -49,6 +51,8 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
 
     // Real time or bulk match.
     private Boolean isBatchMode = false;
+
+    private OperationalMode operationalMode;
 
     // Actor name (class name) -> duns
     // Duns from different source could be treated differently
@@ -87,6 +91,9 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
     private Map<String, Map<EntityMatchType, List<MatchKeyTuple>>> entityExistingLookupEntryMap = new HashMap<>();
 
     private Set<String> fieldsToClear = new HashSet<>();
+
+    // multiple DnB match candidates, only used in PRIME_MATCH mode for now
+    private List<DnBMatchCandidate> candidates;
 
     /***************************************************************************
      * Bound to current decision graph or request to external assistant actors
@@ -446,6 +453,22 @@ public class MatchTraveler extends Traveler implements Fact, Dimension {
         if (StringUtils.isNotBlank(field)) {
             fieldsToClear.add(field);
         }
+    }
+
+    public OperationalMode getOperationalMode() {
+        return operationalMode;
+    }
+
+    public void setOperationalMode(OperationalMode operationalMode) {
+        this.operationalMode = operationalMode;
+    }
+
+    public List<DnBMatchCandidate> getCandidates() {
+        return candidates;
+    }
+
+    public void setCandidates(List<DnBMatchCandidate> candidates) {
+        this.candidates = candidates;
     }
 
     public List<String> getEntityMatchErrors() {

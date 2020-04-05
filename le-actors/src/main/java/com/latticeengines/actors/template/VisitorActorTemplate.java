@@ -23,14 +23,14 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     /**
      * Whether the actor need to call assistant actor to finish task
-     * 
+     *
      * @return
      */
     protected abstract boolean needAssistantActor();
 
     /**
      * Whether the actor accept the traveler and take some actions
-     * 
+     *
      * @param traveler
      * @return
      */
@@ -48,7 +48,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     /**
      * Actor which needs assistant actor to finish some task should override
      * this method
-     * 
+     *
      * @param response:
      *            Message sent from external/assistant actor outside of current
      *            decision graph Eg of external actor: Anchor of other decision
@@ -65,7 +65,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
     /**
      * Based on current status/location of traveler and guide book, decide next
      * location to travel to
-     * 
+     *
      * @param traveler
      * @return
      */
@@ -75,13 +75,13 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
 
     /**
      * Return whether current actor should be skipped in retried travel
-     * 
+     *
      * Some decision graph needs to retry the whole travel if target goal is not
      * met. But most of actors don't need to re-do the task for retried travel.
-     * 
+     *
      * For actors which need to re-do the task in retried travel, override the
      * method
-     * 
+     *
      * @return
      */
     protected boolean skipIfRetravel(Traveler traveler) {
@@ -100,7 +100,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
                     traveler.checkIn(getCurrentActorName());
                 }
                 if (log.isDebugEnabled()) {
-                    log.debug(self() + " received traveler " + traveler);
+                    log.debug(self() + " received traveler " + traveler + " with result " + traveler.getResult());
                 }
                 setOriginalSender(traveler, sender());
 
@@ -179,7 +179,7 @@ public abstract class VisitorActorTemplate extends ActorTemplate {
      * If unexpected/unhandled issue happens, force the traveler to return to
      * anchor to quit traveling, otherwise the traveler might get lost in the
      * actor system
-     * 
+     *
      * @param traveler
      */
     @SuppressWarnings("deprecation")

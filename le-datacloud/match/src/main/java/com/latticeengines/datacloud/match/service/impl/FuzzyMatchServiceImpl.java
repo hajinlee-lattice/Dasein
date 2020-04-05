@@ -118,6 +118,8 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 String result = (String) traveler.getResult();
                 if (OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())) {
                     populateEntityMatchRecordWithTraveler(traveler, result, matchRecord);
+                } else if (OperationalMode.PRIME_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
+                    populatePrimeMatchResult(traveler, result, matchRecord);
                 } else {
                     matchRecord.setLatticeAccountId(result);
                     if (StringUtils.isNotEmpty(result)) {
@@ -165,6 +167,17 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
 
         writeFuzzyMatchHistory(fuzzyMatchHistories);
+    }
+
+    private void populatePrimeMatchResult(MatchTraveler traveler, String result,
+                                          InternalOutputRecord matchRecord) {
+        matchRecord.setLatticeAccountId(result);
+        if (StringUtils.isNotEmpty(result)) {
+            matchRecord.setMatched(true);
+        } else {
+            matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
+        }
+        matchRecord.setCandidates(traveler.getCandidates());
     }
 
     private void populateEntityMatchRecordWithTraveler(MatchTraveler traveler, String result,
@@ -296,7 +309,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 // For now, pass in a null MatchKeyTuple for Entity Match since this will be
                 // handled by the first Actor
                 // which is a Match Planner actor.
-                MatchTraveler matchTraveler = null;
+                MatchTraveler matchTraveler;
                 if (OperationalMode.isEntityMatch(matchInput.getOperationalMode())) {
                     matchTraveler = new MatchTraveler(matchInput.getRootOperationUid(), null);
                     matchTraveler.setInputDataRecord(matchRecord.getInput());
@@ -305,8 +318,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     entityMatchKeyRecord.setOrigTenant(matchRecord.getOrigTenant());
                     entityMatchKeyRecord.setParsedTenant(matchRecord.getParsedTenant());
                     matchTraveler.setEntityMatchKeyRecord(entityMatchKeyRecord);
-                    // 1st decision graph's entity is just final target entity
-                    matchTraveler.setEntity(matchInput.getTargetEntity());
                 } else {
                     MatchKeyTuple matchKeyTuple = createMatchKeyTuple(matchRecord);
                     matchTraveler = new MatchTraveler(matchInput.getRootOperationUid(), matchKeyTuple);
@@ -315,6 +326,13 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                         domainCollectService.enqueue(domain);
                     }
                 }
+                if (StringUtils.isNotBlank(matchInput.getTargetEntity())) {
+                    // for entity match, 1st decision graph's entity is just final target entity
+                    matchTraveler.setEntity(matchInput.getTargetEntity());
+                } else {
+                    matchTraveler.setEntity(BusinessEntity.LatticeAccount.name());
+                }
+                matchTraveler.setOperationalMode(matchInput.getOperationalMode());
                 matchTraveler.setMatchInput(matchInput);
                 matchRecord.setTravelerId(matchTraveler.getTravelerId());
                 matchTraveler.setTravelTimeout(actorSystem.isBatchMode() ? BATCH_TIMEOUT : REALTIME_TIMEOUT);

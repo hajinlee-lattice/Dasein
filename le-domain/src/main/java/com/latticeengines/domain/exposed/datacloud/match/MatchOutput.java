@@ -38,6 +38,7 @@ public class MatchOutput {
     private List<String> inputFields;
     private Map<MatchKey, List<String>> keyMap;
     private List<String> outputFields;
+    private List<String> candidateOutputFields;
     private List<OutputRecord> result;
     private List<ColumnMetadata> metadata;
     private MatchStatistics statistics;
@@ -83,6 +84,16 @@ public class MatchOutput {
     @JsonProperty("OutputFields")
     public void setOutputFields(List<String> outputFields) {
         this.outputFields = outputFields;
+    }
+
+    @JsonProperty("CandidateOutputFields")
+    public List<String> getCandidateOutputFields() {
+        return candidateOutputFields;
+    }
+
+    @JsonProperty("CandidateOutputFields")
+    public void setCandidateOutputFields(List<String> candidateOutputFields) {
+        this.candidateOutputFields = candidateOutputFields;
     }
 
     @JsonProperty("KeyMap")

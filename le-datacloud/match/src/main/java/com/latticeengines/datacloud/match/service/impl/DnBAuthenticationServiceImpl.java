@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.DnBToken;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -96,7 +95,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     @Inject
     private RedisDistributedLock redisLock;
-    
+
     static final String DNB_KEY_PREFIX = "DnBAPIKey_";
     static final String DNB_LOCK_PREFIX = "DnBLockKey_";
 
@@ -179,7 +178,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     /**
      * Request DnB token from local cache
-     * 
+     *
      * @param type:
      *            DnB key type -- realtime/batch
      * @return localCache
@@ -195,7 +194,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      * satisfied): 1. Cached token is not empty; 2. Cached token was created
      * within {expireTimeInMin} minutes 3. Cached token is different with
      * {expiredToken}
-     * 
+     *
      * @param type
      * @param expiredToken
      * @return
@@ -338,9 +337,8 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      * @param type:
      *            DnB key type -- realtime/batch
      * @return response: DnB authentication API response
-     * @throws IOException
      */
-    private String dnbAuthenticateRequest(DnBKeyType type) throws IOException {
+    private String dnbAuthenticateRequest(DnBKeyType type) {
         switch (type) {
         case REALTIME:
             return dnbClient.post(getHttpEntity(realtimeKey, realtimePwd), url);
@@ -373,7 +371,7 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
         }
         return token;
     }
-    
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
     static class DnBTokenCache {

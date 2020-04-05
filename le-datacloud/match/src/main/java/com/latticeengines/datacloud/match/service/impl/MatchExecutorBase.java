@@ -31,11 +31,14 @@ import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.datafabric.FabricStoreEnum;
@@ -82,7 +85,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         matchContext = updateInternalResults(dbHelper, matchContext);
         matchContext = mergeResults(matchContext);
         matchContext.getOutput().setFinishedAt(new Date());
-        Long receiveTime = matchContext.getOutput().getReceivedAt().getTime();
+        long receiveTime = matchContext.getOutput().getReceivedAt().getTime();
         matchContext.getOutput().getStatistics().setTimeElapsedInMsec(System.currentTimeMillis() - receiveTime);
         processMatchHistory(matchContext);
 
@@ -373,6 +376,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     outputRecord.setOutput(internalRecord.getOutput());
                 }
             }
+
             outputRecord.setInput(internalRecord.getInput());
             outputRecord.setMatched(internalRecord.isMatched());
 
@@ -391,6 +395,8 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecord.setMatchedLatticeAccountId(
                     StringStandardizationUtils.getStandardizedOutputLatticeID(internalRecord.getLatticeAccountId()));
 
+            populateCandidateData(outputRecord, internalRecord);
+
             outputRecord.setRowNumber(internalRecord.getRowNumber());
             outputRecord.setErrorMessages(internalRecord.getErrorMessages());
             outputRecord.setMatchLogs(internalRecord.getMatchLogs());
@@ -399,6 +405,9 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecords.add(outputRecord);
         }
 
+        if (OperationalMode.PRIME_MATCH.equals(matchContext.getInput().getOperationalMode())) {
+            matchContext.getOutput().setCandidateOutputFields(candidateOutputFields());
+        }
         matchContext.getOutput().setResult(outputRecords);
         matchContext.getOutput().getStatistics().setRowsMatched(totalMatched);
         log.debug("TotalMatched: " + totalMatched);
@@ -422,6 +431,71 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         return matchContext;
+    }
+
+    private void populateCandidateData(OutputRecord outputRecord, InternalOutputRecord internalRecord) {
+        if (CollectionUtils.isEmpty(internalRecord.getCandidates())) {
+            return;
+        }
+
+        List<DnBMatchCandidate> candidates = internalRecord.getCandidates();
+        List<List<Object>> candidateData = new ArrayList<>();
+        for (DnBMatchCandidate candidate: candidates) {
+            List<Object> data = new ArrayList<>();
+            String duns = candidate.getDuns();
+            data.add(duns);
+            if (candidate.getNameLocation() != null) {
+                NameLocation nl = candidate.getNameLocation();
+                data.add(nl.getName());
+                data.add(nl.getStreet());
+                data.add(nl.getStreet2());
+                data.add(nl.getCity());
+                data.add(nl.getState());
+                data.add(nl.getZipcode());
+                data.add(nl.getCountryCode());
+                data.add(nl.getPhoneNumber());
+            } else {
+                data.add(null); // name
+                data.add(null); // street
+                data.add(null); // street 2
+                data.add(null); // city
+                data.add(null); // state
+                data.add(null); // zip code
+                data.add(null); // country code
+                data.add(null); // phone
+            }
+            if (candidate.getMatchInsight() != null) {
+                DnBMatchInsight matchInsight = candidate.getMatchInsight();
+                data.add(matchInsight.getConfidenceCode());
+                data.add(matchInsight.getMatchGrade().getRawCode());
+                data.add(matchInsight.getMatchDataProfile().getText());
+            } else {
+                data.add(null); // confidence code
+                data.add(null); // match grade
+                data.add(null); // match data profile
+            }
+            candidateData.add(data);
+        }
+        outputRecord.setCandidateOutput(candidateData);
+    }
+
+    private List<String> candidateOutputFields() {
+        // hard coded for now
+        // need to match the corresponding LDC attributes
+        return Arrays.asList(
+                DataCloudConstants.ATTR_LDC_DUNS,
+                DataCloudConstants.ATTR_LDC_NAME,
+                "LDC_Street",
+                "STREET_ADDRESS_2",
+                DataCloudConstants.ATTR_CITY,
+                DataCloudConstants.ATTR_STATE,
+                DataCloudConstants.ATTR_ZIPCODE,
+                "DnB_COUNTRY_CODE",
+                "TELEPHONE_NUMBER",
+                "ConfidenceCode",
+                "MatchGrade",
+                "MatchDataProfile"
+        );
     }
 
     private String getEntityId(InternalOutputRecord record, String entity) {

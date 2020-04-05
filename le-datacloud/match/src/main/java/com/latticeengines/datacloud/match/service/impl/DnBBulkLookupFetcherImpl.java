@@ -42,6 +42,9 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     @Inject
     private DnBAuthenticationService dnBAuthenticationService;
 
+    @Inject
+    private DnBBulkLookupFetcherImpl _self;
+
     @Value("${datacloud.dnb.bulk.url}")
     private String url;
 
@@ -80,6 +83,11 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
 
     @Value("${datacloud.dnb.bulk.fetch.errorcode.xpath}")
     private String errorCodeXpath;
+
+    @Override
+    protected DnBBulkLookupFetcherImpl self() {
+        return _self;
+    }
 
     @Override
     public DnBBatchMatchContext getResult(DnBBatchMatchContext batchContext) {
@@ -205,7 +213,7 @@ public class DnBBulkLookupFetcherImpl extends BaseDnBLookupServiceImpl<DnBBatchM
     /**
      * DnB used to compress the result in GZIP format. Although the GZIP is
      * removed, keep the decompress method for some time.
-     * 
+     *
      * @param compressed
      * @return
      * @throws IOException

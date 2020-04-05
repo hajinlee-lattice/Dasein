@@ -2,10 +2,13 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -13,21 +16,26 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.common.exposed.util.LocationUtils;
 import com.latticeengines.datacloud.match.service.DnBRealTimeLookupService;
+import com.latticeengines.datacloud.match.util.Direct2Utils;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
-import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("dnbRealTimeLookupService")
+@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMatchContext>
         implements DnBRealTimeLookupService {
     private static final Logger log = LoggerFactory.getLogger(DnBRealTimeLookupServiceImpl.class);
 
     @Inject
     private DnBAuthenticationServiceImpl dnBAuthenticationService;
+
+    @Inject
+    private DnBRealTimeLookupServiceImpl _self;
 
     @Value("${datacloud.dnb.realtime.url.prefix}")
     private String realTimeUrlPrefix;
@@ -87,6 +95,11 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     private String errorCodeXpath;
 
     @Override
+    protected DnBRealTimeLookupServiceImpl self() {
+        return _self;
+    }
+
+    @Override
     public DnBMatchContext realtimeEntityLookup(DnBMatchContext context) {
         for (int i = 0; i < retries; i++) {
             Long startTime = System.currentTimeMillis();
@@ -136,37 +149,20 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     protected void parseResponse(String response, DnBMatchContext context, DnBAPIType apiType) {
         switch (apiType) {
         case REALTIME_ENTITY:
-            String duns = (String) retrieveJsonValueFromResponse(entityDunsJsonPath, response, false);
-            context.setDuns(duns);
-            context.setOrigDuns(duns);
-            context.setConfidenceCode(
-                    (Integer) retrieveJsonValueFromResponse(entityConfidenceCodeJsonPath, response, false));
-            context.setMatchGrade((String) retrieveJsonValueFromResponse(entityMatchGradeJsonPath, response, false));
-            if (context.getDuns() == null || context.getConfidenceCode() == null || context.getMatchGrade() == null) {
-                context.setDnbCode(DnBReturnCode.UNMATCH);
-                return;
-            }
-            NameLocation matchedNameLocation = context.getMatchedNameLocation();
-            matchedNameLocation.setName((String) retrieveJsonValueFromResponse(entityNameJsonPath, response, false));
-            matchedNameLocation
-                    .setStreet((String) retrieveJsonValueFromResponse(entityStreetJsonPath, response, false));
-            matchedNameLocation.setCity((String) retrieveJsonValueFromResponse(entityCityJsonPath, response, false));
-            matchedNameLocation.setState((String) retrieveJsonValueFromResponse(entityStateJsonPath, response, false));
-            matchedNameLocation
-                    .setCountryCode((String) retrieveJsonValueFromResponse(entityCountryCodeJsonPath, response, false));
-            matchedNameLocation
-                    .setZipcode((String) retrieveJsonValueFromResponse(entityZipCodeJsonPath, response, false));
-            matchedNameLocation
-                    .setPhoneNumber((String) retrieveJsonValueFromResponse(entityPhoneNumberJsonPath, response, false));
-            String outOfBusiness = (String) retrieveJsonValueFromResponse(operatingStatusJsonPath, response, false);
-            if (outOfBusinessValue.equalsIgnoreCase(outOfBusiness)) {
-                context.setOutOfBusiness(Boolean.TRUE);
-            } else {
-                context.setOutOfBusiness(Boolean.FALSE);
+            Direct2Utils.parseJsonResponse(response, context, apiType);
+            if (CollectionUtils.isNotEmpty(context.getCandidates())) {
+                DnBMatchCandidate topCandidate = context.getCandidates().get(0);
+                context.setDuns(topCandidate.getDuns());
+                context.setOrigDuns(topCandidate.getDuns());
+                context.setConfidenceCode(topCandidate.getMatchInsight().getConfidenceCode());
+                context.setMatchInsight(topCandidate.getMatchInsight());
+                context.setMatchGrade(topCandidate.getMatchInsight().getMatchGrade());
+                context.setMatchedNameLocation(topCandidate.getNameLocation());
+                context.setOutOfBusiness(outOfBusinessValue.equals(topCandidate.getOperatingStatus()));
             }
             break;
         case REALTIME_EMAIL:
-             duns = (String) retrieveJsonValueFromResponse(emailDunsJsonPath, response, false);
+            String duns = (String) retrieveJsonValueFromResponse(emailDunsJsonPath, response, false);
             context.setDuns(duns);
             context.setOrigDuns(duns);
             if (context.getDuns() == null) {
@@ -192,7 +188,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             context.setDnbCode(parseDnBHttpError(httpEx));
         } else if (ex instanceof LedpException) {
             LedpException ledpEx = (LedpException) ex;
-            // If DnB cannot find duns for match input, HttpStatus.NOT_FOUND (LedpCode.LEDP_25038) is returned. 
+            // If DnB cannot find duns for match input, HttpStatus.NOT_FOUND (LedpCode.LEDP_25038) is returned.
             // Treat LedpCode.LEDP_25038 as normal response. Do not log
             if (ledpEx.getCode() != LedpCode.LEDP_25038) {
                 log.error(String.format("LedpException in DnB realtime request%s: %s %s",
@@ -231,7 +227,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     protected HttpEntity<String> constructEntity(DnBMatchContext context, String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(authorizationHeader, token);
-        return new HttpEntity<String>("", headers);
+        return new HttpEntity<>("", headers);
     }
 
     @Override

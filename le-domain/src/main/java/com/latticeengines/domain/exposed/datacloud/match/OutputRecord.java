@@ -64,6 +64,9 @@ public class OutputRecord {
     @JsonProperty("Output")
     private List<Object> output;
 
+    @JsonProperty("Candidates")
+    private List<List<Object>> candidateOutput;
+
     @JsonProperty("MatchLogs")
     private List<String> matchLogs;
 
@@ -193,6 +196,14 @@ public class OutputRecord {
 
     public void setOutput(List<Object> output) {
         this.output = output;
+    }
+
+    public List<List<Object>> getCandidateOutput() {
+        return candidateOutput;
+    }
+
+    public void setCandidateOutput(List<List<Object>> candidateOutput) {
+        this.candidateOutput = candidateOutput;
     }
 
     public List<String> getMatchLogs() {

@@ -47,6 +47,9 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
     @Inject
     private RateLimitingService rateLimitingService;
 
+    @Inject
+    private DnBBulkLookupDispatcherImpl _self;
+
     @Value("${datacloud.dnb.bulk.url}")
     private String url;
 
@@ -72,6 +75,11 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
     private String recordFormat;
 
     private String dnBBulkApiBody;
+
+    @Override
+    protected DnBBulkLookupDispatcherImpl self() {
+        return _self;
+    }
 
     @PostConstruct
     public void init() throws IOException {

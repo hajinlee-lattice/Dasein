@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 
 @Component("dnbLookupService")
 public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements DnBLookupService {
@@ -224,7 +225,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Override
     protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
             String returnAddress) {
-        if (!isBatchMode()) {
+        if (!isBatchMode() || isPrimeMatch(request)) {
             DnBMatchContext result = (DnBMatchContext) lookupFromService(lookupRequestId, request);
             sendResponse(lookupRequestId, result, returnAddress);
         } else {
@@ -740,6 +741,10 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         res.put(MatchConstants.QUEUED_REQ_NUM,
                 executor == null || executor.getQueue() == null ? 0 : executor.getQueue().size());
         return res;
+    }
+
+    private boolean isPrimeMatch(DataSourceLookupRequest request) {
+        return OperationalMode.PRIME_MATCH.equals(request.getMatchTravelerContext().getOperationalMode());
     }
 
 }

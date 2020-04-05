@@ -9,6 +9,7 @@ import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.I
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,7 @@ import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.impl.BeanDispatcherImpl;
 import com.latticeengines.datacloud.match.service.impl.MatchPlannerBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
@@ -105,6 +108,12 @@ public class ProcessorContext {
 
     @Value("${datacloud.yarn.actors.group.size}")
     private int actorsGroupSize;
+
+    @Value("${datacloud.yarn.prime.group.size}")
+    private int primeGroupSize;
+
+    @Value("${datacloud.yarn.prime.num.threads}")
+    private int primeThreadPool;
 
     private static final Long TIME_OUT_PER_10K = TimeUnit.MINUTES.toMillis(20);
 
@@ -205,6 +214,11 @@ public class ProcessorContext {
 
     public String getNewEntityOutputAvro(int split) {
         return hdfsPathBuilder.constructMatchBlockNewEntitySplitAvro(rootOperationUid, blockOperationUid, split)
+                .toString();
+    }
+
+    public String getCandidateOutputAvro(int split) {
+        return hdfsPathBuilder.constructMatchBlockCandidateSplitAvro(rootOperationUid, blockOperationUid, split)
                 .toString();
     }
 
@@ -435,7 +449,10 @@ public class ProcessorContext {
         if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
             groupSize = actorsGroupSize;
             numThreads = actorsThreadPool;
-            if (useRemoteDnB) {
+            if (OperationalMode.PRIME_MATCH.equals(originalInput.getOperationalMode())) {
+                groupSize = primeGroupSize;
+                numThreads = primeThreadPool;
+            } else if (useRemoteDnB) {
                 groupSize = 128;
             } else if (originalInput.isFetchOnly()) {
                 groupSize = 500;
@@ -537,6 +554,25 @@ public class ProcessorContext {
         Map<String, Map<String, String>> propertiesMap = getPropertiesMap(fieldMap.keySet());
         String inputSchemaName = inputSchema.getName();
         return AvroUtils.constructSchemaWithProperties(inputSchemaName, fieldMap, propertiesMap);
+    }
+
+    Schema getCandidateSchema() {
+        List<Pair<String, Class<?>>> attrs = Arrays.asList( //
+                Pair.of(InterfaceName.InternalId.name(), String.class), //
+                Pair.of(DataCloudConstants.ATTR_LDC_DUNS, String.class), //
+                Pair.of(DataCloudConstants.ATTR_LDC_NAME, String.class), //
+                Pair.of("LDC_Street", String.class), //
+                Pair.of("STREET_ADDRESS_2", String.class), //
+                Pair.of(DataCloudConstants.ATTR_CITY, String.class), //
+                Pair.of(DataCloudConstants.ATTR_STATE, String.class), //
+                Pair.of(DataCloudConstants.ATTR_ZIPCODE, String.class), //
+                Pair.of("DnB_COUNTRY_CODE", String.class), //
+                Pair.of("TELEPHONE_NUMBER", String.class), //
+                Pair.of("ConfidenceCode", Integer.class), //
+                Pair.of("MatchGrade", String.class), //
+                Pair.of("MatchDataProfile", String.class) //
+        );
+        return AvroUtils.constructSchema("MatchCandidate", attrs);
     }
 
     private Map<String, Map<String, String>> getPropertiesMap(Set<String> keySet) {

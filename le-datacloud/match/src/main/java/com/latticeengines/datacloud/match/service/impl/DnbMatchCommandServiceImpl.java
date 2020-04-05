@@ -45,9 +45,9 @@ public class DnbMatchCommandServiceImpl implements DnbMatchCommandService {
                     dnbMatchContext.getServiceBatchId());
             // Initialization
             int size = dnbMatchContext.getContexts().values().size();
-            Integer acceptedRecords = 0;
-            Integer discardedRecords = 0;
-            Integer unmatchedRecords = size;
+            int acceptedRecords = 0;
+            int discardedRecords = 0;
+            int unmatchedRecords = size;
             DnBReturnCode batchStatus = dnbMatchContext.getDnbCode();
             // DnB batch request is finished successfully
             if (batchStatus == DnBReturnCode.OK) {

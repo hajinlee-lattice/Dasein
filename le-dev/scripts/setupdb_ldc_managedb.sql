@@ -130,6 +130,24 @@ VALUES
   ('Donut', 'ContactMatchPlanner,EntitySystemIdBased,AccountMatch,EntityEmailAIDBased,EntityNamePhoneAIDBased,EntityEmailBased,EntityNamePhoneBased,EntityIdAssociate', '0', '0:1,2,3,4,5,6,7', 'Default for Contact entity', 'AccountMatch:Cupcake', 'Contact', 3);
 
 
+INSERT INTO `DecisionGraph`
+(
+    `Description`,
+    `Edges`,
+    `Entity`,
+    `GraphName`,
+    `StartingVertices`,
+    `Vertices`)
+VALUES
+(
+    'Match multiple candidates from PRIME',
+    '0:1|1:0',
+    'PrimeAccount',
+    'WestWind',
+    0,
+    'DunsBased,LocationToDuns'
+);
+
 LOAD DATA INFILE 'WSHOME/le-dev/testartifacts/LDC_ManageDB/CountryCode.csv' INTO TABLE `CountryCode`
 CHARACTER SET UTF8
 FIELDS TERMINATED BY ','
