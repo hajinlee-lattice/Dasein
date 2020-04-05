@@ -188,6 +188,7 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         IMPORT_STARTED,
         IMPORT_FINISHED,
         MATCH_STARTED,
-        MATCH_FINISHED
+        MATCH_FINISHED,
+        FINISHED
     }
 }

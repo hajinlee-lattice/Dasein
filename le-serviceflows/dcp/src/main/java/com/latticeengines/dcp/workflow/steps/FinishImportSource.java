@@ -6,6 +6,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
@@ -30,6 +31,7 @@ public class FinishImportSource extends BaseWorkflowStep<ImportSourceStepConfigu
         long statsId = configuration.getStatsPid();
         uploadProxy.updateStatsContent(customerSpace, uploadPid, statsId, stats);
         uploadProxy.setLatestStats(customerSpace, uploadPid, statsId);
+        uploadProxy.updateUploadStatus(customerSpace, uploadPid, Upload.Status.FINISHED);
     }
 
 }

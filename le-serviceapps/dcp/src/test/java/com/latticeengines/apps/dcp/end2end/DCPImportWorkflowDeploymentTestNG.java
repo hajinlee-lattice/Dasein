@@ -90,8 +90,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(upload);
         Assert.assertNotNull(upload.getStatus());
 
-        // to be changed after adding profile steps
-        Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_FINISHED);
+        Assert.assertEquals(upload.getStatus(), Upload.Status.FINISHED);
 
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
