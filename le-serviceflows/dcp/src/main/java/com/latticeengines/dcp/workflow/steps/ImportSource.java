@@ -1,28 +1,30 @@
 package com.latticeengines.dcp.workflow.steps;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -48,7 +50,6 @@ import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -75,9 +76,6 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
 
     @Inject
     private UploadProxy uploadProxy;
-
-    @Inject
-    private WorkflowProxy workflowProxy;
 
     @Inject
     private S3Service s3Service;
@@ -126,7 +124,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         putObjectInContext(UPLOAD_STATS, stats);
     }
 
-    private void registerResultAsATable(EaiImportJobDetail jobDetail) {
+    private Table registerResultAsATable(EaiImportJobDetail jobDetail) {
         HdfsDataUnit result = new HdfsDataUnit();
         result.setDataFormat(DataUnit.DataFormat.AVRO);
 
@@ -151,6 +149,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         metadataProxy.createTable(customerSpace.toString(), tableName, table);
         Table eventTable = metadataProxy.getTable(customerSpace.toString(), tableName);
         putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, eventTable);
+        return eventTable;
     }
 
     private S3FileToHdfsConfiguration setupConfiguration(DataFeedTask dataFeedTask, DropBoxSummary dropBoxSummary,
@@ -190,14 +189,14 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
             throw new RuntimeException("Error in extract info, skip register data table!");
         }
         updateUploadStatistics(eaiImportJobDetail);
-        registerResultAsATable(eaiImportJobDetail);
-
-        copyErrorFile(customerSpace, upload, dropBoxSummary, eaiImportJobDetail);
+        Table eventTable = registerResultAsATable(eaiImportJobDetail);
+        copyErrorFile(customerSpace, upload, dropBoxSummary, eaiImportJobDetail, eventTable.getExtractsDirectory());
 
         uploadProxy.updateUploadStatus(customerSpace, upload.getPid(), Upload.Status.MATCH_STARTED);
     }
 
-    private void copyErrorFile(String customerSpace, Upload upload, DropBoxSummary dropBoxSummary, EaiImportJobDetail eaiImportJobDetail) {
+    private void copyErrorFile(String customerSpace, Upload upload, DropBoxSummary dropBoxSummary,
+                               EaiImportJobDetail eaiImportJobDetail, String extractPath) {
         if (eaiImportJobDetail.getIgnoredRows().intValue() > 0) {
             String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
             String uploadErrorDir = UploadS3PathBuilderUtils.getUploadImportErrorResultDir(configuration.getProjectId(),
@@ -210,26 +209,21 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
 
             upload.getUploadConfig().setUploadImportedErrorFilePath(
                     UploadS3PathBuilderUtils.combinePath(false, false, uploadErrorDirKey, errorFileName));
-            List<String> pathList = eaiImportJobDetail.getPathDetail();
-            String path = pathList.get(0);
-            String dirPath = path.substring(0, path.lastIndexOf("*.avro"));
-            log.info("Diagnostic file path: " + dirPath);
-            String errorFile = "";
+            String path = extractPath;
+            if (!path.endsWith("/")) {
+                path += "/";
+            }
+            log.info("Error file path: " + path);
+            String errorFile = path + ERROR_FILE;
             try {
-                if (HdfsUtils.fileExists(yarnConfiguration, dirPath + ERROR_FILE)) {
-                    Matcher matcher = Pattern.compile("^hdfs://(?<cluster>[^/]+)/Pods/(?<tail>.*)").matcher(dirPath);
-                    if (matcher.matches()) {
-                        errorFile = "/Pods/" + matcher.group("tail") + ERROR_FILE;
-                    } else {
-                        errorFile = dirPath + ERROR_FILE;
-                    }
+                if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
+                    copyToS3(errorFile, dropBoxSummary.getBucket(),
+                            upload.getUploadConfig().getUploadImportedErrorFilePath());
+                } else {
+                    log.error("Cannot find error file under: " + errorFile);
                 }
             } catch (IOException e) {
                 throw new RuntimeException("Cannot process Error file!");
-            }
-            if (StringUtils.isNotBlank(errorFile)) {
-                log.info("Import error file path: " + errorFile);
-                putStringValueInContext(IMPORT_ERROR_FILE, errorFile);
             }
             uploadProxy.updateUploadConfig(customerSpace, upload.getPid(), upload.getUploadConfig());
         }
@@ -239,5 +233,22 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         String rawFileName = FilenameUtils.getName(rawFilePath);
         String extension = FilenameUtils.getExtension(rawFileName);
         return FilenameUtils.getBaseName(rawFileName) + ERROR_SUFFIX + FilenameUtils.EXTENSION_SEPARATOR + extension;
+    }
+
+    private void copyToS3(String hdfsPath, String s3Bucket, String s3Path) throws IOException {
+        log.info("Copy from " + hdfsPath + " to " + s3Path);
+        long fileSize = HdfsUtils.getFileSize(yarnConfiguration, hdfsPath);
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AmazonS3Exception.class), null);
+        retry.execute(context -> {
+            if (context.getRetryCount() > 0) {
+                log.info(String.format("(Attempt=%d) Retry copying file from hdfs://%s to s3://%s/%s", //
+                        context.getRetryCount() + 1, hdfsPath, s3Bucket, s3Path));
+            }
+            try (InputStream stream = HdfsUtils.getInputStream(yarnConfiguration, hdfsPath)) {
+                s3Service.uploadInputStreamMultiPart(s3Bucket, s3Path, stream, fileSize);
+            }
+            return true;
+        });
     }
 }
