@@ -1,7 +1,7 @@
 package com.latticeengines.datacloud.etl.transformation.transformer.impl.stats;
 
-import static com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.SourceProfiler.TRANSFORMER_NAME;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+import static com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.ProfileTxfmr.TRANSFORMER_NAME;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,40 +27,28 @@ import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.SourceAttributeEntityMgr;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.dataflow.transformation.stats.Profile;
 import com.latticeengines.datacloud.etl.transformation.TransformerUtils;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.AbstractDataflowTransformer;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.ConfigurableSparkJobTxfmr;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters;
-import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters.Attribute;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceAttribute;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
+import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.spark.exposed.job.stats.ProfileJob;
 
 
-/**
- * Basic knowledge:
- * config.getStage() == DataCloudConstants.PROFILE_STAGE_ENRICH:
- *      serve AccountMasterStatistics job
- * config.getStage() == DataCloudConstants.PROFILE_STAGE_SEGMENT:
- *      serve ProfileAccount in PA job
- */
 @Component(TRANSFORMER_NAME)
-public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, ProfileParameters> {
-    private static final Logger log = LoggerFactory.getLogger(SourceProfiler.class);
+public class ProfileTxfmr extends ConfigurableSparkJobTxfmr<ProfileJobConfig> {
+    private static final Logger log = LoggerFactory.getLogger(ProfileTxfmr.class);
 
-    public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILER;
+    public static final String TRANSFORMER_NAME = TRANSFORMER_PROFILE_TXMFR;
+
     public static final String AM_PROFILE = "AMProfile";
-    public static final String IS_PROFILE = "IsProfile";
-    public static final String NO_BUCKET = "NoBucket";
-    public static final String DECODE_STRATEGY = "DecodeStrategy";
-    public static final String ENCODED_COLUMN = "EncodedColumn";
-    public static final String NUM_BITS = "NumBits";
-    public static final String BKT_ALGO = "BktAlgo";
-    public static final String VALUE_DICT = "ValueDict";
 
     @Value("${datacloud.etl.profile.encode.bit:64}")
     private int encodeBits;
@@ -80,54 +68,31 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     private AttrClassifier classifier;
 
     @Override
-    protected String getDataFlowBeanName() {
-        return Profile.BEAN_NAME;
-    }
-
-    @Override
     public String getName() {
         return TRANSFORMER_NAME;
     }
 
     @Override
-    protected Class<? extends TransformerConfig> getConfigurationClass() {
-        return ProfileConfig.class;
+    protected Class<ProfileJob> getSparkJobClz() {
+        return ProfileJob.class;
     }
 
     @Override
-    protected Class<ProfileParameters> getDataFlowParametersClass() {
-        return ProfileParameters.class;
+    protected Class<ProfileJobConfig> getJobConfigClz() {
+        return ProfileJobConfig.class;
     }
 
-    /*
-     * 1. Before dataflow executed, classify attributes in base source and
-     * populate idAttr, numericAttrs, catAttrs, amAttrsToEnc, exAttrsToEnc,
-     * attrsToRetain in the ProfileParameters
-     */
-    /*
-     * 2. For attributes which do not need dataflow to profile, eg. we already
-     * know what could be the bucket, put them in corresponding attribute
-     * list/map in ProfileParameters and bucket algo could be finalized in
-     * postDataFlowProcessing
-     */
     @Override
-    protected void preDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
-            ProfileConfig config) {
-        initProfileParameters(config, paras);
-        classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), config, paras);
+    protected void preSparkJobProcessing(TransformStep step, String workflowDir, ProfileJobConfig sparkJobConfig) {
+        initProfileConfig(sparkJobConfig);
+        classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), sparkJobConfig);
     }
 
-    /*
-     * After dataflow executed, profile result from dataflow and pre-known
-     * profile result need to combine together
-     */
     @Override
-    protected void postDataFlowProcessing(TransformStep step, String workflowDir, ProfileParameters paras,
-            ProfileConfig config) {
-        // DataCloudConstants.PROFILE_STAGE_ENRICH: AccountMasterStatistics
-        // DataCloudConstants.PROFILE_STAGE_SEGMENT: ProfileAccount
-        if (DataCloudConstants.PROFILE_STAGE_ENRICH.equals(config.getStage())) {
-            postProcessProfiledAttrs(workflowDir, config, paras);
+    protected void postSparkJobProcessing(TransformStep step, String workflowDir, ProfileJobConfig sparkJobConfig,
+                                                    SparkJobResult sparkJobResult) {
+        if (DataCloudConstants.PROFILE_STAGE_ENRICH.equals(sparkJobConfig.getStage())) {
+            postProcessProfiledAttrs(workflowDir, sparkJobConfig);
         }
         Object[][] data = classifier.parseResult();
         List<Pair<String, Class<?>>> columns = ProfileUtils.getProfileSchema();
@@ -135,33 +100,19 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     }
 
     @Override
-    protected void updateStepCount(TransformStep step, String workflowDir) {
-        try {
-            Long targetRecords = AvroUtils.count(yarnConfiguration, workflowDir + "/*.avro");
-            step.setCount(targetRecords);
-        } catch (Exception ex) {
-            log.error(String.format("Fail to count records in %s", workflowDir), ex);
-        }
+    protected Schema getTargetSchema(HdfsDataUnit result, ProfileJobConfig sparkJobConfig, //
+                                     TransformerConfig configuration, List<Schema> baseSchemas) {
+        return null;
     }
 
-    private void initProfileParameters(ProfileConfig config, ProfileParameters paras) {
-        paras.setNumericAttrs(new ArrayList<>());
-        paras.setCatAttrs(new ArrayList<>());
-        paras.setAmAttrsToEnc(new ArrayList<>());
-        paras.setExAttrsToEnc(new ArrayList<>());
-        paras.setCodeBookMap(new HashMap<>());
-        paras.setCodeBookLookup(new HashMap<>());
-        paras.setNumBucketEqualSized(config.isNumBucketEqualSized());
-        paras.setBucketNum(config.getBucketNum());
-        paras.setMinBucketSize(config.getMinBucketSize());
-        paras.setRandSeed(config.getRandSeed());
-        paras.setEncAttrPrefix(config.getEncAttrPrefix());
-        paras.setMaxCats(config.getMaxCat());
-        paras.setMaxCatLength(config.getMaxCatLength());
-        paras.setCatAttrsNotEnc(config.getCatAttrsNotEnc());
-        paras.setMaxDiscrete(config.getMaxDiscrete());
+    private void initProfileConfig(ProfileJobConfig config) {
+        config.setNumericAttrs(new ArrayList<>());
+        config.setCatAttrs(new ArrayList<>());
+        config.setAmAttrsToEnc(new ArrayList<>());
+        config.setExAttrsToEnc(new ArrayList<>());
+        config.setCodeBookMap(new HashMap<>());
+        config.setCodeBookLookup(new HashMap<>());
     }
-
 
     /* Classify an attribute belongs to which scenario: */
     /*- DataCloud ID attr: AccountMasterId */
@@ -178,16 +129,15 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
      * BucketedAccount needs to support decode in Redshift query, but NO for
      * bucketed AccountMaster
      */
-    private void classifyAttrs(Source baseSrc, String baseVer, ProfileConfig config, ProfileParameters paras) {
-        String dataCloudVersion = findDCVersionToProfile(config);
-        Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(config, dataCloudVersion);
+    private void classifyAttrs(Source baseSrc, String baseVer, ProfileJobConfig jobConfig) {
+        String dataCloudVersion = findDCVersionToProfile(jobConfig);
+        Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(jobConfig, dataCloudVersion);
         Schema schema = findSchema(baseSrc, baseVer);
         List<ColumnMetadata> cms = schema.getFields().stream() //
                 .map(field -> MetadataConverter.getAttribute(field).getColumnMetadata()).collect(Collectors.toList());
-
         log.info("Classifying attributes...");
         try {
-            classifier = new AttrClassifier(paras, config, amAttrsConfig, encodeBits, maxAttrs);
+            classifier = new AttrClassifier(jobConfig, amAttrsConfig, encodeBits, maxAttrs);
             classifier.classifyAttrs(cms);
         } catch (Exception ex) {
             throw new RuntimeException("Fail to classify attributes", ex);
@@ -198,19 +148,19 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
      * For ProfileAccount job in QA, look for metadata of latest approved datacloud version
      * For AccountMasterStatistics job, look for metadata of the datacloud version which is current in build (next datacloud version)
      */
-    private String findDCVersionToProfile(ProfileConfig config) {
+    private String findDCVersionToProfile(ProfileJobConfig config) {
         String dataCloudVersion = config.getDataCloudVersion();
         if (dataCloudVersion == null) {
             switch (config.getStage()) {
-            case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
-                break;
-            case DataCloudConstants.PROFILE_STAGE_ENRICH:
-                dataCloudVersion = dataCloudVersionService
-                        .nextMinorVersion(dataCloudVersionService.currentApprovedVersion().getVersion());
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format("Stage %s is not supported", config.getStage()));
+                case DataCloudConstants.PROFILE_STAGE_SEGMENT:
+                    dataCloudVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+                    break;
+                case DataCloudConstants.PROFILE_STAGE_ENRICH:
+                    dataCloudVersion = dataCloudVersionService
+                            .nextMinorVersion(dataCloudVersionService.currentApprovedVersion().getVersion());
+                    break;
+                default:
+                    throw new UnsupportedOperationException(String.format("Stage %s is not supported", config.getStage()));
             }
         }
         log.info("Profiling is based on datacloud version " + dataCloudVersion);
@@ -220,14 +170,14 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
     /**
      * Get profile/decode strategy for DataCloud attrs
      */
-    private Map<String, ProfileArgument> findAMAttrsConfig(ProfileConfig config, String dataCloudVersion) {
+    private Map<String, ProfileArgument> findAMAttrsConfig(ProfileJobConfig config, String dataCloudVersion) {
         List<SourceAttribute> srcAttrs;
         if (DataCloudConstants.PROFILE_STAGE_SEGMENT.equals(config.getStage())) {
             srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
-                    config.getTransformer(), dataCloudVersion, true);
+                    "SourceProfiler", dataCloudVersion, true);
         } else {
             srcAttrs = srcAttrEntityMgr.getAttributes(AM_PROFILE, config.getStage(),
-                    config.getTransformer(), dataCloudVersion, false);
+                    "SourceProfiler", dataCloudVersion, false);
         }
         if (CollectionUtils.isEmpty(srcAttrs)) {
             throw new RuntimeException("Fail to find configuration for profiling in SourceAttribute table");
@@ -255,17 +205,17 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
      * To encode numeric attrs and categorical attrs. Only serve for
      * AccountMasterStatistic job
      */
-    private void postProcessProfiledAttrs(String avroDir, ProfileConfig config, ProfileParameters paras) {
+    private void postProcessProfiledAttrs(String avroDir, ProfileJobConfig jobConfig) {
         List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, avroDir + "/*.avro");
-        Map<String, Attribute> numericAttrsMap = new HashMap<>(); // attr name -> attr
-        paras.getNumericAttrs().forEach(numericAttr -> numericAttrsMap.put(numericAttr.getAttr(), numericAttr));
-        Map<String, Attribute> catAttrsMap = new HashMap<>();    // attr name -> attr
-        paras.getCatAttrs().forEach(catAttr -> catAttrsMap.put(catAttr.getAttr(), catAttr));
+        Map<String, ProfileParameters.Attribute> numericAttrsMap = new HashMap<>(); // attr name -> attr
+        jobConfig.getNumericAttrs().forEach(numericAttr -> numericAttrsMap.put(numericAttr.getAttr(), numericAttr));
+        Map<String, ProfileParameters.Attribute> catAttrsMap = new HashMap<>();    // attr name -> attr
+        jobConfig.getCatAttrs().forEach(catAttr -> catAttrsMap.put(catAttr.getAttr(), catAttr));
         for (GenericRecord record : records) {
             String attrName = record.get(DataCloudConstants.PROFILE_ATTR_ATTRNAME).toString();
             boolean readyForNext;
             readyForNext = ProfileUtils.isEncodeDisabledAttr(attrName, record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO),
-                    paras, classifier.getAttrsToRetain(), numericAttrsMap, catAttrsMap);
+                    jobConfig, classifier.getAttrsToRetain(), numericAttrsMap, catAttrsMap);
             if (!readyForNext) {
                 readyForNext = ProfileUtils.isIntervalBucketAttr(attrName,
                         record.get(DataCloudConstants.PROFILE_ATTR_BKTALGO), numericAttrsMap);
@@ -284,28 +234,27 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             }
         }
         // Move numerical & categorical attrs to encode attrs
-        String dataCloudVersion = findDCVersionToProfile(config);
-        Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(config, dataCloudVersion);
-        for (ProfileParameters.Attribute numAttr : paras.getNumericAttrs()) {
+        String dataCloudVersion = findDCVersionToProfile(jobConfig);
+        Map<String, ProfileArgument> amAttrsConfig = findAMAttrsConfig(jobConfig, dataCloudVersion);
+        for (ProfileParameters.Attribute numAttr : jobConfig.getNumericAttrs()) {
             if (amAttrsConfig.containsKey(numAttr.getAttr())) {
-                paras.getAmAttrsToEnc().add(numAttr);
+                jobConfig.getAmAttrsToEnc().add(numAttr);
             } else {
-                paras.getExAttrsToEnc().add(numAttr);
+                jobConfig.getExAttrsToEnc().add(numAttr);
             }
         }
-        for (ProfileParameters.Attribute catAttr : paras.getCatAttrs()) {
+        for (ProfileParameters.Attribute catAttr : jobConfig.getCatAttrs()) {
             if (amAttrsConfig.containsKey(catAttr.getAttr())) {
-                paras.getAmAttrsToEnc().add(catAttr);
+                jobConfig.getAmAttrsToEnc().add(catAttr);
             } else {
-                paras.getExAttrsToEnc().add(catAttr);
+                jobConfig.getExAttrsToEnc().add(catAttr);
             }
         }
 
-        // paras.getAmAttrsToEnc().addAll(paras.getNumericAttrs());
-        // paras.getAmAttrsToEnc().addAll(paras.getCatAttrs());
         try {
-            List<String> avros = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*\\.avro$");
+            List<String> avros = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
             for (String path : avros) {
+                log.info("Removing avro file {}", path);
                 HdfsUtils.rmdir(yarnConfiguration, path);
             }
         } catch (Exception e) {

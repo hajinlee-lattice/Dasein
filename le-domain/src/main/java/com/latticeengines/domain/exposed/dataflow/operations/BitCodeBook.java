@@ -147,7 +147,6 @@ public class BitCodeBook implements Serializable {
 
         Map<String, Integer> bitPositionIdx = new HashMap<>();
         int[] bitPositions = assignBitPosAndUpdateIdxMap(decodeFields, bitPositionIdx);
-
         try {
             boolean[] bits = BitCodecUtils.decode(encodedStr, bitPositions);
             return translateBits(bits, decodeFields, bitPositionIdx);

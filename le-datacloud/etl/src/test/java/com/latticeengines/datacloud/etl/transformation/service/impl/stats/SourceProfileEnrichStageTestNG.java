@@ -30,6 +30,7 @@ import com.latticeengines.datacloud.core.source.impl.AccountMaster;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.ProfileTxfmr;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.SourceProfiler;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.BitDecodeStrategy;
@@ -43,6 +44,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 
 public class SourceProfileEnrichStageTestNG extends PipelineTransformationTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(SourceProfileEnrichStageTestNG.class);
@@ -89,14 +91,23 @@ public class SourceProfileEnrichStageTestNG extends PipelineTransformationTestNG
         List<String> baseSources = new ArrayList<>();
         baseSources.add(am.getSourceName());
         step0.setBaseSources(baseSources);
-        step0.setTransformer(SourceProfiler.TRANSFORMER_NAME);
+        step0.setTransformer(ProfileTxfmr.TRANSFORMER_NAME);
         step0.setTargetSource(enrichProfile.getSourceName());
-        String confParamStr0 = getEnrichProfileConfig();
+        String confParamStr0 = getEnrichProfileSparkConfig();
         step0.setConfiguration(confParamStr0);
+
+        TransformationStepConfig step1 = new TransformationStepConfig();
+        List<String> baseSources1 = new ArrayList<>();
+        baseSources1.add(am.getSourceName());
+        step1.setBaseSources(baseSources1);
+        step1.setTransformer(SourceProfiler.TRANSFORMER_NAME);
+        step1.setTargetSource(enrichProfile.getSourceName());
+        step1.setConfiguration(getEnrichProfileTezConfig());
 
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
-        steps.add(step0);
+        steps.add(step1);
+//        steps.add(step0);
 
         // -----------
         configuration.setSteps(steps);
@@ -105,7 +116,20 @@ public class SourceProfileEnrichStageTestNG extends PipelineTransformationTestNG
         return configuration;
     }
 
-    private String getEnrichProfileConfig() {
+    private String getEnrichProfileSparkConfig() {
+        ProfileJobConfig conf = new ProfileJobConfig();
+        conf.setNumBucketEqualSized(false);
+        conf.setBucketNum(4);
+        conf.setMinBucketSize(2);
+        conf.setRandSeed(RAND_SEED);
+        conf.setStage(DataCloudConstants.PROFILE_STAGE_ENRICH);
+        conf.setMaxCat(10);
+        conf.setMaxCatLength(20);
+        conf.setDataCloudVersion(dataCloudVersion);
+        return JsonUtils.serialize(conf);
+    }
+
+    private String getEnrichProfileTezConfig() {
         ProfileConfig conf = new ProfileConfig();
         conf.setNumBucketEqualSized(false);
         conf.setBucketNum(4);
@@ -331,14 +355,14 @@ public class SourceProfileEnrichStageTestNG extends PipelineTransformationTestNG
                         Assert.assertNotNull(intAlgo);
                         pass = true;
                     } catch (Exception ex) {
-                        log.warn("Json deserialization error", ex);
+                        log.warn("Json deserialization error: {}", ex.getMessage());
                     }
                     try {
                         DiscreteBucket intAlgo = JsonUtils.deserialize((String) bktAlgo, DiscreteBucket.class);
                         Assert.assertNotNull(intAlgo);
                         pass = true;
                     } catch (Exception ex) {
-                        log.warn("Json deserialization error", ex);
+                        log.warn("Json deserialization error: {}", ex.getMessage());
                     }
                     Assert.assertTrue(pass);
                     break;

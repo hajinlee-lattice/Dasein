@@ -165,7 +165,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     }
 
     /**
-     * Split into roughly equally sized buckets Genertes a list of small bins as
+     * Split into roughly equally sized buckets Generates a list of small bins as
      * a first step in bucketing. Bins are roughly equally-sized, built from a
      * sorted list. If a possible boundary straddles the same value, make sure
      * the same value either belongs to the left side bin, or to the right side
@@ -258,7 +258,7 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
     }
 
     /**
-     * genertes a list of small bins as a first step in bucketing. bins are
+     * generate a list of small bins as a first step in bucketing. bins are
      * built from a sorted list. returns: a list of index positions at
      * boundaries of these bins
      */

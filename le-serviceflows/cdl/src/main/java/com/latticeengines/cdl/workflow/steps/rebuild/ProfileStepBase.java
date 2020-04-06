@@ -2,7 +2,7 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
@@ -30,7 +30,6 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.CalculateStatsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -42,6 +41,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
+import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -106,8 +106,8 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     private TransformationStepConfig configureProfileStep(TransformationStepConfig step) {
-        step.setTransformer(TRANSFORMER_PROFILER);
-        ProfileConfig conf = new ProfileConfig();
+        step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
+        ProfileJobConfig conf = new ProfileJobConfig();
         conf.setEncAttrPrefix(CEAttr);
         if (evaluationDateAsTimestamp != null) {
             conf.setEvaluationDateAsTimestamp(evaluationDateAsTimestamp);

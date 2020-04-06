@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroParquetUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
@@ -38,8 +39,9 @@ public class CopyTxfmr extends ConfigurableSparkJobTxfmr<CopyConfig> {
         return CopyConfig.class;
     }
 
+
     @Override
-    protected void modifySparkJobConfig(CopyConfig sparkJobConfig, TransformerConfig stepConfig) {
+    protected void preSparkJobProcessing(TransformStep step, String workflowDir, CopyConfig sparkJobConfig) {
         partitionMultiplier = 4;
     }
 

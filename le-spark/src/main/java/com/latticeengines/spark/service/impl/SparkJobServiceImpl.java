@@ -91,7 +91,11 @@ public class SparkJobServiceImpl implements SparkJobService {
         LivyScalaClient client = clientService.createClient(session.getSessionUrl(), extraJars);
         try (PerformanceTimer timer = new PerformanceTimer()) {
             log.info("Submitting spark job " + job.getClass().getSimpleName());
-            log.info("Configuration: " + JsonUtils.serialize(config));
+            String configStr = JsonUtils.serialize(config);
+            if (configStr.length() > 10000) {
+                configStr = "long string";
+            }
+            log.info("Configuration: " + configStr);
             String serialized = submitJobWithRetry(client, job);
             SparkJobResult result = JsonUtils.deserialize(serialized, SparkJobResult.class);
             String timerMsg = "Finished spark job " + job.getClass().getSimpleName();

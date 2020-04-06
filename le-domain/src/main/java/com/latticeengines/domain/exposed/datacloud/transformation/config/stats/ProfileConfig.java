@@ -30,6 +30,7 @@ public class ProfileConfig extends TblDrivenTransformerConfig {
                                   // real use case
     @JsonProperty("MaxCatLen")
     private int maxCatLength = 1024; // Maximum allowed category attribute
+
     @JsonProperty("CatAttrsNotEnc")
     private String[] catAttrsNotEnc; // Dimensional attributes for stats should
                                      // length. If exceeded, this attribute is

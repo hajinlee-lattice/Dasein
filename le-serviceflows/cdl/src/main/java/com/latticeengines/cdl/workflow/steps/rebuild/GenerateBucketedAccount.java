@@ -3,7 +3,7 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.ArrayList;
@@ -28,7 +28,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -43,6 +42,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
@@ -198,8 +198,8 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(filterStep));
-        step.setTransformer(TRANSFORMER_PROFILER);
-        ProfileConfig conf = new ProfileConfig();
+        step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
+        ProfileJobConfig conf = new ProfileJobConfig();
         conf.setEncAttrPrefix(CEAttr);
         String confStr = appendEngineConf(conf, heavyEngineConfig());
         step.setConfiguration(confStr);

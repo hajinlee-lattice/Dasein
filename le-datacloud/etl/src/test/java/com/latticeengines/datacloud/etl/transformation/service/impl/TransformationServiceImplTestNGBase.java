@@ -107,7 +107,7 @@ public abstract class TransformationServiceImplTestNGBase<T extends Transformati
 
     @AfterClass(groups = { "functional", "deployment", "pipeline1", "pipeline2" })
     public void destroy() {
-        prepareCleanPod(s3Bucket, getPodId());
+//        prepareCleanPod(s3Bucket, getPodId());
     }
 
     protected void uploadFileToHdfs(List<String> fileNames) {
