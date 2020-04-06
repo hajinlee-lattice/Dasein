@@ -63,7 +63,8 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
     val codeBookMap: Map[String, BitCodeBook] = //
       if (config.getCodeBookMap == null) Map() else config.getCodeBookMap.asScala.toMap
 
-    val output = BitEncodeUtils.decode(input, numAttrs, codeBookLookup, codeBookMap)
+    val numCols: Seq[String] = numAttrs.map(_.getAttr)
+    val output = BitEncodeUtils.decode(input, numCols, codeBookLookup, codeBookMap)
     output.schema.foreach(field => {
       if (!NUM_TYPES.contains(field.dataType)) {
         throw new IllegalArgumentException(s"Attribute ${field.name} of type ${field.dataType} is not numerical.")

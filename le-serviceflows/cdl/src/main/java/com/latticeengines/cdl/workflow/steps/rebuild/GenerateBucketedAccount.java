@@ -1,7 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -211,12 +212,13 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private TransformationStepConfig bucketEncode() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(filterStep, profileStep));
-        step.setTransformer(TRANSFORMER_BUCKETER);
+        step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
 
         setTargetTable(step, servingStoreTablePrefix);
         step.getTargetTable().setExpandBucketedAttrs(true);
 
-        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
+        BucketEncodeConfig config = new BucketEncodeConfig();
+        step.setConfiguration(appendEngineConf(config, heavyEngineConfig()));
         return step;
     }
 

@@ -1,7 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
+import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -242,7 +243,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             addBaseTables(step, fullAccountTableName);
             step.setInputSteps(Collections.singletonList(profileStep));
         }
-        step.setTransformer(TRANSFORMER_BUCKETER);
+        step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -250,7 +251,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         targetTable.setExpandBucketedAttrs(true);
         step.setTargetTable(targetTable);
 
-        step.setConfiguration(emptyStepConfig(heavyEngineConfig()));
+        BucketEncodeConfig config = new BucketEncodeConfig();
+        step.setConfiguration(appendEngineConf(config, heavyEngineConfig()));
         return step;
     }
 

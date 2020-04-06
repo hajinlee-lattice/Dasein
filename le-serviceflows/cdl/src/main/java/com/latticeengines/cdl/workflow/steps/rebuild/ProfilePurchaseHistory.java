@@ -1,7 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
@@ -67,6 +67,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
+import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.DataCollectionStatusUtils;
@@ -414,8 +415,9 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     private TransformationStepConfig bucket() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(pivotStep, profileStep));
-        step.setTransformer(TRANSFORMER_BUCKETER);
-        step.setConfiguration(emptyStepConfig(heavyMemoryEngineConfig()));
+        step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
+        BucketEncodeConfig config = new BucketEncodeConfig();
+        step.setConfiguration(appendEngineConf(config, heavyEngineConfig()));
         return step;
     }
 

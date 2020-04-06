@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.Collections;
@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -94,8 +95,9 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         } else {
             step.setInputSteps(Collections.singletonList(inputStep));
         }
-        step.setTransformer(TRANSFORMER_BUCKETER);
-        String confStr = heavyEngine ? emptyStepConfig(heavyEngineConfig()) : emptyStepConfig(lightEngineConfig());
+        step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
+        BucketEncodeConfig config = new BucketEncodeConfig();
+        String confStr = heavyEngine ? appendEngineConf(config, heavyEngineConfig()) : emptyStepConfig(lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
