@@ -44,6 +44,7 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
             throw new LedpException(LedpCode.LEDP_40066, new String[] {
                     "Already have import system with name: " + importSystem.getName()});
         }
+        log.info("Create S3Import System: " + importSystem.getName());
         List<S3ImportSystem> currentSystems = s3ImportSystemEntityMgr.findAll();
         if (CollectionUtils.isEmpty(currentSystems)) {
             importSystem.setPriority(1);
@@ -141,8 +142,8 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
     public S3ImportSystem getS3ImportSystem(String customerSpace, String name) {
         S3ImportSystem importSystem = s3ImportSystemEntityMgr.findS3ImportSystem(name);
         if (importSystem == null && DEFAULTSYSTEM.equals(name)) {
-            createDefaultImportSystem(customerSpace);
-            importSystem = s3ImportSystemEntityMgr.findS3ImportSystem(name);
+            log.warn("DefaultSystem will not be created when bootstrap EntityMatch tenant. " +
+                    "Please create DefaultSystem explicitly!");
         }
         return importSystem;
     }
