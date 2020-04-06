@@ -609,7 +609,7 @@ public final class StatsCubeUtils {
                     cmMap.get(key).forEach(cm -> {
                         if (selectedGroup != null && cm.isEnabledFor(selectedGroup)) {
                             cmList.add(cm);
-                        } else {
+                        } else if (selectedGroup == null) {
                             cmList.add(cm);
                         }
                     });
