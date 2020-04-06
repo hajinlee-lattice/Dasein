@@ -59,9 +59,9 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @Column(name = "EXPORT_ID", nullable = false)
     private String exportId;
 
-    @JsonIgnore
+    @JsonProperty("segment")
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_SEGMENT_ID", nullable = true)
+    @JoinColumn(name = "FK_SEGMENT_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment segment;
 
