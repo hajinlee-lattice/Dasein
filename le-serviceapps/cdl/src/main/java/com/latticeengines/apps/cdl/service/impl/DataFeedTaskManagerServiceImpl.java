@@ -55,6 +55,8 @@ import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dataloader.DLTenantMapping;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -309,6 +311,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     csvImportFileInfo.getS3Path(), hostUrl, S3ImportMessageType.Atlas);
             return null;
         } else {
+            checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);
             ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                     csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
             return appId.toString();
@@ -338,6 +341,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         String connectorConfig = dataFeedMetadataService.getConnectorConfig(importConfig, dataFeedTask.getUniqueId());
         CSVImportFileInfo csvImportFileInfo = dataFeedMetadataService.getImportFileInfo(importConfig);
         log.info(String.format("csvImportFileInfo=%s", csvImportFileInfo));
+        checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask, connectorConfig,
                 csvImportFileInfo, null, false, null, new WorkflowPidWrapper(-1L));
         sendS3ImportEmail(customerSpace.toString(), "In_Progress", emailInfo);
@@ -421,10 +425,33 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFilePath(backupPath);
         prepareImportConfig.setEmailInfo(emailInfo);
 
+        checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
                 JsonUtils.serialize(importConfig), csvImportFileInfo, prepareImportConfig,true, emailInfo,
                 new WorkflowPidWrapper(-1L));
         return appId.toString();
+    }
+
+    private void checkImportWithWrongTemplate(String customerSpace, DataFeedTask dataFeedTask) {
+        if (!batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace))) {
+            return;
+        }
+        if (StringUtils.isNotEmpty(S3PathBuilder.getSystemNameFromFeedType(dataFeedTask.getFeedType()))) {
+            // Using the template Under system.
+            return;
+        }
+        List<DataFeedTask> taskList = dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace,
+                dataFeedTask.getEntity());
+        if (CollectionUtils.size(taskList) > 1) {
+            for (DataFeedTask task : taskList) {
+                if (!task.getUniqueId().equals(dataFeedTask.getUniqueId())) {
+                    if (StringUtils.isNotEmpty(S3PathBuilder.getSystemNameFromFeedType(task.getFeedType()))) {
+                        throw new LedpException(LedpCode.LEDP_40077,
+                                new String[] {dataFeedTask.getFeedType(), task.getFeedType()});
+                    }
+                }
+            }
+        }
     }
 
     private S3ImportEmailInfo generateEmailInfo(String customerSpace, String fileName, DataFeedTask dataFeedTask,
