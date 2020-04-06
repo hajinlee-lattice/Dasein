@@ -18,7 +18,7 @@ import com.latticeengines.pls.service.dcp.UploadService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "Pploads")
+@Api(value = "Uploads")
 @RestController
 @RequestMapping("/uploads")
 @PreAuthorize("hasRole('View_DCP_Projects')")
