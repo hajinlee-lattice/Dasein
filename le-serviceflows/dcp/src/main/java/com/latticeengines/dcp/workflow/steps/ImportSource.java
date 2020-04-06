@@ -99,7 +99,6 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
             throw new RuntimeException("Cannot find template for source " + configuration.getSourceId());
         }
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace.toString());
-        importTable(dataFeedTask, dropBoxSummary, upload);
         String eaiAppId = importTable(dataFeedTask, dropBoxSummary, upload);
         updateStats(customerSpace.toString(), eaiAppId, upload, dropBoxSummary);
     }
