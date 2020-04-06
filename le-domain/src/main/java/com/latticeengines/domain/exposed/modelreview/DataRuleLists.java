@@ -41,7 +41,7 @@ public final class DataRuleLists {
         DataRule nullLift = new DataRule("NullLift");
         nullLift.setDisplayName("Prediction from missing data");
         nullLift.setDescription(
-                "This attribute brings prediction from missing data into the model. When unpopulated numbers or categories show signifiant prediction (less than 0.7 or greater than 1.2), later scores are often inaccurate. ");
+                "This attribute brings prediction from missing data into the model. When unpopulated numbers or categories show significant prediction (less than 0.7 or greater than 1.2), later scores are often inaccurate. ");
         nullLift.setMandatoryRemoval(false);
         ruleList.add(nullLift);
 
