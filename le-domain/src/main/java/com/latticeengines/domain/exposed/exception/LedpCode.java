@@ -864,6 +864,7 @@ public enum LedpCode {
     LEDP_40075(
             "{0} is setup as your primary. This cannot be changed. Don't assign the unique ID of this system to {1} and try again."),
     LEDP_40076("Cannot download file {0}."),
+    LEDP_40077("Import using the wrong template {0}, should use {1}."),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //
