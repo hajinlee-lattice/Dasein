@@ -104,6 +104,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected String systemBatchStoreTablePrefix;
     protected String diffTablePrefix;
     protected String diffReportTablePrefix;
+    protected String changeListTablePrefix;
     protected String batchStorePrimaryKey;
 
     protected List<Table> inputTables = new ArrayList<>();
@@ -146,6 +147,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         diffTablePrefix = entity.name() + "_Diff";
         diffReportTablePrefix = entity.name() + "_DiffReport";
+        changeListTablePrefix = entity.name() + "_ChangeList";
 
         if (hasKeyInContext(PERFORM_SOFT_DELETE)) {
             softDeleteEntities = getMapObjectFromContext(PERFORM_SOFT_DELETE, BusinessEntity.class, Boolean.class);

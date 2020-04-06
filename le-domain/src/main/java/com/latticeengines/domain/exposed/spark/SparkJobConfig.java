@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.spark.cdl.AccountContactExportConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig;
+import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CountOrphanTransactionsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
 import com.latticeengines.domain.exposed.spark.cdl.CreateEventTableFilterJobConfig;
@@ -83,6 +84,7 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = CreateCdlEventTableJobConfig.class, name = CreateCdlEventTableJobConfig.NAME), //
         @JsonSubTypes.Type(value = CreateEventTableFilterJobConfig.class, name = CreateEventTableFilterJobConfig.NAME), //
         @JsonSubTypes.Type(value = MergeSystemBatchConfig.class, name = MergeSystemBatchConfig.NAME), //
+        @JsonSubTypes.Type(value = ChangeListConfig.class, name = ChangeListConfig.NAME), //
         @JsonSubTypes.Type(value = PivotScoreAndEventJobConfig.class, name = PivotScoreAndEventJobConfig.NAME), //
         @JsonSubTypes.Type(value = CountAvroGlobsConfig.class, name = CountAvroGlobsConfig.NAME), //
         @JsonSubTypes.Type(value = CalculateDeltaJobConfig.class, name = CalculateDeltaJobConfig.NAME), //
