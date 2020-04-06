@@ -282,6 +282,7 @@ public class StatsCubeUtilsSortUnitTestNG {
             cm.setCategory(Category.WEB_VISIT_PROFILE);
             cm.setAttrName(attrs.get(i));
             cm.setSubcategory(TEST_SUB_CATEGORY);
+            cm.enableGroup(ColumnSelection.Predefined.Segment);
             cms.add(cm);
             stats.put(attrs.get(i), testStats(valCntList.get(i)));
         }
@@ -311,7 +312,7 @@ public class StatsCubeUtilsSortUnitTestNG {
             Assert.assertNotNull(attr.getTopBkt().getValues());
             Assert.assertFalse(attr.getTopBkt().getValues().isEmpty());
             long cnt = attr.getTopBkt().getCount();
-            long val = Long.valueOf(attr.getTopBkt().getValues().get(0).toString());
+            long val = Long.parseLong(attr.getTopBkt().getValues().get(0).toString());
             Assert.assertEquals(val, expectedBucket[0],
                     String.format("Value in top bucket for attr %s does not match the expected value", attrName));
             Assert.assertEquals(cnt, expectedBucket[1],
