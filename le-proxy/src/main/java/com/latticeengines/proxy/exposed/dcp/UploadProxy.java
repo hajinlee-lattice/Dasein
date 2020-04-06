@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadStats;
 
 public interface UploadProxy {
 
@@ -18,5 +19,9 @@ public interface UploadProxy {
     void updateUploadConfig(String customerSpace, Long uploadPid, UploadConfig uploadConfig);
 
     void updateUploadStatus(String customerSpace, Long uploadPid, Upload.Status status);
+
+    void updateStatsContent(String customerSpace, long uploadPid, long statsPid, UploadStats uploadStats);
+
+    void setLatestStats(String customerSpace, long uploadPid, long statsPid);
 
 }

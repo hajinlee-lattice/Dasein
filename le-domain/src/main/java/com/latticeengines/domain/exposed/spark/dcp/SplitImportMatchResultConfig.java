@@ -17,6 +17,9 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
     @JsonProperty("RejectedAttrs")
     private Map<String, String> rejectedAttrsMap;
 
+    @JsonProperty("MatchedDunsAttr")
+    private String matchedDunsAttr;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -42,5 +45,13 @@ public class SplitImportMatchResultConfig extends SparkJobConfig {
 
     public void setRejectedAttrsMap(Map<String, String> rejectedAttrsMap) {
         this.rejectedAttrsMap = rejectedAttrsMap;
+    }
+
+    public String getMatchedDunsAttr() {
+        return matchedDunsAttr;
+    }
+
+    public void setMatchedDunsAttr(String matchedDunsAttr) {
+        this.matchedDunsAttr = matchedDunsAttr;
     }
 }

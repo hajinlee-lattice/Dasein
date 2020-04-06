@@ -14,6 +14,9 @@ public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration
     @JsonProperty("upload_pid")
     private Long uploadPid;
 
+    @JsonProperty("stats_pid")
+    private Long statsPid;
+
     public String getProjectId() {
         return projectId;
     }
@@ -36,5 +39,13 @@ public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration
 
     public void setUploadPid(Long uploadPid) {
         this.uploadPid = uploadPid;
+    }
+
+    public Long getStatsPid() {
+        return statsPid;
+    }
+
+    public void setStatsPid(Long statsPid) {
+        this.statsPid = statsPid;
     }
 }

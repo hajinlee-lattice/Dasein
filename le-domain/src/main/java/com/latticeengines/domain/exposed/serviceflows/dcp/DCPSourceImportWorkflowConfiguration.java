@@ -70,6 +70,11 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
             return this;
         }
 
+        public Builder statsPid(long statsPid) {
+            importSourceStepConfiguration.setStatsPid(statsPid);
+            return this;
+        }
+
         // BEGIN: Match
         public Builder dataCloudVersion(String version) {
             matchConfig.dataCloudVersion(version);
@@ -103,7 +108,6 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
         //FIXME: in alpha release, use a hard coded enrich list
         private List<String> getDCPEnrichAttrs() {
             return Arrays.asList(
-                    DataCloudConstants.LATTICE_ACCOUNT_ID,
                     DataCloudConstants.ATTR_LDC_DUNS,
                     DataCloudConstants.ATTR_LDC_NAME,
                     "TRADESTYLE_NAME",

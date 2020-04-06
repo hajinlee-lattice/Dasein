@@ -4,8 +4,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
@@ -17,13 +15,12 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
-import com.latticeengines.domain.exposed.dcp.UploadStats;
+import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.Job;
 
 @Component
 public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
-
-    private static final Logger log = LoggerFactory.getLogger(DCPSourceImportWorkflowSubmitter.class);
 
     private static final String DEFAULT_DCP_S3_USER = "Default_DCP_S3_User";
 
@@ -36,19 +33,19 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         UploadConfig uploadConfig = new UploadConfig();
         uploadConfig.setDropFilePath(importRequest.getS3FileKey());
         Upload upload = uploadService.createUpload(customerSpace.toString(), importRequest.getSourceId(), uploadConfig);
+        UploadStatsContainer container = new UploadStatsContainer();
+        container = uploadService.appendStatistics(upload.getPid(), container);
         DCPSourceImportWorkflowConfiguration configuration =
-                generateConfiguration(customerSpace, importRequest.getProjectId(), importRequest.getSourceId(), upload.getPid());
-
+                generateConfiguration(customerSpace, importRequest.getProjectId(), importRequest.getSourceId(), upload.getPid(),
+                        container.getPid());
         ApplicationId applicationId = workflowJobService.submit(configuration, pidWrapper.getPid());
-        UploadStats uploadStats = new UploadStats();
-        uploadStats.setImportApplicationPid(pidWrapper.getPid());
-        uploadService.updateUploadStats(customerSpace.toString(), upload.getPid(), uploadStats);
+        Job job = workflowJobService.findByApplicationId(applicationId.toString());
+        uploadService.updateStatsWorkflowPid(upload.getPid(), container.getPid(), job.getPid());
         return applicationId;
     }
 
     private DCPSourceImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace, String projectId,
-                                                                       String sourceId, Long uploadPid) {
-        Preconditions.checkNotNull(uploadPid);
+                                                                       String sourceId, long uploadPid, long statsId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
         return new DCPSourceImportWorkflowConfiguration.Builder()
@@ -59,6 +56,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                 .projectId(projectId) //
                 .sourceId(sourceId) //
                 .uploadPid(uploadPid) //
+                .statsPid(statsId) //
                 .build();
     }
 

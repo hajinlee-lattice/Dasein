@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadStats;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -104,6 +105,21 @@ public class UploadResource {
                              @PathVariable Upload.Status status) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         uploadService.updateUploadStatus(customerSpace, uploadPid, status);
+    }
+
+    @PutMapping("/{pid}/stats/{statsId}")
+    @ResponseBody
+    @ApiOperation(value = "Get upload record by pid")
+    public void updateStatsContent(@PathVariable String customerSpace, @PathVariable Long pid,
+                                    @PathVariable Long statsId, @RequestBody UploadStats uploadStats) {
+        uploadService.updateStatistics(pid, statsId, uploadStats);
+    }
+
+    @PutMapping("/{pid}/latest-stats/{statsId}")
+    @ResponseBody
+    @ApiOperation(value = "Get upload record by pid")
+    public Upload setLatestStats(@PathVariable String customerSpace, @PathVariable Long pid, @PathVariable Long statsId) {
+        return uploadService.setLatestStatistics(pid, statsId);
     }
 
     @PostMapping("/startimport")

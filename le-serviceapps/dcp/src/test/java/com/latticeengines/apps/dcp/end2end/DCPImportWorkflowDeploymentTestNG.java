@@ -7,6 +7,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -23,6 +25,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
@@ -32,6 +35,8 @@ import com.latticeengines.proxy.exposed.dcp.DCPProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DCPImportWorkflowDeploymentTestNG.class);
 
     @Inject
     private DropBoxProxy dropBoxProxy;
@@ -81,15 +86,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private void verifyImport() {
         Upload upload = uploadProxy.getUpload(mainCustomerSpace, uploadId);
+        log.info(JsonUtils.serialize(upload));
         Assert.assertNotNull(upload);
         Assert.assertNotNull(upload.getStatus());
 
-        // to be changed after adding profile steps
-        Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_FINISHED);
+        Assert.assertEquals(upload.getStatus(), Upload.Status.FINISHED);
 
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
         verifyMatchResult(upload);
+        verifyUploadStats(upload);
     }
 
     private void prepareTenant() {
@@ -113,6 +119,19 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
         s3FileKey = dropPath + TEST_ACCOUNT_DATA_FILE;
         testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, "2", TEST_ACCOUNT_DATA_FILE, s3Bucket, s3FileKey);
+    }
+
+    private void verifyUploadStats(Upload upload) {
+        UploadStats uploadStats = upload.getStatistics();
+        Assert.assertNotNull(uploadStats);
+
+        UploadStats.ImportStats importStats = uploadStats.getImportStats();
+        Assert.assertNotNull(importStats);
+        Assert.assertTrue(importStats.getSuccessCnt() > 0);
+
+        UploadStats.MatchStats matchStats = uploadStats.getMatchStats();
+        Assert.assertNotNull(matchStats);
+        Assert.assertTrue(matchStats.getAcceptedCnt() > 0);
     }
 
     private void verifyMatchResult(Upload upload) {

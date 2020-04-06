@@ -49,7 +49,7 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonProperty("tenant")
+    @JsonIgnore
     private Tenant tenant;
 
     @Column(name = "CREATED", nullable = false)
@@ -85,9 +85,8 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     private UploadConfig uploadConfig;
 
     @JsonProperty("upload_stats")
-    @Column(name = "UPLOAD_STATS", columnDefinition = "'JSON'", length = 8000)
-    @Type(type = "json")
-    private UploadStats uploadStats;
+    @Transient
+    public UploadStats statistics;
 
     @Override
     public Long getPid() {
@@ -153,12 +152,12 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         this.uploadConfig = uploadConfig;
     }
 
-    public UploadStats getUploadStats() {
-        return uploadStats;
+    public UploadStats getStatistics() {
+        return statistics;
     }
 
-    public void setUploadStats(UploadStats uploadStats) {
-        this.uploadStats = uploadStats;
+    public void setStatistics(UploadStats statistics) {
+        this.statistics = statistics;
     }
 
     private Table getMatchResult() {
@@ -189,6 +188,7 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         IMPORT_STARTED,
         IMPORT_FINISHED,
         MATCH_STARTED,
-        MATCH_FINISHED
+        MATCH_FINISHED,
+        FINISHED
     }
 }

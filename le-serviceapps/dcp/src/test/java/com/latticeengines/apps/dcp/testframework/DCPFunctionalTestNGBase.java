@@ -1,9 +1,12 @@
 package com.latticeengines.apps.dcp.testframework;
 
+import java.util.Random;
+
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
@@ -26,6 +29,9 @@ public class DCPFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     @Resource(name = "globalAuthFunctionalTestBed")
     protected GlobalAuthFunctionalTestBed testBed;
 
+    @Resource(name = "jdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
+
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;
 
@@ -35,5 +41,27 @@ public class DCPFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
+    }
+
+    /**
+     *
+     * @param tenantPid
+     * @return workflowId
+     */
+    protected Long createFakeWorkflow(long tenantPid) {
+        int rand = new Random(System.currentTimeMillis()).nextInt(10000);
+        String appId = String.format("application_%d_%04d", System.currentTimeMillis(), rand);
+
+        String sql = "INSERT INTO `WORKFLOW_JOB` ";
+        sql += "(`TENANT_ID`, `FK_TENANT_ID`, `USER_ID`, `APPLICATION_ID`, `INPUT_CONTEXT`, `START_TIME`) VALUES ";
+        sql += String.format("(%d, %d, 'DEFAULT_USER', '%s', '{}', NOW())", tenantPid, tenantPid, appId);
+        jdbcTemplate.execute(sql);
+
+        sql = "SELECT `PID` FROM `WORKFLOW_JOB` WHERE ";
+        sql += String.format("`TENANT_ID` = %d", tenantPid);
+        sql += String.format(" AND `APPLICATION_ID` = '%s'", appId);
+        long pid = jdbcTemplate.queryForObject(sql, Long.class);
+        log.info("Created a fake workflow " + pid);
+        return pid;
     }
 }

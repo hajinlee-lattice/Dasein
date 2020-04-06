@@ -33,7 +33,7 @@ import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-@Api(value = "projects")
+@Api(value = "Projects")
 @RestController
 @RequestMapping("/projects")
 public class ProjectResource {

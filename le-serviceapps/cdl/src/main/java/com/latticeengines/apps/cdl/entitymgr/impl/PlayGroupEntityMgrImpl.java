@@ -14,7 +14,6 @@ import com.latticeengines.apps.cdl.repository.PlayGroupRepository;
 import com.latticeengines.apps.cdl.repository.reader.PlayGroupReaderRepository;
 import com.latticeengines.apps.cdl.repository.writer.PlayGroupWriterRepository;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
-import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.PlayGroup;
 
 @Component("playGroupEntityMgr")
@@ -34,7 +33,7 @@ public class PlayGroupEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<PlayG
     private PlayGroupReaderRepository readerRepository;
 
     @Override
-    public BaseJpaRepository<PlayGroup, Long> getRepository() {
+    public PlayGroupRepository getRepository() {
         return repository;
     }
 

@@ -53,32 +53,21 @@ public class UploadEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<UploadRe
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Upload> findBySourceId(String sourceId) {
-        if (isReaderConnection()) {
-            return uploadReaderRepository.findBySourceId(sourceId);
-        } else {
-            return uploadWriterRepository.findBySourceId(sourceId);
-        }
+        return getReadOrWriteRepository().findBySourceId(sourceId);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Upload> findBySourceIdAndStatus(String sourceId, Upload.Status status) {
-        if (isReaderConnection()) {
-            return uploadReaderRepository.findBySourceIdAndStatus(sourceId, status);
-        } else {
-            return uploadWriterRepository.findBySourceIdAndStatus(sourceId, status);
-        }
+        return getReadOrWriteRepository().findBySourceIdAndStatus(sourceId, status);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Upload findByPid(Long pid) {
-        if (isReaderConnection()) {
-            return uploadReaderRepository.findByPid(pid);
-        } else {
-            return uploadWriterRepository.findByPid(pid);
-        }
+        return getReadOrWriteRepository().findByPid(pid);
     }
+
 }

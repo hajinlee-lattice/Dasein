@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 
@@ -69,4 +70,21 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
         log.info("Update status for Upload " + uploadPid + " to " + status);
         put("update Upload status", url);
     }
+
+    @Override
+    public void updateStatsContent(String customerSpace, long uploadPid, long statsPid, UploadStats uploadStats) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/{pid}/stats/{statsPid}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid, statsPid);
+        log.info("Update stats for Upload " + uploadPid + " to " + JsonUtils.serialize(uploadStats));
+        put("update Upload status", url, uploadStats);
+    }
+
+    @Override
+    public void setLatestStats(String customerSpace, long uploadPid, long statsPid) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/{pid}/latest-stats/{statsPid}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid, statsPid);
+        log.info("Update latest stats for Upload " + uploadPid + " to " + statsPid);
+        put("set Upload latest statistics", url);
+    }
+
 }
