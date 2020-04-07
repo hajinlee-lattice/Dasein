@@ -55,6 +55,7 @@ CREATE PRODEDURE `CreateFileDownloadTable`()
          `FILE_DOWNLOAD_CONFIG` JSON,
          `TOKEN` varchar(255) not null,
          `TTL` integer not null,
+         `FK_TENANT_ID` bigint not null,
           primary key (`PID`)
      )
     engine=InnoDB;

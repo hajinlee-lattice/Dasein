@@ -52,7 +52,7 @@ public class UploadResource {
 
     @GetMapping(value = "/uploadId/{uploadId}/token")
     @ResponseBody
-    @ApiOperation("Generate token for upload")
+    @ApiOperation("Generate a token for downloading zip file of the upload results")
     public String getToken(@PathVariable String uploadId) {
         return uploadService.generateToken(uploadId);
     }

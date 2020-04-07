@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HashUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.FileDownload;
 import com.latticeengines.domain.exposed.pls.FileDownloadConfig;
 import com.latticeengines.pls.entitymanager.FileDownloadEntityMgr;
@@ -29,6 +30,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
         FileDownload fileDownload = new FileDownload();
         String token = HashUtils.getMD5CheckSum(UUID.randomUUID().toString());
         fileDownload.setFileDownloadConfig(fileDownloadConfig);
+        fileDownload.setTenant(MultiTenantContext.getTenant());
         fileDownload.setToken(token);
         fileDownload.setTtl(10);
         fileDownload.setCreation(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -41,13 +43,17 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     public void downloadByToken(String token, HttpServletRequest request, HttpServletResponse response)
             throws Exception {
         FileDownload fileDownload = fileDownloadEntityMgr.findByToken(token);
+        if (fileDownload == null) {
+            throw new RuntimeException("no token exists");
+        }
         long create = fileDownload.getCreation();
-        int ttl = fileDownload.getTtl();
+        int ttlInMinute = fileDownload.getTtl();
         long now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        if (create + TimeUnit.MINUTES.toMillis(ttl) < now) {
+        if (create + TimeUnit.MINUTES.toMillis(ttlInMinute) < now) {
             throw new RuntimeException("token time out");
         }
         FileDownloadConfig config = fileDownload.getFileDownloadConfig();
+        MultiTenantContext.setTenant(fileDownload.getTenant());
         AbstractFileDownloadService fileDownloadService =
                 AbstractFileDownloadService.getDownloadService(config.getClass());
         fileDownloadService.downloadByConfig(config, request, response);

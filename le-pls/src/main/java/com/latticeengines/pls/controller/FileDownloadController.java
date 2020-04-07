@@ -12,7 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
+import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
+import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
 import com.latticeengines.pls.service.FileDownloadService;
+import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,17 +33,25 @@ public class FileDownloadController {
     @Inject
     private FileDownloadService fileDownloadService;
 
+    @Inject
+    private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
+
     @GetMapping(value = "/{token}")
     @ResponseBody
-    @ApiOperation("Download process/import/error files by uploadId")
-    public void downloadByToken(@PathVariable String token,
-                                HttpServletRequest request, HttpServletResponse response) throws Exception {
+    @ApiOperation("Pipe an output stream to http response via a token")
+    @NoMetricsLog
+    @IgnoreGlobalApiMeter
+    public UIAction downloadByToken(@PathVariable String token,
+                                    HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {
             fileDownloadService.downloadByToken(token, request, response);
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("failed to download config: {}", e.getMessage());
-            throw e;
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Error, "");
         }
+        return graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Success, "");
     }
 
 }

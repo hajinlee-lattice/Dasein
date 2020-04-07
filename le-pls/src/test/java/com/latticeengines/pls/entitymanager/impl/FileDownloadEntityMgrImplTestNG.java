@@ -8,7 +8,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HashUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
 import com.latticeengines.domain.exposed.pls.FileDownload;
@@ -25,6 +24,7 @@ public class FileDownloadEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     public void testFileDownload() {
         FileDownload download = new FileDownload();
         String token = HashUtils.getMD5CheckSum(UUID.randomUUID().toString());
+        download.setTenant(mainTestTenant);
         download.setToken(token);
         download.setTtl(10);
         download.setCreation(System.currentTimeMillis());
@@ -35,7 +35,6 @@ public class FileDownloadEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         SleepUtils.sleep(300);
 
         FileDownload retrieved = fileDownloadEntityMgr.findByToken(token);
-        System.out.println(JsonUtils.pprint(retrieved));
         Assert.assertNotNull(retrieved);
 
         fileDownloadEntityMgr.delete(retrieved);

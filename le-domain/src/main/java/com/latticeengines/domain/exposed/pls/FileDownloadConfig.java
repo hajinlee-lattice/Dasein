@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
         setterVisibility = JsonAutoDetect.Visibility.NONE //
 )
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = UploadFileDownloadConfig.class, name = "uploadFileDownloadConfig")
 })
