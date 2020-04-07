@@ -800,7 +800,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         Set<Long> jobPids = new HashSet<>();
         Map<Long, Job> updateJobs = new HashMap<>();
         for (Job job : jobs) {
-            if (job.getJobType().equals(PA_JOB_TYPE)) {
+            if (PA_JOB_TYPE.equals(job.getJobType())) {
                 continue;
             }
             if (job.getInputs() == null) {
