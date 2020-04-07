@@ -58,7 +58,7 @@ public class ServingStoreServiceImplEntityMatchGADeploymentTestNG extends Servin
                 .withSubcategory(Category.SUB_CAT_ACCOUNT_IDS) //
                 .withGroups(ColumnSelection.Predefined.Enrichment, ColumnSelection.Predefined.Segment) //
                 .canEnrich(Boolean.TRUE) //
-                .canSegment(Boolean.FALSE) //
+                .canSegment(Boolean.TRUE) //
                 .canModel(Boolean.TRUE) //
                 .build());
         cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
