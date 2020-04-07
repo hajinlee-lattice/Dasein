@@ -29,16 +29,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementService;
-import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 public class LoginResourceTestNG extends SecurityFunctionalTestNGBase {
 
     @Inject
     GlobalTenantManagementService globalTenantManagementService;
-
-    @Inject
-    TenantService tenantService;
 
     @Inject
     private UserService userService;

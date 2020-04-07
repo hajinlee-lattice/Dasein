@@ -82,12 +82,12 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCurdTeam() {
         MultiTenantContext.setTenant(tenant);
-        String teamId = teamService.createTeam(username1InTenant, getGlobalTeamData(teamName1InTenant, Sets.newHashSet(username1InTenant, username2InTenant)));
+        String teamId = createTeam(username1InTenant, teamName1InTenant, Sets.newHashSet(username1InTenant, username2InTenant));
         assertNotNull(teamId);
         GlobalTeam globalTeam = teamService.getTeamByTeamId(teamId, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         validateTeamInfo(globalTeam, teamName1InTenant, username2InTenant, 2);
         // create
-        teamService.createTeam(username2InTenant, getGlobalTeamData(teamName2InTenant, Sets.newHashSet(username1InTenant)));
+        createTeam(username2InTenant, teamName2InTenant, Sets.newHashSet(username1InTenant));
         List<GlobalTeam> globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 2);
         globalTeams = teamService.getTeamsByUserName(username1InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
@@ -105,7 +105,7 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
         MultiTenantContext.setTenant(anotherTenant);
-        teamService.createTeam(usernameInAnotherTenant, getGlobalTeamData(teamNameInAnotherTenant, Sets.newHashSet(usernameInAnotherTenant)));
+        createTeam(usernameInAnotherTenant, teamNameInAnotherTenant, Sets.newHashSet(usernameInAnotherTenant));
         globalTeams = teamService.getTeamsByUserName(usernameInAnotherTenant, getUser(usernameInAnotherTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
         validateTeamInfo(globalTeams.get(0), teamNameInAnotherTenant, usernameInAnotherTenant, 1);

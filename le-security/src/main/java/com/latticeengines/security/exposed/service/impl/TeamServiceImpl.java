@@ -103,13 +103,7 @@ public class TeamServiceImpl implements TeamService {
         try (PerformanceTimer timer = new PerformanceTimer(String.format("Get teams by username %s.", username))) {
             List<GlobalAuthTeam> globalAuthTeams;
             if (loginUser.getEmail().equals(username)) {
-                Session session = MultiTenantContext.getSession();
-                // session only exists in GlobalAuthMultiTenantContextStrategy
-                if (session != null && CollectionUtils.isNotEmpty(session.getTeamIds())) {
-                    globalAuthTeams = globalTeamManagementService.getTeamsByTeamIds(session.getTeamIds(), withTeamMember);
-                } else {
-                    globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
-                }
+                globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
             } else {
                 globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
             }

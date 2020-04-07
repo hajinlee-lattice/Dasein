@@ -36,12 +36,16 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.AfterClass;
 
+import com.google.common.collect.Sets;
+import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
@@ -72,6 +76,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
     public final String adminUsername = NamingUtils.timestamp(this.getClass().getSimpleName())
             + "@lattice-engines.com";
     public final String adminTenantName = this.getClass().getSimpleName() + "_AdminTenant";
+    protected final String adminTeamName = this.getClass().getSimpleName() + "_AdminTeam";
     public static final String adminPassword = "tahoe";
     public static final String adminPasswordHash = "mE2oR2b7hmeO1DpsoKuxhzx/7ODE9at6um7wFqa7udg=";
     public static final String generalUsername = "lming@lattice-engines.com";
@@ -95,6 +100,9 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Inject
     private SessionService sessionService;
+
+    @Inject
+    protected GlobalTeamManagementService globalTeamManagementService;
 
     protected AuthorizationHeaderHttpRequestInterceptor addAuthHeader = new AuthorizationHeaderHttpRequestInterceptor(
             "");
@@ -275,6 +283,21 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         globalUserManagementService.grantRight(AccessLevel.SUPER_ADMIN.name(), adminTenantName, adminUsername);
     }
 
+    protected String createAdminTeam() {
+        Tenant tenant = getAdminTenant();
+        if (tenant != null) {
+            MultiTenantContext.setTenant(tenant);
+            return createTeam(adminUsername, adminTeamName, Sets.newHashSet(adminUsername));
+        } else {
+            return null;
+        }
+    }
+
+    protected String createTeam(String createdByUser, String teamName, Set<String> teamMembers) {
+        GlobalAuthTeam globalAuthTeam = globalTeamManagementService.createTeam(createdByUser, getGlobalTeamData(teamName, teamMembers));
+        return globalAuthTeam.getTeamId();
+    }
+
     protected void createUser(String username, String email, String firstName, String lastName) {
         createUser(username, email, firstName, lastName, generalPasswordHash);
     }
@@ -294,6 +317,8 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
             log.info("User " + username + " already created.");
         }
     }
+
+
 
     protected Boolean changePassword(Ticket ticket, String username, String oldPassword, String newPassword) {
         try {
