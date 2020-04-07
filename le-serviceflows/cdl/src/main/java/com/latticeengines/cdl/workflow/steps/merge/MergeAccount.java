@@ -235,7 +235,9 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
         if (!noImports) {
-            exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
+            if (StringUtils.isNotBlank(changeListTableName)) {
+                exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
+            }
             exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
         }
         TableRoleInCollection role = TableRoleInCollection.ConsolidatedAccount;
