@@ -788,8 +788,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
             id = id != null ? id : "";
             List<String> errorDetail  = new ArrayList<>();
             if (detailError) {
-                while(csvRecord.iterator().hasNext()) {
-                    errorDetail.add(csvRecord.iterator().next());
+                for (String s : csvRecord) {
+                    errorDetail.add(s);
                 }
             }
             errorDetail.add(String.valueOf(lineNumber));
