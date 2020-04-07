@@ -46,7 +46,6 @@ public class FileDownloadController {
         try {
             fileDownloadService.downloadByToken(token, request, response);
         } catch (Exception e) {
-            e.printStackTrace();
             log.error("failed to download config: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return graphDependencyToUIActionUtil.generateUIAction("", View.Banner, Status.Error, "");
