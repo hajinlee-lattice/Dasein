@@ -407,7 +407,8 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     }
 
     public enum SubType {
-        Bundle, Hierarchy, Lead, SourceMedium, StageName
+        Bundle, Hierarchy, Lead, SourceMedium, StageName, Opportunity, MarketingActivity,
+        MarketingActivityType
     }
 
     public enum S3ImportStatus {
