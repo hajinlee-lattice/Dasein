@@ -173,8 +173,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         return s3FileToHdfsConfiguration;
     }
 
-    private void updateStats(String customerSpace, String eaiAppId, Upload upload,
-                             DropBoxSummary dropBoxSummary) {
+    private void updateStats(String customerSpace, String eaiAppId, Upload upload, DropBoxSummary dropBoxSummary) {
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(eaiAppId);
         if (eaiImportJobDetail == null) {
             log.error("No data imported for EAI application: " + eaiAppId);
@@ -208,7 +207,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
             String errorFileName = getErrorFileName(upload.getUploadConfig().getUploadRawFilePath());
 
             upload.getUploadConfig().setUploadImportedErrorFilePath(
-                    UploadS3PathBuilderUtils.combinePath(false, false, uploadErrorDirKey, errorFileName));
+                    UploadS3PathBuilderUtils.combinePath(false, false, uploadErrorDir, errorFileName));
             String path = extractPath;
             if (!path.endsWith("/")) {
                 path += "/";
@@ -218,7 +217,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
             try {
                 if (HdfsUtils.fileExists(yarnConfiguration, errorFile)) {
                     copyToS3(errorFile, dropBoxSummary.getBucket(),
-                            upload.getUploadConfig().getUploadImportedErrorFilePath());
+                            UploadS3PathBuilderUtils.combinePath(false, false, uploadErrorDirKey, errorFileName));
                 } else {
                     log.error("Cannot find error file under: " + errorFile);
                 }

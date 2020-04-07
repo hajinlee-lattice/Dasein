@@ -94,8 +94,21 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
+        verifyErrorFile(upload);
         verifyMatchResult(upload);
         verifyUploadStats(upload);
+        // for test only
+        Assert.fail();
+    }
+
+    private void verifyErrorFile(Upload upload) {
+        Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadImportedErrorFilePath()));
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
+        String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
+        String errorFileKey = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+                upload.getUploadConfig().getUploadImportedErrorFilePath());
+        System.out.println("Error file path=" + errorFileKey);
+        Assert.assertTrue(s3Service.objectExist(dropBoxSummary.getBucket(), errorFileKey));
     }
 
     private void prepareTenant() {
@@ -118,7 +131,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         dropPath = UploadS3PathBuilderUtils.combinePath(false, true,
                 UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
         s3FileKey = dropPath + TEST_ACCOUNT_DATA_FILE;
-        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, "2", TEST_ACCOUNT_DATA_FILE, s3Bucket, s3FileKey);
+        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket, s3FileKey);
     }
 
     private void verifyUploadStats(Upload upload) {
