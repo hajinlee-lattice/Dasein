@@ -61,6 +61,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
     private int encodeStep;
 
     private boolean shortCutMode;
+    private boolean doFullProfile;
 
     private String fullAccountTableName;
 
@@ -81,7 +82,8 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
         List<String> tables = Arrays.asList(ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME,
                 ACCOUNT_STATS_TABLE_NAME);
-        if (getConfiguration().isFullProfile()) {
+        doFullProfile = "true".equals(getStringValueFromContext(PROCESS_ACCOUNT_FULL_PROFILE));
+        if (doFullProfile) {
             tables = Arrays.asList(ACCOUNT_SERVING_TABLE_NAME, ACCOUNT_PROFILE_TABLE_NAME);
         }
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(),
@@ -101,13 +103,13 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
             dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
                     servingStoreRole, inactive);
 
-            if (!getConfiguration().isFullProfile()) {
+            if (!doFullProfile) {
                 Table statsTableInCtx = getTableSummaryFromKey(customerSpace.toString(), ACCOUNT_STATS_TABLE_NAME);
                 updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableInCtx.getName(), String.class);
             }
 
         } else {
-            if (configuration.isFullProfile()) {
+            if (doFullProfile) {
                 statsTablePrefix = null;
             }
             fullAccountTableName = getStringValueFromContext(FULL_ACCOUNT_TABLE_NAME);
@@ -135,8 +137,8 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         List<TransformationStepConfig> steps = new ArrayList<>();
 
         if (shouldExcludeDataCloudAttrs() && hasFullProfleAndEncoded()) {
-            String fullProfile = getStringValueFromContext(FULL_ACCOUNT_PROFILE_TABLE_NAME);
-            TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, fullProfile);
+            String fullProfileTableName = getStringValueFromContext(FULL_ACCOUNT_PROFILE_TABLE_NAME);
+            TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, fullProfileTableName);
             steps.add(sortProfile);
 
             servingStoreTableName = getStringValueFromContext(FULL_ACCOUNT_ENCODED_TABLE_NAME);
@@ -155,7 +157,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
             TransformationStepConfig encode = bucketEncode();
             TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, null);
             TransformationStepConfig calc = null;
-            if (!getConfiguration().isFullProfile()) {
+            if (!doFullProfile) {
                 calc = calcStats(profileStep, encodeStep, statsTablePrefix, null);
             }
 
@@ -178,7 +180,7 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         super.onPostTransformationCompleted();
         exportToS3AndAddToContext(profileTableName, ACCOUNT_PROFILE_TABLE_NAME);
         exportToS3AndAddToContext(servingStoreTableName, ACCOUNT_SERVING_TABLE_NAME);
-        if (!getConfiguration().isFullProfile()) {
+        if (!doFullProfile) {
             exportToS3AndAddToContext(statsTableName, ACCOUNT_STATS_TABLE_NAME);
             putStringValueInContext(PROCESS_ACCOUNT_STATS_MERGE, "true");
         }
