@@ -94,7 +94,7 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertTrue(result);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testVboRequest() {
         String fullTenantId = "LETest" + System.currentTimeMillis();
         String url = getRestHostPort() + "/admin/tenants/vboadmin";
