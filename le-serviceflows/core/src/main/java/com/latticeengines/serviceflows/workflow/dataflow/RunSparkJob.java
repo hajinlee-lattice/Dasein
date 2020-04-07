@@ -116,7 +116,7 @@ public abstract class RunSparkJob<S extends BaseStepConfiguration, C extends Spa
         resultTable.setAttributes(newAttrs);
     }
 
-    protected boolean isShortCutMode(Map<String, String> tableNames) {
+    protected boolean allTablesExist(Map<String, String> tableNames) {
         String customer = customerSpace.toString();
         if (MapUtils.isEmpty(tableNames)) {
             return false;

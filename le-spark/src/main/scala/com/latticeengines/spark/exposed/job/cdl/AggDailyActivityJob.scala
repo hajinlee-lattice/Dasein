@@ -2,7 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
 import com.latticeengines.domain.exposed.cdl.activity.{DimensionCalculator, DimensionCalculatorRegexMode, DimensionGenerator}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{__Row_Count__, __StreamDate, __StreamDateId}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, __Row_Count__, __StreamDate, __StreamDateId}
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig
 import com.latticeengines.domain.exposed.util.ActivityStoreUtils
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -20,6 +20,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
   override def runJob(spark: SparkSession, lattice: LatticeContext[AggDailyActivityConfig]): Unit = {
     // define vars
     val inputIdx = lattice.config.rawStreamInputIdx.asScala
+    val dateAttrs = lattice.config.streamDateAttrs.asScala
     val metadataMap = lattice.config.dimensionMetadataMap.asScala.mapValues(_.asScala)
     val calculatorMap = lattice.config.dimensionCalculatorMap.asScala.mapValues(_.asScala)
     val attrDeriverMap = lattice.config.attrDeriverMap.asScala.mapValues(_.asScala.toList)
@@ -34,6 +35,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
       .filterKeys(metadataMap(_).nonEmpty)
       .map { case (streamId, idx) =>
         val metadataInStream = metadataMap(streamId)
+        val dateAttr = dateAttrs(streamId)
         val calculators = calculatorMap(streamId)
         val attrs = metadataInStream.keys
         val additionalDimCols = entityIdColMap.getOrElse(streamId, Nil)
@@ -70,10 +72,12 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
         val aggDf: DataFrame = {
           if (streamReducerMap.get(streamId).isDefined) {
             // if stream has reducer, just append 1 as dedup already done for daily level
-            df.withColumn(__Row_Count__.name, lit(1).cast(LongType))
+            addLastActivityDateColIfNotExist(df, dateAttr).withColumn(__Row_Count__.name, lit(1).cast(LongType))
           } else {
-            df.groupBy(dimAttrs.head, dimAttrs.tail: _*)
-              .agg(count("*").as(__Row_Count__.name), aggFns: _*)
+            addLastActivityDateColIfNotExist(df, dateAttr)
+              .groupBy(dimAttrs.head, dimAttrs.tail: _*)
+              .agg(count("*").as(__Row_Count__.name),
+                max(LastActivityDate.name).as(LastActivityDate.name) :: aggFns: _*)
           }
         }
 
@@ -87,6 +91,15 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     lattice.output = result.map(_._2)
     // json str (list of streamId with the same order as output df)
     lattice.outputStr = Serialization.write(result.map(_._1))(org.json4s.DefaultFormats)
+  }
+
+  private def addLastActivityDateColIfNotExist(df: DataFrame, dateAttr: String): DataFrame = {
+    if (!df.columns.contains(LastActivityDate.name)) {
+      df.withColumn(LastActivityDate.name, df.col(dateAttr))
+    } else {
+      df.withColumn(LastActivityDate.name,
+        coalesce(df.col(LastActivityDate.name), df.col(dateAttr), lit(null).cast(LongType)))
+    }
   }
 }
 

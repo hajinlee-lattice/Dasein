@@ -239,6 +239,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE = "ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE";
     protected static final String RAW_ACTIVITY_STREAM_TABLE_NAME = "RAW_ACTIVITY_STREAM_TABLE_NAME";
     protected static final String AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME = "AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME";
+    protected static final String LAST_ACTIVITY_DATE_TABLE_NAME = "LAST_ACTIVITY_DATE_TABLE_NAME";
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
     protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
@@ -339,8 +340,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             DELETED_TABLE_NAME, CATALOG_TABLE_NAME, ENTITY_MATCH_STREAM_TARGETTABLE,
             ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE, ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE,
             RAW_ACTIVITY_STREAM_TABLE_NAME, AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, METRICS_GROUP_TABLE_NAME,
-            MERGED_METRICS_GROUP_TABLE_NAME,
-            PERIOD_STORE_TABLE_NAME);
+            MERGED_METRICS_GROUP_TABLE_NAME, PERIOD_STORE_TABLE_NAME, LAST_ACTIVITY_DATE_TABLE_NAME);
 
     // extra context keys to be carried over in restarted PA, beyond table names
     // above

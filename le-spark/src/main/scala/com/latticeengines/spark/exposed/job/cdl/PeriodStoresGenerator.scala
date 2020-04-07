@@ -5,8 +5,8 @@ import java.util
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
-import com.latticeengines.domain.exposed.cdl.activity.{ActivityRowReducer, AtlasStream, StreamAttributeDeriver, StreamDimension}
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{PeriodId, __Row_Count__, __StreamDate}
+import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver, StreamDimension}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, PeriodId, __Row_Count__, __StreamDate}
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DailyStoreToPeriodStoresJobConfig}
@@ -15,7 +15,7 @@ import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeriveAttrsUtils
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{IntegerType, StringType}
+import org.apache.spark.sql.types.{IntegerType, LongType, StringType}
 import org.apache.spark.sql.{Column, DataFrame, SparkSession}
 
 import scala.collection.JavaConversions._
@@ -69,9 +69,12 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
 
     var withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStore, periodName, translator, stream))
     if (Option(stream.getReducer).isEmpty) { // if reducer exists, no need to group by PeriodId as each periodId should only has one record
-      val aggColumns: Seq[Column] = aggregations.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) :+ sum(__Row_Count__.name).as(__Row_Count__.name) // Default row count must exist
+      // Default row count and last activity date must exist
+      val defaultAggColumns = Seq(sum(__Row_Count__.name).as(__Row_Count__.name), max(LastActivityDate.name).as(LastActivityDate.name))
+      val aggColumns: Seq[Column] = aggregations.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) ++: defaultAggColumns
       val columns: Seq[String] = DeriveAttrsUtils.getEntityIdColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
-      withPeriodId = withPeriodId.map((df: DataFrame) => df.groupBy(columns.head, columns.tail: _*).agg(aggColumns.head, aggColumns.tail: _*))
+      withPeriodId = withPeriodId.map((df: DataFrame) =>
+        addLastActivityDateColIfNotExist(df).groupBy(columns.head, columns.tail: _*).agg(aggColumns.head, aggColumns.tail: _*))
     }
     withPeriodId.map((df: DataFrame) => DeriveAttrsUtils.appendPartitionColumns(df, Seq(PeriodId.name)))
   }
@@ -101,5 +104,13 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
 
   private def getPeriodStrategies(periods: Seq[String], calendar: BusinessCalendar): util.List[PeriodStrategy] = {
     scala.collection.JavaConversions.seqAsJavaList(periods.map(name => toPeriodStrategy(name, calendar)))
+  }
+
+  private def addLastActivityDateColIfNotExist(df: DataFrame): DataFrame = {
+    if (!df.columns.contains(LastActivityDate.name)) {
+      df.withColumn(LastActivityDate.name, lit(null).cast(LongType))
+    } else {
+      df
+    }
   }
 }
