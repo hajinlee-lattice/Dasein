@@ -59,7 +59,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(LPIEndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
-    private static String userEmail = "test@test.com";
+    private static String userEmail = "test@dcp.com";
 
     private static final String HDFS_POD_PATH = "/Pods/%s/Contracts/%s";
     private static final String HDFS_MODELING_BASE_PATH = "/user/s-analytics/customers";
@@ -160,11 +160,13 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         name.setLastName("test");
         user.setName(name);
         user.setEmailAddress(userEmail);
+        user.setTelephoneNumber("1234567");
 
         pro.setUsers(new ArrayList<VboRequest.User>());
         pro.getUsers().add(user);
         req.setProduct(pro);
         VboRequest.Subscriber sub = new VboRequest.Subscriber();
+        sub.setLanguage("English");
         sub.setName(tenantId);
         req.setSubscriber(sub);
 

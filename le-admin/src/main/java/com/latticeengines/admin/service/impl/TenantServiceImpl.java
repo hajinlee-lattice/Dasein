@@ -703,6 +703,9 @@ public class TenantServiceImpl implements TenantService {
         iDaasuser.setUserName(user.getUserId());
         iDaasuser.setPhoneNumber(user.getTelephoneNumber());
         iDaasuser.setLanguage(language);
+        iDaasuser.setRequestor("dcp_dev@lattice-engines.com");
+        iDaasuser.setSource("Data Cloud Portal");
+        iDaasuser.setAppName("Data Cloud Portal");
         return iDaasuser;
     }
 

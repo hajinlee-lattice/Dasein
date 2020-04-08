@@ -155,6 +155,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     public IDaaSUser getIDaaSUser(String email) {
         if (enabled) {
+            initialize();
             IDaaSUser user = null;
             try {
                 RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
@@ -324,7 +325,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         });
         String accessToken = jsonNode.get("access_token").asText();
         String refreshToken = jsonNode.get("refresh_token").asText();
-//        log.info("IDaaS OAuth AssessToken={}, RefreshToken={}", accessToken, refreshToken);
+        log.info("IDaaS OAuth AssessToken={}, RefreshToken={}", accessToken, refreshToken);
         setOauthToken(accessToken);
     }
 
