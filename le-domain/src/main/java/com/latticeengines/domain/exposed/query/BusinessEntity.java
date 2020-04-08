@@ -258,6 +258,26 @@ public enum BusinessEntity implements GraphNode {
         }
     }
 
+    // for example Rating is in fact a part of Account data
+    public static BusinessEntity getCentralEntity(BusinessEntity entity) {
+        switch (entity) {
+            case Contact:
+                return Contact;
+            case Account:
+            case CuratedAccount:
+            case PurchaseHistory:
+            case AnalyticPurchaseState:
+            case Rating:
+            case WebVisitProfile:
+            case Opportunity:
+                return Account;
+            case LatticeAccount:
+                return LatticeAccount;
+            default:
+                throw new UnsupportedOperationException("The central entity for " + entity + "is not well defined.");
+        }
+    }
+
     public enum Cardinality {
         ONE_TO_ONE, ONE_TO_MANY, MANY_TO_ONE, MANY_TO_MANY
     }
