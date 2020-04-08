@@ -59,6 +59,7 @@ CREATE PRODEDURE `CreateFileDownloadTable`()
           primary key (`PID`)
      )
     engine=InnoDB;
+    alter table `FILE_DOWNLOAD` add constraint `FK_FILEDOWNLOAD_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
   END;
 
 DELIMITER;

@@ -38,7 +38,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
-import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.model.FileHeader;
 
 
