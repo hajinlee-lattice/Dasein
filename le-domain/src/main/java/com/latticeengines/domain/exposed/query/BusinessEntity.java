@@ -262,6 +262,7 @@ public enum BusinessEntity implements GraphNode {
     public static BusinessEntity getCentralEntity(BusinessEntity entity) {
         switch (entity) {
             case Contact:
+            case ContactMarketingActivity:
                 return Contact;
             case Account:
             case CuratedAccount:
@@ -270,6 +271,7 @@ public enum BusinessEntity implements GraphNode {
             case Rating:
             case WebVisitProfile:
             case Opportunity:
+            case AccountMarketingActivity:
                 return Account;
             case LatticeAccount:
                 return LatticeAccount;
