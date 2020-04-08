@@ -346,7 +346,7 @@ public class IDaaSServiceImpl implements IDaaSService {
                     scheduler.setPoolSize(1);
                     scheduler.setThreadNamePrefix("idaas-oauth-token");
                     scheduler.initialize();
-                    scheduler.scheduleWithFixedDelay(this::refreshOAuthTokens, TimeUnit.DAYS.toMillis(1));
+                    scheduler.scheduleWithFixedDelay(this::refreshOAuthTokens, TimeUnit.HOURS.toMillis(1));
                     initialized = true;
                 }
             }
