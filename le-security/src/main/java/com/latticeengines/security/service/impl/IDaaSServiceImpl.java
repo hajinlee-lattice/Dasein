@@ -52,7 +52,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     public static final String DCP_PRODUCT = "Data Cloud Portal";
     private static final String DCP_ROLE = "DATA_CLOUD_PORTAL_ACCESS";
 
-    private RestTemplate restTemplate = HttpClientUtils.newJsonRestTemplate();
+    private RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
 
     @Inject
     private SessionService sessionService;
@@ -90,9 +90,9 @@ public class IDaaSServiceImpl implements IDaaSService {
             IDaaSUser iDaaSUser = getIDaaSUser(credentials.getUsername());
             boolean hasAccess = hasAccessToApp(iDaaSUser);
             if (hasAccess) {
-                String email = iDaaSUser.getEmailAddress();
+                String email = iDaaSUser.getEmailAddress().toLowerCase();
                 if (StringUtils.isBlank(email)) {
-                    email = credentials.getUsername();
+                    email = credentials.getUsername().toLowerCase();
                 }
                 IDaaSExternalSession externalSession = new IDaaSExternalSession();
                 externalSession.setIssuer("IDaaS");
@@ -306,7 +306,7 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     private void refreshOAuthTokens() {
         Map<String, String> payload = ImmutableMap.of("grant_type", "client_credentials");
-        RestTemplate restTemplate = HttpClientUtils.newJsonRestTemplate();
+        RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
         String headerValue = String.format("client_id:%s,client_secret:%s", clientId, clientSecret);
         ClientHttpRequestInterceptor interceptor = new AuthorizationHeaderHttpRequestInterceptor(headerValue);
         restTemplate.setInterceptors(Collections.singletonList(interceptor));
@@ -324,8 +324,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         });
         String accessToken = jsonNode.get("access_token").asText();
         String refreshToken = jsonNode.get("refresh_token").asText();
-        log.info("IDaaS OAuth AssessToken={}, RefreshToken={}", accessToken, refreshToken);
-
+//        log.info("IDaaS OAuth AssessToken={}, RefreshToken={}", accessToken, refreshToken);
         setOauthToken(accessToken);
     }
 
@@ -342,6 +341,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         if (!initialized) {
             synchronized (this) {
                 if (!initialized) {
+                    refreshOAuthTokens();
                     ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
                     scheduler.setPoolSize(1);
                     scheduler.setThreadNamePrefix("idaas-oauth-token");
