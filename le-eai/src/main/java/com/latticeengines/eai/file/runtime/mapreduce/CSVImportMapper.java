@@ -292,7 +292,6 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 new BOMInputStream(getInputFileStream(context), false, ByteOrderMark.UTF_8,
                         ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE,
                         ByteOrderMark.UTF_32BE), StandardCharsets.UTF_8)), format)) {
-//            headers = Sets.newHashSet(new ArrayList<>(parser.getHeaderMap().keySet()).toArray(new String[]{}));
             headerMap = parser.getHeaderMap();
             Iterator<CSVRecord> iter = parser.iterator();
             String ERROR_FILE = getFileName("error", ".csv", 0);
