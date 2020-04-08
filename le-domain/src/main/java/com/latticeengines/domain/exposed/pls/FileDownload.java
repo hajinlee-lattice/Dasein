@@ -55,6 +55,7 @@ public class FileDownload implements HasPid, HasTenant {
     @Column(name = "CREATION", nullable = false)
     private Long creation;
 
+    // Note: this ttl is in minute
     @JsonProperty("ttl")
     @Column(name = "TTL", nullable = false)
     private int ttl;

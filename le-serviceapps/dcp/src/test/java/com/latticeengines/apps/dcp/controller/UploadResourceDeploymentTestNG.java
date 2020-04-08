@@ -1,11 +1,15 @@
 package com.latticeengines.apps.dcp.controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,6 +26,7 @@ import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.Project;
@@ -32,6 +37,10 @@ import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+
+import net.lingala.zip4j.ZipFile;
+import net.lingala.zip4j.model.FileHeader;
+
 
 public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -47,9 +56,9 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     private S3Service s3Service;
 
-    private String SOURCE_ID;
+    private String sourceId;
 
-    private String PROJECT_ID;
+    private String projectId;
 
     @BeforeClass(groups = {"deployment"})
     public void setup() throws Exception {
@@ -60,14 +69,14 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     public void testCRUD() {
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
                 Project.ProjectType.Type1, "test@dnb.com");
-        PROJECT_ID = details.getProjectId();
+        projectId = details.getProjectId();
 
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
                 TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
-        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", PROJECT_ID,
+        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId,
                 fieldDefinitionsRecord);
-        SOURCE_ID = source.getSourceId();
+        sourceId = source.getSourceId();
 
         UploadConfig config = new UploadConfig();
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
@@ -113,7 +122,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testCRUD")
     public void testDownload() throws Exception {
-        List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, SOURCE_ID, Upload.Status.MATCH_STARTED);
+        List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         Upload upload = uploads.get(0);
@@ -148,6 +157,30 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertNotNull(contents);
         Assert.assertTrue(contents.length > 0);
 
+        // write the byte to zip, then unzip the zip
+        File zip = File.createTempFile(NamingUtils.uuid("zip"), ".zip");
+        zip.deleteOnExit();
+        OutputStream outputStream = new FileOutputStream(zip);
+        outputStream.write(contents);
+        outputStream.flush();
+        outputStream.close();
+
+        // test the zip file can be extracted to 3 files
+        ZipFile zipFile = new ZipFile(zip);
+        List<FileHeader> fileHeaders = zipFile.getFileHeaders();
+        Assert.assertNotNull(fileHeaders);
+        Assert.assertEquals(fileHeaders.size(), 3);
+        String tmp = System.getProperty("java.io.tmpdir");
+        if (tmp.endsWith("/")) {
+            tmp = tmp.substring(0, tmp.length() -1);
+        }
+        String destPath = tmp + NamingUtils.uuid("/download");
+        zipFile.extractAll(destPath);
+        File destDir = new File(destPath);
+        Assert.assertTrue(destDir.isDirectory());
+        String[] files = destDir.list();
+        Assert.assertEquals(files.length, 3);
+        FileUtils.forceDelete(destDir);
     }
 
 }
