@@ -1,6 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
@@ -51,7 +52,8 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
             Pair.of(__StreamDateId.name(), Integer.class), //
             Pair.of(__StreamDate.name(), String.class));
     private static final List<String> DAILY_AGG_OUTPUT_FIELDS = Arrays.asList(AccountId.name(), UserId.name(),
-            SourceMediumId.name(), PathPatternId.name(), __StreamDate.name(), __Row_Count__.name());
+            SourceMediumId.name(), PathPatternId.name(), __StreamDate.name(), __Row_Count__.name(),
+            LastActivityDate.name());
     private static final String STREAM_ID = "daily_agg_stream";
     private static final String DAY_1 = "2019-07-01";
     private static final String DAY_2 = "2019-07-02";
@@ -241,6 +243,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private AggDailyActivityConfig baseConfig() {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         config.rawStreamInputIdx.put(STREAM_ID, 0);
+        config.streamDateAttrs.put(STREAM_ID, __StreamDateId.name());
         config.dimensionMetadataMap.put(STREAM_ID, webVisitMetadata());
         config.dimensionCalculatorMap.put(STREAM_ID, webVisitDimensionCalculators());
         config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(SourceMediumId.name(), PathPatternId.name()));

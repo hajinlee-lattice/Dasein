@@ -119,7 +119,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         // for profiling merged tables
         putObjectInContext(ACTIVITY_MERGED_METRICS_SERVING_ENTITIES, activityMetricsServingEntities);
         Map<String, String> mergedMetricsGroupTableNames = getMapObjectFromContext(MERGED_METRICS_GROUP_TABLE_NAME, String.class, String.class);
-        shortCutMode = isShortCutMode(mergedMetricsGroupTableNames);
+        shortCutMode = allTablesExist(mergedMetricsGroupTableNames);
         if (shortCutMode) {
             Map<TableRoleInCollection, Map<String, String>> signatureTableNames = new HashMap<>();
             for (Map.Entry<String, String> entry : mergedMetricsGroupTableNames.entrySet()) {

@@ -183,6 +183,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processTransactionWorkflowBuilder.rebuildEntities(entities);
             curatedAttributesWorkflowBuilder.rebuildEntities(entities);
             processRatingWorkflowBuilder.rebuildEntities(entities);
+            processActivityStreamWorkflowBuilder.rebuildEntities(entities);
             return this;
         }
 

@@ -38,6 +38,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String Stage = "Stage";
     private static final String Count = InterfaceName.__Row_Count__.name();
     private static final String StreamDate = InterfaceName.__StreamDate.name();
+    private static final String LastActivityDate = InterfaceName.LastActivityDate.name();
     private static final String DATE_ATTR = InterfaceName.LastModifiedDate.name();
     private static final String PeriodIdForPartition = DeriveAttrsUtils.PARTITION_COL_PREFIX() + PeriodId;
     // DateId in daily store table is not used while generating period stores
@@ -116,14 +117,15 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of(Stage, String.class), //
                 Pair.of(DATE_ATTR, String.class), //
                 Pair.of(StreamDate, String.class), //
-                Pair.of(Count, Integer.class)
+                Pair.of(Count, Integer.class), //
+                Pair.of(LastActivityDate, Long.class)
         );
         Object[][] data = new Object[][]{
-                {"acc1", "opp1", "open", "Oct 21, 2018 18:37", "2018-10-21", 1},
-                {"acc1", "opp1", "dev", "Oct 22, 2018 19:37", "2018-10-22", 1},
-                {"acc1", "opp1", "won", "Oct 23, 2018 20:37", "2018-10-23", 1},
-                {"acc2", "opp1", "close", "Oct 24, 2018 20:37", "2018-10-24", 1},
-                {"acc2", "opp2", "open", "Oct 29, 2018 20:37", "2018-10-29", 1}
+                { "acc1", "opp1", "open", "Oct 21, 2018 18:37", "2018-10-21", 1, 1L },
+                { "acc1", "opp1", "dev", "Oct 22, 2018 19:37", "2018-10-22", 1, 2L },
+                { "acc1", "opp1", "won", "Oct 23, 2018 20:37", "2018-10-23", 1, 3L },
+                { "acc2", "opp1", "close", "Oct 24, 2018 20:37", "2018-10-24", 1, 4L },
+                { "acc2", "opp2", "open", "Oct 29, 2018 20:37", "2018-10-29", 1, 9L }
         };
         setupStreamWithReducer();
         return uploadHdfsDataUnit(data, inputFields);
@@ -165,33 +167,36 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private Boolean verifyMonthPeriodStore(HdfsDataUnit df) {
-        OUTPUT_FIELDS_NO_REDUCER = Arrays.asList(AccountId, PathPatternId, PeriodIdForPartition, Count);
+        OUTPUT_FIELDS_NO_REDUCER = Arrays.asList(AccountId, PathPatternId, PeriodIdForPartition, Count,
+                LastActivityDate);
         Object[][] expected = new Object[][]{
-                {"2", "pp2", 237, 6}, //
-                {"1", "pp1", 237, 8}, //
-                {"2", "pp1", 237, 12}
+                { "2", "pp2", 237, 6, null }, //
+                { "1", "pp1", 237, 8, null }, //
+                { "2", "pp1", 237, 12, null }
         };
         verifyPeriodStore(expected, df, false);
         return false;
     }
 
     private Boolean verifyWeekPeriodStore(HdfsDataUnit df) {
-        OUTPUT_FIELDS_NO_REDUCER = Arrays.asList(AccountId, PathPatternId, PeriodIdForPartition, Count);
+        OUTPUT_FIELDS_NO_REDUCER = Arrays.asList(AccountId, PathPatternId, PeriodIdForPartition, Count,
+                LastActivityDate);
         Object[][] expected = new Object[][]{
-                {"2", "pp1", 1031, 5}, //
-                {"2", "pp1", 1032, 7}, //
-                {"2", "pp2", 1032, 6}, //
-                {"1", "pp1", 1031, 8}
+                { "2", "pp1", 1031, 5, null }, //
+                { "2", "pp1", 1032, 7, null }, //
+                { "2", "pp2", 1032, 6, null }, //
+                { "1", "pp1", 1031, 8, null }
         };
         verifyPeriodStore(expected, df, false);
         return false;
     }
 
     private Boolean verifyReduced(HdfsDataUnit df) {
-        OUTPUT_FIELDS_WITH_REDUCER = Arrays.asList(AccountId, OpportunityId, PeriodIdForPartition, Stage, Count);
-        Object[][] expected = new Object[][]{
-                {"acc2", "opp1", 982, "close", 1},
-                {"acc2", "opp2", 983, "open", 1}
+        OUTPUT_FIELDS_WITH_REDUCER = Arrays.asList(AccountId, OpportunityId, PeriodIdForPartition, Stage, Count,
+                LastActivityDate);
+        Object[][] expected = new Object[][] { //
+                { "acc2", "opp1", 982, "close", 1, 4L }, //
+                { "acc2", "opp2", 983, "open", 1, 9L } //
         };
         verifyPeriodStore(expected, df, true);
         return false;
@@ -218,7 +223,10 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertTrue(keys.stream().noneMatch(key -> record.get(key) == null));
         String key = keys.stream().map(k -> record.get(k).toString()).collect(Collectors.joining(""));
         Assert.assertNotNull(expectedMap.get(key));
-        List<Object> actual = fields.stream().map(field -> record.get(field).toString()).collect(Collectors.toList());
-        Assert.assertEquals(actual, expectedMap.get(key).stream().map(Object::toString).collect(Collectors.toList()));
+        List<Object> actual = fields.stream()
+                .map(field -> record.get(field) == null ? null : record.get(field).toString())
+                .collect(Collectors.toList());
+        Assert.assertEquals(actual, expectedMap.get(key).stream().map(obj -> obj == null ? null : obj.toString())
+                .collect(Collectors.toList()));
     }
 }

@@ -23,6 +23,9 @@ public class ActivityStreamSparkStepConfiguration extends SparkJobStepConfigurat
     @JsonProperty("entity_match_ga_only")
     private boolean entityMatchGAOnly;
 
+    @JsonProperty("rebuild_activity_store")
+    private boolean shouldRebuild;
+
     public Map<String, AtlasStream> getActivityStreamMap() {
         return activityStreamMap;
     }
@@ -53,5 +56,13 @@ public class ActivityStreamSparkStepConfiguration extends SparkJobStepConfigurat
 
     public void setEntityMatchGAOnly(boolean entityMatchGAOnly) {
         this.entityMatchGAOnly = entityMatchGAOnly;
+    }
+
+    public boolean isShouldRebuild() {
+        return shouldRebuild;
+    }
+
+    public void setShouldRebuild(boolean shouldRebuild) {
+        this.shouldRebuild = shouldRebuild;
     }
 }

@@ -22,6 +22,10 @@ public class AggDailyActivityConfig extends SparkJobConfig {
     @JsonProperty
     public Map<String, Integer> rawStreamInputIdx = new HashMap<>();
 
+    // streamId -> date attribute name
+    @JsonProperty
+    public Map<String, String> streamDateAttrs = new HashMap<>();
+
     @JsonProperty
     public Map<String, ActivityRowReducer> streamReducerMap = new HashMap<>();
 

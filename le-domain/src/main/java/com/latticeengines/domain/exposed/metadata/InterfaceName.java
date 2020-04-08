@@ -47,6 +47,7 @@ public enum InterfaceName {
 
     LastModifiedDate, //
     CreatedDate, //
+    LastActivityDate, //
 
     FirstName, //
     LastName, //

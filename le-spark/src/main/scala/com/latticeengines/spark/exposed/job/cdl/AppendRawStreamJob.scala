@@ -4,8 +4,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
-import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{__StreamDate, __StreamDateId}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, __StreamDate, __StreamDateId}
 import com.latticeengines.domain.exposed.spark.cdl.AppendRawStreamConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
@@ -40,6 +39,7 @@ class AppendRawStreamJob extends AbstractSparkJob[AppendRawStreamConfig] {
       var mdf: DataFrame = lattice.input(config.matchedRawStreamInputIdx)
       mdf = mdf.withColumn(__StreamDate.name, getDate(mdf.col(config.dateAttr)))
         .withColumn(__StreamDateId.name, getDateId(mdf.col(config.dateAttr)))
+        .withColumn(LastActivityDate.name, mdf.col(config.dateAttr))
       if (hasMaster) {
         mdf = MergeUtils.concat2(mdf, lattice.input(config.masterInputIdx))
       }

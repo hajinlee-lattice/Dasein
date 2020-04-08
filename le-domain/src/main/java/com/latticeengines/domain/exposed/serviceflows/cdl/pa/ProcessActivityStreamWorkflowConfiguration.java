@@ -2,11 +2,15 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
@@ -85,6 +89,13 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
 
         public Builder setRematchMode(boolean isRematchMode) {
             processStepConfiguration.setRematchMode(isRematchMode);
+            return this;
+        }
+
+        public Builder rebuildEntities(Set<BusinessEntity> entities) {
+            if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.ActivityStream)) {
+                activityStreamSparkConfiguration.setShouldRebuild(true);
+            }
             return this;
         }
 

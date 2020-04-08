@@ -72,15 +72,13 @@ public class AggActivityStreamToDaily
     private boolean shortCutMode = false;
     private DataCollection.Version inactive;
 
-    // TODO handle skipped stream (ACTIVITY_STREAMS_SKIP_AGG ctx)
-
     @Override
     protected AggDailyActivityConfig configureJob(ActivityStreamSparkStepConfiguration stepConfiguration) {
         if (MapUtils.isEmpty(stepConfiguration.getActivityStreamMap())) {
             return null;
         }
         Map<String, String> dailyTableNames = getMapObjectFromContext(AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class);
-        shortCutMode = isShortCutMode(dailyTableNames);
+        shortCutMode = allTablesExist(dailyTableNames);
         if (shortCutMode) {
             log.info(String.format("Found aggregate daily stream tables: %s in context, going thru short-cut mode.", dailyTableNames.values()));
             inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
@@ -115,6 +113,7 @@ public class AggActivityStreamToDaily
                     }
                 });
 
+                config.streamDateAttrs.put(streamId, stream.getDateAttribute());
                 config.attrDeriverMap.put(streamId,
                         stream.getAttributeDerivers() == null ? Collections.emptyList() : stream.getAttributeDerivers());
                 config.dimensionCalculatorMap.put(streamId, calculatorMap);
