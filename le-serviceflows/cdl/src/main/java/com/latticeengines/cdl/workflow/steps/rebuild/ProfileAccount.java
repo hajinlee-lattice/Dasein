@@ -74,6 +74,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
 
     private boolean ldcRefresh;
     private boolean hasFilter;
+    private boolean hasManyChange;
+    private boolean doFullProfile;
 
     @Override
     protected BusinessEntity getEntity() {
@@ -100,11 +102,13 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             finishing(true);
             return null;
         } else {
-            if (!getConfiguration().isFullProfile()) {
+            checkDataChanges();
+            if (!hasManyChange && !doFullProfile) {
                 log.info("It's not full profile, skip this step.");
                 finishing(false);
                 return null;
             }
+            putStringValueInContext(PROCESS_ACCOUNT_FULL_PROFILE, true + "");
             // reset result table names
             statsTableName = null;
 
@@ -121,7 +125,6 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             log.info("Set scalingMultiplier=" + scalingMultiplier + " base on master table size=" + sizeInGb + " gb.");
 
             setEvaluationDateStrAndTimestamp();
-            checkDataChanges();
 
             PipelineTransformationRequest request = getTransformRequest();
             return transformationProxy.getWorkflowConf(customerSpace.toString(), request, configuration.getPodId());
@@ -306,7 +309,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     }
 
     private void checkDataChanges() {
-        if (checkManyUpdate()) {
+        hasManyChange = checkManyUpdate();
+        if (hasManyChange) {
             log.info("There's many new or updated records, compute stats for all columns.");
             return;
         }
@@ -318,8 +322,10 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         boolean enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
         hasFilter = hasFilter && !enforceRebuild;
         putStringValueInContext(PROCESS_ACCOUNT_STATS_MERGE, hasFilter + "");
+        doFullProfile = getConfiguration().isFullProfile() || ldcChange || grapherContext.isDataCloudNew();
         log.info("hasFilter=" + hasFilter + " ldcChange=" + ldcChange + " ldcRefresh=" + ldcRefresh + " ldcNew="
-                + grapherContext.isDataCloudNew() + " enforceRebuild=" + enforceRebuild);
+                + grapherContext.isDataCloudNew() + " enforceRebuild=" + enforceRebuild + " doFullProfile = "
+                + doFullProfile);
     }
 
     private boolean checkManyUpdate() {

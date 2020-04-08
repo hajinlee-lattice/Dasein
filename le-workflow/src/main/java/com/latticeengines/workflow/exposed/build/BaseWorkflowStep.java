@@ -189,6 +189,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String RECOMMENDATION_ACCOUNT_DISPLAY_NAMES = "RECOMMENDATION_ACCOUNT_DISPLAY_NAMES";
     protected static final String RECOMMENDATION_CONTACT_DISPLAY_NAMES = "RECOMMENDATION_CONTACT_DISPLAY_NAMES";
     protected static final String PROCESS_ACCOUNT_STATS_MERGE = "PROCESS_ACCOUNT_STATS_MERGE";
+    protected static final String PROCESS_ACCOUNT_FULL_PROFILE = "PROCESS_ACCOUNT_FULL_PROFILE";
     protected static final String ACTIVITY_STREAMS_NEED_REBUILD = "ACTIVITY_STREAMS_NEED_REBUILD";
     protected static final String ACTIVITY_STREAMS_SKIP_AGG = "ACTIVITY_STREAMS_SKIP_AGG";
     protected static final String ACTIVITY_STREAM_METADATA_CACHE = "STREAM_METADATA_CACHE";
