@@ -11,7 +11,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.User;
@@ -46,7 +45,6 @@ public class IDaaSServiceImplTestNG extends AbstractTestNGSpringContextTests {
         credentials.setPassword("Lattice123!");
         LoginDocument loginDocument = iDaaSService.login(credentials);
         Assert.assertNotNull(loginDocument);
-        System.out.println(JsonUtils.serialize(loginDocument));
         Assert.assertTrue(CollectionUtils.isEmpty(loginDocument.getErrors()));
         Assert.assertNotNull(loginDocument.getUniqueness());
         Assert.assertNotNull(loginDocument.getRandomness());
