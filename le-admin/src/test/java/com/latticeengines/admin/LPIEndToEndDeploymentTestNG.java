@@ -50,6 +50,7 @@ import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSServiceImpl;
 import com.latticeengines.security.service.impl.IDaaSUser;
 
 public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
@@ -145,6 +146,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     private void verifyIDaasUserExists() {
         IDaaSUser user = iDaaSService.getIDaaSUser(userEmail);
         Assert.assertNotNull(user);
+        Assert.assertTrue(user.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT));
     }
 
     private void provisionEndToEndVboTestTenants() {
