@@ -40,7 +40,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
 
     @Override
-    public String createTeam(String createdByUser, GlobalTeamData globalTeamData) {
+    public GlobalAuthTeam createTeam(String createdByUser, GlobalTeamData globalTeamData) {
         GlobalAuthTenant tenantData = getGlobalAuthTenant();
         validateTeam(null, globalTeamData, tenantData);
         GlobalAuthTeam globalAuthTeam = new GlobalAuthTeam();
@@ -55,7 +55,7 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
             globalAuthTeam.setUserTenantRights(globalAuthUserTenantRights);
         }
         globalAuthTeamEntityMgr.create(globalAuthTeam);
-        return globalAuthTeam.getTeamId();
+        return globalAuthTeam;
     }
 
     private void validateTeam(String teamId, GlobalTeamData globalTeamData, GlobalAuthTenant globalAuthTenant) {

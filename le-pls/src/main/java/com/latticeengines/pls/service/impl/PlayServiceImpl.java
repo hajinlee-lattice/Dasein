@@ -43,10 +43,11 @@ public class PlayServiceImpl implements PlayService {
         shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
         Tenant tenant = MultiTenantContext.getTenant();
         List<Play> plays = playProxy.getPlays(tenant.getId(), shouldLoadCoverage, ratingEngineId);
-        Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext()
+        Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(true, true)
                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
+        GlobalTeam defaultGlobalTeam = teamService.getDefaultGlobalTeam();
         for (Play play : plays) {
-            inflateSegment(play, globalTeamMap.get(play.getTargetSegment().getTeamId()), teamService.getTeamIdsInContext());
+            inflateSegment(play, globalTeamMap.getOrDefault(play.getTargetSegment().getTeamId(), defaultGlobalTeam), teamService.getTeamIdsInContext());
         }
         return plays;
     }

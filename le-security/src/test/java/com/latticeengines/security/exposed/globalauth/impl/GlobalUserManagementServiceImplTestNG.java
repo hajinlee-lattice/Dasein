@@ -189,7 +189,7 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
             String teamName = "TestName_" + UUID.randomUUID().toString();
             createUser(username, username, firstName, lastName);
             userService.assignAccessLevel(accessLevel, testTenantId, username);
-            teamService.createTeam(username, getGlobalTeamData(teamName, Sets.newHashSet(username)));
+            createTeam(username, teamName, Sets.newHashSet(username));
             userService.assignAccessLevel(accessLevel, testTenantId, username, null, null, false);
             List<GlobalTeam> globalTeams = teamService.getTeamsByUserName(username, getUser(username, accessLevel.name()));
             assertEquals(globalTeams.size(), 1);

@@ -61,7 +61,7 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_SEGMENT_ID", nullable = true)
+    @JoinColumn(name = "FK_SEGMENT_ID")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment segment;
 
@@ -139,6 +139,10 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @JsonProperty("export_prefix")
     @Transient
     private String exportPrefix;
+
+    @JsonProperty("teamId")
+    @Transient
+    private String teamId;
 
     public Long getPid() {
         return pid;
@@ -288,6 +292,14 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
 
     public void setExportPrefix(String exportPrefix) {
         this.exportPrefix = exportPrefix;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
     public enum Status {

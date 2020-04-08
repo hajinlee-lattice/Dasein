@@ -1,9 +1,9 @@
 package com.latticeengines.security.exposed.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
@@ -71,6 +71,6 @@ public interface UserService {
     boolean assignAccessLevel(AccessLevel accessLevel, String tenantId, String username, String createdByUser,
                               Long expirationDate, boolean createUser, boolean clearSession, List<GlobalTeam> userTeams);
 
-    List<User> getUsers(String tenantId, UserFilter filter, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights, boolean withTeam);
+    List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam);
 
 }

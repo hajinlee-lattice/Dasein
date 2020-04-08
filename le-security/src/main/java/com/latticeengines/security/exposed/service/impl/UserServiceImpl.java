@@ -380,11 +380,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getUsers(String tenantId, UserFilter filter, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights, boolean withTeam) {
+    public List<User> getUsers(String tenantId, UserFilter filter, Set<String> emails, boolean withTeam) {
         List<User> users = new ArrayList<>();
         try {
             List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = globalUserManagementService
-                    .getAllUsersOfTenant(tenantId, globalAuthUserTenantRights, withTeam);
+                    .getAllUsersOfTenant(tenantId, emails, withTeam);
             for (Map.Entry<User, List<String>> userRights : userRightsList) {
                 User user = userRights.getKey();
                 AccessLevel accessLevel = AccessLevel.findAccessLevel(userRights.getValue());

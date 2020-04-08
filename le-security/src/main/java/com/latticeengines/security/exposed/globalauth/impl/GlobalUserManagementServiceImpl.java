@@ -733,11 +733,10 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     }
 
     @Override
-    public List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights,
-                                                                                 boolean withTeam) {
+    public List<AbstractMap.SimpleEntry<User, List<String>>> getAllUsersOfTenant(String tenantId, Set<String> emails, boolean withTeam) {
         try {
             log.info(String.format("Getting all users and their rights for tenant %s.", tenantId));
-            return globalFindAllUserRightsByTenant(tenantId, globalAuthUserTenantRights, withTeam);
+            return globalFindAllUserRightsByTenant(tenantId, emails, withTeam);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18016, e, new String[]{tenantId});
         }
@@ -761,15 +760,15 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
     }
 
     private List<AbstractMap.SimpleEntry<User, List<String>>> globalFindAllUserRightsByTenant(
-            String tenantId, List<GlobalAuthUserTenantRight> globalAuthUserTenantRights, boolean withTeam) throws Exception {
+            String tenantId, Set<String> emails, boolean withTeam) throws Exception {
         List<AbstractMap.SimpleEntry<User, List<String>>> userRightsList = new ArrayList<>();
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
             throw new Exception("Unable to find the tenant requested: " + tenantId);
         }
         List<GlobalAuthUserTenantRight> userRightDatas;
-        if (CollectionUtils.isNotEmpty(globalAuthUserTenantRights)) {
-            userRightDatas = globalAuthUserTenantRights;
+        if (CollectionUtils.isNotEmpty(emails)) {
+            userRightDatas = gaUserTenantRightEntityMgr.findByEmailsAndTenantId(emails, tenantData.getPid());
         } else {
             userRightDatas = gaUserTenantRightEntityMgr.findByTenantId(tenantData.getPid(), withTeam);
         }
@@ -829,8 +828,7 @@ import com.latticeengines.security.util.GlobalAuthPasswordUtils;
                     log.info("teamMap put is {}", teamMap);
                     userMap.put(user.getEmail(), user);
                 }
-                AbstractMap.SimpleEntry<User, HashSet<String>> uRights = new AbstractMap.SimpleEntry<>(user,
-                        new HashSet<String>());
+                AbstractMap.SimpleEntry<User, HashSet<String>> uRights = new AbstractMap.SimpleEntry<>(user, new HashSet());
                 uRights.getValue().add(userRightData.getOperationName());
                 userRights.put(userData.getPid(), uRights);
             }

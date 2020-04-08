@@ -36,6 +36,7 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
     private Ticket ticket;
     private Tenant tenant;
     private final String testUsername = "sessionservice_tester@test.lattice-engines.com";
+    private String adminTeamId;
 
     @Inject
     private GlobalAuthenticationService globalAuthenticationService;
@@ -46,6 +47,8 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         createAdminUser();
+        adminTeamId = createAdminTeam();
+        assertNotNull(adminTeamId);
         ticket = globalAuthenticationService.authenticateUser(adminUsername, DigestUtils.sha256Hex(adminPassword));
         assertNotNull(ticket);
         Session session = login(adminUsername, adminPassword);
@@ -61,6 +64,8 @@ public class SessionServiceImplTestNG extends SecurityFunctionalTestNGBase {
     public void attach() {
         Session session = sessionService.attach(ticket);
         assertNotNull(session);
+        assertTrue(session.getTeamIds().size() > 0);
+        assertEquals(session.getTeamIds().get(0), adminTeamId);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "attach" })
