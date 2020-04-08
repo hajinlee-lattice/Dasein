@@ -58,6 +58,7 @@ public class PlayLaunchWorkflowListener extends LEJobListener {
                 log.info(String.format("CampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
                 playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
+                playProxy.publishTalkingPoints(customerSpace, playName);
             }
         } finally {
             cleanupIntermediateFiles(jobExecution);

@@ -164,10 +164,11 @@ public class TalkingPointServiceImpl implements TalkingPointService {
 
     @Override
     public void publish(String playName) {
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        String customerSpace = MultiTenantContext.getCustomerSpace().getTenantId();
         try {
-            log.info("Publishing Talkingpoints for play " + playName + " for availabilty in BIS");
             List<TalkingPoint> tps = talkingPointEntityMgr.findAllByPlayName(playName);
+            log.info("Publishing " + (CollectionUtils.isNotEmpty(tps) ? tps.size() : 0) + " Talkingpoints for play "
+                    + playName + " for public api availablility");
             List<PublishedTalkingPoint> toBeDeleted = publishedTalkingPointEntityMgr.findAllByPlayName(playName);
 
             for (PublishedTalkingPoint ptp : toBeDeleted) {

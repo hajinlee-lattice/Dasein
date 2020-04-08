@@ -59,6 +59,7 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
                         "DeltaCampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
                 playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Launched);
+                playProxy.publishTalkingPoints(customerSpace, playName);
             }
         } finally {
             cleanupIntermediateFiles(jobExecution);
