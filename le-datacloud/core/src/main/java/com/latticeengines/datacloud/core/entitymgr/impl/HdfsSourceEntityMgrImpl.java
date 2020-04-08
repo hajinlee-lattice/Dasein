@@ -34,6 +34,8 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("hdfsSourceEntityMgr")
 public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
@@ -55,6 +57,9 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Inject
     YarnConfiguration yarnConfiguration;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Override
     public List<String> getAllSources() {
@@ -244,9 +249,14 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
     public Schema getAvscSchemaAtVersion(Source source, String version) {
         if (source instanceof TableSource) {
             TableSource tableSource = (TableSource) source;
-            String path = hdfsPathBuilder.constructTableSchemaFilePath(tableSource.getTable().getName(),
-                    tableSource.getCustomerSpace(), tableSource.getTable().getNamespace()).toString();
-            return getAvscSchemaAtVersion(tableSource.getTable().getName(), version, path);
+            Table table = tableSource.getTable();
+            if (table != null && CollectionUtils.isNotEmpty(table.getAttributes())) {
+                return TableUtils.createSchema(table.getName(), table);
+            } else {
+                String path = hdfsPathBuilder.constructTableSchemaFilePath(tableSource.getTable().getName(),
+                        tableSource.getCustomerSpace(), tableSource.getTable().getNamespace()).toString();
+                return getAvscSchemaAtVersion(tableSource.getTable().getName(), version, path);
+            }
         } else {
             return getAvscSchemaAtVersion(source.getSourceName(), version);
         }
