@@ -643,6 +643,18 @@ public class DataLakeServiceImpl implements DataLakeService {
         ThreadPoolUtils.runInParallel(runnables);
         metadataMap.putAll(concurrentMetadataMap);
         columnNamesMap.putAll(concurrentColumnNamesMap);
+        concurrentStatsCubeMap.forEach((entity, cube)-> {
+            // filter only segmentable attributes
+            Set<String> cols = columnNamesMap.get(BusinessEntity.valueOf(entity));
+            Map<String, AttributeStats> stats = cube.getStatistics();
+            Map<String, AttributeStats> stats2 = new HashMap<>();
+            stats.forEach((a, s) -> {
+                if (cols.contains(a)) {
+                    stats2.put(a, s);
+                }
+            });
+            cube.setStatistics(stats2);
+        });
         statsCubeMap.putAll(concurrentStatsCubeMap);
         log.info(String.format("Finished collection metadata artifacts in parallel for %s. Used %d secs.", tenantId,
                 stopWatch.getTime(TimeUnit.SECONDS)));
