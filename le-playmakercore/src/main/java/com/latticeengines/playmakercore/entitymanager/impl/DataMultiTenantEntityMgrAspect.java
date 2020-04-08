@@ -19,7 +19,8 @@ public class DataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.playmakercore.entitymanager.impl.RecommendationEntityMgrImpl.find*(..))")
+    @Before("execution(* com.latticeengines.playmakercore.entitymanager.impl.RecommendationEntityMgrImpl.find*(..)) " +
+            "  && !execution(public * com.latticeengines.playmakercore.entitymanager.impl.RecommendationEntityMgrImpl.findRecommendationsAsMapByLaunchIds(..))")
     public void findRecommendations(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
