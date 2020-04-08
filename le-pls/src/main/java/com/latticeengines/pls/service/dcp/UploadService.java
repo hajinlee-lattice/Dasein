@@ -10,4 +10,5 @@ public interface UploadService {
 
     Upload getByUploadId(long uploadPid);
 
+    String generateToken(String uploadId);
 }

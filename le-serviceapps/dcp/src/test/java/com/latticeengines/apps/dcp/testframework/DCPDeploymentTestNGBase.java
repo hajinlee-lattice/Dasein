@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -67,6 +68,9 @@ public abstract class DCPDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     @Inject
     protected TestArtifactService testArtifactService;
+
+    @Value("${common.test.pls.url}")
+    protected String deployedHostPort;
 
     protected Tenant mainTestTenant;
     protected String mainCustomerSpace;

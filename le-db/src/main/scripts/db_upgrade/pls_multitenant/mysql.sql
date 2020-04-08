@@ -46,4 +46,20 @@ BEGIN
         ADD COLUMN `TEAM_ID` VARCHAR(255);
 END;
 
+CREATE PRODEDURE `CreateFileDownloadTable`()
+  BEGIN
+    create table `FILE_DOWNLOAD` 
+      (
+         `PID` bigint not null auto_increment,
+         `CREATION` bigint not null,
+         `FILE_DOWNLOAD_CONFIG` JSON,
+         `TOKEN` varchar(255) not null,
+         `TTL` integer not null,
+         `FK_TENANT_ID` bigint not null,
+          primary key (`PID`)
+     )
+    engine=InnoDB;
+    alter table `FILE_DOWNLOAD` add constraint `FK_FILEDOWNLOAD_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
+  END;
+
 DELIMITER;

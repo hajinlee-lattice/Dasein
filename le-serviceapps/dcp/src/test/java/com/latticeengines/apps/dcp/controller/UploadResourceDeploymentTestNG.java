@@ -1,35 +1,64 @@
 package com.latticeengines.apps.dcp.controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.amazonaws.util.StringInputStream;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
-import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.model.FileHeader;
+
 
 public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
-    @Inject
-    private UploadProxy uploadProxy;
 
     @Inject
     private ProjectService projectService;
 
     @Inject
     private SourceService sourceService;
+
+    @Inject
+    private DropBoxProxy dropBoxProxy;
+
+    @Inject
+    private S3Service s3Service;
+
+    private String sourceId;
+
+    private String projectId;
 
     @BeforeClass(groups = {"deployment"})
     public void setup() throws Exception {
@@ -40,37 +69,47 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     public void testCRUD() {
         ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
                 Project.ProjectType.Type1, "test@dnb.com");
-        String projectId = details.getProjectId();
+        projectId = details.getProjectId();
 
-        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
+        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
+                TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
-        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId, fieldDefinitionsRecord);
+        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId,
+                fieldDefinitionsRecord);
+        sourceId = source.getSourceId();
 
         UploadConfig config = new UploadConfig();
-        config.setDropFilePath("/drop");
-        config.setUploadImportedErrorFilePath("/error");
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
+        String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
+        String uploadDir = UploadS3PathBuilderUtils.getUploadRoot(details.getProjectId(), source.getSourceId());
+        String uploadDirKey = UploadS3PathBuilderUtils.combinePath(false, true, dropFolder, uploadDir);
+
+        String timeStamp = "2020-03-20";
+        String errorPath = uploadDirKey + timeStamp + "/error/file1.csv";
+        String importedFilePath = uploadDirKey + timeStamp + "/processed/file2.csv";
+        String rawPath = uploadDirKey + timeStamp + "/raw/file3.csv";
+        config.setUploadImportedErrorFilePath(errorPath);
         Upload upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
         UploadConfig returnedConfig = upload.getUploadConfig();
-        Assert.assertEquals(returnedConfig.getDropFilePath(), "/drop");
-        Assert.assertEquals(returnedConfig.getUploadImportedErrorFilePath(), "/error");
+        Assert.assertEquals(returnedConfig.getUploadImportedErrorFilePath(), errorPath);
         Assert.assertNull(returnedConfig.getUploadImportedFilePath());
         Assert.assertNull(returnedConfig.getUploadRawFilePath());
 
-
         // update config
-        config.setUploadImportedFilePath("/processed");
-        config.setUploadTSPrefix("2020-03-20");
+        config.setUploadRawFilePath(rawPath);
+        config.setUploadImportedFilePath(importedFilePath);
+        config.setUploadTSPrefix(timeStamp);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getPid(), config);
         List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
         Upload retrievedUpload = uploads.get(0);
         UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
-        Assert.assertEquals(retrievedConfig.getUploadImportedFilePath(), "/processed");
-        Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), "2020-03-20");
-        Assert.assertEquals(retrievedConfig.getDropFilePath(), "/drop");
-        Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), "/error");
+        Assert.assertEquals(retrievedConfig.getUploadImportedFilePath(), importedFilePath);
+        Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), timeStamp);
+        Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
+        Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
 
         uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getPid(), Upload.Status.MATCH_STARTED);
         uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED);
@@ -79,4 +118,69 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         retrievedUpload = uploads.get(0);
         Assert.assertEquals(retrievedUpload.getStatus(), Upload.Status.MATCH_STARTED);
     }
+
+
+    @Test(groups = "deployment", dependsOnMethods = "testCRUD")
+    public void testDownload() throws Exception {
+        List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED);
+        Assert.assertNotNull(uploads);
+        Assert.assertEquals(uploads.size(), 1);
+        Upload upload = uploads.get(0);
+        Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_STARTED);
+
+        StringInputStream sis = new StringInputStream("file1");
+
+        DropBoxSummary dropBox = dropBoxProxy.getDropBox(mainCustomerSpace);
+        String bucket = dropBox.getBucket();
+        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadImportedErrorFilePath(), sis, true);
+
+        StringInputStream sis2 = new StringInputStream("file2");
+        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadImportedFilePath(), sis2, true);
+
+        StringInputStream sis3 = new StringInputStream("file3");
+        s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadRawFilePath(), sis3, true);
+
+        RestTemplate template = testBed.getRestTemplate();
+        String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
+                upload.getPid().toString());
+        String token = template.getForObject(tokenUrl, String.class);
+        SleepUtils.sleep(300);
+        String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = template.exchange(downloadUrl, HttpMethod.GET, entity, byte[].class);
+        String fileName = response.getHeaders().getFirst("Content-Disposition");
+        Assert.assertTrue(fileName.contains(".zip"));
+        byte[] contents = response.getBody();
+        Assert.assertNotNull(contents);
+        Assert.assertTrue(contents.length > 0);
+
+        // write the byte to zip, then unzip the zip
+        File zip = File.createTempFile(NamingUtils.uuid("zip"), ".zip");
+        zip.deleteOnExit();
+        OutputStream outputStream = new FileOutputStream(zip);
+        outputStream.write(contents);
+        outputStream.flush();
+        outputStream.close();
+
+        // test the zip file can be extracted to 3 files
+        ZipFile zipFile = new ZipFile(zip);
+        List<FileHeader> fileHeaders = zipFile.getFileHeaders();
+        Assert.assertNotNull(fileHeaders);
+        Assert.assertEquals(fileHeaders.size(), 3);
+        String tmp = System.getProperty("java.io.tmpdir");
+        if (tmp.endsWith("/")) {
+            tmp = tmp.substring(0, tmp.length() -1);
+        }
+        String destPath = tmp + NamingUtils.uuid("/download");
+        zipFile.extractAll(destPath);
+        File destDir = new File(destPath);
+        Assert.assertTrue(destDir.isDirectory());
+        String[] files = destDir.list();
+        Assert.assertEquals(files.length, 3);
+        FileUtils.forceDelete(destDir);
+    }
+
 }
