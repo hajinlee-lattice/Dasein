@@ -257,6 +257,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                         }
                     }
 
+                    // DP-12913 if EntityMatchGA, hide all system Ids
+                    if (attrConfig.getAttrName().startsWith("user_DefaultSystem_")) {
+                        if (batonService.onlyEntityMatchGAEnabled(MultiTenantContext.getCustomerSpace())) {
+                            includeCurrentAttr = false;
+                        }
+                    }
+
                     if (includeCurrentAttr) {
                         AttrConfigProp<?> configProp = attrProps.get(propertyName);
                         String attrName = attrConfig.getAttrName();
