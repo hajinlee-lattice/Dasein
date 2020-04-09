@@ -325,7 +325,7 @@ public class IDaaSServiceImpl implements IDaaSService {
         });
         String accessToken = jsonNode.get("access_token").asText();
         String refreshToken = jsonNode.get("refresh_token").asText();
-        log.info("IDaaS OAuth AssessToken={}, RefreshToken={}", accessToken, refreshToken);
+//        log.info("IDaaS OAuth AssessToken={}, RefreshToken={}", accessToken, refreshToken);
         setOauthToken(accessToken);
     }
 
