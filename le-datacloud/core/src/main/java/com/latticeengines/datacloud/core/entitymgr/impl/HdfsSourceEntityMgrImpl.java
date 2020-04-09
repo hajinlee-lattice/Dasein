@@ -251,7 +251,7 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
             TableSource tableSource = (TableSource) source;
             Table table = tableSource.getTable();
             if (table != null && CollectionUtils.isNotEmpty(table.getAttributes())) {
-                return TableUtils.createSchema(table.getName(), table);
+                return TableUtils.createSchema(AvroUtils.getAvroFriendlyString(table.getName()), table);
             } else {
                 String path = hdfsPathBuilder.constructTableSchemaFilePath(tableSource.getTable().getName(),
                         tableSource.getCustomerSpace(), tableSource.getTable().getNamespace()).toString();
