@@ -22,7 +22,7 @@ public class UploadConfig {
     @JsonProperty("upload_imported_file_path")
     private String uploadImportedFilePath;
 
-    @JsonProperty("upload_math_result_prefix")
+    @JsonProperty("upload_match_result_prefix")
     private String uploadMatchResultPrefix;
 
     @JsonProperty("upload_imported_error_file_path")

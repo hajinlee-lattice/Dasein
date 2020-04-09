@@ -7,7 +7,7 @@ BEGIN
         `PID`             bigint       not null auto_increment,
         `CREATED`         datetime     not null,
         `SOURCE_ID`       varchar(255) not null,
-        `STATUS`          integer,
+        `STATUS`          varchar(40)
         `UPDATED`         datetime     not null,
         `UPLOAD_CONFIG`   JSON,
         `FK_MATCH_RESULT` bigint,

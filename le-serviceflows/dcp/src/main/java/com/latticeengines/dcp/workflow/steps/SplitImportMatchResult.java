@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -123,7 +124,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         String acceptedS3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
                 upload.getUploadConfig().getUploadMatchResultAccepted());
         try {
-            copyToS3(acceptedCsvFilePath, acceptedS3Path);
+            if (StringUtils.isNotEmpty(acceptedCsvFilePath)) {
+                copyToS3(acceptedCsvFilePath, acceptedS3Path);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -131,7 +134,9 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         String rejectedS3Path = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
                 upload.getUploadConfig().getUploadMatchResultRejected());
         try {
-            copyToS3(rejectedCsvFilePath, rejectedS3Path);
+            if (StringUtils.isNotEmpty(rejectedCsvFilePath)) {
+                copyToS3(rejectedCsvFilePath, rejectedS3Path);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

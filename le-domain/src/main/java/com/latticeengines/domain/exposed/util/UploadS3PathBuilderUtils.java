@@ -21,6 +21,7 @@ public final class UploadS3PathBuilderUtils {
     private static String uploadDir = sourceDir + "/upload";
     private static String uploadRawDir = uploadDir + "/%s/RawFile/";
     private static String uploadImportDir = uploadDir + "/%s/ImportResult/";
+    private static String uploadImportErrorDir = uploadImportDir + "ImportError/";
     private static String uploadMatchDir = uploadDir + "/%s/MatchResult/";
 
     protected UploadS3PathBuilderUtils() {
@@ -61,6 +62,13 @@ public final class UploadS3PathBuilderUtils {
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
         Preconditions.checkArgument(StringUtils.isNotBlank(timestamp));
         return String.format(uploadImportDir, projectId, sourceId, timestamp);
+    }
+
+    public static String getUploadImportErrorResultDir(String projectId, String sourceId, String timestamp) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(projectId));
+        Preconditions.checkArgument(StringUtils.isNotBlank(sourceId));
+        Preconditions.checkArgument(StringUtils.isNotBlank(timestamp));
+        return String.format(uploadImportErrorDir, projectId, sourceId, timestamp);
     }
 
     public static String getUploadMatchResultDir(String projectId, String sourceId, String timestamp) {

@@ -6,6 +6,8 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -66,8 +68,9 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @JsonProperty("source_id")
     private String sourceId;
 
-    @Column(name = "STATUS")
+    @Column(name = "STATUS", length = 40)
     @JsonProperty("status")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @JsonIgnore

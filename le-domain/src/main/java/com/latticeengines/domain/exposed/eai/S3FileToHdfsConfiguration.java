@@ -17,6 +17,9 @@ public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
     @JsonProperty("s3_file_path")
     private String s3FilePath;
 
+    @JsonProperty("need_detail_error")
+    private Boolean needDetailError;
+
     public String getFeedType() {
         return feedType;
     }
@@ -39,6 +42,14 @@ public class S3FileToHdfsConfiguration extends CSVToHdfsConfiguration {
 
     public void setS3FilePath(String s3FilePath) {
         this.s3FilePath = s3FilePath;
+    }
+
+    public Boolean getNeedDetailError() {
+        return needDetailError;
+    }
+
+    public void setNeedDetailError(Boolean needDetailError) {
+        this.needDetailError = needDetailError;
     }
 
     @JsonIgnore
