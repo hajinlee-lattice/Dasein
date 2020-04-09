@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.web.client.RestTemplate;
 
 import com.amazonaws.services.sqs.model.UnsupportedOperationException;
@@ -25,6 +26,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
@@ -230,7 +232,17 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
                 // FIXME: some test tenant may not be on the default partition
                 RedshiftService redshiftService = redshiftPartitionService.getBatchUserService(null);
                 List<String> tables = redshiftService.getTables(CustomerSpace.parse(tenant.getId()).getTenantId());
-                tables.forEach(redshiftService::dropTable);
+                RetryTemplate retry = RetryUtils.getExponentialBackoffRetryTemplate(5, 2000, 2, null);
+                tables.forEach(t -> {
+                    try {
+                        retry.execute(ctx -> {
+                            redshiftService.dropTable(t);
+                            return true;
+                        });
+                    } catch (Exception e) {
+                        log.warn("Failed to drop testing table {}", t, e);
+                    }
+                });
             }
         }
     }
