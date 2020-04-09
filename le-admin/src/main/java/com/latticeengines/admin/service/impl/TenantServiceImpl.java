@@ -28,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.ServiceConfigService;
@@ -694,6 +695,16 @@ public class TenantServiceImpl implements TenantService {
         iDaasuser.setUserName(user.getUserId());
         iDaasuser.setPhoneNumber(user.getTelephoneNumber());
         iDaasuser.setLanguage(language);
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
+                "Last name is required");
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),
+                "Email is required");
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getUserName()),
+                "User name is required");
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLanguage()),
+                "Language is required");
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getPhoneNumber()),
+                "Phone number is required");
         return iDaasuser;
     }
 
