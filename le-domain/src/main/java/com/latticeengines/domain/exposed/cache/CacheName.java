@@ -26,6 +26,8 @@ public enum CacheName {
 
     SessionCache(Constants.SessionCacheName), //
 
+    DnBRealTimeLookupCache(Constants.DnBRealTimeLookup), //
+
     LastActionTimeCache(Constants.LastActionTimeCacheName),//
     PAFailCountCache(Constants.PAFailCountCacheName);//
 
@@ -88,6 +90,7 @@ public enum CacheName {
         public static final String ActiveStackInfoCacheName = "ActiveStackInfoCache";
         public static final String LastActionTimeCacheName = "LastActionTimeCache";
         public static final String PAFailCountCacheName = "PAFailCountCache";
+        public static final String DnBRealTimeLookup = "DnBRealTimeLookup";
     }
 
     public String getKeyForCache(String tenantId) {

@@ -29,30 +29,36 @@ public abstract class AMLookupMicroEngineTemplate extends DataSourceMicroEngineT
         MatchTraveler traveler = (MatchTraveler) response.getTravelerContext();
         if (response.getResult() != null) {
             AccountLookupEntry lookupEntry = (AccountLookupEntry) response.getResult();
-            // got lattice account id from data source wrapper actor
-            traveler.setResult((lookupEntry == null) ? null : lookupEntry.getLatticeAccountId());
-            traveler.setMatched(true);
-            traveler.debug(
-                    "Found a precious LatticeAccountId=" + traveler.getLatticeAccountId() + " at "
-                            + getClass().getSimpleName()
-                            + " using " + usedKeys(traveler.getMatchKeyTuple()) + ", so ready to go home.");
-
-            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
-                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
-                            Collections.singletonList(traveler.getLatticeAccountId()))));
             if (lookupEntry != null) {
-                String logMessage = "The cacheId was " + lookupEntry.getId() + ".";
+                String logMessage = "The cacheId was " + lookupEntry.getId() + " for result " //
+                        + lookupEntry.getLatticeAccountId();
                 if (lookupEntry.isPatched()) {
                     logMessage += " This lookup entry was manually patched.";
                 }
                 traveler.debug(logMessage);
+
+                String latticeAccountId = lookupEntry.getLatticeAccountId();
+                // got lattice account id from data source wrapper actor
+                traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                        Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                                Collections.singletonList(traveler.getLatticeAccountId()))));
+                traveler.setResult(latticeAccountId);
+                traveler.setMatched(true);
+                traveler.debug(
+                        "Found a precious LatticeAccountId=" + latticeAccountId + " at "
+                                + getClass().getSimpleName()
+                                + " using " + usedKeys(traveler.getMatchKeyTuple()) + ", so ready to go home.");
+                return;
+            } else {
+                traveler.debug(
+                        "Found a null LatticeAccountId at " + getClass().getSimpleName()
+                                + " using " + usedKeys(traveler.getMatchKeyTuple()) + ".");
             }
-        } else {
-            traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
-                    Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
-                            Collections.singletonList(null))));
-            traveler.debug("Did not get any luck at " + getClass().getSimpleName() + " with "
-                    + usedKeys(traveler.getMatchKeyTuple()));
         }
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(null))));
+        traveler.debug("Did not get any luck at " + getClass().getSimpleName() + " with "
+                + usedKeys(traveler.getMatchKeyTuple()));
     }
 }

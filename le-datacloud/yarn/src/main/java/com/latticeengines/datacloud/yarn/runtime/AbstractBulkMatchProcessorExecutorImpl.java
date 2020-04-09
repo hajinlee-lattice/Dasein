@@ -55,6 +55,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatistics;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
@@ -163,6 +164,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             writeDataToAvro(processorContext, groupOutput.getResult());
             logError(processorContext, groupOutput);
             writeNewEntityDataToAvro(processorContext, groupOutput.getResult());
+            writeCandidateDataToAvro(processorContext, groupOutput.getResult(), groupOutput.getInputFields());
         } catch (IOException e) {
             throw new RuntimeException("Failed to write result to avro.", e);
         }
@@ -341,6 +343,58 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             AvroUtils.appendToHdfsFile(yarnConfiguration, newEntityAvroFile, records, useSnappy);
         }
         log.info("Write {} newly allocated entity records to {}", records.size(), newEntityAvroFile);
+    }
+
+    private void writeCandidateDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords,
+                                          List<String> inputFields)
+            throws IOException {
+        if (processorContext == null || CollectionUtils.isEmpty(outputRecords)) {
+            return;
+        }
+        // check whether we need to generate candidate file or not
+        if (!OperationalMode.PRIME_MATCH.equals(processorContext.getOriginalInput().getOperationalMode())) {
+            return;
+        }
+
+        int internalIdIdx = inputFields.indexOf(InterfaceName.InternalId.name());
+        if (internalIdIdx < 0) {
+            throw new RuntimeException("Prime match must have an InternalId");
+        }
+
+        List<GenericRecord> records = new ArrayList<>();
+        Schema schema = processorContext.getCandidateSchema();
+        for (OutputRecord outputRecord : outputRecords) {
+            List<List<Object>> candidates = outputRecord.getCandidateOutput();
+            if (CollectionUtils.isEmpty(candidates)) {
+                continue;
+            }
+            String internalId = outputRecord.getInput().get(internalIdIdx).toString();
+            for (List<Object> candidate: candidates) {
+                GenericRecordBuilder builder = new GenericRecordBuilder(schema);
+                List<Schema.Field> fields = schema.getFields();
+                if (candidate.size() + 1 != fields.size()) {
+                    throw new RuntimeException(String.format("%d candidate data and %d schema fields do not match.",
+                            CollectionUtils.size(candidate) + 1, fields.size()));
+                }
+                for (int i = 0; i < fields.size(); i++) {
+                    Schema.Field field = fields.get(i);
+                    Object val = (i == 0) ? internalId : candidate.get(i - 1);
+                    builder.set(field, val);
+                }
+                records.add(builder.build());
+            }
+        }
+
+        // write to hdfs
+        int randomSplit = random.nextInt(processorContext.getSplits());
+        String candidateAvroFile = processorContext.getCandidateOutputAvro(randomSplit);
+        if (!HdfsUtils.fileExists(yarnConfiguration, candidateAvroFile)) {
+            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, candidateAvroFile, records, useSnappy);
+        } else {
+            AvroUtils.appendToHdfsFile(yarnConfiguration, candidateAvroFile, records, useSnappy);
+        }
+        log.info("Write {} match candidate records to {}", records.size(), candidateAvroFile);
+
     }
 
     private void writeErrorDataToAvro(ProcessorContext processorContext, List<OutputRecord> outputRecords)

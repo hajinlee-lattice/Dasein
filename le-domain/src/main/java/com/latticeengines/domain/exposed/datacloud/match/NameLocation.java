@@ -34,8 +34,14 @@ public class NameLocation implements Fact, Serializable {
     @JsonProperty("Street")
     private String street;
 
+    @JsonProperty("Street2")
+    private String street2;
+
     @JsonProperty("Zipcode")
     private String zipcode;
+
+    @JsonProperty("ZipcodeExtension")
+    private String zipcodeExtension;
 
     @JsonProperty("PhoneNumber")
     private String phoneNumber;
@@ -104,6 +110,14 @@ public class NameLocation implements Fact, Serializable {
         this.street = street;
     }
 
+    public String getStreet2() {
+        return street2;
+    }
+
+    public void setStreet2(String street2) {
+        this.street2 = street2;
+    }
+
     @MetricField(name = "Zipcode")
     public String getZipcode() {
         return zipcode;
@@ -111,6 +125,14 @@ public class NameLocation implements Fact, Serializable {
 
     public void setZipcode(String zipcode) {
         this.zipcode = zipcode;
+    }
+
+    public String getZipcodeExtension() {
+        return zipcodeExtension;
+    }
+
+    public void setZipcodeExtension(String zipcodeExtension) {
+        this.zipcodeExtension = zipcodeExtension;
     }
 
     @MetricField(name = "PhoneNumber")

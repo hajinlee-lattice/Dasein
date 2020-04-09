@@ -15,6 +15,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.web.client.HttpClientErrorException;
@@ -24,6 +25,7 @@ import org.xml.sax.SAXException;
 
 import com.jayway.jsonpath.JsonPath;
 import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
@@ -52,6 +54,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
 
     protected abstract void updateTokenInContext(T context, String token);
 
+    protected abstract BaseDnBLookupServiceImpl<T> self();
 
     @Inject
     private ApplicationContext applicationContext;
@@ -62,11 +65,11 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         dnbClient.setErrorHandler(new GetDnBResponseErrorHandler());
     }
 
-    public void executeLookup(T context, DnBKeyType keyType, DnBAPIType apiType) {
+    void executeLookup(T context, DnBKeyType keyType, DnBAPIType apiType) {
         try {
+            String url = constructUrl(context, apiType);
             String token = dnbAuthenticationService.requestToken(keyType, null);
             updateTokenInContext(context, token);
-            String url = constructUrl(context, apiType);
             HttpEntity<String> entity = constructEntity(context, token);
             if (keyType == DnBKeyType.BATCH) {
                 log.info("Submitting request {} with token {}", url, token);
@@ -78,13 +81,19 @@ public abstract class BaseDnBLookupServiceImpl<T> {
         }
     }
 
-    protected String sendRequest(String url, HttpEntity<String> entity, DnBAPIType apiType) {
-        if (apiType == DnBAPIType.REALTIME_ENTITY || apiType == DnBAPIType.REALTIME_EMAIL
-                || apiType == DnBAPIType.BATCH_FETCH || apiType == DnBAPIType.BATCH_STATUS) {
+    private String sendRequest(String url, HttpEntity<String> entity, DnBAPIType apiType) {
+        if (apiType == DnBAPIType.REALTIME_ENTITY || apiType == DnBAPIType.REALTIME_EMAIL) {
+            return self().sendCacheableRequest(url, entity);
+        } else if (apiType == DnBAPIType.BATCH_FETCH || apiType == DnBAPIType.BATCH_STATUS) {
             return dnbClient.get(entity, url);
         } else {
             return dnbClient.post(entity, url);
         }
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.DnBRealTimeLookup, key = "T(java.lang.String).format(\"%s\", #url)")
+    public String sendCacheableRequest(String url, HttpEntity<String> entity) {
+        return dnbClient.get(entity, url);
     }
 
     DnBReturnCode parseDnBHttpError(HttpClientErrorException ex) {

@@ -295,6 +295,44 @@ public final class JsonUtils {
         return (T) deserialize(serialize(object), object.getClass());
     }
 
+    public static JsonNode tryGetJsonNode(JsonNode root, String... paths) {
+        JsonNode toReturn = root;
+        for (String path: paths) {
+            if (toReturn.has(path)) {
+                toReturn = toReturn.get(path);
+            } else {
+                return null;
+            }
+        }
+        return toReturn;
+    }
+
+    public static Integer parseIntegerValueAtPath(JsonNode root, String... paths) {
+        return parseValueAtPath(root, Integer.class, paths);
+    }
+
+    public static String parseStringValueAtPath(JsonNode root, String... paths) {
+        return parseValueAtPath(root, String.class, paths);
+    }
+
+    private static <T> T parseValueAtPath(JsonNode root, Class<T> clz, String... paths) {
+        JsonNode node = tryGetJsonNode(root, paths);
+        if (node == null) {
+            return null;
+        } else {
+            switch (clz.getSimpleName()) {
+                case "String":
+                    //noinspection unchecked
+                    return (T) node.asText();
+                case "Integer":
+                    //noinspection unchecked
+                    return (T) Integer.valueOf(node.asInt());
+                default:
+                    throw new UnsupportedOperationException("Unknown json type " + clz);
+            }
+        }
+    }
+
     public static ObjectNode createObjectNode() {
         ObjectMapper mapper = getObjectMapper();
         return mapper.createObjectNode();

@@ -142,7 +142,7 @@ public class DecisionGraph implements HasPid, Serializable {
 
     /**
      * Based on current junction name, decide next decision graph to jump to
-     * 
+     *
      * @param junctionName
      * @return
      */
@@ -152,7 +152,7 @@ public class DecisionGraph implements HasPid, Serializable {
     }
 
     /**
-     * 
+     *
      * @return Junction name -> decision graph to jump to
      */
     public Map<String, String> getJunctionGraphMap() {
@@ -216,19 +216,21 @@ public class DecisionGraph implements HasPid, Serializable {
     }
 
     private Map<Integer, List<Integer>> parseEdges() {
-        String[] groups = getEdges().split("\\|");
         Map<Integer, List<Integer>> toReturn = new HashMap<>();
-        for (String group : groups) {
-            String[] ends = group.split(":");
-            if (ends.length != 2) {
-                throw new IllegalArgumentException("Invalid edge definition " + group);
+        if (StringUtils.isNotBlank(getEdges())) {
+            String[] groups = getEdges().split("\\|");
+            for (String group : groups) {
+                String[] ends = group.split(":");
+                if (ends.length != 2) {
+                    throw new IllegalArgumentException("Invalid edge definition " + group);
+                }
+                Integer fromVertex = Integer.valueOf(ends[0]);
+                List<Integer> toVertices = new ArrayList<>();
+                for (String v : ends[1].split(",")) {
+                    toVertices.add(Integer.valueOf(v));
+                }
+                toReturn.put(fromVertex, toVertices);
             }
-            Integer fromVertex = Integer.valueOf(ends[0]);
-            List<Integer> toVertices = new ArrayList<>();
-            for (String v : ends[1].split(",")) {
-                toVertices.add(Integer.valueOf(v));
-            }
-            toReturn.put(fromVertex, toVertices);
         }
         return toReturn;
     }

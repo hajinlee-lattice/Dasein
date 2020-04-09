@@ -113,6 +113,12 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
             logMessage += " This cache entry has been manually patched.";
         }
         traveler.debug(logMessage);
+        traveler.setDunsOriginMapIfAbsent(new HashMap<>());
+        traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
+        traveler.getDnBMatchContexts().add(res);
+        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
+                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
+                        Collections.singletonList(res.getDuns()))));
         if (res.getDnbCode() != DnBReturnCode.OK) {
             if (StringUtils.isNotEmpty(res.getDuns())) {
                 res.setDuns(null);
@@ -122,13 +128,11 @@ public class LocationToCachedDunsMicroEngineActor extends DataSourceMicroEngineT
                     (res.getDnbCode() == null ? "No DnBReturnCode" : res.getDnbCode().getMessage())));
         } else {
             matchKeyTuple.setDuns(res.getDuns());
+            if (BusinessEntity.PrimeAccount.name().equals(traveler.getEntity())) {
+                traveler.setResult(res.getDuns());
+                traveler.setMatched(true);
+            }
         }
-        traveler.addEntityMatchLookupResults(BusinessEntity.LatticeAccount.name(),
-                Collections.singletonList(Pair.of(traveler.getMatchKeyTuple(),
-                        Collections.singletonList(res.getDuns()))));
-        traveler.setDunsOriginMapIfAbsent(new HashMap<>());
-        traveler.getDunsOriginMap().put(this.getClass().getName(), res.getDuns());
-        traveler.getDnBMatchContexts().add(res);
         response.setResult(null);
     }
 }

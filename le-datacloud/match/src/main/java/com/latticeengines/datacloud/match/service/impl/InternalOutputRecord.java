@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.EntityMatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.LatticeAccount;
@@ -58,6 +59,9 @@ public class InternalOutputRecord extends OutputRecord {
 
     // field names that should be cleared out in the output
     private Set<String> fieldsToClear;
+
+    // for prime match
+    private List<DnBMatchCandidate> candidates;
 
     // For Entity Match, the InternalOutputRecord must contain the map between the MatchKeys and the position of the
     // corresponding fields in the input record, for each Entity.  This is then passed on to the MatchTraveler and
@@ -367,5 +371,13 @@ public class InternalOutputRecord extends OutputRecord {
 
     public void setEntityMatchHistory(EntityMatchHistory entityMatchHistory) {
         this.entityMatchHistory = entityMatchHistory;
+    }
+
+    public List<DnBMatchCandidate> getCandidates() {
+        return candidates;
+    }
+
+    public void setCandidates(List<DnBMatchCandidate> candidates) {
+        this.candidates = candidates;
     }
 }

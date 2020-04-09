@@ -92,6 +92,19 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .prefixKeysWith(getPrefix(CacheName.Constants.EMRClusterCacheName));
 
         // =========================
+        // BEGIN: dnb match
+        // =========================
+        RedisCacheConfiguration dnbRealTimeLookupCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofDays(1)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.DnBRealTimeLookup));
+        // =========================
+        // END: dnb match
+        // =========================
+
+        // =========================
         // BEGIN: datalake service
         // =========================
         RedisCacheConfiguration dataLakeCMCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
@@ -175,6 +188,8 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.DataLakeCMCacheName, dataLakeCMCacheConfig);
         cacheConfigs.put(CacheName.Constants.DataLakeTopNTreeCache, dataLakeTopNTreeCache);
         cacheConfigs.put(CacheName.Constants.DataLakeStatsCubesCache, dataLakeStatsCacheConfig);
+
+        cacheConfigs.put(CacheName.Constants.DnBRealTimeLookup, dnbRealTimeLookupCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.ObjectApiCacheName, objectApiCacheConfig);
         cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);

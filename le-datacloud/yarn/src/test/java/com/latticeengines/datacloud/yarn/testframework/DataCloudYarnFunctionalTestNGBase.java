@@ -4,8 +4,9 @@ import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -31,6 +32,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -67,7 +69,7 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
             }
             CSVParser parser = CSVParser.parse(url, Charset.forName("UTF-8"), CSVFormat.DEFAULT);
             List<List<Object>> data = new ArrayList<>();
-            List<String> fieldNames = new ArrayList<>(Collections.singleton("ID"));
+            List<String> fieldNames = new ArrayList<>(Arrays.asList("ID", InterfaceName.InternalId.name()));
             int rowNum = 0;
             for (CSVRecord record : parser.getRecords()) {
                 if (rowNum == 0) {
@@ -75,6 +77,7 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
                 } else if (record.size() > 0 ){
                     List<Object> row = new ArrayList<>();
                     row.add(record.getRecordNumber());
+                    row.add(UUID.randomUUID().toString().toLowerCase());
                     for (String field: record) {
                         if ("NULL".equalsIgnoreCase(field) || StringUtils.isEmpty(field)) {
                             row.add(null);
@@ -102,7 +105,8 @@ public class DataCloudYarnFunctionalTestNGBase extends AbstractTestNGSpringConte
                 + "{\"name\":\"" + fieldNames.get(2) + "\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"" + fieldNames.get(3) + "\",\"type\":[\"string\",\"null\"]},"
                 + "{\"name\":\"" + fieldNames.get(4) + "\",\"type\":[\"string\",\"null\"]},"
-                + "{\"name\":\"" + fieldNames.get(5) + "\",\"type\":[\"string\",\"null\"]}"
+                + "{\"name\":\"" + fieldNames.get(5) + "\",\"type\":[\"string\",\"null\"]},"
+                + "{\"name\":\"" + fieldNames.get(6) + "\",\"type\":[\"string\",\"null\"]}"
                 + "]}");
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
         for (List<Object> tuple : data) {

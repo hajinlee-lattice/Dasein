@@ -1,9 +1,14 @@
 package com.latticeengines.domain.exposed.datacloud.dnb;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.metric.Dimension;
 import com.latticeengines.common.exposed.metric.Fact;
 import com.latticeengines.common.exposed.metric.annotation.MetricField;
@@ -12,65 +17,108 @@ import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect( //
+        fieldVisibility = JsonAutoDetect.Visibility.NONE, //
+        getterVisibility = JsonAutoDetect.Visibility.NONE, //
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
+        setterVisibility = JsonAutoDetect.Visibility.NONE //
+)
 public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimension {
 
+    @JsonProperty("inputNameLocation")
     private NameLocation inputNameLocation;
 
+    @JsonProperty("inputEmail")
     private String inputEmail;
 
+    @JsonProperty("duns")
     private String duns;
 
+    @JsonProperty("finalDuns")
     private String finalDuns;
 
+    @JsonProperty("finalDuDuns")
     private String finalDuDuns;
 
+    @JsonProperty("finalGuDuns")
     private String finalGuDuns;
 
+    @JsonProperty("origDuns")
     private String origDuns;
 
+    @JsonProperty("matchedNameLocation")
     private NameLocation matchedNameLocation;
 
+    @JsonProperty("confidenceCode")
     private Integer confidenceCode;
 
+    @JsonProperty("matchInsight")
+    private DnBMatchInsight matchInsight;
+
+    @JsonProperty("matchGrade")
     private DnBMatchGrade matchGrade;
 
+    @JsonProperty("dnbCode")
     private DnBReturnCode dnbCode;
 
+    @JsonProperty("hitWhiteCache")
     private Boolean hitWhiteCache = false;
 
+    @JsonProperty("hitBlackCache")
     private Boolean hitBlackCache = false;
 
+    @JsonProperty("cacheId")
     private String cacheId;
 
+    @JsonProperty("lookupRequestId")
     private String lookupRequestId;
 
+    @JsonProperty("serviceBatchId")
     private String serviceBatchId;
 
+    @JsonProperty("matchStrategy")
     private DnBMatchStrategy matchStrategy;
 
+    @JsonProperty("duration")
     private Long duration;
 
+    @JsonProperty("logDnBBulkResult")
     private boolean logDnBBulkResult;
 
+    @JsonProperty("patched")
     private Boolean patched;
 
+    @JsonProperty("timestamp")
     private long timestamp;
 
+    @JsonProperty("outOfBusiness")
     private Boolean outOfBusiness;
 
+    @JsonProperty("dunsInAM")
     private Boolean dunsInAM;
 
+    @JsonProperty("dataCloudVersion")
     private String dataCloudVersion;
 
+    @JsonProperty("calledRemoteDnB")
     private boolean calledRemoteDnB;
 
+    @JsonProperty("requestTime")
     private Date requestTime;
 
+    @JsonProperty("responseTime")
     private Date responseTime;
 
+    @JsonProperty("acPassed")
     private Boolean acPassed;
 
+    @JsonProperty("rootOperationUid")
     private String rootOperationUid;
+
+    @JsonProperty("candidates")
+    private List<DnBMatchCandidate> candidates;
 
     public DnBMatchContext() {
         inputNameLocation = new NameLocation();
@@ -258,6 +306,14 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
             this.matchGrade = null;
         }
 
+    }
+
+    public DnBMatchInsight getMatchInsight() {
+        return matchInsight;
+    }
+
+    public void setMatchInsight(DnBMatchInsight matchInsight) {
+        this.matchInsight = matchInsight;
     }
 
     @MetricField(name = "DnbCode")
@@ -449,6 +505,14 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
 
     public void setRootOperationUid(String rootOperationUid) {
         this.rootOperationUid = rootOperationUid;
+    }
+
+    public List<DnBMatchCandidate> getCandidates() {
+        return candidates;
+    }
+
+    public void setCandidates(List<DnBMatchCandidate> candidates) {
+        this.candidates = candidates;
     }
 
     public enum DnBMatchStrategy {

@@ -65,6 +65,7 @@ public enum BusinessEntity implements GraphNode {
 
     // Lattice Data Cloud
     LatticeAccount, //
+    PrimeAccount, //
 
     ActivityStream, //
     Catalog, //

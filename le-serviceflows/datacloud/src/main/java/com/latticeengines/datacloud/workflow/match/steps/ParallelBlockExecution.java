@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.datacloud.match.EntityMatchResult;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -98,6 +99,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
     private String matchErrorDir;
     // directory to store all newly allocated entity list of this match
     private String matchNewEntityDir;
+    private String matchCandidateDir;
 
     @Override
     public void execute() {
@@ -126,6 +128,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             rootOperationUid = getStringValueFromContext(BulkMatchContextKey.ROOT_OPERATION_UID);
             matchErrorDir = hdfsPathBuilder.constructMatchErrorDir(rootOperationUid).toString();
             matchNewEntityDir = hdfsPathBuilder.constructMatchNewEntityDir(rootOperationUid).toString();
+            matchCandidateDir = hdfsPathBuilder.constructMatchCandidateDir(rootOperationUid).toString();
             remainingJobs = new ArrayList<>(jobConfigurations);
             // TODO trace block submission
             while ((remainingJobs.size() != 0) || (applicationIds.size() != 0)) {
@@ -387,10 +390,11 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                 if (FinalApplicationStatus.FAILED.equals(status) || FinalApplicationStatus.KILLED.equals(status)) {
                     handleAbnormallyTerminatedBlock(report);
                 } else if (FinalApplicationStatus.SUCCEEDED.equals(status)) {
-                    matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
                     mergeBlockResult(appId);
                     mergeBlockErrorResult(appId);
                     mergeBlockNewEntityResult(appId);
+                    mergeBlockCandidateResult(appId);
+                    matchCommandService.updateBlock(blockUid).status(state).progress(1f).commit();
                 } else {
                     log.error("Unknown teminal status " + status + " for Application [" + appId
                             + "]. Treat it as FAILED.");
@@ -571,6 +575,30 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
                     "Failed to move block avro for newly allocated entities to match dir %s. ApplicationId=%s, error=%s",
                     matchNewEntityDir, appId, e.getMessage());
             throw new RuntimeException(msg, e);
+        }
+    }
+
+    /*
+     * Move all match candidate avro files from target block directory to directory of
+     * the entire match
+     */
+    private void mergeBlockCandidateResult(ApplicationId appId) {
+        if (appId == null || StringUtils.isBlank(matchCandidateDir)) {
+            return;
+        }
+        MatchInput input = jobConfigurations.get(0).getMatchInput();
+        if (OperationalMode.PRIME_MATCH.equals(input.getOperationalMode())) {
+            String blockOperationUid = blockUuidMap.get(appId.toString());
+            String blockAvroGlob = hdfsPathBuilder.constructMatchBlockCandidateAvroGlob(rootOperationUid,
+                    blockOperationUid);
+            try {
+                moveBlockAvro(blockAvroGlob, matchCandidateDir);
+            } catch (Exception e) {
+                String msg = String.format(
+                        "Failed to move block avro for match candidates to match dir %s. ApplicationId=%s, error=%s",
+                        matchCandidateDir, appId, e.getMessage());
+                throw new RuntimeException(msg, e);
+            }
         }
     }
 
