@@ -12,6 +12,9 @@ public class SplitSystemBatchStoreConfig extends SparkJobConfig {
     @JsonProperty("Templates")
     private List<String> templates;
 
+    @JsonProperty("DiscardFields")
+    private List<String> discardFields;
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -29,5 +32,13 @@ public class SplitSystemBatchStoreConfig extends SparkJobConfig {
 
     public void setTemplates(List<String> templates) {
         this.templates = templates;
+    }
+
+    public List<String> getDiscardFields() {
+        return discardFields;
+    }
+
+    public void setDiscardFields(List<String> discardFields) {
+        this.discardFields = discardFields;
     }
 }

@@ -2,15 +2,19 @@ package com.latticeengines.cdl.workflow.steps.migrate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.cdl.workflow.service.ConvertBatchStoreService;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.EntityMatchImportMigrateConfig;
@@ -50,37 +54,43 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
             return null;
         }
         PipelineTransformationRequest request = generateRequest();
-        return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request,
+                configuration.getPodId());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     protected void onPostTransformationCompleted() {
-        String migratedImportTableName =
-                TableUtils.getFullTableName(
-                        convertBatchStoreService.getTargetTablePrefix(customerSpace.toString(), convertServiceConfig)
-                        , pipelineVersion);
-        convertBatchStoreService.setDataTable(migratedImportTableName, customerSpace.toString(),
-                templateTable, convertServiceConfig, yarnConfiguration);
+        String migratedImportTableName = TableUtils.getFullTableName(
+                convertBatchStoreService.getTargetTablePrefix(customerSpace.toString(), convertServiceConfig),
+                pipelineVersion);
+        convertBatchStoreService.setDataTable(migratedImportTableName, customerSpace.toString(), templateTable,
+                convertServiceConfig, yarnConfiguration);
 
-        Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
+        Map<String, List<String>> rematchTables = getTypedObjectFromContext(REMATCH_TABLE_NAMES,
+                new TypeReference<Map<String, List<String>>>() {
+                });
         if (rematchTables == null) {
             rematchTables = new HashMap<>();
         }
-        rematchTables.put(configuration.getEntity().name(), migratedImportTableName);
+        rematchTables.putIfAbsent(configuration.getEntity().name(), new LinkedList<>());
+        rematchTables.get(configuration.getEntity().name()).add(migratedImportTableName);
         log.info("rematchTables : {}, config : {}.", rematchTables, convertServiceConfig.getClass());
-        putObjectInContext(REMATCH_TABLE_NAME, rematchTables);
+        putObjectInContext(REMATCH_TABLE_NAMES, rematchTables);
         addToListInContext(TEMPORARY_CDL_TABLES, migratedImportTableName, String.class);
     }
 
     private boolean isShortCutMode() {
-        Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
-        if (rematchTables == null) {
+        Map<String, List<String>> rematchTables = getTypedObjectFromContext(REMATCH_TABLE_NAMES,
+                new TypeReference<Map<String, List<String>>>() {
+                });
+        if (MapUtils.isEmpty(rematchTables)) {
             return false;
         }
-        if (rematchTables.get(configuration.getEntity().name()) != null) {
+        if (CollectionUtils.isNotEmpty(rematchTables.get(configuration.getEntity().name()))) {
             return true;
         }
+
         return false;
     }
 
@@ -137,13 +147,15 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         config.setTransformer(TRANSFORMER);
         config.setRetainFields(convertBatchStoreService.getAttributes(customerSpace.toString(), templateTable,
                 masterTable, configuration.getDiscardFields(), convertServiceConfig));
-        config.setDuplicateMap(convertBatchStoreService.getDuplicateMap(customerSpace.toString(), convertServiceConfig));
+        config.setDuplicateMap(
+                convertBatchStoreService.getDuplicateMap(customerSpace.toString(), convertServiceConfig));
         config.setRenameMap(convertBatchStoreService.getRenameMap(customerSpace.toString(), convertServiceConfig));
 
         String configStr = appendEngineConf(config, lightEngineConfig());
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(convertBatchStoreService.getTargetTablePrefix(customerSpace.toString(), convertServiceConfig));
+        targetTable.setNamePrefix(
+                convertBatchStoreService.getTargetTablePrefix(customerSpace.toString(), convertServiceConfig));
 
         step.setBaseSources(sourceNames);
         step.setBaseTables(baseTables);

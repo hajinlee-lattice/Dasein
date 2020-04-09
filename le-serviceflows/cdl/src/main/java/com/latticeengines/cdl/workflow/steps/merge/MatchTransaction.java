@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -52,25 +51,25 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
 
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
-            String convertBatchStoreTableName = getConvertBatchStoreTableName();
+            List<String> convertSystemBatchStoreTableNames = getConvertedRematchTableNames();
             if (CollectionUtils.isNotEmpty(inputTableNames)) {
                 TransformationStepConfig mergeImport = mergeInputs(getConsolidateDataTxmfrConfig(), null,
                         ETLEngineLoad.LIGHT, null, -1);
                 steps.add(mergeImport);
-                if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+                if (CollectionUtils.isNotEmpty(convertSystemBatchStoreTableNames)) {
                     TransformationStepConfig matchImport = matchTransaction(steps.size() - 1, null, null);
                     steps.add(matchImport);
                 }
             }
-            if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+            if (CollectionUtils.isNotEmpty(convertSystemBatchStoreTableNames)) {
                 // when there is no input table, steps.size() - 1 will be -1
-                TransformationStepConfig mergeImportAndBatchStore = mergeInputs(getConsolidateDataTxmfrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
-                        convertBatchStoreTableName, steps.size() - 1);
+                TransformationStepConfig mergeImportAndBatchStore = mergeInputs(
+                        getConsolidateDataTxmfrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
+                        convertSystemBatchStoreTableNames, steps.size() - 1);
                 steps.add(mergeImportAndBatchStore);
             }
             TransformationStepConfig matchImportAndBatchStore = matchTransaction(steps.size() - 1,
-                    matchTargetTablePrefix,
-                    convertBatchStoreTableName);
+                    matchTargetTablePrefix, convertSystemBatchStoreTableNames);
             steps.add(matchImportAndBatchStore);
         } else {
             // legacy tenants, just merge imports
@@ -96,36 +95,38 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
     }
 
     private TransformationStepConfig matchTransaction(int inputStep, String matchTargetTable,
-            String convertBatchStoreTableName) {
+            List<String> convertSystemBatchStoreTableNames) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         if (matchTargetTable != null) {
             setTargetTable(step, matchTargetTable);
         }
         step.setTransformer(TRANSFORMER_MATCH);
-        step.setConfiguration(getMatchConfig(convertBatchStoreTableName));
+        step.setConfiguration(getMatchConfig(convertSystemBatchStoreTableNames));
         return step;
     }
 
-    private String getMatchConfig(String convertBatchStoreTableName) {
+    private String getMatchConfig(List<String> convertSystemBatchStoreTableNames) {
         // NOTE get all imports just to be safe, currently txn should only have one
         // template
         Set<String> columnNames = getInputTableColumnNames();
         MatchInput matchInput = getBaseMatchInput();
-        boolean hasConvertBatchStoreTableName = StringUtils.isNotEmpty(convertBatchStoreTableName);
-        if (hasConvertBatchStoreTableName) {
-            columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
+        boolean hasConvertSystemBatchStoreTables = CollectionUtils.isNotEmpty(convertSystemBatchStoreTableNames);
+        if (hasConvertSystemBatchStoreTables) {
+            convertSystemBatchStoreTableNames.forEach(tableName -> {
+                columnNames.addAll(getTableColumnNames(tableName));
+            });
             setRematchVersions(matchInput);
         }
         log.info("matchInput is {}.", matchInput);
         if (configuration.isEntityMatchGAOnly()) {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
                     Collections.singletonList(InterfaceName.CustomerAccountId.name()), null,
-                    hasConvertBatchStoreTableName, null);
+                    hasConvertSystemBatchStoreTables, null);
         } else {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
                     Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName,
-                    hasConvertBatchStoreTableName, null);
+                    hasConvertSystemBatchStoreTables, null);
         }
     }
 

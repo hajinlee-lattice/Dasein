@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.migrate.ConvertBatchStoreToImportWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.rematch.ConvertAccountWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -18,17 +17,16 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ConvertAccountWorkflow extends AbstractWorkflow<ConvertAccountWorkflowConfiguration> {
 
+    // system batch store is a prerequisite for current rematch PA workflow
     @Inject
-    private ConvertBatchStoreToImportWrapper convertBatchStoreToImportWrapper;
+    private SplitSystemBatchStore splitSystemBatchStore;
 
     @Inject
     private DeleteByUploadStepWrapper deleteByUploadStepWrapper;
 
     @Override
     public Workflow defineWorkflow(ConvertAccountWorkflowConfiguration workflowConfig) {
-        return new WorkflowBuilder(name(), workflowConfig)
-                .next(convertBatchStoreToImportWrapper)
-                .next(deleteByUploadStepWrapper)
-                .build();
+        return new WorkflowBuilder(name(), workflowConfig).next(splitSystemBatchStore)
+                .next(deleteByUploadStepWrapper).build();
     }
 }

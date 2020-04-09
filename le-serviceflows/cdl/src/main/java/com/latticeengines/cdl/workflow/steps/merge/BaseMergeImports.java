@@ -29,6 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -91,7 +92,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     @Inject
     protected CDLAttrConfigProxy cdlAttrConfigProxy;
-
 
     protected DataCollection.Version active;
     protected DataCollection.Version inactive;
@@ -240,7 +240,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     TransformationStepConfig concatImports(String targetTablePrefix, String[][] cloneSrcFlds, String[][] renameSrcFlds,
-            String convertBatchStoreTableName, int inputStep) {
+            List<String> convertedRematchTableNames, int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_MERGE_IMPORTS);
         if (inputStep == -1) {
@@ -249,8 +249,10 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             step.setInputSteps(Collections.singletonList(inputStep));
         }
 
-        if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-            addBaseTables(step, convertBatchStoreTableName);
+        if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
+            convertedRematchTableNames.forEach(tableName -> {
+                addBaseTables(step, tableName);
+            });
         }
 
         MergeImportsConfig config = new MergeImportsConfig();
@@ -328,15 +330,18 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected TransformationStepConfig mergeInputs(ConsolidateDataTransformerConfig config,
-            String targetTableNamePrefix, ETLEngineLoad engineLoad, String convertBatchStoreTableName, int inputStep) {
+            String targetTableNamePrefix, ETLEngineLoad engineLoad, List<String> convertSystemBatchStoreTableNames,
+            int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         if (inputStep == -1) {
             inputTableNames.forEach(tblName -> addBaseTables(step, tblName));
         } else {
             step.setInputSteps(Collections.singletonList(inputStep));
         }
-        if (StringUtils.isNotEmpty(convertBatchStoreTableName)) {
-            addBaseTables(step, convertBatchStoreTableName);
+        if (CollectionUtils.isNotEmpty(convertSystemBatchStoreTableNames)) {
+            convertSystemBatchStoreTableNames.forEach(tableName -> {
+                addBaseTables(step, tableName);
+            });
         }
 
         if (targetTableNamePrefix != null) {
@@ -398,8 +403,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     /**
-     * Retrieve all system IDs for target entity of current tenant (sorted by
-     * system priority from high to low)
+     * Retrieve all system IDs for target entity of current tenant (sorted by system
+     * priority from high to low)
      *
      * @param entity
      *            target entity
@@ -630,12 +635,14 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
     }
 
-    protected String getConvertBatchStoreTableName() {
-        Map<String, String> rematchTables = getObjectFromContext(DELETED_TABLE_NAME, Map.class);
+    protected List<String> getConvertedRematchTableNames() {
+        TypeReference<Map<String, List<String>>> ref = new TypeReference<Map<String, List<String>>>() {
+        };
+        Map<String, List<String>> rematchTables = getTypedObjectFromContext(DELETED_TABLE_NAMES, ref);
         if (rematchTables == null) {
-            rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
+            rematchTables = getTypedObjectFromContext(REMATCH_TABLE_NAMES, ref);
         }
-        log.info("rematch_table_name is : {}", JsonUtils.serialize(rematchTables));
+        log.info("rematchTables is : {}", JsonUtils.serialize(rematchTables));
         return (rematchTables != null) && rematchTables.get(configuration.getMainEntity().name()) != null
                 ? rematchTables.get(configuration.getMainEntity().name())
                 : null;
@@ -645,38 +652,38 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         if (CollectionUtils.isNotEmpty(inputTableNames)) {
             return false;
         }
-        String convertBatchStoreTableName = getConvertBatchStoreTableName();
-        return convertBatchStoreTableName == null;
+        List<String> convertRematchTableNames = getConvertedRematchTableNames();
+        return CollectionUtils.isEmpty(convertRematchTableNames);
     }
 
     protected boolean isHasLegacyDelete(BusinessEntity entity) {
         Set<Action> legacyDeleteAction;
         switch (entity) {
-            case Account:
-                legacyDeleteAction = getSetObjectFromContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
-                if (CollectionUtils.isNotEmpty(legacyDeleteAction)) {
-                    log.info("legacyDeleteAction is {}", JsonUtils.serialize(legacyDeleteAction));
-                    return true;
-                }
-                break;
-            case Contact:
-                legacyDeleteAction = getSetObjectFromContext(CONTACT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
-                if (CollectionUtils.isNotEmpty(legacyDeleteAction)) {
-                    log.info("legacyDeleteAction is {}", JsonUtils.serialize(legacyDeleteAction));
-                    return true;
-                }
-                break;
-            case Transaction:
-                Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELETE_BYDATERANGE_ACTIONS,
-                        BusinessEntity.class, Set.class);
-                Map<CleanupOperationType, Set> legacyDeleteByUploadMap =
-                        getMapObjectFromContext(TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS, CleanupOperationType.class
-                                , Set.class);
-                if ((actionMap != null && !actionMap.isEmpty()) || (legacyDeleteByUploadMap != null && !legacyDeleteByUploadMap.isEmpty())) {
-                    log.info("already has Transaction legacyDeleteActions");
-                    return true;
-                }
-                break;
+        case Account:
+            legacyDeleteAction = getSetObjectFromContext(ACCOUNT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
+            if (CollectionUtils.isNotEmpty(legacyDeleteAction)) {
+                log.info("legacyDeleteAction is {}", JsonUtils.serialize(legacyDeleteAction));
+                return true;
+            }
+            break;
+        case Contact:
+            legacyDeleteAction = getSetObjectFromContext(CONTACT_LEGACY_DELTE_BYUOLOAD_ACTIONS, Action.class);
+            if (CollectionUtils.isNotEmpty(legacyDeleteAction)) {
+                log.info("legacyDeleteAction is {}", JsonUtils.serialize(legacyDeleteAction));
+                return true;
+            }
+            break;
+        case Transaction:
+            Map<BusinessEntity, Set> actionMap = getMapObjectFromContext(LEGACY_DELETE_BYDATERANGE_ACTIONS,
+                    BusinessEntity.class, Set.class);
+            Map<CleanupOperationType, Set> legacyDeleteByUploadMap = getMapObjectFromContext(
+                    TRANSACTION_LEGACY_DELTE_BYUOLOAD_ACTIONS, CleanupOperationType.class, Set.class);
+            if ((actionMap != null && !actionMap.isEmpty())
+                    || (legacyDeleteByUploadMap != null && !legacyDeleteByUploadMap.isEmpty())) {
+                log.info("already has Transaction legacyDeleteActions");
+                return true;
+            }
+            break;
         }
         return false;
     }

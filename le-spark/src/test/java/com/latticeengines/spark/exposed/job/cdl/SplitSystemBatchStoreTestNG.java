@@ -24,6 +24,7 @@ public class SplitSystemBatchStoreTestNG extends SparkJobFunctionalTestNGBase {
         List<Runnable> runnables = new ArrayList<>();
         runnables.add(this::testSingleTemplateSystemBatch);
         runnables.add(this::testMultiTemplateSystemBatch);
+        runnables.add(this::testSystemBatchWithDiscardFields);
         ThreadPoolUtils.runInParallel(this.getClass().getSimpleName(), runnables);
     }
 
@@ -45,11 +46,30 @@ public class SplitSystemBatchStoreTestNG extends SparkJobFunctionalTestNGBase {
                 this::verifyTemplateThreeSplit));
     }
 
+    private void testSystemBatchWithDiscardFields() {
+        List<String> input = prepareData();
+        SplitSystemBatchStoreConfig config = getConfigForTemplateTwoWithDiscards();
+        SparkJobResult result = runSparkJob(SplitSystemBatchStoreJob.class, config, input,
+                String.format("/tmp/%s/%s/SystemBatchWithDiscardFields", leStack, this.getClass().getSimpleName()));
+        verify(result, Collections.singletonList(this::verifyTemplateTwoWithDiscards));
+    }
+
     private SplitSystemBatchStoreConfig getConfigForTemplateOne() {
         SplitSystemBatchStoreConfig config = new SplitSystemBatchStoreConfig();
         List<String> templates = new LinkedList<>();
         templates.add("template1");
         config.setTemplates(templates);
+        return config;
+    }
+
+    private SplitSystemBatchStoreConfig getConfigForTemplateTwoWithDiscards() {
+        SplitSystemBatchStoreConfig config = new SplitSystemBatchStoreConfig();
+        List<String> templates = new LinkedList<>();
+        templates.add("template2");
+        List<String> discardFields = new LinkedList<>();
+        discardFields.add("Attr3");
+        config.setTemplates(templates);
+        config.setDiscardFields(discardFields);
         return config;
     }
 
@@ -126,6 +146,43 @@ public class SplitSystemBatchStoreTestNG extends SparkJobFunctionalTestNGBase {
                 break;
             default:
                 Assert.fail("Should not see a record with id " + id + ": " + record.toString());
+            }
+            count.addAndGet(1);
+        });
+        Assert.assertEquals(count.get(), 2L);
+        return true;
+    }
+
+    private Boolean verifyTemplateTwoWithDiscards(HdfsDataUnit templatetwoWithDiscards) {
+        // for template 2 with discard file "Attr3", output should be:
+        //+-----+-----+-----------------+--------------+--------------+---+
+        //|Attr1|Attr2|CustomerAccountId|CDLCreatedTime|CDLUpdatedTime| Id|
+        //+-----+-----+-----------------+--------------+--------------+---+
+        //|  2_1|  2_2|              2_3|           100|           200|  1|
+        //| 2_1b| 2_2b|             2_3b|           100|           200|  2|
+        //+-----+-----+-----------------+--------------+--------------+---+
+        final AtomicLong count = new AtomicLong();
+        verifyAndReadTarget(templatetwoWithDiscards).forEachRemaining(record -> {
+            int id = (int) record.get("Id");
+            switch (id) {
+                case 1:
+                    Assert.assertEquals(record.get("Attr1").toString(), "2_1");
+                    Assert.assertEquals(record.get("Attr2").toString(), "2_2");
+                    Assert.assertEquals(record.get("CustomerAccountId").toString(), "2_3");
+                    Assert.assertEquals(record.get("CDLCreatedTime"), 100L);
+                    Assert.assertEquals(record.get("CDLUpdatedTime"), 200L);
+                    Assert.assertEquals(record.get("Attr3"), null);
+                    break;
+                case 2:
+                    Assert.assertEquals(record.get("Attr1").toString(), "2_1b");
+                    Assert.assertEquals(record.get("Attr2").toString(), "2_2b");
+                    Assert.assertEquals(record.get("CustomerAccountId").toString(), "2_3b");
+                    Assert.assertEquals(record.get("CDLCreatedTime"), 100L);
+                    Assert.assertEquals(record.get("CDLUpdatedTime"), 200L);
+                    Assert.assertEquals(record.get("Attr3"), null);
+                    break;
+                default:
+                    Assert.fail("Should not see a record with id " + id + ": " + record.toString());
             }
             count.addAndGet(1);
         });
