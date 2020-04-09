@@ -2,21 +2,28 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_CURATED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfContacts;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedAccountAttribute;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +31,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.NumberOfContactsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.CalculateStatsConfig;
@@ -35,11 +43,13 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.cdl.MergeCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
@@ -55,14 +65,20 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     public static final String BEAN_NAME = "curatedAccountAttributesStep";
 
     public static final String NUMBER_OF_CONTACTS_DISPLAY_NAME = "Number of Contacts";
+    public static final String LAST_ACTIVITY_DATE_DISPLAY_NAME = "Lattice Last Activity Date";
 
-    private int numberOfContactsStep, profileStep, bucketStep;
+    private static final Set<String> CURATED_ACCOUNT_ATTRIBUTES = Sets.newHashSet(NumberOfContacts.name(),
+            LastActivityDate.name());
+
+    private int numberOfContactsStep, mergedAttributeStep, profileStep, bucketStep;
     private String accountTableName;
     private String contactTableName;
 
     // Set to true if either of the Account or Contact table is missing or empty and we should not
     // run this step's transformation.
     private boolean skipTransformation;
+    private boolean calculateNumOfContacts;
+    private boolean calculateLastActivityDate;
 
     private boolean shortCut;
 
@@ -118,31 +134,22 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
             accountTableName = getAccountTableName();
             contactTableName = getContactTableName();
 
-            // Get a map of the imported BusinessEntities.
-            Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
-                    BusinessEntity.class, List.class);
-
             // Do not run this step if there is no account table, since accounts are required for this step to be
             // meaningful.
             if (StringUtils.isBlank(accountTableName)) {
                 log.warn("Cannot find account master table.  Skipping CuratedAccountAttributes Step.");
                 skipTransformation = true;
-            } else if (StringUtils.isBlank(contactTableName)) {
-                // Do not run this step if there is no contact table, since contacts are required for this step to be
-                // meaningful.
-                log.warn("Cannot find contact master table.  Skipping CuratedAccountAttributes Step.");
-                skipTransformation = true;
-            } else if ((MapUtils.isEmpty(entityImportsMap) || (!entityImportsMap.containsKey(BusinessEntity.Account)
-                    && !entityImportsMap.containsKey(BusinessEntity.Contact)))
-                    && (configuration.getRebuild() == null || !configuration.getRebuild())) {
-                // Skip this step if there are no newly imported accounts and no newly imported contacts, and force rebuild
-                // for BusinessEntity CuratedAccounts is null or has been set to false.
-                log.warn("There are no newly imported Account or Contacts.  Skipping CuratedAccountAttributes Step.");
-                skipTransformation = true;
-            } else if (shouldResetCuratedAttributesContext()) {
-                log.warn("Should reset. Skipping CuratedAccountAttributes Step.");
-                skipTransformation = true;
+                return;
             }
+
+            calculateNumOfContacts = shouldCalculateNumberOfContacts();
+            calculateLastActivityDate = shouldCalculateLastActivityDate();
+            skipTransformation = !calculateNumOfContacts && !calculateLastActivityDate
+                    && BooleanUtils.isNotTrue(configuration.getRebuild());
+
+            log.info(
+                    "calculateNumOfContacts={}, calculateLastActivityDate={}, skipCuratedAccountCalculation={}, rebuild={}",
+                    calculateNumOfContacts, calculateLastActivityDate, skipTransformation, configuration.getRebuild());
 
             if (!skipTransformation) {
                 Table accountTable = metadataProxy.getTable(customerSpace.toString(), accountTableName);
@@ -158,7 +165,6 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     }
 
     private String getAccountTableName() {
-        // TODO: Change to BusinessEntity.Account.getBatchStore()
         String accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 BusinessEntity.Account.getBatchStore(), inactive);
         if (StringUtils.isBlank(accountTableName)) {
@@ -212,15 +218,23 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        numberOfContactsStep = 0;
-        profileStep = 1;
-        bucketStep = 2;
+        int currStep = 0;
+        if (calculateNumOfContacts) {
+            TransformationStepConfig numberOfContacts = numberOfContacts();
+            steps.add(numberOfContacts);
+            numberOfContactsStep = currStep++;
+        }
 
-        TransformationStepConfig numberOfContacts = numberOfContacts();
+        mergedAttributeStep = currStep++;
+        profileStep = currStep++;
+        bucketStep = currStep;
+
+        // PBS
+        TransformationStepConfig mergeAttrs = mergeAttributes();
         TransformationStepConfig profile = profile();
         TransformationStepConfig bucket = bucket();
         TransformationStepConfig calcStats = calcStats();
-        steps.add(numberOfContacts);
+        steps.add(mergeAttrs);
         steps.add(profile);
         steps.add(bucket);
         steps.add(calcStats);
@@ -243,13 +257,6 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         step.setBaseTables(baseTables);
         step.setTransformer(TRANSFORMER_NUMBER_OF_CONTACTS);
 
-        // Set up the Curated Attributes table as a new output table indexed by Account ID.
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(servingStoreTablePrefix);
-        targetTable.setPrimaryKey(InterfaceName.AccountId.name());
-        step.setTargetTable(targetTable);
-
         NumberOfContactsConfig conf = new NumberOfContactsConfig();
         conf.setLhsJoinField(InterfaceName.AccountId.name());
         conf.setRhsJoinField(InterfaceName.AccountId.name());
@@ -259,9 +266,59 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
         return step;
     }
 
+    /*-
+     * merge all curated attributes from different sources
+     * 1. newly calculated number of contact step
+     * 2. newly calculated last activity date table
+     * 3. existing curated attribute table
+     *
+     * TODO skip this step when there's only number of contacts step
+     */
+    private TransformationStepConfig mergeAttributes() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        MergeCuratedAttributesConfig config = new MergeCuratedAttributesConfig();
+        step.setTransformer(TRANSFORMER_MERGE_CURATED_ATTRIBUTES);
+
+        int inputIdx = 0;
+        // since it's linked in previous step, check inactive is enough
+        Table table = dataCollectionProxy.getTable(customerSpace.toString(), CalculatedCuratedAccountAttribute,
+                inactive);
+        Set<String> currAttrs = new HashSet<>(currentCuratedAttributes(table));
+        if (calculateNumOfContacts) {
+            step.setInputSteps(Collections.singletonList(numberOfContactsStep));
+            currAttrs.remove(NumberOfContacts.name());
+            config.attrsToMerge.put(inputIdx, Collections.singletonList(NumberOfContacts.name()));
+            inputIdx++;
+        }
+        if (calculateLastActivityDate) {
+            config.lastActivityDateInputIdx = inputIdx++;
+            config.masterTableIdx = inputIdx++;
+            addBaseTables(step, getLastActivityDateTableName(BusinessEntity.Account), accountTableName);
+            currAttrs.remove(LastActivityDate.name());
+        }
+        if (!currAttrs.isEmpty()) {
+            log.info("Attributes to copied from existing curated account table = {}", currAttrs);
+            addBaseTables(step, table.getName());
+            config.attrsToMerge.put(inputIdx, new ArrayList<>(currAttrs));
+        }
+        config.joinKey = InterfaceName.AccountId.name();
+
+        // Set up the Curated Attributes table as a new output table indexed by Account
+        // ID.
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(servingStoreTablePrefix);
+        targetTable.setPrimaryKey(InterfaceName.AccountId.name());
+        step.setTargetTable(targetTable);
+
+        // set config
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
     private TransformationStepConfig profile() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(numberOfContactsStep));
+        step.setInputSteps(Collections.singletonList(mergedAttributeStep));
         step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
         ProfileJobConfig conf = new ProfileJobConfig();
         conf.setEncAttrPrefix(CEAttr);
@@ -272,7 +329,7 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
 
     private TransformationStepConfig bucket() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(profileStep, numberOfContactsStep));
+        step.setInputSteps(Arrays.asList(profileStep, mergedAttributeStep));
         step.setTransformer(TRANSFORMER_BUCKETER);
         step.setConfiguration(emptyStepConfig(lightEngineConfig()));
         return step;
@@ -280,7 +337,7 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
 
     private TransformationStepConfig calcStats() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(bucketStep, profileStep, numberOfContactsStep));
+        step.setInputSteps(Arrays.asList(bucketStep, profileStep, mergedAttributeStep));
         step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
 
         TargetTable targetTable = new TargetTable();
@@ -302,7 +359,7 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
 
     private void finishing() {
         updateDCStatusForCuratedAccountAttributes();
-        TableRoleInCollection role = TableRoleInCollection.CalculatedCuratedAccountAttribute;
+        TableRoleInCollection role = CalculatedCuratedAccountAttribute;
         exportToDynamo(servingStoreTableName, role.getPartitionKey(), role.getRangeKey());
     }
 
@@ -310,15 +367,79 @@ public class CuratedAccountAttributesStep extends BaseSingleEntityProfileStep<Cu
     protected void enrichTableSchema(Table servingStoreTable) {
         List<Attribute> attrs = servingStoreTable.getAttributes();
         attrs.forEach(attr -> {
-            if (InterfaceName.NumberOfContacts.name().equals(attr.getName())) {
+            if (NumberOfContacts.name().equals(attr.getName())) {
                 attr.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
                 attr.setSubcategory(null);
                 attr.setDisplayName(NUMBER_OF_CONTACTS_DISPLAY_NAME);
                 attr.setDescription("This curated attribute is calculated by counting the number of contacts " +
                         "matching each account");
                 attr.setFundamentalType(FundamentalType.NUMERIC.getName());
+            } else if (LastActivityDate.name().equals(attr.getName())) {
+                attr.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
+                attr.setSubcategory(null);
+                attr.setDisplayName(LAST_ACTIVITY_DATE_DISPLAY_NAME);
+                attr.setDescription(
+                        "Most recent activity date among any of the time series data (excluding transactions)");
+                attr.setLogicalDataType(LogicalDataType.Date);
+                attr.setFundamentalType(FundamentalType.DATE.getName());
             }
         });
+    }
+
+    /*-
+     * whether to re-calculate last activity date attribute
+     */
+    private boolean shouldCalculateLastActivityDate() {
+        return getLastActivityDateTableName(BusinessEntity.Account) != null;
+    }
+
+    private String getLastActivityDateTableName(BusinessEntity entity) {
+        if (!hasKeyInContext(LAST_ACTIVITY_DATE_TABLE_NAME)) {
+            log.info("No last activity date table names in ctx {}", LAST_ACTIVITY_DATE_TABLE_NAME);
+            return null;
+        }
+        Map<String, String> lastActivityDateTableNames = getMapObjectFromContext(LAST_ACTIVITY_DATE_TABLE_NAME,
+                String.class, String.class);
+        return lastActivityDateTableNames.get(entity.name());
+    }
+
+    /*-
+     * whether to re-calculate number of contacts attribute
+     */
+    private boolean shouldCalculateNumberOfContacts() {
+        // Get a map of the imported BusinessEntities.
+        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
+                BusinessEntity.class, List.class);
+        if (StringUtils.isBlank(contactTableName)) {
+            // Do not run this step if there is no contact table, since contacts are
+            // required for this step to be
+            // meaningful.
+            log.warn("Cannot find contact master table.  Skipping CuratedAccountAttributes Step.");
+            return false;
+        } else if ((MapUtils.isEmpty(entityImportsMap) || (!entityImportsMap.containsKey(BusinessEntity.Account)
+                && !entityImportsMap.containsKey(BusinessEntity.Contact)))
+                && (configuration.getRebuild() == null || !configuration.getRebuild())) {
+            // Skip this step if there are no newly imported accounts and no newly imported
+            // contacts, and force rebuild
+            // for BusinessEntity CuratedAccounts is null or has been set to false.
+            log.warn("There are no newly imported Account or Contacts.  Skipping CuratedAccountAttributes Step.");
+            return false;
+        } else if (shouldResetCuratedAttributesContext()) {
+            log.warn("Should reset. Skipping CuratedAccountAttributes Step.");
+            return false;
+        }
+        return true;
+    }
+
+    private Set<String> currentCuratedAttributes(Table table) {
+        if (table == null) {
+            log.info("No existing table found for curated account attributes in inactive version {}", inactive);
+            return Collections.emptySet();
+        }
+
+        return Arrays.stream(table.getAttributeNames()) //
+                .filter(CURATED_ACCOUNT_ATTRIBUTES::contains) //
+                .collect(Collectors.toSet());
     }
 
     protected void updateDCStatusForCuratedAccountAttributes() {
