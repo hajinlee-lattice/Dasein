@@ -123,20 +123,29 @@ public class AccountAttrsDecorator implements Decorator {
             return cm;
         }
 
+        // DP-12913 Hide other ids for entity match GA
         if (attrNameInOtherIDAndMatchID.contains(cm.getAttrName()) && entityMatchEnabled) {
-            cm.enableGroup(Enrichment);
-            cm.disableGroup(TalkingPoint);
-            cm.disableGroup(CompanyProfile);
-            cm.disableGroup(Model);
-            cm.setCanSegment(true);
-            cm.setCanModel(true);
-            cm.setCanEnrich(true);
             if (onlyEntityMatchGAEnabled) {
-                cm.enableGroup(Segment);
+                cm.disableGroup(Segment);
+                cm.disableGroup(Enrichment);
+                cm.disableGroup(TalkingPoint);
+                cm.disableGroup(CompanyProfile);
+                cm.disableGroup(Model);
+                cm.setCanSegment(false);
+                cm.setCanEnrich(false);
+                cm.setCanModel(false);
+                return cm;
             } else {
                 cm.disableGroup(Segment);
+                cm.enableGroup(Enrichment);
+                cm.disableGroup(TalkingPoint);
+                cm.disableGroup(CompanyProfile);
+                cm.disableGroup(Model);
+                cm.setCanSegment(true);
+                cm.setCanEnrich(true);
+                cm.setCanModel(false);
+                return cm;
             }
-            return cm;
         }
 
         cm.enableGroup(Segment);
