@@ -272,6 +272,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
         query.setFirstResult(offset);
         query.setParameter("deleted", Boolean.FALSE);
         query.setParameterList("launchIds", launchIds);
+        query.addQueryHint( "REC_LAUNCH_ID" );
         return query.list();
     }
 
