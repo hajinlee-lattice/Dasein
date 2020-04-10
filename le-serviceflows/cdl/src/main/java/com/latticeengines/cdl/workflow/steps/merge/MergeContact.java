@@ -83,6 +83,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             List<TransformationStepConfig> extracts = new ArrayList<>();
             List<Integer> extractSteps = new ArrayList<>();
             addNewContactExtractStepsForActivityStream(extracts, extractSteps);
+            steps.addAll(extracts);
             boolean noImports = CollectionUtils.isEmpty(extractSteps) && StringUtils.isEmpty(matchedTable);
             if (noImports) {
                 if (!hasSystemBatch) {
