@@ -82,8 +82,8 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Tenant> findAllByType(TenantType type) {
-        return tenantRepository.findAllByTenantType(type);
+    public List<Tenant> findAllByTypes(List<TenantType> types) {
+        return tenantRepository.findAllByTenantTypeIn(types);
     }
 
     @Override
@@ -120,6 +120,10 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
         if (TenantType.POC.equals(tenant.getTenantType()) && tenant.getExpiredTime() == null) {
             // expired date = registered + 90
             Long expiredTime = tenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(90);
+            tenant.setExpiredTime(expiredTime);
+        }
+        if (TenantType.STAGING.equals(tenant.getTenantType()) && tenant.getExpiredTime() == null) {
+            Long expiredTime = tenant.getRegisteredTime() + TimeUnit.DAYS.toMillis(180);
             tenant.setExpiredTime(expiredTime);
         }
         if(tenant.getNotificationLevel() == null) {

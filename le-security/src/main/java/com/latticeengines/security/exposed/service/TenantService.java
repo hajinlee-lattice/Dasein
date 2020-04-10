@@ -22,7 +22,7 @@ public interface TenantService {
 
     List<Tenant> getTenantsByStatus(TenantStatus status);
 
-    List<Tenant> getTenantByType(TenantType type);
+    List<Tenant> getTenantByTypes(List<TenantType> types);
 
     boolean getTenantEmailFlag(String tenantId);
 

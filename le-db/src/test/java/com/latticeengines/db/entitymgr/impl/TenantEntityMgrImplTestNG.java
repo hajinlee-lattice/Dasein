@@ -3,6 +3,7 @@ package com.latticeengines.db.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -73,7 +74,7 @@ public class TenantEntityMgrImplTestNG extends DbFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void findAllByTenantType() {
-        List<Tenant> tenantList = tenantEntityMgr.findAllByType(TenantType.QA);
+        List<Tenant> tenantList = tenantEntityMgr.findAllByTypes(Collections.singletonList(TenantType.QA));
         Assert.assertNotNull(tenantList);
         Tenant t = tenantEntityMgr.findByTenantName(TENANT_ID);
         assertTrue(tenantList.contains(t));

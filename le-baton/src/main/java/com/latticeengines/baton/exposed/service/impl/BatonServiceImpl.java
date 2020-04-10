@@ -96,6 +96,8 @@ public class BatonServiceImpl implements BatonService {
             tenantInfo.properties.lastModified = tenantInfo.properties.created;
             if (TenantType.POC.name().equals(tenantInfo.properties.tenantType)) {
                 tenantInfo.properties.expiredTime = tenantInfo.properties.created + TimeUnit.DAYS.toMillis(90);
+            } else if (TenantType.STAGING.name().equals(tenantInfo.properties.tenantType)) {
+                tenantInfo.properties.expiredTime = tenantInfo.properties.created + TimeUnit.DAYS.toMillis(180);
             }
 
             TenantLifecycleManager.create(contractId, tenantId, tenantInfo, defaultSpaceId, spaceInfo);

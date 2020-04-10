@@ -2,6 +2,7 @@ package com.latticeengines.admin.service.impl;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -52,9 +53,9 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
 
     @Override
     public Boolean call() throws Exception {
-        List<Tenant> tempTenants = tenantService.getTenantByType(TenantType.POC);
+        List<Tenant> tempTenants = tenantService.getTenantByTypes(Arrays.asList(TenantType.POC, TenantType.STAGING));
         if (CollectionUtils.isNotEmpty(tempTenants)) {
-            log.info("POC tennats size is " + tempTenants.size());
+            log.info("Tennats size is " + tempTenants.size());
             for (Tenant tenant : tempTenants) {
                 log.info("begin dealing with tenant " + tenant.getName());
                 if (tenant.getExpiredTime() == null) {

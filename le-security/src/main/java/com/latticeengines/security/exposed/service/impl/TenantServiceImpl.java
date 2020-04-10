@@ -120,8 +120,8 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public List<Tenant> getTenantByType(TenantType type) {
-        return tenantEntityMgr.findAllByType(type);
+    public List<Tenant> getTenantByTypes(List<TenantType> types) {
+        return tenantEntityMgr.findAllByTypes(types);
     }
 
     @Override
