@@ -5,6 +5,7 @@ import org.opensaml.saml2.core.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -46,7 +47,7 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
      *  tenant B attempt to login with identity provider with the same identity id
      */
     @Test(groups = "deployment")
-    public void testIdpInitiatedAuth_SameIdpAssociatedWithMutiTenant() throws InterruptedException {
+    public void testIdpInitiatedAuth_SameIdpAssociatedWithMutiTenant() {
         GlobalAuthTestBed gatestbed = samlDeploymentTestBed.getGlobalAuthTestBed();
 
         // Switch to secondary tenant
@@ -59,11 +60,11 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
 
         // Register IdP
         samlDeploymentTestBed.registerIdentityProvider(identityProvider);
+        // Sleep to let metadata manager pick up the new IdP
+        SleepUtils.sleep(10000);
         // Try to login
         response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
         assertRedirectedToSuccessPage(samlDeploymentTestBed.sendSamlResponse(response));
-        // Sleep to let metadata manager pick up the new IdP
-        Thread.sleep(10000);
 
         // Switch back to main tenant
         gatestbed.setMainTestTenant(gatestbed.getTestTenants().get(0));
