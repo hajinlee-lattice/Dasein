@@ -44,7 +44,8 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
 
     /**
      *  this tests the scenario where we create an identity provider associated with tenant A,
-     *  tenant B attempt to login with identity provider with the same identity id
+     *  then create the identity provider with the same identity id and metadata as tenant A
+     *  for tenant B,　tenant B can login
      */
     @Test(groups = "deployment")
     public void testIdpInitiatedAuth_SameIdpAssociatedWithMutiTenant() {
