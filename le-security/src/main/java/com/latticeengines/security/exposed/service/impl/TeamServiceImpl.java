@@ -143,10 +143,10 @@ public class TeamServiceImpl implements TeamService {
                         emails.add(globalAuthUserTenantRight.getGlobalAuthUser().getEmail());
                     }
                 }
-                List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser),
+                List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), UserFilter.TRIVIAL_FILTER,
                         emails, false);
                 userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
-                globalTeam = getGlobalTeam(globalAuthTeam, withTeamMember, userMap);
+                globalTeam = getGlobalTeam(globalAuthTeam, withTeamMember, userMap, loginUser);
             }
             return globalTeam;
         }
@@ -168,29 +168,30 @@ public class TeamServiceImpl implements TeamService {
     }
 
     private List<GlobalTeam> getGlobalTeams(List<GlobalAuthTeam> globalAuthTeams, boolean withTeamMember, User loginUser) {
-        List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), getFilter(loginUser), false);
+        List<User> users = userService.getUsers(MultiTenantContext.getTenant().getId(), UserFilter.TRIVIAL_FILTER, false);
         Map<String, User> userMap = users.stream().collect(Collectors.toMap(User::getEmail, User -> User));
         List<GlobalTeam> globalTeams = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(globalAuthTeams)) {
             for (GlobalAuthTeam globalAuthTeam : globalAuthTeams) {
-                globalTeams.add(getGlobalTeam(globalAuthTeam, withTeamMember, userMap));
+                globalTeams.add(getGlobalTeam(globalAuthTeam, withTeamMember, userMap, loginUser));
             }
         }
         return globalTeams;
     }
 
-    private GlobalTeam getGlobalTeam(GlobalAuthTeam globalAuthTeam, boolean withTeamMember, Map<String, User> userMap) {
+    private GlobalTeam getGlobalTeam(GlobalAuthTeam globalAuthTeam, boolean withTeamMember, Map<String, User> userMap, User loginUser) {
         GlobalTeam globalTeam = new GlobalTeam();
         globalTeam.setTeamName(globalAuthTeam.getName());
         globalTeam.setTeamId(globalAuthTeam.getTeamId());
         globalTeam.setCreated(globalAuthTeam.getCreationDate());
         globalTeam.setCreatedByUser(userMap.get(globalAuthTeam.getCreatedByUser()));
         if (withTeamMember) {
+            UserFilter userFilter = getFilter(loginUser);
             List<User> teamMembers = new ArrayList<>();
             if (CollectionUtils.isNotEmpty(globalAuthTeam.getUserTenantRights())) {
                 for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthTeam.getUserTenantRights()) {
                     User user = userMap.get(globalAuthUserTenantRight.getGlobalAuthUser().getEmail());
-                    if (user != null) {
+                    if (user != null && userFilter.visible(user)) {
                         teamMembers.add(user);
                     }
                 }
