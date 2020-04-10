@@ -40,6 +40,7 @@ import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeActivityMetricsJobConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeCSVConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
+import com.latticeengines.domain.exposed.spark.cdl.MergeProductConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeScoringTargetsConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.PivotRatingsConfig;
@@ -114,7 +115,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = ProfileJobConfig.class, name = ProfileJobConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateCuratedAttributesConfig.class, name = GenerateCuratedAttributesConfig.NAME), //
         @JsonSubTypes.Type(value = CalculateLastActivityDateConfig.class, name = CalculateLastActivityDateConfig.NAME), //
-        @JsonSubTypes.Type(value = BucketEncodeConfig.class, name = BucketEncodeConfig.NAME) //
+        @JsonSubTypes.Type(value = BucketEncodeConfig.class, name = BucketEncodeConfig.NAME), //
+        @JsonSubTypes.Type(value = MergeProductConfig.class, name = MergeProductConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 

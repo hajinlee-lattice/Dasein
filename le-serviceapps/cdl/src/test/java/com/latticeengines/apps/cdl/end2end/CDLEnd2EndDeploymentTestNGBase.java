@@ -349,7 +349,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Warn message after merging product
     static final String PRODUCT_WARN_MESSAGE = "whatever warn message as it is not null or empty string";
     // Number of products in batch store after ProcessTransaction test
-    static final Long BATCH_STORE_PRODUCT_PT = 103L;
+    static final Long BATCH_STORE_PRODUCT_PT = 123L;
     // Number of products in serving store after ProcessTransaction test
     static final Long SERVING_STORE_PRODUCTS_PT = 34L;
     // Number of product hierarchy in serving store after ProcessTransaction

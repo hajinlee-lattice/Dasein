@@ -28,4 +28,14 @@ public class DateTimeUtilsUnitTestNG {
         Assert.assertEquals(DateTimeUtils.dayPeriodToDate(49278), "2018-05-30");
         System.out.println(DateTimeUtils.dateToDayPeriod("2000-01-01"));
     }
+
+    @Test(groups = "manual")
+    public void manualConversion1() {
+        System.out.println(DateTimeUtils.dayPeriodToDate(85584));
+    }
+
+    @Test(groups = "manual")
+    public void manualConversion2() {
+        System.out.println(DateTimeUtils.dateToDayPeriod("2019-12-31"));
+    }
 }
