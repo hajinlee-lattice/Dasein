@@ -191,7 +191,7 @@ public class TeamServiceImpl implements TeamService {
             if (CollectionUtils.isNotEmpty(globalAuthTeam.getUserTenantRights())) {
                 for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthTeam.getUserTenantRights()) {
                     User user = userMap.get(globalAuthUserTenantRight.getGlobalAuthUser().getEmail());
-                    if (user != null && userFilter.visible(user)) {
+                    if (user != null && (userFilter == UserFilter.TRIVIAL_FILTER || userFilter.visible(user))) {
                         teamMembers.add(user);
                     }
                 }
