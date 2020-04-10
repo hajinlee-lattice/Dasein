@@ -13,7 +13,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -73,15 +72,6 @@ public class TeamServiceImpl implements TeamService {
     private boolean isExternalUser(User loginUser) {
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
         if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean isNonAdminUser(User loginUser) {
-        AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
-        if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.INTERNAL_USER)) {
             return true;
         } else {
             return false;
@@ -210,23 +200,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Override
     public Boolean editTeam(User loginUser, String teamId, GlobalTeamData globalTeamData) {
-        if (isNonAdminUser(loginUser) && !globalTeamManagementService.userBelongsToTeam(loginUser.getEmail(), teamId)) {
-            throw new AccessDeniedException("Access denied.");
-        }
         GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
-        if (CollectionUtils.isNotEmpty(globalTeamData.getTeamMembers()) && isExternalUser(loginUser)) {
-            // add the internal users into team member list if internal user exists in the edit team
-            if (globalAuthTeam != null && CollectionUtils.isNotEmpty(globalAuthTeam.getUserTenantRights())) {
-                List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
-                Set<String> teamMembers = globalTeamData.getTeamMembers();
-                for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
-                    String username = globalAuthUserTenantRight.getGlobalAuthUser().getEmail();
-                    if (!teamMembers.contains(username) && isInternalUser(globalAuthUserTenantRight)) {
-                        teamMembers.add(username);
-                    }
-                }
-            }
-        }
         GlobalAuthTeam globalAuthTeamUpdated = globalTeamManagementService.updateTeam(teamId, globalTeamData);
         List<Long> userIds = getChangedUserNames(getUserIds(globalAuthTeam), getUserIds(globalAuthTeamUpdated));
         userService.clearSession(false, MultiTenantContext.getTenant().getId(), userIds);
