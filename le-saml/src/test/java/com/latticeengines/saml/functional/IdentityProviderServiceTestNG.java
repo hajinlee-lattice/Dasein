@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 
 import javax.inject.Inject;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -99,8 +100,12 @@ public class IdentityProviderServiceTestNG extends SamlTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "testCreateAgain")
     public void testCascadeDelete() {
+        IdentityProvider retrieved = identityProviderEntityMgr.findByGATenantAndEntityId(null,
+                identityProvider.getEntityId());
+        Assert.assertNull(retrieved);
         tenantService.discardTenant(samlFunctionalTestBed.getGlobalAuthTestBed().getMainTestTenant());
-        IdentityProvider retrieved = identityProviderEntityMgr.findByEntityId(identityProvider.getEntityId());
+        retrieved = identityProviderEntityMgr.findByGATenantAndEntityId(identityProvider.getGlobalAuthTenant(),
+                identityProvider.getEntityId());
         assertNull(retrieved);
     }
 }

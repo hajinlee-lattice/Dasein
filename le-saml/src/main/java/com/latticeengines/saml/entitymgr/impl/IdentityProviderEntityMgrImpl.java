@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
@@ -60,8 +61,8 @@ public class IdentityProviderEntityMgrImpl extends BaseEntityMgrImpl<IdentityPro
 
     @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public IdentityProvider findByEntityId(String entityId) {
-        return identityProviderDao.findByField("entityId", entityId);
+    public IdentityProvider findByGATenantAndEntityId(GlobalAuthTenant gaTenant, String entityId) {
+        return identityProviderDao.findByFields("globalAuthTenant", gaTenant, "entityId", entityId);
     }
 
     private void validate(IdentityProvider identityProvider) {
@@ -78,7 +79,8 @@ public class IdentityProviderEntityMgrImpl extends BaseEntityMgrImpl<IdentityPro
             throw new LedpException(LedpCode.LEDP_33001, new String[] { e.getMessage() });
         }
 
-        IdentityProvider existing = findByEntityId(identityProvider.getEntityId());
+        IdentityProvider existing = findByGATenantAndEntityId(identityProvider.getGlobalAuthTenant(),
+                identityProvider.getEntityId());
         if (existing != null) {
             throw new LedpException(LedpCode.LEDP_33000, new String[] { identityProvider.getEntityId() });
         }

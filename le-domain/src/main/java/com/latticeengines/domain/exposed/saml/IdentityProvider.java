@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -33,7 +34,9 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
 
 @Entity
 @Table(name = "SECURITY_IDENTITY_PROVIDER", indexes = {
-        @Index(name = "IX_ENTITY_ID", columnList = "ENTITY_ID") })
+        @Index(name = "IX_ENTITY_ID", columnList = "ENTITY_ID") },
+        uniqueConstraints = {@UniqueConstraint(name = "UX_IDENTITY_ID", columnNames = { "TENANT_ID", "ENTITY_ID" })})
+
 public class IdentityProvider implements HasPid, HasAuditingFields {
 
     @Id
@@ -50,7 +53,7 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
     private GlobalAuthTenant globalAuthTenant;
 
     @JsonProperty("entity_id")
-    @Column(name = "ENTITY_ID", nullable = false, unique = true)
+    @Column(name = "ENTITY_ID", nullable = false)
     private String entityId;
 
     @JsonProperty("config_id")

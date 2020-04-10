@@ -5,6 +5,7 @@ import org.opensaml.saml2.core.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
@@ -39,6 +40,41 @@ public class SamlDeploymentTestNG extends SamlDeploymentTestNGBase {
         Assertion assertion = response.getAssertions().get(0);
         assertion.getSubject().getNameID().setValue("unknown@lattice-engines.com");
         assertRedirectedToErrorPage(samlDeploymentTestBed.sendSamlResponse(response));
+    }
+
+    /**
+     *  this tests the scenario where we create an identity provider associated with tenant A,
+     *  then create the identity provider with the same identity id and metadata as tenant A
+     *  for tenant B,　tenant B can login
+     */
+    @Test(groups = "deployment")
+    public void testIdpInitiatedAuth_SameIdpAssociatedWithMutiTenant() {
+        GlobalAuthTestBed gatestbed = samlDeploymentTestBed.getGlobalAuthTestBed();
+
+        // Switch to secondary tenant
+        gatestbed.setMainTestTenant(gatestbed.getTestTenants().get(1));
+        gatestbed.switchToSuperAdmin(gatestbed.getMainTestTenant());
+        MultiTenantContext.setTenant(gatestbed.getMainTestTenant());
+        // Try to login
+        Response response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
+        assertRedirectedToErrorPage(samlDeploymentTestBed.sendSamlResponse(response));
+
+        // Register IdP
+        samlDeploymentTestBed.registerIdentityProvider(identityProvider);
+        // Sleep to let metadata manager pick up the new IdP
+        SleepUtils.sleep(10000);
+        // Try to login
+        response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
+        assertRedirectedToSuccessPage(samlDeploymentTestBed.sendSamlResponse(response));
+
+        // Switch back to main tenant
+        gatestbed.setMainTestTenant(gatestbed.getTestTenants().get(0));
+        gatestbed.switchToSuperAdmin(gatestbed.getMainTestTenant());
+        MultiTenantContext.setTenant(gatestbed.getMainTestTenant());
+
+        // Try to login
+        response = samlDeploymentTestBed.getTestSAMLResponse(identityProvider);
+        assertRedirectedToSuccessPage(samlDeploymentTestBed.sendSamlResponse(response));
     }
 
     /**
