@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.ImportSystemAttrsDecoratorFac;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
@@ -21,13 +22,18 @@ public class ImportSystemAttrsDecoratorFacImpl implements ImportSystemAttrsDecor
     @Inject
     private S3ImportSystemService s3ImportSystemService;
 
+    @Inject
+    private BatonService batonService;
+
     @Override
     public Decorator getDecorator(Namespace1<String> namespace) {
         String tenantId = namespace.getCoord1();
         if (StringUtils.isNotBlank(tenantId)) {
+            boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
+            boolean onlyEntityMatchGAEnabled = batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(tenantId));
             List<S3ImportSystem> s3ImportSystems =
                     s3ImportSystemService.getAllS3ImportSystem(CustomerSpace.parse(tenantId).toString());
-            return new ImportSystemAttrsDecorator(s3ImportSystems);
+            return new ImportSystemAttrsDecorator(s3ImportSystems, entityMatchEnabled, onlyEntityMatchGAEnabled);
         } else {
             return new DummyDecorator();
         }

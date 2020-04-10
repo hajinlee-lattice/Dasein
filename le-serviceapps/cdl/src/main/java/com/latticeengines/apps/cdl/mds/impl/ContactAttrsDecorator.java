@@ -28,12 +28,10 @@ public class ContactAttrsDecorator implements Decorator {
 
     private final Set<String> exportAttrs;
 
-    private Set<String> attrNameInOtherIDAndMatchID;
-
     private final boolean entityMatchEnabled;
     private final boolean onlyEntityMatchGAEnabled;
 
-    ContactAttrsDecorator(boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled, Set<String> attrNameInOtherIDAndMatchID) {
+    ContactAttrsDecorator(boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
         this.entityMatchEnabled = entityMatchEnabled;
         this.onlyEntityMatchGAEnabled = onlyEntityMatchGAEnabled;
         this.stdAttrs = SchemaRepository //
@@ -45,7 +43,6 @@ public class ContactAttrsDecorator implements Decorator {
         this.exportAttrs = SchemaRepository //
                 .getDefaultExportAttributes(BusinessEntity.Contact, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
-        this.attrNameInOtherIDAndMatchID = attrNameInOtherIDAndMatchID;
     }
 
     @Override
@@ -90,30 +87,15 @@ public class ContactAttrsDecorator implements Decorator {
                 return cm;
             }
 
+            // PLS-15406 setting for attributes corresponds to mappings in section
+            // Unique ID, Other IDs, Match IDs, only enable for usage export
             if (InterfaceName.CustomerContactId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
                 cm.enableGroup(Enrichment);
                 cm.disableGroup(TalkingPoint);
                 cm.disableGroup(CompanyProfile);
                 cm.disableGroup(Model);
-                cm.setCanSegment(true);
-                cm.setCanModel(true);
-                cm.setCanEnrich(true);
-                if (onlyEntityMatchGAEnabled) {
-                    cm.enableGroup(Segment);
-                } else {
-                    cm.disableGroup(Segment);
-                }
-                return cm;
-            }
-
-            // PLS-15406  setting for attributes corresponds to mappings in section Unique ID,
-            // Other IDs, Match IDs, only enable for usage export
-            // InterfaceName.CustomerAccountId belongs to system attrs
-            if (attrNameInOtherIDAndMatchID.contains(cm.getAttrName()) && entityMatchEnabled) {
-                cm.enableGroup(Enrichment);
-                cm.disableGroup(TalkingPoint);
-                cm.disableGroup(CompanyProfile);
-                cm.disableGroup(Model);
+                // do not use CustomerContactId in segment, as there will always be a system id that can be used
+                // M36: still enable it. after asking all customer to move away from CustomerContactId, can disable it.
                 cm.setCanSegment(true);
                 cm.setCanModel(true);
                 cm.setCanEnrich(true);
