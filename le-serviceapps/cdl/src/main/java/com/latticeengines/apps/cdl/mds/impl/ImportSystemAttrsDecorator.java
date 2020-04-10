@@ -28,13 +28,11 @@ public class ImportSystemAttrsDecorator implements Decorator {
 
     private final Map<String, Pair<S3ImportSystem, EntityType>> accountSystemIdMap;
     private final Map<String, Pair<S3ImportSystem, EntityType>> contactSystemIdMap;
-    private final boolean entityMatchEnabled;
     private final boolean onlyEntityMatchGAEnabled;
 
-    ImportSystemAttrsDecorator(List<S3ImportSystem> s3ImportSystems, boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
+    ImportSystemAttrsDecorator(List<S3ImportSystem> s3ImportSystems, boolean onlyEntityMatchGAEnabled) {
         this.accountSystemIdMap = new HashMap<>();
         this.contactSystemIdMap = new HashMap<>();
-        this.entityMatchEnabled = entityMatchEnabled;
         this.onlyEntityMatchGAEnabled = onlyEntityMatchGAEnabled;
         if (CollectionUtils.isNotEmpty(s3ImportSystems)) {
             s3ImportSystems.forEach(s3ImportSystem -> {

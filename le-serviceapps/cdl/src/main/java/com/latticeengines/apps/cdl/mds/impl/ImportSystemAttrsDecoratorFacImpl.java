@@ -30,12 +30,13 @@ public class ImportSystemAttrsDecoratorFacImpl implements ImportSystemAttrsDecor
         String tenantId = namespace.getCoord1();
         if (StringUtils.isNotBlank(tenantId)) {
             boolean entityMatchEnabled = batonService.isEntityMatchEnabled(CustomerSpace.parse(tenantId));
-            boolean onlyEntityMatchGAEnabled = batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(tenantId));
-            List<S3ImportSystem> s3ImportSystems =
-                    s3ImportSystemService.getAllS3ImportSystem(CustomerSpace.parse(tenantId).toString());
-            return new ImportSystemAttrsDecorator(s3ImportSystems, entityMatchEnabled, onlyEntityMatchGAEnabled);
-        } else {
-            return new DummyDecorator();
+            if (entityMatchEnabled) {
+                boolean onlyEntityMatchGAEnabled = batonService.onlyEntityMatchGAEnabled(CustomerSpace.parse(tenantId));
+                List<S3ImportSystem> s3ImportSystems =
+                        s3ImportSystemService.getAllS3ImportSystem(CustomerSpace.parse(tenantId).toString());
+                return new ImportSystemAttrsDecorator(s3ImportSystems, onlyEntityMatchGAEnabled);
+            }
         }
+        return new DummyDecorator();
     }
 }
