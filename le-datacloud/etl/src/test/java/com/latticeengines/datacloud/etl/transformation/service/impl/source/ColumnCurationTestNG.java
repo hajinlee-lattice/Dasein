@@ -14,6 +14,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,7 +152,8 @@ public class ColumnCurationTestNG extends PipelineTransformationTestNGBase {
         Set<String> depSet = new HashSet<>();
         for (SourceColumn column : sourceColumnEntityMgr.getSourceColumns(baseSource.getSourceName())) {
             if (column.getCalculation() == Calculation.MOCK_UP) {
-                fieldValueMap.put(column.getColumnName(), column.getArguments());
+                fieldValueMap.put(column.getColumnName(),
+                        StringUtils.isBlank(column.getArguments()) ? null : column.getArguments());
             }
             if (column.getCalculation() == Calculation.DEPRECATED) {
                 depSet.add(column.getColumnName());
@@ -166,7 +168,11 @@ public class ColumnCurationTestNG extends PipelineTransformationTestNGBase {
                 Assert.assertEquals(record.get(depField), null);
             }
             for (String field : fieldValueMap.keySet()) {
-                Assert.assertEquals(record.get(field).toString(), fieldValueMap.get(field));
+                if (fieldValueMap.get(field) == null) {
+                    Assert.assertEquals(record.get(field), null);
+                } else {
+                    Assert.assertEquals(record.get(field).toString(), fieldValueMap.get(field));
+                }
             }
         }
     }
