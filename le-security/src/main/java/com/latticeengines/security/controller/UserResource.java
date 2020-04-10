@@ -67,7 +67,6 @@ public class UserResource {
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get all users that have at least one access right to the current tenant")
-    @PreAuthorize("hasRole('View_PLS_Users')")
     public ResponseDocument<List<User>> getAll(HttpServletRequest request) {
         ResponseDocument<List<User>> response = new ResponseDocument<>();
 
