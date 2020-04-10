@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -38,9 +40,11 @@ import com.latticeengines.apps.cdl.workflow.CDLDataFeedImportWorkflowSubmitter;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.DropBoxService;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -123,10 +127,15 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     private BatonService batonService;
 
     @Inject
+    private S3Service s3Service;
+
+    @Inject
     private PlsInternalProxy plsInternalProxy;
 
     @Inject
     private DataFeedService dataFeedService;
+
+    private ExecutorService s3CopyWorker = null;
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter, TenantService tenantService,
@@ -425,7 +434,28 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         csvImportFileInfo.setReportFilePath(backupPath);
         prepareImportConfig.setEmailInfo(emailInfo);
 
-        checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);
+        try {
+            checkImportWithWrongTemplate(customerSpace.toString(), dataFeedTask);
+        } catch (LedpException e) {
+            if (LedpCode.LEDP_40077.equals(e.getCode())) {
+                List<DataFeedTask> taskList = dataFeedTaskService.getDataFeedTaskWithSameEntity(customerSpace.toString(),
+                        dataFeedTask.getEntity());
+                Optional<DataFeedTask> correctTask =
+                        taskList.stream()
+                                .filter(task -> !task.getUniqueId().equals(dataFeedTask.getUniqueId())
+                                        && S3PathBuilder.DEFAULT_SYSTEM.equals(S3PathBuilder.getSystemNameFromFeedType(dataFeedTask.getFeedType())))
+                                .findFirst();
+                if (correctTask.isPresent()) {
+                    String destFolder = prepareImportConfig.getSourceKey().substring(0,
+                            prepareImportConfig.getBackupKey().lastIndexOf("/"));
+                    destFolder = destFolder.replace(dataFeedTask.getFeedType(), correctTask.get().getFeedType());
+                    String destKey = destFolder + prepareImportConfig.getSourceFileName();
+                    getCopyWorker().submit(() -> s3Service.copyObject(prepareImportConfig.getSourceBucket(), prepareImportConfig.getSourceKey(),
+                            prepareImportConfig.getSourceBucket(), destKey));
+                }
+            }
+            throw e;
+        }
         ApplicationId appId = cdlDataFeedImportWorkflowSubmitter.submit(customerSpace, dataFeedTask,
                 JsonUtils.serialize(importConfig), csvImportFileInfo, prepareImportConfig,true, emailInfo,
                 new WorkflowPidWrapper(-1L));
@@ -445,7 +475,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (CollectionUtils.size(taskList) > 1) {
             for (DataFeedTask task : taskList) {
                 if (!task.getUniqueId().equals(dataFeedTask.getUniqueId())) {
-                    if (StringUtils.isNotEmpty(S3PathBuilder.getSystemNameFromFeedType(task.getFeedType()))) {
+                    if (S3PathBuilder.DEFAULT_SYSTEM.equals(S3PathBuilder.getSystemNameFromFeedType(task.getFeedType()))) {
                         throw new LedpException(LedpCode.LEDP_40077,
                                 new String[] {dataFeedTask.getFeedType(), task.getFeedType()});
                     }
@@ -758,6 +788,17 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         }
         BusinessEntity entity = BusinessEntity.getByName(dataFeedTask.getEntity());
         return DiagnoseTable.diagnostic(customerSpaceStr, dataFeedTask.getImportTemplate(), entity, batonService);
+    }
+
+    private ExecutorService getCopyWorker() {
+        if (s3CopyWorker == null) {
+            synchronized (this) {
+                if (s3CopyWorker == null) {
+                    s3CopyWorker = ThreadPoolUtils.getCachedThreadPool("s3-legacy-copy");
+                }
+            }
+        }
+        return s3CopyWorker;
     }
 
 
