@@ -112,8 +112,9 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
 
     private void validateConfig() {
         // Currently only support Account entity
-        Preconditions.checkArgument(Account.name().equals(config.getEntity()),
-                "Currently only support Account entity, but asked for entity " + config.getEntity());
+        Preconditions.checkArgument(
+                Account.name().equals(config.getEntity()) || Contact.name().equals(config.getEntity()),
+                "Currently only support Account and Contact entity, but asked for entity " + config.getEntity());
         if (config.getSystemIdFlds() == null) {
             config.setSystemIdFlds(new ArrayList<>());
         }
