@@ -447,6 +447,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             if (candidate.getNameLocation() != null) {
                 NameLocation nl = candidate.getNameLocation();
                 data.add(nl.getName());
+                data.add(null); // trade style name
                 data.add(nl.getStreet());
                 data.add(nl.getStreet2());
                 data.add(nl.getCity());
@@ -456,6 +457,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 data.add(nl.getPhoneNumber());
             } else {
                 data.add(null); // name
+                data.add(null); // trade style name
                 data.add(null); // street
                 data.add(null); // street 2
                 data.add(null); // city
@@ -485,6 +487,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         return Arrays.asList(
                 DataCloudConstants.ATTR_LDC_DUNS,
                 DataCloudConstants.ATTR_LDC_NAME,
+                "TRADESTYLE_NAME",
                 "LDC_Street",
                 "STREET_ADDRESS_2",
                 DataCloudConstants.ATTR_CITY,

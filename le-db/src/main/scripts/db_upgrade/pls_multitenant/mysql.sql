@@ -10,6 +10,7 @@ BEGIN
         `STATUS`          varchar(40)
         `UPDATED`         datetime     not null,
         `UPLOAD_CONFIG`   JSON,
+        `FK_MATCH_CANDIDATES` bigint,
         `FK_MATCH_RESULT` bigint,
         `FK_TENANT_ID`    bigint       not null,
         primary key (`PID`)
@@ -48,7 +49,7 @@ END;
 
 CREATE PRODEDURE `CreateFileDownloadTable`()
   BEGIN
-    create table `FILE_DOWNLOAD` 
+    create table `FILE_DOWNLOAD`
       (
          `PID` bigint not null auto_increment,
          `CREATION` bigint not null,

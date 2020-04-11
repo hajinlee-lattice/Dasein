@@ -15,8 +15,10 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -62,6 +64,19 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
         dataUnit.setCount(matchCommand.getRowsRequested().longValue());
         List<DataUnit> inputUnits = new ArrayList<>();
         inputUnits.add(dataUnit);
+
+        try {
+            String candidateDir = matchCommand.getCandidateLocation();
+            candidateDir = PathUtils.toParquetOrAvroDir(candidateDir);
+            if (StringUtils.isNotBlank(candidateDir) && HdfsUtils.isDirectory(yarnConfiguration, candidateDir)) {
+                Table candidateTable = MetadataConverter.getTable(yarnConfiguration, candidateDir);
+                String candidateTableName = NamingUtils.timestamp("MatchCandidates");
+                metadataProxy.createTable(configuration.getCustomer(), candidateTableName, candidateTable);
+                putStringValueInContext(MATCH_CANDIDATES_TABLE_NAME, candidateTableName);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to extract match candidates table.", e);
+        }
 
         preMatchTable = getObjectFromContext(PREMATCH_EVENT_TABLE, Table.class);
         if (preMatchTable != null) {

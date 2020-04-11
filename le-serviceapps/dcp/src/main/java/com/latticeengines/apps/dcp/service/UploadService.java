@@ -19,6 +19,8 @@ public interface UploadService {
 
     void registerMatchResult(String customerSpace, long uploadPid, String tableName);
 
+    void registerMatchCandidates(String customerSpace, long uploadPid, String tableName);
+
     void updateUploadConfig(String customerSpace, Long uploadPid, UploadConfig uploadConfig);
 
     void updateUploadStatus(String customerSpace, Long uploadPid, Upload.Status status);
