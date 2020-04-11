@@ -1,9 +1,12 @@
 package com.latticeengines.proxy.exposed;
 
+import java.util.Map;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 
 @Component("restApiClient")
@@ -48,7 +51,7 @@ public class RestApiClient extends BaseRestApiProxy {
      * This is the client used to call external api outside of lattice. This
      * client ignores ssl name check This client WON'T use standard error
      * handler in BaseRestApiProxy
-     * 
+     *
      * @param appCtx
      * @param hostport
      * @return RestApiClient
@@ -85,5 +88,13 @@ public class RestApiClient extends BaseRestApiProxy {
 
     public <T> T post(final Class<T> returnValueClazz, final HttpEntity<String> entity, final String url) {
         return super.postForEntity("generic post", url, entity, returnValueClazz);
+    }
+
+    public <B> void put(final String url, final B body, final Map<String, String> headers) {
+        super.put("generic put", url, body, headers, String.class, false, false);
+    }
+
+    public void putMultipart(final String url, final MultiValueMap<String, Object> parts, final Map<String, String> headers) {
+        super.putMultiPart("put multi-part", url, parts, headers);
     }
 }

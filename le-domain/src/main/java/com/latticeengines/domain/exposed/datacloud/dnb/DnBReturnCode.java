@@ -30,7 +30,6 @@ public enum DnBReturnCode {
     // DnB provides 50+ result/error codes. We don't support parsing all of
     // them. For unparsed ones, mark it as unknown
     UNKNOWN("Unknown Status"), //
-
     /* Internal status in DnB services. Not exposed */
     PARTIAL_SUCCESS("Batch match is partially finished with some error records.");
 

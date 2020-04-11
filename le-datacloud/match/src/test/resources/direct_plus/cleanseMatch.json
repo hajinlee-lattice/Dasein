@@ -1,0 +1,1709 @@
+{
+  "transactionDetail": {
+    "transactionID": "rrt-06227f00e209ad95d-d-ea-32027-119969012-97",
+    "transactionTimestamp": "2020-04-11T18:32:24.680Z",
+    "inLanguage": "en-US",
+    "serviceVersion": "1"
+  },
+  "inquiryDetail": {
+    "name": "GOOGLE",
+    "address": {
+      "countryISOAlpha2Code": "US"
+    },
+    "candidateMaximumQuantity": 10,
+    "confidenceLowerLevelThresholdValue": 1,
+    "isCleanseAndStandardizeInformationRequired": true
+  },
+  "candidatesMatchedQuantity": 10,
+  "matchDataCriteria": "Name and Address Lookup",
+  "matchCandidates": [
+    {
+      "displaySequence": 1,
+      "organization": {
+        "duns": "060902413",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE LLC",
+        "tradeStyleNames": [],
+        "telephone": [
+          {
+            "telephoneNumber": "6502530000",
+            "isUnreachable": false
+          }
+        ],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "MOUNTAIN VIEW"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "CA"
+          },
+          "postalCode": "94043",
+          "postalCodeExtension": "1351",
+          "streetAddress": {
+            "line1": "1600 AMPHITHEATRE PKWY",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "COEUR D ALENE"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "ID"
+          },
+          "postalCode": "83816",
+          "postalCodeExtension": null,
+          "streetAddress": {
+            "line1": "PO BOX 1824",
+            "line2": null
+          }
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [
+          {
+            "fullName": "TOM  KURIAN"
+          }
+        ],
+        "isStandalone": false,
+        "corporateLinkage": {
+          "familytreeRolesPlayed": [
+            {
+              "description": "Parent / Headquarters",
+              "dnbCode": 9141
+            }
+          ]
+        }
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 2,
+      "organization": {
+        "duns": "015575096",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE INC",
+        "tradeStyleNames": [],
+        "telephone": [],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "SANTA CLARA"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "CA"
+          },
+          "postalCode": "95054",
+          "postalCodeExtension": "2729",
+          "streetAddress": {
+            "line1": "2055 LAURELWOOD RD STE 13",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 3,
+      "organization": {
+        "duns": "024020242",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE, INC.",
+        "tradeStyleNames": [],
+        "telephone": [
+          {
+            "telephoneNumber": "9176394213",
+            "isUnreachable": false
+          }
+        ],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "NEW YORK"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "NY"
+          },
+          "postalCode": "10020",
+          "postalCodeExtension": "1517",
+          "streetAddress": {
+            "line1": "1230 AVENUE OF THE AMERICAS FL 7",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 4,
+      "organization": {
+        "duns": "042949665",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE",
+        "tradeStyleNames": [],
+        "telephone": [],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "SUNNYVALE"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "CA"
+          },
+          "postalCode": "94089",
+          "postalCodeExtension": "1125",
+          "streetAddress": {
+            "line1": "495 E JAVA DR",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 5,
+      "organization": {
+        "duns": "053008529",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE INC",
+        "tradeStyleNames": [],
+        "telephone": [
+          {
+            "telephoneNumber": "6502146253",
+            "isUnreachable": false
+          }
+        ],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "SUNNYVALE"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "CA"
+          },
+          "postalCode": "94089",
+          "postalCodeExtension": "1413",
+          "streetAddress": {
+            "line1": "1000 ENTERPRISE WAY",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 6,
+      "organization": {
+        "duns": "060666289",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE INC",
+        "tradeStyleNames": [],
+        "telephone": [],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "SAN JOSE"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "CA"
+          },
+          "postalCode": "95113",
+          "postalCodeExtension": "1748",
+          "streetAddress": {
+            "line1": "225 W SANTA CLARA ST LOT 1",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 7,
+      "organization": {
+        "duns": "067338316",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE",
+        "tradeStyleNames": [],
+        "telephone": [],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "BOULDER"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "CO"
+          },
+          "postalCode": "80301",
+          "postalCodeExtension": "3122",
+          "streetAddress": {
+            "line1": "3333 WALNUT ST STE 300",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 8,
+      "organization": {
+        "duns": "072389905",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE",
+        "tradeStyleNames": [],
+        "telephone": [],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "RESTON"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "VA"
+          },
+          "postalCode": "20190",
+          "postalCodeExtension": "5318",
+          "streetAddress": {
+            "line1": "1780 BUSINESS CTR DR",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 9,
+      "organization": {
+        "duns": "083733065",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE LLC",
+        "tradeStyleNames": [],
+        "telephone": [
+          {
+            "telephoneNumber": "8437193329",
+            "isUnreachable": false
+          }
+        ],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "MONCKS CORNER"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "SC"
+          },
+          "postalCode": "29461",
+          "postalCodeExtension": "6601",
+          "streetAddress": {
+            "line1": "1669 GARROTT AVE",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZBZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "B"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    },
+    {
+      "displaySequence": 10,
+      "organization": {
+        "duns": "090664175",
+        "websiteAddress": [],
+        "dunsControlStatus": {
+          "operatingStatus": {
+            "description": "Active",
+            "dnbCode": 9074
+          },
+          "isMailUndeliverable": false
+        },
+        "primaryName": "GOOGLE",
+        "tradeStyleNames": [],
+        "telephone": [],
+        "primaryAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {
+            "name": "SAN JOSE"
+          },
+          "addressRegion": {
+            "name": null,
+            "abbreviatedName": "CA"
+          },
+          "postalCode": "95131",
+          "postalCodeExtension": "1108",
+          "streetAddress": {
+            "line1": "75 E TRIMBLE RD",
+            "line2": null
+          }
+        },
+        "mailingAddress": {
+          "addressCountry": {
+            "isoAlpha2Code": "US",
+            "name": "UNITED STATES"
+          },
+          "addressLocality": {},
+          "addressRegion": {},
+          "postalCode": null,
+          "postalCodeExtension": null,
+          "streetAddress": {}
+        },
+        "registrationNumbers": [],
+        "mostSeniorPrincipals": [],
+        "isStandalone": true,
+        "corporateLinkage": {}
+      },
+      "matchQualityInformation": {
+        "confidenceCode": 6,
+        "matchGrade": "AZZZZZZZFZZ",
+        "matchGradeComponentsCount": 11,
+        "matchGradeComponents": [
+          {
+            "componentType": "Name",
+            "componentRating": "A"
+          },
+          {
+            "componentType": "Street Number",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Street Name",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "City",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "State",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "PO Box",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Phone",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Density",
+            "componentRating": "F"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentRating": "Z"
+          },
+          {
+            "componentType": "Sic",
+            "componentRating": "Z"
+          }
+        ],
+        "matchDataProfile": "0099999999999999000000989898",
+        "matchDataProfileComponentsCount": 14,
+        "matchDataProfileComponents": [
+          {
+            "componentType": "Name",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Street Number",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Street Name",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "City",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "State",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "PO Box",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Phone",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "Postal Code",
+            "componentValue": "99"
+          },
+          {
+            "componentType": "DUNS",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "SIC",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Density",
+            "componentValue": "00"
+          },
+          {
+            "componentType": "Uniqueness",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "National ID",
+            "componentValue": "98"
+          },
+          {
+            "componentType": "URL",
+            "componentValue": "98"
+          }
+        ],
+        "nameMatchScore": 100.0
+      }
+    }
+  ],
+  "cleanseAndStandardizeInformation": {
+    "standardizedName": "GOOGLE",
+    "standardizedAddress": {
+      "addressCountry": {
+        "isoAlpha2Code": "US",
+        "name": "UNITED STATES"
+      },
+      "addressLocality": {},
+      "addressRegion": {},
+      "addressCounty": {},
+      "postalCode": null,
+      "postalCodeExtension": null,
+      "streetAddress": {},
+      "deliveryPointValidationStatus": "No DPV Address",
+      "deliveryPointValidationCMRAValue": "No DPV Address",
+      "isInexactAddress": false,
+      "addressType": "Unknown"
+    }
+  }
+}

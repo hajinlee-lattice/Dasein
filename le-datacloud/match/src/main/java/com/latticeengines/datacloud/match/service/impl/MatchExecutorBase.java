@@ -495,6 +495,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     private List<String> candidateOutputFields() {
         // hard coded for now
         // need to match the corresponding LDC attributes
+        // need to in sync with ProcessorContext.getCandidateSchema
         return Arrays.asList(
                 DataCloudConstants.ATTR_LDC_DUNS,
                 DataCloudConstants.ATTR_LDC_NAME,

@@ -1,8 +1,13 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode.IN_PROGRESS;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode.RATE_LIMITING;
+import static com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode.SUBMITTED;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,22 +39,22 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 
 // Use Fortune1000 to compare match result between DnB realtime match and DnB bulk match
-public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(DnBLookupVerificationTestNG.class);
+public class DirectPlusLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(DirectPlusLookupVerificationTestNG.class);
 
     @Inject
     private CountryCodeService countryCodeService;
 
-    @Resource(name = "dnbRealTimeLookupService")
-    private DnBRealTimeLookupService dnbRealTimeLookupService;
+    @Resource(name = "directPlusRealTimeLookupService")
+    private DnBRealTimeLookupService dnBRealTimeLookupService;
 
-    @Resource(name = "dnbBulkLookupDispatcher")
+    @Resource(name = "directPlusBulkLookupDispatcher")
     private DnBBulkLookupDispatcher dnBBulkLookupDispatcher;
 
-    @Resource(name = "dnbBulkLookupStatusChecker")
+    @Resource(name = "directPlusBulkLookupStatusChecker")
     private DnBBulkLookupStatusChecker dnbBulkLookupStatusChecker;
 
-    @Resource(name = "dnbBulkLookupFetcher")
+    @Resource(name = "directPlusBulkLookupFetcher")
     private DnBBulkLookupFetcher dnbBulkLookupFetcher;
 
     @SuppressWarnings("unused")
@@ -72,6 +77,8 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
 
     private Map<String, DnBMatchContext> contextsBulk = new HashMap<String, DnBMatchContext>();
 
+    private CSVParser csvFileParser;
+
     @Test(groups = "dnb", enabled = true)
     public void testConsistency() {
         // prepareFortune1000InputData(FORTUNE1000_SMALL_FILENAME, true, true);
@@ -92,7 +99,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
     private void realtimeLookup() {
         for (String lookupRequestId : contextsRealtime.keySet()) {
             DnBMatchContext context = contextsRealtime.get(lookupRequestId);
-            DnBMatchContext res = dnbRealTimeLookupService.realtimeEntityLookup(context);
+            DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(context);
             context.copyMatchResult(res);
             log.info(String.format(
                     "Realtime match result for request %s: Status=%s, Duns=%s, ConfidenceCode=%d, MatchGrade=%s",
@@ -106,8 +113,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         List<DnBBatchMatchContext> contexts = Collections.singletonList(batchContext);
         dnbBulkLookupStatusChecker.checkStatus(contexts);
 
-        while (batchContext.getDnbCode() == DnBReturnCode.IN_PROGRESS
-                || batchContext.getDnbCode() == DnBReturnCode.RATE_LIMITING) {
+        while (Arrays.asList(SUBMITTED, IN_PROGRESS, RATE_LIMITING).contains(batchContext.getDnbCode())) {
             if (batchContext.getTimestamp() == null
                     || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) / 1000 / 60 > 60) {
                 break;
@@ -190,9 +196,9 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             InputStream fileStream = ClassLoader.getSystemResourceAsStream("matchinput/" + fileName);
             CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(FORTUNE1000_FILENAME_HEADER)
                     .withRecordSeparator("\n");
-            CSVParser csvFileParser = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
+            csvFileParser = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
             List<CSVRecord> csvRecords = csvFileParser.getRecords();
-            for (int i = 1; i < csvRecords.size(); i++) {
+            for (int i = 1; i < Math.min(1000, csvRecords.size()); i++) {
                 CSVRecord record = csvRecords.get(i);
                 String country = record.get(FORTUNE1000_COUNTRY);
                 String countryCode = countryCodeService.getCountryCode(country);

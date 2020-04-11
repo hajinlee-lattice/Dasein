@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -31,21 +30,22 @@ import com.latticeengines.testframework.service.impl.SimpleRetryAnalyzer;
 import com.latticeengines.testframework.service.impl.SimpleRetryListener;
 
 @Listeners({ SimpleRetryListener.class })
-public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
+public class DirectPlusLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(DnBRealTimeLookupServiceImplTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(DirectPlusLookupServiceImplTestNG.class);
 
     @Inject
-    private DnBRealTimeLookupServiceImpl dnbRealTimeLookupService;
+    private DirectPlusRealTimeLookupServiceImpl lookupService;
 
     @Inject
     private DnBAuthenticationService dnbAuthenticationService;
 
     private static final int THREAD_NUM = 5;
 
-    @Test(groups = "dnb", dataProvider = "entityInputData", enabled = true, priority = 1, retryAnalyzer = SimpleRetryAnalyzer.class)
+    @Test(groups = "dnb", dataProvider = "entityInputData", priority = 1, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testRealTimeEntityLookupService(String name, String city, String state, String country,
-            String countryCode, DnBReturnCode dnbCode, String duns, Integer ConfidenceCode, DnBMatchGrade matchGrade) {
+            String countryCode, DnBReturnCode expectedDnbCode, String expectedDuns, Integer expectedConfidenceCode,
+            DnBMatchGrade expectedMatchGrade) {
         MatchKeyTuple input = new MatchKeyTuple();
         input.setCountry(country);
         input.setCountryCode(countryCode);
@@ -56,18 +56,18 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         context.setInputNameLocation(input);
         context.setLookupRequestId(UUID.randomUUID().toString());
 
-        DnBMatchContext res = dnbRealTimeLookupService.realtimeEntityLookup(context);
+        DnBMatchContext res = lookupService.realtimeEntityLookup(context);
         Assert.assertNotNull(res.getDuration());
         log.info("InputName={}, DnBReturnCode={}, ConfidenceCode={}, MatchGrade={}, OutOfBusiness={}",
                 res.getInputNameLocation().getName(), res.getDnbCode(), res.getConfidenceCode(),
                 res.getMatchGrade() != null ? res.getMatchGrade().getRawCode() : null, res.isOutOfBusiness());
 
-        Assert.assertEquals(res.getDnbCode(), dnbCode);
-        if (duns != null) {
-            Assert.assertEquals(res.getDuns(), duns);
+        Assert.assertEquals(res.getDnbCode(), expectedDnbCode);
+        if (expectedDuns != null) {
+            Assert.assertEquals(res.getDuns(), expectedDuns);
         }
-        Assert.assertEquals(res.getConfidenceCode(), ConfidenceCode);
-        Assert.assertEquals(res.getMatchGrade(), matchGrade);
+        Assert.assertEquals(res.getConfidenceCode(), expectedConfidenceCode);
+        Assert.assertEquals(res.getMatchGrade(), expectedMatchGrade);
         Assert.assertNotNull(res.getDuration());
         log.info("Match duration: {}", res.getDuration());
         if (res.getMatchGrade() != null) {
@@ -76,24 +76,21 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     }
 
-    @Test(groups = "dnb", enabled = true, retryAnalyzer = SimpleRetryAnalyzer.class)
+    @Test(groups = "dnb", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void loadTestRealTimeLookupService() {
         ExecutorService executorService = Executors.newFixedThreadPool(THREAD_NUM);
-        CompletionService<DnBMatchContext> cs = new ExecutorCompletionService<DnBMatchContext>(executorService);
+        CompletionService<DnBMatchContext> cs = new ExecutorCompletionService<>(executorService);
 
         for (int i = 0; i < THREAD_NUM; i++) {
-            cs.submit(new Callable<DnBMatchContext>() {
-                @Override
-                public DnBMatchContext call() throws Exception {
-                    MatchKeyTuple input = new MatchKeyTuple();
-                    input.setCountry("USA");
-                    input.setCountryCode("US");
-                    input.setName("Google");
-                    input.setState("CA");
-                    DnBMatchContext context = new DnBMatchContext();
-                    context.setInputNameLocation(input);
-                    return dnbRealTimeLookupService.realtimeEntityLookup(context);
-                }
+            cs.submit(() -> {
+                MatchKeyTuple input = new MatchKeyTuple();
+                input.setCountry("USA");
+                input.setCountryCode("US");
+                input.setName("Google");
+                input.setState("CA");
+                DnBMatchContext context = new DnBMatchContext();
+                context.setInputNameLocation(input);
+                return lookupService.realtimeEntityLookup(context);
             });
             log.info("Submit {}th request", i);
         }
@@ -113,17 +110,17 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     // Test is disabled due to email lookup is not actively used in application
     @Test(groups = "dnb", dataProvider = "emailInputData", enabled = false, priority = 2, retryAnalyzer = SimpleRetryAnalyzer.class)
-    public void testRealTimeEmailLookupService(String email, DnBReturnCode dnbCode, String duns) {
+    public void testRealTimeEmailLookupService(String email, DnBReturnCode expectedDnbCode, String expectedDuns) {
         DnBMatchContext context = new DnBMatchContext();
         context.setInputEmail(email);
-        DnBMatchContext res = dnbRealTimeLookupService.realtimeEmailLookup(context);
-        Assert.assertEquals(res.getDnbCode(), dnbCode);
-        Assert.assertEquals(res.getDuns(), duns);
+        DnBMatchContext res = lookupService.realtimeEmailLookup(context);
+        Assert.assertEquals(res.getDnbCode(), expectedDnbCode);
+        Assert.assertEquals(res.getDuns(), expectedDuns);
         Assert.assertNotNull(res.getDuration());
         log.info(String.format("Match duration: %d", res.getDuration()));
     }
 
-    @Test(groups = "dnb", dataProvider = "entityInputDataTestMatchedNameLocation", priority = 3, retryAnalyzer = SimpleRetryAnalyzer.class)
+    @Test(groups = "dnb", dataProvider = "entityInputDataTestMatchedNameLocation", enabled = true, priority = 3, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testRealTimeEntityLookupMatchedNameLocation(String inputName, String inputCountry,
             String inputCountryCode, DnBReturnCode dnbCode, String duns, Integer ConfidenceCode,
             DnBMatchGrade matchGrade, String matchedName, String matchedStreet, String matchedCity, String matchedState,
@@ -136,7 +133,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         context.setInputNameLocation(input);
         context.setLookupRequestId(UUID.randomUUID().toString());
 
-        DnBMatchContext res = dnbRealTimeLookupService.realtimeEntityLookup(context);
+        DnBMatchContext res = lookupService.realtimeEntityLookup(context);
         Assert.assertNotNull(res.getDuration());
         log.info(
                 "MatchGrade = {}, Name = {}, Street = {}, City = {}, State = {}, CountryCode = {}, ZipCode = {}, PhoneNumber = {}, OutOfBusiness = {}",
@@ -164,29 +161,22 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
 
     /**
      * Notice that DnB is changing error response schema periodically without
-     * notification. Should update the error response schema in the test up to
-     * date if there is any change detected.
+     * notification. Should update the error response schema in the test up to date
+     * if there is any change detected.
      */
     @Test(groups = "functional", retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testParseDnBHttpError() {
-        Assert.assertEquals(dnbRealTimeLookupService.parseDnBHttpError(
-                new HttpClientErrorException(HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED.name(),
-                        ("{\"GetCleanseMatchResponse\":{\"@ServiceVersionNumber\":\"5.0\","
-                                + "\"TransactionDetail\":{\"ApplicationTransactionID\":\"REST\","
-                                + "\"ServiceTransactionID\":\"Id-7db4e95d4ff4a07f6d5288be\","
-                                + "\"TransactionTimestamp\":\"2019-12-05T20:53:01.226-05:00\"},"
-                                + "\"TransactionResult\":{\"SeverityText\":\"Error\",\"ResultID\":\"SC001\","
-                                + "\"ResultText\":\"Your user credentials are invalid. "
-                                + "Please contact your D&B Representative or your local Customer Service Center.\"}}}")
-                                .getBytes(),
-                        null)),
-                DnBReturnCode.UNAUTHORIZED);
+        Assert.assertEquals(lookupService.parseDnBHttpError(new HttpClientErrorException(HttpStatus.UNAUTHORIZED,
+                HttpStatus.UNAUTHORIZED.name(),
+                ("{\"transactionDetail\":{\"transactionID\":\"rrt-0623a0192b166e525-c-ea-16523-119576738-21\",\"transactionTimestamp\":\"2020-04-11T17:18:37.582Z\",\"inLanguage\":\"en-US\",\"serviceVersion\":null},\"error\":{\"errorMessage\":\"You are not currently authorised to access this product. Please contact your D&B account representative\",\"errorCode\":\"00004\"}}")
+                        .getBytes(),
+                null)), DnBReturnCode.UNAUTHORIZED);
     }
 
     @Test(groups = "dnb", priority = 4, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testInvalidToken() {
         // Set token to be invalid
-        dnbAuthenticationService.refreshToken(DnBKeyType.REALTIME, "abc");
+        dnbAuthenticationService.refreshToken(DnBKeyType.DPLUS, "abc");
         // Wait for local cache to be refreshed
         SleepUtils.sleep(5000L);
         // Expected the service to refresh token and make a successful call via
@@ -199,18 +189,18 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         context.setInputNameLocation(tuple);
         context.setLookupRequestId(UUID.randomUUID().toString());
 
-        DnBMatchContext res = dnbRealTimeLookupService.realtimeEntityLookup(context);
+        DnBMatchContext res = lookupService.realtimeEntityLookup(context);
         Assert.assertEquals(res.getDnbCode(), DnBReturnCode.OK);
     }
 
     @DataProvider(name = "entityInputData")
     public static Object[][] getEntityInputData() {
-        return new Object[][] {
+        return new Object[][]{
                 { "BENCHMARK BLINDS", "GILBERT", "ARIZONA", "USA", "US", DnBReturnCode.OK, "038796548", 8,
                         new DnBMatchGrade("AZZAAZZZFAB") },
                 { "DÉSIRÉE DAUDE", null, null, "GERMANY", "DE", DnBReturnCode.OK, null, 4,
                         new DnBMatchGrade("BZZZZZZZZZZ") },
-                { "ABCDEFG", "NEW YORK", "WASHINTON", "USA", "US", DnBReturnCode.UNMATCH, null, null, null },
+                {"ABCDEFG", "NEW YORK", "WASHINTON", "USA", "US", DnBReturnCode.UNMATCH, null, null, null},
                 { "GORMAN MANUFACTURING", null, null, "USA", "US", DnBReturnCode.OK, "804735132", 6,
                         new DnBMatchGrade("AZZZZZZZFZZ") },
                 { "GOOGLE", null, "CA", "USA", "US", DnBReturnCode.OK, "060902413", 6,
@@ -218,7 +208,8 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
                 { "GOOGLE GERMANY", "HAMBURG", null, "GERMANY", "DE", DnBReturnCode.OK, "330465266", 7,
                         new DnBMatchGrade("AZZAZZZZZFZ") },
                 { "GORMAN MFG CO INC", "SACRAMENTO", "CA", "USA", "US", DnBReturnCode.OK, "009175688", 7,
-                        new DnBMatchGrade("AZZAAZZZFFZ") } };
+                        new DnBMatchGrade("AZZAAZZZFFZ") },
+        };
     }
 
     @DataProvider(name = "emailInputData")
@@ -231,7 +222,6 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
     public static Object[][] getEntityInputDataTestMatchedNameLocation() {
         return new Object[][] {
                 { "GOOGLE", "USA", "US", DnBReturnCode.OK, "060902413", 6, new DnBMatchGrade("AZZZZZZZFZZ"),
-                        "GOOGLE LLC", "1600 AMPHITHEATRE PKWY", "MOUNTAIN VIEW", "CA", "US", "94043", "6502530000" },
-        };
+                        "GOOGLE LLC", "1600 AMPHITHEATRE PKWY", "MOUNTAIN VIEW", "CA", "US", "94043", "6502530000" }, };
     }
 }

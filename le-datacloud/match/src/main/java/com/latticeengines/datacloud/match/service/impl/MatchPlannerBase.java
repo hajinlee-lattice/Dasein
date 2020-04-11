@@ -92,6 +92,9 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     @Value("${datacloud.match.default.decision.graph.contact}")
     private String defaultContactGraph;
 
+    @Value("${datacloud.match.default.decision.graph.prime}")
+    private String defaultPrimeGraph;
+
     /**
      * Default DataCloud version is latest approved version with major version as
      * 2.0
@@ -110,7 +113,11 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     void setDecisionGraph(MatchInput input) {
         String decisionGraph = input.getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph)) {
-            decisionGraph = defaultGraph;
+            if (OperationalMode.PRIME_MATCH.equals(input.getOperationalMode())) {
+                decisionGraph = defaultPrimeGraph;
+            } else {
+                decisionGraph = defaultGraph;
+            }
             input.setDecisionGraph(decisionGraph);
             log.debug("Did not specify decision graph, use the default one: " + decisionGraph);
         }
