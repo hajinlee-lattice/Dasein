@@ -82,7 +82,9 @@ public class PlsValidateTeamMemberRightsAspect {
         if (play.getTargetSegment() == null) {
             checkTeamOnPlay(play.getName());
         } else {
-            checkTeamOnPlay(play);
+            String segmentName = play.getTargetSegment().getName();
+            MetadataSegment metadataSegment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segmentName);
+            checkTeamOnSegment(metadataSegment);
         }
     }
 
