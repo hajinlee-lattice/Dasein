@@ -52,6 +52,7 @@ public class PlsValidateTeamMemberRightsAspect {
 
     private void checkTeamInContext(String teamId) {
         if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE)) {
+            log.info("Team feature is not enabled.");
             return;
         }
         if (StringUtils.isNotEmpty(teamId)) {
