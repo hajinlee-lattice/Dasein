@@ -155,8 +155,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
             }
         }
-        MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegment,
-                teamService.getTeamInContext(metadataSegment.getTeamId()),
+        MetadataSegment createdOrUpdatedSegment = translateForFrontend(metadataSegment, metadataSegment.getTeam(),
                 teamService.getTeamIdsInContext());
         clearRatingCache();
         return createdOrUpdatedSegment;
