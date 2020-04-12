@@ -14,7 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -34,6 +36,9 @@ public class PlsValidateTeamMemberRightsAspect {
     @Inject
     private PlayProxy playProxy;
 
+    @Inject
+    private BatonService batonService;
+
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentServiceImpl.createOrUpdateSegment(..))")
     public void createOrUpdateSegment(JoinPoint joinPoint) {
         MetadataSegment segment = (MetadataSegment) joinPoint.getArgs()[0];
@@ -47,6 +52,9 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamInContext(String teamId) {
+        if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE)) {
+            return;
+        }
         if (StringUtils.isNotEmpty(teamId)) {
             Session session = MultiTenantContext.getSession();
             if (session != null) {
