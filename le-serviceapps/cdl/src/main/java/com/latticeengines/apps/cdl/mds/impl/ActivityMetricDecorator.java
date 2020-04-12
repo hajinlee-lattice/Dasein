@@ -169,12 +169,17 @@ public class ActivityMetricDecorator implements Decorator {
         renderFundamentalType(cm, group);
 
         switch (cm.getEntity()) {
-            case WebVisitProfile:
-                WebVisitUtils.setColumnMetadataUIProperties(cm, group, timeRange, params);
-                break;
-            case Opportunity:
-                OpportunityUtils.setColumnMetadataUIProperties(cm, group, streamsNeedSystemName.get().contains(group.getStream().getName()));
-                break;
+        case WebVisitProfile:
+            WebVisitUtils.setColumnMetadataUIProperties(cm, group, timeRange, params);
+            break;
+        case Opportunity:
+            OpportunityUtils.setColumnMetadataUIProperties(cm, group,
+                    streamsNeedSystemName.get().contains(group.getStream().getName()));
+            break;
+        case AccountMarketingActivity:
+        case ContactMarketingActivity:
+            // do nothing atm
+            break;
             default:
                 log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
         }
