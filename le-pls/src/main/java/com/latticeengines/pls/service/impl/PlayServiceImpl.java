@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,13 +47,13 @@ public class PlayServiceImpl implements PlayService {
         // listing API takes lot of time to load
         shouldLoadCoverage = shouldLoadCoverage == null ? false : shouldLoadCoverage;
         Tenant tenant = MultiTenantContext.getTenant();
-        List<Play> plays = playProxy.getPlays(tenant.getId(), shouldLoadCoverage, ratingEngineId);
-        Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(true, true)
-                .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
-        GlobalTeam defaultGlobalTeam = teamService.getDefaultGlobalTeam();
         boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
+        List<Play> plays = playProxy.getPlays(tenant.getId(), shouldLoadCoverage, ratingEngineId);
+        Map<String, GlobalTeam> globalTeamMap = teamFeatureEnabled ? teamService.getTeamsInContext(true, true)
+                .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam)) : new HashMap<>();
+        GlobalTeam defaultGlobalTeam = teamFeatureEnabled ? teamService.getDefaultGlobalTeam() : null;
         for (Play play : plays) {
-            inflateSegment(teamFeatureEnabled, play, globalTeamMap.getOrDefault(play.getTargetSegment().getTeamId(),
+            inflateSegment(play, globalTeamMap.getOrDefault(play.getTargetSegment().getTeamId(),
                     defaultGlobalTeam), teamService.getTeamIdsInContext());
         }
         return plays;
@@ -64,15 +65,15 @@ public class PlayServiceImpl implements PlayService {
         Play play = playProxy.getPlay(tenant.getId(), playName);
         if (play != null) {
             boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
-            inflateSegment(teamFeatureEnabled, play, teamService.getTeamInContext(play.getTargetSegment().getTeamId())
+            inflateSegment(play, teamFeatureEnabled ? teamService.getTeamInContext(play.getTargetSegment().getTeamId()) : null
                     , teamService.getTeamIdsInContext());
         }
         return play;
     }
 
-    private void inflateSegment(boolean teamFeatureEnabled, Play play, GlobalTeam globalTeam, Set<String> teamIds) {
+    private void inflateSegment(Play play, GlobalTeam globalTeam, Set<String> teamIds) {
         MetadataSegment metadataSegment = play.getTargetSegment();
-        if (!teamFeatureEnabled) {
+        if (globalTeam == null) {
             metadataSegment.setTeamId(null);
             return;
         }
