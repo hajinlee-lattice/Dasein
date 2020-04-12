@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityTypeId;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -721,8 +723,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         Catalog marketingTypeCatalog = createCatalog(tenant, marketingAtlasStreamName, marketingTypeDataFeedTask);
         catalogEntityMgr.create(marketingTypeCatalog);
         log.info("marketingTypeCatalog is {}.", JsonUtils.serialize(marketingTypeCatalog));
-        StreamDimension dimension = createActivityTypeDimension(marketingAtlasStream, marketingTypeCatalog,
-                InterfaceName.ActivityTypeId.name(), StreamDimension.Usage.Pivot, InterfaceName.ActivityType.name(), InterfaceName.ActivityType.name());
+        StreamDimension dimension = createActivityTypeDimension(marketingAtlasStream, marketingTypeCatalog);
         dimensionEntityMgr.create(dimension);
         log.info("dimension is {}.", JsonUtils.serialize(dimension));
         List<ActivityMetricsGroup> defaultGroups =
@@ -874,11 +875,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return dim;
     }
 
-    private StreamDimension createActivityTypeDimension(@NotNull AtlasStream stream, Catalog catalog,
-                                                       String dimensionName, StreamDimension.Usage usage,
-                                                       String attributeName, String patternAttributeName) {
+    private StreamDimension createActivityTypeDimension(@NotNull AtlasStream stream, Catalog catalog) {
         StreamDimension dim = new StreamDimension();
-        dim.setName(dimensionName);
+        dim.setName(ActivityTypeId.name());
         dim.setDisplayName(dim.getName());
         dim.setTenant(stream.getTenant());
         dim.setStream(stream);
@@ -887,15 +886,15 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
         // standardize and hash ptn name for dimension
         DimensionGenerator generator = new DimensionGenerator();
-        generator.setAttribute(patternAttributeName);
+        generator.setAttribute(InterfaceName.Name.name());
         generator.setFromCatalog(true);
         generator.setOption(DimensionGenerator.DimensionGeneratorOption.HASH);
         dim.setGenerator(generator);
         // use url attr in stream to determine whether it matches catalog pattern
         DimensionCalculatorRegexMode calculator = new DimensionCalculatorRegexMode();
-        calculator.setName(attributeName);
-        calculator.setAttribute(attributeName);
-        calculator.setPatternAttribute(patternAttributeName);
+        calculator.setName(InterfaceName.ActivityType.name());
+        calculator.setAttribute(InterfaceName.ActivityType.name());
+        calculator.setPatternAttribute(InterfaceName.ActivityType.name());
         calculator.setPatternFromCatalog(true);
         dim.setCalculator(calculator);
         return dim;

@@ -66,6 +66,9 @@ public class SchemaRepository {
             if (!BusinessEntity.Account.equals(entity)) {
                 sysAttrs.add(InterfaceName.AccountId);
             }
+            if (!BusinessEntity.Contact.equals(entity)) {
+                sysAttrs.add(InterfaceName.ContactId);
+            }
             sysAttrs.add(InterfaceName.InternalId);
             sysAttrs.add(InterfaceName.CDLCreatedTime);
             sysAttrs.add(InterfaceName.CDLUpdatedTime);
