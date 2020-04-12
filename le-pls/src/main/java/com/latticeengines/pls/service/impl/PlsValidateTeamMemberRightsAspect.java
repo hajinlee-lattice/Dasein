@@ -45,14 +45,26 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamOnSegment(MetadataSegment segment) {
+        if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE)) {
+            return;
+        }
         if (segment != null) {
             checkTeamInContext(segment.getTeamId());
         }
     }
 
+    private void checkTeamOnSegment(String segmentName) {
+        if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE)) {
+            return;
+        }
+        MetadataSegment metadataSegment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segmentName);
+        if (metadataSegment != null) {
+            checkTeamOnSegment(metadataSegment);
+        }
+    }
+
     private void checkTeamInContext(String teamId) {
         if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE)) {
-            log.info("Team feature is not enabled.");
             return;
         }
         if (StringUtils.isNotEmpty(teamId)) {
@@ -91,16 +103,21 @@ public class PlsValidateTeamMemberRightsAspect {
             checkTeamOnPlay(play.getName());
         } else {
             String segmentName = play.getTargetSegment().getName();
-            MetadataSegment metadataSegment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segmentName);
-            checkTeamOnSegment(metadataSegment);
+            checkTeamOnSegment(segmentName);
         }
     }
 
     private void checkTeamOnPlay(Play play) {
+        if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE)) {
+            return;
+        }
         checkTeamInContext(play.getTargetSegment().getTeamId());
     }
 
     private void checkTeamOnPlay(String playName) {
+        if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE)) {
+            return;
+        }
         Play play = playProxy.getPlay(MultiTenantContext.getTenant().getId(), playName);
         if (play != null) {
             checkTeamOnPlay(play);
