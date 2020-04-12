@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.PrimaryAttributeService;
 import com.latticeengines.baton.exposed.service.BatonService;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;

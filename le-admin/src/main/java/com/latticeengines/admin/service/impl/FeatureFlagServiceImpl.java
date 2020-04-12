@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.featureflags.FeatureFlagClient;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagDefinition;

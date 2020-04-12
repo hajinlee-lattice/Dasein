@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -36,6 +37,9 @@ public class PlayServiceImpl implements PlayService {
     @Inject
     private TeamService teamService;
 
+    @Inject
+    private BatonService batonService;
+
     @Override
     public List<Play> getPlays(Boolean shouldLoadCoverage, String ratingEngineId) {
         // by default shouldLoadCoverage flag should be false otherwise play
@@ -46,8 +50,10 @@ public class PlayServiceImpl implements PlayService {
         Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(true, true)
                 .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
         GlobalTeam defaultGlobalTeam = teamService.getDefaultGlobalTeam();
+        boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
         for (Play play : plays) {
-            inflateSegment(play, globalTeamMap.getOrDefault(play.getTargetSegment().getTeamId(), defaultGlobalTeam), teamService.getTeamIdsInContext());
+            inflateSegment(teamFeatureEnabled, play, globalTeamMap.getOrDefault(play.getTargetSegment().getTeamId(),
+                    defaultGlobalTeam), teamService.getTeamIdsInContext());
         }
         return plays;
     }
@@ -57,14 +63,19 @@ public class PlayServiceImpl implements PlayService {
         Tenant tenant = MultiTenantContext.getTenant();
         Play play = playProxy.getPlay(tenant.getId(), playName);
         if (play != null) {
-            inflateSegment(play, teamService.getTeamInContext(play.getTargetSegment().getTeamId()), teamService.getTeamIdsInContext());
+            boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
+            inflateSegment(teamFeatureEnabled, play, teamService.getTeamInContext(play.getTargetSegment().getTeamId())
+                    , teamService.getTeamIdsInContext());
         }
         return play;
-
     }
 
-    private void inflateSegment(Play play, GlobalTeam globalTeam, Set<String> teamIds) {
+    private void inflateSegment(boolean teamFeatureEnabled, Play play, GlobalTeam globalTeam, Set<String> teamIds) {
         MetadataSegment metadataSegment = play.getTargetSegment();
+        if (!teamFeatureEnabled) {
+            metadataSegment.setTeamId(null);
+            return;
+        }
         String teamId = metadataSegment.getTeamId();
         if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
             play.setViewOnly(true);

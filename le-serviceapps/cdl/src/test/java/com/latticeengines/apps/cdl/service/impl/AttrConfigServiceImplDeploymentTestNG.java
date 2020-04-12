@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
