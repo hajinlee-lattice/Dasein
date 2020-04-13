@@ -257,6 +257,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         existing.setDisplayName(incoming.getDisplayName());
         existing.setDescription(incoming.getDescription());
         existing.setUpdatedBy(incoming.getUpdatedBy());
+        existing.setTeamId(incoming.getTeamId());
         if (!Boolean.TRUE.equals(existing.getMasterSegment())) {
             existing.setAccountRestriction(incoming.getAccountRestriction());
             existing.setContactRestriction(incoming.getContactRestriction());
