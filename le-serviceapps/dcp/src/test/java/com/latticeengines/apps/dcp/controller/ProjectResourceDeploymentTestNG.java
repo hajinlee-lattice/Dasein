@@ -4,10 +4,14 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -52,7 +56,14 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         List<Project> result = projectProxy.getAllDCPProject(mainTestTenant.getId());
         assertNotNull(result);
-        assertEquals(result.get(0).getProjectId(), "getalltest1");
-        assertEquals(result.get(1).getProjectId(), "getalltest2");
+        Set<String> projectIds = new HashSet<>(Arrays.asList("getalltest1", "getalltest2"));
+        for (Project project: result) {
+            if (project.getProjectId().equals("createtest")) {
+                Assert.assertEquals(project.getDeleted(), Boolean.TRUE);
+            } else {
+                projectIds.remove(project.getProjectId());
+            }
+        }
+        Assert.assertTrue(projectIds.isEmpty());
     }
 }
