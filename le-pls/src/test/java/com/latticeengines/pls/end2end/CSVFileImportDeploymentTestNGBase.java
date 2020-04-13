@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -30,6 +31,7 @@ import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
@@ -74,6 +76,9 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
 
     @Inject
     protected DataFeedProxy dataFeedProxy;
+
+    @Inject
+    protected CDLProxy cdlProxy;
 
     @Inject
     protected CDLService cdlService;
@@ -223,5 +228,15 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
         Assert.assertEquals(detail.getIgnoredRows(), ignored);
         Assert.assertEquals(detail.getProcessedRecords(), processed);
 
+    }
+
+    protected void createDefaultImportSystem() {
+        S3ImportSystem importSystem = new S3ImportSystem();
+        importSystem.setPriority(1);
+        importSystem.setName("DefaultSystem");
+        importSystem.setDisplayName("DefaultSystem");
+        importSystem.setSystemType(S3ImportSystem.SystemType.Other);
+        importSystem.setTenant(mainTestTenant);
+        cdlProxy.createS3ImportSystem(customerSpace, importSystem);
     }
 }
