@@ -36,6 +36,7 @@ public class CSVFileImportEntityMatchSchemaDeploymentTestNG extends CSVFileImpor
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")

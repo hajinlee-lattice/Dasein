@@ -39,6 +39,8 @@ import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+
 public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private S3ImportTemplateDisplay templateDisplay;
@@ -51,6 +53,9 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Inject
     private CDLService cdlService;
+
+    @Inject
+    private CDLProxy cdlProxy;
 
     @Inject
     private SourceFileService sourceFileService;
@@ -70,6 +75,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         flags.put(featureFlag, true);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")
@@ -186,6 +192,16 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
             }
         }
         return flag;
+    }
+
+    protected void createDefaultImportSystem() {
+        S3ImportSystem importSystem = new S3ImportSystem();
+        importSystem.setPriority(1);
+        importSystem.setName("DefaultSystem");
+        importSystem.setDisplayName("DefaultSystem");
+        importSystem.setSystemType(S3ImportSystem.SystemType.Other);
+        importSystem.setTenant(mainTestTenant);
+        cdlProxy.createS3ImportSystem(mainTestTenant.getId(), importSystem);
     }
 
 }
