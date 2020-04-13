@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.service.CompanyProfileService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;

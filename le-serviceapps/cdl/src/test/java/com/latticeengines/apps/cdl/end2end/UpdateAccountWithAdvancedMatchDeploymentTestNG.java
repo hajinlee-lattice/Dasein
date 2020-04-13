@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.impl.CheckpointService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;

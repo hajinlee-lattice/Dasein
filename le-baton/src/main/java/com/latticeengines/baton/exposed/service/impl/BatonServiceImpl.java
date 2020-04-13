@@ -41,6 +41,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.camille.exposed.paths.PathConstants;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
@@ -95,6 +96,8 @@ public class BatonServiceImpl implements BatonService {
             tenantInfo.properties.lastModified = tenantInfo.properties.created;
             if (TenantType.POC.name().equals(tenantInfo.properties.tenantType)) {
                 tenantInfo.properties.expiredTime = tenantInfo.properties.created + TimeUnit.DAYS.toMillis(90);
+            } else if (TenantType.STAGING.name().equals(tenantInfo.properties.tenantType)) {
+                tenantInfo.properties.expiredTime = tenantInfo.properties.created + TimeUnit.DAYS.toMillis(180);
             }
 
             TenantLifecycleManager.create(contractId, tenantId, tenantInfo, defaultSpaceId, spaceInfo);

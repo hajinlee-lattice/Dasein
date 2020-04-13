@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;

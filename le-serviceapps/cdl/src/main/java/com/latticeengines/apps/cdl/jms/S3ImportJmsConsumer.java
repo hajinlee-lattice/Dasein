@@ -35,6 +35,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
 import com.latticeengines.domain.exposed.security.Tenant;

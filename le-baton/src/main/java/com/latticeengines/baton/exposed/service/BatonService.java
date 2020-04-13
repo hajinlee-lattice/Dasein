@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.apache.curator.framework.recipes.cache.TreeCache;
 
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
 import com.latticeengines.domain.exposed.admin.TenantDocument;

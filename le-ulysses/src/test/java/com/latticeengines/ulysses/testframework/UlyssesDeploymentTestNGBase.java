@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerTenant;
 import com.latticeengines.domain.exposed.security.Tenant;

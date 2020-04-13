@@ -11,6 +11,7 @@ import org.testng.annotations.BeforeClass;
 import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.end2end.ProcessAccountWithAdvancedMatchDeploymentTestNG;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 /**

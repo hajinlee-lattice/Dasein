@@ -1,6 +1,7 @@
 package com.latticeengines.scoringapi.exposed;
 
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 
 public final class ScoreUtils {
