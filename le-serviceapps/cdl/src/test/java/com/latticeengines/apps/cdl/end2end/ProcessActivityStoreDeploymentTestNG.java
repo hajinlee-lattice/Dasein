@@ -14,7 +14,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -40,10 +39,13 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     private static final Logger log = LoggerFactory.getLogger(ProcessActivityStoreDeploymentTestNG.class);
 
-    private static final String SKIP_WEB_VISIT_KEY = "SKIP_WEB_VISIT";
-    private static final String SKIP_OPPORTUNITY_KEY = "SKIP_OPPORTUNITY";
+    private static final String SKIP_WEB_VISIT = "SKIP_WEB_VISIT";
+    private static final String SKIP_OPPORTUNITY = "SKIP_OPPORTUNITY";
+    private static final String SKIP_MARKETING = "SKIP_MARKETING";
     private static final String WEBSITE_SYSTEM = "Default_Website_System";
     private static final String OPPORTUNITY_SYSTEM = "Default_Opportunity_System";
+    private static final String MARKETO_SYSTEM = "Default_Marketo_System";
+    private static final String ELOQUA_SYSTEM = "Default_Eloqua_System";
     protected static final Instant CURRENT_PA_TIME = LocalDate.of(2017, 8, 1).atStartOfDay().toInstant(ZoneOffset.UTC);
 
     @Inject
@@ -65,15 +67,20 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
     @Test(groups = "end2end")
     protected void test() throws Exception {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        if (StringUtils.isBlank(System.getenv(SKIP_WEB_VISIT_KEY))) {
+        if (!Boolean.parseBoolean(System.getenv(SKIP_WEB_VISIT))) {
             setupWebVisit();
         } else {
-            log.warn("Skip web visit setup. {}={}", SKIP_WEB_VISIT_KEY, System.getenv(SKIP_WEB_VISIT_KEY));
+            log.warn("Skip web visit setup. {}={}", SKIP_WEB_VISIT, System.getenv(SKIP_WEB_VISIT));
         }
-        if (StringUtils.isBlank(System.getenv(SKIP_OPPORTUNITY_KEY))) {
+        if (!Boolean.parseBoolean(System.getenv(SKIP_OPPORTUNITY))) {
             setupOpportunityTemplates();
         } else {
-            log.info("Skip opportunity setup. {}={}", SKIP_OPPORTUNITY_KEY, System.getenv(SKIP_OPPORTUNITY_KEY));
+            log.info("Skip opportunity setup. {}={}", SKIP_OPPORTUNITY, System.getenv(SKIP_OPPORTUNITY));
+        }
+        if (!Boolean.getBoolean(System.getenv(SKIP_MARKETING))) {
+            setupMarketingTemplates();
+        } else {
+            log.info("Skip marketing setup. {}={}", SKIP_MARKETING, System.getenv(SKIP_MARKETING));
         }
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
 
@@ -149,6 +156,25 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         Thread.sleep(2000);
     }
 
+    private void setupMarketingTemplates() throws Exception {
+        createMarketingActivitySystems();
+        Thread.sleep(2000L);
+        Assert.assertTrue(createS3Folder(MARKETO_SYSTEM, Arrays.asList(EntityType.MarketingActivity, EntityType.MarketingActivityType)));
+
+        // setup templates
+        Assert.assertTrue(cdlProxy.createDefaultMarketingTemplate(mainCustomerSpace, MARKETO_SYSTEM, S3ImportSystem.SystemType.Marketo.name()),
+                String.format("Failed to create marketing template in system %s", MARKETO_SYSTEM));
+
+        mockCSVImport(BusinessEntity.Contact, ADVANCED_MATCH_SUFFIX, 1, "DefaultSystem_ContactData");
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.ActivityStream, ADVANCED_MATCH_SUFFIX, 4,
+                generateFullFeedType(MARKETO_SYSTEM, EntityType.MarketingActivity));
+        Thread.sleep(2000);
+        mockCSVImport(BusinessEntity.Catalog, ADVANCED_MATCH_SUFFIX, 5,
+                generateFullFeedType(MARKETO_SYSTEM, EntityType.MarketingActivityType));
+        Thread.sleep(2000);
+    }
+
     /*-
      * create a dummy system for opportunity templates to attach to
      * NOTE that account import for this system might not work (not fully setup)
@@ -166,6 +192,25 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         system.setMapToLatticeAccount(true);
         cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
     }
+
+    private void createMarketingActivitySystems() {
+        createMarketingActivitySystem(MARKETO_SYSTEM);
+//        createMarketingActivitySystem(ELOQUA_SYSTEM);
+    }
+
+    private void createMarketingActivitySystem(String systemName) {
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(mainTestTenant);
+        system.setName(systemName);
+        system.setDisplayName(systemName);
+        system.setSystemType(S3ImportSystem.SystemType.Other);
+        system.setPriority(2);
+        // dummy id, maybe just use the customer account id
+        system.setContactSystemId(String.format("user_%s_dlugenoz_ContactId", systemName));
+        system.setMapToLatticeContact(true);
+        cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
+    }
+
 
     private void setupWebVisit() throws Exception {
         setupWebVisitTemplates();

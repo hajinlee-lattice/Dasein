@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.query.EntityTypeUtils;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
 /*
  * dpltc deploy -a pls,admin,cdl,modeling,lp,metadata,workflowapi,eai,matchapi
@@ -52,6 +55,9 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
     private String downloadDir = localDir + "/download";
     private String uploadDir = localDir + "/upload";
 
+    @Inject
+    private DropBoxProxy dropBoxProxy;
+
     @BeforeClass(groups = { "manual" })
     public void setup() throws Exception {
         if (isEntityMatchMode) {
@@ -64,7 +70,7 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
 //        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
-    @Test(groups = "manual")
+    @Test(groups = "manual", enabled = false)
     public void runTest() throws Exception {
         ensureEmptyDirs();
 //        importAndDownload(BusinessEntity.Account);
@@ -72,14 +78,14 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         // importAndDownload(BusinessEntity.Contact);
         S3ImportSystem system = createSystem();
         cdlProxy.createDefaultOpportunityTemplate(mainCustomerSpace, system.getName());
-        importAndDownload(BusinessEntity.Catalog);
+        importAndDownload(BusinessEntity.Contact);
 //        clearHdfs();
 //        importAndDownload(BusinessEntity.Product);
 //        clearHdfs();
 //        importAndDownload(BusinessEntity.Transaction);
     }
 
-    @Test(groups = "manual")
+    @Test(groups = "manual", enabled = false)
     private void importWebVisitData() throws Exception {
         ensureEmptyDirs();
         // setup web visit templates
@@ -110,15 +116,16 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         // collectAvroFilesForEntity(BusinessEntity.Catalog);
     }
 
-    @Test(groups = "manual")
+    @Test(groups = "manual", enabled = false)
     private void importOpportunityData() throws Exception {
         ensureEmptyDirs();
 
         S3ImportSystem system = createSystem();
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, system.getName(), null, null);
         cdlProxy.createDefaultOpportunityTemplate(mainCustomerSpace, system.getName());
 
         // import opportunity & stage data
-        importData(BusinessEntity.ActivityStream, "opportunity_1ec2c252-f36d-4054-aaf4-9d6379006244.csv",
+        importData(BusinessEntity.ActivityStream, "opportunity_1ec2c252_f36d_4054_aaf4_9d6379006244.csv",
                 EntityTypeUtils.generateFullFeedType(system.getName(), EntityType.Opportunity), false, false);
         importData(BusinessEntity.Catalog, "opportunity_stage.csv",
                 EntityTypeUtils.generateFullFeedType(system.getName(), EntityType.OpportunityStageName), false, false);
@@ -127,6 +134,35 @@ public class CsvImportEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNG
         downloadData();
         collectAvroFilesForEntity(BusinessEntity.ActivityStream);
         collectAvroFilesForEntity(BusinessEntity.Catalog);
+    }
+
+    @Test(groups = "manual", enabled = true)
+    private void importMarketingData() throws Exception {
+        ensureEmptyDirs();
+        String systemName = "Default_Marketo_System";
+        S3ImportSystem system = new S3ImportSystem();
+        system.setTenant(mainTestTenant);
+        system.setName(systemName);
+        system.setDisplayName(systemName);
+        system.setSystemType(S3ImportSystem.SystemType.Marketo);
+        system.setPriority(2);
+        // dummy id, maybe just use the customer account id
+        system.setContactSystemId(String.format("user_%s_dlugenoz_ContactId", systemName));
+        system.setMapToLatticeContact(true);
+        cdlProxy.createS3ImportSystem(mainCustomerSpace, system);
+        dropBoxProxy.createTemplateFolder(mainCustomerSpace, systemName, null, null);
+
+        cdlProxy.createDefaultMarketingTemplate(mainCustomerSpace, system.getName(), S3ImportSystem.SystemType.Marketo.name());
+
+        importData(BusinessEntity.ActivityStream, "marketing_8e1c6639_6eb6_40ee_ad58_0e86a192a1c7.csv",
+                EntityTypeUtils.generateFullFeedType(system.getName(), EntityType.MarketingActivity), false, false);
+        importData(BusinessEntity.Catalog, "marketing_catalog_c2f17396_45e5_4a75_bb60_75fccaec07ed.csv",
+                EntityTypeUtils.generateFullFeedType(system.getName(), EntityType.MarketingActivityType), false, false);
+
+        downloadData();
+        collectAvroFilesForEntity(BusinessEntity.ActivityStream);
+        collectAvroFilesForEntity(BusinessEntity.Catalog);
+
     }
 
     private void ensureEmptyDirs() throws Exception {
