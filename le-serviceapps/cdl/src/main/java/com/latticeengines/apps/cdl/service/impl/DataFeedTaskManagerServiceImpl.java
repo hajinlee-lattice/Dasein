@@ -447,7 +447,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                                 .findFirst();
                 if (correctTask.isPresent()) {
                     String destFolder = prepareImportConfig.getSourceKey().substring(0,
-                            prepareImportConfig.getBackupKey().lastIndexOf("/"));
+                            prepareImportConfig.getSourceKey().lastIndexOf("/"));
                     destFolder = destFolder.replace(dataFeedTask.getFeedType(), correctTask.get().getFeedType());
                     String destKey = destFolder + prepareImportConfig.getSourceFileName();
                     getCopyWorker().submit(() -> s3Service.copyObject(prepareImportConfig.getSourceBucket(), prepareImportConfig.getSourceKey(),
@@ -800,6 +800,4 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         }
         return s3CopyWorker;
     }
-
-
 }
