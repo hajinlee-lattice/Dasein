@@ -153,6 +153,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 }
                 if (matchInput.getRequestSource() != null)
                     matchHistory.setRequestSource(matchInput.getRequestSource().toString());
+                if (matchInput.isFetchOnly() && record.getLatticeAccount() != null) {
+                    matchHistory.setMatched(true);
+                    matchHistory.setLdcMatched(true);
+                }
             }
             String matchStatus = getMatchStatus(record, matchHistory);
             matchHistory.setMatchStatus(matchStatus);

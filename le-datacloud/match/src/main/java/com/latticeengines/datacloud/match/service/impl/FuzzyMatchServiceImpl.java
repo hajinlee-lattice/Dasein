@@ -114,7 +114,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 // Copy Data Cloud Version from traveler to the InternalOutputRecord.
                 matchRecord.setDataCloudVersion(traveler.getDataCloudVersion());
-
+                Boolean ldcMatched = null;
                 String result = (String) traveler.getResult();
                 if (OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())) {
                     populateEntityMatchRecordWithTraveler(traveler, result, matchRecord);
@@ -124,6 +124,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     matchRecord.setLatticeAccountId(result);
                     if (StringUtils.isNotEmpty(result)) {
                         matchRecord.setMatched(true);
+                        ldcMatched = true;
                     } else {
                         matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
                     }
@@ -158,7 +159,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                     entityMatchMetricService.recordMatchHistory(history);
                 }
                 if (isMatchHistoryEnabled) {
-                    matchRecord.setFabricMatchHistory(getDnbMatchHistory(matchRecord, traveler));
+                    matchRecord.setFabricMatchHistory(getDnbMatchHistory(matchRecord, traveler, ldcMatched));
                 }
                 traveler.finish();
                 dumpTravelStory(matchRecord, traveler, logLevel);
@@ -212,9 +213,10 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         }
     }
 
-    private MatchHistory getDnbMatchHistory(InternalOutputRecord matchRecord, MatchTraveler traveler) {
+    private MatchHistory getDnbMatchHistory(InternalOutputRecord matchRecord, MatchTraveler traveler,
+            boolean ldcMatched) {
         MatchHistory matchHistory = matchRecord.getFabricMatchHistory();
-        matchHistory.setMatched(traveler.isMatched()).setMatchMode(traveler.getMode());
+        matchHistory.setMatched(traveler.isMatched()).setLdcMatched(ldcMatched).setMatchMode(traveler.getMode());
         if (CollectionUtils.isNotEmpty(traveler.getDnBMatchContexts())) {
             DnBMatchContext dnbMatchContext = traveler.getDnBMatchContexts().get(0);
             if (dnbMatchContext != null) {
