@@ -1,5 +1,11 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Enrichment;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -75,6 +81,15 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         if (StringUtils.isNotBlank(displayName)) {
             cm.setDisplayName(displayName);
         }
+        // PLS-15406 setting for attributes corresponds to mappings in section
+        // Unique ID, Other IDs, Match IDs, only enable for usage export
+        cm.disableGroup(Segment);
+        cm.enableGroup(Enrichment);
+        cm.disableGroup(TalkingPoint);
+        cm.disableGroup(CompanyProfile);
+        cm.disableGroup(Model);
+        cm.setCanSegment(true);
+        cm.setCanEnrich(true);
         cm.setCanModel(false);
         return cm;
     }

@@ -32,14 +32,11 @@ public class AccountAttrsDecorator implements Decorator {
 
     private final Set<String> exportAttrs;
 
-    private Set<String> attrNameInOtherIDAndMatchID;
-
     private final boolean internalEnrichEnabled;
     private final boolean entityMatchEnabled;
     private final boolean onlyEntityMatchGAEnabled;
 
-    AccountAttrsDecorator(boolean internalEnrichEnabled, boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled,
-                          Set<String> attrNameInOtherIDAndMatchID) {
+    AccountAttrsDecorator(boolean internalEnrichEnabled, boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
         this.internalEnrichEnabled = internalEnrichEnabled;
         this.entityMatchEnabled = entityMatchEnabled;
         this.onlyEntityMatchGAEnabled = onlyEntityMatchGAEnabled;
@@ -49,7 +46,6 @@ public class AccountAttrsDecorator implements Decorator {
         this.exportAttrs = SchemaRepository //
                 .getDefaultExportAttributes(BusinessEntity.Account, entityMatchEnabled).stream() //
                 .map(InterfaceName::name).collect(Collectors.toSet());
-        this.attrNameInOtherIDAndMatchID = attrNameInOtherIDAndMatchID;
     }
 
     @Override
@@ -121,31 +117,6 @@ public class AccountAttrsDecorator implements Decorator {
             }
 
             return cm;
-        }
-
-        // DP-12913 Hide other ids for entity match GA
-        if (attrNameInOtherIDAndMatchID.contains(cm.getAttrName()) && entityMatchEnabled) {
-            if (onlyEntityMatchGAEnabled) {
-                cm.disableGroup(Segment);
-                cm.disableGroup(Enrichment);
-                cm.disableGroup(TalkingPoint);
-                cm.disableGroup(CompanyProfile);
-                cm.disableGroup(Model);
-                cm.setCanSegment(false);
-                cm.setCanEnrich(false);
-                cm.setCanModel(false);
-                return cm;
-            } else {
-                cm.disableGroup(Segment);
-                cm.enableGroup(Enrichment);
-                cm.disableGroup(TalkingPoint);
-                cm.disableGroup(CompanyProfile);
-                cm.disableGroup(Model);
-                cm.setCanSegment(true);
-                cm.setCanEnrich(true);
-                cm.setCanModel(false);
-                return cm;
-            }
         }
 
         cm.enableGroup(Segment);
