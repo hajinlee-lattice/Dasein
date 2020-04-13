@@ -532,7 +532,6 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                     str = str.replaceAll(tenantNames[0], testTenant);
                 }
             }
-            log.info("resume tableName = {}.", str);
             tables.add(JsonUtils.deserialize(str, Table.class));
         }
 
@@ -841,7 +840,9 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             //streamName -> oldStreamId
             Map<String, String> streamNameMap =
                     atlasStreamMap.entrySet().stream().map(entry -> Pair.of(entry.getValue().getName(), entry.getKey())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            log.info("streamNameMap is {}.", JsonUtils.serialize(streamNameMap));
             for (Map.Entry<String, Map> entry : dimensionMetadataMap.entrySet()) {
+                log.info("dimensionMetadataMap entry is {}.", JsonUtils.serialize(entry));
                 String oldStreamName = entry.getKey();
                 if (!streamNameMap.containsKey(oldStreamName)) {
                     continue;
