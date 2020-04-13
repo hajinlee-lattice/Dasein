@@ -1,7 +1,10 @@
 package com.latticeengines.domain.exposed.cdl;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.util.TalkingPointUtils;
@@ -29,7 +32,7 @@ public class TalkingPointDTO {
     private String content;
 
     @JsonProperty("attributes")
-    private Set<AttributeLookup> attributes;
+    private Set<AttributeLookup> attributes = new HashSet<>();
 
     @JsonProperty("offset")
     private int offset;
@@ -50,7 +53,9 @@ public class TalkingPointDTO {
         playDisplayName = tp.getPlay().getDisplayName();
         title = tp.getTitle();
         content = tp.getContent();
-        attributes = TalkingPointUtils.extractAttributes(content);
+        if (StringUtils.isNotEmpty(content)) {
+            attributes = TalkingPointUtils.extractAttributes(content);
+        }
         offset = tp.getOffset();
         created = tp.getCreated();
         updated = tp.getUpdated();
@@ -62,7 +67,9 @@ public class TalkingPointDTO {
         playName = tp.getPlayName();
         title = tp.getTitle();
         content = tp.getContent();
-        attributes = TalkingPointUtils.extractAttributes(content);
+        if (StringUtils.isNotEmpty(content)) {
+            attributes = TalkingPointUtils.extractAttributes(content);
+        }
         offset = tp.getOffset();
         created = tp.getCreated();
         updated = tp.getUpdated();
