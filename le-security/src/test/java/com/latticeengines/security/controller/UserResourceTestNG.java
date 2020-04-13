@@ -101,12 +101,12 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @DataProvider(name="authTableProvider")
     private static Object[][] authTableProvider() {
         return new Object[][] { //
-            { AccessLevel.SUPER_ADMIN, new Boolean[] {true, true, true, true, true, true} },
-            { AccessLevel.INTERNAL_ADMIN, new Boolean[] {true, true, true, true, true, false} },
-            { AccessLevel.INTERNAL_USER, new Boolean[] {false, false, false, false, false, false} },
-            { AccessLevel.EXTERNAL_ADMIN, new Boolean[] {true, true, true, false, false, false} },
-            { AccessLevel.EXTERNAL_USER, new Boolean[] {false, false, false, false, false, false} },
-            { AccessLevel.THIRD_PARTY_USER, new Boolean[] {false, false, false, false, false, false} },
+                { AccessLevel.SUPER_ADMIN, new Boolean[] {true, true, true, true, true, true} },
+                { AccessLevel.INTERNAL_ADMIN, new Boolean[] {true, true, true, true, true, false} },
+                { AccessLevel.INTERNAL_USER, new Boolean[] {false, false, false, false, false, false} },
+                { AccessLevel.EXTERNAL_ADMIN, new Boolean[] {true, true, true, false, false, false} },
+                { AccessLevel.EXTERNAL_USER, new Boolean[] {false, false, false, false, false, false} },
+                { AccessLevel.THIRD_PARTY_USER, new Boolean[] {false, false, false, false, false, false} },
         };
     }
 
@@ -146,9 +146,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         return new Object[][] {
                 { AccessLevel.SUPER_ADMIN, true, 6 },
                 { AccessLevel.INTERNAL_ADMIN, true, 6 },
-                { AccessLevel.INTERNAL_USER, true, 6 },
+                { AccessLevel.INTERNAL_USER, false, 0 },
                 { AccessLevel.EXTERNAL_ADMIN, true, 2 },
-                { AccessLevel.EXTERNAL_USER, true, 2 },
+                { AccessLevel.EXTERNAL_USER, false, 0 },
                 { AccessLevel.THIRD_PARTY_USER, false, 0 },
         };
     }

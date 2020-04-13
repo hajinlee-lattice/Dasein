@@ -76,6 +76,7 @@ public class TeamResource {
     @PutMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Update a team")
+    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean editTeam(@PathVariable("teamId") String teamId, //
                             @RequestBody GlobalTeamData globalTeamData) {
         log.info("Edit team {}.", teamId);
@@ -85,6 +86,7 @@ public class TeamResource {
     @DeleteMapping(value = "/teamId/{teamId}")
     @ResponseBody
     @ApiOperation(value = "Delete a team")
+    @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public Boolean deleteTeam(@PathVariable("teamId") String teamId) {
         log.info("Delete team " + teamId);
         return true;
