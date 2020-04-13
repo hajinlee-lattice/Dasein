@@ -454,7 +454,8 @@ public class PlayServiceImpl implements PlayService {
         }
 
         List<PlayLaunch> launches = playLaunchService.findByPlayId(play.getPid(),
-                Arrays.asList(LaunchState.Launched, LaunchState.Failed));
+                Arrays.asList(LaunchState.Launched, LaunchState.Skipped, LaunchState.Syncing, LaunchState.Synced,
+                        LaunchState.PartialSync, LaunchState.SyncFailed));
 
         if (CollectionUtils.isEmpty(launches)) {
             log.warn("Play " + playName
@@ -512,8 +513,7 @@ public class PlayServiceImpl implements PlayService {
         Set<String> playIds = talkingPointService.findDependantPlayDisplayNames(attributes);
         stopWatch.stop();
         log.info(String.format("Time to get %d play display names from talking points for Tenant %s: %s ms",
-                playIds.size(),
-                customerSpace, stopWatch.getTime(TimeUnit.MILLISECONDS)));
+                playIds.size(), customerSpace, stopWatch.getTime(TimeUnit.MILLISECONDS)));
 
         return CollectionUtils.isEmpty(playIds) ? new ArrayList<>() : new ArrayList<>(playIds);
     }
