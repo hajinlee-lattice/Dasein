@@ -341,6 +341,7 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 activityStoreService.getDimensionMetadata(customerSpace,
                         signature);
         if (!dimensionMetadataMap.isEmpty()) {
+            log.info("dimensionMetadataMap is {}", JsonUtils.serialize(dimensionMetadataMap));
             String jsonFile = String.format(DIMENSION_METADATA_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             om.writeValue(new File(jsonFile), dimensionMetadataMap);
             log.info("Save dimensionMetadataMap to file {}.", jsonFile);
