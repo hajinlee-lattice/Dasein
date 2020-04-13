@@ -21,6 +21,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ExecutionContext;
@@ -341,7 +342,6 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 activityStoreService.getDimensionMetadata(customerSpace,
                         signature);
         if (!dimensionMetadataMap.isEmpty()) {
-            log.info("dimensionMetadataMap is {}", JsonUtils.serialize(dimensionMetadataMap));
             String jsonFile = String.format(DIMENSION_METADATA_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             om.writeValue(new File(jsonFile), dimensionMetadataMap);
             log.info("Save dimensionMetadataMap to file {}.", jsonFile);
@@ -838,9 +838,15 @@ public class CheckpointAutoService extends CheckpointServiceBase {
                 Map.class);
         Map<String, Map<String, DimensionMetadata>> newDimensionMetadaMap = new HashMap<>();
         if (MapUtils.isNotEmpty(dimensionMetadataMap)) {
+            //streamName -> oldStreamId
+            Map<String, String> streamNameMap =
+                    atlasStreamMap.entrySet().stream().map(entry -> Pair.of(entry.getValue().getName(), entry.getKey())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
             for (Map.Entry<String, Map> entry : dimensionMetadataMap.entrySet()) {
-                String oldStreamId = entry.getKey();
-                AtlasStream atlasStream = atlasStreamMap.get(oldStreamId);
+                String oldStreamName = entry.getKey();
+                if (!streamNameMap.containsKey(oldStreamName)) {
+                    continue;
+                }
+                AtlasStream atlasStream = atlasStreamMap.get(streamNameMap.get(oldStreamName));
                 Map<String, DimensionMetadata> metadataMap = JsonUtils.convertMap(entry.getValue(), String.class,
                         DimensionMetadata.class);
                 newDimensionMetadaMap.put(atlasStream.getStreamId(), metadataMap);
