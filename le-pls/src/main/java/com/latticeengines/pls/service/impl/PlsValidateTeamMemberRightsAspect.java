@@ -42,20 +42,27 @@ public class PlsValidateTeamMemberRightsAspect {
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentServiceImpl.createOrUpdateSegment(..))")
     public void createOrUpdateSegment(JoinPoint joinPoint) {
         MetadataSegment segment = (MetadataSegment) joinPoint.getArgs()[0];
-        checkTeamOnSegment(segment);
+        checkTeamWithSegment(segment);
     }
 
-    private void checkTeamOnSegment(MetadataSegment segment) {
-        if (segment != null) {
-            checkTeamInContext(segment.getTeamId());
+    private void checkTeamWithSegment(MetadataSegment segment) {
+        if (teamFeatureEnabled()) {
+            if (segment != null) {
+                checkTeamInContext(segment.getTeamId());
+            }
+        }
+    }
+
+    private void checkTeamWithSegmentName(String segmentName) {
+        if (teamFeatureEnabled()) {
+            MetadataSegment metadataSegment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segmentName);
+            if (metadataSegment != null) {
+                checkTeamInContext(metadataSegment.getTeamId());
+            }
         }
     }
 
     private void checkTeamInContext(String teamId) {
-        if (!batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE)) {
-            log.info("Team feature is not enabled.");
-            return;
-        }
         if (StringUtils.isNotEmpty(teamId)) {
             Session session = MultiTenantContext.getSession();
             if (session != null) {
@@ -75,57 +82,55 @@ public class PlsValidateTeamMemberRightsAspect {
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentServiceImpl.delete*(..))")
     public void deleteSegment(JoinPoint joinPoint) {
         String segmentName = (String) joinPoint.getArgs()[0];
-        MetadataSegment segment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segmentName);
-        checkTeamOnSegment(segment);
+        checkTeamWithSegmentName(segmentName);
     }
 
     @Before("execution(public * com.latticeengines.pls.service.impl.MetadataSegmentExportServiceImpl.createSegmentExportJob(..))")
     public void createSegmentExportJob(JoinPoint joinPoint) {
         MetadataSegmentExport metadataSegmentExport = (MetadataSegmentExport) joinPoint.getArgs()[0];
-        checkTeamInContext(metadataSegmentExport.getTeamId());
+        if (teamFeatureEnabled()) {
+            checkTeamInContext(metadataSegmentExport.getTeamId());
+        }
     }
 
     @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.createOrUpdate(..))")
     public void createOrUpdatePlay(JoinPoint joinPoint) {
         Play play = (Play) joinPoint.getArgs()[0];
         if (play.getTargetSegment() == null) {
-            checkTeamOnPlay(play.getName());
+            checkTeamWithPlayName(play.getName());
         } else {
             String segmentName = play.getTargetSegment().getName();
-            MetadataSegment metadataSegment = segmentProxy.getMetadataSegmentByName(MultiTenantContext.getTenant().getId(), segmentName);
-            checkTeamOnSegment(metadataSegment);
+            checkTeamWithSegmentName(segmentName);
         }
     }
 
-    private void checkTeamOnPlay(Play play) {
-        checkTeamInContext(play.getTargetSegment().getTeamId());
-    }
-
-    private void checkTeamOnPlay(String playName) {
-        Play play = playProxy.getPlay(MultiTenantContext.getTenant().getId(), playName);
-        if (play != null) {
-            checkTeamOnPlay(play);
+    private void checkTeamWithPlayName(String playName) {
+        if (teamFeatureEnabled()) {
+            Play play = playProxy.getPlay(MultiTenantContext.getTenant().getId(), playName);
+            if (play != null) {
+                checkTeamInContext(play.getTargetSegment().getTeamId());
+            }
         }
     }
 
     @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.delete(..))")
     public void deletePlay(JoinPoint joinPoint) {
         String playName = (String) joinPoint.getArgs()[0];
-        checkTeamOnPlay(playName);
+        checkTeamWithPlayName(playName);
     }
 
     @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.createPlayLaunchChannel(..))" +
             " ||execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.updatePlayLaunchChannel(..))")
     public void createOrUpdatePlayChannel(JoinPoint joinPoint) {
         String playName = (String) joinPoint.getArgs()[0];
-        checkTeamOnPlay(playName);
+        checkTeamWithPlayName(playName);
     }
 
     @Before("execution(public * com.latticeengines.pls.service.impl.TalkingPointServiceImpl.createOrUpdate(..))")
     public void createOrUpdateTalkingPoint(JoinPoint joinPoint) {
         List<TalkingPointDTO> talkingPoints = (List<TalkingPointDTO>) joinPoint.getArgs()[0];
         if (CollectionUtils.isNotEmpty(talkingPoints) && talkingPoints.size() > 0) {
-            checkTeamOnPlay(talkingPoints.get(0).getPlayName());
+            checkTeamWithPlayName(talkingPoints.get(0).getPlayName());
         }
     }
 
@@ -133,6 +138,10 @@ public class PlsValidateTeamMemberRightsAspect {
             " ||execution(public * com.latticeengines.pls.service.impl.TalkingPointServiceImpl.revert(..))")
     public void publishOrRevertTalkingPoint(JoinPoint joinPoint) {
         String playName = (String) joinPoint.getArgs()[0];
-        checkTeamOnPlay(playName);
+        checkTeamWithPlayName(playName);
+    }
+
+    private boolean teamFeatureEnabled() {
+        return batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
     }
 }

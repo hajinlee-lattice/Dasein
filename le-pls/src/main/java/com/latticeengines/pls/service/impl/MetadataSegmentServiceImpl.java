@@ -35,6 +35,7 @@ import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.security.exposed.service.TeamService;
+
 @Service("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private static final String SEGMENT_IN_USE_TITLE = "Segment In Use";
