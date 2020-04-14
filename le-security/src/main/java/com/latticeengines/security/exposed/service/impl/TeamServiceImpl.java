@@ -91,12 +91,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public List<GlobalTeam> getTeamsByUserName(String username, User loginUser, boolean withTeamMember) {
         try (PerformanceTimer timer = new PerformanceTimer(String.format("Get teams by username %s.", username))) {
-            List<GlobalAuthTeam> globalAuthTeams;
-            if (loginUser.getEmail().equals(username)) {
-                globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
-            } else {
-                globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
-            }
+            List<GlobalAuthTeam> globalAuthTeams = globalTeamManagementService.getTeamsByUserName(username, withTeamMember);
             return getGlobalTeams(globalAuthTeams, withTeamMember, loginUser);
         }
     }

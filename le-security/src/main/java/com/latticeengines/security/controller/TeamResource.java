@@ -43,7 +43,7 @@ public class TeamResource {
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsByUsername(@PathVariable(value = "username") String username,
                                                @RequestParam(value = "withTeamMember", required = false,
-                                                       defaultValue = "false") boolean withTeamMember) {
+                                                       defaultValue = "true") boolean withTeamMember) {
         User loginUser = MultiTenantContext.getUser();
         return teamService.getTeamsByUserName(username, loginUser, withTeamMember);
     }
@@ -52,7 +52,7 @@ public class TeamResource {
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsFromSession(
-            @RequestParam(value = "withTeamMember", required = false, defaultValue = "false") boolean withTeamMember,
+            @RequestParam(value = "withTeamMember", required = false, defaultValue = "true") boolean withTeamMember,
             @RequestParam(value = "appendDefaultGlobalTeam", required = false, defaultValue = "true") boolean appendDefaultGlobalTeam) {
         List<GlobalTeam> globalTeams = teamService.getTeamsFromSession(withTeamMember, appendDefaultGlobalTeam);
         return globalTeams;
