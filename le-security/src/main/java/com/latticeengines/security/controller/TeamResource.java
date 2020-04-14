@@ -38,12 +38,13 @@ public class TeamResource {
     @Inject
     private TeamService teamService;
 
-    @GetMapping(value = "/username/{username}")
+    @GetMapping(value = "/username/{username:.+}")
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsByUsername(@PathVariable(value = "username") String username,
                                                @RequestParam(value = "withTeamMember", required = false, defaultValue = "true") boolean withTeamMember) {
         User loginUser = MultiTenantContext.getUser();
+        System.out.println(username + "sssss");
         return teamService.getTeamsByUserName(username, loginUser, withTeamMember);
     }
 
