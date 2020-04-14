@@ -90,7 +90,7 @@ public class TeamServiceImplTestNG extends SecurityFunctionalTestNGBase {
         createTeam(username2InTenant, teamName2InTenant, Sets.newHashSet(username1InTenant));
         List<GlobalTeam> globalTeams = teamService.getTeams(getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 2);
-        globalTeams = teamService.getTeamsByUserName(username1InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
+        globalTeams = teamService.getTeamsByUserName(username1InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()), true);
         assertEquals(globalTeams.size(), 2);
         globalTeams = teamService.getTeamsByUserName(username2InTenant, getUser(username1InTenant, AccessLevel.INTERNAL_ADMIN.name()));
         assertEquals(globalTeams.size(), 1);
