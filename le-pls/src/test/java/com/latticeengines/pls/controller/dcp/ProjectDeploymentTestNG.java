@@ -63,13 +63,13 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         List<Project> projectList = testProjectProxy.getAllProjects();
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
-        Assert.assertEquals(projectList.size(), 2);
+        Assert.assertEquals(projectList.size(), 4);
 
         testProjectProxy.deleteProject(projectDetail1.getProjectId());
         testProjectProxy.deleteProject(projectDetail2.getProjectId());
 
         projectList = testProjectProxy.getAllProjects();
-        Assert.assertEquals(projectList.size(), 2);
+        Assert.assertEquals(projectList.size(), 4);
         projectList.forEach(project -> Assert.assertEquals(project.getDeleted(), Boolean.TRUE));
     }
 }
