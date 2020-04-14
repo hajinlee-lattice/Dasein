@@ -475,6 +475,9 @@ public class CDLServiceImpl implements CDLService {
             log.info(String.format("Empty path in s3 folders for tenant %s in", customerSpace));
         }
         for (String folderName : folderNames) {
+            if (hideLegacyTemplate(customerSpace, folderName)) {
+                continue;
+            }
             DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
             if (task == null) {
                 EntityType entityType = EntityType
@@ -540,6 +543,29 @@ public class CDLServiceImpl implements CDLService {
             }
         }
         return templates;
+    }
+
+    // For migrated tenant, user may create the drop folder again. Need to hide these templates from UI.
+    private boolean hideLegacyTemplate(String customerSpace, String folderName) {
+        if (StringUtils.isEmpty(getSystemNameFromFeedType(folderName))) {
+            DataFeedTask task = dataFeedProxy.getDataFeedTask(customerSpace, "File", folderName);
+            if (task == null) {
+                task = dataFeedProxy.getDataFeedTask(customerSpace, "File", DEFAULT_SYSTEM + "_" + folderName);
+                return task != null;
+            } else {
+                List<DataFeedTask> taskList = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace,
+                        task.getEntity());
+                if (CollectionUtils.size(taskList) > 1) {
+                    DataFeedTask finalTask = task;
+                    Optional<DataFeedTask> taskWithSystem = taskList.stream()
+                            .filter(dataFeedTask -> !dataFeedTask.getUniqueId().equals(finalTask.getUniqueId())
+                                && S3PathBuilder.DEFAULT_SYSTEM.equals(S3PathBuilder.getSystemNameFromFeedType(dataFeedTask.getFeedType())))
+                            .findFirst();
+                    return taskWithSystem.isPresent();
+                }
+            }
+        }
+        return false;
     }
 
     @Override
