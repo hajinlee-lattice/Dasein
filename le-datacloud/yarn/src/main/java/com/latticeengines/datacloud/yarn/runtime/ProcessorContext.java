@@ -561,7 +561,6 @@ public class ProcessorContext {
                 Pair.of(InterfaceName.InternalId.name(), String.class), //
                 Pair.of(DataCloudConstants.ATTR_LDC_DUNS, String.class), //
                 Pair.of(DataCloudConstants.ATTR_LDC_NAME, String.class), //
-                Pair.of("TRADESTYLE_NAME", String.class), //
                 Pair.of("LDC_Street", String.class), //
                 Pair.of("STREET_ADDRESS_2", String.class), //
                 Pair.of(DataCloudConstants.ATTR_CITY, String.class), //
