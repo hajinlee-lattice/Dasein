@@ -135,7 +135,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     @Inject
     private DataFeedService dataFeedService;
 
-    private ExecutorService s3CopyWorker = null;
+    private volatile ExecutorService s3CopyWorker = null;
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter, TenantService tenantService,
