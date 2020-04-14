@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
@@ -62,6 +63,7 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertNotNull(projectDetail2);
 
         List<Project> projectList = testProjectProxy.getAllProjects();
+        System.out.println(JsonUtils.pprint(projectList));
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         Assert.assertEquals(projectList.size(), 4);
 
