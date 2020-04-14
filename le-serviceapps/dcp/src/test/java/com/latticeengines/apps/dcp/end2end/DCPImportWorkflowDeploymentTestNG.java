@@ -38,6 +38,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DCPImportWorkflowDeploymentTestNG.class);
 
+    private static final String TEST_DATA_VERSION = "1";
+    private static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
+
     @Inject
     private DropBoxProxy dropBoxProxy;
 
@@ -146,11 +149,16 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     private void verifyMatchResult(Upload upload) {
-        String matchResultName = upload.getMatchResultName();
+        String matchResultName = upload.getMatchResultTableName();
         Assert.assertNotNull(matchResultName);
         Table matchResult = metadataProxy.getTableSummary(mainCustomerSpace, matchResultName);
         Assert.assertNotNull(matchResult);
         Assert.assertEquals(matchResult.getExtracts().size(), 1);
+
+        String matchCandidateTableName = upload.getMatchResultTableName();
+        Table matchCandidate = metadataProxy.getTableSummary(mainCustomerSpace, matchCandidateTableName);
+        Assert.assertNotNull(matchCandidate);
+        Assert.assertEquals(matchCandidate.getExtracts().size(), 1);
 
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
@@ -162,8 +170,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         System.out.println("acceptedPath=" + acceptedPath);
         System.out.println("rejectedPath=" + rejectedPath);
         Assert.assertTrue(s3Service.objectExist(bucket, acceptedPath));
-        // Changed the import file, looks like there's no rejected. Will add them back later.
-//        Assert.assertTrue(s3Service.objectExist(bucket, rejectedPath));
+        Assert.assertTrue(s3Service.objectExist(bucket, rejectedPath));
     }
 
 }

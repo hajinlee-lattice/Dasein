@@ -80,7 +80,16 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     @JsonProperty("match_result")
     @Transient
-    private String matchResultName;
+    private String matchResultTableName;
+
+    @JsonIgnore
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_MATCH_CANDIDATES")
+    private Table matchCandidates;
+
+    @JsonProperty("match_candidates")
+    @Transient
+    private String matchCandidatesTableName;
 
     @JsonProperty("upload_config")
     @Column(name = "UPLOAD_CONFIG", columnDefinition = "'JSON'", length = 8000)
@@ -170,19 +179,41 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     public void setMatchResult(Table matchResult) {
         this.matchResult = matchResult;
         if (matchResult != null) {
-            this.matchResultName = matchResult.getName();
+            this.matchResultTableName = matchResult.getName();
         }
     }
 
-    public String getMatchResultName() {
-        if (StringUtils.isBlank(matchResultName) && this.matchResult != null) {
-            matchResultName = this.matchResult.getName();
+    public String getMatchResultTableName() {
+        if (StringUtils.isBlank(matchResultTableName) && this.matchResult != null) {
+            matchResultTableName = this.matchResult.getName();
         }
-        return matchResultName;
+        return matchResultTableName;
     }
 
-    private void setMatchResultName(String matchResultName) {
-        this.matchResultName = matchResultName;
+    private void setMatchResultTableName(String matchResultTableName) {
+        this.matchResultTableName = matchResultTableName;
+    }
+
+    private Table getMatchCandidates() {
+        return matchCandidates;
+    }
+
+    public void setMatchCandidates(Table matchCandidates) {
+        this.matchCandidates = matchCandidates;
+        if (matchCandidates != null) {
+            this.matchCandidatesTableName = matchCandidates.getName();
+        }
+    }
+
+    public String getMatchCandidatesTableName() {
+        if (StringUtils.isBlank(matchCandidatesTableName) && this.matchCandidates != null) {
+            matchCandidatesTableName = this.matchCandidates.getName();
+        }
+        return matchCandidatesTableName;
+    }
+
+    private void setMatchCandidatesTableName(String matchCandidatesTableName) {
+        this.matchCandidatesTableName = matchCandidatesTableName;
     }
 
     // TODO: more specific status.

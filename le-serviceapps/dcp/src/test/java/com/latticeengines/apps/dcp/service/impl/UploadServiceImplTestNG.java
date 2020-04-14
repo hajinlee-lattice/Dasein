@@ -86,7 +86,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         Table table = createTable();
         uploadService.registerMatchResult(mainCustomerSpace, upload.getPid(), table.getName());
         Upload uploadWithTable = uploadService.getUpload(mainCustomerSpace, upload.getPid());
-        String matchedTableName = uploadWithTable.getMatchResultName();
+        String matchedTableName = uploadWithTable.getMatchResultTableName();
         Assert.assertEquals(matchedTableName, table.getName());
         Table matchedTable = tableEntityMgr.findByName(matchedTableName);
         Assert.assertNotNull(matchedTable);
@@ -95,7 +95,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         Table table2 = createTable();
         uploadService.registerMatchResult(mainCustomerSpace, upload.getPid(), table2.getName());
         uploadWithTable = uploadService.getUpload(mainCustomerSpace, upload.getPid());
-        matchedTableName = uploadWithTable.getMatchResultName();
+        matchedTableName = uploadWithTable.getMatchResultTableName();
         Assert.assertEquals(matchedTableName, table2.getName());
         table = tableEntityMgr.findByName(table.getName());
         Assert.assertNotNull(table);
