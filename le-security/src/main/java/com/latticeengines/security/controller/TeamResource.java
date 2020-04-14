@@ -42,8 +42,7 @@ public class TeamResource {
     @ResponseBody
     @ApiOperation(value = "Get teams by username")
     public List<GlobalTeam> getTeamsByUsername(@PathVariable(value = "username") String username,
-                                               @RequestParam(value = "withTeamMember", required = false,
-                                                       defaultValue = "true") boolean withTeamMember) {
+                                               @RequestParam(value = "withTeamMember", required = false, defaultValue = "true") boolean withTeamMember) {
         User loginUser = MultiTenantContext.getUser();
         return teamService.getTeamsByUserName(username, loginUser, withTeamMember);
     }
