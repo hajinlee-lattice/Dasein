@@ -141,18 +141,18 @@ public final class TestDunsGuideBookUtils {
                         "ManualMatch" //
                 }, //
                 /*
-                { //
+                { // manual seed entry changed
                         newTuple("Valmont Newmark, Inc.", "USA", "NEBRASKA", null), //
                         "828616990", "007267214", //
                         "ManualMatch" //
                 }, //
                 */
+                /* dnb behaviour changed
                 { //
-                        newTuple("G.I.A. Publications Inc", "USA", null, "Chicago"), //
+                        newTuple("GIA Publications", "USA", null, "Chicago"), //
                         "080935386", "062501705", //
                         "ManualMatch" //
                 }, //
-
                 /* Domain DUNS Map redirect book */
                 // { newTuple("H&R Block Enterprises LLC", "USA", "Texas", null),
                 // "018628337", "167155829", "DomDunsMap" },
