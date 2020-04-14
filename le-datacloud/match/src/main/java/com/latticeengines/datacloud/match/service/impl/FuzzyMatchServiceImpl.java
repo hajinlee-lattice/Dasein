@@ -114,7 +114,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 InternalOutputRecord matchRecord = (InternalOutputRecord) matchRecords.get(idx);
                 // Copy Data Cloud Version from traveler to the InternalOutputRecord.
                 matchRecord.setDataCloudVersion(traveler.getDataCloudVersion());
-                Boolean ldcMatched = null;
+                boolean ldcMatched = false;
                 String result = (String) traveler.getResult();
                 if (OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())) {
                     populateEntityMatchRecordWithTraveler(traveler, result, matchRecord);
