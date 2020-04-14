@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.auth.exposed.service.impl.GlobalAuthDependencyChecker;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
@@ -46,8 +47,6 @@ public class TeamServiceImpl implements TeamService {
     @Inject
     private GlobalAuthDependencyChecker dependencyChecker;
 
-    private static String GLOBAL_TEAM = "Global Team";
-
     @Override
     public List<GlobalTeam> getTeams(User loginUser) {
         return getTeams(loginUser, true);
@@ -73,16 +72,6 @@ public class TeamServiceImpl implements TeamService {
         AccessLevel loginLevel = AccessLevel.valueOf(loginUser.getAccessLevel());
         if (loginLevel.equals(AccessLevel.EXTERNAL_USER) || loginLevel.equals(AccessLevel.EXTERNAL_ADMIN)) {
             return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean isInternalUser(GlobalAuthUserTenantRight globalAuthUserTenantRight) {
-        if (AccessLevel.INTERNAL_ADMIN.name().equals(globalAuthUserTenantRight.getOperationName())
-                || AccessLevel.INTERNAL_USER.name().equals(globalAuthUserTenantRight.getOperationName())
-                || AccessLevel.SUPER_ADMIN.name().equals(globalAuthUserTenantRight.getOperationName())) {
-            return globalAuthUserTenantRight.getExpirationDate() == null || globalAuthUserTenantRight.getExpirationDate() > System.currentTimeMillis();
         } else {
             return false;
         }
@@ -147,7 +136,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public GlobalTeam getDefaultGlobalTeam() {
         GlobalTeam globalTeam = new GlobalTeam();
-        globalTeam.setTeamName(GLOBAL_TEAM);
+        globalTeam.setTeamName(TeamUtils.GLOBAL_TEAM);
         globalTeam.setTeamMembers(new ArrayList<>());
         return globalTeam;
     }

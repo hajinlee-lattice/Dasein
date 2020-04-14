@@ -16,6 +16,7 @@ import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTeamEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantRightEntityMgr;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
@@ -62,6 +63,9 @@ public class GlobalTeamManagementServiceImpl implements GlobalTeamManagementServ
         String teamName = globalTeamData.getTeamName() == null ? null : globalTeamData.getTeamName().trim();
         if (StringUtils.isEmpty(teamName)) {
             throw new LedpException(LedpCode.LEDP_18242);
+        }
+        if (teamName.equals(TeamUtils.GLOBAL_TEAM)) {
+            throw new LedpException(LedpCode.LEDP_18241, new String[]{teamName, globalAuthTenant.getId()});
         }
         globalTeamData.setTeamName(teamName);
         GlobalAuthTeam globalAuthTeam = globalAuthTeamEntityMgr.findByTeamNameAndTenantId(globalAuthTenant.getPid(),
