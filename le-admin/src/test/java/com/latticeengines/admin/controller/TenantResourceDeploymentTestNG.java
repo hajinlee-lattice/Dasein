@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
+import com.latticeengines.security.service.IDaaSService;
 
 public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
 
@@ -35,6 +36,9 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Inject
     private ServiceService serviceService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     @Test(groups = "deployment", enabled = false)
     public void testCreateTenant() {
@@ -101,20 +105,20 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
 
         VboRequest req = new VboRequest();
         VboRequest.Product pro = new VboRequest.Product();
-        VboRequest.User user = new VboRequest.User();
-        VboRequest.Name name = new VboRequest.Name();
-        name.setFirstName("test");
-        name.setLastName("test");
-        user.setName(name);
-        user.setEmailAddress("test@test.com");
+        VboRequest.User internalUser = constructVBOUser(String.format("test%s@lattice-engines.com",
+                System.currentTimeMillis()));
+        VboRequest.User externalUser = constructVBOUser(String.format("test%s@163.com",
+                System.currentTimeMillis()));
 
-        pro.setUsers(new ArrayList<VboRequest.User>());
-        pro.getUsers().add(user);
+        pro.setUsers(Arrays.asList(internalUser, externalUser));
         req.setProduct(pro);
         VboRequest.Subscriber sub = new VboRequest.Subscriber();
+        sub.setLanguage("Chinese");
         sub.setName(fullTenantId);
         req.setSubscriber(sub);
 
+        Assert.assertFalse(verifyUserExists(internalUser.getEmailAddress()));
+        Assert.assertFalse(verifyUserExists(externalUser.getEmailAddress()));
         VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);
 
         Assert.assertNotNull(result);
@@ -122,9 +126,27 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
 
         waitForTenantInstallation(fullTenantId, fullTenantId);
 
+        Assert.assertTrue(verifyUserExists(internalUser.getEmailAddress()));
+        Assert.assertTrue(verifyUserExists(externalUser.getEmailAddress()));
         try {
             deleteTenant(fullTenantId, fullTenantId);
         } catch (Exception ignore) {
         }
+    }
+
+    private VboRequest.User constructVBOUser(String email) {
+        VboRequest.User user = new VboRequest.User();
+        VboRequest.Name nameObj = new VboRequest.Name();
+        nameObj.setLastName("test");
+        user.setUserId(email);
+        user.setName(nameObj);
+        user.setEmailAddress(email);
+        user.setTelephoneNumber("2345678");
+
+        return user;
+    }
+
+    private Boolean verifyUserExists(String email) {
+        return iDaaSService.getIDaaSUser(email) != null;
     }
 }
