@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -58,6 +59,20 @@ public interface DataFeedTaskService {
      * @return A list of template names ordered by priority.
      */
     List<String> getTemplatesBySystemPriority(String customerSpace, String entity, boolean highestFirst);
+
+    /**
+     *
+     * @param taskUniqueId DataFeedTask.uniqueId
+     * @return template name: could be DataFeedTask.taskUniqueName or template table name (if already used in
+     * SystemStore)
+     */
+    String getTemplateName(String customerSpace, String taskUniqueId);
+
+    /**
+     *
+     * @return templateName -> systemName Map
+     */
+    Map<String, String> getTemplateToSystemMap(String customerSpace);
 
     DataFeedTask getDataFeedTaskBySource(String customerSpace, String sourceId);
 

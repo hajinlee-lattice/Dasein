@@ -520,7 +520,7 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
     }
 
     @Test(groups = "deployment", dependsOnMethods = "importBase")
-    public void verifyBase() {
+    public void verifyBase() throws IOException {
         Assert.assertNotNull(accountDataFeedTask);
         Assert.assertNotNull(contactDataFeedTask);
         Table accountTemplate = accountDataFeedTask.getImportTemplate();
@@ -542,6 +542,33 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
             Assert.assertNotNull(action.getActionConfiguration());
             ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
             Assert.assertNotNull(importActionConfiguration.getOriginalFilename());
+        }
+        verifyTemplateName();
+    }
+
+    private void verifyTemplateName() throws IOException {
+        String templateName = dataFeedProxy.getTemplateName(customerSpace, accountDataFeedTask.getUniqueId());
+        Assert.assertNotNull(baseAccountFile);
+        String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts",
+                PathBuilder
+                        .buildDataTablePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(mainTestTenant.getId()))
+                        .toString(),
+                SourceType.FILE.getName());
+        Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
+        String avroFileName = baseTransactionFile.getName().substring(0,
+                baseTransactionFile.getName().lastIndexOf("."));
+        List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file ->
+                !file.isDirectory() && file.getPath().toString().contains(avroFileName)
+                        && file.getPath().getName().endsWith("avro"));
+        Assert.assertEquals(avroFiles.size(), 1);
+        String avroFilePath = avroFiles.get(0).substring(0, avroFiles.get(0).lastIndexOf("/"));
+        Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(avroFiles.get(0)));
+        Assert.assertNotNull(schema.getField(InterfaceName.CDLTemplateName.name()));
+        AvroUtils.AvroFilesIterator iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroFilePath + "/*.avro");
+        Assert.assertTrue(iterator.hasNext());
+        while (iterator.hasNext()) {
+            GenericRecord record = iterator.next();
+            Assert.assertEquals(record.get(InterfaceName.CDLTemplateName.name()).toString(), templateName);
         }
     }
 

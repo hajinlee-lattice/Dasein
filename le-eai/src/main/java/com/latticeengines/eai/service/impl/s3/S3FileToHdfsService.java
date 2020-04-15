@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -171,6 +172,9 @@ public class S3FileToHdfsService extends EaiRuntimeService<S3FileToHdfsConfigura
             context.setProperty(ImportProperty.S3_OBJECT_KEY, config.getS3FilePath());
             if (Boolean.TRUE.equals(config.getNeedDetailError())) {
                 context.setProperty(ImportProperty.NEED_DETAIL_ERROR, Boolean.TRUE.toString());
+            }
+            if (MapUtils.isNotEmpty(config.getDefaultColumnMap())) {
+                context.setProperty(ImportProperty.DEFAULT_COLUMN_MAP, JsonUtils.serialize(config.getDefaultColumnMap()));
             }
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
 

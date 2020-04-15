@@ -41,6 +41,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.mapreduce.AvroJob;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
@@ -158,6 +159,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private boolean detailError = false;
 
+    private Map<String, String> defaultColumnMap = null;
+
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
         LogManager.getLogger(CSVImportMapper.class).setLevel(Level.INFO);
@@ -169,6 +172,12 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
         LOG.info("table is:" + table);
         LOG.info("Deduplicate enable = false");
+        Map<?, ?> rawMap = JsonUtils.deserialize(conf.get("eai.default.column.map"), Map.class);
+        if (rawMap != null) {
+            defaultColumnMap = JsonUtils.convertMap(rawMap, String.class, String.class);
+            LOG.info("Default column map: " + JsonUtils.serialize(defaultColumnMap));
+        }
+
         idColumnName = conf.get("eai.id.column.name");
         LOG.info("Import file id column is: " + idColumnName);
         if (StringUtils.isEmpty(idColumnName)) {
@@ -662,6 +671,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                 }
             }
             avroRecord.put(InterfaceName.InternalId.name(), getInternalIdObj(lineNum));
+            if (MapUtils.isNotEmpty(defaultColumnMap)) {
+                defaultColumnMap.forEach((columnName, value) -> avroRecord.put(columnName, value));
+            }
             return avroRecord;
         }
 

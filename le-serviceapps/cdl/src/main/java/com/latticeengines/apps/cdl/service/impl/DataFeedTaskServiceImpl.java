@@ -4,23 +4,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.persistence.RollbackException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
@@ -28,10 +31,12 @@ import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.metadata.service.MetadataService;
 
 @Component("dataFeedTaskService")
@@ -52,6 +57,9 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Inject
     private S3ImportSystemService s3ImportSystemService;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @Override
     public void createDataFeedTask(String customerSpace, DataFeedTask dataFeedTask) {
@@ -287,7 +295,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
                 if (dataFeedTask.getImportTemplate() != null) {
                     String systemName = getSystemNameFromFeedType(dataFeedTask.getFeedType());
                     if (StringUtils.isNotEmpty(systemName)) {
-                        templatePair.add(Pair.of(systemName, dataFeedTask.getImportTemplate().getName()));
+                        templatePair.add(Pair.of(systemName, getDataFeedTaskUniqueName(customerSpace, dataFeedTask)));
                     }
                 }
             }
@@ -296,6 +304,65 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public String getTemplateName(String customerSpace, String taskUniqueId) {
+        DataFeedTask dataFeedTask = dataFeedTaskEntityMgr.getDataFeedTask(taskUniqueId);
+        if (dataFeedTask == null) {
+            return StringUtils.EMPTY;
+        }
+        return getDataFeedTaskUniqueName(customerSpace, dataFeedTask);
+    }
+
+    @Override
+    public Map<String, String> getTemplateToSystemMap(String customerSpace) {
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        List<DataFeedTask> allTasks = dataFeedTaskEntityMgr.getDataFeedTaskUnderDataFeed(dataFeed);
+        if (CollectionUtils.isNotEmpty(allTasks)) {
+            Map<String, String> templateSystemMap = new HashMap<>();
+            allTasks.forEach(task -> {
+                if (StringUtils.isNotEmpty(task.getImportSystemName())) {
+                    templateSystemMap.put(getDataFeedTaskUniqueName(customerSpace, task), task.getImportSystemName());
+                } else {
+                    String systemName = getSystemNameFromFeedType(task.getFeedType());
+                    if (StringUtils.isNotEmpty(systemName)) {
+                        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
+                                systemName);
+                        if (importSystem != null) {
+                            task.setImportSystem(importSystem);
+                            dataFeedTaskEntityMgr.updateDataFeedTask(task, true);
+                            templateSystemMap.put(getDataFeedTaskUniqueName(customerSpace, task),
+                                    task.getImportSystemName());
+                        }
+                    }
+                }
+            });
+            return templateSystemMap;
+        }
+        return Collections.emptyMap();
+    }
+
+    private String getDataFeedTaskUniqueName(String customerSpace, DataFeedTask dataFeedTask) {
+        if (StringUtils.isEmpty(dataFeedTask.getTaskUniqueName())) {
+            dataFeedTask.setTaskUniqueName(generateTaskUniqueName(dataFeedTask.getDataFeed()));
+            dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask, true);
+        }
+        BusinessEntity businessEntity = BusinessEntity.getByName(dataFeedTask.getEntity());
+        if (businessEntity.getSystemBatchStore() != null) {
+            Table systemTable = dataCollectionService.getTable(customerSpace, businessEntity.getSystemBatchStore(),
+                    dataCollectionService.getActiveVersion(customerSpace));
+            if (systemTable == null || CollectionUtils.isEmpty(systemTable.getAttributes())) {
+                return dataFeedTask.getTaskUniqueName();
+            } else {
+                for (Attribute attribute: systemTable.getAttributes()) {
+                    if (attribute.getName().startsWith(dataFeedTask.getImportTemplate().getName())) {
+                        return dataFeedTask.getImportTemplate().getName();
+                    }
+                }
+            }
+        }
+        return dataFeedTask.getTaskUniqueName();
     }
 
     @Override

@@ -138,6 +138,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         props.put("eai.import.aws.s3.object.key", ctx.getProperty(ImportProperty.S3_OBJECT_KEY, String.class, ""));
         props.put("eai.import.aws.s3.file.size", ctx.getProperty(ImportProperty.S3_FILE_SIZE, String.class, "0"));
         props.put("eai.import.detail.error", ctx.getProperty(ImportProperty.NEED_DETAIL_ERROR, String.class, "false"));
+        props.put("eai.default.column.map", ctx.getProperty(ImportProperty.DEFAULT_COLUMN_MAP, String.class, null));
         props.put("eai.import.aws.region", awsRegion);
         props.put("eai.import.aws.access.key", CipherUtils.encrypt(awsAccessKey));
         props.put("eai.import.aws.secret.key", CipherUtils.encrypt(awsSecretKey));

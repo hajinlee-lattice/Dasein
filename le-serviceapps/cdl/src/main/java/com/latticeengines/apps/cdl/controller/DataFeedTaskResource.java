@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -220,5 +221,21 @@ public class DataFeedTaskResource {
                                             @PathVariable DataFeedTask.S3ImportStatus status) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataFeedTaskService.setDataFeedTaskS3ImportStatus(customerSpace, pid, status);
+    }
+
+    @GetMapping(value = "/{taskUniqueId}/templateName")
+    @ResponseBody
+    @ApiOperation(value = "Get template name by task unique id")
+    public String getTemplateName(@PathVariable String customerSpace, @PathVariable String taskUniqueId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getTemplateName(customerSpace, taskUniqueId);
+    }
+
+    @GetMapping(value = "/templateToSystemMap")
+    @ResponseBody
+    @ApiOperation(value = "Get template to import system Map")
+    public Map<String, String> getTemplateName(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getTemplateToSystemMap(customerSpace);
     }
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -74,6 +75,9 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             // CDL import won't update the attribute name to interface name.
             context.setProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, Boolean.TRUE.toString());
             context.setProperty(ImportProperty.ID_COLUMN_NAME, config.getBusinessEntity().name() + InterfaceName.Id.name());
+            if (MapUtils.isNotEmpty(config.getDefaultColumnMap())) {
+                context.setProperty(ImportProperty.DEFAULT_COLUMN_MAP, JsonUtils.serialize(config.getDefaultColumnMap()));
+            }
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
 
             if (dataFeedTask == null) {
