@@ -504,8 +504,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         }
 
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        detail.setMaxTxnDate(newLatest);
-        detail.setMinTxnDate(newEarliest);
+        detail.setMaxTxnDate(earliestDayPeriod);
+        detail.setMinTxnDate(latestDayPeriod);
         log.info("MergeTransaction step : dataCollection Status is " + JsonUtils.serialize(detail));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
     }
