@@ -443,7 +443,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 Optional<DataFeedTask> correctTask =
                         taskList.stream()
                                 .filter(task -> !task.getUniqueId().equals(dataFeedTask.getUniqueId())
-                                        && S3PathBuilder.DEFAULT_SYSTEM.equals(S3PathBuilder.getSystemNameFromFeedType(dataFeedTask.getFeedType())))
+                                        && S3PathBuilder.DEFAULT_SYSTEM.equals(S3PathBuilder.getSystemNameFromFeedType(task.getFeedType())))
                                 .findFirst();
                 if (correctTask.isPresent()) {
                     String destFolder = prepareImportConfig.getSourceKey().substring(0,
