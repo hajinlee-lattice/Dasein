@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -31,10 +33,12 @@ import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.eai.VdbToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
@@ -114,6 +118,15 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
 
                     List<Table> metadata = importService.prepareMetadata(new ArrayList<>(tableTemplates.values()));
                     metadata = sortTable(metadata, vdbConnectorConfiguration);
+                    if (MapUtils.isNotEmpty(config.getDefaultColumnMap())) {
+                        for (Table table : metadata) {
+                            config.getDefaultColumnMap().forEach((attrName, value) -> {
+                                if (table.getAttribute(attrName) == null) {
+                                    table.addAttribute(getDefaultStringAttribute(attrName, value));
+                                }
+                            });
+                        }
+                    }
 
                     sourceImportConfiguration.setTables(metadata);
 
@@ -258,6 +271,20 @@ public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> 
             }
         }
         return tables;
+    }
+
+    private Attribute getDefaultStringAttribute(String attrName, String value) {
+        Attribute attribute = new Attribute();
+        attribute.setName(attrName);
+        attribute.setDisplayName(attrName);
+        attribute.setPhysicalDataType(Schema.Type.STRING.getName());
+        attribute.setSourceLogicalDataType("");
+        attribute.setSourceAttrName("");
+        attribute.setLogicalDataType("");
+        attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        attribute.setDefaultValueStr(value);
+        attribute.setNullable(true);
+        return attribute;
     }
 
     private List<Table> sortTable(List<Table> tables, VdbConnectorConfiguration config) {
