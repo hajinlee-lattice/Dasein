@@ -25,7 +25,7 @@ public class ProjectDetails {
     @JsonProperty("drop_folder_access")
     private GrantDropBoxAccessResponse dropFolderAccess;
 
-    @JsonProperty("deleted")
+    @JsonProperty("archived")
     private Boolean deleted;
 
     @JsonProperty("sources")
