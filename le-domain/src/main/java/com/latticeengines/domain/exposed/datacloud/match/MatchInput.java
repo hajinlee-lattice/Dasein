@@ -219,6 +219,13 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("TargetEntity")
     private String targetEntity = BusinessEntity.LatticeAccount.name();
 
+    /*-
+     * Business entity of the input data used for matching.
+     * E.g., when performing Account match on Transaction Data. SourceEntity=Transaction, TargetEntity=Account
+     */
+    @JsonProperty("SourceEntity")
+    private String sourceEntity;
+
     // A map from Business Entity (as a String) to EntityKeyMap.
     @JsonProperty("EntityKeyMaps")
     private Map<String, EntityKeyMap> entityKeyMaps;
@@ -642,6 +649,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setTargetEntity(String targetEntity) {
         this.targetEntity = targetEntity;
+    }
+
+    public String getSourceEntity() {
+        return sourceEntity;
+    }
+
+    public void setSourceEntity(String sourceEntity) {
+        this.sourceEntity = sourceEntity;
     }
 
     public Map<String, EntityKeyMap> getEntityKeyMaps() {

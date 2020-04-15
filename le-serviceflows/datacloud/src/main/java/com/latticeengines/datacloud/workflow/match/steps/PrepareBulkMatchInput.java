@@ -183,7 +183,20 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
         if (!entityBlockInfo.containsKey(input.getTargetEntity())) {
             throw new UnsupportedOperationException("Unsupported target entity in match: " + input.getTargetEntity());
         }
-        Triple<Integer, Integer, Integer> blockInfo = entityBlockInfo.get(input.getTargetEntity());
+        Triple<Integer, Integer, Integer> blockInfo = null;
+        if (StringUtils.isNotBlank(input.getSourceEntity())) {
+            blockInfo = entityBlockInfo.get(input.getSourceEntity());
+            if (blockInfo != null) {
+                log.info("Choose match block info using source entity = {}, block info = {}", input.getSourceEntity(),
+                        blockInfo);
+            }
+        }
+        if (blockInfo == null) {
+            blockInfo = entityBlockInfo.get(input.getTargetEntity());
+            log.info("Choose match block info using target entity = {}, block info = {}", input.getTargetEntity(),
+                    blockInfo);
+        }
+
         // Fail fast in case we configure anything wrong
         if (ObjectUtils.defaultIfNull(blockInfo.getLeft(), 0) == 0
                 || ObjectUtils.defaultIfNull(blockInfo.getMiddle(), 0) == 0
