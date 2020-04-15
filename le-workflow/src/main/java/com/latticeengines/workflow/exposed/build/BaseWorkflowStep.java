@@ -283,8 +283,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String DATAQUOTA_LIMIT = "DATAQUOTA_LIMIT";
     public static final String ATTRIBUTE_QUOTA_LIMIT = "ATTRIBUTE_QUOTA_LIMIT";
 
-    public static final String REMATCH_TABLE_NAME = "REMATCH_TABLE_NAME";
-    public static final String DELETED_TABLE_NAME = "DELETED_TABLE_NAME";
+    public static final String REMATCH_TABLE_NAMES = "REMATCH_TABLE_NAMES";
+    public static final String DELETED_TABLE_NAMES = "DELETED_TABLE_NAMES";
     public static final String ENTITY_MATCH_ENABLED = "ENTITY_MATCH_ENABLED";
     public static final String FULL_REMATCH_PA = "FULL_REMATCH_PA";
     /*-
@@ -338,8 +338,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             CURATED_ACCOUNT_STATS_TABLE_NAME);
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME);
 
-    protected static final Set<String> TABLE_NAME_MAPS_FOR_PA_RETRY = Sets.newHashSet(REMATCH_TABLE_NAME,
-            DELETED_TABLE_NAME, CATALOG_TABLE_NAME, ENTITY_MATCH_STREAM_TARGETTABLE,
+    protected static final Set<String> TABLE_NAME_MAPS_FOR_PA_RETRY = Sets.newHashSet(REMATCH_TABLE_NAMES,
+            DELETED_TABLE_NAMES, CATALOG_TABLE_NAME, ENTITY_MATCH_STREAM_TARGETTABLE,
             ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE, ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE,
             RAW_ACTIVITY_STREAM_TABLE_NAME, AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, METRICS_GROUP_TABLE_NAME,
             MERGED_METRICS_GROUP_TABLE_NAME, PERIOD_STORE_TABLE_NAME, LAST_ACTIVITY_DATE_TABLE_NAME);

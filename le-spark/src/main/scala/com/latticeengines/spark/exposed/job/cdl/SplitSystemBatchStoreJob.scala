@@ -18,26 +18,27 @@ class SplitSystemBatchStoreJob extends AbstractSparkJob[SplitSystemBatchStoreCon
     if (config.getTemplates == null) throw new UnsupportedOperationException(s"No template specified")
 
     val templates = config.getTemplates.asScala.toList.sorted
-    templates.foreach{template: String => {
-        if(templateColMap.keySet.contains(template) == false) {
-          throw new UnsupportedOperationException(s"template specified doesn't exist in the data")
-        }
+    templates.foreach { template: String => {
+      if (templateColMap.keySet.contains(template) == false) {
+        throw new UnsupportedOperationException(s"template specified doesn't exist in the data")
       }
+    }
     }
 
     println("----- BEGIN SCRIPT OUTPUT -----")
     println(s"templates under operation are: $templates")
     println("----- END SCRIPT OUTPUT -----")
 
+    val discardFieldsList: List[String] = if (config.getDiscardFields == null) null else config.getDiscardFields.asScala.toList
     // base on the templates, generate # of templates dataset as output
     var output: Seq[DataFrame] = Seq()
     templates.foreach { template: String => {
         val colList = templateColMap.apply(template)
-        val df: DataFrame = input.select(colList map col: _*)
+        val df: DataFrame = if (discardFieldsList == null) input.select(colList map col: _*) else input.select(colList map col: _*).drop(discardFieldsList: _*)
         // stripe out the prefix in the columns
         val newColumns =
           df.columns map (c => c.stripPrefix(template + "__"))
-        output :+= df.toDF(newColumns:_*)
+        output :+= df.toDF(newColumns: _*)
       }
     }
 

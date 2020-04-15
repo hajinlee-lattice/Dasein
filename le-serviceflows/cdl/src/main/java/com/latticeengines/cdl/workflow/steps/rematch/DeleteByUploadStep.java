@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -44,7 +46,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
 
     static final String BEAN_NAME = "deleteByUploadStep";
 
-    private Table masterTable;
+    private List<Table> masterTables;
 
     private CustomerSpace customerSpace;
 
@@ -61,25 +63,35 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
             return null;
         }
         PipelineTransformationRequest request = generateRequest();
-        return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request, configuration.getPodId());
+        return transformationProxy.getWorkflowConf(configuration.getCustomerSpace().toString(), request,
+                configuration.getPodId());
     }
 
     @Override
     protected void onPostTransformationCompleted() {
-        String cleanupTableName = TableUtils.getFullTableName(CLEANUP_TABLE_PREFIX, pipelineVersion);
-        setDeletedTableName(cleanupTableName);
+        List<String> cleanupTableNames = new LinkedList<>();
+        masterTables.forEach(masterTable -> {
+            String cleanupTablePrefix = CLEANUP_TABLE_PREFIX + "_" + masterTable.getName();
+            String cleanupTableName = TableUtils.getFullTableName(cleanupTablePrefix, pipelineVersion);
+            cleanupTableNames.add(cleanupTableName);
+        });
+        log.info("cleanupTableNames " + cleanupTableNames);
+        setDeletedTableName(cleanupTableNames);
     }
 
     private void intializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
-        String masterTableName = getConvertBatchStoreTableName();
-        masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
-        if (masterTable == null) {
+        List<String> masterTableNames = getConvertedRematchTableNames();
+        if (CollectionUtils.isEmpty(masterTableNames)) {
             throw new RuntimeException(
-                    String.format("master table in metadataTable shouldn't be null when customer space %s, tableName " +
-                                    "%s",
-                            customerSpace.toString(), masterTableName));
+                    String.format("master tables in metadataTable shouldn't be null for customer space %s",
+                            customerSpace.toString()));
         }
+        log.info("masterTableNames " + masterTableNames);
+        masterTables = new LinkedList<>();
+        masterTableNames.forEach(tableName -> {
+            masterTables.add(metadataProxy.getTable(customerSpace.toString(), tableName));
+        });
     }
 
     private PipelineTransformationRequest generateRequest() {
@@ -93,9 +105,12 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
             List<TransformationStepConfig> steps = new ArrayList<>();
             int mergeStep = 0;
             TransformationStepConfig mergeDelete = mergeHardDelete();
-            TransformationStepConfig hardDelete = hardDelete(mergeStep);
             steps.add(mergeDelete);
-            steps.add(hardDelete);
+            // Loop through the master tables to add multiple hard delete steps
+            masterTables.forEach(masterTable -> {
+                TransformationStepConfig hardDelete = hardDelete(mergeStep, masterTable.getName());
+                steps.add(hardDelete);
+            });
             log.info(JsonUtils.serialize(steps));
             request.setSteps(steps);
             return request;
@@ -121,21 +136,20 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
         return step;
     }
 
-    TransformationStepConfig hardDelete(int mergeSoftDeleteStep) {
+    TransformationStepConfig hardDelete(int mergeSoftDeleteStep, String tableName) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(mergeSoftDeleteStep));
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
-        String masterName = masterTable.getName();
-        SourceTable source = new SourceTable(masterName, customerSpace);
+        SourceTable source = new SourceTable(tableName, customerSpace);
         List<String> sourceNames = new ArrayList<>();
         Map<String, SourceTable> baseTables = new HashMap<>();
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(CLEANUP_TABLE_PREFIX);
+        targetTable.setNamePrefix(CLEANUP_TABLE_PREFIX + "_" + tableName);
 
-        sourceNames.add(masterName);
-        baseTables.put(masterName, source);
+        sourceNames.add(tableName);
+        baseTables.put(tableName, source);
         SoftDeleteConfig softDeleteConfig = new SoftDeleteConfig();
         softDeleteConfig.setDeleteSourceIdx(0);
         softDeleteConfig.setIdColumn(InterfaceName.AccountId.name());
@@ -146,28 +160,39 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
         return step;
     }
 
-    private String getConvertBatchStoreTableName() {
-        Map<String, String> rematchTables = getObjectFromContext(REMATCH_TABLE_NAME, Map.class);
-        return (rematchTables != null) && rematchTables.get(configuration.getEntity().name()) != null ?
-                rematchTables.get(configuration.getEntity().name()) : null;
+    private List<String> getConvertedRematchTableNames() {
+        Map<String, List<String>> rematchTables = getTypedObjectFromContext(REMATCH_TABLE_NAMES,
+                new TypeReference<Map<String, List<String>>>() {
+                });
+        return (rematchTables != null) && rematchTables.get(configuration.getEntity().name()) != null
+                ? rematchTables.get(configuration.getEntity().name())
+                : null;
     }
 
-    private void setDeletedTableName(String tableName) {
-        Map<String, String> deletedTables = getObjectFromContext(DELETED_TABLE_NAME, Map.class);
+    private void setDeletedTableName(List<String> tableNames) {
+        Map<String, List<String>> deletedTables = getTypedObjectFromContext(DELETED_TABLE_NAMES,
+                new TypeReference<Map<String, List<String>>>() {
+                });
         if (deletedTables == null) {
             deletedTables = new HashMap<>();
         }
-        deletedTables.put(configuration.getEntity().name(), tableName);
-        putObjectInContext(DELETED_TABLE_NAME, deletedTables);
-        addToListInContext(TEMPORARY_CDL_TABLES, tableName, String.class);
+        if (CollectionUtils.isNotEmpty(tableNames)) {
+            deletedTables.put(configuration.getEntity().name(), tableNames);
+            putObjectInContext(DELETED_TABLE_NAMES, deletedTables);
+            tableNames.forEach(tableName -> {
+                addToListInContext(TEMPORARY_CDL_TABLES, tableName, String.class);
+            });
+        }
     }
 
     private boolean isShortCutMode() {
-        Map<String, String> deletedTables = getObjectFromContext(DELETED_TABLE_NAME, Map.class);
-        if (deletedTables == null) {
+        Map<String, List<String>> deletedTables = getTypedObjectFromContext(DELETED_TABLE_NAMES,
+                new TypeReference<Map<String, List<String>>>() {
+                });
+        if (MapUtils.isEmpty(deletedTables)) {
             return false;
         }
-        if (deletedTables.get(configuration.getEntity().name()) != null) {
+        if (CollectionUtils.isNotEmpty(deletedTables.get(configuration.getEntity().name()))) {
             return true;
         }
         return false;
@@ -185,7 +210,7 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
         if (MapUtils.isEmpty(baseTables)) {
             baseTables = new HashMap<>();
         }
-        for (String sourceTableName: sourceTableNames) {
+        for (String sourceTableName : sourceTableNames) {
             SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
             baseSources.add(sourceTableName);
             baseTables.put(sourceTableName, sourceTable);

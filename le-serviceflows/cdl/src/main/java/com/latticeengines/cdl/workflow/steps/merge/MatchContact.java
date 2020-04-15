@@ -11,7 +11,6 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,31 +104,30 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
     private List<TransformationStepConfig> entityMatchSteps() {
         List<TransformationStepConfig> steps = new ArrayList<>();
-        String convertBatchStoreTableName = getConvertBatchStoreTableName();
+        List<String> convertedRematchTableNames = getConvertedRematchTableNames();
         Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
 
         if (CollectionUtils.isNotEmpty(inputTableNames)) {
-            TransformationStepConfig mergeImport = concatImports(null, preProcessFlds.getLeft(), preProcessFlds.getRight(),
-                    null, -1);
+            TransformationStepConfig mergeImport = concatImports(null, preProcessFlds.getLeft(),
+                    preProcessFlds.getRight(), null, -1);
             steps.add(mergeImport);
             TransformationStepConfig concatenateImportContactName = concatenateContactName(steps.size() - 1, null);
             steps.add(concatenateImportContactName);
-            if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
+            if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
                 TransformationStepConfig entityMatchImport = matchContact(steps.size() - 1, null, null);
                 steps.add(entityMatchImport);
             }
         }
-        if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
-            // when there is no inpot table, steps.size() - 1 will be -1
+        if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
+            // when there is no input table, steps.size() - 1 will be -1
             TransformationStepConfig mergeBatchStore = concatImports(null, preProcessFlds.getLeft(),
-                    preProcessFlds.getRight(),
-                    convertBatchStoreTableName, steps.size() - 1);
+                    preProcessFlds.getRight(), convertedRematchTableNames, steps.size() - 1);
             steps.add(mergeBatchStore);
             TransformationStepConfig concatenateBatchStoreContactName = concatenateContactName(steps.size() - 1, null);
             steps.add(concatenateBatchStoreContactName);
         }
         TransformationStepConfig entityMatch = matchContact(steps.size() - 1, matchTargetTablePrefix,
-                convertBatchStoreTableName);
+                convertedRematchTableNames);
         steps.add(entityMatch);
         log.info("steps are {}.", steps);
         return steps;
@@ -161,7 +159,7 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
     }
 
     private TransformationStepConfig matchContact(int inputStep, String targetTableName,
-            String convertBatchStoreTableName) {
+            List<String> convertedRematchTableNames) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         setTargetTable(step, targetTableName);
@@ -169,24 +167,25 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
         String configStr;
         // combine columns from all imports
         Set<String> columnNames = getInputTableColumnNames();
-        boolean hasConvertBatchStoreTableName = org.apache.commons.lang3.StringUtils.isNotEmpty(convertBatchStoreTableName);
+        boolean hasConvertedRematchTables = CollectionUtils.isNotEmpty(convertedRematchTableNames);
         MatchInput matchInput = getBaseMatchInput();
-        if (hasConvertBatchStoreTableName) {
-            columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
+        if (hasConvertedRematchTables) {
+            convertedRematchTableNames.forEach(tableName -> {
+                columnNames.addAll(getTableColumnNames(tableName));
+            });
+
             setRematchVersions(matchInput);
         }
         log.info("Ignore domain match keys for account in contact = {}", ignoreDomainMatchKeyInContact);
         if (configuration.isEntityMatchGAOnly()) {
-            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
-                    columnNames, getSystemIds(BusinessEntity.Account),
-                    getSystemIds(BusinessEntity.Contact), null, hasConvertBatchStoreTableName,
-                    ignoreDomainMatchKeyInContact, null);
+            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput, columnNames,
+                    getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact), null,
+                    hasConvertedRematchTables, ignoreDomainMatchKeyInContact, null);
         } else {
             matchRootOperationUid = UUID.randomUUID().toString();
-            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput,
-                    columnNames, getSystemIds(BusinessEntity.Account),
-                    getSystemIds(BusinessEntity.Contact), newAccountTableName, hasConvertBatchStoreTableName,
-                    ignoreDomainMatchKeyInContact, matchRootOperationUid);
+            configStr = MatchUtils.getAllocateIdMatchConfigForContact(customerSpace.toString(), matchInput, columnNames,
+                    getSystemIds(BusinessEntity.Account), getSystemIds(BusinessEntity.Contact), newAccountTableName,
+                    hasConvertedRematchTables, ignoreDomainMatchKeyInContact, matchRootOperationUid);
             log.info("Set match RootOperationUID to {}", matchRootOperationUid);
         }
         step.setConfiguration(configStr);
@@ -199,18 +198,17 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
 
     /**
      * For PA during entity match migration period: some files are imported with
-     * legacy template (having ContactId/AccountId) while some files are
-     * imported after template is upgraded (having
-     * CustomerContactId/CustomerAccountId)
+     * legacy template (having ContactId/AccountId) while some files are imported
+     * after template is upgraded (having CustomerContactId/CustomerAccountId)
      *
-     * It's to rename ContactId/AccountId to CustomerContactId/CustomerAccountId
-     * and copy to DefaultSystem's ID with same value
+     * It's to rename ContactId/AccountId to CustomerContactId/CustomerAccountId and
+     * copy to DefaultSystem's ID with same value
      *
      * Copy happens before rename and the merge job has check whether specified
      * original column (ContactId/AccountId) exists or not
      *
-     * TODO: After all the tenants finish entity match migration, we could get
-     * rid of this field rename/copy logic
+     * TODO: After all the tenants finish entity match migration, we could get rid
+     * of this field rename/copy logic
      *
      * @return <cloneFlds, renameFlds>
      */

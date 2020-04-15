@@ -25,6 +25,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchVersion;
@@ -117,8 +118,12 @@ public class HardDeleteDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
                 SourceFile sourceFile = uploadDeleteCSV(fileName, SchemaInterpretation.RegisterDeleteDataTemplate,
                         CleanupOperationType.BYUPLOAD_ID,
                         source);
-                ApplicationId appId = cdlProxy.registerDeleteData(customerSpace, MultiTenantContext.getEmailAddress(),
-                        sourceFile.getName(), true);
+                DeleteRequest request = new DeleteRequest();
+                request.setUser(MultiTenantContext.getEmailAddress());
+                request.setFilename(sourceFile.getName());
+                request.setIdEntity(BusinessEntity.Account);
+                request.setHardDelete(true);
+                ApplicationId appId = cdlProxy.registerDeleteData(customerSpace, request);
                 JobStatus status = waitForWorkflowStatus(appId.toString(), false);
                 Assert.assertEquals(JobStatus.COMPLETED, status);
                 if (numRecordsInCsv == 20) {

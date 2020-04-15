@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
 
         List<TransformationStepConfig> steps = new ArrayList<>();
-        String convertBatchStoreTableName = getConvertBatchStoreTableName();
+        List<String> convertedRematchTableNames = getConvertedRematchTableNames();
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
             Pair<String[][], String[][]> preProcessFlds = getPreProcessFlds();
@@ -59,16 +58,15 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 TransformationStepConfig mergeImports = concatImports(null, preProcessFlds.getLeft(),
                         preProcessFlds.getRight(), null, -1);
                 steps.add(mergeImports);
-                if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
-                    TransformationStepConfig matchImport =  matchAccount(steps.size() - 1, null, null);
+                if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
+                    TransformationStepConfig matchImport = matchAccount(steps.size() - 1, null, null);
                     steps.add(matchImport);
                 }
             }
-            if (StringUtils.isNotBlank(convertBatchStoreTableName)) {
-                TransformationStepConfig mergeBatchStoreAndImport = concatImports(null, preProcessFlds.getLeft(),
-                        preProcessFlds.getRight(),
-                        convertBatchStoreTableName, steps.size() - 1);
-                steps.add(mergeBatchStoreAndImport);
+            if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
+                TransformationStepConfig mergeSystemBatchStoreAndImport = concatImports(null, preProcessFlds.getLeft(),
+                        preProcessFlds.getRight(), convertedRematchTableNames, steps.size() - 1);
+                steps.add(mergeSystemBatchStoreAndImport);
             }
         } else {
             TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
@@ -76,7 +74,7 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         }
 
         TransformationStepConfig match = matchAccount(steps.size() - 1, matchTargetTablePrefix,
-                convertBatchStoreTableName);
+                convertedRematchTableNames);
         steps.add(match);
 
         log.info("steps are {}.", steps);
@@ -89,14 +87,14 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
      * legacy template (having AccountId) while some files are imported after
      * template is upgraded (having CustomerAccountId)
      *
-     * It's to rename AccountId to CustomerAccountId and copy to DefaultSystem's
-     * ID with same value
+     * It's to rename AccountId to CustomerAccountId and copy to DefaultSystem's ID
+     * with same value
      *
      * Copy happens before rename and the merge job has check whether specified
      * original column (AccountId) exists or not
      *
-     * TODO: After all the tenants finish entity match migration, we could get
-     * rid of this field rename/copy logic
+     * TODO: After all the tenants finish entity match migration, we could get rid
+     * of this field rename/copy logic
      *
      * @return <cloneFlds, renameFlds>
      */
@@ -121,29 +119,31 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     }
 
     private TransformationStepConfig matchAccount(int inputStep, String matchTargetTable,
-            String convertBatchStoreTableName) {
+            List<String> convertedRematchTableNames) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         if (matchTargetTable != null) {
             setTargetTable(step, matchTargetTable);
         }
         step.setTransformer(TRANSFORMER_MATCH);
-        step.setConfiguration(getMatchConfig(convertBatchStoreTableName));
+        step.setConfiguration(getMatchConfig(convertedRematchTableNames));
         return step;
     }
 
-    private String getMatchConfig(String convertBatchStoreTableName) {
+    private String getMatchConfig(List<String> convertedRematchTableNames) {
         MatchInput matchInput = getBaseMatchInput();
         if (configuration.isEntityMatchEnabled()) {
             // combine columns from all imports
             Set<String> columnNames = getInputTableColumnNames();
-            boolean hasConvertBatchStoreTableName = StringUtils.isNotEmpty(convertBatchStoreTableName);
-            if (hasConvertBatchStoreTableName) {
-                columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
+            boolean hasConvertedRematchTables = CollectionUtils.isNotEmpty(convertedRematchTableNames);
+            if (hasConvertedRematchTables) {
+                convertedRematchTableNames.forEach(tableName -> {
+                    columnNames.addAll(getTableColumnNames(tableName));
+                });
                 setRematchVersions(matchInput);
             }
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    getSystemIds(BusinessEntity.Account), null, hasConvertBatchStoreTableName, null);
+                    getSystemIds(BusinessEntity.Account), null, hasConvertedRematchTables, null);
         } else {
             // for non-entity match, schema for all imports are the same (only one
             // template). thus checking the first table is enough
