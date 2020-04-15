@@ -135,7 +135,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
     @Inject
     private DataFeedService dataFeedService;
 
-    private ExecutorService s3CopyWorker = null;
+    private volatile ExecutorService s3CopyWorker = null;
 
     @Inject
     public DataFeedTaskManagerServiceImpl(CDLDataFeedImportWorkflowSubmitter cdlDataFeedImportWorkflowSubmitter, TenantService tenantService,
@@ -450,8 +450,12 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                             prepareImportConfig.getSourceKey().lastIndexOf("/"));
                     destFolder = destFolder.replace(dataFeedTask.getFeedType(), correctTask.get().getFeedType());
                     String destKey = destFolder + prepareImportConfig.getSourceFileName();
-                    getCopyWorker().submit(() -> s3Service.copyObject(prepareImportConfig.getSourceBucket(), prepareImportConfig.getSourceKey(),
-                            prepareImportConfig.getSourceBucket(), destKey));
+                    log.info("Prepare copy file from " + prepareImportConfig.getSourceKey() + " to " + destKey);
+                    getCopyWorker().submit(() -> {
+                        s3Service.copyObject(prepareImportConfig.getSourceBucket(), prepareImportConfig.getSourceKey(),
+                            prepareImportConfig.getSourceBucket(), destKey);
+                        log.info("Copy data file complete!");
+                    });
                 }
             }
             throw e;
