@@ -43,16 +43,23 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperties;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantProperties;
+import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
+import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.pls.UserDocument;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSServiceImpl;
+import com.latticeengines.security.service.impl.IDaaSUser;
+
 public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     private static final String tenantName = "Global Test Tenant" + System.currentTimeMillis();
     private static final Logger log = LoggerFactory.getLogger(LPIEndToEndDeploymentTestNG.class);
     private static String tenantId = "EndToEnd";
     private static String contractId = "";
+    private static String userEmail = "test@dcp2.com";
 
     private static final String HDFS_POD_PATH = "/Pods/%s/Contracts/%s";
     private static final String HDFS_MODELING_BASE_PATH = "/user/s-analytics/customers";
@@ -70,6 +77,9 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     private UserService userService;
 
     @Inject
+    private IDaaSService iDaaSService;
+
+    @Inject
     private PLSComponentDeploymentTestNG plsComponentDeploymentTestNG;
 
     @Value("${admin.test.contract}")
@@ -84,7 +94,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     /**
      * In setup, orchestrateForInstall a full tenant.
      **/
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment")
     public void setup() {
         tenantId = testContract + tenantId + System.currentTimeMillis();
         contractId = tenantId;
@@ -95,7 +105,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
     }
 
-    @AfterClass(groups = "deployment", enabled = false)
+    @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
         cleanup();
     }
@@ -119,6 +129,52 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         Thread.sleep(10000);
         log.info("Uninstall again and again with wiping out ZK.");
         deleteTenant(contractId, tenantId);
+    }
+
+    @Test(groups = "deployment")
+    public void testVboEnd2End() throws Exception {
+        provisionEndToEndVboTestTenants();
+        log.info("Verify installation");
+        verifyZKState();
+        verifyPLSTenantExists();
+        verifyIDaasUserExists();
+
+        log.info("Uninstall again with wiping out ZK.");
+        deleteTenant(contractId, tenantId);
+    }
+
+    private void verifyIDaasUserExists() {
+        IDaaSUser user = iDaaSService.getIDaaSUser(userEmail);
+        Assert.assertNotNull(user);
+        Assert.assertTrue(user.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT));
+    }
+
+    private void provisionEndToEndVboTestTenants() {
+        String url = getRestHostPort() + "/admin/tenants/vboadmin";
+
+        VboRequest req = new VboRequest();
+        VboRequest.Product pro = new VboRequest.Product();
+        VboRequest.User user = new VboRequest.User();
+        VboRequest.Name name = new VboRequest.Name();
+        name.setFirstName("test2");
+        name.setLastName("test2");
+        user.setName(name);
+        user.setUserId("testdcp2");
+        user.setEmailAddress(userEmail);
+        user.setTelephoneNumber("1234567");
+
+        pro.setUsers(new ArrayList<VboRequest.User>());
+        pro.getUsers().add(user);
+        req.setProduct(pro);
+        VboRequest.Subscriber sub = new VboRequest.Subscriber();
+        sub.setLanguage("English");
+        sub.setName(tenantId);
+        req.setSubscriber(sub);
+
+        VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getStatus(), "success");
     }
 
     // ==================================================
@@ -225,8 +281,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         List<String> lp3ServiceNames = new ArrayList<>();
         for (String serviceName : serviceNames) {
             if (!(serviceName.toLowerCase().contains("test") || serviceName.equals(DanteComponent.componentName)
-                    || (plsSkipped && serviceName.equals(PLSComponent.componentName)))) {
-                lp3ServiceNames.add(serviceName);
+                    || (plsSkipped && serviceName.equals(PLSComponent.componentName)))) { lp3ServiceNames.add(serviceName);
             }
         }
 
