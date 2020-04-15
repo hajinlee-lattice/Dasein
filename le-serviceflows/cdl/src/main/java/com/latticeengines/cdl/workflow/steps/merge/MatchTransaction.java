@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.C
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
@@ -51,25 +52,25 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
 
         if (configuration.isEntityMatchEnabled()) {
             bumpEntityMatchStagingVersion();
-            List<String> convertSystemBatchStoreTableNames = getConvertedRematchTableNames();
+            List<String> convertedRematchTableNames = getConvertedRematchTableNames();
             if (CollectionUtils.isNotEmpty(inputTableNames)) {
                 TransformationStepConfig mergeImport = mergeInputs(getConsolidateDataTxmfrConfig(), null,
                         ETLEngineLoad.LIGHT, null, -1);
                 steps.add(mergeImport);
-                if (CollectionUtils.isNotEmpty(convertSystemBatchStoreTableNames)) {
+                if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
                     TransformationStepConfig matchImport = matchTransaction(steps.size() - 1, null, null);
                     steps.add(matchImport);
                 }
             }
-            if (CollectionUtils.isNotEmpty(convertSystemBatchStoreTableNames)) {
+            if (CollectionUtils.isNotEmpty(convertedRematchTableNames)) {
                 // when there is no input table, steps.size() - 1 will be -1
                 TransformationStepConfig mergeImportAndBatchStore = mergeInputs(
                         getConsolidateDataTxmfrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
-                        convertSystemBatchStoreTableNames, steps.size() - 1);
+                        convertedRematchTableNames, steps.size() - 1);
                 steps.add(mergeImportAndBatchStore);
             }
             TransformationStepConfig matchImportAndBatchStore = matchTransaction(steps.size() - 1,
-                    matchTargetTablePrefix, convertSystemBatchStoreTableNames);
+                    matchTargetTablePrefix, convertedRematchTableNames);
             steps.add(matchImportAndBatchStore);
         } else {
             // legacy tenants, just merge imports
@@ -95,38 +96,38 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
     }
 
     private TransformationStepConfig matchTransaction(int inputStep, String matchTargetTable,
-            List<String> convertSystemBatchStoreTableNames) {
+            List<String> convertedRematchTableNames) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
         if (matchTargetTable != null) {
             setTargetTable(step, matchTargetTable);
         }
         step.setTransformer(TRANSFORMER_MATCH);
-        step.setConfiguration(getMatchConfig(convertSystemBatchStoreTableNames));
+        step.setConfiguration(getMatchConfig(convertedRematchTableNames));
         return step;
     }
 
-    private String getMatchConfig(List<String> convertSystemBatchStoreTableNames) {
+    private String getMatchConfig(List<String> convertedRematchTableNames) {
         // NOTE get all imports just to be safe, currently txn should only have one
         // template
         Set<String> columnNames = getInputTableColumnNames();
         MatchInput matchInput = getBaseMatchInput();
-        boolean hasConvertSystemBatchStoreTables = CollectionUtils.isNotEmpty(convertSystemBatchStoreTableNames);
-        if (hasConvertSystemBatchStoreTables) {
-            convertSystemBatchStoreTableNames.forEach(tableName -> {
+        boolean hasConvertedRematchTables = CollectionUtils.isNotEmpty(convertedRematchTableNames);
+        if (hasConvertedRematchTables) {
+            convertedRematchTableNames.forEach(tableName -> {
                 columnNames.addAll(getTableColumnNames(tableName));
             });
             setRematchVersions(matchInput);
         }
+        matchInput.setSourceEntity(BusinessEntity.Transaction.name());
         log.info("matchInput is {}.", matchInput);
         if (configuration.isEntityMatchGAOnly()) {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), null,
-                    hasConvertSystemBatchStoreTables, null);
+                    getSystemIds(BusinessEntity.Account), null, hasConvertedRematchTables, null);
         } else {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName,
-                    hasConvertSystemBatchStoreTables, null);
+                    getSystemIds(BusinessEntity.Account), newAccountTableName,
+                    hasConvertedRematchTables, null);
         }
     }
 

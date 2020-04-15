@@ -51,7 +51,7 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
     private String orgId3;
     private String externalSysType3;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void beforeClass() {
         tenantName = TestFrameworkUtils.generateTenantName();
         tenantProxy.deleteTenant(tenantName);
@@ -71,12 +71,12 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
         externalSysType3 = null;
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment", enabled = false)
     public void afterClass() {
         tenantProxy.deleteTenant(tenantName);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void createTenantWithTenantNameByNonAdmin() throws InterruptedException {
         PlaymakerTenant tenant = getTenant();
         newTenant = tenantProxy.createTenant(tenant);
@@ -94,7 +94,7 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
         Assert.assertNull(newTenant.getTenantPassword());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
     public void updateTenantWithTenantName() {
         PlaymakerTenant tenant = tenantProxy.getTenant(tenantName);
         tenant.setExternalId("externalId2");
@@ -104,7 +104,7 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
         Assert.assertNull(newTenant.getTenantPassword());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "updateTenantWithTenantName")
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = "updateTenantWithTenantName")
     public void getOauthTokenToTenant() throws InterruptedException {
         String oneTimePassword = tenantProxy.createAPIToken(newTenant.getTenantName());
         Assert.assertNotNull(oneTimePassword);
@@ -124,21 +124,21 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
         Assert.assertEquals(tenantNameViaToken, tenantName);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToTenant")
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = "getOauthTokenToTenant")
     public void getOauthTokenToAppId() throws InterruptedException {
         getOauthTokenToAppId(appId1, orgId1, externalSysType1);
         getOauthTokenToAppId(appId2, orgId2, externalSysType2);
         getOauthTokenToAppId(appId3, orgId3, externalSysType3);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToAppId")
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = "getOauthTokenToAppId")
     public void getOauthTokenToOrgInfo() throws InterruptedException {
         getOauthTokenToOrgInfo(appId1, orgId1, externalSysType1);
         getOauthTokenToOrgInfo(appId2, orgId2, externalSysType2);
         getOauthTokenToOrgInfo(appId3, orgId3, externalSysType3);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToOrgInfo")
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = "getOauthTokenToOrgInfo")
     public void deleteTenantWithTenantName() throws InterruptedException {
         tenantProxy.deleteTenant(tenantName);
         Thread.sleep(500); // wait for replication lag

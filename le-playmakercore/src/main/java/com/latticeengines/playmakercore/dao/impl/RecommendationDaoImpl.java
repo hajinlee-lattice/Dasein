@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.persistence.Table;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -239,40 +242,57 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     public List<Map<String, Object>> findRecommendationsAsMapByLaunchIds(List<String> launchIds, long start, int offset, int max) {
         Session session = getSessionFactory().getCurrentSession();
         Class<Recommendation> entityClz = getEntityClass();
-        String queryStr = "SELECT new map " //
-                + "( " //
-                + "  recommendationId AS " + PlaymakerConstants.ID //
-                + ", accountId AS " + PlaymakerConstants.AccountID //
-                + ", leAccountExternalID AS " + PlaymakerConstants.LEAccountExternalID //
-                + ", playId AS " + PlaymakerConstants.PlayID //
-                + ", launchId AS " + PlaymakerConstants.LaunchID //
-                + ", description AS " + PlaymakerConstants.Description //
-                + ", UNIX_TIMESTAMP(launchDate) AS " + PlaymakerConstants.LaunchDate //
-                + ", UNIX_TIMESTAMP(lastUpdatedTimestamp) AS " + PlaymakerConstants.LastModificationDate //
-                + ", monetaryValue AS " + PlaymakerConstants.MonetaryValue //
-                + ", likelihood AS " + PlaymakerConstants.Likelihood //
-                + ", companyName AS " + PlaymakerConstants.CompanyName //
-                + ", sfdcAccountID AS " + PlaymakerConstants.SfdcAccountID //
-                + ", priorityID AS " + PlaymakerConstants.PriorityID //
-                + ", priorityDisplayName AS " + PlaymakerConstants.PriorityDisplayName //
-                + ", monetaryValueIso4217ID AS " + PlaymakerConstants.MonetaryValueIso4217ID //
-                + ", contacts AS " + PlaymakerConstants.Contacts //
-                + ", lift AS " + PlaymakerConstants.Lift//
-                + ", ratingModelId AS " + PlaymakerConstants.RatingModelId //
-                + ", modelSummaryId AS " + PlaymakerConstants.ModelSummaryId //
-                + " ) " //
-                + "FROM %s " //
-                + "WHERE deleted = :deleted " //
-                + "AND launchId IN (:launchIds) " //
-                + "ORDER BY lastUpdatedTimestamp, pid ";
-        queryStr = String.format(queryStr, entityClz.getSimpleName());
+        String recommendationTable = entityClz.getAnnotation(Table.class).name();
+        String queryStr = "SELECT "
+                + " EXTERNAL_ID, ACCOUNT_ID, LE_ACCOUNT_EXTERNAL_ID, PLAY_ID, LAUNCH_ID, DESCRIPTION"
+                + ", UNIX_TIMESTAMP(LAUNCH_DATE), UNIX_TIMESTAMP(LAST_UPDATED_TIMESTAMP), MONETARY_VALUE"
+                + ", LIKELIHOOD, COMPANY_NAME, SFDC_ACCOUNT_ID, PRIORITY_ID, PRIORITY_DISPLAY_NAME"
+                + ", MONETARY_VALUE_ISO4217_ID, CONTACTS, LIFT, RATING_MODEL_ID, MODEL_SUMMARY_ID"
+                + " FROM %s USE INDEX(REC_LAUNCH_ID) " //
+                + " WHERE DELETED = :deleted " //
+                + " AND LAUNCH_ID IN (:launchIds) ";
+        if (launchIds.size() == 1){
+            queryStr += "ORDER BY PID ";
+        } else{
+            queryStr += "ORDER BY LAST_UPDATED_TIMESTAMP, PID ";
+        }
+        queryStr = String.format(queryStr, recommendationTable);
         @SuppressWarnings("rawtypes")
-        Query query = session.createQuery(queryStr);
+        Query query = session.createSQLQuery(queryStr);
         query.setMaxResults(max);
         query.setFirstResult(offset);
         query.setParameter("deleted", Boolean.FALSE);
         query.setParameterList("launchIds", launchIds);
-        return query.list();
+        return extractResultToMap(query.list());
+    }
+
+    private List<Map<String, Object>> extractResultToMap(List<Object[]> objects) {
+        if (CollectionUtils.isEmpty(objects)) {
+            return new ArrayList<>();
+        }
+        return objects.stream().map(object -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put(PlaymakerConstants.ID, object[0]);
+            map.put(PlaymakerConstants.AccountID, object[1]);
+            map.put(PlaymakerConstants.LEAccountExternalID, object[2]);
+            map.put(PlaymakerConstants.PlayID, object[3]);
+            map.put(PlaymakerConstants.LaunchID, object[4]);
+            map.put(PlaymakerConstants.Description, object[5]);
+            map.put(PlaymakerConstants.LaunchDate, object[6]);
+            map.put(PlaymakerConstants.LastModificationDate, object[7]);
+            map.put(PlaymakerConstants.MonetaryValue, object[8]);
+            map.put(PlaymakerConstants.Likelihood, object[9]);
+            map.put(PlaymakerConstants.CompanyName, object[10]);
+            map.put(PlaymakerConstants.SfdcAccountID, object[11]);
+            map.put(PlaymakerConstants.PriorityID, object[12]);
+            map.put(PlaymakerConstants.PriorityDisplayName, object[13]);
+            map.put(PlaymakerConstants.MonetaryValueIso4217ID, object[14]);
+            map.put(PlaymakerConstants.Contacts, object[15]);
+            map.put(PlaymakerConstants.Lift, object[16]);
+            map.put(PlaymakerConstants.RatingModelId, object[17]);
+            map.put(PlaymakerConstants.ModelSummaryId, object[18]);
+            return map;
+        }).collect(Collectors.toList());
     }
 
     private String additionalWhereClause(List<String> playIds, Pair<String, String> effectiveOrgInfo, String queryStr) {

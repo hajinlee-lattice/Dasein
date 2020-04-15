@@ -27,7 +27,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
 
     private PlaymakerTenant newTenant = null;
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void beforeClass() {
         super.beforeClass();
         SSLUtils.turnOffSSLNameVerification();
@@ -35,12 +35,12 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         restTemplate = createOAuth2RestTemplate(newTenant, "playmaker");
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getRecommendations() {
         testGetRecommendations(restTemplate);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getEmptyRecommendations() {
 
         long start = new Date().getTime();
@@ -61,7 +61,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         System.out.println(result.toString());
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getRecommendationCount() {
         String url = apiHostPort + "/playmaker/recommendationcount?start=1&destination=SFDC";
         @SuppressWarnings("unchecked")
@@ -69,7 +69,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getPlays() {
         String url = apiHostPort + "/playmaker/plays?start=1&offset=1&maximum=100&destination=SFDC";
         @SuppressWarnings("unchecked")
@@ -77,7 +77,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertNotNull(result);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getPlayCount() {
         String url = apiHostPort + "/playmaker/playcount?start=1&destination=SFDC";
         @SuppressWarnings("unchecked")
@@ -85,7 +85,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getAccountExtensions() {
         getAccountExtensions(null);
         getAccountExtensions("Recommendations");
@@ -190,7 +190,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertEquals(result.size(), 3);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getAccountExtensionCount() {
         String url = apiHostPort + "/playmaker/accountextensioncount?start=1";
         @SuppressWarnings("unchecked")
@@ -198,7 +198,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getAccountExtensionSchema() {
         String url = apiHostPort + "/playmaker/accountextensionschema";
         @SuppressWarnings("unchecked")
@@ -207,7 +207,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(result.size() > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getAccountExtensionColumnCount() {
         String url = apiHostPort + "/playmaker/accountextensioncolumncount";
         @SuppressWarnings("unchecked")
@@ -215,7 +215,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getContacts() {
         String url = apiHostPort + "/playmaker/contacts?start=1&offset=1&maximum=100";
         @SuppressWarnings("unchecked")
@@ -223,7 +223,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertNotNull(result);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getContactCount() {
         String url = apiHostPort + "/playmaker/contactcount?start=1";
         @SuppressWarnings("unchecked")
@@ -231,7 +231,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getContactExtensions() {
         String url = apiHostPort + "/playmaker/contactextensions?start=1&offset=1&maximum=100";
         @SuppressWarnings("unchecked")
@@ -239,7 +239,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertNotNull(result);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getContactExtensionCount() {
         String url = apiHostPort + "/playmaker/contactextensioncount?start=1";
         @SuppressWarnings("unchecked")
@@ -247,7 +247,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getContactExtensionSchema() {
         String url = apiHostPort + "/playmaker/contactextensionschema";
         @SuppressWarnings("unchecked")
@@ -256,7 +256,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(result.size() > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getContactExtensionColumnCount() {
         String url = apiHostPort + "/playmaker/contactextensioncolumncount";
         @SuppressWarnings("unchecked")
@@ -264,7 +264,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getPlayValues() {
         String url = apiHostPort + "/playmaker/playvalues?start=1&offset=1&maximum=100";
         @SuppressWarnings("unchecked")
@@ -273,7 +273,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(result.size() > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getPlayValueCount() {
         String url = apiHostPort + "/playmaker/playvaluecount?start=1";
         @SuppressWarnings("unchecked")
@@ -281,7 +281,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(((Integer) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getWorkflowTypes() {
         String url = apiHostPort + "/playmaker/workflowtypes";
         @SuppressWarnings("unchecked")
@@ -290,7 +290,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(result.size() > 0);
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void getPlayGroups() {
         String url = apiHostPort + "/playmaker/playgroups?start=1&offset=1&maximum=100";
         @SuppressWarnings("unchecked")

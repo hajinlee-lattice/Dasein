@@ -295,17 +295,6 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         log.info("maxPremiumEnrichAttributesStr is " + maxPremiumEnrichAttributesStr);
         ValidateEnrichAttributesUtils.validateEnrichAttributes(maxPremiumEnrichAttributesStr);
 
-        String usersInJson ;
-        try {
-            usersInJson = configDir.get("/IDaaSUsers").getDocument().getData();
-        } catch (Exception e) {
-            usersInJson = "[]";
-        }
-        log.info("IDaaS users are: " + usersInJson);
-        List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
-                IDaaSUser.class);
-        OperateIDaaSUsers(iDaaSUsers);
-
         String emailListInJson;
         try {
             emailListInJson = configDir.get("/SuperAdminEmails").getDocument().getData();
@@ -334,6 +323,17 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             throw new LedpException(LedpCode.LEDP_18028, "Cannot parse input configuration", e);
         }
         List<String> thirdPartyEmails = EmailUtils.parseEmails(emailListInJson);
+
+        String usersInJson ;
+        try {
+            usersInJson = configDir.get("/IDaaSUsers").getDocument().getData();
+        } catch (Exception e) {
+            usersInJson = "[]";
+        }
+        log.info("IDaaS users are: " + usersInJson);
+        List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
+                IDaaSUser.class);
+        OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails);
 
         Tenant tenant;
         if (tenantService.hasTenantId(PLSTenantId)) {
@@ -376,15 +376,22 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         }
     }
 
-    private void OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers) {
+    private void OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
+                                   List<String> externalAdminEmails) {
         for (IDaaSUser user : iDaaSUsers) {
-            if (iDaaSService.getIDaaSUser(user.getEmailAddress()) == null) {
+            String email = user.getEmailAddress();
+            if (iDaaSService.getIDaaSUser(email) == null) {
                 iDaaSService.createIDaaSUser(user);
+            } else {
+                // add product access and default role to user when user already exists in IDaaS
+                iDaaSService.addProductAccessToUser(constructProductRequest(user.getEmailAddress()));
             }
-            // add product access and default role to user
-            iDaaSService.addProductAccessToUser(constructProductRequest(user.getEmailAddress()));
+            if (EmailUtils.isInternalUser(email)) {
+                superAdminEmails.add(email.toLowerCase());
+            } else {
+                externalAdminEmails.add(email.toLowerCase());
+            }
         }
-
     }
 
     private ProductRequest constructProductRequest(String email) {

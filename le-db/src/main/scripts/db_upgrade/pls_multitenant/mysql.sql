@@ -10,6 +10,7 @@ BEGIN
         `STATUS`          varchar(40)
         `UPDATED`         datetime     not null,
         `UPLOAD_CONFIG`   JSON,
+        `FK_MATCH_CANDIDATES` bigint,
         `FK_MATCH_RESULT` bigint,
         `FK_TENANT_ID`    bigint       not null,
         primary key (`PID`)
@@ -24,6 +25,26 @@ BEGIN
         `FK_UPLOAD_ID` bigint not null,
         primary key (`PID`)
     ) engine = InnoDB;
+
+    CREATE TABLE `TIME_LINE` (
+      `PID` bigint(20) NOT NULL AUTO_INCREMENT,
+      `TIMELINE_ID` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+      `NAME` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+      `ENTITY` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+      `STREAM_TYPES` json DEFAULT NULL,
+      `STREAM_IDS` json DEFAULT NULL,
+      `EVENT_MAPPINGS` json DEFAULT NULL,
+      `FK_TENANT_ID` bigint(20) NOT NULL,
+      PRIMARY KEY (`PID`),
+      UNIQUE KEY `PID_UNIQUE` (`PID`),
+      UNIQUE KEY `TIMELINE_ID_UNIQUE` (`TIMELINE_ID`),
+      UNIQUE KEY `index5` (`TIMELINE_ID`,`FK_TENANT_ID`),
+      KEY `FK_TENANT_ID_idx` (`FK_TENANT_ID`),
+      CONSTRAINT `FK_TENANT_ID` FOREIGN KEY (`FK_TENANT_ID`) REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+    ALTER TABLE `PLS_MultiTenant`.`ATLAS_STREAM`
+    ADD COLUMN `STREAM_TYPE` VARCHAR(255) NULL AFTER `STREAM_ID`;
 
     CREATE INDEX IX_SOURCE_ID ON `DCP_UPLOAD` (`SOURCE_ID`);
 
@@ -48,7 +69,7 @@ END;
 
 CREATE PRODEDURE `CreateFileDownloadTable`()
   BEGIN
-    create table `FILE_DOWNLOAD` 
+    create table `FILE_DOWNLOAD`
       (
          `PID` bigint not null auto_increment,
          `CREATION` bigint not null,

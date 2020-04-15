@@ -60,7 +60,8 @@ public final class MetadataConverter {
             String lastModifiedKeyName, boolean skipCount) {
         try {
             List<Extract> extracts = convertToExtracts(configuration, path, skipCount);
-            Schema schema = AvroUtils.getSchemaFromGlob(configuration, extracts.get(0).getPath());
+            String avroGlob = PathUtils.toAvroGlob(extracts.get(0).getPath());
+            Schema schema = AvroUtils.getSchemaFromGlob(configuration, avroGlob);
             return getTable(schema, extracts, primaryKeyName, lastModifiedKeyName, false);
         } catch (Exception e) {
             throw new RuntimeException(

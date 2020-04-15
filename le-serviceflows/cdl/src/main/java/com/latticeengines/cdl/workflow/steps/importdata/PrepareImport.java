@@ -33,6 +33,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.csv.CSVConstants;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
@@ -60,6 +61,8 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
     private static final String IN_PROGRESS = "/inprogress";
     private static final String COMPLETED = "/completed";
     private static final String FAILED = "/failed";
+
+    private static final long GB = 1024L * 1024L * 1024L;
 
     @Inject
     private S3Service s3Service;
@@ -102,6 +105,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         String s3FilePath = configuration.getDestKey();
         boolean needUpdateTask = false;
         List<String> warnings = new ArrayList<>();
+        checkFileSize(s3Bucket, s3FilePath);
         try (InputStream fileStream = s3Service.readObjectAsStream(s3Bucket, s3FilePath)) {
             InputStreamReader reader = new InputStreamReader(
                     new BOMInputStream(fileStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
@@ -112,7 +116,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             CSVParser parser = new CSVParser(reader, format);
             Set<String> headerFields = parser.getHeaderMap().keySet();
             checkForCSVInjectionInFileNameAndHeaders(configuration.getSourceFileName(), headerFields);
-            Map<String, Integer> longFieldMap = new HashMap<String, Integer>();
+            Map<String, Integer> longFieldMap = new HashMap<>();
             for (String field : headerFields) {
                 if (StringUtils.length(field) > CSVConstants.MAX_HEADER_LENGTH) {
                     longFieldMap.put(field, StringUtils.length(field));
@@ -120,8 +124,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             }
             if (MapUtils.isNotEmpty(longFieldMap)) {
                 StringBuilder sb = new StringBuilder();
-                longFieldMap.entrySet().forEach(
-                        entry -> sb.append(String.format("\nfield: %s, length: %s", entry.getKey(), entry.getValue())));
+                longFieldMap.forEach((key, value) -> sb.append(String.format("\nfield: %s, length: %s", key, value)));
                 throw new LedpException(LedpCode.LEDP_18188,
                         new String[] { String.valueOf(CSVConstants.MAX_HEADER_LENGTH), sb.toString() });
             }
@@ -215,6 +218,16 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
             emailInfo.setErrorMsg(e.getMessage());
             sendS3ImportEmail("Failed", emailInfo);
             throw e;
+        }
+    }
+
+    private void checkFileSize(String s3Bucket, String fileKey) {
+        ObjectMetadata objectMetadata = s3Service.getObjectMetadata(s3Bucket, fileKey);
+        if (objectMetadata == null) {
+            throw new RuntimeException(String.format("Cannot get metadata for file %s : %s", s3Bucket, fileKey));
+        }
+        if (objectMetadata.getContentLength() > 10L * GB) {
+            throw new LedpException(LedpCode.LEDP_40078);
         }
     }
 

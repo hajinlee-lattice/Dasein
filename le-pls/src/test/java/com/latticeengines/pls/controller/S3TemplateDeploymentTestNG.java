@@ -1,9 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +12,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -39,6 +36,9 @@ import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
+
 public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private S3ImportTemplateDisplay templateDisplay;
@@ -51,6 +51,12 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Inject
     private CDLService cdlService;
+
+    @Inject
+    private CDLProxy cdlProxy;
+
+    @Inject
+    private DropBoxProxy dropBoxProxy;
 
     @Inject
     private SourceFileService sourceFileService;
@@ -70,70 +76,74 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         flags.put(featureFlag, true);
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
+        createDefaultImportSystem();
     }
 
     @Test(groups = "deployment")
     public void testCreateS3Template() throws Exception {
-        assertTrue(getS3ImportTemplateEntries());
+        Assert.assertTrue(getS3ImportTemplateEntries());
         SourceFile file = uploadSourceFile(ACCOUNT_SOURCE_FILE, ENTITY_ACCOUNT);
         String templateName = file.getName();
         templateDisplay.setTemplateName(templateName);
         String url = String.format(BASE_URL_PREFIX + "/s3/template?templateFileName=%s", templateName);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
-        HttpEntity<String> requestEntity = new HttpEntity<String>(JsonUtils.serialize(templateDisplay), headers);
+        HttpEntity<String> requestEntity = new HttpEntity<>(JsonUtils.serialize(templateDisplay), headers);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(getRestAPIHostPort() + url, requestEntity,
                 String.class);
         String responseBody = responseEntity.getBody();
+        Assert.assertNotNull(responseBody);
         JSONObject jsonObject = new JSONObject(responseBody);
         UIAction uiAction = JsonUtils.deserialize(jsonObject.getString("UIAction"), UIAction.class);
-        assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
+        Assert.assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
     }
 
     @Test(groups = "deployment")
     public void testImportS3Template() throws Exception {
-        assertTrue(getS3ImportTemplateEntries());
+        Assert.assertTrue(getS3ImportTemplateEntries());
         String url = String.format(BASE_URL_PREFIX + "/s3/template/import?templateFileName=%s",
                 templateDisplay.getTemplateName());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
-        HttpEntity<String> requestEntity = new HttpEntity<String>(JsonUtils.serialize(templateDisplay), headers);
+        HttpEntity<String> requestEntity = new HttpEntity<>(JsonUtils.serialize(templateDisplay), headers);
         ResponseEntity<String> responseEntity = restTemplate.postForEntity(getRestAPIHostPort() + url, requestEntity,
                 String.class);
         String responseBody = responseEntity.getBody();
+        Assert.assertNotNull(responseBody);
         JSONObject jsonObject = new JSONObject(responseBody);
         UIAction uiAction = JsonUtils.deserialize(jsonObject.getString("UIAction"), UIAction.class);
-        assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
+        Assert.assertTrue("Success".equalsIgnoreCase(uiAction.getStatus().toString()));
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testCreateS3Template")
-    public void testUpdateTemplateName() throws Exception {
-        assertTrue(getS3ImportTemplateEntries());
+    public void testUpdateTemplateName() {
+        Assert.assertTrue(getS3ImportTemplateEntries());
         String url = BASE_URL_PREFIX + "/s3/template/displayname";
         String updateName = "test111";
         templateDisplay.setTemplateName(updateName);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
-        HttpEntity<String> requestEntity = new HttpEntity<String>(JsonUtils.serialize(templateDisplay), headers);
+        HttpEntity<String> requestEntity = new HttpEntity<>(JsonUtils.serialize(templateDisplay), headers);
         restTemplate.put(getRestAPIHostPort() + url, requestEntity);
-        assertTrue(getS3ImportTemplateEntries());
+        Assert.assertTrue(getS3ImportTemplateEntries());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testCreateS3Template")
-    public void testPreviewTemplateName() throws Exception {
-        assertTrue(getS3ImportTemplateEntries());
+    public void testPreviewTemplateName() {
+        Assert.assertTrue(getS3ImportTemplateEntries());
         S3ImportSystem importSystem = cdlService.getS3ImportSystem(MultiTenantContext.getCustomerSpace().toString(), templateDisplay.getS3ImportSystem().getName());
         importSystem.setAccountSystemId("user_crmaccount_external_id");
         cdlService.updateS3ImportSystem(mainTestTenant.getId(), importSystem);
         String url = BASE_URL_PREFIX + "/s3import/template/preview";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.valueOf("application/json;UTF-8"));
-        HttpEntity<String> requestEntity = new HttpEntity<String>(JsonUtils.serialize(templateDisplay), headers);
+        HttpEntity<String> requestEntity = new HttpEntity<>(JsonUtils.serialize(templateDisplay), headers);
         List<?> list = restTemplate.postForObject(getRestAPIHostPort() + url, requestEntity, List.class);
         List<TemplateFieldPreview> previewList = JsonUtils.convertList(list, TemplateFieldPreview.class);
+        Assert.assertNotNull(previewList);
         for (TemplateFieldPreview preview : previewList) {
             if (preview.getNameInTemplate().equalsIgnoreCase("user_crmaccount_external_id")) {
-                assertEquals(preview.getFieldCategory(), FieldCategory.LatticeField);
+                Assert.assertEquals(preview.getFieldCategory(), FieldCategory.LatticeField);
             }
         }
     }
@@ -167,7 +177,7 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
         List<S3ImportTemplateDisplay> templateDisplays = JsonUtils.deserialize(responseEntity.getBody(),
                 new TypeReference<List<S3ImportTemplateDisplay>>() {
                 });
-        assertNotNull(templateDisplays);
+        Assert.assertNotNull(templateDisplays);
         if (templateDisplay == null) {
             for (S3ImportTemplateDisplay template : templateDisplays) {
                 if (template.getObject().equals(EntityType.Accounts.getDisplayName())) {
@@ -186,6 +196,17 @@ public class S3TemplateDeploymentTestNG extends PlsDeploymentTestNGBase {
             }
         }
         return flag;
+    }
+
+    protected void createDefaultImportSystem() {
+        S3ImportSystem importSystem = new S3ImportSystem();
+        importSystem.setPriority(1);
+        importSystem.setName("DefaultSystem");
+        importSystem.setDisplayName("DefaultSystem");
+        importSystem.setSystemType(S3ImportSystem.SystemType.Other);
+        importSystem.setTenant(mainTestTenant);
+        cdlProxy.createS3ImportSystem(mainTestTenant.getId(), importSystem);
+        dropBoxProxy.createTemplateFolder(mainTestTenant.getId(), "DefaultSystem", null, null);
     }
 
 }

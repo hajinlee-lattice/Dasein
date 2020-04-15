@@ -13,7 +13,6 @@ import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.entitymgr.PlaymakerTenantEntityMgr;
 import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
-
 public class PlaymakerTenantEntityMgrImplTestNG extends PlaymakerTestNGBase {
 
     @Inject
@@ -22,7 +21,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends PlaymakerTestNGBase {
     @Inject
     private OAuthUserEntityMgr users;
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testCRUD() {
 
         PlaymakerTenant tenant = getTenant();
@@ -58,7 +57,7 @@ public class PlaymakerTenantEntityMgrImplTestNG extends PlaymakerTestNGBase {
         playMakerEntityMgr.create(tenant);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testPasswordExpiration() {
         PlaymakerTenant tenant = getTenant();
         try {

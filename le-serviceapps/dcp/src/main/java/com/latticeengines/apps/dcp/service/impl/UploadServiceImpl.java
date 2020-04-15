@@ -81,7 +81,7 @@ public class UploadServiceImpl implements UploadService {
         if (table == null) {
             throw new RuntimeException("Cannot find Upload match result table with name: " + tableName);
         }
-        String oldTableName = upload.getMatchResultName();
+        String oldTableName = upload.getMatchResultTableName();
         Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
         boolean hasOldTable = oldTable != null;
         upload.setMatchResult(table);
@@ -93,6 +93,31 @@ public class UploadServiceImpl implements UploadService {
                     retentionPolicy);
         } else {
             log.info("There was no old match result table.");
+        }
+    }
+
+    @Override
+    public void registerMatchCandidates(String customerSpace, long uploadPid, String tableName) {
+        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+        if (upload == null) {
+            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+        }
+        Table table = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
+        if (table == null) {
+            throw new RuntimeException("Cannot find Upload match candidates table with name: " + tableName);
+        }
+        String oldTableName = upload.getMatchCandidatesTableName();
+        Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
+        boolean hasOldTable = oldTable != null;
+        upload.setMatchCandidates(table);
+        uploadEntityMgr.update(upload);
+        if (hasOldTable) {
+            log.info("There was an old match candidates table {}, going to be marked as temporary.", oldTableName);
+            RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
+            metadataService.updateTableRetentionPolicy(CustomerSpace.parse(customerSpace), oldTableName,
+                    retentionPolicy);
+        } else {
+            log.info("There was no old match candidates table.");
         }
     }
 

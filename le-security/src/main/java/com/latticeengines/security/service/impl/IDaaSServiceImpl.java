@@ -155,6 +155,7 @@ public class IDaaSServiceImpl implements IDaaSService {
     @Override
     public IDaaSUser getIDaaSUser(String email) {
         if (enabled) {
+            initialize();
             IDaaSUser user = null;
             try {
                 RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);

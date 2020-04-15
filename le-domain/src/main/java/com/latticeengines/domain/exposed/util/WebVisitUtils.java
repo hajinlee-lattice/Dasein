@@ -155,6 +155,7 @@ public final class WebVisitUtils {
         stream.setName(EntityType.WebVisit.name());
         stream.setTenant(tenant);
         stream.setDataFeedTask(dataFeedTask);
+        stream.setStreamType(AtlasStream.StreamType.WebVisit);
         stream.setMatchEntities(Collections.singletonList(BusinessEntity.Account.name()));
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
         stream.setDateAttribute(InterfaceName.WebVisitDate.name());

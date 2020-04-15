@@ -1,5 +1,11 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Enrichment;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -9,6 +15,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
 import com.latticeengines.apps.cdl.mds.ExternalSystemMetadataStore;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -24,14 +32,18 @@ import reactor.core.publisher.Flux;
 public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataStore {
 
     private final CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr;
-
     private final CDLNamespaceService cdlNamespaceService;
+    private final BatonService batonService;
+
+    private boolean isEntityMatch;
+    private boolean isEntityMatchGAOnly;
 
     @Inject
     public ExternalSystemMetadataStoreImpl(CDLExternalSystemEntityMgr cdlExternalSystemEntityMgr,
-            CDLNamespaceService cdlNamespaceService) {
+                                           CDLNamespaceService cdlNamespaceService, BatonService batonService) {
         this.cdlExternalSystemEntityMgr = cdlExternalSystemEntityMgr;
         this.cdlNamespaceService = cdlNamespaceService;
+        this.batonService = batonService;
     }
 
     @Override
@@ -40,6 +52,9 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         // only account has external system ids now
         if (BusinessEntity.Account.equals(namespace.getCoord2())) {
             cdlNamespaceService.setMultiTenantContext(namespace.getCoord1());
+            CustomerSpace customerSpace = CustomerSpace.parse(namespace.getCoord1());
+            isEntityMatch = batonService.isEntityMatchEnabled(customerSpace);
+            isEntityMatchGAOnly = batonService.onlyEntityMatchGAEnabled(customerSpace);
             CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem(BusinessEntity.Account);
 
             if (externalSystem != null) {
@@ -75,7 +90,20 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         if (StringUtils.isNotBlank(displayName)) {
             cm.setDisplayName(displayName);
         }
-        cm.setCanModel(false);
+        // PLS-15406 setting for attributes corresponds to mappings in section
+        // Unique ID, Other IDs, Match IDs, only enable for usage export
+        if (isEntityMatch && !isEntityMatchGAOnly) {
+            cm.disableGroup(Segment);
+            cm.enableGroup(Enrichment);
+            cm.disableGroup(TalkingPoint);
+            cm.disableGroup(CompanyProfile);
+            cm.disableGroup(Model);
+            cm.setCanSegment(true);
+            cm.setCanEnrich(true);
+            cm.setCanModel(false);
+        } else {
+            cm.setCanModel(false);
+        }
         return cm;
     }
 

@@ -247,6 +247,9 @@ public class MatchHistory implements HasId<String> {
     @AvroName("Matched")
     private Boolean matched;
     @Nullable
+    @AvroName("LdcMatched")
+    private Boolean ldcMatched;
+    @Nullable
     @AvroName("HitWhiteCache")
     private Boolean hitWhiteCache;
     @Nullable
@@ -373,6 +376,17 @@ public class MatchHistory implements HasId<String> {
     @Union({})
     public MatchHistory setMatched(Boolean matched) {
         this.matched = matched;
+        return this;
+    }
+
+    @Union({})
+    public Boolean getLdcMatched() {
+        return ldcMatched;
+    }
+
+    @Union({})
+    public MatchHistory setLdcMatched(boolean ldcMatched) {
+        this.ldcMatched = ldcMatched;
         return this;
     }
 

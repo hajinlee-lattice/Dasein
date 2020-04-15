@@ -108,9 +108,9 @@ public class ProjectResource {
 
     @DeleteMapping(value = "/{projectId}")
     @ResponseBody
-    @ApiOperation("Delete project by projectId")
+    @ApiOperation("Archive project by projectId")
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    void deleteProject(@PathVariable String projectId) {
+    void archiveProject(@PathVariable String projectId) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
@@ -119,7 +119,7 @@ public class ProjectResource {
         try {
             projectService.deleteProject(customerSpace.toString(), projectId);
         } catch (LedpException e) {
-            log.error("Failed to delete project by projectId: " + e.getMessage());
+            log.error("Failed to archive project by projectId: " + e.getMessage());
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());

@@ -686,7 +686,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                                         DataFeedTask opportunityDataFeedTask, DataFeedTask stageDataFeedTask) {
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         AtlasStream opportunityAtlasStream =
-                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(opportunityDataFeedTask)
+                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(opportunityDataFeedTask).withStreamType(AtlasStream.StreamType.Opportunity)
                         .withName(opportunityAtlasStreamName).withMatchEntities(Collections.singletonList(BusinessEntity.Account.name()))
                         .withAggrEntities(Collections.singletonList(BusinessEntity.Account.name())).withDateAttribute(InterfaceName.LastModifiedDate.name())
                         .withPeriods(Collections.singletonList(PeriodStrategy.Template.Week.name())).withRetentionDays(365).withReducer(prepareReducer()).build();
@@ -712,7 +712,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
                                          DataFeedTask marketingDataFeedTask, DataFeedTask marketingTypeDataFeedTask) {
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         AtlasStream marketingAtlasStream =
-                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(marketingDataFeedTask)
+                new AtlasStream.Builder().withTenant(tenant).withDataFeedTask(marketingDataFeedTask).withStreamType(AtlasStream.StreamType.MarketingActivity)
                         .withName(marketingAtlasStreamName).withMatchEntities(Collections.singletonList(BusinessEntity.Contact.name()))
                         .withAggrEntities(Arrays.asList(BusinessEntity.Contact.name(),
                                 BusinessEntity.Account.name())).withDateAttribute(InterfaceName.ActivityDate.name())

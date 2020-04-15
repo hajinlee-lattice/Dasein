@@ -10,6 +10,8 @@ import java.util.UUID;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -140,6 +142,11 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
     @JsonProperty("count")
     @Transient
     private Long count;
+
+    @Column(name="STREAM_TYPE")
+    @JsonProperty("stream_type")
+    @Enumerated(EnumType.STRING)
+    private StreamType streamType;
 
     @Override
     public Long getPid() {
@@ -316,6 +323,14 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
         return STREAM_ID_PREFIX + uuid;
     }
 
+    public StreamType getStreamType() {
+        return streamType;
+    }
+
+    public void setStreamType(StreamType streamType) {
+        this.streamType = streamType;
+    }
+
     public static final class Builder {
         private AtlasStream atlasStream;
 
@@ -368,8 +383,17 @@ public class AtlasStream implements HasPid, Serializable, HasAuditingFields {
             return this;
         }
 
+        public Builder withStreamType(StreamType streamType) {
+            atlasStream.setStreamType(streamType);
+            return this;
+        }
+
         public AtlasStream build() {
             return atlasStream;
         }
+    }
+
+    public enum StreamType {
+        WebVisit, Opportunity, MarketingActivity
     }
 }

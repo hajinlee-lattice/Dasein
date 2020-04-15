@@ -36,6 +36,8 @@ public class LaunchSummary {
 
     private String audienceName;
 
+    private String folderName;
+
     private DataIntegrationStatusMonitor integrationStatusMonitor;
 
     public LaunchSummary() {
@@ -65,6 +67,7 @@ public class LaunchSummary {
         this.setDestinationSysType(launch.getDestinationSysType());
         this.setDestinationAccountId(launch.getDestinationAccountId());
         this.setAudienceName(launch.getAudienceName());
+        this.setFolderName(launch.getFolderName());
         if (launch.getPlay() != null) {
             this.setPlayName(launch.getPlay().getName());
             this.setPlayDisplayName(launch.getPlay().getDisplayName());
@@ -175,6 +178,14 @@ public class LaunchSummary {
 
     public void setAudienceName(String audienceName) {
         this.audienceName = audienceName;
+    }
+
+    public String getFolderName() {
+        return folderName;
+    }
+
+    public void setFolderName(String folderName) {
+        this.folderName = folderName;
     }
 
     public DataIntegrationStatusMonitor getIntegrationStatusMonitor() {

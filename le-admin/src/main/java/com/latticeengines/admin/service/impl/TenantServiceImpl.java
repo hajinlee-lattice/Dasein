@@ -28,6 +28,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.latticeengines.admin.entitymgr.TenantEntityMgr;
 import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.ServiceConfigService;
@@ -653,23 +654,14 @@ public class TenantServiceImpl implements TenantService {
         List<SerializableDocumentDirectory> configDirs = new ArrayList<>();
 
         // generate email list to be added and IDaaS user list
-        List<String> vboEmails = new ArrayList<>();
         List<IDaaSUser> users = new ArrayList<>();
         for(VboRequest.User user : vboRequest.getProduct().getUsers()) {
-            vboEmails.add(user.getEmailAddress());
             users.add(constructIDaaSUser(user, vboRequest.getSubscriber().getLanguage()));
         }
 
         for (String component : services) {
             SerializableDocumentDirectory componentConfig = serviceService.getDefaultServiceConfig(component);
             if(component.equalsIgnoreCase(PLSComponent.componentName)) {
-                for (SerializableDocumentDirectory.Node node : componentConfig.getNodes()) {
-                    if (node.getNode().contains("ExternalAdminEmails")) {
-                        List<String> mailList = JsonUtils.convertList(JsonUtils.deserialize(node.getData(), List.class), String.class);
-                        mailList.addAll(vboEmails);
-                        node.setData(JsonUtils.serialize(mailList));
-                    }
-                }
                 // add users node
                 if (CollectionUtils.isNotEmpty(users)) {
                     SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
@@ -703,6 +695,16 @@ public class TenantServiceImpl implements TenantService {
         iDaasuser.setUserName(user.getUserId());
         iDaasuser.setPhoneNumber(user.getTelephoneNumber());
         iDaasuser.setLanguage(language);
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
+                "Last name is required");
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),
+                "Email is required");
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getUserName()),
+                "User name is required");
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLanguage()),
+                "Language is required");
+        Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getPhoneNumber()),
+                "Phone number is required");
         return iDaasuser;
     }
 

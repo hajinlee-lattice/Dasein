@@ -167,8 +167,6 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
                 log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
                 log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
-                publishTalkingPoints(customerSpace, playLaunchContext.getPlayName(),
-                        playLaunchContext.getPlayLaunchId());
             }
         } catch (Exception ex) {
             failureUpdates(customerSpace, playName, playLaunchId, ex);
@@ -263,10 +261,6 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
     private void failureUpdates(CustomerSpace customerSpace, String playName, String playLaunchId, Exception ex) {
         log.error(ex.getMessage(), ex);
         playProxy.updatePlayLaunch(customerSpace.toString(), playName, playLaunchId, LaunchState.Failed);
-    }
-
-    private void publishTalkingPoints(CustomerSpace customerSpace, String playName, String playLaunchId) {
-        playProxy.publishTalkingPoints(customerSpace.toString(), playName);
     }
 
     private void setCustomDisplayNames(PlayLaunchContext playLaunchContext) {

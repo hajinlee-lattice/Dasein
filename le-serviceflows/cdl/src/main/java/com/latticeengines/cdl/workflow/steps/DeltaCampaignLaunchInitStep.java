@@ -270,13 +270,5 @@ public class DeltaCampaignLaunchInitStep
         campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
         log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
         log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
-        publishTalkingPoints(customerSpace, playLaunchContext.getPlayName(), playLaunchContext.getPlayLaunchId());
     }
-
-    private void publishTalkingPoints(CustomerSpace customerSpace, String playName, String playLaunchId) {
-        if (createRecommendationDataFrame) {
-            playProxy.publishTalkingPoints(customerSpace.toString(), playName);
-        }
-    }
-
 }
