@@ -322,7 +322,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         boolean enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
         hasFilter = hasFilter && !enforceRebuild;
         putStringValueInContext(PROCESS_ACCOUNT_STATS_MERGE, hasFilter + "");
-        doFullProfile = getConfiguration().isFullProfile() || ldcChange || grapherContext.isDataCloudNew();
+        doFullProfile = getConfiguration().isFullProfile() || (ldcChange && !ldcRefresh)
+                || grapherContext.isDataCloudNew();
         log.info("hasFilter=" + hasFilter + " ldcChange=" + ldcChange + " ldcRefresh=" + ldcRefresh + " ldcNew="
                 + grapherContext.isDataCloudNew() + " enforceRebuild=" + enforceRebuild + " doFullProfile = "
                 + doFullProfile);
