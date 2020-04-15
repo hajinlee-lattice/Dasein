@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.C
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.serviceflows.workflow.util.ETLEngineLoad;
@@ -117,15 +118,14 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
             columnNames.addAll(getTableColumnNames(convertBatchStoreTableName));
             setRematchVersions(matchInput);
         }
+        matchInput.setSourceEntity(BusinessEntity.Transaction.name());
         log.info("matchInput is {}.", matchInput);
         if (configuration.isEntityMatchGAOnly()) {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), null,
-                    hasConvertBatchStoreTableName, null);
+                    getSystemIds(BusinessEntity.Account), null, hasConvertBatchStoreTableName, null);
         } else {
             return MatchUtils.getAllocateIdMatchConfigForAccount(customerSpace.toString(), matchInput, columnNames,
-                    Collections.singletonList(InterfaceName.CustomerAccountId.name()), newAccountTableName,
-                    hasConvertBatchStoreTableName, null);
+                    getSystemIds(BusinessEntity.Account), newAccountTableName, hasConvertBatchStoreTableName, null);
         }
     }
 

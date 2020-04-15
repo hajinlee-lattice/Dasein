@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,6 +38,7 @@ import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.service.EntityLookupEntryService;
 import com.latticeengines.datacloud.match.service.EntityMatchCommitter;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.EntityMatchVersionService;
 import com.latticeengines.datacloud.match.service.EntityRawSeedService;
 import com.latticeengines.datacloud.match.util.EntityMatchUtils;
@@ -74,6 +78,9 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
     @Inject
     private EntityMatchVersionService entityMatchVersionService;
 
+    @Inject
+    private EntityMatchMetricService entityMatchMetricService;
+
     @Override
     public EntityPublishStatistics commit(@NotNull String entity, @NotNull Tenant tenant, Boolean destTTLEnabled,
             Map<EntityMatchEnvironment, Integer> versionMap) {
@@ -96,6 +103,8 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
             Map<EntityMatchEnvironment, Integer> versionMap, int nReader, int nWriter) {
         ExecutorService readService = ThreadPoolUtils.getCachedThreadPool(String.format("em-commit-r-%s", entity));
         ExecutorService writeService = ThreadPoolUtils.getCachedThreadPool(String.format("em-commit-w-%s", entity));
+        ScheduledExecutorService monitorService = Executors.newScheduledThreadPool(1);
+
         AtomicBoolean readFinished = new AtomicBoolean(false);
         AtomicBoolean writeFinished = new AtomicBoolean(false);
         // shared queues
@@ -122,6 +131,12 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
             readService.submit(new LookupEntryReader(tenant, versionMap, readFinished, nLookupNotInStaging, writeQueue,
                     readQueue));
         }
+
+        // report progress, only for large volume
+        ScheduledFuture<?> monitorFuture = monitorService.scheduleAtFixedRate(() -> {
+            log.info("Entity={} No. scanned seed = {}, No. written seed = {}, No. written lookup entries = {}", entity,
+                    nScannedSeeds.get(), nWrittenSeeds.get(), nWrittenLookups.get());
+        }, 10, 5, TimeUnit.MINUTES);
 
         // scanning seeds
         List<String> seedIds = new ArrayList<>();
@@ -165,6 +180,9 @@ public class EntityMatchCommitterImpl implements EntityMatchCommitter {
             writeFinished.set(true);
             writeService.shutdown();
             writeService.awaitTermination(maxWriterLagInHours, TimeUnit.HOURS);
+            monitorFuture.cancel(true);
+            monitorService.shutdown();
+            monitorService.awaitTermination(2, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             log.error("Commit entity {} for tenant {} is interrupted", entity, tenant.getId(), e);
             throw new RuntimeException(e);
