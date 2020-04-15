@@ -38,6 +38,7 @@ public class FileDownloadEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
         Assert.assertNotNull(retrieved);
 
         fileDownloadEntityMgr.delete(retrieved);
+        SleepUtils.sleep(500);
 
         retrieved = fileDownloadEntityMgr.findByToken(token);
         Assert.assertNull(retrieved);
