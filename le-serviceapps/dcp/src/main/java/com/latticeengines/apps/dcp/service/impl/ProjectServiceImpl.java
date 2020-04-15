@@ -16,6 +16,8 @@ import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
+import com.latticeengines.common.exposed.util.EmailUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -114,6 +116,21 @@ public class ProjectServiceImpl implements ProjectService {
         return true;
     }
 
+    @Override
+    public List<String> getRecipientList(String customerSpace, String projectId) {
+        Project project = projectEntityMgr.findByProjectId(projectId);
+        if (project == null) {
+            return new ArrayList<>();
+        }
+        return StringUtils.isEmpty(project.getRecipientList()) ? new ArrayList<>() : EmailUtils.parseEmails(project.getRecipientList());
+    }
+
+    @Override
+    public void updateRecipientList(String customerSpace, String projectId, String recipientList) {
+        projectEntityMgr.updateRecipientListByProjectId(projectId, recipientList);
+
+    }
+
     private void validateProjectId(String projectId) {
         if (StringUtils.isBlank(projectId)) {
             throw new RuntimeException("Cannot create DCP project with blank projectId!");
@@ -167,6 +184,9 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectType(projectType);
         project.setRootPath(rootPath);
         project.setS3ImportSystem(system);
+        List<String> mailList = new ArrayList<>();
+        mailList.add(user);
+        project.setRecipientList(JsonUtils.serialize(mailList));
         return project;
     }
 

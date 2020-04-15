@@ -43,5 +43,15 @@ public class ProjectServiceImpl implements ProjectService {
         projectProxy.deleteProject(customerSpace, projectId);
     }
 
+    @Override
+    public List<String> getRecipientList(String customerSpace, String projectId) {
+        return projectProxy.getRecipientList(customerSpace, projectId);
+    }
+
+    @Override
+    public void updateRecipientList(String customerSpace, String projectId, String recipientList) {
+        projectProxy.updateRecipientList(customerSpace, projectId, recipientList);
+    }
+
 
 }

@@ -98,6 +98,10 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
     @JsonProperty("project_description")
     private String projectDescription;
 
+    @Column(name = "RECIPIENT_LIST", length = 4000)
+    @JsonProperty("recipient_list")
+    private String recipientList;
+
     @Override
     public Long getPid() {
         return pid;
@@ -202,6 +206,14 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
 
     public void setProjectDescription(String projectDescription) {
         this.projectDescription = projectDescription;
+    }
+
+    public String getRecipientList() {
+        return recipientList;
+    }
+
+    public void setRecipientList(String recipientList) {
+        this.recipientList = recipientList;
     }
 
     //TODO: define project type

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -72,5 +73,20 @@ public class ProjectResource {
     @ApiOperation(value = "Delete project by projectId")
     public Boolean deleteProject(@PathVariable String customerSpace, @PathVariable String projectId) {
         return projectService.deleteProject(customerSpace, projectId);
+    }
+
+    @GetMapping(value = "/projectId/{projectId}/recipientlist")
+    @ResponseBody
+    @ApiOperation(value = "Get recipientlist of project")
+    public List<String> getRecipientList(@PathVariable String customerSpace, @PathVariable String projectId) {
+        return projectService.getRecipientList(customerSpace, projectId);
+    }
+
+    @PutMapping(value = "/projectId/{projectId}/recipientlist")
+    @ResponseBody
+    @ApiOperation(value = "Update recipientlist of project")
+    public void updateRecipientList(@PathVariable String customerSpace, @PathVariable String projectId,
+                                                          @RequestBody String recipientList) {
+         projectService.updateRecipientList(customerSpace, projectId, recipientList);
     }
 }

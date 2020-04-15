@@ -15,4 +15,8 @@ public interface ProjectService {
     ProjectDetails getProjectByProjectId(String customerSpace, String projectId);
 
     void deleteProject(String customerSpace, String projectId);
+
+    List<String> getRecipientList(String customerSpace, String projectId);
+
+    void updateRecipientList(String customerSpace, String projectId, String recipientList);
 }
