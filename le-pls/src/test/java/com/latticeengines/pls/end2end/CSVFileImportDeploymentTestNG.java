@@ -555,8 +555,8 @@ public class CSVFileImportDeploymentTestNG extends CSVFileImportDeploymentTestNG
                         .toString(),
                 SourceType.FILE.getName());
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, targetPath));
-        String avroFileName = baseTransactionFile.getName().substring(0,
-                baseTransactionFile.getName().lastIndexOf("."));
+        String avroFileName = baseAccountFile.getName().substring(0,
+                baseAccountFile.getName().lastIndexOf("."));
         List<String> avroFiles = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, targetPath, file ->
                 !file.isDirectory() && file.getPath().toString().contains(avroFileName)
                         && file.getPath().getName().endsWith("avro"));
