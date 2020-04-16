@@ -22,12 +22,12 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
-import com.latticeengines.domain.exposed.spark.cdl.MergeCuratedAttributesConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class MergeCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
+public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(MergeCuratedAttributesTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(GenerateCuratedAttributesTestNG.class);
 
     // input schema
     private static final List<Pair<String, Class<?>>> ACC_BATCH_STORE_FIELDS = Arrays.asList( //
@@ -55,10 +55,10 @@ public class MergeCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
     // TODO add other test cases
     @Test(groups = "functional")
     private void test() {
-        MergeCuratedAttributesConfig config = baseConfig();
+        GenerateCuratedAttributesConfig config = baseConfig();
         prepareTestData();
         log.info("Config = {}", JsonUtils.serialize(config));
-        SparkJobResult result = runSparkJob(MergeCuratedAttributes.class, config);
+        SparkJobResult result = runSparkJob(GenerateCuratedAttributes.class, config);
         log.info("Result = {}", JsonUtils.serialize(result));
         verifyResult(result);
     }
@@ -105,8 +105,8 @@ public class MergeCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
         uploadHdfsDataUnit(numOfContacts, NUM_CONTACT_FIELDS);
     }
 
-    private MergeCuratedAttributesConfig baseConfig() {
-        MergeCuratedAttributesConfig config = new MergeCuratedAttributesConfig();
+    private GenerateCuratedAttributesConfig baseConfig() {
+        GenerateCuratedAttributesConfig config = new GenerateCuratedAttributesConfig();
         config.joinKey = AccountId.name();
         config.lastActivityDateInputIdx = 0;
         config.masterTableIdx = 1;

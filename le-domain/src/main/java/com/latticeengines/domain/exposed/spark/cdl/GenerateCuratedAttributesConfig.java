@@ -6,9 +6,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
-public class MergeCuratedAttributesConfig extends SparkJobConfig {
+public class GenerateCuratedAttributesConfig extends SparkJobConfig {
 
-    public static final String NAME = "mergeCuratedAttrs";
+    public static final String NAME = "generateCuratedAttrs";
     private static final long serialVersionUID = 7277006448211365773L;
 
     // [required]: column used as join key to merge attrs

@@ -1,7 +1,7 @@
 package com.latticeengines.spark.exposed.job.cdl
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{CDLUpdatedTime, LastActivityDate}
-import com.latticeengines.domain.exposed.spark.cdl.MergeCuratedAttributesConfig
+import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.functions._
@@ -14,9 +14,9 @@ import scala.collection.mutable
 /**
   * Merge curated attributes from multiple sources and do some consolidation
   */
-class MergeCuratedAttributes extends AbstractSparkJob[MergeCuratedAttributesConfig] {
-  override def runJob(spark: SparkSession, lattice: LatticeContext[MergeCuratedAttributesConfig]): Unit = {
-    val config: MergeCuratedAttributesConfig = lattice.config
+class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttributesConfig] {
+  override def runJob(spark: SparkSession, lattice: LatticeContext[GenerateCuratedAttributesConfig]): Unit = {
+    val config: GenerateCuratedAttributesConfig = lattice.config
     val masterTableIdx = Option(config.masterTableIdx)
     val lastActivityDateIdx = Option(config.lastActivityDateInputIdx)
     val attrsToMerge = config.attrsToMerge.asScala.mapValues(_.asScala)

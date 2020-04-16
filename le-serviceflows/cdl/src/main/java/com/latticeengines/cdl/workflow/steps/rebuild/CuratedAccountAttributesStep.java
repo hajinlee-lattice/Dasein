@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_CURATED_ATTRIBUTES;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_GENERATE_CURATED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLUpdatedTime;
@@ -52,7 +52,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
-import com.latticeengines.domain.exposed.spark.cdl.MergeCuratedAttributesConfig;
+import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -217,8 +217,8 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
      */
     private TransformationStepConfig mergeAttributes() {
         TransformationStepConfig step = new TransformationStepConfig();
-        MergeCuratedAttributesConfig config = new MergeCuratedAttributesConfig();
-        step.setTransformer(TRANSFORMER_MERGE_CURATED_ATTRIBUTES);
+        GenerateCuratedAttributesConfig config = new GenerateCuratedAttributesConfig();
+        step.setTransformer(TRANSFORMER_GENERATE_CURATED_ATTRIBUTES);
 
         int inputIdx = 0;
         // since it's linked in previous step, check inactive is enough
