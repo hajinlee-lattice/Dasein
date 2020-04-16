@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportConfigurationFactory;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportDataFeedTaskConfiguration;
@@ -74,6 +75,8 @@ public class ImportDataFeedTask extends BaseWorkflowStep<ImportDataFeedTaskConfi
         identifiers.add(taskUniqueId);
         importConfig.setProperty(ImportProperty.COLLECTION_IDENTIFIERS, JsonUtils.serialize(identifiers));
         importConfig.setBusinessEntity(BusinessEntity.getByName(dataFeedTask.getEntity()));
+
+        importConfig.addDefaultColumn(InterfaceName.CDLTemplateName.name(), dataFeedProxy.getTemplateName(configuration.getCustomerSpace().toString(), taskUniqueId));
 
         if (sourceType.equals(SourceType.FILE)) {
             putStringValueInContext(WorkflowContextConstants.Outputs.EAI_JOB_INPUT_FILE_PATH,

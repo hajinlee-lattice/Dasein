@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.eai;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -43,9 +45,28 @@ public class ImportConfiguration extends EaiJobConfiguration {
         this.sourceConfigurations = sourceConfigurations;
     }
 
+    @JsonProperty("default_column_map")
+    private Map<String, String> defaultColumnMap;
+
     @JsonIgnore
     public void addSourceConfiguration(SourceImportConfiguration sourceConfiguration) {
         sourceConfigurations.add(sourceConfiguration);
+    }
+
+    public Map<String, String> getDefaultColumnMap() {
+        return defaultColumnMap;
+    }
+
+    public void setDefaultColumnMap(Map<String, String> defaultColumnMap) {
+        this.defaultColumnMap = defaultColumnMap;
+    }
+
+    @JsonIgnore
+    public void addDefaultColumn(String columnName, String value) {
+        if (defaultColumnMap == null) {
+            defaultColumnMap = new HashMap<>();
+        }
+        defaultColumnMap.put(columnName, value);
     }
 
     @Override

@@ -41,6 +41,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, DataFeed datafeed);
 
+    List<DataFeedTask> getDataFeedTaskUnderDataFeed(DataFeed dataFeed);
+
     List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String entity, DataFeed datafeed,
                                                                String excludeSource, String excludeFeedType);
 

@@ -321,6 +321,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<DataFeedTask> getDataFeedTaskUnderDataFeed(DataFeed dataFeed) {
+        List<DataFeedTask> dataFeedTasks = datafeedTaskRepository.findByDataFeed(dataFeed);
+        if (dataFeedTasks != null) {
+            for (DataFeedTask dataFeedTask : dataFeedTasks) {
+                TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
+                TableEntityMgr.inflateTable(dataFeedTask.getImportData());
+            }
+        }
+        return dataFeedTasks;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public List<DataFeedTask> getDataFeedTaskWithSameEntityExcludeOne(String entity, DataFeed datafeed,
                                                                       String excludeSource, String excludeFeedType) {
         List<DataFeedTask> dataFeedTasks =
@@ -368,17 +381,18 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         task.setS3ImportStatus(dataFeedTask.getS3ImportStatus());
         task.setTemplateDisplayName(dataFeedTask.getTemplateDisplayName());
         task.setFeedType(dataFeedTask.getFeedType());
-        if (updateTaskOnly) {
-            datafeedTaskDao.update(task);
-        } else {
+        if (dataFeedTask.getImportSystem() != null) {
+            task.setImportSystem(dataFeedTask.getImportSystem());
+        }
+        if (!updateTaskOnly) {
             log.info("Update data feed task {} with its import template.", task.getUniqueId());
             TableEntityMgr.inflateTable(task.getImportTemplate());
             deleteReferences(task.getImportTemplate());
             task.getImportTemplate().setAttributes(dataFeedTask.getImportTemplate().getAttributes());
             updateReferences(task.getImportTemplate());
             createReferences(task.getImportTemplate());
-            datafeedTaskDao.update(task);
         }
+        datafeedTaskDao.update(task);
     }
 
     private void deleteReferences(Table table) {

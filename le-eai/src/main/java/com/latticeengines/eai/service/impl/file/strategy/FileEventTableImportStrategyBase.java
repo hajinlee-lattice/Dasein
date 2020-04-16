@@ -2,6 +2,8 @@ package com.latticeengines.eai.service.impl.file.strategy;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema.Type;
 import org.apache.camel.ProducerTemplate;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -198,7 +201,38 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         } else {
             table.getAttribute(InterfaceName.InternalId.name()).setNullable(true);
         }
+        List<Attribute> defaultAttrs = getDefaultAttribute(ctx);
+        if (CollectionUtils.isNotEmpty(defaultAttrs)) {
+            table.addAttributes(defaultAttrs);
+        }
         return table;
+    }
+
+    private List<Attribute> getDefaultAttribute(ImportContext ctx) {
+        String defaultMapStr = ctx.getProperty(ImportProperty.DEFAULT_COLUMN_MAP, String.class, null);
+        if (StringUtils.isNotEmpty(defaultMapStr)) {
+            Map<?, ?> rawMap = JsonUtils.deserialize(defaultMapStr, Map.class);
+            if (rawMap != null) {
+                Map<String, String> defaultMap = JsonUtils.convertMap(rawMap, String.class, String.class);
+                List<Attribute> attrList = new ArrayList<>();
+                defaultMap.forEach((name, value) -> attrList.add(getDefaultStringAttribute(name, value)));
+                return attrList;
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    private Attribute getDefaultStringAttribute(String attrName, String value) {
+        Attribute attribute = new Attribute();
+        attribute.setName(attrName);
+        attribute.setDisplayName(attrName);
+        attribute.setPhysicalDataType(Type.STRING.getName());
+        attribute.setSourceLogicalDataType("");
+        attribute.setLogicalDataType("");
+        attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        attribute.setDefaultValueStr(value);
+        attribute.setNullable(true);
+        return attribute;
     }
 
     private void addInternalId(Table table) {

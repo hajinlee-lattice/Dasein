@@ -169,6 +169,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         table = JsonUtils.deserialize(conf.get("eai.table.schema"), Table.class);
         LOG.info("table is:" + table);
         LOG.info("Deduplicate enable = false");
+
         idColumnName = conf.get("eai.id.column.name");
         LOG.info("Import file id column is: " + idColumnName);
         if (StringUtils.isEmpty(idColumnName)) {

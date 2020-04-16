@@ -2,8 +2,10 @@ package com.latticeengines.proxy.exposed.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -338,5 +340,21 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{pid}/S3Import/status/{status}",
                 shortenCustomerSpace(customerSpace), pid, status);
         put("set DataFeedTask S3 import status", url);
+    }
+
+    public String getTemplateName(String customerSpace, String taskUniqueId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskUniqueId}/templateName",
+                shortenCustomerSpace(customerSpace), taskUniqueId);
+        return get("get template name from dataFeedTask uniqueId", url, String.class);
+    }
+
+    public Map<String, String> getTemplateToSystemMap(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/templateToSystemMap",
+                shortenCustomerSpace(customerSpace));
+        Map<?, ?> rawMap = get("get template name to system name map", url, Map.class);
+        if (rawMap != null) {
+            return JsonUtils.convertMap(rawMap, String.class, String.class);
+        }
+        return Collections.emptyMap();
     }
 }

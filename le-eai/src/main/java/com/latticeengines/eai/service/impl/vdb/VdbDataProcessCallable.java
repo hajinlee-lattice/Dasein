@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -49,6 +50,8 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
 
     private DataContainer dataContainer;
     HashMap<String, Attribute> attributeMap;
+    HashMap<String, Attribute> attrWithDefaultValueMap;
+
     int processedRecord = 0;
     int errorRecord = 0;
     int duplicateRecord = 0;
@@ -77,7 +80,7 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
     public Integer[] call() throws Exception {
         log.info("Start Vdb data processor: " + processorId);
         long startTime = System.currentTimeMillis();
-        intialize();
+        initialize();
         while (!fileQueue.isEmpty() || !stop) {
             String dataFileName = fileQueue.poll();
             if (dataFileName == null) {
@@ -95,14 +98,20 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
         return result;
     }
 
-    private void intialize() {
+    private void initialize() {
         dataContainer = new DataContainer(vdbValueConverter, table, true);
         attributeMap = new HashMap<>();
+        attrWithDefaultValueMap = new HashMap<>();
         idColumnName = null;
         for (Attribute attr : table.getAttributes()) {
-            attributeMap.put(attr.getSourceAttrName(), attr);
+            if (StringUtils.isNotEmpty(attr.getSourceAttrName())) {
+                attributeMap.put(attr.getSourceAttrName(), attr);
+            }
             if (attr.getInterfaceName() != null && attr.getInterfaceName().equals(InterfaceName.Id)) {
                 idColumnName = attr.getName();
+            }
+            if (StringUtils.isNotEmpty(attr.getDefaultValueStr())) {
+                attrWithDefaultValueMap.put(attr.getName(), attr);
             }
         }
         errorMap = new HashMap<>();
@@ -141,7 +150,7 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
     }
 
 
-    private boolean copyToHdfs(DataContainer dataContainer, String filePath) {
+    private void copyToHdfs(DataContainer dataContainer, String filePath) {
         int retries = 0;
         Exception exception = null;
         boolean fileCopy = true;
@@ -167,12 +176,12 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
             throw new RuntimeException(
                     String.format("Cannot write stream to Hdfs. Exception: %s", exception.toString()));
         }
-        return fileCopy;
     }
 
     private int appendGenericRecord(VdbQueryDataResult vdbQueryDataResult) {
         int rowSize = vdbQueryDataResult.getColumns().get(0).getValues().size();
         int rowsAppend = 0;
+        Set<String> attrNames = new HashSet<>();
         for (int i = 0; i < rowSize; i++) {
             if (validateRecord(vdbQueryDataResult, i)) {
                 dataContainer.newRecord();
@@ -182,12 +191,18 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
                             if (attributeMap.containsKey(column.getColumnName())) {
                                 Attribute attr = attributeMap.get(column.getColumnName());
                                 dataContainer.setValueForAttribute(attr, column.getValues().get(i));
+                                attrNames.add(attr.getName());
                             }
                         } catch (RuntimeException e) {
                             errorMap.put(column.getColumnName(), e.getMessage());
                             throw e;
                         }
                     }
+                    attrWithDefaultValueMap.forEach((attrName, attr) -> {
+                        if (!attrNames.contains(attrName)) {
+                            dataContainer.setValueForAttribute(attr, attr.getDefaultValueStr());
+                        }
+                    });
                     dataContainer.endRecord();
                     rowsAppend++;
                 } catch (RuntimeException e) {
