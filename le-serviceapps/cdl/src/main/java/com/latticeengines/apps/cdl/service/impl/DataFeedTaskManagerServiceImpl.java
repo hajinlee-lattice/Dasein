@@ -449,7 +449,7 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                     String destFolder = prepareImportConfig.getSourceKey().substring(0,
                             prepareImportConfig.getSourceKey().lastIndexOf("/"));
                     destFolder = destFolder.replace(dataFeedTask.getFeedType(), correctTask.get().getFeedType());
-                    String destKey = destFolder + prepareImportConfig.getSourceFileName();
+                    String destKey = destFolder + "/" + prepareImportConfig.getSourceFileName();
                     log.info("Prepare copy file from " + prepareImportConfig.getSourceKey() + " to " + destKey);
                     getCopyWorker().submit(() -> {
                         s3Service.copyObject(prepareImportConfig.getSourceBucket(), prepareImportConfig.getSourceKey(),
