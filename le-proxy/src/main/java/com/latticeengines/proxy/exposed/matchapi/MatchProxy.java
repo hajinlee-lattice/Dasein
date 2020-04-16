@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.InternalAccountIdLookupRequest;
+import com.latticeengines.domain.exposed.datacloud.match.InternalContactLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionRequest;
@@ -113,13 +114,14 @@ public class MatchProxy extends BaseRestApiProxy {
         return post("lookup_internal_account_id", url, request, String.class);
     }
 
-    public List<Map<String, Object>> lookupContactsByAccountId(@NotNull String customerSpace, @NotNull String lookupId,
-            @NotNull String lookupIdVal, DataCollection.Version version) {
+    public List<Map<String, Object>> lookupContacts(@NotNull String customerSpace, @NotNull String lookupId,
+            @NotNull String lookupIdVal, String contactId, DataCollection.Version version) {
         String url = constructUrl("/cdllookup/contacts", customerSpace);
-        InternalAccountIdLookupRequest request = new InternalAccountIdLookupRequest();
+        InternalContactLookupRequest request = new InternalContactLookupRequest();
         request.setCustomerSpace(customerSpace);
-        request.setLookupId(lookupId);
-        request.setLookupIdVal(lookupIdVal);
+        request.setContactId(contactId);
+        request.setAccountLookupId(lookupId);
+        request.setAccountLookupIdVal(lookupIdVal);
         request.setDataCollectionVersion(version);
         List<?> raw = post("lookup_contacts_by_account_id", url, request, List.class);
         return JsonUtils.convertListOfMaps(raw, String.class, Object.class);

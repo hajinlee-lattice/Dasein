@@ -23,6 +23,6 @@ public interface CDLLookupService {
             String lookupIdValue);
 
     List<Map<String, Object>> lookupContactsByInternalAccountId(String customerSpace, DataCollection.Version version,
-            String lookupIdKey, String lookupIdValue);
+            String lookupIdKey, String lookupIdValue, String contactId);
 
 }

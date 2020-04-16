@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.DnBTokenRefreshResponse;
 import com.latticeengines.domain.exposed.datacloud.match.InternalAccountIdLookupRequest;
+import com.latticeengines.domain.exposed.datacloud.match.InternalContactLookupRequest;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -248,12 +249,13 @@ public class MatchResource {
     @PostMapping(value = "/cdllookup/contacts")
     @ResponseBody
     @ApiOperation(value = "Looking for AccountId using given LookupId")
-    public List<Map<String, Object>> lookupContactsByInternalAccountId(@RequestBody InternalAccountIdLookupRequest request) {
+    public List<Map<String, Object>> lookupContactsByInternalAccountId(@RequestBody InternalContactLookupRequest request) {
         return cdlLookupService.lookupContactsByInternalAccountId( //
                 request.getCustomerSpace(), //
                 request.getDataCollectionVersion(), //
-                request.getLookupId(), //
-                request.getLookupIdVal() //
+                request.getAccountLookupId(), //
+                request.getAccountLookupIdVal(), //
+                request.getContactId()
         );
     }
 

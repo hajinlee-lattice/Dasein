@@ -780,6 +780,7 @@ public enum LedpCode {
     LEDP_39005("Failed to compile the MetadataDocument for the CustomerSpace {0}"), //
     LEDP_39008("No SpendAnalyticsSegment data found"), //
     LEDP_39009("No talking points found for play with id: {0}, CustomerSpace {1}"), //
+    LEDP_39010("Invalid ID value ({0}) for {1} :CustomerSpace {2}"), //
 
     // le-cdl
     LEDP_40000("CustomerSpace in CleanupByDateRangeConfig is null."), //
