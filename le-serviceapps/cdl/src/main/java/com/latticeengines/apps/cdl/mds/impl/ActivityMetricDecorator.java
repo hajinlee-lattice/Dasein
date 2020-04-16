@@ -126,15 +126,16 @@ public class ActivityMetricDecorator implements Decorator {
             return cm;
         }
 
+        cm.enableGroup(Segment);
+        cm.enableGroup(Enrichment);
+        cm.disableGroup(Model);
+        cm.setCanModel(false);
+
         try {
             enrichColumnMetadata(cm);
         } catch (Exception e) {
             log.warn("Error while rendering the column " + cm.getAttrName(), e);
         }
-
-        cm.enableGroup(Segment);
-        cm.enableGroup(Enrichment);
-        cm.disableGroup(Model);
         return cm;
     }
 
@@ -177,8 +178,12 @@ public class ActivityMetricDecorator implements Decorator {
                     streamsNeedSystemName.get().contains(group.getStream().getName()));
             break;
         case AccountMarketingActivity:
-        case ContactMarketingActivity:
             // do nothing atm
+            break;
+        case ContactMarketingActivity:
+            // TODO enable after we support new contact categories in segment/export
+            cm.disableGroup(Segment);
+            cm.disableGroup(Enrichment);
             break;
             default:
                 log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
