@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeCuratedAttributesConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.LongType
+import org.apache.spark.sql.types.{LongType, StringType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -54,7 +54,24 @@ class MergeCuratedAttributes extends AbstractSparkJob[MergeCuratedAttributesConf
   }
 
   private def mergeAttr(df: DataFrame, attrs: mutable.Map[String, String]): DataFrame = {
-    attrs.foldLeft(df)((accDf, args) => accDf.withColumn(args._2, accDf.col(args._1)))
+    attrs.foldLeft(df)((accDf, args) => {
+      val tgtAttr = args._2
+      val srcAttr = args._1
+      val cols = accDf.columns.toSeq
+      if (cols.contains(tgtAttr)) {
+        // TODO consider failing job
+        accDf
+      } else if (!cols.contains(srcAttr)) {
+        // TODO pass in tgt attribute type, use attr name to support time field for now
+        if (tgtAttr.endsWith("Date") || tgtAttr.endsWith("Time")) {
+          accDf.withColumn(tgtAttr, lit(null).cast(LongType))
+        } else {
+          accDf.withColumn(tgtAttr, lit(null).cast(StringType))
+        }
+      } else {
+        accDf.withColumn(tgtAttr, accDf.col(srcAttr))
+      }
+    })
   }
 
   private def mergeLastActivityDate(lastActivityDf: DataFrame, accDf: DataFrame, joinKey: String): DataFrame = {

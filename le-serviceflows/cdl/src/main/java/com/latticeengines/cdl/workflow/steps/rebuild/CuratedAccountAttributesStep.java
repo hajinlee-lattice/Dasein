@@ -34,6 +34,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.NumberOfContactsConfig;
@@ -47,6 +48,7 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
@@ -90,14 +92,18 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
     private DataCollection.Version active;
     private DataCollection.Version inactive;
     private String accountTableName;
+    private String accountSystemTableName;
     private String contactTableName;
     private String servingStoreTablePrefix;
+    // template name
+    private List<String> accountTemplates;
 
     // Set to true if either of the Account or Contact table is missing or empty and we should not
     // run this step's transformation.
     private boolean skipTransformation;
     private boolean calculateNumOfContacts;
     private boolean calculateLastActivityDate;
+    private boolean calculateSystemLastUpdateTime;
 
     private int numberOfContactsStep;
 
@@ -231,6 +237,18 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             addBaseTables(step, getLastActivityDateTableName(BusinessEntity.Account));
             currAttrs.remove(LastActivityDate.name());
         }
+        if (calculateSystemLastUpdateTime) {
+            addBaseTables(step, accountSystemTableName);
+            int systemAccountInputIdx = inputIdx++;
+            Map<String, String> lastSystemUpdateAttrs = accountTemplates.stream().distinct().map(template -> {
+                // copy last update time to account from this system/template
+                String srcAttr = String.format("%s__%s", template, CDLUpdatedTime.name());
+                String tgtAttr = String.format("%s__%s", template, EntityLastUpdatedDate.name());
+                return Pair.of(srcAttr, tgtAttr);
+            }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+            log.info("Last updated date attributes from systems = {}", lastSystemUpdateAttrs);
+            config.attrsToMerge.put(systemAccountInputIdx, lastSystemUpdateAttrs);
+        }
 
         // copy create time & last update time from account batch store
         config.masterTableIdx = inputIdx;
@@ -276,6 +294,8 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
 
         accountTableName = getAccountTableName();
         contactTableName = getContactTableName();
+        accountSystemTableName = getSystemAccountTableName();
+        accountTemplates = getAccountTemplates();
 
         // Do not run this step if there is no account table, since accounts are
         // required for this step to be
@@ -288,12 +308,14 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
 
         calculateNumOfContacts = shouldCalculateNumberOfContacts();
         calculateLastActivityDate = shouldCalculateLastActivityDate();
+        calculateSystemLastUpdateTime = shouldCalculateSystemLastUpdateTime();
         skipTransformation = !calculateNumOfContacts && !calculateLastActivityDate
                 && BooleanUtils.isNotTrue(configuration.getRebuild());
 
         log.info(
-                "calculateNumOfContacts={}, calculateLastActivityDate={}, skipCuratedAccountCalculation={}, rebuild={}",
-                calculateNumOfContacts, calculateLastActivityDate, skipTransformation, configuration.getRebuild());
+                "calculateNumOfContacts={}, calculateLastActivityDate={}, calculateSystemLastUpdateTime={}, skipCuratedAccountCalculation={}, rebuild={}",
+                calculateNumOfContacts, calculateLastActivityDate, calculateSystemLastUpdateTime, skipTransformation,
+                configuration.getRebuild());
 
         if (!skipTransformation) {
             Table accountTable = metadataProxy.getTable(customerSpace.toString(), accountTableName);
@@ -317,6 +339,14 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
      */
     private boolean shouldCalculateLastActivityDate() {
         return getLastActivityDateTableName(BusinessEntity.Account) != null;
+    }
+
+    /*-
+     * only re-calculate when having template and have system store.
+     * TODO change to only calculate when there's account imports. copy from existing table otherwise
+     */
+    private boolean shouldCalculateSystemLastUpdateTime() {
+        return CollectionUtils.isNotEmpty(accountTemplates) && StringUtils.isNotBlank(accountSystemTableName);
     }
 
     private String getLastActivityDateTableName(BusinessEntity entity) {
@@ -368,34 +398,43 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
                 .collect(Collectors.toSet());
     }
 
-    private String getAccountTableName() {
-        String accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                BusinessEntity.Account.getBatchStore(), inactive);
-        if (StringUtils.isBlank(accountTableName)) {
-            accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                    BusinessEntity.Account.getBatchStore(), active);
-            if (StringUtils.isNotBlank(accountTableName)) {
-                log.info("Found account batch store in active version " + active);
+    private String getTableName(@NotNull TableRoleInCollection role, @NotNull String name) {
+        String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactive);
+        if (StringUtils.isBlank(tableName)) {
+            tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
+            if (StringUtils.isNotBlank(tableName)) {
+                log.info("Found {} (role={}) in active version {}", name, role, active);
             }
         } else {
-            log.info("Found account batch store in inactive version " + inactive);
+            log.info("Found {} (role={}) in inactive version {}", name, role, inactive);
         }
-        return accountTableName;
+        return tableName;
+    }
+
+    private List<String> getAccountTemplates() {
+        Map<BusinessEntity, List> templates = getMapObjectFromContext(CONSOLIDATE_TEMPLATES_IN_ORDER,
+                BusinessEntity.class, List.class);
+        List<String> templateNames;
+        if (MapUtils.isNotEmpty(templates) && templates.containsKey(BusinessEntity.Account)) {
+            templateNames = JsonUtils.convertList(templates.get(BusinessEntity.Account), String.class);
+        } else {
+            templateNames = Collections.emptyList();
+        }
+
+        log.info("Account templates = {}", templateNames);
+        return templateNames;
+    }
+
+    private String getAccountTableName() {
+        return getTableName(BusinessEntity.Account.getBatchStore(), "account batch store");
     }
 
     private String getContactTableName() {
-        String contactTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                BusinessEntity.Contact.getBatchStore(), inactive);
-        if (StringUtils.isBlank(contactTableName)) {
-            contactTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                    BusinessEntity.Contact.getBatchStore(), active);
-            if (StringUtils.isNotBlank(contactTableName)) {
-                log.info("Found contact batch store in active version " + active);
-            }
-        } else {
-            log.info("Found contact batch store in inactive version " + inactive);
-        }
-        return contactTableName;
+        return getTableName(BusinessEntity.Contact.getBatchStore(), "contact batch store");
+    }
+
+    private String getSystemAccountTableName() {
+        return getTableName(BusinessEntity.Account.getSystemBatchStore(), "account system batch store");
     }
 
     private boolean shouldResetCuratedAttributesContext() {
