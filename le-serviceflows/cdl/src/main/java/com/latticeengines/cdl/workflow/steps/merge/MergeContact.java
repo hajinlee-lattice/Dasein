@@ -77,8 +77,12 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         List<TransformationStepConfig> steps = new ArrayList<>();
         int upsertMasterStep;
         int diffStep;
+        int changeListStep;
         TransformationStepConfig upsert;
         TransformationStepConfig diff;
+        TransformationStepConfig changeList;
+        TransformationStepConfig reportChangeList;
+        TransformationStepConfig report;
         if (configuration.isEntityMatchEnabled()) {
             List<TransformationStepConfig> extracts = new ArrayList<>();
             List<Integer> extractSteps = new ArrayList<>();
@@ -117,6 +121,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                 upsert = upsertMaster(true, dedupStep, true);
             }
             diffStep = upsertMasterStep + 1;
+            changeListStep = upsertMasterStep + 2;
             diff = diff(matchedTable, upsertMasterStep);
             if (upsertSystem != null) {
                 steps.add(upsertSystem);
@@ -125,13 +130,19 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         } else {
             upsertMasterStep = 0;
             diffStep = 1;
+            changeListStep = 2;
             upsert = upsertMaster(false, matchedTable);
             diff = diff(matchedTable, upsertMasterStep);
             steps.add(upsert);
         }
-
+        String joinKey = configuration.isEntityMatchEnabled() ? InterfaceName.EntityId.name()
+                : InterfaceName.AccountId.name();
+        changeList = createChangeList(upsertMasterStep, joinKey);
+        reportChangeList = reportChangeList(changeListStep);
+        report = reportDiff(diffStep);
         steps.add(diff);
-        TransformationStepConfig report = reportDiff(diffStep);
+        steps.add(changeList);
+        steps.add(reportChangeList);
         steps.add(report);
         request.setSteps(steps);
         return request;

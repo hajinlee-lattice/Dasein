@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CHANGELIST_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_SYSTEM_BATCH_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
@@ -40,7 +39,6 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
-import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
@@ -54,6 +52,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     protected String inputMasterTableName;
     protected String diffTableName;
     protected String changeListTableName;
+    protected String reportChangeListTableName;
     protected Table masterTable;
     protected Table systemBatchTable;
     protected String systemBatchTableName;
@@ -68,10 +67,13 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
         diffTableName = getDiffTableName();
         changeListTableName = getChangeListTableName();
+        reportChangeListTableName = getReportChangeListTableName();
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
         updateEntityValueMapInContext(ENTITY_CHANGELIST_TABLES, changeListTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, changeListTableName, String.class);
+        updateEntityValueMapInContext(ENTITY_REPORT_CHANGELIST_TABLES, changeListTableName, String.class);
+        addToListInContext(TEMPORARY_CDL_TABLES, reportChangeListTableName, String.class);
 
         if (hasSchemaChange()) {
             List<BusinessEntity> entityList = getListObjectFromContext(ENTITIES_WITH_SCHEMA_CHANGE,
@@ -347,24 +349,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         return step;
     }
 
-    protected TransformationStepConfig createChangeList(int inputStep) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        setupActiveMasterTable(step);
-        step.setInputSteps(Collections.singletonList(inputStep));
-        step.setTransformer(TRANSFORMER_CHANGELIST_TXMFR);
-        setTargetTable(step, changeListTablePrefix);
-        ChangeListConfig config = getChangeListConfig();
-        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
-        return step;
-    }
-
-    private ChangeListConfig getChangeListConfig() {
-        ChangeListConfig config = new ChangeListConfig();
-        config.setJoinKey(InterfaceName.EntityId.name());
-        config.setExclusionColumns(Arrays.asList(InterfaceName.CDLCreatedTime.name(),
-                InterfaceName.CDLUpdatedTime.name(), InterfaceName.EntityId.name()));
-        return config;
-    }
 
     private MergeSystemBatchConfig getMergeSystemBatchConfig() {
         MergeSystemBatchConfig config = new MergeSystemBatchConfig();
@@ -427,16 +411,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         setTargetTable(step, diffTablePrefix);
         return step;
-    }
-
-    private void setupActiveMasterTable(TransformationStepConfig step) {
-        Table activeMasterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
-        if (activeMasterTable != null && StringUtils.isNotBlank(activeMasterTable.getName())) {
-            if (!activeMasterTable.getExtracts().isEmpty()) {
-                log.info("Add active masterTable=" + activeMasterTable.getName());
-                addBaseTables(step, activeMasterTable.getName());
-            }
-        }
     }
 
     private void setupMasterTable(TransformationStepConfig step, String inputTable) {
@@ -530,5 +504,9 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
 
     protected String getChangeListTableName() {
         return TableUtils.getFullTableName(changeListTablePrefix, pipelineVersion);
+    }
+
+    protected String getReportChangeListTableName() {
+        return TableUtils.getFullTableName(reportChangeListTablePrefix, pipelineVersion);
     }
 }
