@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,11 +23,9 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component(PrepareForActivityStream.BEAN_NAME)
@@ -40,9 +36,6 @@ public class PrepareForActivityStream extends BaseWorkflowStep<ProcessActivitySt
     private static final Logger log = LoggerFactory.getLogger(PrepareForActivityStream.class);
 
     static final String BEAN_NAME = "prepareForActivityStream";
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
 
     @Override
     public void execute() {
@@ -137,13 +130,9 @@ public class PrepareForActivityStream extends BaseWorkflowStep<ProcessActivitySt
      * version
      */
     private void saveStreamsToDataCollectionStatus(@NotNull Map<String, AtlasStream> currentStreams) {
-        String customerSpace = configuration.getCustomerSpace().toString();
-        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, inactive);
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
         status.setActivityStreamMap(currentStreams);
         putObjectInContext(CDL_COLLECTION_STATUS, status);
-        log.info("Save current activity streams {} to version {}", JsonUtils.serialize(currentStreams), inactive);
-        dataCollectionProxy.saveOrUpdateDataCollectionStatus(customerSpace, status, inactive);
     }
 
     /*
