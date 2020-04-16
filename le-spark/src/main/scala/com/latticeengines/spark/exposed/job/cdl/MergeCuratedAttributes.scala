@@ -36,20 +36,25 @@ class MergeCuratedAttributes extends AbstractSparkJob[MergeCuratedAttributesConf
       // must have val
       optLastActivityDf.get
     } else {
-      val mergeFn = (accDf: DataFrame, args: (Integer, mutable.Buffer[String])) => {
+      val mergeFn = (accDf: DataFrame, args: (Integer, mutable.Map[String, String])) => {
         MergeUtils.merge2(
-          accDf, lattice.input(args._1).select(config.joinKey, args._2: _*),
+          accDf, mergeAttr(lattice.input(args._1), args._2).select(config.joinKey, args._2.valuesIterator.toSeq: _*),
           Seq(config.joinKey), Set(), overwriteByNull = false)
       }
       optLastActivityDf match {
         case Some(df) => attrsToMerge.foldLeft(df)(mergeFn(_, _))
         case _ =>
-          val df = lattice.input(attrsToMerge.head._1).select(config.joinKey, attrsToMerge.head._2: _*)
+          val df = mergeAttr(lattice.input(attrsToMerge.head._1), attrsToMerge.head._2)
+            .select(config.joinKey, attrsToMerge.head._2.valuesIterator.toSeq: _*)
           attrsToMerge.tail.foldLeft(df)(mergeFn(_, _))
       }
     }
 
     lattice.output = mdf :: Nil
+  }
+
+  private def mergeAttr(df: DataFrame, attrs: mutable.Map[String, String]): DataFrame = {
+    attrs.foldLeft(df)((accDf, args) => accDf.withColumn(args._2, accDf.col(args._1)))
   }
 
   private def mergeLastActivityDate(lastActivityDf: DataFrame, accDf: DataFrame, joinKey: String): DataFrame = {

@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLUpdatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLastUpdatedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfContacts;
 
@@ -47,6 +48,7 @@ public class MergeCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
     private static final List<Pair<String, Class<?>>> OUTPUT_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
             Pair.of(LastActivityDate.name(), Long.class), //
+            Pair.of(EntityLastUpdatedDate.name(), Long.class), //
             Pair.of(NumberOfContacts.name(), Long.class) //
     );
 
@@ -108,7 +110,8 @@ public class MergeCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
         config.joinKey = AccountId.name();
         config.lastActivityDateInputIdx = 0;
         config.masterTableIdx = 1;
-        config.attrsToMerge.put(2, Collections.singletonList(NumberOfContacts.name()));
+        config.attrsToMerge.put(1, Collections.singletonMap(CDLUpdatedTime.name(), EntityLastUpdatedDate.name()));
+        config.attrsToMerge.put(2, Collections.singletonMap(NumberOfContacts.name(), NumberOfContacts.name()));
         return config;
     }
 }

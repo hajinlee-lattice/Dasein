@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -25,10 +24,10 @@ public class MergeCuratedAttributesConfig extends SparkJobConfig {
     public Integer masterTableIdx;
 
     /*-
-     * input idx -> list of attributes to be merged
+     * input idx -> map of attributes to be merged (src -> attr name after merge)
      */
     @JsonProperty
-    public Map<Integer, List<String>> attrsToMerge = new HashMap<>();
+    public Map<Integer, Map<String, String>> attrsToMerge = new HashMap<>();
 
     @Override
     public String getName() {

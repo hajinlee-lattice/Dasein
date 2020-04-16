@@ -48,7 +48,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryStatistics;
 import com.latticeengines.domain.exposed.metadata.statistics.CategoryTopNTree;
@@ -494,11 +493,11 @@ public final class StatsCubeUtils {
 
     public static boolean shouldHideAttr(BusinessEntity entity, ColumnMetadata cm, boolean entityMatchEnabled) {
         // Hide Date Attributes not in category Account Attributes (aka "My Attributes")
-        // or Contact Attributes.
+        // or Contact Attributes or Curated Account Attributes.
         // Also hide all system attributes.
         return (cm.isDateAttribute() && !(Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory())
                 || Category.CONTACT_ATTRIBUTES.equals(cm.getCategory())
-                || InterfaceName.LastActivityDate.name().equals(cm.getAttrName())))
+                || Category.CURATED_ACCOUNT_ATTRIBUTES.equals(cm.getCategory())))
                 || isSystemAttribute(entity, cm, entityMatchEnabled);
     }
 

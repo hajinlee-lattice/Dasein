@@ -129,7 +129,7 @@ public enum InterfaceName {
     AnnualRevenueCurrency, SpendAnalyticsSegment, RepresentativeAccounts, CustomerParentAccountID, DoNotCall, LeadStatus, LeadType, Cost, TotalCost, //
 
     // These values are for Curated Attributes.
-    NumberOfContacts,
+    NumberOfContacts, EntityLastUpdatedDate, EntityCreatedDate,
 
     // CDL External
     SalesforceSandboxAccountID, SalesforceSandboxContactID, MarketoAccountID, EloquaAccountID,
