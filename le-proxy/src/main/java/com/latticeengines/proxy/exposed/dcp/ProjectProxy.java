@@ -65,16 +65,4 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         delete("delete dcp project by projectId", url);
     }
 
-    public List<String> getRecipientList(String customerSpace, String projectId) {
-        String url = "/customerspaces/{customerSpace}/project/projectId/{projectId}/recipientlist";
-        url = constructUrl(url, customerSpace, projectId);
-        List<?> results = get("get recipientlist of project", url, List.class);
-        return JsonUtils.convertList(results, String.class);
-    }
-
-    public void updateRecipientList(String customerSpace, String projectId, String recipientList) {
-        String url = "/customerspaces/{customerSpace}/project/projectId/{projectId}/recipientlist";
-        url = constructUrl(url, customerSpace, projectId);
-        put("update recipientlist of project", url, recipientList);
-    }
 }

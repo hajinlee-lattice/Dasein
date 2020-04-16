@@ -12,7 +12,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
@@ -72,22 +71,5 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         projectList = testProjectProxy.getAllProjects();
         Assert.assertEquals(projectList.size(), 4);
         projectList.forEach(project -> Assert.assertEquals(project.getDeleted(), Boolean.TRUE));
-    }
-
-    @Test(groups = "deployment", enabled = true)
-    public void testGetAndUpdateRecipientList() throws Exception {
-        ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
-        assertNotNull(projectDetail);
-        List<String> recipientList = testProjectProxy.getRecipientList(projectDetail.getProjectId());
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recipientList));
-        Assert.assertEquals(recipientList.size(), 1);
-
-        recipientList.add("test@test.com");
-        testProjectProxy.updateRecipientList(projectDetail.getProjectId(), JsonUtils.serialize(recipientList));
-        recipientList = testProjectProxy.getRecipientList(projectDetail.getProjectId());
-        Assert.assertTrue(CollectionUtils.isNotEmpty(recipientList));
-        Assert.assertEquals(recipientList.size(), 2);
-
-        testProjectProxy.deleteProject(PROJECT_ID);
     }
 }

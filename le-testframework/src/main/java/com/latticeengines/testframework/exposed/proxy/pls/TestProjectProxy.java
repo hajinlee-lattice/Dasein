@@ -50,17 +50,4 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         delete("deleteProject", url);
     }
 
-    public List<String> getRecipientList(String projectId) {
-        String urlPattern = "/projectId/{projectId}/recipientlist";
-        String url = constructUrl(urlPattern, projectId);
-        List<?> raw = get("getRecipientList", url, null, List.class);
-        return JsonUtils.convertList(raw, String.class);
-    }
-
-    public void updateRecipientList(String projectId, String recipientList) {
-        String urlPattern = "/projectId/{projectId}/recipientlist";
-        String url = constructUrl(urlPattern, projectId);
-        put("updateRecipientList", url, recipientList);
-    }
-
 }

@@ -117,15 +117,6 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<String> getRecipientList(String customerSpace, String projectId) {
-        Project project = projectEntityMgr.findByProjectId(projectId);
-        if (project == null) {
-            return new ArrayList<>();
-        }
-        return StringUtils.isEmpty(project.getRecipientList()) ? new ArrayList<>() : EmailUtils.parseEmails(project.getRecipientList());
-    }
-
-    @Override
     public void updateRecipientList(String customerSpace, String projectId, String recipientList) {
         projectEntityMgr.updateRecipientListByProjectId(projectId, recipientList);
 
@@ -169,6 +160,8 @@ public class ProjectServiceImpl implements ProjectService {
                         }
                     });
         }
+        List<String>recipientList = StringUtils.isEmpty(project.getRecipientList()) ? new ArrayList<>() : EmailUtils.parseEmails(project.getRecipientList());
+        details.setRecipientList(recipientList);
         return details;
     }
 

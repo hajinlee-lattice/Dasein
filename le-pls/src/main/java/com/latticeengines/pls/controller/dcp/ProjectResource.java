@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -125,31 +124,6 @@ public class ProjectResource {
                     Status.Error, e.getMessage());
             throw new UIActionException(action, e.getCode());
         }
-    }
-
-    @GetMapping(value = "/projectId/{projectId}/recipientlist")
-    @ResponseBody
-    @ApiOperation(value = "Get recipientlist of project")
-    @PreAuthorize("hasRole('View_DCP_Projects')")
-    public List<String> getRecipientList(@PathVariable String projectId) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            throw new LedpException(LedpCode.LEDP_18217);
-        }
-        return projectService.getRecipientList(customerSpace.toString(), projectId);
-    }
-
-    @PutMapping(value = "/projectId/{projectId}/recipientlist")
-    @ResponseBody
-    @ApiOperation(value = "Update recipientlist of project")
-    @PreAuthorize("hasRole('Edit_DCP_Projects')")
-    public void updateRecipientList(@PathVariable String projectId,
-                                    @RequestBody String recipientList) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        if (customerSpace == null) {
-            throw new LedpException(LedpCode.LEDP_18217);
-        }
-        projectService.updateRecipientList(customerSpace.toString(), projectId, recipientList);
     }
 
 }

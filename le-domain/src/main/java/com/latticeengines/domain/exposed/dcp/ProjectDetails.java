@@ -31,6 +31,9 @@ public class ProjectDetails {
     @JsonProperty("sources")
     private List<Source> sources;
 
+    @JsonProperty("recipient_list")
+    private List<String> recipientList;
+
     public String getProjectId() {
         return projectId;
     }
@@ -77,5 +80,13 @@ public class ProjectDetails {
 
     public void setSources(List<Source> sources) {
         this.sources = sources;
+    }
+
+    public List<String> getRecipientList() {
+        return recipientList;
+    }
+
+    public void setRecipientList(List<String> recipientList) {
+        this.recipientList = recipientList;
     }
 }
