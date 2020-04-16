@@ -50,7 +50,7 @@ public class SetupMarketingActivityDeploymentTestNG extends CDLEnd2EndDeployment
                 "eloqua_marketing_activity_1ec2c252-f36d-4054-aaf4-9d6379006244.csv");
     }
 
-    private void createMaerketingActivitySystem(String systemName) {
+    private void createMarketingActivitySystem(String systemName) {
         S3ImportSystem system = new S3ImportSystem();
         system.setTenant(mainTestTenant);
         system.setName(systemName);
@@ -64,7 +64,7 @@ public class SetupMarketingActivityDeploymentTestNG extends CDLEnd2EndDeployment
     }
 
     private void setupMarketingActivityTemplatesAndVerify(String systemName, String systemType, String fileName) throws Exception {
-        createMaerketingActivitySystem(systemName);
+        createMarketingActivitySystem(systemName);
         Thread.sleep(2000L);
         Assert.assertTrue(createS3Folder(systemName, Arrays.asList(EntityType.MarketingActivity,
                 EntityType.MarketingActivityType)));
