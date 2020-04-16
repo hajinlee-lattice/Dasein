@@ -278,8 +278,8 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
             map.put(PlaymakerConstants.PlayID, object[3]);
             map.put(PlaymakerConstants.LaunchID, object[4]);
             map.put(PlaymakerConstants.Description, object[5]);
-            map.put(PlaymakerConstants.LaunchDate, object[6]);
-            map.put(PlaymakerConstants.LastModificationDate, object[7]);
+            map.put(PlaymakerConstants.LaunchDate, ((BigInteger)object[6]).longValue());
+            map.put(PlaymakerConstants.LastModificationDate, ((BigInteger)object[7]).longValue());
             map.put(PlaymakerConstants.MonetaryValue, object[8]);
             map.put(PlaymakerConstants.Likelihood, object[9]);
             map.put(PlaymakerConstants.CompanyName, object[10]);
