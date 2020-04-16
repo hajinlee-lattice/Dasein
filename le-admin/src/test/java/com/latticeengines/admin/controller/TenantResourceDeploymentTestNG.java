@@ -117,6 +117,7 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         sub.setName(fullTenantId);
         sub.setSubscriberNumber("1234");
         req.setSubscriber(sub);
+        String uniqueTenantName = String.format("%s_%s", sub.getName(), sub.getSubscriberNumber());
 
         Assert.assertFalse(verifyUserExists(internalUser.getEmailAddress()));
         Assert.assertFalse(verifyUserExists(externalUser.getEmailAddress()));
@@ -125,12 +126,12 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getStatus(), "success");
 
-        waitForTenantInstallation(fullTenantId, fullTenantId);
+        waitForTenantInstallation(uniqueTenantName, uniqueTenantName);
 
         Assert.assertTrue(verifyUserExists(internalUser.getEmailAddress()));
         Assert.assertTrue(verifyUserExists(externalUser.getEmailAddress()));
         try {
-            deleteTenant(fullTenantId, fullTenantId);
+            deleteTenant(uniqueTenantName, uniqueTenantName);
         } catch (Exception ignore) {
         }
     }
