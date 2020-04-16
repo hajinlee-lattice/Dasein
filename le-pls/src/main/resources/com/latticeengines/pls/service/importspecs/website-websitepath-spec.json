@@ -20,7 +20,7 @@
             {
                 "fieldName": "PathPattern",
                 "fieldType": "TEXT",
-                "screenName": "Path Pattern",
+                "screenName": "Website URL Pattern",
                 "matchingColumnNames": [
                     "PATTERN",
                     "PATH PATTERN"

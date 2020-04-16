@@ -4,7 +4,7 @@
     "fieldDefinitionsRecordsMap": {
         "General": [
             {
-                "fieldName": "SourceMedium",
+                "fieldName": "Referral Source",
                 "fieldType": "TEXT",
                 "screenName": "Source Medium",
                 "matchingColumnNames": [
