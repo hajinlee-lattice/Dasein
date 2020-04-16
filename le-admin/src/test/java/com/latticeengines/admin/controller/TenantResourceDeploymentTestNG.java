@@ -98,7 +98,7 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertTrue(result);
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment", enabled = true)
     public void testVboRequest() {
         String fullTenantId = "LETest" + System.currentTimeMillis();
         String url = getRestHostPort() + "/admin/tenants/vboadmin";
@@ -115,6 +115,7 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         VboRequest.Subscriber sub = new VboRequest.Subscriber();
         sub.setLanguage("Chinese");
         sub.setName(fullTenantId);
+        sub.setSubscriberNumber("1234");
         req.setSubscriber(sub);
 
         Assert.assertFalse(verifyUserExists(internalUser.getEmailAddress()));

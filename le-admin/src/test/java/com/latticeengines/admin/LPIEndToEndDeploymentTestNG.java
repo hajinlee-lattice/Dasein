@@ -169,6 +169,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         VboRequest.Subscriber sub = new VboRequest.Subscriber();
         sub.setLanguage("English");
         sub.setName(tenantId);
+        sub.setSubscriberNumber("1234");
         req.setSubscriber(sub);
 
         VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);

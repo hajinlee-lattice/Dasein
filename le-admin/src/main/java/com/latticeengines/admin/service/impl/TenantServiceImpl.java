@@ -610,7 +610,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     public boolean createVboTenant(VboRequest vboRequest, String userName) {
-        String tenantName = vboRequest.getSubscriber().getName();
+
+        String tenantName = String.format("%s_%s", vboRequest.getSubscriber().getName(),
+                vboRequest.getSubscriber().getSubscriberNumber());
 
         List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
 
