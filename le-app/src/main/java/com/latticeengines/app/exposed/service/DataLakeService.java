@@ -36,6 +36,8 @@ public interface DataLakeService {
 
     DataPage getAccountById(String accountId, List<String> lookupAttributes, Map<String, String> orgInfo);
 
-    DataPage getContactsByAccountById(String accountId, Map<String, String> orgInfo);
+    DataPage getAllContactsByAccountId(String accountId, Map<String, String> orgInfo);
+
+    DataPage getContactByAccountIdAndContactId(String contactId, String accountId, Map<String, String> orgInfo);
 
 }

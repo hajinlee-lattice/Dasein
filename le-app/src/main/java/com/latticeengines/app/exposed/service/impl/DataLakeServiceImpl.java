@@ -218,24 +218,6 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Override
-    public DataPage getContactsByAccountById(String accountIdValue, Map<String, String> orgInfo) {
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-
-        if (!StringUtils.isNotEmpty(accountIdValue)) {
-            throw new LedpException(LedpCode.LEDP_39001, new String[] { accountIdValue, customerSpace });
-        }
-
-        if (Boolean.TRUE.equals(contactsByAccountLookupsPopulatedCache.get(customerSpace))) {
-            String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
-            return new DataPage(
-                    matchProxy.lookupContactsByAccountId(customerSpace, lookupIdColumn, accountIdValue, null));
-        } else {
-            log.warn(String.format("Contact Data not published in Dynamo for customerSpace: %s", customerSpace));
-            return new DataPage(new ArrayList<>());
-        }
-    }
-
-    @Override
     public DataPage getAccountById(String accountId, ColumnSelection.Predefined predefined,
             Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
@@ -319,6 +301,44 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
 
         return page;
+    }
+
+    @Override
+    public DataPage getAllContactsByAccountId(String accountIdValue, Map<String, String> orgInfo) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+
+        if (StringUtils.isBlank(accountIdValue)) {
+            throw new LedpException(LedpCode.LEDP_39010, new String[] { accountIdValue, "Account", customerSpace });
+        }
+
+        if (Boolean.TRUE.equals(contactsByAccountLookupsPopulatedCache.get(customerSpace))) {
+            String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
+            return new DataPage(matchProxy.lookupContacts(customerSpace, lookupIdColumn, accountIdValue, null, null));
+        } else {
+            log.warn(String.format("Contact Data not published in Dynamo for customerSpace: %s", customerSpace));
+            return new DataPage(new ArrayList<>());
+        }
+    }
+
+    @Override
+    public DataPage getContactByAccountIdAndContactId(String contactId, String accountId, Map<String, String> orgInfo) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+
+        if (StringUtils.isBlank(accountId)) {
+            throw new LedpException(LedpCode.LEDP_39010, new String[] { accountId, "Account", customerSpace });
+        }
+
+        if (StringUtils.isBlank(contactId)) {
+            throw new LedpException(LedpCode.LEDP_39010, new String[] { contactId, "Contact", customerSpace });
+        }
+
+        if (Boolean.TRUE.equals(contactsByAccountLookupsPopulatedCache.get(customerSpace))) {
+            String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
+            return new DataPage(matchProxy.lookupContacts(customerSpace, lookupIdColumn, accountId, contactId, null));
+        } else {
+            log.warn(String.format("Contact Data not published in Dynamo for customerSpace: %s", customerSpace));
+            return new DataPage(new ArrayList<>());
+        }
     }
 
     private String getInternalAccountId(String accountId, Map<String, String> orgInfo) {
@@ -643,7 +663,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         ThreadPoolUtils.runInParallel(runnables);
         metadataMap.putAll(concurrentMetadataMap);
         columnNamesMap.putAll(concurrentColumnNamesMap);
-        concurrentStatsCubeMap.forEach((entity, cube)-> {
+        concurrentStatsCubeMap.forEach((entity, cube) -> {
             // filter only segmentable attributes
             Set<String> cols = columnNamesMap.get(BusinessEntity.valueOf(entity));
             Map<String, AttributeStats> stats = cube.getStatistics();

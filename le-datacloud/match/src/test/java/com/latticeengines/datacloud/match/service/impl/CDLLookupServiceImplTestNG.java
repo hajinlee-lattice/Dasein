@@ -30,7 +30,7 @@ public class CDLLookupServiceImplTestNG extends DataCloudMatchFunctionalTestNGBa
     @Test(groups = "functional", enabled = false)
     public void testlookupContactsByInternalAccountId() {
         List<Map<String, Object>> contacts = cdlLookupService
-                .lookupContactsByInternalAccountId("QA_CDL_DemoScript_1202", null, null, "0012400001DNrwwAAD");
+                .lookupContactsByInternalAccountId("QA_CDL_DemoScript_1202", null, null, "0012400001DNrwwAAD", null);
         Assert.assertNotNull(contacts);
         Assert.assertEquals(contacts.size(), 25);
     }

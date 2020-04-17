@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,7 +97,7 @@ public class DataLakeAccountResource {
         InstrumentRegistry.register(INSTRUMENT_CL, new UlyssesInstrument(true));
     }
 
-    @GetMapping(value = "/{accountId}/{attributeGroup}")
+    @GetMapping(value = "/{accountId:.+}/{attributeGroup}")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     @InvocationMeter(name = "talkingpoint", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -106,7 +107,7 @@ public class DataLakeAccountResource {
         return getAccountById(requestEntity, accountId, attributeGroup, null);
     }
 
-    @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat")
+    @GetMapping(value = "/{accountId:.+}/{attributeGroup}/danteformat")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     @InvocationMeter(name = "talkingpoint-dante", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -135,7 +136,7 @@ public class DataLakeAccountResource {
         }
     }
 
-    @GetMapping(value = "/{accountId}/{attributeGroup}/danteformat/aslist")
+    @GetMapping(value = "/{accountId:.+}/{attributeGroup}/danteformat/aslist")
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     @InvocationMeter(name = "talkingpoint-dante-list", measurment = "ulysses", instrument = INSTRUMENT_TP)
@@ -213,7 +214,8 @@ public class DataLakeAccountResource {
                 return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
 
-            List<String> toReturn = talkingPointDanteFormatter.format(JsonUtils.convertList(tps, TalkingPointDTO.class));
+            List<String> toReturn = talkingPointDanteFormatter
+                    .format(JsonUtils.convertList(tps, TalkingPointDTO.class));
             return new FrontEndResponse<>(JsonUtils.serialize(
                     new AccountAndTalkingPoints(accountFormatter.format(accountRawData.getData().get(0)), toReturn)));
         } catch (LedpException le) {
@@ -223,6 +225,24 @@ public class DataLakeAccountResource {
             log.error("Failed to populate talkingpoints and accounts for " + customerSpace, e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
+    }
+
+    @GetMapping(value = "/{accountId:.+}/contacts")
+    @ResponseBody
+    @ApiOperation(value = "Get all contacts for the given account by id")
+    public DataPage getAllContactsByAccountId(RequestEntity<String> requestEntity, @PathVariable String accountId) {
+        Map<String, String> orgInfo = tenantProxy.getOrgInfoFromOAuthRequest(requestEntity);
+        return dataLakeService.getAllContactsByAccountId(accountId, orgInfo);
+    }
+
+    @GetMapping(value = "/{accountId:.+}/contacts/{contactId:.+}")
+    @ResponseBody
+    @ApiOperation(value = "Get contact by given accountid and contactId")
+    public DataPage getContactByAccountIdContactId(RequestEntity<String> requestEntity, @PathVariable String accountId,
+            @PathVariable String contactId) {
+        Map<String, String> orgInfo = tenantProxy.getOrgInfoFromOAuthRequest(requestEntity);
+
+        return dataLakeService.getContactByAccountIdAndContactId(contactId, accountId, orgInfo);
     }
 
     private Set<String> ExtractAttributes(List<TalkingPointDTO> tps, BusinessEntity entity) {

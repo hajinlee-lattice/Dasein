@@ -190,7 +190,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
 
     @Override
     public List<Map<String, Object>> lookupContactsByInternalAccountId(String customerSpace,
-            DataCollection.Version version, String lookupIdKey, String lookupIdValue) {
+            DataCollection.Version version, String lookupIdKey, String lookupIdValue, String contactId) {
         String internalAccountId = lookupInternalAccountId(customerSpace, version, lookupIdKey, lookupIdValue);
 
         if (StringUtils.isBlank(internalAccountId)) {
@@ -212,7 +212,10 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         String tenantId = parseTenantId(lookupDataUnit);
         String tableName = parseTableName(lookupDataUnit);
 
-        return tableEntityMgr.getAllByPartitionKey(tenantId, tableName, internalAccountId);
+        return StringUtils.isBlank(contactId)
+                ? tableEntityMgr.getAllByPartitionKey(tenantId, tableName, internalAccountId)
+                : Collections.singletonList(
+                        tableEntityMgr.getByKeyPair(tenantId, tableName, Pair.of(internalAccountId, contactId)));
     }
 
     private String lookupInternalAccountId(DynamoDataUnit lookupDataUnit, String lookupIdKey, String lookupIdValue) {

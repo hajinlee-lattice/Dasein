@@ -32,13 +32,13 @@ public class ContactResource {
         this.tenantProxy = tenantProxy;
     }
 
-    @GetMapping(value = "/accounts/{accountId}")
+    @GetMapping(value = "/accounts/{accountId:.+}")
     @ResponseBody
-    @ApiOperation(value = "Get all contacts for the given id")
+    @ApiOperation(value = "Get given accountid and contactId")
     public DataPage getContactsByAccountId(RequestEntity<String> requestEntity, @PathVariable String accountId) {
         Map<String, String> orgInfo = tenantProxy.getOrgInfoFromOAuthRequest(requestEntity);
 
-        return dataLakeService.getContactsByAccountById(accountId, orgInfo);
+        return dataLakeService.getAllContactsByAccountId(accountId, orgInfo);
     }
 
 }
