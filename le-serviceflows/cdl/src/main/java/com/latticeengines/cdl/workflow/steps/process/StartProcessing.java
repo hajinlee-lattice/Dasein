@@ -725,8 +725,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 if (configuration.isEntityMatchEnabled()) {
                     DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(),
                             importActionConfiguration.getDataFeedTaskId());
-                    String template = dataFeedTask.getImportTemplate().getName();
-                    associateTemplates(tables, template, tableTemplateMap);
+                    String templateName = dataFeedProxy.getTemplateName(customerSpace.toString(), dataFeedTask.getUniqueId());
+                    associateTemplates(tables, templateName, tableTemplateMap);
                 }
             }
             putObjectInContext(CONSOLIDATE_INPUT_TEMPLATES, tableTemplateMap);
