@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -16,8 +17,6 @@ import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
-import com.latticeengines.common.exposed.util.EmailUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -117,9 +116,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void updateRecipientList(String customerSpace, String projectId, String recipientList) {
-        projectEntityMgr.updateRecipientListByProjectId(projectId, recipientList);
-
+    public void updateRecipientList(String customerSpace, String projectId, List<String> recipientList) {
+        Project project = projectEntityMgr.findByProjectId(projectId);
+        if (project == null) {
+            return;
+        }
+        project.setRecipientList(recipientList);
+        projectEntityMgr.update(project);
     }
 
     private void validateProjectId(String projectId) {
@@ -160,8 +163,7 @@ public class ProjectServiceImpl implements ProjectService {
                         }
                     });
         }
-        List<String>recipientList = StringUtils.isEmpty(project.getRecipientList()) ? new ArrayList<>() : EmailUtils.parseEmails(project.getRecipientList());
-        details.setRecipientList(recipientList);
+        details.setRecipientList(project.getRecipientList());
         return details;
     }
 
@@ -177,9 +179,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectType(projectType);
         project.setRootPath(rootPath);
         project.setS3ImportSystem(system);
-        List<String> mailList = new ArrayList<>();
-        mailList.add(user);
-        project.setRecipientList(JsonUtils.serialize(mailList));
+        project.setRecipientList(Collections.singletonList(user));
         return project;
     }
 

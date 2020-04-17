@@ -24,5 +24,5 @@ public interface ProjectService {
 
     Boolean deleteProject(String customerSpace, String projectId);
 
-    void updateRecipientList(String customerSpace, String projectId, String recipientList);
+    void updateRecipientList(String customerSpace, String projectId, List<String> recipientList);
 }

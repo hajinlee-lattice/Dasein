@@ -15,5 +15,4 @@ public interface ProjectService {
     ProjectDetails getProjectByProjectId(String customerSpace, String projectId);
 
     void deleteProject(String customerSpace, String projectId);
-    
 }

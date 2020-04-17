@@ -74,12 +74,6 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     }
 
     @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void updateRecipientListByProjectId(String projectId, String recipientList) {
-        projectDao.updateRecipientListByProjectId(projectId, recipientList);
-    }
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Project> findAll() {
         List<Project> projectList = getReadOrWriteRepository().findAll();

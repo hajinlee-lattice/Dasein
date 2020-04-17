@@ -64,5 +64,4 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         url = constructUrl(url, customerSpace, projectId);
         delete("delete dcp project by projectId", url);
     }
-
 }
