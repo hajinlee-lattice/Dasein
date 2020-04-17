@@ -10,21 +10,22 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
-@Component("curatedAccountAttributesWrapper")
+@Component("profileCuratedAccountWrapper")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class CuratedAccountAttributesWrapper
-        extends BaseTransformationWrapper<CuratedAccountAttributesStepConfiguration, CuratedAccountAttributesStep> {
+public class ProfileCuratedAccountWrapper
+        extends BaseTransformationWrapper<CuratedAccountAttributesStepConfiguration, ProfileCuratedAccount> {
 
     @Inject
-    private CuratedAccountAttributesStep curatedAccountAttributesStep;
+    private ProfileCuratedAccount profileCuratedAccount;
 
     @PostConstruct
     public void overrideTransformationStepBeanName() {
-        setTransformationStepBeanName(CuratedAccountAttributesStep.BEAN_NAME);
+        setTransformationStepBeanName(ProfileCuratedAccount.BEAN_NAME);
     }
 
     @Override
-    protected CuratedAccountAttributesStep getWrapperStep() {
-        return curatedAccountAttributesStep;
+    protected ProfileCuratedAccount getWrapperStep() {
+        return profileCuratedAccount;
     }
+
 }

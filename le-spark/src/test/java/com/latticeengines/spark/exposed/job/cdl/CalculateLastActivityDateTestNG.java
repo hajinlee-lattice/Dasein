@@ -86,6 +86,7 @@ public class CalculateLastActivityDateTestNG extends SparkJobFunctionalTestNGBas
                 log.info(debugStr(record, columns));
             });
             log.info("Number of records = {}", counter.get());
+            // TODO add assertion
             return true;
         };
     }
