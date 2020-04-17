@@ -102,4 +102,5 @@ public interface PlsInternalProxy {
     List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, String attributeDisplayNameFilter, Category category,
                                                               String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes);
 
+    void sendUploadCompletedEmail(String uploadId, List<String> recipientList);
 }

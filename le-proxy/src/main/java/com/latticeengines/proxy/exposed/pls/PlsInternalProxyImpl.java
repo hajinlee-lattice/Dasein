@@ -543,4 +543,15 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
             throw new RuntimeException("sendScoreEmail: Remote call failure", e);
         }
     }
+
+    @Override
+    public void sendUploadCompletedEmail(String uploadId, List<String> recipientList) {
+        try {
+            String url = constructUrl(combine("/internal/emails/upload/{uploadId}/completed", uploadId));
+            log.info(String.format("Putting to %s", url));
+            put("sendUploadCompletedEmail", url, recipientList);
+        } catch (Exception e) {
+            throw new RuntimeException("sendUploadCompletedEmail: Remote call failure", e);
+        }
+    }
 }

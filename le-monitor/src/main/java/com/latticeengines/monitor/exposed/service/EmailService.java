@@ -82,4 +82,6 @@ public interface EmailService {
     void sendS3TemplateUpdateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo);
 
     void sendPlsActionCancelSuccessEmail(User user, String hostport, CancelActionEmailInfo cancelActionEmailInfo);
+
+    void sendUploadCompleteEmail(String uploadId, List<String> recipientList);
 }

@@ -779,4 +779,24 @@ public class EmailServiceImpl implements EmailService {
             log.error("Failed to send PLS action cancel success email to " + user.getEmail() + " " + e.getMessage());
         }
     }
+
+    @Override
+    public void sendUploadCompleteEmail(String uploadId, List<String> recipientList) {
+        try {
+            if (recipientList != null && !recipientList.isEmpty()) {
+                log.info("Sending PLS action cancel success email to " + recipientList.toString() + " started.");
+                EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                        EmailTemplateBuilder.Template.DCP_UPLOAD_COMPLETED);
+
+                builder.replaceToken("{{uploadId}}", uploadId);
+
+                Multipart mp = builder.buildMultipart();
+                sendMultiPartEmail(EmailSettings.DCP_UPLOAD_COMPLETED_SUBJECT,
+                        mp, recipientList);
+                log.info("Sending PLS action cancel success email to " + recipientList.toString() + " succeeded.");
+            }
+        } catch (Exception e) {
+            log.error("Failed to send PLS action cancel success email to " + recipientList.toString() + " " + e.getMessage());
+        }
+    }
 }

@@ -1151,4 +1151,12 @@ public class InternalResource extends InternalResourceBase {
         }
         return srcContext;
     }
+
+    @RequestMapping(value = "/emails/upload/{uploadId}/completed", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after upload completed")
+    public void sendUploadCompletedEmail(@PathVariable("uploadId") String uploadId,
+                                          @RequestBody List<String> recipientList, HttpServletRequest request) {
+        emailService.sendUploadCompleteEmail(uploadId, recipientList);
+    }
 }
