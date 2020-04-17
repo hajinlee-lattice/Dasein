@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.UpdateSegmentCountResponse;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -47,12 +49,23 @@ public class SegmentServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment-app")
     public void testUpdateCounts() {
+        MetadataSegment segment1 = segmentService.findByName(segmentName1);
+        Date updated1 = segment1.getUpdated();
+        MetadataSegment segment2 = segmentService.findByName(segmentName2);
+        Date updated2 = segment2.getUpdated();
+
+        SleepUtils.sleep(2000L);
         UpdateSegmentCountResponse response = segmentService.updateSegmentsCounts();
         Map<String, Map<BusinessEntity, Long>> review = response.getUpdatedCounts();
         Assert.assertEquals(review.size(), 3);
         Assert.assertTrue(review.containsKey(segmentName1));
         Assert.assertTrue(review.containsKey(segmentName2));
         review.values().forEach(counts -> Assert.assertEquals(CollectionUtils.size(counts), 2));
+
+        segment1 = segmentService.findByName(segmentName1);
+        Assert.assertEquals(segment1.getUpdated(), updated1);
+        segment2 = segmentService.findByName(segmentName2);
+        Assert.assertEquals(segment2.getUpdated(), updated2);
     }
 
     private void createSegments() {
