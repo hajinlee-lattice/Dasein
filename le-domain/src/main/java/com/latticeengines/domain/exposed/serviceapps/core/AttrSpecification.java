@@ -156,6 +156,24 @@ public class AttrSpecification {
         );
     }
 
+    // allow all
+    public static AttrSpecification DEFAULT() {
+        return new AttrSpecification("CDL Derived Attributes for Account", //
+                true, // segment
+                true, // export
+                true, // cp
+                true, // tp
+                true, // model
+                true, // type
+                true, // display name
+                true, // description
+                true, // category
+                true, // icon
+                true, // state
+                true // approved usage
+        );
+    }
+
     public static AttrSpecification getAttrSpecification(AttrType attrType, AttrSubType attrSubType,
             BusinessEntity entity) {
         if (attrType == null) {
@@ -190,9 +208,8 @@ public class AttrSpecification {
                     return AttrSpecification.CDL_CONTACT_EXTENSION();
                 }
             default:
-                break;
+                return AttrSpecification.DEFAULT();
             }
-            break;
         case Curated:
             switch (attrSubType) {
             case ProductBundle:
