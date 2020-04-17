@@ -16,6 +16,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -89,6 +90,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             addNewContactExtractStepsForActivityStream(extracts, extractSteps);
             steps.addAll(extracts);
             boolean noImports = CollectionUtils.isEmpty(extractSteps) && StringUtils.isEmpty(matchedTable);
+            Integer mergedImportStep = null;
             if (noImports) {
                 if (!hasSystemBatch) {
                     throw new IllegalArgumentException("There's no merge or soft delete!");
@@ -100,6 +102,7 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
                         CollectionUtils.isEmpty(extractSteps) ? null : extractSteps, //
                         StringUtils.isBlank(matchedTable) ? null : Collections.singletonList(matchedTable), //
                         Arrays.asList(InterfaceName.CustomerAccountId.name(), InterfaceName.CustomerContactId.name()));
+                mergedImportStep = steps.size();
                 steps.add(dedup);
             }
             int dedupStep = extractSteps.size();
@@ -122,7 +125,8 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             }
             diffStep = upsertMasterStep + 1;
             changeListStep = upsertMasterStep + 2;
-            diff = diff(matchedTable, upsertMasterStep);
+            Preconditions.checkNotNull(mergedImportStep, "Must have merged contact import when reaching here");
+            diff = diff(mergedImportStep, upsertMasterStep);
             if (upsertSystem != null) {
                 steps.add(upsertSystem);
             }

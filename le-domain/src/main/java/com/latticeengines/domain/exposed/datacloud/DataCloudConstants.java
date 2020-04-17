@@ -163,6 +163,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_PROFILE_TXMFR = "ProfileTxmfr";
     public static final String TRANSFORMER_MERGE_IMPORTS = "MergeImports";
     public static final String TRANSFORMER_APPEND_RAWSTREAM = "AppendRawStreamTxmfr";
+    public static final String TRANSFORMER_GENERATE_CURATED_ATTRIBUTES = "GenerateCuratedAttrsTxmfr";
     public static final String TRANSFORMER_CONSOLIDATE_REPORT = "ConsolidateReporter";
     public static final String TRANSFORMER_CONSOLIDATE_DATA = "consolidateDataTransformer";
     public static final String TRANSFORMER_CONSOLIDATE_DELTA = "consolidateDeltaTransformer";
