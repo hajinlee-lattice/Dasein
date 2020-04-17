@@ -47,7 +47,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
@@ -489,23 +488,14 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     }
 
     private void updateEarliestLatestTransaction() {
-        DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
-
         Pair<Integer, Integer> minMaxPeriod = TimeSeriesUtils.getMinMaxPeriod(yarnConfiguration, rawTable);
         Integer earliestDayPeriod = minMaxPeriod.getLeft();
         Integer latestDayPeriod = minMaxPeriod.getRight();
-        Integer currentEarliest = feed.getEarliestTransaction();
-        Integer currentLatest = feed.getLatestTransaction();
-        Integer newEarliest = currentEarliest == null || earliestDayPeriod < currentEarliest ? earliestDayPeriod
-                : currentEarliest;
-        Integer newLatest = currentLatest == null || latestDayPeriod > currentLatest ? latestDayPeriod : currentLatest;
-        if (newEarliest != currentEarliest || newLatest != currentLatest) {
-            dataFeedProxy.updateEarliestLatestTransaction(customerSpace.toString(), newEarliest, newLatest);
-        }
+        dataFeedProxy.updateEarliestLatestTransaction(customerSpace.toString(), earliestDayPeriod, latestDayPeriod);
 
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        detail.setMaxTxnDate(newLatest);
-        detail.setMinTxnDate(newEarliest);
+        detail.setMaxTxnDate(earliestDayPeriod);
+        detail.setMinTxnDate(latestDayPeriod);
         log.info("MergeTransaction step : dataCollection Status is " + JsonUtils.serialize(detail));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
     }
