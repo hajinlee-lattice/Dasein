@@ -1,8 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CHANGELIST_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_EXTRACT_EMBEDDED_ENTITY;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_IMPORTS;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_REPORT_CHANGELIST_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.SERVING;
 import static com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment.STAGING;
 
@@ -29,7 +31,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -65,6 +69,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.spark.cdl.ChangeListConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeImportsConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
@@ -105,6 +110,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected String diffTablePrefix;
     protected String diffReportTablePrefix;
     protected String changeListTablePrefix;
+    protected String reportChangeListTablePrefix;
     protected String batchStorePrimaryKey;
 
     protected List<Table> inputTables = new ArrayList<>();
@@ -148,6 +154,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         diffTablePrefix = entity.name() + "_Diff";
         diffReportTablePrefix = entity.name() + "_DiffReport";
         changeListTablePrefix = entity.name() + "_ChangeList";
+        reportChangeListTablePrefix = entity.name() + "_ReportChangeList";
 
         if (hasKeyInContext(PERFORM_SOFT_DELETE)) {
             softDeleteEntities = getMapObjectFromContext(PERFORM_SOFT_DELETE, BusinessEntity.class, Boolean.class);
@@ -219,6 +226,55 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         String configStr = appendEngineConf(config, lightEngineConfig());
         step.setConfiguration(configStr);
         setTargetTable(step, diffReportTablePrefix);
+    }
+
+    protected TransformationStepConfig createChangeList(int inputStep, String joinKey) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        setupActiveMasterTable(step);
+        step.setInputSteps(Collections.singletonList(inputStep));
+        step.setTransformer(TRANSFORMER_CHANGELIST_TXMFR);
+        setTargetTable(step, changeListTablePrefix);
+        ChangeListConfig config = getChangeListConfig(joinKey);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    protected TransformationStepConfig reportChangeList(int inputStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(inputStep));
+        step.setTransformer(TRANSFORMER_REPORT_CHANGELIST_TXMFR);
+        setTargetTable(step, reportChangeListTablePrefix);
+        ChangeListConfig config = getChangeListConfig(null);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    protected TransformationStepConfig reportChangeList(String changeListTableName) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        addBaseTables(step, changeListTableName);
+        step.setTransformer(TRANSFORMER_REPORT_CHANGELIST_TXMFR);
+        setTargetTable(step, reportChangeListTablePrefix);
+        ChangeListConfig config = getChangeListConfig(null);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
+    private ChangeListConfig getChangeListConfig(String joinKey) {
+        ChangeListConfig config = new ChangeListConfig();
+        config.setJoinKey(joinKey);
+        config.setExclusionColumns(Arrays.asList(InterfaceName.CDLCreatedTime.name(),
+                InterfaceName.CDLUpdatedTime.name(), InterfaceName.EntityId.name()));
+        return config;
+    }
+
+    private void setupActiveMasterTable(TransformationStepConfig step) {
+        Table activeMasterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore, active);
+        if (activeMasterTable != null && StringUtils.isNotBlank(activeMasterTable.getName())) {
+            if (!activeMasterTable.getExtracts().isEmpty()) {
+                log.info("Add active masterTable=" + activeMasterTable.getName());
+                addBaseTables(step, activeMasterTable.getName());
+            }
+        }
     }
 
     TransformationStepConfig dedupAndConcatImports(String joinKey) {
@@ -449,47 +505,94 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
 
     protected void updateReportPayload(ObjectNode report, Table diffReport) {
         try {
-            ObjectMapper om = JsonUtils.getObjectMapper();
-            String path = diffReport.getExtracts().get(0).getPath();
-            Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path);
-            ObjectNode newItem = (ObjectNode) om
-                    .readTree(records.next().get(InterfaceName.ConsolidateReport.name()).toString());
+            Long chgNewRecords = null;
+            Long chgUpdatedRecords = null;
+            Long chgDeletedRecords = null;
+            String changeListReportTableName = TableUtils.getFullTableName(reportChangeListTablePrefix,
+                    pipelineVersion);
+            Table chagneListReport = metadataProxy.getTable(customerSpace.toString(), changeListReportTableName);
+            if (chagneListReport != null) {
+                String path = chagneListReport.getExtracts().get(0).getPath();
+                GenericRecord record = AvroUtils.iterator(yarnConfiguration, path).next();
+                chgNewRecords = (Long) record.get("NewRecords");
+                chgUpdatedRecords = (Long) record.get("UpdatedRecords");
+                chgDeletedRecords = (Long) record.get("DeletedRecords");
+                log.info(String.format("From change lists, new records=%d, updated records=%d, deleted records=%d",
+                        chgNewRecords, chgUpdatedRecords, chgDeletedRecords));
+            }
 
-            JsonNode entitiesSummaryNode = report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
-            if (entitiesSummaryNode == null) {
-                entitiesSummaryNode = report.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
-            }
-            JsonNode entityNode = entitiesSummaryNode.get(entity.name());
-            if (entityNode == null) {
-                entityNode = ((ObjectNode) entitiesSummaryNode).putObject(entity.name());
-            }
-            JsonNode consolidateSummaryNode = entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
-            if (consolidateSummaryNode == null) {
-                consolidateSummaryNode = ((ObjectNode) entityNode)
-                        .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
-            }
-            ((ObjectNode) consolidateSummaryNode).setAll((ObjectNode) newItem.get(entity.name()));
+            JsonNode consolidateSummaryNode = setConsolidateSummary(report, diffReport);
+            setUpdateCount(chgUpdatedRecords, consolidateSummaryNode);
+            setNewCount(chgNewRecords, consolidateSummaryNode);
+            setDeletedCount(chgDeletedRecords, consolidateSummaryNode);
 
-            long updateCnt = 0;
-            if (entityNode.has(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey())
-                    && entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey()).has(ReportConstants.UPDATE)) {
-                updateCnt = entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey())
-                        .get(ReportConstants.UPDATE).asLong();
-            }
-            updateEntityValueMapInContext(entity, UPDATED_RECORDS, updateCnt, Long.class);
-            log.info(String.format("Save updated count %d for entity %s to workflow context", updateCnt, entity));
-
-            long newCnt = 0;
-            if (entityNode.has(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey())
-                    && entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey()).has(ReportConstants.NEW)) {
-                newCnt = entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey()).get(ReportConstants.NEW)
-                        .asLong();
-            }
-            updateEntityValueMapInContext(entity, NEW_RECORDS, newCnt, Long.class);
-            log.info(String.format("Save new count %d for entity %s to workflow context", newCnt, entity));
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
         }
+    }
+
+    private JsonNode setConsolidateSummary(ObjectNode report, Table diffReport)
+            throws JsonProcessingException, JsonMappingException {
+        ObjectMapper om = JsonUtils.getObjectMapper();
+        String path = diffReport.getExtracts().get(0).getPath();
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path);
+        ObjectNode newItem = (ObjectNode) om
+                .readTree(records.next().get(InterfaceName.ConsolidateReport.name()).toString());
+
+        JsonNode entitiesSummaryNode = report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
+        if (entitiesSummaryNode == null) {
+            entitiesSummaryNode = report.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
+        }
+        JsonNode entityNode = entitiesSummaryNode.get(entity.name());
+        if (entityNode == null) {
+            entityNode = ((ObjectNode) entitiesSummaryNode).putObject(entity.name());
+        }
+        JsonNode consolidateSummaryNode = entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+        if (consolidateSummaryNode == null) {
+            consolidateSummaryNode = ((ObjectNode) entityNode)
+                    .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+        }
+        ((ObjectNode) consolidateSummaryNode).setAll((ObjectNode) newItem.get(entity.name()));
+        return consolidateSummaryNode;
+    }
+
+    private void setDeletedCount(Long chgDeletedRecords, JsonNode consolidateSummaryNode) {
+        long delCnt = 0;
+        if (chgDeletedRecords != null) {
+            delCnt = chgDeletedRecords;
+            ((ObjectNode) consolidateSummaryNode).put(ReportConstants.DELETE, chgDeletedRecords);
+        }
+        updateEntityValueMapInContext(entity, DELETED_RECORDS, delCnt, Long.class);
+        log.info(String.format("Save deleted count %d for entity %s to workflow context", delCnt, entity));
+    }
+
+    private void setNewCount(Long chgNewRecords, JsonNode consolidateSummaryNode) {
+        long newCnt = 0;
+        if (consolidateSummaryNode.has(ReportConstants.NEW)) {
+            newCnt = consolidateSummaryNode.get(ReportConstants.NEW)
+                    .asLong();
+            if (chgNewRecords != null) {
+                newCnt = chgNewRecords;
+                ((ObjectNode) consolidateSummaryNode)
+                        .put(ReportConstants.NEW, chgNewRecords);
+            }
+        }
+        updateEntityValueMapInContext(entity, NEW_RECORDS, newCnt, Long.class);
+        log.info(String.format("Save new count %d for entity %s to workflow context", newCnt, entity));
+    }
+
+    private void setUpdateCount(Long chgUpdatedRecords, JsonNode consolidateSummaryNode) {
+        long updateCnt = 0;
+        if (consolidateSummaryNode.has(ReportConstants.UPDATE)) {
+            updateCnt = consolidateSummaryNode.get(ReportConstants.UPDATE).asLong();
+            if (chgUpdatedRecords != null) {
+                updateCnt = chgUpdatedRecords;
+                ((ObjectNode) consolidateSummaryNode)
+                        .put(ReportConstants.UPDATE, chgUpdatedRecords);
+            }
+        }
+        updateEntityValueMapInContext(entity, UPDATED_RECORDS, updateCnt, Long.class);
+        log.info(String.format("Save updated count %d for entity %s to workflow context", updateCnt, entity));
     }
 
     private void markPreviousEntityCnt() {
