@@ -79,6 +79,7 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
+    //  Map<String, List<String>> --> <category --> list of attribute ids>
     @JsonProperty("attributesMap")
     @Transient
     public Map<String, List<String>> getAttributesMap() {
