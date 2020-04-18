@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
 
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,8 +167,15 @@ public class ActivityMetricDecorator implements Decorator {
 
         String[] rollupDimVals = tokens.get(1).split("_");
         String timeRange = tokens.get(2);
-        Map<String, Object> params = getRenderParams(attrName, group, rollupDimVals, timeRange);
-        renderTemplates(cm, group, params);
+        Map<String, Object> params = Collections.emptyMap();
+        if (BooleanUtils.isNotTrue(cm.getShouldDeprecate())) {
+            // only render for active attributes
+            params = getRenderParams(attrName, group, rollupDimVals, timeRange);
+            renderTemplates(cm, group, params);
+        } else {
+            log.debug("Attribute {} is deprecated (shouldDeprecate={}), skip rendering", cm.getAttrName(),
+                    cm.getShouldDeprecate());
+        }
         renderFundamentalType(cm, group);
 
         switch (cm.getEntity()) {
