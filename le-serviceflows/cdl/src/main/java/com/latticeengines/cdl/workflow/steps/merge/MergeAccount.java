@@ -54,7 +54,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private String newAccountTableFromTxnMatch;
 
     private boolean noImports;
-    private boolean useChangeList = true; // TODO:
+    private boolean useChangeList = false; // TODO:
 
     @Override
     protected void initializeConfiguration() {
@@ -74,8 +74,6 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             shortCutMode = true;
             diffTableNameInContext = tablesInCtx.get(0).getName();
             batchStoreNameInContext = tablesInCtx.get(1).getName();
-            chgListTableNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(3).getName()
-                    : tablesInCtx.get(2).getName();
             diffTableName = diffTableNameInContext;
             if (hasSystemBatch) {
                 systemBatchStoreNameInContext = tablesInCtx.size() > 2 ? tablesInCtx.get(2).getName() : null;
