@@ -41,6 +41,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -512,8 +513,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                     pipelineVersion);
             Table chagneListReport = metadataProxy.getTable(customerSpace.toString(), changeListReportTableName);
             if (chagneListReport != null) {
-                String path = chagneListReport.getExtracts().get(0).getPath();
-                GenericRecord record = AvroUtils.iterator(yarnConfiguration, path).next();
+                String path = PathUtils.toAvroGlob(chagneListReport.getExtracts().get(0).getPath());
+                GenericRecord record = AvroUtils.iterateAvroFiles(yarnConfiguration, path).next();
                 chgNewRecords = (Long) record.get("NewRecords");
                 chgUpdatedRecords = (Long) record.get("UpdatedRecords");
                 chgDeletedRecords = (Long) record.get("DeletedRecords");
