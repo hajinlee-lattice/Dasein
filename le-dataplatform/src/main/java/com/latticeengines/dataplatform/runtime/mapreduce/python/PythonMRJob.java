@@ -33,13 +33,13 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
     private EMRCacheService emrCacheService;
     private String stackName;
     private String condaEnv;
-    private String condaEnvAmbari;
+    private String condaEnvP2;
     private boolean useEmr;
 
     public PythonMRJob(Configuration config) {
         setConf(config);
-        this.condaEnv = "lattice";
-        this.condaEnvAmbari = "lattice";
+        this.condaEnv = "lattice3";
+        this.condaEnvP2 = "lattice";
         this.useEmr = false;
     }
 
@@ -50,7 +50,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
             EMRCacheService emrCacheService, //
             String stackName, //
             String condaEnv, //
-            String condaEnvAmbari, //
+            String condaEnvP2, //
             Boolean useEmr) {
         setConf(config);
         mapReduceCustomizationRegistry.register(this);
@@ -58,7 +58,7 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         this.emrCacheService = emrCacheService;
         this.stackName = stackName;
         this.condaEnv = condaEnv;
-        this.condaEnvAmbari = condaEnvAmbari;
+        this.condaEnvP2 = condaEnvP2;
         this.useEmr = Boolean.TRUE.equals(useEmr);
     }
 
@@ -136,7 +136,8 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         config.set("mapreduce.job.maxtaskfailures.per.tracker", "1");
         config.set("mapreduce.map.maxattempts", "1");
         config.set("mapreduce.reduce.maxattempts", "1");
-        config.set(PythonContainerProperty.CONDA_ENV.name(), getCondaEnv());
+        String pythonVersion = properties.getProperty(MapReduceProperty.PYTHON_MAJOR_VERSION.name());
+        config.set(PythonContainerProperty.CONDA_ENV.name(), getCondaEnv(pythonVersion));
         if (Boolean.TRUE.equals(useEmr)) { // useEmr might be null
             config.set(PythonMRProperty.SHDP_HD_FSWEB.name(), emrCacheService.getWebHdfsUrl());
         }
@@ -158,11 +159,11 @@ public class PythonMRJob extends Configured implements MRJobCustomization {
         mrJob.setInputFormatClass(NLineInputFormat.class);
     }
 
-    private String getCondaEnv() {
-        if (Boolean.TRUE.equals(useEmr)) {
+    private String getCondaEnv(String pythonVersion) {
+        if ("3".equals(pythonVersion)) {
             return condaEnv;
         } else {
-            return condaEnvAmbari;
+            return condaEnvP2;
         }
     }
 

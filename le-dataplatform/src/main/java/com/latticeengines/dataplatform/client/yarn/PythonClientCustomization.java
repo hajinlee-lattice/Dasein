@@ -36,21 +36,23 @@ import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.yarn.exposed.client.ContainerProperty;
 import com.latticeengines.yarn.exposed.client.DefaultYarnClientCustomization;
 import com.latticeengines.yarn.exposed.runtime.python.PythonContainerProperty;
-import com.latticeengines.yarn.exposed.service.EMREnvService;
 
 @Component("pythonClientCustomization")
 public class PythonClientCustomization extends DefaultYarnClientCustomization {
 
     private static final Logger log = LoggerFactory.getLogger(PythonClientCustomization.class);
 
-    @Value("${dataplatform.hdfs.stack}")
-    private String stackName;
-
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
 
-    @Inject
-    private EMREnvService emrEnvService;
+    @Value("${dataplatform.python.conda.env}")
+    private String condaEnv;
+
+    @Value("${dataplatform.python2.conda.env}")
+    private String condaEnvP2;
+
+    @Value("${dataplatform.default.python.version}")
+    private String pythonVersion;
 
     @Inject
     private EMRCacheService emrCacheService;
@@ -115,7 +117,7 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             FileUtils.writeStringToFile(metadataFile, metadata, Charset.defaultCharset());
             properties.put(PythonContainerProperty.METADATA_CONTENTS.name(), metadata);
             properties.put(PythonContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
-            properties.put(PythonContainerProperty.CONDA_ENV.name(), emrEnvService.getLatticeCondaEnv());
+            properties.put(PythonContainerProperty.CONDA_ENV.name(), getLatticeCondaEnv());
             if (Boolean.TRUE.equals(useEmr)) {
                 properties.put(PythonContainerProperty.WEBHDFS_URL.name(),
                         emrCacheService.getWebHdfsUrl());
@@ -194,6 +196,14 @@ public class PythonClientCustomization extends DefaultYarnClientCustomization {
             if (!fieldNames.contains(feature)) {
                 throw new LedpException(LedpCode.LEDP_10004, new String[] { feature });
             }
+        }
+    }
+
+    public String getLatticeCondaEnv() {
+        if ("3".equals(pythonVersion)) {
+            return condaEnv;
+        } else {
+            return condaEnvP2;
         }
     }
 

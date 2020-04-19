@@ -113,6 +113,7 @@ public class ModelSummaryParser {
         summary.setTrainingConversionCount(JsonUtils.getOrDefault(details.get("TrainingConversions"), Long.class, 0L));
         summary.setTestConversionCount(JsonUtils.getOrDefault(details.get("TestingConversions"), Long.class, 0L));
         summary.setTotalConversionCount(JsonUtils.getOrDefault(details.get("TotalConversions"), Long.class, 0L));
+        summary.setPythonMajorVersion(JsonUtils.getOrDefault(details.get("PythonMajorVersion"), String.class, "2"));
         summary.setConstructionTime(constructionTime);
         summary.setModelType(
                 JsonUtils.getOrDefault(details.get("ModelType"), String.class, ModelType.PYTHONMODEL.getModelType()));

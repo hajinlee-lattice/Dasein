@@ -20,7 +20,7 @@
         <constructor-arg ref="emrCacheService" />
         <constructor-arg value="${dataplatform.hdfs.stack}" />
         <constructor-arg value="${dataplatform.python.conda.env}" />
-        <constructor-arg value="${dataplatform.python.conda.env.ambari}" />
+        <constructor-arg value="${dataplatform.python2.conda.env}" />
         <constructor-arg value="${hadoop.use.emr}" />
     </bean>
 

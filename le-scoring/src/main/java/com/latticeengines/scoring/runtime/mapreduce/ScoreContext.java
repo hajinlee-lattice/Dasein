@@ -40,6 +40,7 @@ public class ScoreContext {
     public boolean readModelIdFromRecord;
     public int recordNumber = 0;
     public Collection<String> modelGuids;
+    public Collection<String> p2ModelGuids;
     public ObjectMapper mapper;
     public String uniqueKeyColumn;
     public long recordFileThreshold;
@@ -55,6 +56,9 @@ public class ScoreContext {
         type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
         readModelIdFromRecord = config.getBoolean(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(), true);
         modelGuids = config.getStringCollection(ScoringProperty.MODEL_GUID.name());
+        p2ModelGuids = config.getStringCollection(ScoringProperty.MODEL_GUID_P2.name());
+        log.info("p2Models: {}", modelGuids);
+        log.info("p3Models: {}", p2ModelGuids);
         uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
         recordFileThreshold = config.getLong(ScoringProperty.RECORD_FILE_THRESHOLD.name(), DEFAULT_LEAD_FILE_THRESHOLD);
         mapper = new ObjectMapper();
@@ -68,7 +72,7 @@ public class ScoreContext {
         return modelAndRecordInfo;
     }
 
-    public void closeFiles(String uuid) throws IOException, InterruptedException {
+    public void closeFiles(String uuid) throws IOException {
         if (out != null) {
             creator.close();
             writer.close();
@@ -97,7 +101,10 @@ public class ScoreContext {
                 String uuid = UuidUtils.extractUuid(modelGuid);
                 res.putIfAbsent(uuid, new ArrayList<>());
                 res.get(uuid).add(record);
-                uuidToModeId.put(uuid, modelGuid);
+                if (!uuidToModeId.containsKey(uuid)) {
+                    uuidToModeId.put(uuid, modelGuid);
+                    log.info("Add model: modelGuid={}, uuid={}", modelGuid, uuid);
+                }
                 total++;
             }
         } else {
@@ -112,12 +119,21 @@ public class ScoreContext {
                 String uuid = UuidUtils.extractUuid(modelGuid);
                 res.put(uuid, records);
                 uuidToModeId.put(uuid, modelGuid);
+                log.info("Add python 3 model: modelGuid={}, uuid={}", modelGuid, uuid);
+            }
+            for (String modelGuid : p2ModelGuids) {
+                String uuid = UuidUtils.extractUuid(modelGuid);
+                res.put(uuid, records);
+                uuidToModeId.put(uuid, modelGuid);
+                log.info("Add python 2 model: modelGuid={}, uuid={}", modelGuid, uuid);
             }
         }
         log.info("readModelIdFromRecord=" + readModelIdFromRecord + " total records=" + total);
         res.forEach((key, value) -> {
             log.info("UUID=" + key + " records=" + value.size());
         });
+
+        log.info("uuidToModeId: {}", uuidToModeId);
         return res;
     }
 }

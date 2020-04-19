@@ -1,13 +1,12 @@
 package com.latticeengines.scoring.workflow.steps;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,15 +40,15 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
     @Override
     public void execute() {
         log.info("Inside Score execute()");
-        Map.Entry<ScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
-        ScoringConfiguration scoringConfig = scoringConfigAndTableName.getKey();
+        Pair<ScoringConfiguration, String> scoringConfigAndTableName = buildScoringConfig();
+        ScoringConfiguration scoringConfig = scoringConfigAndTableName.getLeft();
         AppSubmission submission = scoringProxy.createScoringJob(scoringConfig);
         waitForAppId(submission.getApplicationIds().get(0));
         copyImportErrors(scoringConfig.getTargetResultDir());
 
         if (configuration.isRegisterScoredTable()) {
             try {
-                registerTable(scoringConfigAndTableName.getValue(), scoringConfig.getTargetResultDir());
+                registerTable(scoringConfigAndTableName.getRight(), scoringConfig.getTargetResultDir());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -86,17 +85,23 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         putStringValueInContext(SCORING_RESULT_TABLE_NAME, tableName);
     }
 
-    private Map.Entry<ScoringConfiguration, String> buildScoringConfig() {
+    private Pair<ScoringConfiguration, String> buildScoringConfig() {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(configuration.getCustomerSpace().toString());
-        String[] modelIds = getModelId().split("\\|");
-        log.info("Get model ids: " + StringUtils.join(modelIds, ", "));
+        String pythonMajorVersion = getStringValueFromContext(PYTHON_MAJOR_VERSION);
+        if (StringUtils.isBlank(pythonMajorVersion)) {
+            throw new IllegalArgumentException("Must specify python major version in context!");
+        }
+        String[] modelIds = getModelId(pythonMajorVersion).split("\\|");
         scoringConfig.setModelGuids(Arrays.asList(modelIds));
+        String[] p2ModelIds = getP2ModelId(pythonMajorVersion).split("\\|");
+        scoringConfig.setP2ModelGuids(Arrays.asList(p2ModelIds));
         scoringConfig.setSourceDataDir(getSourceDir());
         scoringConfig.setUniqueKeyColumn(getUniqueKeyColumn());
         scoringConfig.setUseScorederivation(configuration.getUseScorederivation());
         scoringConfig.setModelIdFromRecord(configuration.getReadModelIdFromRecord());
-        Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), //
+        scoringConfig.setPythonMajorVersion(pythonMajorVersion);
+        Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), //
                 configuration.getCustomerSpace());
         String tableName = String.format("ScoreResult_%s_%d", modelIds[0].replaceAll("-", "_"),
                 System.currentTimeMillis());
@@ -104,15 +109,23 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         if (getScoringInputType() != null) {
             scoringConfig.setScoreInputType(getScoringInputType());
         }
-        return new AbstractMap.SimpleEntry<>(scoringConfig, tableName);
+        return Pair.of(scoringConfig, tableName);
     }
 
-    private String getModelId() {
-        String modelId = getStringValueFromContext(SCORING_MODEL_ID);
-        if (modelId == null) {
+    private String getModelId(String pythonMajorVersion) {
+        String modelId = getStringValueFromContext(SCORING_MODEL_ID_P3);
+        if (modelId == null && "3".equals(pythonMajorVersion)) {
             modelId = configuration.getModelId();
         }
-        return modelId;
+        return StringUtils.isBlank(modelId) ? "" : modelId;
+    }
+
+    private String getP2ModelId(String pythonMajorVersion) {
+        String modelId = getStringValueFromContext(SCORING_MODEL_ID_P2);
+        if (modelId == null && !"3".equals(pythonMajorVersion)) {
+            modelId = configuration.getModelId();
+        }
+        return StringUtils.isBlank(modelId) ? "" : modelId;
     }
 
     private String getSourceDir() {
