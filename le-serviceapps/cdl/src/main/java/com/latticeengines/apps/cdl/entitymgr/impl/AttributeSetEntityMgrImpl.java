@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.dao.AttributeSetDao;
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.repository.AttributeSetRepository;
+import com.latticeengines.apps.cdl.repository.reader.AttributeSetReaderRepository;
+import com.latticeengines.apps.cdl.repository.writer.AttributeSetWriterRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
@@ -23,19 +25,19 @@ public class AttributeSetEntityMgrImpl
     private AttributeSetDao attributeSetDao;
 
     @Inject
-    private AttributeSetRepository readerRepository;
+    private AttributeSetReaderRepository attributeSetReaderRepository;
 
     @Inject
-    private AttributeSetRepository writerRepository;
+    private AttributeSetWriterRepository attributeSetWriterRepository;
 
     @Override
     protected AttributeSetRepository getReaderRepo() {
-        return readerRepository;
+        return attributeSetReaderRepository;
     }
 
     @Override
     protected AttributeSetRepository getWriterRepo() {
-        return writerRepository;
+        return attributeSetWriterRepository;
     }
 
     @Override
