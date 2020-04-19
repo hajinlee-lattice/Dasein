@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.end2end;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -18,12 +20,18 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     public static final String CHECK_POINT = "update1";
 
+    private Date segment3Updated;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(resumeFromCheckPoint());
         Assert.assertEquals(Long.valueOf(countInRedshift(BusinessEntity.Account)), getPrePAAccountCount());
 
-        new Thread(this::createTestSegment3).start();
+        new Thread(() -> {
+            createTestSegment3();
+            MetadataSegment segment3 = getSegmentByName(SEGMENT_NAME_3);
+            segment3Updated = segment3.getUpdated();
+        }).start();
 
         createSystems();
         importData();
@@ -72,6 +80,8 @@ public class UpdateAccountDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         verifyExtraTableRoles(getExtraTableRoeCounts());
 
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
+        MetadataSegment segment3 = getSegmentByName(SEGMENT_NAME_3);
+        Assert.assertEquals(segment3Updated, segment3.getUpdated());
         Map<BusinessEntity, Long> segment3Counts = getSegmentCounts(SEGMENT_NAME_3);
         verifyTestSegment3Counts(segment3Counts);
     }

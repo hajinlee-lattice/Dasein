@@ -118,11 +118,13 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public MetadataSegment updateSegment(MetadataSegment segment, MetadataSegment existingSegment) {
+        log.info("Updating segment {} with action and auditing", segment.getName());
         preprocessBeforeCreateOrUpdate(segment);
 
         if (existingSegment != null) {
             existingSegment = findByName(existingSegment.getName());
             cloneForUpdate(existingSegment, segment);
+            existingSegment.setSkipAuditing(false);
             segmentDao.update(existingSegment);
             setMetadataSegmentActionContext(existingSegment);
             return existingSegment;
@@ -134,6 +136,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public MetadataSegment updateSegmentWithoutActionAndAuditing(MetadataSegment segment, MetadataSegment existingSegment) {
+        log.info("Updating segment {} without action and auditing", existingSegment.getName());
         preprocessBeforeCreateOrUpdate(segment);
 
         if (existingSegment != null) {
@@ -258,6 +261,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> //
         existing.setDescription(incoming.getDescription());
         existing.setUpdatedBy(incoming.getUpdatedBy());
         existing.setTeamId(incoming.getTeamId());
+        if (incoming.getCountsOutdated() != null) {
+            existing.setCountsOutdated(incoming.getCountsOutdated());
+        }
         if (!Boolean.TRUE.equals(existing.getMasterSegment())) {
             existing.setAccountRestriction(incoming.getAccountRestriction());
             existing.setContactRestriction(incoming.getContactRestriction());
