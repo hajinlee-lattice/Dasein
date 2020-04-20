@@ -75,6 +75,7 @@ public final class MatchUtils {
         if (StringUtils.isNotBlank(rootOperationUid)) {
             config.setRootOperationUid(rootOperationUid);
         }
+        baseMatchInput.setIncludeLineageFields(true);
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         MatchInput.EntityKeyMap entityKeyMap = new MatchInput.EntityKeyMap();
@@ -104,6 +105,7 @@ public final class MatchUtils {
         if (StringUtils.isNotBlank(rootOperationUid)) {
             config.setRootOperationUid(rootOperationUid);
         }
+        baseMatchInput.setIncludeLineageFields(true);
         baseMatchInput.setPredefinedSelection(ColumnSelection.Predefined.ID);
         baseMatchInput.setTenant(new Tenant(CustomerSpace.parse(customer).toString()));
         MatchInput.EntityKeyMap accountKeyMap = MatchInput.EntityKeyMap
