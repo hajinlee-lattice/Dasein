@@ -16,6 +16,10 @@ public interface TenantEntityMgr extends BaseEntityMgrRepository<Tenant, Long> {
 
     Tenant findByTenantName(String tenantName);
 
+    List<Tenant> findByTenantNamePrefix(String namePrefix);
+
+    Tenant findBySubscriberNumber(String subscriberNumber);
+
     List<Tenant> findAllByStatus(TenantStatus status);
 
     List<Tenant> findAllByTypes(List<TenantType> types);

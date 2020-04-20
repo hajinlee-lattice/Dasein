@@ -230,23 +230,15 @@ public class TenantResource {
     @ResponseBody
     @ApiOperation(value = "Create a DCP tenant from VBO request")
     public VboResponse createTenant(@RequestBody VboRequest vboRequest, HttpServletRequest request) {
-        VboResponse vboResponse = new VboResponse();
         try{
             String userName = getUserName(request);
-
-            boolean result = tenantService.createVboTenant(vboRequest, userName);
-            if (result) {
-                vboResponse.setStatus("success");
-                vboResponse.setMessage("tenant created successfully via Vbo request");
-            } else {
-                vboResponse.setStatus("failed");
-                vboResponse.setMessage("tenant created failed via Vbo request");
-            }
+            return tenantService.createVboTenant(vboRequest, userName);
         } catch(Exception e){
+            VboResponse vboResponse = new VboResponse();
             vboResponse.setStatus("failed");
             vboResponse.setMessage("tenant created failed via Vbo request," + e.getMessage());
             e.printStackTrace();
+            return vboResponse;
         }
-        return vboResponse;
     }
 }
