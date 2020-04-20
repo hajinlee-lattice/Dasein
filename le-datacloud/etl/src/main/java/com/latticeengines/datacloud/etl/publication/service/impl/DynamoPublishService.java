@@ -47,6 +47,7 @@ public class DynamoPublishService extends AbstractPublishService
     private static final String PREFIX = "_REPO_DataCloud_RECORD_";
     private static final Long THREE_DAYS = TimeUnit.DAYS.toSeconds(3);
 
+    static final String TAG_LE_NAME = "le-name";
     static final String TAG_LE_ENV = "le-env";
     static final String TAG_LE_PRODUCT = "le-product";
     static final String TAG_LE_PRODUCT_VALUE = "lpi";
@@ -143,7 +144,8 @@ public class DynamoPublishService extends AbstractPublishService
                 environment = "production";
                 break;
         }
-        Map<String, String> tags = ImmutableMap.of(TAG_LE_ENV, environment, TAG_LE_PRODUCT, TAG_LE_PRODUCT_VALUE);
+        Map<String, String> tags = ImmutableMap.of(TAG_LE_ENV, environment, TAG_LE_PRODUCT, TAG_LE_PRODUCT_VALUE,
+                TAG_LE_NAME, tableName);
         dynamoService.tagTable(tableName, tags);
         log.info("Tagged dynamo table " + tableName + ": " + JsonUtils.serialize(tags));
     }

@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.publication.service.impl;
 
 import static com.latticeengines.datacloud.etl.publication.service.impl.DynamoPublishService.TAG_LE_ENV;
+import static com.latticeengines.datacloud.etl.publication.service.impl.DynamoPublishService.TAG_LE_NAME;
 import static com.latticeengines.datacloud.etl.publication.service.impl.DynamoPublishService.TAG_LE_PRODUCT;
 import static com.latticeengines.datacloud.etl.publication.service.impl.DynamoPublishService.TAG_LE_PRODUCT_VALUE;
 import static org.mockito.ArgumentMatchers.any;
@@ -166,8 +167,11 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
     private void verifyTags(MockDynamoTable table) {
         Assert.assertTrue(table.tags.containsKey(TAG_LE_ENV));
         Assert.assertTrue(table.tags.containsKey(TAG_LE_PRODUCT));
+        Assert.assertTrue(table.tags.containsKey(TAG_LE_NAME));
         Assert.assertEquals(table.tags.get(TAG_LE_ENV), "qa");
         Assert.assertEquals(table.tags.get(TAG_LE_PRODUCT), TAG_LE_PRODUCT_VALUE);
+        Assert.assertEquals(table.tags.get(TAG_LE_PRODUCT), TAG_LE_PRODUCT_VALUE);
+        Assert.assertEquals(table.tags.get(TAG_LE_NAME), table.tableName);
     }
 
     private void verifyThroughput(MockDynamoTable table) {
