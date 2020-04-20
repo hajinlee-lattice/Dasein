@@ -1647,7 +1647,8 @@ public class SchemaRepository {
     }
 
     private Attribute attrStageName() {
-        return attr(InterfaceName.StageName.name()).allowedDisplayNames(Arrays.asList("STAGENAME", "STAGE_NAME"))
+        return attr(InterfaceName.StageName.name()).allowedDisplayNames(Arrays.asList("STAGENAME", "STAGE_NAME",
+                "Stage Name"))
                 .required().physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.StageName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1712,7 +1713,7 @@ public class SchemaRepository {
 
     private Attribute attrSourceMedium(boolean required) {
         AttributeBuilder builder = attr(InterfaceName.SourceMedium.name())
-                .allowedDisplayNames(Arrays.asList("SOURCE_MEDIUM", "SOURCEMEDIUM"))
+                .allowedDisplayNames(Arrays.asList("SOURCE_MEDIUM", "SOURCEMEDIUM", "Referral Source"))
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.SourceMedium) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1810,7 +1811,7 @@ public class SchemaRepository {
 
     private Attribute attrPathPatternName() {
         return attr(InterfaceName.PathPatternName.name()) //
-                .allowedDisplayNames(Arrays.asList("NAME", "PATH_PATTERN_NAME")) //
+                .allowedDisplayNames(Arrays.asList("NAME", "PATH_PATTERN_NAME", "Website URL Pattern")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PathPatternName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
