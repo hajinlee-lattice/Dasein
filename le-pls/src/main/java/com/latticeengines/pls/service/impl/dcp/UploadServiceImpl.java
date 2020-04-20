@@ -79,7 +79,7 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         String uploadTSPrefix = config.getUploadTSPrefix();
         int index = rawPath.indexOf(uploadTSPrefix);
         Preconditions.checkState(index != -1, String.format("invalid upload config %s.", uploadId));
-        String parentPath = rawPath.substring(0, rawPath.indexOf(uploadTSPrefix));
+        String parentPath = rawPath.substring(0, index + uploadTSPrefix.length());
 
         // search csv file under TSPrefix folder recursively, returned paths are absolute from protocol to file name
         final String filter = ".*.csv";
