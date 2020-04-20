@@ -182,9 +182,32 @@ public class TeamServiceImpl implements TeamService {
         return globalAuthTeam.getTeamId();
     }
 
+    private boolean isInternalUser(GlobalAuthUserTenantRight globalAuthUserTenantRight) {
+        if (AccessLevel.INTERNAL_ADMIN.name().equals(globalAuthUserTenantRight.getOperationName())
+                || AccessLevel.INTERNAL_USER.name().equals(globalAuthUserTenantRight.getOperationName())
+                || AccessLevel.SUPER_ADMIN.name().equals(globalAuthUserTenantRight.getOperationName())) {
+            return globalAuthUserTenantRight.getExpirationDate() == null || globalAuthUserTenantRight.getExpirationDate() > System.currentTimeMillis();
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public Boolean editTeam(User loginUser, String teamId, GlobalTeamData globalTeamData) {
         GlobalAuthTeam globalAuthTeam = globalTeamManagementService.getTeamById(teamId, true);
+        if (CollectionUtils.isNotEmpty(globalTeamData.getTeamMembers()) && isExternalUser(loginUser)) {
+            // add the internal users into team member list if internal user exists in the edit team
+            if (globalAuthTeam != null && CollectionUtils.isNotEmpty(globalAuthTeam.getUserTenantRights())) {
+                List<GlobalAuthUserTenantRight> globalAuthUserTenantRights = globalAuthTeam.getUserTenantRights();
+                Set<String> teamMembers = globalTeamData.getTeamMembers();
+                for (GlobalAuthUserTenantRight globalAuthUserTenantRight : globalAuthUserTenantRights) {
+                    String username = globalAuthUserTenantRight.getGlobalAuthUser().getEmail();
+                    if (!teamMembers.contains(username) && isInternalUser(globalAuthUserTenantRight)) {
+                        teamMembers.add(username);
+                    }
+                }
+            }
+        }
         GlobalAuthTeam globalAuthTeamUpdated = globalTeamManagementService.updateTeam(teamId, globalTeamData);
         List<Long> userIds = getChangedUserNames(getUserIds(globalAuthTeam), getUserIds(globalAuthTeamUpdated));
         userService.clearSession(false, MultiTenantContext.getTenant().getId(), userIds);
