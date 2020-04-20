@@ -2,6 +2,7 @@ package com.latticeengines.eai.service.impl.file;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -44,7 +45,7 @@ public class FileImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> prepareMetadata(List<Table> originalTables) {
+    public List<Table> prepareMetadata(List<Table> originalTables, Map<String, String> defaultColumnMap) {
         return null;
     }
 
