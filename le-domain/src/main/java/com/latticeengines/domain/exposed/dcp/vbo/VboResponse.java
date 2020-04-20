@@ -17,6 +17,7 @@ public class VboResponse {
     @ApiModelProperty(required = true, value = "message")
     private String message;
 
+    // this property is used for testing
     @JsonProperty("tenantName")
     private String tenantName;
 
