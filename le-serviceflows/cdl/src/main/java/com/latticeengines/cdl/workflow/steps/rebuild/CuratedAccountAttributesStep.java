@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.NumberOfContactsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
@@ -55,7 +58,9 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedA
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
@@ -71,6 +76,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
     private static final String LAST_ACTIVITY_DATE_DISPLAY_NAME = "Lattice Last Activity Date";
     private static final String ENTITY_CREATED_DATE_DISPLAY_NAME = "Lattice Created Date";
     private static final String ENTITY_MODIFIED_DATE_DISPLAY_NAME = "Lattice Last Modified Date";
+    private static final String ENTITY_SYS_MODIFIED_DATE_NAME_FMT = "Lattice Last Modified Date by System %s";
 
     private static final String NUMBER_OF_CONTACTS_DESCRIPTION = "This curated attribute is calculated by counting the "
             + "number of contacts matching each account";
@@ -78,14 +84,23 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             + "any of the time series data (excluding transactions)";
     private static final String ENTITY_CREATED_DATE_DESCRIPTION = "The date when the account is created";
     private static final String ENTITY_MODIFIED_DATE_DESCRIPTION = "Most recent date when the account is updated";
+    private static final String ENTITY_SYS_MODIFIED_DATE_DESC_FMT = "Most recent date when the account is updated by system %s";
 
+    // <TEMPLATE_NAME>__<ATTR>
+    private static final String SYSTEM_ATTR_FORMAT = "%s__%s";
     // optional curated attrs might not be re-calculated everytime (need to be
     // copied from old table)
     private static final Set<String> CURATED_ACCOUNT_ATTRIBUTES = Sets.newHashSet(NumberOfContacts.name(),
             LastActivityDate.name());
 
     @Inject
+    protected CDLProxy cdlProxy;
+
+    @Inject
     protected DataCollectionProxy dataCollectionProxy;
+
+    @Inject
+    protected DataFeedProxy dataFeedProxy;
 
     @Inject
     protected MetadataProxy metadataProxy;
@@ -98,6 +113,9 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
     private String servingStoreTablePrefix;
     // template name
     private List<String> accountTemplates;
+    // template name -> system name
+    private Map<String, String> templateSystemMap;
+    private Map<String, S3ImportSystem> systemMap;
 
     // Set to true if either of the Account or Contact table is missing or empty and we should not
     // run this step's transformation.
@@ -148,15 +166,50 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
                 enrichDateAttribute(attr, ENTITY_MODIFIED_DATE_DISPLAY_NAME, ENTITY_MODIFIED_DATE_DESCRIPTION);
             } else if (EntityCreatedDate.name().equals(attr.getName())) {
                 enrichDateAttribute(attr, ENTITY_CREATED_DATE_DISPLAY_NAME, ENTITY_CREATED_DATE_DESCRIPTION);
+            } else {
+                enrichSystemAttributes(attr);
             }
         });
     }
 
-    private void enrichDateAttribute(@NotNull Attribute attribute, @NotNull String diplayName,
+    private void enrichSystemAttributes(@NotNull Attribute attribute) {
+        if (StringUtils.isBlank(attribute.getName())) {
+            return;
+        }
+
+        Optional<String> matchingTmpl = templateSystemMap.keySet() //
+                .stream() //
+                .filter(tmpl -> {
+                    String attr = String.format(SYSTEM_ATTR_FORMAT, tmpl, EntityLastUpdatedDate.name());
+                    return attr.equals(attribute.getName());
+                }) //
+                .findFirst();
+        matchingTmpl.ifPresent(tmpl -> {
+            String system = templateSystemMap.get(tmpl);
+            if (!systemMap.containsKey(system)) {
+                log.warn("No corresponding system found for template {}, system {} in attribute {}", tmpl, system,
+                        attribute.getName());
+                return;
+            }
+
+            S3ImportSystem sys = systemMap.get(system);
+            if (sys == null || StringUtils.isBlank(sys.getDisplayName())) {
+                log.warn("No display name found for system {}", system);
+                return;
+            }
+            String displayName = String.format(ENTITY_SYS_MODIFIED_DATE_NAME_FMT, sys.getDisplayName());
+            String description = String.format(ENTITY_SYS_MODIFIED_DATE_DESC_FMT, sys.getDisplayName());
+            log.info("Enriching system attribute {} with system display name {}. system = {}, template = {}",
+                    attribute.getName(), sys.getDisplayName(), system, tmpl);
+            enrichDateAttribute(attribute, displayName, description);
+        });
+    }
+
+    private void enrichDateAttribute(@NotNull Attribute attribute, @NotNull String displayName,
             @NotNull String description) {
         attribute.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
         attribute.setSubcategory(null);
-        attribute.setDisplayName(diplayName);
+        attribute.setDisplayName(displayName);
         attribute.setDescription(description);
         attribute.setLogicalDataType(LogicalDataType.Date);
         attribute.setFundamentalType(FundamentalType.DATE.getName());
@@ -243,14 +296,16 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             int systemAccountInputIdx = inputIdx++;
             Map<String, String> lastSystemUpdateAttrs = accountTemplates.stream().distinct().map(template -> {
                 // copy last update time to account from this system/template
-                String srcAttr = String.format("%s__%s", template, CDLUpdatedTime.name());
-                String tgtAttr = String.format("%s__%s", template, EntityLastUpdatedDate.name());
+                String srcAttr = String.format(SYSTEM_ATTR_FORMAT, template, CDLUpdatedTime.name());
+                String tgtAttr = String.format(SYSTEM_ATTR_FORMAT, template, EntityLastUpdatedDate.name());
                 return Pair.of(srcAttr, tgtAttr);
             }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
             log.info("Last updated date attributes from systems = {}", lastSystemUpdateAttrs);
             config.attrsToMerge.put(systemAccountInputIdx, lastSystemUpdateAttrs);
             // only EntityId field guaranteed to exist
             config.joinKeys.put(systemAccountInputIdx, EntityId.name());
+            // not copying from exist store
+            currAttrs.removeAll(lastSystemUpdateAttrs.values());
         }
 
         // copy create time & last update time from account batch store
@@ -299,12 +354,18 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         contactTableName = getContactTableName();
         accountSystemTableName = getSystemAccountTableName();
         accountTemplates = getAccountTemplates();
+        templateSystemMap = dataFeedProxy.getTemplateToSystemMap(customerSpace.toString());
+        systemMap = getSystemMap();
 
         // Do not run this step if there is no account table, since accounts are
         // required for this step to be
         // meaningful.
         if (StringUtils.isBlank(accountTableName)) {
             log.warn("Cannot find account master table.  Skipping CuratedAccountAttributes Step.");
+            skipTransformation = true;
+            return;
+        } else if (shouldResetCuratedAttributesContext()) {
+            log.warn("Should reset. Skipping CuratedAccountAttributes Step.");
             skipTransformation = true;
             return;
         }
@@ -349,7 +410,25 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
      * TODO change to only calculate when there's account imports. copy from existing table otherwise
      */
     private boolean shouldCalculateSystemLastUpdateTime() {
-        return CollectionUtils.isNotEmpty(accountTemplates) && StringUtils.isNotBlank(accountSystemTableName);
+        if (CollectionUtils.isEmpty(accountTemplates) && StringUtils.isBlank(accountSystemTableName)) {
+            log.info(
+                    "No account templates ({}) and/or account system store ({}), skip calculating system last update time",
+                    accountTemplates, accountSystemTableName);
+            return false;
+        }
+        Map<BusinessEntity, List> entityImportsMap = getMapObjectFromContext(CONSOLIDATE_INPUT_IMPORTS,
+                BusinessEntity.class, List.class);
+        if (BooleanUtils.isTrue(configuration.getRebuild())) {
+            log.info("In rebuild mode for curated account, re-calculating system last update time");
+            return true;
+        } else if (MapUtils.emptyIfNull(entityImportsMap).containsKey(BusinessEntity.Account)) {
+            log.info("Has account import (size={}), re-calculating system last update time",
+                    CollectionUtils.size(entityImportsMap.get(BusinessEntity.Account)));
+            return true;
+        }
+
+        log.info("No account change, not calculating system last update time");
+        return false;
     }
 
     private String getLastActivityDateTableName(BusinessEntity entity) {
@@ -373,7 +452,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             // Do not run this step if there is no contact table, since contacts are
             // required for this step to be
             // meaningful.
-            log.warn("Cannot find contact master table.  Skipping CuratedAccountAttributes Step.");
+            log.warn("Cannot find contact master table. Skip calculation number of contact.");
             return false;
         } else if ((MapUtils.isEmpty(entityImportsMap) || (!entityImportsMap.containsKey(BusinessEntity.Account)
                 && !entityImportsMap.containsKey(BusinessEntity.Contact)))
@@ -381,10 +460,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             // Skip this step if there are no newly imported accounts and no newly imported
             // contacts, and force rebuild
             // for BusinessEntity CuratedAccounts is null or has been set to false.
-            log.warn("There are no newly imported Account or Contacts.  Skipping CuratedAccountAttributes Step.");
-            return false;
-        } else if (shouldResetCuratedAttributesContext()) {
-            log.warn("Should reset. Skipping CuratedAccountAttributes Step.");
+            log.warn("There are no newly imported Account or Contacts. Skip calculation number of contact.");
             return false;
         }
         return true;
@@ -397,7 +473,16 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         }
 
         return Arrays.stream(table.getAttributeNames()) //
-                .filter(CURATED_ACCOUNT_ATTRIBUTES::contains) //
+                .filter(attr -> {
+                    if (CURATED_ACCOUNT_ATTRIBUTES.contains(attr)) {
+                        return true;
+                    }
+
+                    // check if this is a system last modified date attribute
+                    return accountTemplates.stream()
+                            .map(tmpl -> String.format(SYSTEM_ATTR_FORMAT, tmpl, EntityLastUpdatedDate.name()))
+                            .anyMatch(attr::equals);
+                }) //
                 .collect(Collectors.toSet());
     }
 
@@ -428,6 +513,15 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         return templateNames;
     }
 
+    private Map<String, S3ImportSystem> getSystemMap() {
+        List<S3ImportSystem> systems = cdlProxy.getS3ImportSystemList(customerSpace.toString());
+        return CollectionUtils.emptyIfNull(systems) //
+                .stream() //
+                .filter(Objects::nonNull) //
+                .filter(sys -> StringUtils.isNotBlank(sys.getName())) //
+                .collect(Collectors.toMap(S3ImportSystem::getName, sys -> sys));
+    }
+
     private String getAccountTableName() {
         return getTableName(BusinessEntity.Account.getBatchStore(), "account batch store");
     }
@@ -441,10 +535,10 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
     }
 
     private boolean shouldResetCuratedAttributesContext() {
-        // if either Account or Contact is reset, should reset CuratedAccount too
+        // reset CuratedAccount when account is reset
+        // TODO handle contact reset (erase number of contacts attribute)
         Set<BusinessEntity> entitySet = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
-        if (CollectionUtils.isNotEmpty(entitySet) && //
-                (entitySet.contains(BusinessEntity.Account) || entitySet.contains(BusinessEntity.Contact))) {
+        if (CollectionUtils.emptyIfNull(entitySet).contains(BusinessEntity.Account)) {
             entitySet.add(BusinessEntity.CuratedAccount);
             putObjectInContext(RESET_ENTITIES, entitySet);
             return true;
