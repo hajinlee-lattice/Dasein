@@ -35,14 +35,16 @@ public abstract class ImportService {
      * 1. Attribute length, precision, scale, physical type, logical type 2.
      * Avro schema associated with the Table
      *
-     * @param tables
-     *            list of tables that only has table name and attribute names
-     * @return
+     * @param extractionConfig source import config
+     * @param context import context
+     * @param connectorConfiguration connector config.
+     *
+     * @return list of tables that represents the import metadata.
      */
     public abstract List<Table> importMetadata(SourceImportConfiguration extractionConfig, ImportContext context,
                                                ConnectorConfiguration connectorConfiguration);
 
-    public abstract List<Table> prepareMetadata(List<Table> originalTables);
+    public abstract List<Table> prepareMetadata(List<Table> originalTables, Map<String, String> defaultColumnMap);
 
     public abstract void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext context,
                                                   ConnectorConfiguration connectorConfiguration);
