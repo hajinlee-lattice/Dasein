@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLUpdatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLastUpdatedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfContacts;
@@ -248,6 +249,8 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
             log.info("Last updated date attributes from systems = {}", lastSystemUpdateAttrs);
             config.attrsToMerge.put(systemAccountInputIdx, lastSystemUpdateAttrs);
+            // only EntityId field guaranteed to exist
+            config.joinKeys.put(systemAccountInputIdx, EntityId.name());
         }
 
         // copy create time & last update time from account batch store

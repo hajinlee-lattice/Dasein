@@ -29,6 +29,10 @@ public class GenerateCuratedAttributesConfig extends SparkJobConfig {
     @JsonProperty
     public Map<Integer, Map<String, String>> attrsToMerge = new HashMap<>();
 
+    // input idx -> join keys, only set this if it's different than joinKey above
+    @JsonProperty
+    public Map<Integer, String> joinKeys = new HashMap<>();
+
     @Override
     public String getName() {
         return NAME;
