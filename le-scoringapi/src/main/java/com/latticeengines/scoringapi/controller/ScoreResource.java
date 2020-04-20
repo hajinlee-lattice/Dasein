@@ -140,7 +140,7 @@ public class ScoreResource extends BaseScoring {
     @PostMapping("/records")
     @ApiOperation(value = "Score list of records. Maximum " + MAX_ALLOWED_RECORDS
             + " records are allowed in a request.")
-    @InvocationMeter(name = "score-records", measurment = "scoringapi", instrument = SINGLE_RECORD_INSTRUMENT, errors = true)
+    @InvocationMeter(name = "score-records", measurment = "scoringapi", instrument = MULTI_RECORDS_INSTRUMENT, errors = true)
     public List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request, //
             @RequestBody BulkRecordScoreRequest scoreRequest) {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
