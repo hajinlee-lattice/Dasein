@@ -7,9 +7,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.merge.MergeProductImportsWrapper;
+import com.latticeengines.cdl.workflow.steps.merge.MergeProductSpark;
 import com.latticeengines.cdl.workflow.steps.merge.MergeProductWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetProduct;
-import com.latticeengines.cdl.workflow.steps.validations.ValidateProductBatchStore;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessProductWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -24,7 +25,10 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessProductWorkf
     private MergeProductWrapper mergeProductWrapper;
 
     @Inject
-    private ValidateProductBatchStore validateProductBatchStore;
+    private MergeProductImportsWrapper mergeProductImportsWrapper;
+
+    @Inject
+    private MergeProductSpark mergeProductSpark;
 
     @Inject
     private UpdateProductWorkflow updateProductWorkflow;
@@ -38,7 +42,8 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessProductWorkf
     @Override
     public Workflow defineWorkflow(ProcessProductWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
-                .next(mergeProductWrapper) //
+                .next(mergeProductImportsWrapper) //
+                .next(mergeProductSpark) //
                 .next(updateProductWorkflow) //
                 .next(rebuildProductWorkflow) //
                 .next(resetProduct) //
