@@ -1,7 +1,6 @@
 package com.latticeengines.spark.aggregation
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
 import org.apache.spark.sql.types._
@@ -11,24 +10,11 @@ import scala.collection.JavaConverters._
 private[spark] class DedupHierarchyProductAggregation extends UserDefinedAggregateFunction {
 
   private val Id = InterfaceName.Id.name
-  private val ProductId = InterfaceName.ProductId.name
   private val Name = InterfaceName.ProductName.name
   private val Description = InterfaceName.Description.name
-  private val Type = InterfaceName.ProductType.name
-  private val Bundle = InterfaceName.ProductBundle.name
   private val Line = InterfaceName.ProductLine.name
   private val Family = InterfaceName.ProductFamily.name
   private val Category = InterfaceName.ProductCategory.name
-  private val BundleId = InterfaceName.ProductBundleId.name
-  private val LineId = InterfaceName.ProductLineId.name
-  private val FamilyId = InterfaceName.ProductFamilyId.name
-  private val CategoryId = InterfaceName.ProductCategoryId.name
-  private val Status = InterfaceName.ProductStatus.name
-
-  private val Active = ProductStatus.Active.name
-  private val Obsolete = ProductStatus.Obsolete.name
-
-  private val Level = "Level"
   private val Messages = "Messages"
 
   private val idIdx = 0
@@ -86,13 +72,7 @@ private[spark] class DedupHierarchyProductAggregation extends UserDefinedAggrega
     val isFirst = buffer.getBoolean(flagIdx)
 
     if (isFirst) {
-      buffer(idIdx) = input.getString(idIdx)
-      buffer(nameIdx) = input.getString(nameIdx)
-      buffer(descIdx) = input.getString(descIdx)
-      buffer(lineIdx) = input.getString(lineIdx)
-      buffer(famIdx) = input.getString(famIdx)
-      buffer(catIdx) = input.getString(catIdx)
-      buffer(flagIdx) = false
+      copyToBuffer(buffer, input)
     } else {
       val sku = input.getString(idIdx)
       val message = s"Duplicated sku in hierarchy data: $sku"
@@ -109,13 +89,7 @@ private[spark] class DedupHierarchyProductAggregation extends UserDefinedAggrega
       val message = s"Duplicated sku in hierarchy data: $sku"
       buffer1(msgIdx) = message :: buffer1.getList[String](msgIdx).asScala.toList
     } else if (!isFirst2) {
-      buffer1(idIdx) = buffer2.getAs[String](idIdx)
-      buffer1(nameIdx) = buffer2.getAs[String](nameIdx)
-      buffer1(descIdx) = buffer2.getAs[String](descIdx)
-      buffer1(lineIdx) = buffer2.getAs[String](lineIdx)
-      buffer1(famIdx) = buffer2.getAs[String](famIdx)
-      buffer1(catIdx) = buffer2.getAs[String](catIdx)
-      buffer1(flagIdx) = false
+      copyToBuffer(buffer1, buffer2)
     }
     buffer1(msgIdx) = (buffer1.getList[String](msgIdx).asScala ++ buffer2.getList[String](msgIdx).asScala).toList
   }
@@ -130,4 +104,15 @@ private[spark] class DedupHierarchyProductAggregation extends UserDefinedAggrega
       buffer.get(msgIdx)
     ))
   }
+
+  private def copyToBuffer(buffer: MutableAggregationBuffer, input: Row): Unit = {
+    buffer(idIdx) = input.getString(idIdx)
+    buffer(nameIdx) = input.getString(nameIdx)
+    buffer(descIdx) = input.getString(descIdx)
+    buffer(lineIdx) = input.getString(lineIdx)
+    buffer(famIdx) = input.getString(famIdx)
+    buffer(catIdx) = input.getString(catIdx)
+    buffer(flagIdx) = false
+  }
+
 }

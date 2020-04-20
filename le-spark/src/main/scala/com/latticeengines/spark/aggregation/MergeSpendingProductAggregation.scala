@@ -11,24 +11,15 @@ import scala.collection.JavaConverters._
 
 private[spark] class MergeSpendingProductAggregation extends UserDefinedAggregateFunction {
 
-  private val Id = InterfaceName.Id.name
-  private val ProductId = InterfaceName.ProductId.name
   private val Name = InterfaceName.ProductName.name
-  private val Description = InterfaceName.Description.name
-  private val Type = InterfaceName.ProductType.name
-  private val Bundle = InterfaceName.ProductBundle.name
   private val Line = InterfaceName.ProductLine.name
   private val Family = InterfaceName.ProductFamily.name
   private val Category = InterfaceName.ProductCategory.name
-  private val BundleId = InterfaceName.ProductBundleId.name
   private val LineId = InterfaceName.ProductLineId.name
   private val FamilyId = InterfaceName.ProductFamilyId.name
   private val CategoryId = InterfaceName.ProductCategoryId.name
   private val Status = InterfaceName.ProductStatus.name
-
   private val Active = ProductStatus.Active.name
-  private val Obsolete = ProductStatus.Obsolete.name
-
   private val Messages = "Messages"
 
   private val nameIdx = 0
@@ -85,44 +76,23 @@ private[spark] class MergeSpendingProductAggregation extends UserDefinedAggregat
   }
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    val oldName = buffer.getAs[String](nameIdx)
-    val newName = input.getAs[String](nameIdx)
+    val oldName = buffer.getString(nameIdx)
+    val newName = input.getString(nameIdx)
     if (StringUtils.isBlank(oldName)) {
       buffer(nameIdx) = newName
     }
 
-    val oldLine = buffer.getAs[String](lineIdx)
-    val newLine = input.getAs[String](lineIdx)
-    if (StringUtils.isBlank(oldLine)) {
-      buffer(lineIdx) = newLine
-      buffer(lineIdx + 3) = input.getAs[String](lineIdx + 3)
-    } else if (StringUtils.isNotBlank(newLine) && !oldLine.equalsIgnoreCase(newLine)) {
-      val message = s"Conflicting line name $newLine and $oldLine: ${input.mkString(", ")}"
-      buffer(msgIdx) = message :: buffer.getList[String](msgIdx).asScala.toList
-    }
+    updateIdx(buffer, input, lineIdx,
+      (oldVal, newVal, input) => s"Conflicting line name $newVal and $oldVal: ${input.mkString(", ")}")
 
-    val oldFam = buffer.getAs[String](famIdx)
-    val newFam = input.getAs[String](famIdx)
-    if (StringUtils.isBlank(oldFam)) {
-      buffer(famIdx) = newFam
-      buffer(famIdx + 3) = input.getAs[String](famIdx + 3)
-    } else if (StringUtils.isNotBlank(newFam) && !oldFam.equalsIgnoreCase(newFam)) {
-      val message = s"Conflicting family name $newFam and $oldFam: ${input.mkString(", ")}"
-      buffer(msgIdx) = message :: buffer.getList[String](msgIdx).asScala.toList
-    }
+    updateIdx(buffer, input, famIdx,
+      (oldVal, newVal, input) => s"Conflicting family name $newVal and $oldVal: ${input.mkString(", ")}")
 
-    val oldCat = buffer.getAs[String](catIdx)
-    val newCat = input.getAs[String](catIdx)
-    if (StringUtils.isBlank(oldCat)) {
-      buffer(catIdx) = newCat
-      buffer(catIdx + 3) = input.getAs[String](catIdx + 3)
-    } else if (StringUtils.isNotBlank(newCat) && !oldCat.equalsIgnoreCase(newCat)) {
-      val message = s"Conflicting category name $newCat and $oldCat: ${input.mkString(", ")}"
-      buffer(msgIdx) = message :: buffer.getList[String](msgIdx).asScala.toList
-    }
+    updateIdx(buffer, input, catIdx,
+      (oldVal, newVal, input) => s"Conflicting category name $newVal and $oldVal: ${input.mkString(", ")}")
 
-    val oldStatus = buffer.getAs[String](statusIdx)
-    val newStatus = input.getAs[String](statusIdx)
+    val oldStatus = buffer.getString(statusIdx)
+    val newStatus = input.getString(statusIdx)
     if (!Active.equals(oldStatus) && newStatus != null) {
       buffer(statusIdx) = newStatus
     }
@@ -134,4 +104,18 @@ private[spark] class MergeSpendingProductAggregation extends UserDefinedAggregat
   }
 
   override def evaluate(buffer: Row): Any = buffer
+
+  private def updateIdx(buffer: MutableAggregationBuffer, input: Row, idx: Int,
+                        errorMsgBldr: Function3[String, String, Row, String]): Unit = {
+    val oldVal = buffer.getString(idx)
+    val newVal = input.getString(idx)
+    if (StringUtils.isBlank(oldVal)) {
+      buffer(idx) = newVal
+      buffer(idx + 3) = input.getString(idx + 3)
+    } else if (StringUtils.isNotBlank(newVal) && !oldVal.equalsIgnoreCase(newVal)) {
+      val message = errorMsgBldr.apply(oldVal, newVal, input)
+      buffer(msgIdx) = message :: buffer.getList[String](msgIdx).asScala.toList
+    }
+  }
+
 }

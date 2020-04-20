@@ -11,24 +11,10 @@ import scala.collection.JavaConverters._
 
 private[spark] class AnalyticProductAggregation extends UserDefinedAggregateFunction {
 
-  private val Id = InterfaceName.Id.name
-  private val ProductId = InterfaceName.ProductId.name
-  private val Name = InterfaceName.ProductName.name
-  private val Description = InterfaceName.Description.name
-  private val Type = InterfaceName.ProductType.name
+   private val Description = InterfaceName.Description.name
   private val Bundle = InterfaceName.ProductBundle.name
-  private val Line = InterfaceName.ProductLine.name
-  private val Family = InterfaceName.ProductFamily.name
-  private val Category = InterfaceName.ProductCategory.name
-  private val BundleId = InterfaceName.ProductBundleId.name
-  private val LineId = InterfaceName.ProductLineId.name
-  private val FamilyId = InterfaceName.ProductFamilyId.name
-  private val CategoryId = InterfaceName.ProductCategoryId.name
   private val Status = InterfaceName.ProductStatus.name
-
   private val Active = ProductStatus.Active.name
-  private val Obsolete = ProductStatus.Obsolete.name
-
   private val Messages = "Messages"
 
   override def inputSchema: StructType = StructType(List(

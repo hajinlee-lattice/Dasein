@@ -54,7 +54,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
     val newBundleInfo = updateBundleInfo(newProdsWithBundleId, newAnalytic)
 
     val (newProdsWithHierarchyIds, err4) = filterNewHierarchyMembers(validNew)
-    val (newSpendings, err5) = expandNewSpending(newProdsWithHierarchyIds, oldProdsOpt)
+    val (newSpendings, err5) = mergeSpendings(newProdsWithHierarchyIds, oldProdsOpt)
 
     val analytic = finalizeAnalytic(newAnalytic).persist(StorageLevel.DISK_ONLY)
     val bundles = finalizeBundle(newBundleInfo).persist(StorageLevel.DISK_ONLY)
@@ -214,24 +214,27 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
   }
 
   private def filterNewHierarchyMembers(prods: DataFrame): (DataFrame, DataFrame) = {
+    // udf to generate line id
     val lineIdFunc: (String, String, String) => String = (cat, fam, line) => {
       val compositeId = ProductUtils.getCompositeId(ProductType.Spending.name, null, line, null, cat, fam, line)
       HashUtils.getCleanedString(HashUtils.getShortHash(compositeId))
     }
     val lineIdUdf = udf(lineIdFunc)
-
+    // udf to generate family id
     val famIdFunc: (String, String) => String = (cat, fam) => {
       val compositeId = ProductUtils.getCompositeId(ProductType.Spending.name, null, fam, null, cat, fam, null)
       HashUtils.getCleanedString(HashUtils.getShortHash(compositeId))
     }
     val famIdUdf = udf(famIdFunc)
-
+    // udf to generate category id
     val catIdFunc: String => String = cat => {
       val compositeId = ProductUtils.getCompositeId(ProductType.Spending.name, null, cat, null, cat, null, null)
       HashUtils.getCleanedString(HashUtils.getShortHash(compositeId))
     }
     val catIdUdf = udf(catIdFunc)
 
+    // if contains category, then it is an hierarchy product
+    // filter then dedup by id -> one sku should only appear once (otherwise, either duplication or confliction)
     val filtered = prods.filter(col(Category).isNotNull).select(Id, Name, Description, Line, Family, Category)
     val dedup = new DedupHierarchyProductAggregation()
     val groupBy = filtered.groupBy(Id)
@@ -252,7 +255,36 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
     (valid, err)
   }
 
-  private def expandNewSpending(prods: DataFrame, oldProdsOpt: Option[DataFrame]): (DataFrame, DataFrame) = {
+  private def mergeSpendings(prods: DataFrame, oldProdsOpt: Option[DataFrame]): (DataFrame, DataFrame) = {
+    val newSpendings = expandNewSpending(prods).withColumn(Status, lit(ProductStatus.Active.name))
+    val allSpendings = oldProdsOpt match {
+      case Some(oldProds) =>
+        val oldSpendings = oldProds.filter(col(Type) === ProductType.Spending.name)
+          .withColumn(Status, lit(ProductStatus.Obsolete.name))
+          .select(newSpendings.columns.map(col):_*)
+        newSpendings union oldSpendings
+      case _ => newSpendings
+    }
+    val aggregation = new MergeSpendingProductAggregation()
+    val groupBy = allSpendings.groupBy(ProductId)
+      .agg(aggregation(
+        col(Name), col(Line), col(Family), col(Category), col(LineId), col(FamilyId), col(CategoryId), col(Status)
+      ).as("agg"))
+      .withColumn(Name, col(s"agg.$Name"))
+      .withColumn(Line, col(s"agg.$Line"))
+      .withColumn(Family, col(s"agg.$Family"))
+      .withColumn(Category, col(s"agg.$Category"))
+      .withColumn(LineId, col(s"agg.$LineId"))
+      .withColumn(FamilyId, col(s"agg.$FamilyId"))
+      .withColumn(CategoryId, col(s"agg.$CategoryId"))
+      .withColumn(Status, col(s"agg.$Status"))
+    val spendings = groupBy.select(ProductId, Name, Line, Family, Category, LineId, FamilyId, CategoryId, Status)
+    val err = groupBy.select(col("agg.Messages"))
+      .withColumn(Message, explode(col("Messages"))).select(Message)
+    (spendings, err)
+  }
+
+  private def expandNewSpending(prods: DataFrame): DataFrame = {
     val lines = prods.filter(col(LineId).isNotNull)
         .withColumn(ProductId, col(LineId))
         .withColumn(Name, col(Line))
@@ -274,34 +306,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
       .withColumn(FamilyId, lit(null).cast(StringType))
       .withColumn(CategoryId, lit(null).cast(StringType))
       .select(ProductId, Name, Line, Family, Category, LineId, FamilyId, CategoryId)
-    val newSpendings = (lines union fams union cats).withColumn(Status, lit(ProductStatus.Active.name))
-
-    val allSpendings = oldProdsOpt match {
-      case Some(oldProds) =>
-        val oldSpendings = oldProds.filter(col(Type) === ProductType.Spending.name)
-          .withColumn(Status, lit(ProductStatus.Obsolete.name))
-          .select(ProductId, Name, Line, Family, Category, LineId, FamilyId, CategoryId, Status)
-        newSpendings union oldSpendings
-      case _ => newSpendings
-    }
-
-    val aggregation = new MergeSpendingProductAggregation()
-    val groupBy = allSpendings.groupBy(ProductId)
-      .agg(aggregation(
-        col(Name), col(Line), col(Family), col(Category), col(LineId), col(FamilyId), col(CategoryId), col(Status)
-      ).as("agg"))
-      .withColumn(Name, col(s"agg.$Name"))
-      .withColumn(Line, col(s"agg.$Line"))
-      .withColumn(Family, col(s"agg.$Family"))
-      .withColumn(Category, col(s"agg.$Category"))
-      .withColumn(LineId, col(s"agg.$LineId"))
-      .withColumn(FamilyId, col(s"agg.$FamilyId"))
-      .withColumn(CategoryId, col(s"agg.$CategoryId"))
-      .withColumn(Status, col(s"agg.$Status"))
-    val spendings = groupBy.select(ProductId, Name, Line, Family, Category, LineId, FamilyId, CategoryId, Status)
-    val err = groupBy.select(col("agg.Messages"))
-      .withColumn(Message, explode(col("Messages"))).select(Message)
-    (spendings, err)
+    lines union fams union cats
   }
 
   private def finalizeAnalytic(df: DataFrame): DataFrame = {
