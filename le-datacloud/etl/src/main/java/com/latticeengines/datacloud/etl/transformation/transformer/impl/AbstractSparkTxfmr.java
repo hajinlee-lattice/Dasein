@@ -166,9 +166,11 @@ public abstract class AbstractSparkTxfmr<S extends SparkJobConfig, T extends Tra
 
             RetryTemplate retry = RetryUtils.getRetryTemplate(3);
             SparkJobResult sparkJobResult = retry.execute(ctx -> {
-                log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": retry running spark job " //
-                        + getSparkJobClz().getSimpleName());
-                log.warn("Previous failure:",  ctx.getLastThrowable());
+                if (ctx.getRetryCount() > 0) {
+                    log.info("Attempt=" + (ctx.getRetryCount() + 1) + ": retry running spark job " //
+                            + getSparkJobClz().getSimpleName());
+                    log.warn("Previous failure:", ctx.getLastThrowable());
+                }
                 if (sessionHolder.get() != null) {
                     livySessionService.stopSession(sessionHolder.get());
                 }

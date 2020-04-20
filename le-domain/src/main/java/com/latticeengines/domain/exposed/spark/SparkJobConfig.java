@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
 import com.latticeengines.domain.exposed.spark.common.MultiCopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.spark.dcp.SplitImportMatchResultConfig;
+import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 
 import reactor.core.publisher.Flux;
@@ -112,7 +113,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = SplitSystemBatchStoreConfig.class, name = SplitSystemBatchStoreConfig.NAME), //
         @JsonSubTypes.Type(value = ProfileJobConfig.class, name = ProfileJobConfig.NAME), //
         @JsonSubTypes.Type(value = GenerateCuratedAttributesConfig.class, name = GenerateCuratedAttributesConfig.NAME), //
-        @JsonSubTypes.Type(value = CalculateLastActivityDateConfig.class, name = CalculateLastActivityDateConfig.NAME) //
+        @JsonSubTypes.Type(value = CalculateLastActivityDateConfig.class, name = CalculateLastActivityDateConfig.NAME), //
+        @JsonSubTypes.Type(value = BucketEncodeConfig.class, name = BucketEncodeConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 

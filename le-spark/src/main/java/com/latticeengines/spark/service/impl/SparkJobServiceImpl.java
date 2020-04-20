@@ -93,7 +93,7 @@ public class SparkJobServiceImpl implements SparkJobService {
             log.info("Submitting spark job " + job.getClass().getSimpleName());
             String configStr = JsonUtils.serialize(config);
             if (configStr.length() > 10000) {
-                configStr = "long string";
+                configStr = configStr.substring(0, 10000) + " (truncated)";
             }
             log.info("Configuration: " + configStr);
             String serialized = submitJobWithRetry(client, job);
