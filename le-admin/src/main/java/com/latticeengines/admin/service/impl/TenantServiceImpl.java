@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -746,18 +745,14 @@ public class TenantServiceImpl implements TenantService {
             log.info("tenant name {} is not equal to encoded name {}", tenantName, encodedName);
             return null;
         }
-        List<Tenant> existingTenants = tenantService.findByTenantNamePrefix(tenantName);
-        if (CollectionUtils.isNotEmpty(existingTenants)) {
-            Set<String> names = existingTenants.stream().map(Tenant::getName).collect(Collectors.toSet());
-            int suffix = 1;
-            String uniqueTenantName = tenantName;
-            while(names.contains(uniqueTenantName)) {
-                uniqueTenantName = String.format("%s_%s", tenantName, suffix);
-                suffix++;
-            }
-            tenantName = uniqueTenantName;
+        int suffix = 1;
+        String uniqueTenantName = tenantName;
+        String tenantId = CustomerSpace.parse(uniqueTenantName).toString();
+        while (tenantService.hasTenantId(tenantId)) {
+            uniqueTenantName = String.format("%s_%s", tenantName, suffix++);
+            tenantId = CustomerSpace.parse(uniqueTenantName).toString();
         }
-        return tenantName;
+        return uniqueTenantName;
     }
 
     private VboResponse generateVBOResponse(String tenantName, boolean result) {

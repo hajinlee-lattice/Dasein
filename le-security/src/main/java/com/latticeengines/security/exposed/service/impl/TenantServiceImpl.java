@@ -149,11 +149,6 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public List<Tenant> findByTenantNamePrefix(String namePrefix) {
-        return tenantEntityMgr.findByTenantNamePrefix(namePrefix);
-    }
-
-    @Override
     public Tenant findBySubscriberNumber(String subscriberNumber) {
         return tenantEntityMgr.findBySubscriberNumber(subscriberNumber);
     }
