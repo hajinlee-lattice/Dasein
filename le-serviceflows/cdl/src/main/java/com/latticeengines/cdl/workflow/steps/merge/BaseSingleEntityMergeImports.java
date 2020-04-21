@@ -72,7 +72,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
         updateEntityValueMapInContext(ENTITY_CHANGELIST_TABLES, changeListTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, changeListTableName, String.class);
-        updateEntityValueMapInContext(ENTITY_REPORT_CHANGELIST_TABLES, changeListTableName, String.class);
+        updateEntityValueMapInContext(ENTITY_REPORT_CHANGELIST_TABLES, reportChangeListTableName, String.class);
         addToListInContext(TEMPORARY_CDL_TABLES, reportChangeListTableName, String.class);
 
         if (hasSchemaChange()) {
