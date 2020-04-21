@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
@@ -61,6 +62,9 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
     @Inject
     protected ServingStoreService servingStoreService;
+
+    @Inject
+    protected ServingStoreProxy servingStoreProxy;
 
     final Set<String> internalEnrichAttrs = new HashSet<>();
     final Set<String> cannotSegmentAttrs = new HashSet<>();
