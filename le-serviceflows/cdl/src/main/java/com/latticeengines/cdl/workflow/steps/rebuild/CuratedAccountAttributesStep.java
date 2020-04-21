@@ -285,6 +285,9 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             config.attrsToMerge.put(inputIdx,
                     Collections.singletonMap(NumberOfContacts.name(), NumberOfContacts.name()));
             inputIdx++;
+        } else if (isResettingEntity(BusinessEntity.Contact)) {
+            log.info("Resetting contact, not copying number of contact attribute from active serving table");
+            currAttrs.remove(NumberOfContacts.name());
         }
         if (calculateLastActivityDate) {
             config.lastActivityDateInputIdx = inputIdx++;
@@ -462,6 +465,9 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             // for BusinessEntity CuratedAccounts is null or has been set to false.
             log.warn("There are no newly imported Account or Contacts. Skip calculation number of contact.");
             return false;
+        } else if (isResettingEntity(BusinessEntity.Contact)) {
+            log.info("Resetting contact, not calculating number of contact attribute");
+            return false;
         }
         return true;
     }
@@ -534,11 +540,16 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         return getTableName(BusinessEntity.Account.getSystemBatchStore(), "account system batch store");
     }
 
+    private boolean isResettingEntity(@NotNull BusinessEntity entity) {
+        Set<BusinessEntity> entitySet = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
+        return CollectionUtils.emptyIfNull(entitySet).contains(entity);
+    }
+
     private boolean shouldResetCuratedAttributesContext() {
         // reset CuratedAccount when account is reset
         // TODO handle contact reset (erase number of contacts attribute)
         Set<BusinessEntity> entitySet = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
-        if (CollectionUtils.emptyIfNull(entitySet).contains(BusinessEntity.Account)) {
+        if (isResettingEntity(BusinessEntity.Account)) {
             entitySet.add(BusinessEntity.CuratedAccount);
             putObjectInContext(RESET_ENTITIES, entitySet);
             return true;
