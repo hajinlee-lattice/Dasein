@@ -1,6 +1,7 @@
 package com.latticeengines.apps.dcp.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -114,6 +115,16 @@ public class ProjectServiceImpl implements ProjectService {
         return true;
     }
 
+    @Override
+    public void updateRecipientList(String customerSpace, String projectId, List<String> recipientList) {
+        Project project = projectEntityMgr.findByProjectId(projectId);
+        if (project == null) {
+            return;
+        }
+        project.setRecipientList(recipientList);
+        projectEntityMgr.update(project);
+    }
+
     private void validateProjectId(String projectId) {
         if (StringUtils.isBlank(projectId)) {
             throw new RuntimeException("Cannot create DCP project with blank projectId!");
@@ -152,6 +163,7 @@ public class ProjectServiceImpl implements ProjectService {
                         }
                     });
         }
+        details.setRecipientList(project.getRecipientList());
         return details;
     }
 
@@ -167,6 +179,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectType(projectType);
         project.setRootPath(rootPath);
         project.setS3ImportSystem(system);
+        project.setRecipientList(Collections.singletonList(user));
         return project;
     }
 

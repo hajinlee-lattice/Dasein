@@ -1,5 +1,7 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -45,5 +47,29 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
                 "TestDCPProject", Project.ProjectType.Type1, "test@dnb.com");
         Assert.assertNotNull(details2);
 
+    }
+
+    @Test(groups = "deployment")
+    public void testUpdateRecipient() {
+        ProjectDetails details = projectService.createProject(mainCustomerSpace, "TestDCPProject",
+                Project.ProjectType.Type1, "test@dnb.com");
+        Assert.assertNotNull(details);
+        Assert.assertNotNull(details.getProjectId());
+        Assert.assertNotNull(details.getDropFolderAccess());
+        Assert.assertNotNull(details.getRecipientList());
+        Assert.assertEquals(details.getRecipientList().size(), 1);
+
+        List<String> recipientList = details.getRecipientList();
+
+        recipientList.add("test@test.com");
+
+        projectService.updateRecipientList(mainCustomerSpace, details.getProjectId(), recipientList);
+        details = projectService.getProjectDetailByProjectId(mainCustomerSpace, details.getProjectId());
+        Assert.assertNotNull(details.getRecipientList());
+        Assert.assertEquals(details.getRecipientList().size(), 2);
+
+        Project project = projectService.getProjectByProjectId(mainCustomerSpace, details.getProjectId());
+        Assert.assertNotNull(project.getRecipientList());
+        Assert.assertEquals(project.getRecipientList().size(), 2);
     }
 }
