@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.datacloud.match;
 
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -18,7 +17,7 @@ public class InternalContactLookupRequest {
     @JsonProperty("DataCollectionVersion")
     private DataCollection.Version dataCollectionVersion;
 
-    @JsonProperty("contactId")
+    @JsonProperty("ContactId")
     private String contactId;
 
     @JsonProperty("AccountLookupId")
@@ -43,16 +42,28 @@ public class InternalContactLookupRequest {
         this.dataCollectionVersion = dataCollectionVersion;
     }
 
-    public String getContactId() { return contactId; }
+    public String getContactId() {
+        return contactId;
+    }
 
-    public void setContactId(String contactId) { this.contactId = contactId; }
+    public void setContactId(String contactId) {
+        this.contactId = contactId;
+    }
 
-    public String getAccountLookupId() { return accountLookupId; }
+    public String getAccountLookupId() {
+        return accountLookupId;
+    }
 
-    public void setAccountLookupId(String accountLookupId) { this.accountLookupId = accountLookupId; }
+    public void setAccountLookupId(String accountLookupId) {
+        this.accountLookupId = accountLookupId;
+    }
 
-    public String getAccountLookupIdVal() { return accountLookupIdVal; }
+    public String getAccountLookupIdVal() {
+        return accountLookupIdVal;
+    }
 
-    public void setAccountLookupIdVal(String accountLookupIdVal) { this.accountLookupIdVal = accountLookupIdVal; }
+    public void setAccountLookupIdVal(String accountLookupIdVal) {
+        this.accountLookupIdVal = accountLookupIdVal;
+    }
 
 }

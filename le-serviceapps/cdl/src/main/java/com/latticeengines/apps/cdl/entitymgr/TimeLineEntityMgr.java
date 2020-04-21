@@ -12,5 +12,7 @@ public interface TimeLineEntityMgr extends BaseEntityMgrRepository<TimeLine, Lon
 
     TimeLine findByTimeLineId(String timelineId);
 
+    TimeLine findByEntity(String entity);
+
     List<TimeLine> findByTenant(Tenant tenant);
 }
