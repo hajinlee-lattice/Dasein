@@ -43,10 +43,16 @@ public class GraphDependencyToUIActionUtil {
                     Status.Warning,
                     generateHtmlMsg(dependencies,
                             "Changing a segment that is in use may affect the scoring and rating configuration.",
-                            String.format("This segment has %d dependencies", count.get())));
+                            String.format("This segment has %d dependencies", count.get())) + (segment.isViewOnly()
+                            ? generateHtmlMsgWithTeamInfo(segment) : ""));
         } else {
-            uiAction = generateUIAction(String.format("Segment %s is safe to edit", segment.getDisplayName()),
-                    View.Notice, Status.Success, null);
+            if (segment.isViewOnly()) {
+                uiAction = generateUIAction(String.format("Segment %s is not safe to edit", segment.getDisplayName()),
+                        View.Banner, Status.Warning, generateHtmlMsgWithTeamInfo(segment));
+            } else {
+                uiAction = generateUIAction(String.format("Segment %s is safe to edit", segment.getDisplayName()),
+                        View.Notice, Status.Success, null);
+            }
         }
         return uiAction;
     }
@@ -59,6 +65,13 @@ public class GraphDependencyToUIActionUtil {
         uiAction.setStatus(status);
         uiAction.setMessage(message);
         return uiAction;
+    }
+
+    private String generateHtmlMsgWithTeamInfo(MetadataSegment segment) {
+        StringBuffer html = new StringBuffer();
+        html.append(div(String.format("This segment belongs to \"%s\", you are not allowed to edit it. You can ask admin to add you to the team.",
+                segment.getTeam().getTeamName())).render());
+        return html.toString();
     }
 
     public String generateHtmlMsg(Map<String, List<String>> dependencies, String messageHeader, String depListHeader) {
