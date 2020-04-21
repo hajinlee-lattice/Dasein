@@ -2,10 +2,12 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -125,7 +127,7 @@ public class DataFeedTaskServiceImplTestNG extends CDLFunctionalTestNGBase {
         s3ImportSystemService.updateS3ImportSystem(mainCustomerSpace, system3);
     }
 
-    private void createMoreDataFeedTask(String systemName) {
+    private String createMoreDataFeedTask(String systemName) {
         DataFeedTask dataFeedTask = new DataFeedTask();
         Table templateTable = new Table(TableType.IMPORTTABLE);
         templateTable.setName(systemName + "_importTable");
@@ -147,6 +149,8 @@ public class DataFeedTaskServiceImplTestNG extends CDLFunctionalTestNGBase {
         dataFeedTask.setTemplateDisplayName("DisplayA");
         dataFeedTask.setUniqueId(UUID.randomUUID().toString());
         datafeedTaskService.createDataFeedTask(customerSpace.toString(), dataFeedTask);
+
+        return datafeedTaskService.getTemplateName(customerSpace.toString(), dataFeedTask.getUniqueId());
     }
 
 
@@ -178,17 +182,23 @@ public class DataFeedTaskServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "testUpdate")
     public void testGetTemplateByPriority() {
         createS3ImportSystem();
-        createMoreDataFeedTask("SYSTEM1");
-        createMoreDataFeedTask("SYSTEM2");
-        createMoreDataFeedTask("SYSTEM3");
+        String template1 = createMoreDataFeedTask("SYSTEM1");
+        String template2 = createMoreDataFeedTask("SYSTEM2");
+        String template3 = createMoreDataFeedTask("SYSTEM3");
         List<String> templates = datafeedTaskService.getTemplatesBySystemPriority(customerSpace.toString(),
                 BusinessEntity.Account.name(), true);
         Assert.assertEquals(templates.size(), 3);
-        Assert.assertEquals(templates.get(0), "SYSTEM3_importTable");
+        Assert.assertEquals(templates.get(0), template3);
         templates = datafeedTaskService.getTemplatesBySystemPriority(customerSpace.toString(),
                 BusinessEntity.Account.name(), false);
         Assert.assertEquals(templates.size(), 3);
-        Assert.assertEquals(templates.get(0), "SYSTEM2_importTable");
+        Assert.assertEquals(templates.get(0), template2);
+
+        Map<String, String> templateSystemMap = datafeedTaskService.getTemplateToSystemMap(customerSpace.toString());
+        Assert.assertEquals(MapUtils.size(templateSystemMap), 3);
+        Assert.assertEquals(templateSystemMap.get(template1), "SYSTEM1");
+        Assert.assertEquals(templateSystemMap.get(template2), "SYSTEM2");
+        Assert.assertEquals(templateSystemMap.get(template3), "SYSTEM3");
     }
 }
 
