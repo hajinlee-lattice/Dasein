@@ -76,6 +76,12 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Tenant findBySubscriberNumber(String subscriberNumber) {
+        return tenantRepository.findBySubscriberNumber(subscriberNumber);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Tenant> findAllByStatus(TenantStatus status) {
         return tenantRepository.findAllByStatus(status);
     }

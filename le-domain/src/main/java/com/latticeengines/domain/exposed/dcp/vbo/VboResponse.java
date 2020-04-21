@@ -17,6 +17,10 @@ public class VboResponse {
     @ApiModelProperty(required = true, value = "message")
     private String message;
 
+    // this property is used for testing
+    @JsonProperty("tenantName")
+    private String tenantName;
+
     public String getStatus() {
         return status;
     }
@@ -31,5 +35,13 @@ public class VboResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
     }
 }

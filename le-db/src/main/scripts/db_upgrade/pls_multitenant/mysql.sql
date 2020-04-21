@@ -89,6 +89,12 @@ BEGIN
         ADD COLUMN `RECIPIENT_LIST` JSON;
 END;
 
+
+Create PROCEDURE `UpdateTenantTable`()
+  BEGIN
+      ALTER TABLE `PLS_MultiTenant`.`TENANT` ADD COLUMN `SUBSCRIBER_NUMBER` varchar(255);
+  END;
+  
 CREATE PROCEDURE `UpdatePlayLaunchTable`()
 BEGIN
     ALTER TABLE `PLAY_LAUNCH`
