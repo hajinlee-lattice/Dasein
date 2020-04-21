@@ -12,7 +12,6 @@
                     "Referral Source"
                 ],
                 "required": true,
-                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],

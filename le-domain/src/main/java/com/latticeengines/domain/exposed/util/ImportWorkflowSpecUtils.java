@@ -120,7 +120,7 @@ public final class ImportWorkflowSpecUtils {
                 // Tag and nullable seem to be set the same way for all Atlas Attributes.
                 // TODO(jwinter): Do we need to set the tag?  Looks like it is only for legacy systems.
                 //.tag(Tag.INTERNAL.toString()) //
-                .nullable(true) //
+                .nullable(definition.isNullable()) //
                 // TODO(jwinter): Does the Attribute physicalDataType String have to be lower case?  This is not
                 //     consistent in the code.
                 .physicalDataType(definition.getFieldType().getAvroType()) //

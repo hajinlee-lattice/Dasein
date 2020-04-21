@@ -43,7 +43,6 @@
                     "USER ID"
                 ],
                 "required": true,
-                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],
@@ -58,7 +57,6 @@
                     "Referral Source"
                 ],
                 "required": true,
-                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],
