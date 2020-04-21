@@ -79,9 +79,13 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         String uploadTSPrefix = config.getUploadTSPrefix();
         int index = rawPath.indexOf(uploadTSPrefix);
         Preconditions.checkState(index != -1, String.format("invalid upload config %s.", uploadId));
-        String parentPath = rawPath.substring(0, index + uploadTSPrefix.length());
 
-        // search csv file under TSPrefix folder recursively, returned paths are absolute from protocol to file name
+        // the download part will download files in path in UploadConfig: uploadRawFilePath,
+        // uploadImportedFilePath, uploadMatchResultPrefix, uploadImportedErrorFilePath.
+        // from the folder hierarchy the four path has the same parental folder TSPrefix,
+        // search csv file under TSPrefix folder recursively, returned paths are absolute
+        // from protocol to file name
+        String parentPath = rawPath.substring(0, index + uploadTSPrefix.length());
         final String filter = ".*.csv";
         List<String> paths = importFromS3Service.getFilesForDir(parentPath,
                 filename -> {
