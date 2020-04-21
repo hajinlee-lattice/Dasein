@@ -7,6 +7,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
@@ -57,6 +58,11 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                 .sourceId(sourceId) //
                 .uploadPid(uploadPid) //
                 .statsPid(statsId) //
+                .inputProperties(ImmutableMap.<String, String>builder()
+                        .put(DCPSourceImportWorkflowConfiguration.UPLOAD_ID, String.valueOf(uploadPid)) //
+                        .put(DCPSourceImportWorkflowConfiguration.SOURCE_ID, sourceId) //
+                        .put(DCPSourceImportWorkflowConfiguration.PROJECT_ID, projectId)
+                        .build())
                 .build();
     }
 

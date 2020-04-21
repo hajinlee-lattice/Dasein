@@ -7,6 +7,7 @@ import javax.mail.Multipart;
 
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -83,5 +84,5 @@ public interface EmailService {
 
     void sendPlsActionCancelSuccessEmail(User user, String hostport, CancelActionEmailInfo cancelActionEmailInfo);
 
-    void sendUploadCompleteEmail(String uploadId, List<String> recipientList);
+    void sendUploadCompletedEmail(UploadEmailInfo uploadEmailInfo);
 }

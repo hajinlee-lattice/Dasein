@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 
 public interface UploadProxy {
@@ -27,5 +28,7 @@ public interface UploadProxy {
     void updateStatsContent(String customerSpace, long uploadPid, long statsPid, UploadStats uploadStats);
 
     void setLatestStats(String customerSpace, long uploadPid, long statsPid);
+
+    void sendUploadCompletedEmail(String customerSpace, UploadEmailInfo uploadEmailInfo);
 
 }

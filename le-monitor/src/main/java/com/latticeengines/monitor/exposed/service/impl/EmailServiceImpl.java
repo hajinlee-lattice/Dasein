@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -781,22 +782,24 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendUploadCompleteEmail(String uploadId, List<String> recipientList) {
+    public void sendUploadCompletedEmail(UploadEmailInfo uploadEmailInfo) {
         try {
-            if (recipientList != null && !recipientList.isEmpty()) {
-                log.info("Sending PLS action cancel success email to " + recipientList.toString() + " started.");
+            if (uploadEmailInfo.getRecipientList() != null && !uploadEmailInfo.getRecipientList().isEmpty()) {
+                log.info("Sending PLS action cancel success email to " + uploadEmailInfo.getRecipientList().toString() + " started.");
                 EmailTemplateBuilder builder = new EmailTemplateBuilder(
                         EmailTemplateBuilder.Template.DCP_UPLOAD_COMPLETED);
 
-                builder.replaceToken("{{uploadId}}", uploadId);
+                builder.replaceToken("{{uploadId}}", uploadEmailInfo.getUploadId());
+                builder.replaceToken("{{sourceId}}", uploadEmailInfo.getSourceId());
+                builder.replaceToken("{{projectId}}", uploadEmailInfo.getProjectId());
 
                 Multipart mp = builder.buildMultipart();
                 sendMultiPartEmail(EmailSettings.DCP_UPLOAD_COMPLETED_SUBJECT,
-                        mp, recipientList);
-                log.info("Sending PLS action cancel success email to " + recipientList.toString() + " succeeded.");
+                        mp, uploadEmailInfo.getRecipientList());
+                log.info("Sending PLS action cancel success email to " + uploadEmailInfo.getRecipientList().toString() + " succeeded.");
             }
         } catch (Exception e) {
-            log.error("Failed to send PLS action cancel success email to " + recipientList.toString() + " " + e.getMessage());
+            log.error("Failed to send PLS action cancel success email to " + uploadEmailInfo.getRecipientList().toString() + " " + e.getMessage());
         }
     }
 }
