@@ -299,7 +299,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertTrue(result.size() > 0);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getPlayGroups")
+    @Test(groups = "deployment", dependsOnMethods = "getPlayGroups", enabled = false)
     public void getOauthTokenToTenant() {
         String url = apiHostPort + "/playmaker/oauthtotenant";
         String tenantNameViaToken = restTemplate.getForObject(url, String.class);
@@ -307,7 +307,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertEquals(tenantNameViaToken, newTenant.getTenantName());
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToTenant")
+    @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToTenant", enabled = false)
     public void createPrereqForRecommendations() {
         String url = apiHostPort + "/playmaker/oauthtotenant";
         String tenantNameViaToken = restTemplate.getForObject(url, String.class);
@@ -315,7 +315,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         Assert.assertEquals(tenantNameViaToken, newTenant.getTenantName());
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment", enabled = false)
     public void afterClass() {
         tryGettingRecommendationsWithLPOauthToken();
         playMakerEntityMgr.deleteByTenantName(tenant.getTenantName());
