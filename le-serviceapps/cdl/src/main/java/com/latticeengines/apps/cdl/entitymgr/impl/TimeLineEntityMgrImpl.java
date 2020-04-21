@@ -41,6 +41,13 @@ public class TimeLineEntityMgrImpl extends JpaEntityMgrRepositoryImpl<TimeLine, 
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public TimeLine findByEntity(String entity) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return readerRepository.findByTenantAndEntity(tenant, entity);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<TimeLine> findByTenant(Tenant tenant) {
         return readerRepository.findByTenant(tenant);
     }

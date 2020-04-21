@@ -35,9 +35,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
+import com.latticeengines.domain.exposed.ulysses.formatters.PurchaseHistoryDanteFormatter;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
-import com.latticeengines.ulysses.utils.PurchaseHistoryDanteFormatter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -104,6 +104,7 @@ public class PurchaseHistoryResource {
     @GetMapping(value = "/spendanalyticssegment/{spendAnalyticsSegment}/danteformat", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the purchase history data for all the accounts in the given spend analytics segment")
+    @SuppressWarnings("ConstantConditions")
     public FrontEndResponse<List<String>> getPurchaseHistoryAccountBySegment(
             @PathVariable String spendAnalyticsSegment) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
