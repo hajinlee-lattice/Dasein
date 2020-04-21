@@ -513,8 +513,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             Table chagneListReport = metadataProxy.getTable(customerSpace.toString(), changeListReportTableName);
             if (chagneListReport != null) {
                 String path = PathUtils.toAvroGlob(chagneListReport.getExtracts().get(0).getPath());
-                Iterator<GenericRecord> iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, path);
-                GenericRecord record = iterator.next();
+                List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, path);
+                GenericRecord record = records.get(0);
                 chgNewRecords = (Long) record.get("NewRecords");
                 chgUpdatedRecords = (Long) record.get("UpdatedRecords");
                 chgDeletedRecords = (Long) record.get("DeletedRecords");
