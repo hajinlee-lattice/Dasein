@@ -12,8 +12,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -39,8 +37,6 @@ import com.latticeengines.security.exposed.service.TenantService;
 
 public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(PlayLaunchEntityMgrImplTestNG.class);
-
     @Inject
     private PlayEntityMgr playEntityMgr;
 
@@ -62,7 +58,6 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private PlayLaunch playLaunch_org2_1;
     private PlayLaunch playLaunch_org2_2;
 
-    private List<PlayLaunch> allPlayLaunches;
     private List<PlayType> types;
 
     private String org1 = "org1";
@@ -113,9 +108,6 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 destinationAccountIdColumn_2);
         playLaunch_org2_2 = createPlayLaunch(org2, externalSystemType, externalSystemName,
                 destinationAccountIdColumn_2);
-
-        allPlayLaunches = Arrays.asList(playLaunch1, playLaunch2, playLaunch_org1_1, playLaunch_org1_2,
-                playLaunch_org2_1, playLaunch_org2_2);
     }
 
     @Test(groups = "functional")
@@ -678,6 +670,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         if (dashboardEntries.size() > 0) {
             dashboardEntries.forEach(entry -> {
+                PlayLaunch launch = playLaunchEntityMgr.findByLaunchId(entry.getLaunchId(), false);
                 Assert.assertNotNull(entry.getLaunchId());
                 Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
                 Assert.assertNotNull(entry.getLaunchState());
@@ -685,8 +678,10 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 Assert.assertNotNull(entry.getPlayDisplayName());
                 Assert.assertNotNull(entry.getPlayName());
                 Assert.assertNotNull(entry.getSelectedBuckets());
-                Assert.assertEquals(entry.getStats().getContactsWithinRecommendations(), 4);
-                Assert.assertEquals(entry.getStats().getRecommendationsLaunched(), 2);
+                Assert.assertEquals(entry.getStats().getContactsWithinRecommendations(),
+                        launch.getContactsAdded().longValue() + launch.getContactsDeleted().longValue());
+                Assert.assertEquals(entry.getStats().getRecommendationsLaunched(),
+                        launch.getAccountsAdded().longValue() + launch.getAccountsDeleted().longValue());
             });
 
             if (descending) {
