@@ -90,8 +90,6 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private Play play;
 
-    private PlayLaunchChannel plChannel1;
-
     private PlayLaunch playLaunch1;
     private PlayLaunch playLaunch2;
 
@@ -289,8 +287,12 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setLaunchState(LaunchState.Launched);
         playLaunch1.setAccountsErrored(1L);
         playLaunch1.setAccountsLaunched(5L);
+        playLaunch1.setAccountsAdded(3L);
+        playLaunch1.setAccountsDeleted(2L);
         playLaunch1.setAccountsSuppressed(3L);
         playLaunch1.setContactsLaunched(7L);
+        playLaunch1.setContactsAdded(6L);
+        playLaunch1.setContactsDeleted(1L);
 
         playLaunch2 = playLaunchService.findByLaunchId(playLaunch2.getLaunchId(), false);
         assertBucketsToLaunch(playLaunch2, bucketsToLaunch2);
@@ -298,8 +300,12 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setLaunchState(LaunchState.Launched);
         playLaunch2.setAccountsErrored(2L);
         playLaunch2.setAccountsLaunched(10L);
+        playLaunch2.setAccountsAdded(10L);
+        playLaunch2.setAccountsDeleted(10L);
         playLaunch2.setAccountsSuppressed(5L);
         playLaunch2.setContactsLaunched(8L);
+        playLaunch2.setContactsAdded(8L);
+        playLaunch2.setContactsDeleted(12L);
 
         playLaunch1 = playLaunchService.update(playLaunch1);
         playLaunch2 = playLaunchService.update(playLaunch2);
@@ -592,10 +598,12 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
                 PlayLaunch matchingPlayLaunch = playLaunchMap.get(entry.getLaunchId());
                 Assert.assertEquals(stats.getContactsWithinRecommendations(),
-                        matchingPlayLaunch.getContactsLaunched().longValue());
+                        matchingPlayLaunch.getContactsAdded().longValue()
+                                + matchingPlayLaunch.getContactsDeleted().longValue());
                 Assert.assertEquals(stats.getAccountErrors(), matchingPlayLaunch.getAccountsErrored().longValue());
                 Assert.assertEquals(stats.getRecommendationsLaunched(),
-                        matchingPlayLaunch.getAccountsLaunched().longValue());
+                        matchingPlayLaunch.getAccountsAdded().longValue()
+                                + matchingPlayLaunch.getAccountsDeleted().longValue());
                 Assert.assertEquals(stats.getAccountsSuppressed(),
                         matchingPlayLaunch.getAccountsSuppressed().longValue());
                 Assert.assertNotNull(entry.getDestinationOrgId());
