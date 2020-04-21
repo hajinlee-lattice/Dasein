@@ -11,7 +11,8 @@
                     "NAME",
                     "PATH PATTERN NAME"
                 ],
-                "required": false,
+                "required": true,
+                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],
@@ -26,7 +27,8 @@
                     "PATH PATTERN",
                     "Website URL Pattern"
                 ],
-                "required": false,
+                "required": true,
+                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],

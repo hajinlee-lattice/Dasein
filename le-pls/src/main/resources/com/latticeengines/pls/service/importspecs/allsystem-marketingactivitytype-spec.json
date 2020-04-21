@@ -13,6 +13,7 @@
           "ACTIVITY TYPE"
         ],
         "required": true,
+        "nullable": false,
         "approvedUsage": [
           "None"
         ],
@@ -28,6 +29,7 @@
           "name"
         ],
         "required": true,
+        "nullable": false,
         "approvedUsage": [
           "None"
         ],
