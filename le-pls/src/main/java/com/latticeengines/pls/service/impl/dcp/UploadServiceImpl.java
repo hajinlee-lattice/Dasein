@@ -120,8 +120,15 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
     }
 
     @Override
-    public void sendUploadCompleteEmail(UploadEmailInfo uploadEmailInfo) {
-        emailService.sendUploadCompletedEmail(uploadEmailInfo);
+    public void sendUploadEmail(UploadEmailInfo uploadEmailInfo) {
+        switch (uploadEmailInfo.getJobStatus()) {
+            case "COMPLETED":
+                emailService.sendUploadCompletedEmail(uploadEmailInfo);
+                break;
+            case "FAILED":
+                emailService.sendUploadFailedEmail(uploadEmailInfo);
+                break;
+        }
     }
 
 }

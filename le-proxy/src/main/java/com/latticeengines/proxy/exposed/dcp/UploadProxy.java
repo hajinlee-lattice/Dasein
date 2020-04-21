@@ -29,6 +29,6 @@ public interface UploadProxy {
 
     void setLatestStats(String customerSpace, long uploadPid, long statsPid);
 
-    void sendUploadCompletedEmail(String customerSpace, UploadEmailInfo uploadEmailInfo);
+    void sendUploadEmail(String customerSpace, UploadEmailInfo uploadEmailInfo);
 
 }

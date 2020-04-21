@@ -13,5 +13,5 @@ public interface UploadService {
 
     String generateToken(String uploadId);
 
-    void sendUploadCompleteEmail(UploadEmailInfo uploadEmailInfo);
+    void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
 }

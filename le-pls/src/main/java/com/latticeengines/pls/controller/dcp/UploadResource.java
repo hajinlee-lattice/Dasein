@@ -59,10 +59,10 @@ public class UploadResource {
         return uploadService.generateToken(uploadId);
     }
 
-    @PutMapping(value = "/email/completed")
+    @PutMapping(value = "/email")
     @ResponseBody
-    @ApiOperation(value = "Send out email after upload completed")
-    public void sendUploadCompletedEmail(@RequestBody UploadEmailInfo uploadEmailInfo) {
-        uploadService.sendUploadCompleteEmail(uploadEmailInfo);
+    @ApiOperation(value = "Send out email after upload state change")
+    public void sendUploadEmail(@RequestBody UploadEmailInfo uploadEmailInfo) {
+        uploadService.sendUploadEmail(uploadEmailInfo);
     }
 }

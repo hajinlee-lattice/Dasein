@@ -50,7 +50,7 @@ public class SourceImportListener extends LEJobListener {
             String uploadId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
             String projectId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.PROJECT_ID);
             String sourceId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.SOURCE_ID);
-            ;
+
             ProjectDetails project = projectProxy.getDCPProjectByProjectId(tenantId, projectId);
 
             log.info("tenantId=" + tenantId);
@@ -61,12 +61,8 @@ public class SourceImportListener extends LEJobListener {
             uploadEmailInfo.setSourceId(sourceId);
             uploadEmailInfo.setUploadId(uploadId);
             uploadEmailInfo.setRecipientList(project.getRecipientList());
-
-            if (jobStatus == BatchStatus.COMPLETED) {
-                uploadProxy.sendUploadCompletedEmail(tenantId, uploadEmailInfo);
-            } else if (jobStatus == BatchStatus.FAILED) {
-                uploadProxy.sendUploadCompletedEmail();
-            }
+            uploadEmailInfo.setJobStatus(jobStatus.name());
+            uploadProxy.sendUploadEmail(tenantId, uploadEmailInfo);
         }
     }
 }

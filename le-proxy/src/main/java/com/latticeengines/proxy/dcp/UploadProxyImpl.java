@@ -96,11 +96,11 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
     }
 
     @Override
-    public void sendUploadCompletedEmail(String customerSpace, UploadEmailInfo uploadEmailInfo) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/email/completed";
+    public void sendUploadEmail(String customerSpace, UploadEmailInfo uploadEmailInfo) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/email";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
-        log.info("Send upload completed mail for Upload " + uploadEmailInfo.getUploadId());
-        put("Send Upload Completed Mail", url, uploadEmailInfo);
+        log.info("Send upload email for Upload " + uploadEmailInfo.getUploadId());
+        put("Send Upload Completed Email", url, uploadEmailInfo);
     }
 
 }

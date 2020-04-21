@@ -20,6 +20,9 @@ public class UploadEmailInfo {
     @JsonProperty("recipient_list")
     private List<String> recipientList;
 
+    @JsonProperty("job_status")
+    private String jobStatus;
+
     public String getUploadId() {
         return uploadId;
     }
@@ -50,5 +53,13 @@ public class UploadEmailInfo {
 
     public void setRecipientList(List<String> recipientList) {
         this.recipientList = recipientList;
+    }
+
+    public String getJobStatus() {
+        return jobStatus;
+    }
+
+    public void setJobStatus(String jobStatus) {
+        this.jobStatus = jobStatus;
     }
 }

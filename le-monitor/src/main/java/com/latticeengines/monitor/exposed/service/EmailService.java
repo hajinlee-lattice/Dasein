@@ -85,4 +85,6 @@ public interface EmailService {
     void sendPlsActionCancelSuccessEmail(User user, String hostport, CancelActionEmailInfo cancelActionEmailInfo);
 
     void sendUploadCompletedEmail(UploadEmailInfo uploadEmailInfo);
+
+    void sendUploadFailedEmail(UploadEmailInfo uploadEmailInfo);
 }
