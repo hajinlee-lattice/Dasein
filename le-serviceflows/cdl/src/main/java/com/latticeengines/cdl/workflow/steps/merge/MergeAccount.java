@@ -68,7 +68,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             accountTables.add(ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
         }
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), accountTables);
-        shortCutMode = tablesInCtx.stream().noneMatch(Objects::isNull);
+        shortCutMode = tablesInCtx != null && tablesInCtx.stream().noneMatch(Objects::isNull);
         if (shortCutMode) {
             log.info("Found diff table and batch store in context, using short-cut pipeline");
             shortCutMode = true;
@@ -258,12 +258,8 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
         if (!noImports) {
-            if (useChangeList && StringUtils.isNotBlank(changeListTableName)) {
-                exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
-            }
-            if (StringUtils.isNotBlank(reportChangeListTableName)) {
-                exportToS3AndAddToContext(reportChangeListTableName, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
-            }
+            exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
+            exportToS3AndAddToContext(reportChangeListTableName, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
             exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
 
         }
