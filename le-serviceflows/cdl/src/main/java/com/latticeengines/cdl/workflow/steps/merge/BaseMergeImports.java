@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -534,10 +533,10 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     private JsonNode setConsolidateSummary(ObjectNode report, Table diffReport)
-            throws JsonProcessingException, JsonMappingException {
+            throws JsonProcessingException {
         ObjectMapper om = JsonUtils.getObjectMapper();
-        String path = diffReport.getExtracts().get(0).getPath();
-        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, path);
+        String path = PathUtils.toAvroGlob(diffReport.getExtracts().get(0).getPath());
+        Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, path);
         ObjectNode newItem = (ObjectNode) om
                 .readTree(records.next().get(InterfaceName.ConsolidateReport.name()).toString());
 
