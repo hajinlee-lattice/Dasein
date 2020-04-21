@@ -7,9 +7,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -22,8 +19,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.StoreFilter;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 import reactor.core.publisher.Flux;
 
@@ -33,9 +28,6 @@ import reactor.core.publisher.Flux;
 public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ServingStoreServiceImplDeploymentTestNG.class);
-
-    @Inject
-    private ServingStoreProxy servingStoreProxy;
 
     @Test(groups = "deployment-app")
     public void testDecoratedMetadata() {
@@ -53,27 +45,6 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
         Flux<ColumnMetadata> allModelingAttrs = servingStoreProxy.getAllowedModelingAttrs(mainTestTenant.getId());
         p = ColumnMetadata::getCanModel;
         Assert.assertTrue(allModelingAttrs.all(p).block());
-    }
-
-    @Test(groups = "deployment-app")
-    public void testCustomerAttrs() {
-        Flux<ColumnMetadata> customerAccountAttrs = servingStoreProxy.getDecoratedMetadata(mainTestTenant.getId(),
-                BusinessEntity.Account, null, null, StoreFilter.NON_LDC);
-        Map<String, String> nameMap = customerAccountAttrs.filter(
-                clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
-                .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName).block();
-        Assert.assertNotNull(nameMap);
-        Assert.assertTrue(nameMap.containsKey(ACCOUNT_SYSTEM_ID));
-        Assert.assertEquals(nameMap.get(ACCOUNT_SYSTEM_ID), "DefaultSystem Account ID");
-        Flux<ColumnMetadata> customerContactAttrs = servingStoreProxy.getDecoratedMetadata(mainTestTenant.getId(),
-                BusinessEntity.Contact, null, null, StoreFilter.NON_LDC);
-        nameMap = customerContactAttrs.filter(
-                clm -> StringUtils.isNotEmpty(clm.getAttrName()) && StringUtils.isNotEmpty(clm.getDisplayName()))
-                .collectMap(ColumnMetadata::getAttrName, ColumnMetadata::getDisplayName).block();
-        Assert.assertNotNull(nameMap);
-        Assert.assertTrue(nameMap.containsKey(OTHERSYSTEM_ACCOUNT_SYSTEM_ID));
-        Assert.assertEquals(nameMap.get(OTHERSYSTEM_ACCOUNT_SYSTEM_ID), "DefaultSystem_2 Account ID");
-
     }
 
     @Test(groups = "deployment-app")
