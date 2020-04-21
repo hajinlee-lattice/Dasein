@@ -19,9 +19,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
 import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
+import com.latticeengines.domain.exposed.ulysses.formatters.ProductHierarchyDanteFormatter;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
-import com.latticeengines.ulysses.utils.ProductHierarchyDanteFormatter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

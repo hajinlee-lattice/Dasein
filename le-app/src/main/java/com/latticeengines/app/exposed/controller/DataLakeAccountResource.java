@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.controller;
+package com.latticeengines.app.exposed.controller;
 
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
@@ -44,14 +44,14 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
+import com.latticeengines.domain.exposed.ulysses.formatters.AccountDanteFormatter;
+import com.latticeengines.domain.exposed.ulysses.formatters.DanteFormatter;
+import com.latticeengines.domain.exposed.ulysses.formatters.TalkingPointDanteFormatter;
 import com.latticeengines.monitor.exposed.annotation.InvocationMeter;
 import com.latticeengines.monitor.exposed.metrics.impl.InstrumentRegistry;
 import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 import com.latticeengines.proxy.exposed.objectapi.PeriodTransactionProxy;
-import com.latticeengines.ulysses.utils.AccountDanteFormatter;
-import com.latticeengines.ulysses.utils.DanteFormatter;
-import com.latticeengines.ulysses.utils.TalkingPointDanteFormatter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -92,9 +92,9 @@ public class DataLakeAccountResource {
 
     @PostConstruct
     public void postConstruct() {
-        InstrumentRegistry.register(INSTRUMENT_TP, new UlyssesInstrument(TalkingPoint));
-        InstrumentRegistry.register(INSTRUMENT_CP, new UlyssesInstrument(CompanyProfile));
-        InstrumentRegistry.register(INSTRUMENT_CL, new UlyssesInstrument(true));
+        InstrumentRegistry.register(INSTRUMENT_TP, new AppInstrument(TalkingPoint));
+        InstrumentRegistry.register(INSTRUMENT_CP, new AppInstrument(CompanyProfile));
+        InstrumentRegistry.register(INSTRUMENT_CL, new AppInstrument(true));
     }
 
     @GetMapping(value = "/{accountId:.+}/{attributeGroup}")

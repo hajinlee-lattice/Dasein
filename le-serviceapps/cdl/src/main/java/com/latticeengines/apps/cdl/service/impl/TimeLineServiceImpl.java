@@ -13,6 +13,7 @@ import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.micrometer.core.instrument.util.StringUtils;
@@ -39,6 +40,11 @@ public class TimeLineServiceImpl implements TimeLineService {
     public List<TimeLine> findByTenant(String customerSpace) {
         Tenant tenant = MultiTenantContext.getTenant();
         return timeLineEntityMgr.findByTenant(tenant);
+    }
+
+    @Override
+    public TimeLine findByTenantAndEntity(String customerSpace, BusinessEntity entity) {
+        return timeLineEntityMgr.findByEntity(entity.name());
     }
 
     public TimeLine createOrUpdateTimeLine(String customerSpace, TimeLine timeLine) {
