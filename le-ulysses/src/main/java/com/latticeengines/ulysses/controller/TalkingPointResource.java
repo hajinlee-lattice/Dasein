@@ -19,9 +19,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.FrontEndResponse;
+import com.latticeengines.domain.exposed.ulysses.formatters.DanteFormatter;
+import com.latticeengines.domain.exposed.ulysses.formatters.TalkingPointDanteFormatter;
 import com.latticeengines.proxy.exposed.cdl.TalkingPointProxy;
-import com.latticeengines.ulysses.utils.DanteFormatter;
-import com.latticeengines.ulysses.utils.TalkingPointDanteFormatter;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

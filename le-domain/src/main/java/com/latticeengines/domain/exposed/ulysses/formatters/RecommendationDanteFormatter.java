@@ -1,11 +1,11 @@
-package com.latticeengines.ulysses.utils;
+package com.latticeengines.domain.exposed.ulysses.formatters;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

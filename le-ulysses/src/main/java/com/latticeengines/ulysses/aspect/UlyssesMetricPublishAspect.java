@@ -36,7 +36,7 @@ public class UlyssesMetricPublishAspect {
     @Around("execution(* com.latticeengines.app.exposed.controller.PrimaryAttributeResource.*(..))")
     public Object ulyssesAttributeMonitor(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        Object retval = null;
+        Object retval;
         long timestamp = System.currentTimeMillis();
         retval = joinPoint.proceed();
         long timeTaken = System.currentTimeMillis() - timestamp;
@@ -55,13 +55,14 @@ public class UlyssesMetricPublishAspect {
         return metrics;
     }
 
-    @Around("execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountById(..))"
-            + "&& execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountsById(..))"
-            + "&& execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountByIdInDanteFormat(..))"
+    @Around("execution(* com.latticeengines.app.exposed.controller.DataLakeAccountResource.getAccountById(..))"
+            + "&& execution(* com.latticeengines.app.exposed.controller.DataLakeAccountResource.getAccountsById(..))"
+            + "&& execution(* com.latticeengines.app.exposed.controller.DataLakeAccountResource.getAccountByIdInDanteFormat(..))"
+            + "&& execution(* com.latticeengines.app.exposed.controller.DataLakeAccountResource.getAccountsAndTalkingpoints(..))"
             + "&& args(attributeGroup, ..)")
     public Object ulyssesAccMonitor(ProceedingJoinPoint joinPoint, Predefined attributeGroup) throws Throwable {
 
-        Object retval = null;
+        Object retval;
         long timestamp = System.currentTimeMillis();
         retval = joinPoint.proceed();
         long timeTaken = System.currentTimeMillis() - timestamp;
@@ -81,10 +82,10 @@ public class UlyssesMetricPublishAspect {
         return metrics;
     }
 
-    @Around("execution(* com.latticeengines.ulysses.controller.DataLakeAccountResource.getAccountSegmentsInDanteFormat(..))")
+    @Around("execution(* com.latticeengines.app.exposed.controller.DataLakeAccountResource.getAccountSegmentsInDanteFormat(..))")
     public Object ulyssesAccSegmentMonitor(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        Object retval = null;
+        Object retval;
         long timestamp = System.currentTimeMillis();
         retval = joinPoint.proceed();
         long timeTaken = System.currentTimeMillis() - timestamp;
@@ -106,7 +107,7 @@ public class UlyssesMetricPublishAspect {
     @Around("execution(* com.latticeengines.ulysses.controller.PurchaseHistoryResource.*(..))")
     public Object ulyssesPurchaseHistMonitor(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        Object retval = null;
+        Object retval;
         long timestamp = System.currentTimeMillis();
         retval = joinPoint.proceed();
         long timeTaken = System.currentTimeMillis() - timestamp;
@@ -128,7 +129,7 @@ public class UlyssesMetricPublishAspect {
     @Around("execution(public * com.latticeengines.ulysses.controller.RecommendationResource.*(..))")
     public Object ulyssesRecommendationMonitor(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        Object retval = null;
+        Object retval;
         long timestamp = System.currentTimeMillis();
         retval = joinPoint.proceed();
         long timeTaken = System.currentTimeMillis() - timestamp;
@@ -150,7 +151,7 @@ public class UlyssesMetricPublishAspect {
     @Around("execution(* com.latticeengines.ulysses.controller.TalkingPointResource.*(..))")
     public Object ulyssesTalkingPointsMonitor(ProceedingJoinPoint joinPoint) throws Throwable {
 
-        Object retval = null;
+        Object retval;
         long timestamp = System.currentTimeMillis();
         retval = joinPoint.proceed();
         long timeTaken = System.currentTimeMillis() - timestamp;
