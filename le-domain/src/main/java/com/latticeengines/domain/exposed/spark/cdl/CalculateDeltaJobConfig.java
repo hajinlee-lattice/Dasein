@@ -5,6 +5,9 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
 public class CalculateDeltaJobConfig extends SparkJobConfig {
+
+    private static final long serialVersionUID = -3636956961979908155L;
+
     public static final String NAME = "calculateDelta";
 
     @JsonProperty("OldData")
@@ -12,22 +15,25 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
     @JsonProperty("NewData")
     private DataUnit newData;
     @JsonProperty("FilterPrimaryJoinKeyNulls")
-    private Boolean filterPrimaryJoinKeyNulls = false;
+    private boolean filterPrimaryJoinKeyNulls = false;
     @JsonProperty("PrimaryJoinKey")
     private String primaryJoinKey;
     @JsonProperty("SecondaryJoinKey")
     private String secondaryJoinKey;
+    @JsonProperty("IsAccountEntity")
+    private boolean isAccountEntity = false;
 
     public CalculateDeltaJobConfig() {
     }
 
     public CalculateDeltaJobConfig(DataUnit newData, DataUnit oldData, String primaryJoinKey, String secondaryJoinKey,
-            boolean filterPrimaryJoinKeyNulls, String workSpace) {
+            boolean filterPrimaryJoinKeyNulls, boolean isAccountEntity, String workSpace) {
         this.setWorkspace(workSpace);
         this.newData = newData;
         this.oldData = oldData;
         this.primaryJoinKey = primaryJoinKey;
         this.secondaryJoinKey = secondaryJoinKey;
+        this.isAccountEntity = isAccountEntity;
         this.filterPrimaryJoinKeyNulls = filterPrimaryJoinKeyNulls;
     }
 
@@ -58,7 +64,7 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
         this.newData = newData;
     }
 
-    public Boolean getFilterPrimaryJoinKeyNulls() {
+    public boolean getFilterPrimaryJoinKeyNulls() {
         return filterPrimaryJoinKeyNulls;
     }
 
@@ -70,8 +76,16 @@ public class CalculateDeltaJobConfig extends SparkJobConfig {
         this.secondaryJoinKey = secondaryJoinKey;
     }
 
-    public void setFilterPrimaryJoinKeyNulls(Boolean filterPrimaryJoinKeyNulls) {
+    public void setFilterPrimaryJoinKeyNulls(boolean filterPrimaryJoinKeyNulls) {
         this.filterPrimaryJoinKeyNulls = filterPrimaryJoinKeyNulls;
+    }
+
+    public boolean getIsAccountEntity() {
+        return isAccountEntity;
+    }
+
+    public void setIsAccountEntity(boolean isAccountEntity) {
+        this.isAccountEntity = isAccountEntity;
     }
 
     public String getPrimaryJoinKey() {

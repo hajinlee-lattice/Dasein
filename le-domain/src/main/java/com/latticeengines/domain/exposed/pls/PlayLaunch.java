@@ -254,21 +254,45 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "LAUNCH_COMPLETION_PERCENT")
     private double launchCompletionPercent;
 
+    // segment selected accounts
     @JsonProperty("accountsSelected")
     @Column(name = "ACCOUNTS_SELECTED")
     private Long accountsSelected;
 
+    // segment selected contacts
     @JsonProperty("contactsSelected")
     @Column(name = "CONTACTS_SELECTED")
     private Long contactsSelected;
 
+    // accumulative launched contacts
     @JsonProperty("contactsLaunched")
     @Column(name = "CONTACTS_LAUNCHED")
     private Long contactsLaunched;
 
+    // incremental added contacts
+    @JsonProperty("contactsAdded")
+    @Column(name = "CONTACTS_ADDED")
+    private Long contactsAdded;
+
+    // incremental deleted contacts
+    @JsonProperty("contactsDeleted")
+    @Column(name = "CONTACTS_DELETED")
+    private Long contactsDeleted;
+
+    // accumulative launched accounts
     @JsonProperty("accountsLaunched")
     @Column(name = "ACCOUNTS_LAUNCHED")
     private Long accountsLaunched;
+
+    // incremental added accounts
+    @JsonProperty("accountsAdded")
+    @Column(name = "ACCOUNTS_ADDED")
+    private Long accountsAdded;
+
+    // incremental deleted accounts
+    @JsonProperty("accountsDeleted")
+    @Column(name = "ACCOUNTS_DELETED")
+    private Long accountsDeleted;
 
     @JsonProperty("accountsSuppressed")
     @Column(name = "ACCOUNTS_SUPPRESSED")
@@ -480,12 +504,44 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         this.accountsLaunched = accountsLaunched;
     }
 
+    public Long getAccountsAdded() {
+        return this.accountsAdded;
+    }
+
+    public void setAccountsAdded(Long accountsAdded) {
+        this.accountsAdded = accountsAdded;
+    }
+
+    public Long getAccountsDeleted() {
+        return this.accountsDeleted;
+    }
+
+    public void setAccountsDeleted(Long accountsDeleted) {
+        this.accountsDeleted = accountsDeleted;
+    }
+
     public Long getContactsLaunched() {
         return this.contactsLaunched;
     }
 
     public void setContactsLaunched(Long contactsLaunched) {
         this.contactsLaunched = contactsLaunched;
+    }
+
+    public Long getContactsAdded() {
+        return this.contactsAdded;
+    }
+
+    public void setContactsAdded(Long contactsAdded) {
+        this.contactsAdded = contactsAdded;
+    }
+
+    public Long getContactsDeleted() {
+        return this.contactsDeleted;
+    }
+
+    public void setContactsDeleted(Long contactsDeleted) {
+        this.contactsDeleted = contactsDeleted;
     }
 
     public Long getAccountsSuppressed() {
@@ -792,6 +848,12 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         if (playLaunch.getAccountsLaunched() != null) {
             this.setAccountsLaunched(playLaunch.getAccountsLaunched());
         }
+        if (playLaunch.getAccountsAdded() != null) {
+            this.setAccountsAdded(playLaunch.getAccountsAdded());
+        }
+        if (playLaunch.getAccountsDeleted() != null) {
+            this.setAccountsDeleted(playLaunch.getAccountsDeleted());
+        }
         if (playLaunch.getAccountsSuppressed() != null) {
             this.setAccountsSuppressed(playLaunch.getAccountsSuppressed());
         }
@@ -813,6 +875,12 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
         }
         if (playLaunch.getContactsLaunched() != null) {
             this.setContactsLaunched(playLaunch.getContactsLaunched());
+        }
+        if (playLaunch.getContactsAdded() != null) {
+            this.setContactsAdded(playLaunch.getContactsAdded());
+        }
+        if (playLaunch.getContactsDeleted() != null) {
+            this.setContactsDeleted(playLaunch.getContactsDeleted());
         }
         if (playLaunch.getContactsSuppressed() != null) {
             this.setContactsSuppressed(playLaunch.getContactsSuppressed());

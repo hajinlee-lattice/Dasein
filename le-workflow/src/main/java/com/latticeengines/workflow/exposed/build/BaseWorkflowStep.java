@@ -185,6 +185,15 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ADDED_ACCOUNTS_FULL_CONTACTS_TABLE = "ADDED_ACCOUNTS_FULL_CONTACTS_TABLE";
     protected static final String FULL_ACCOUNTS_UNIVERSE = "FULL_ACCOUNTS_UNIVERSE";
     protected static final String FULL_CONTACTS_UNIVERSE = "FULL_CONTACTS_UNIVERSE";
+    protected static final String PREVIOUS_ACCUMULATIVE_ACCOUNTS = "PREVIOUS_ACCUMULATIVE_ACCOUNTS";
+    protected static final String PREVIOUS_ACCUMULATIVE_CONTACTS = "PREVIOUS_ACCUMULATIVE_CONTACTS";
+    protected static final String ACCOUNTS_ADDED = "ACCOUNTS_ADDED";
+    protected static final String ACCOUNTS_DELETED = "ACCOUNTS_DELETED";
+    protected static final String ACCUMULATIVE_ACCOUNTS = "ACCUMULATIVE_ACCOUNTS";
+    protected static final String CONTACTS_ADDED = "CONTACTS_ADDED";
+    protected static final String CONTACTS_DELETED = "CONTACTS_DELETED";
+    protected static final String FULL_CONTACTS = "FULL_CONTACTS";
+    protected static final String ACCUMULATIVE_CONTACTS = "ACCUMULATIVE_CONTACTS";
     protected static final String PREVIOUS_ACCOUNTS_UNIVERSE = "PREVIOUS_ACCOUNTS_UNIVERSE";
     protected static final String PREVIOUS_CONTACTS_UNIVERSE = "PREVIOUS_CONTACTS_UNIVERSE";
     protected static final String FULL_LAUNCH_UNIVERSE = "FULL_LAUNCH_UNIVERSE";
@@ -202,7 +211,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     // set of merged activity metrics groups' serving entities
     protected static final String ACTIVITY_MERGED_METRICS_SERVING_ENTITIES = "MERGED_METRICS_SERVING_ENTITIES";
     protected static final String SCORE_TRAINING_FILE_INCLUDED_FEATURES = "SCORE_TRAINING_FILE_INCLUDED_FEATURES";
-    protected static final String PERIOD_STORE_TABLE_FORMAT = "PERIODSTORE_%s_%s"; // streamId, period
+    // streamId, period
+    protected static final String PERIOD_STORE_TABLE_FORMAT = "PERIODSTORE_%s_%s";
     protected static final String PERIOD_STORE_TABLE_NAME = "PERIOD_STORE_TABLE_NAME";
     protected static final String PERFORM_SOFT_DELETE = "PERFORM_SOFT_DELETE"; //
     protected static final String PERFORM_HARD_DELETE = "PERFORM_HARD_DELETE"; //
@@ -604,10 +614,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
      * @param tableNameStrCtxKeys
      *            list of context keys that contain a single table as string
      * @param tableNameListCtxKeys
-     *            list of context keys that contain a list of tables as serialized
-     *            list of string
-     * @return list of tables, null will be inserted if the corresponding table does
-     *         not exist
+     *            list of context keys that contain a list of tables as
+     *            serialized list of string
+     * @return list of tables, null will be inserted if the corresponding table
+     *         does not exist
      */
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameStrCtxKeys,
             List<String> tableNameListCtxKeys) {

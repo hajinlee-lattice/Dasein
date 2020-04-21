@@ -48,10 +48,13 @@ public class LaunchSummary {
         Stats stats = new Stats();
         stats.setSelectedTargets(getCount(launch.getAccountsSelected()));
         stats.setSelectedContacts(getCount(launch.getContactsSelected()));
-        stats.setContactsWithinRecommendations(getCount(launch.getContactsLaunched()));
+        // PLS-15540 incremental contacts = contactsAdded + contactsDeleted
+        stats.setContactsWithinRecommendations(
+                getCount(launch.getContactsAdded()) + getCount(launch.getContactsDeleted()));
         stats.setAccountErrors(getCount(launch.getAccountsErrored()));
         stats.setContactErrors(getCount(launch.getContactsErrored()));
-        stats.setRecommendationsLaunched(getCount(launch.getAccountsLaunched()));
+        // PLS-15540 incremental accounts = accountsAdded + accountsDeleted
+        stats.setRecommendationsLaunched(getCount(launch.getAccountsAdded()) + getCount(launch.getAccountsDeleted()));
         stats.setAccountsSuppressed(getCount(launch.getAccountsSuppressed()));
         stats.setContactsSuppressed(getCount(launch.getContactsSuppressed()));
         stats.setAccountsDuplicated(getCount(launch.getAccountsDuplicated()));
@@ -126,7 +129,9 @@ public class LaunchSummary {
         this.launchState = launchState;
     }
 
-    public String getUiLaunchState() { return uiLaunchState; }
+    public String getUiLaunchState() {
+        return uiLaunchState;
+    }
 
     public void setUiLaunchState(String uiLaunchState) {
         this.uiLaunchState = uiLaunchState;
