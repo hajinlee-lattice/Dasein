@@ -6,7 +6,7 @@
             {
                 "fieldName": "PathPatternName",
                 "fieldType": "TEXT",
-                "screenName": "Path Pattern Name",
+                "screenName": "Name",
                 "matchingColumnNames": [
                     "NAME",
                     "PATH PATTERN NAME"
@@ -20,10 +20,11 @@
             {
                 "fieldName": "PathPattern",
                 "fieldType": "TEXT",
-                "screenName": "Path Pattern",
+                "screenName": "Website URL Pattern",
                 "matchingColumnNames": [
                     "PATTERN",
-                    "PATH PATTERN"
+                    "PATH PATTERN",
+                    "Website URL Pattern"
                 ],
                 "required": false,
                 "approvedUsage": [
