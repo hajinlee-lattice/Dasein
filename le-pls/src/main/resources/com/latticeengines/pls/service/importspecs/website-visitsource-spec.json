@@ -6,9 +6,10 @@
             {
                 "fieldName": "SourceMedium",
                 "fieldType": "TEXT",
-                "screenName": "Source Medium",
+                "screenName": "Referral Source",
                 "matchingColumnNames": [
-                    "SOURCE MEDIUM"
+                    "SOURCE MEDIUM",
+                    "Referral Source"
                 ],
                 "required": true,
                 "approvedUsage": [

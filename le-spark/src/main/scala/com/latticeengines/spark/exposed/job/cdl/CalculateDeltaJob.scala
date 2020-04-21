@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit
 import com.latticeengines.domain.exposed.spark.cdl.CalculateDeltaJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -16,7 +17,22 @@ class CalculateDeltaJob extends AbstractSparkJob[CalculateDeltaJobConfig] {
     val newDFAlias = "newDfAlias"
     val oldDFAlias = "oldDFAlias"
     val compositeKey = "account_contact"
-
+    val accountId = InterfaceName.AccountId.name()
+    val contactId = InterfaceName.ContactId.name()
+    val isAccountEntity = config.getIsAccountEntity
+    var accountAndContactNums = new Array[Long](2)
+    
+    logSpark("OldData schema is as follows:")
+    oldData.printSchema
+    if (isAccountEntity) {
+      accountAndContactNums(0) = oldData.count()
+      accountAndContactNums(1) = 0L
+    } else {
+      accountAndContactNums(0) = oldData.select(accountId).distinct().count()
+      accountAndContactNums(1) = oldData.count()
+    }
+    lattice.outputStr = accountAndContactNums.mkString("[", ",", "]")
+    
     val positiveDelta = if (config.getSecondaryJoinKey != null && !config.getFilterPrimaryJoinKeyNulls) {
       newData.withColumn(compositeKey, concat(col(config.getSecondaryJoinKey), lit("_"), when(col(config.getPrimaryJoinKey).isNotNull, col(config.getPrimaryJoinKey)).otherwise(lit("null")))).alias(newDFAlias)
         .join(oldData.withColumn(compositeKey, concat(col(config.getSecondaryJoinKey), lit("_"), when(col(config.getPrimaryJoinKey).isNotNull, col(config.getPrimaryJoinKey)).otherwise(lit("null")))).alias(oldDFAlias), Seq(compositeKey), "leftanti")

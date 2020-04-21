@@ -12,6 +12,7 @@
                     "WEB_VISIT_PAGE_URL"
                 ],
                 "required": true,
+                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],
@@ -26,6 +27,7 @@
                     "WEB VISIT DATE"
                 ],
                 "required": true,
+                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],
@@ -49,9 +51,10 @@
             {
                 "fieldName": "SourceMedium",
                 "fieldType": "TEXT",
-                "screenName": "Source Medium",
+                "screenName": "Referral Source",
                 "matchingColumnNames": [
-                    "SOURCE MEDIUM"
+                    "SOURCE MEDIUM",
+                    "Referral Source"
                 ],
                 "required": true,
                 "approvedUsage": [

@@ -91,6 +91,12 @@ public class FieldDefinition {
     @JsonProperty
     protected Boolean required;
 
+    //Defined in Spec
+    //false if this field can't set null value. Use for validation
+    //if false, file need have this column when import.
+    @JsonProperty
+    protected Boolean nullable = true;
+
     // TODO(jwinter): Figure out where there is an enum (ApprovedUsage) and a class (ModelingMetadata) with similar
     //     defined values for this field.
     // Defined in Spec
@@ -298,6 +304,14 @@ public class FieldDefinition {
         this.mappedToLatticeId = mappedToLatticeId;
     }
 
+    public Boolean isNullable() {
+        return nullable;
+    }
+
+    public void  setNullable(Boolean nullable) {
+        this.nullable = nullable;
+    }
+
     public CDLExternalSystemType getExternalSystemType() {
         return externalSystemType;
     }
@@ -338,6 +352,7 @@ public class FieldDefinition {
             output += String.join(" ", matchingColumnNames);
         }
         output += "\nrequired: " + required;
+        output += "\nnullable: " + nullable;
         output += "\napprovedUsage:";
         if (CollectionUtils.isNotEmpty(approvedUsage)) {
             output += String.join(" ", approvedUsage);
@@ -386,6 +401,13 @@ public class FieldDefinition {
                     return false;
                 }
             } else if (!this.required.equals(definition.required)) {
+                return false;
+            }
+            if (this.nullable == null) {
+                if (definition.nullable != null) {
+                    return false;
+                }
+            } else if (!this.nullable.equals(definition.nullable)) {
                 return false;
             }
             if (this.approvedUsage == null) {

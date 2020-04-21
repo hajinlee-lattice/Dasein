@@ -44,10 +44,9 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
     private DataUnit previousS3Contacts;
     private DataUnit currentContacts;
 
+    @Override
     @BeforeClass(groups = "functional")
     public void setup() {
-        CalculateDeltaJobConfig config = new CalculateDeltaJobConfig();
-
         Schema accountSchema = SchemaBuilder.record("Account").fields() //
                 .name("AccountId").type().stringType().noDefault()//
                 .endRecord();
@@ -96,20 +95,6 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
             log.error(e.getMessage());
         }
         super.setup();
-
-        // Spark repl setup
-        // val newDFAlias = "newDfAlias"
-        // val oldDFAlias = "oldDFAlias"
-        //
-        // val newData
-        // =spark.read.format("avro").load("/tmp/testCalculateDeltaCurrentAccounts.avro")
-        // val oldData =
-        // spark.read.format("avro").load("/tmp/testCalculateDeltaPreviousAccounts.avro")
-        //
-        // val oldCData =
-        // spark.read.format("avro").load("/tmp/testCalculateDeltaPreviousContacts.avro")
-        // val newCData
-        // =spark.read.format("avro").load("/tmp/testCalculateDeltaCurrentContacts.avro")
     }
 
     @Test(groups = "functional")
@@ -118,11 +103,18 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setOldData(previousAccounts);
         config.setNewData(currentAccounts);
         config.setPrimaryJoinKey(InterfaceName.AccountId.name());
+        config.setIsAccountEntity(true);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 2);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 1);
+        long previousAccumulativeAccounts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+        long previousAccumulativeContacts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(1);
+        Assert.assertEquals(previousAccumulativeAccounts, 6);
+        Assert.assertEquals(previousAccumulativeContacts, 0);
     }
 
     @Test(groups = "functional")
@@ -131,12 +123,19 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setOldData(previousContacts);
         config.setNewData(currentContacts);
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
+        config.setIsAccountEntity(false);
         config.setFilterPrimaryJoinKeyNulls(true);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 2);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 3);
+        long previousAccumulativeAccounts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+        long previousAccumulativeContacts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(1);
+        Assert.assertEquals(previousAccumulativeAccounts, 6);
+        Assert.assertEquals(previousAccumulativeContacts, 8);
     }
 
     @Test(groups = "functional")
@@ -147,11 +146,18 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setSecondaryJoinKey(InterfaceName.AccountId.name());
         config.setFilterPrimaryJoinKeyNulls(false);
+        config.setIsAccountEntity(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 3);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 4);
+        long previousAccumulativeAccounts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+        long previousAccumulativeContacts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(1);
+        Assert.assertEquals(previousAccumulativeAccounts, 8);
+        Assert.assertEquals(previousAccumulativeContacts, 10);
     }
 
     @Test(groups = "functional")
@@ -160,11 +166,18 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setOldData(null);
         config.setNewData(currentAccounts);
         config.setPrimaryJoinKey(InterfaceName.AccountId.name());
+        config.setIsAccountEntity(true);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 7);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
+        long previousAccumulativeAccounts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+        long previousAccumulativeContacts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(1);
+        Assert.assertEquals(previousAccumulativeAccounts, 0);
+        Assert.assertEquals(previousAccumulativeContacts, 0);
     }
 
     @Test(groups = "functional")
@@ -174,11 +187,18 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setNewData(currentContacts);
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setFilterPrimaryJoinKeyNulls(true);
+        config.setIsAccountEntity(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 7);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
+        long previousAccumulativeAccounts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+        long previousAccumulativeContacts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(1);
+        Assert.assertEquals(previousAccumulativeAccounts, 0);
+        Assert.assertEquals(previousAccumulativeContacts, 0);
     }
 
     @Test(groups = "functional")
@@ -188,11 +208,18 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setNewData(currentContacts);
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setFilterPrimaryJoinKeyNulls(false);
+        config.setIsAccountEntity(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 9);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
+        long previousAccumulativeAccounts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+        long previousAccumulativeContacts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(1);
+        Assert.assertEquals(previousAccumulativeAccounts, 0);
+        Assert.assertEquals(previousAccumulativeContacts, 0);
     }
 
     @Test(groups = "functional")
@@ -202,11 +229,18 @@ public class CalculateDeltaJobTestNG extends SparkJobFunctionalTestNGBase {
         config.setNewData(previousContacts);
         config.setPrimaryJoinKey(InterfaceName.ContactId.name());
         config.setFilterPrimaryJoinKeyNulls(false);
+        config.setIsAccountEntity(false);
         log.info(JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(CalculateDeltaJob.class, config);
         Assert.assertEquals(result.getTargets().size(), 2);
         Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 0);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
+        long previousAccumulativeAccounts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(0);
+        long previousAccumulativeContacts = JsonUtils
+                .convertList(JsonUtils.deserialize(result.getOutput(), List.class), Long.class).get(1);
+        Assert.assertEquals(previousAccumulativeAccounts, 6);
+        Assert.assertEquals(previousAccumulativeContacts, 8);
     }
 
     interface AvroExportable {

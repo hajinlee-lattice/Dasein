@@ -11,6 +11,7 @@
           "ID"
         ],
         "required": true,
+        "nullable": false,
         "fundamentalType": "ALPHA",
         "approvedUsage": [
           "None"
@@ -28,6 +29,7 @@
           "LAST MODIFIED DATE"
         ],
         "required": true,
+        "nullable": false,
         "approvedUsage": [
           "None"
         ],
@@ -37,14 +39,16 @@
       {
         "fieldName": "StageName",
         "fieldType": "TEXT",
-        "columnName": "StageName",
-        "screenName": "StageName",
+        "columnName": "Stage Name",
+        "screenName": "Stage Name",
         "matchingColumnNames": [
           "StageName",
           "STAGE",
-          "STAGE NAME"
+          "STAGE NAME",
+          "Stage Name"
         ],
         "required": true,
+        "nullable": false,
         "approvedUsage": [
           "None"
         ],
