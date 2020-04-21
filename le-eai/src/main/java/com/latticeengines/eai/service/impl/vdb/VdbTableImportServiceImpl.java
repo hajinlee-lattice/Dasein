@@ -56,6 +56,7 @@ import com.latticeengines.domain.exposed.eai.VdbConnectorConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.VdbCreateTableRule;
@@ -269,6 +270,13 @@ public class VdbTableImportServiceImpl extends ImportService {
     public List<Table> prepareMetadata(List<Table> originalTables, Map<String, String> defaultColumnMap) {
         List<Table> metaData = new ArrayList<>();
         for (Table table : originalTables) {
+            if (MapUtils.isNotEmpty(defaultColumnMap)) {
+                defaultColumnMap.forEach((attrName, value) -> {
+                    if (table.getAttribute(attrName) == null) {
+                        table.addAttribute(getDefaultStringAttribute(attrName, value));
+                    }
+                });
+            }
             for (Attribute attribute : table.getAttributes()) {
                 if (attribute == null) {
                     log.warn(String.format("Empty attribute in table %s", table.getName()));
@@ -288,13 +296,6 @@ public class VdbTableImportServiceImpl extends ImportService {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }
             }
-            if (MapUtils.isNotEmpty(defaultColumnMap)) {
-                defaultColumnMap.forEach((attrName, value) -> {
-                    if (table.getAttribute(attrName) == null) {
-                        table.addAttribute(getDefaultStringAttribute(attrName, value));
-                    }
-                });
-            }
             Schema schema = TableUtils.createSchema(table.getName(), table);
             table.setSchema(schema);
             metaData.add(table);
@@ -306,11 +307,12 @@ public class VdbTableImportServiceImpl extends ImportService {
         Attribute attribute = new Attribute();
         attribute.setName(attrName);
         attribute.setDisplayName(attrName);
-        attribute.setPhysicalDataType(Schema.Type.STRING.getName());
-        attribute.setSourceLogicalDataType("");
+        attribute.setPhysicalDataType(Schema.Type.STRING.name());
+        attribute.setSourceLogicalDataType("NVARCHAR(50)");
         attribute.setSourceAttrName("");
         attribute.setLogicalDataType("");
         attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        attribute.setFundamentalType(FundamentalType.ALPHA);
         attribute.setDefaultValueStr(value);
         attribute.setNullable(true);
         return attribute;
