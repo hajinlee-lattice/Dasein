@@ -37,7 +37,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWor
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.DeltaCampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateDeltaRecommendationConfig;
-import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.CreateDeltaRecommendationsJob;
 
@@ -56,9 +55,6 @@ public class DeltaCampaignLaunchInitStep
 
     @Inject
     private FrontEndQueryCreator frontEndQueryCreator;
-
-    @Inject
-    private PlayProxy playProxy;
 
     @Value("${datadb.datasource.driver}")
     private String dataDbDriver;
@@ -260,13 +256,8 @@ public class DeltaCampaignLaunchInitStep
             throw new RuntimeException("Illegal situation.");
         }
 
-        PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-        playLaunch.setAccountsLaunched(launchedAccountNum);
-        playLaunch.setContactsLaunched(launchedContactNum);
         long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
-        playLaunch.setAccountsSuppressed(suppressedAccounts);
         long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
-        playLaunch.setContactsSuppressed(suppressedContacts);
         campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
         log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
         log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));

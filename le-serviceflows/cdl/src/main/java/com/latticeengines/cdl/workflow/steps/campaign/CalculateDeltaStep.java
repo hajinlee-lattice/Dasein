@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.campaign;
 import static com.latticeengines.workflow.exposed.build.WorkflowStaticContext.ATTRIBUTE_REPO;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -80,8 +81,10 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         evaluationDate = parseEvaluationDateStr(configuration);
 
         HdfsDataUnit previousLaunchUniverse;
+        boolean isAccountEntity = false;
 
         if (channel.getChannelConfig().getAudienceType() == AudienceType.ACCOUNTS) {
+            isAccountEntity = true;
             Table previousAccountUniverseTable = StringUtils
                     .isNotBlank(channel.getCurrentLaunchedAccountUniverseTable())
                             ? metadataProxy.getTable(configuration.getCustomerSpace().getTenantId(),
@@ -118,16 +121,16 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
                         && !channel.getChannelConfig().isSuppressAccountsWithoutContacts()
                                 ? AudienceType.ACCOUNTS.getInterfaceName()
                                 : null,
-                channel.getChannelConfig().isSuppressAccountsWithoutContacts());
+                channel.getChannelConfig().isSuppressAccountsWithoutContacts(), isAccountEntity);
 
         // 3) Generate Metadata tables for delta results
         processDeltaCalculationResult(channel.getChannelConfig().getAudienceType(), deltaCalculationResult);
     }
 
     private SparkJobResult executeSparkJob(HdfsDataUnit currentLaunchUniverse, HdfsDataUnit previousLaunchUniverse,
-            String primaryJoinKey, String secondaryJoinKey, boolean filterJoinKeyNulls) {
+            String primaryJoinKey, String secondaryJoinKey, boolean filterJoinKeyNulls, boolean isAccountEntity) {
         CalculateDeltaJobConfig config = new CalculateDeltaJobConfig(currentLaunchUniverse, previousLaunchUniverse,
-                primaryJoinKey, secondaryJoinKey, filterJoinKeyNulls, getRandomWorkspace());
+                primaryJoinKey, secondaryJoinKey, filterJoinKeyNulls, isAccountEntity, getRandomWorkspace());
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
@@ -150,6 +153,15 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
 
     private void processDeltaCalculationResult(AudienceType audienceType, SparkJobResult deltaCalculationResult) {
         CalculateDeltaStepConfiguration config = getConfiguration();
+
+        long previousAccumulativeAccounts = JsonUtils
+                .convertList(JsonUtils.deserialize(deltaCalculationResult.getOutput(), List.class), Long.class).get(0);
+        long previousAccumulativeContacts = JsonUtils
+                .convertList(JsonUtils.deserialize(deltaCalculationResult.getOutput(), List.class), Long.class).get(1);
+        log.info("previousAccumulativeAccounts=" + previousAccumulativeAccounts + ", previousAccumulativeContacts="
+                + previousAccumulativeContacts);
+        putLongValueInContext(PREVIOUS_ACCUMULATIVE_ACCOUNTS, previousAccumulativeAccounts);
+        putLongValueInContext(PREVIOUS_ACCUMULATIVE_CONTACTS, previousAccumulativeContacts);
 
         HdfsDataUnit positiveDelta = deltaCalculationResult.getTargets().get(0);
         if (positiveDelta != null && positiveDelta.getCount() > 0) {
@@ -273,4 +285,3 @@ public class CalculateDeltaStep extends BaseSparkSQLStep<CalculateDeltaStepConfi
         return attrRepo;
     }
 }
-
