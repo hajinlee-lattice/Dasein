@@ -42,7 +42,8 @@
         "matchingColumnNames": [
           "StageName",
           "STAGE",
-          "STAGE NAME"
+          "STAGE NAME",
+          "Stage Name"
         ],
         "required": true,
         "approvedUsage": [

@@ -51,7 +51,8 @@
                 "fieldType": "TEXT",
                 "screenName": "Referral Source",
                 "matchingColumnNames": [
-                    "SOURCE MEDIUM"
+                    "SOURCE MEDIUM",
+                    "Referral Source"
                 ],
                 "required": true,
                 "approvedUsage": [
