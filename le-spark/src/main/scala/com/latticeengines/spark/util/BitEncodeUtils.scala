@@ -1,6 +1,5 @@
 package com.latticeengines.spark.util
 
-import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParameters.Attribute
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook.DecodeStrategy
 import org.apache.avro.util.Utf8
@@ -13,11 +12,11 @@ import scala.collection.JavaConverters._
 
 private[spark] object BitEncodeUtils {
 
-  def decode(input: DataFrame, outputAttrs: List[Attribute], codeBookLookup: Map[String, String], codeBooks: Map[String, BitCodeBook]): DataFrame = {
-    val outputCols: Seq[String] = outputAttrs.map(_.getAttr)
+  def decode(input: DataFrame, outputCols: Seq[String], codeBookLookup: Map[String, String], codeBooks: Map[String, BitCodeBook]): DataFrame = {
     val encodedAttrs: Seq[String] = codeBookLookup.values.toSeq.intersect(input.columns)
     println(s"encodedAttrs=$encodedAttrs")
     val retainFields: Seq[StructField] = input.schema.filter(field => outputCols.contains(field.name))
+      .filterNot(field => codeBookLookup.keySet.contains(field.name))
     val newFields: Seq[StructField] = getDecodedFields(outputCols, codeBookLookup, codeBooks)
     val outputSchema = StructType(retainFields ++ newFields)
     val attrPos: Map[String, Int] = outputSchema.zipWithIndex.map(t => (t._1.name, t._2)).toMap
@@ -43,7 +42,7 @@ private[spark] object BitEncodeUtils {
       val values: Array[Any] = Array.ofDim[Any](outputWidth)
       pairs.foreach(t => {
         val value = t._2
-        if (value != null) {
+        if (value != null && attrPos.contains(t._1)) {
           values.update(attrPos(t._1), value)
         }
       })
@@ -59,7 +58,7 @@ private[spark] object BitEncodeUtils {
         case Some(codeBook: BitCodeBook) =>
           val strategy: DecodeStrategy = codeBook.getDecodeStrategy
           strategy match {
-            case DecodeStrategy.BOOLEAN_YESNO => StructField(attrName, BooleanType, nullable = true)
+            case DecodeStrategy.BOOLEAN_YESNO => StructField(attrName, StringType, nullable = true)
             case DecodeStrategy.NUMERIC_INT => StructField(attrName, IntegerType, nullable = true)
             case DecodeStrategy.NUMERIC_UNSIGNED_INT => StructField(attrName, IntegerType, nullable = true)
             case DecodeStrategy.ENUM_STRING => StructField(attrName, StringType, nullable = true)

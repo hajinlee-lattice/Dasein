@@ -132,9 +132,9 @@ public class S3ImportServiceImpl implements S3ImportService {
         String projectId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.DCP,
                 S3ImportMessageUtils.KeyPart.PROJECT_ID);
         String sourceId = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.DCP,
-                S3ImportMessageUtils.KeyPart.PROJECT_ID);
+                S3ImportMessageUtils.KeyPart.SOURCE_ID);
         String fileName = S3ImportMessageUtils.getKeyPart(message.getKey(), S3ImportMessageType.DCP,
-                S3ImportMessageUtils.KeyPart.PROJECT_ID);
+                S3ImportMessageUtils.KeyPart.FILE_NAME);
 
         Tenant tenant = dropBoxService.getDropBoxOwner(message.getDropBox().getDropBox());
         String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());

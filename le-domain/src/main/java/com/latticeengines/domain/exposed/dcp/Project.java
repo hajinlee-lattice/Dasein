@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.dcp;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -24,6 +25,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
@@ -97,6 +99,11 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
     @Column(name = "PROJECT_DESCRIPTION", length = 4000)
     @JsonProperty("project_description")
     private String projectDescription;
+
+    @Column(name = "RECIPIENT_LIST", columnDefinition = "'JSON'")
+    @Type(type = "json")
+    @JsonProperty("recipient_list")
+    private List<String> recipientList;
 
     @Override
     public Long getPid() {
@@ -202,6 +209,14 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
 
     public void setProjectDescription(String projectDescription) {
         this.projectDescription = projectDescription;
+    }
+
+    public List<String> getRecipientList() {
+        return recipientList;
+    }
+
+    public void setRecipientList(List<String> recipientList) {
+        this.recipientList = recipientList;
     }
 
     //TODO: define project type

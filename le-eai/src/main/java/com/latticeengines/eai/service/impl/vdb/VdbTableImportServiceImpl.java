@@ -21,6 +21,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -56,6 +57,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.VdbCreateTableRule;
 import com.latticeengines.domain.exposed.pls.VdbGetQueryData;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
@@ -264,7 +266,7 @@ public class VdbTableImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> prepareMetadata(List<Table> originalTables) {
+    public List<Table> prepareMetadata(List<Table> originalTables, Map<String, String> defaultColumnMap) {
         List<Table> metaData = new ArrayList<>();
         for (Table table : originalTables) {
             for (Attribute attribute : table.getAttributes()) {
@@ -286,11 +288,32 @@ public class VdbTableImportServiceImpl extends ImportService {
                     attribute.setPropertyValue("dateFormat", "YYYY-MM-DD");
                 }
             }
+            if (MapUtils.isNotEmpty(defaultColumnMap)) {
+                defaultColumnMap.forEach((attrName, value) -> {
+                    if (table.getAttribute(attrName) == null) {
+                        table.addAttribute(getDefaultStringAttribute(attrName, value));
+                    }
+                });
+            }
             Schema schema = TableUtils.createSchema(table.getName(), table);
             table.setSchema(schema);
             metaData.add(table);
         }
         return metaData;
+    }
+
+    private Attribute getDefaultStringAttribute(String attrName, String value) {
+        Attribute attribute = new Attribute();
+        attribute.setName(attrName);
+        attribute.setDisplayName(attrName);
+        attribute.setPhysicalDataType(Schema.Type.STRING.getName());
+        attribute.setSourceLogicalDataType("");
+        attribute.setSourceAttrName("");
+        attribute.setLogicalDataType("");
+        attribute.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        attribute.setDefaultValueStr(value);
+        attribute.setNullable(true);
+        return attribute;
     }
 
     @SuppressWarnings("unused")
@@ -386,7 +409,7 @@ public class VdbTableImportServiceImpl extends ImportService {
     @Override
     public void importDataAndWriteToHdfs(SourceImportConfiguration extractionConfig, ImportContext context,
             ConnectorConfiguration connectorConfiguration) {
-        VdbConnectorConfiguration vdbConnectorConfiguration = null;
+        VdbConnectorConfiguration vdbConnectorConfiguration;
         if (connectorConfiguration instanceof VdbConnectorConfiguration) {
             vdbConnectorConfiguration = (VdbConnectorConfiguration) connectorConfiguration;
         } else {
@@ -453,7 +476,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                 long getDLDataResultTime = 0;
                 int retryForEachBatch = 0;
                 while (startRow < totalRows) {
-                    VdbQueryDataResult vdbQueryDataResult = null;
+                    VdbQueryDataResult vdbQueryDataResult;
                     try {
                         long readDLStartTime = System.currentTimeMillis();
                         vdbQueryDataResult = dataLoaderService.getQueryDataResult(queryDataUrl,
@@ -615,7 +638,6 @@ public class VdbTableImportServiceImpl extends ImportService {
                 .uniqueIds(uniqueIds)
                 .vdbValueConverter(new VdbValueConverter())
                 .yarnConfiguration(yarnConfiguration);
-        VdbDataProcessCallable callable = new VdbDataProcessCallable(builder);
-        return callable;
+        return new VdbDataProcessCallable(builder);
     }
 }

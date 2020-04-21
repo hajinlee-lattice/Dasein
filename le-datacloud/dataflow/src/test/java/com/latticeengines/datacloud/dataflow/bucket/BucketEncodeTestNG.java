@@ -110,7 +110,7 @@ public class BucketEncodeTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                 tokens.add(ATTR_CAT_STR + "=" + getBkt(record, ATTR_CAT_STR));
                 tokens.add(ATTR_CAT_MAP_STR + "=" + getBkt(record, ATTR_CAT_MAP_STR));
                 tokens.add(ATTR_BOOLEAN_1 + "=" + getBkt(record, ATTR_BOOLEAN_1));
-                tokens.add(ATTR_BOOLEAN_2 + "=" + getBkt(record, ATTR_BOOLEAN_3));
+                tokens.add(ATTR_BOOLEAN_2 + "=" + getBkt(record, ATTR_BOOLEAN_2));
                 tokens.add(ATTR_BOOLEAN_3 + "=" + getBkt(record, ATTR_BOOLEAN_3));
                 tokens.add(ATTR_BOOLEAN_4 + "=" + getBkt(record, ATTR_BOOLEAN_4));
                 tokens.add(ATTR_ENCODED_1 + "=" + getBkt(record, ATTR_ENCODED_1));

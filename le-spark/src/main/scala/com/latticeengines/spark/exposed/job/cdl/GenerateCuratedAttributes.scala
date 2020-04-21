@@ -20,6 +20,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
     val masterTableIdx = Option(config.masterTableIdx)
     val lastActivityDateIdx = Option(config.lastActivityDateInputIdx)
     val attrsToMerge = config.attrsToMerge.asScala.mapValues(_.asScala)
+    val specialJoinKeys = config.joinKeys.asScala
 
     // calculation
     val optLastActivityDf = if (lastActivityDateIdx.isDefined) {
@@ -37,20 +38,33 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
       optLastActivityDf.get
     } else {
       val mergeFn = (accDf: DataFrame, args: (Integer, mutable.Map[String, String])) => {
+        val srcJoinKey = specialJoinKeys.getOrElse(args._1, config.joinKey)
+        val df = modifyJoinKey(lattice.input(args._1), config.joinKey, srcJoinKey)
         MergeUtils.merge2(
-          accDf, mergeAttr(lattice.input(args._1), args._2).select(config.joinKey, args._2.valuesIterator.toSeq: _*),
+          accDf, mergeAttr(df, args._2).select(config.joinKey, args._2.valuesIterator.toSeq: _*),
           Seq(config.joinKey), Set(), overwriteByNull = false)
       }
       optLastActivityDf match {
         case Some(df) => attrsToMerge.foldLeft(df)(mergeFn(_, _))
         case _ =>
-          val df = mergeAttr(lattice.input(attrsToMerge.head._1), attrsToMerge.head._2)
+          val inputIdx = attrsToMerge.head._1
+          val srcJoinKey = specialJoinKeys.getOrElse(inputIdx, config.joinKey)
+          val df = mergeAttr(modifyJoinKey(lattice.input(inputIdx), config.joinKey, srcJoinKey), attrsToMerge.head._2)
             .select(config.joinKey, attrsToMerge.head._2.valuesIterator.toSeq: _*)
           attrsToMerge.tail.foldLeft(df)(mergeFn(_, _))
       }
     }
 
     lattice.output = mdf :: Nil
+  }
+
+  private def modifyJoinKey(df: DataFrame, tgtJoinKey: String, srcJoinKey: String): DataFrame = {
+    val cols = df.columns.toSeq
+    if (cols.contains(tgtJoinKey) || tgtJoinKey.equals(srcJoinKey)) {
+      df
+    } else {
+      df.withColumnRenamed(srcJoinKey, tgtJoinKey)
+    }
   }
 
   private def mergeAttr(df: DataFrame, attrs: mutable.Map[String, String]): DataFrame = {

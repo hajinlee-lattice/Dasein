@@ -29,14 +29,16 @@ import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.dataflow.transformation.stats.CalculateStats;
 import com.latticeengines.datacloud.etl.transformation.service.impl.PipelineTransformationTestNGBase;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.atlas.SourceSorter;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.SourceBucketer;
+import com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.BucketEncodeTxfmr;
 import com.latticeengines.datacloud.etl.transformation.transformer.impl.stats.SourceProfiler;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
 
 public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase {
 
@@ -59,6 +61,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         progress = transformData(progress);
         finish(progress);
         confirmResultFile(progress);
+//        verifyProfile();
         verifySort();
         verifyStats();
         verifyAvsc();
@@ -111,6 +114,11 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         boolean hasNotZero = false;
         while (records.hasNext()) {
             GenericRecord record = records.next();
+            for (Schema.Field field: record.getSchema().getFields()) {
+                if (rowCount == 0) {
+                    System.out.println(field.name());
+                }
+            }
             for (Schema.Field field : record.getSchema().getFields()) {
                 if (!hasNotZero && field.name().startsWith("EAttr")) {
                     long value = (Long) record.get(field.pos());
@@ -157,8 +165,16 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
         TransformationStepConfig step = new TransformationStepConfig();
         step.setBaseSources(Collections.singletonList(accountMaster.getSourceName()));
         step.setInputSteps(Collections.singletonList(1));
-        step.setTransformer(SourceBucketer.TRANSFORMER_NAME);
-        step.setConfiguration("{}");
+
+        step.setTransformer(BucketEncodeTxfmr.TRANSFORMER_NAME);
+        BucketEncodeConfig config = new BucketEncodeConfig();
+        config.setStage(DataCloudConstants.PROFILE_STAGE_ENRICH);
+        config.setDataCloudVersion(DATA_CLOUD_VERSION);
+        step.setConfiguration(JsonUtils.serialize(config));
+
+//        step.setTransformer(SourceBucketer.TRANSFORMER_NAME);
+//        step.setConfiguration("{}");
+
         return step;
     }
 
@@ -236,9 +252,6 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
             }
             long attrCount = (long) record.get(STATS_ATTR_COUNT);
             Assert.assertTrue(attrCount <= expectedCount);
-            if (attrName.equals("OUT_OF_BUSINESS_INDICATOR")) {
-                System.out.print(record);
-            }
         }
     }
 }

@@ -89,7 +89,7 @@ private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscr
     StructField("algo", StringType, nullable = true)
   )))
 
-  override def deterministic: Boolean = true
+  override def deterministic: Boolean = false
 
   // This is the initial value for your buffer schema.
   override def initialize(buffer: MutableAggregationBuffer): Unit = {

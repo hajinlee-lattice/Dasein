@@ -2,6 +2,7 @@ package com.latticeengines.eai.service.impl.marketo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class MarketoImportServiceImpl extends ImportService {
     }
 
     @Override
-    public List<Table> prepareMetadata(List<Table> originalTables) {
+    public List<Table> prepareMetadata(List<Table> originalTables, Map<String, String> defaultColumnMap) {
         return null;
     }
 

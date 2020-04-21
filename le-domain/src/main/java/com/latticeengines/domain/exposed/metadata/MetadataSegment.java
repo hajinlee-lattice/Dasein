@@ -352,6 +352,11 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         this.countsOutdated = countsOutdated;
     }
 
+    @Override
+    public boolean skipAuditing() {
+        return isSkipAuditing();
+    }
+
     public boolean isSkipAuditing() {
         return skipAuditing;
     }

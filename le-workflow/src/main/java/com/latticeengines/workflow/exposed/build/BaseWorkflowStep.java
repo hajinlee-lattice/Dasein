@@ -209,6 +209,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SOFT_DELETE_RECORD_COUNT = "SOFT_DELETE_RECORD_COUNT"; //
     protected static final String RAW_STREAM_TABLE_AFTER_DELETE = "RAW_STREAM_TABLE_AFTER_DELETE"; //
     protected static final String ACTIVITY_IMPORT_AFTER_HARD_DELETE = "ACTIVITY_IMPORT_AFTER_HARD_DELETE"; //
+    protected static final String MERGED_PRODUCT_IMPORTS = "MERGED_PRODUCT_IMPORTS";
 
     // intermediate results for skippable steps
     protected static final String NEW_ENTITY_MATCH_ENVS = "NEW_ENTITY_MATCH_ENVS";

@@ -83,4 +83,10 @@ CREATE PRODEDURE `CreateFileDownloadTable`()
     alter table `FILE_DOWNLOAD` add constraint `FK_FILEDOWNLOAD_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
   END;
 
+CREATE PROCEDURE `UpdateDCPProjectTable`()
+BEGIN
+    ALTER TABLE `DCP_PROJECT`
+        ADD COLUMN `RECIPIENT_LIST` JSON;
+END;
+
 DELIMITER;

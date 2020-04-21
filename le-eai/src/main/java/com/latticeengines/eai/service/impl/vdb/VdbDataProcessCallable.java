@@ -99,6 +99,10 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
     }
 
     private void initialize() {
+        log.info("Import Table is: " + JsonUtils.serialize(table));
+        if (table.getSchema() != null) {
+            log.info("Import Schema is: " + table.getSchema().toString());
+        }
         dataContainer = new DataContainer(vdbValueConverter, table, true);
         attributeMap = new HashMap<>();
         attrWithDefaultValueMap = new HashMap<>();
@@ -135,7 +139,7 @@ public class VdbDataProcessCallable implements Callable<Integer[]> {
         result[1] = errorRecord;
         result[2] = duplicateRecord;
         copyCSVReport();
-
+        log.info("Processed records: " + processedRecord + " Error records: " + errorRecord);
     }
 
     private void copyCSVReport() {

@@ -5,12 +5,14 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.Date;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -22,6 +24,7 @@ import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -137,7 +140,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         Assert.assertNull(action);
         Date preUpdateTime = new Date();
         log.info("Start create test at " + preUpdateTime.getTime());
-        Thread.sleep(1500);
+        Thread.sleep(1500L);
 
         MetadataSegment UPDATED_SEGMENT = new MetadataSegment();
         UPDATED_SEGMENT.setPid(METADATA_SEGMENT.getPid());
@@ -182,6 +185,18 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         action = ActionContext.getAction();
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.METADATA_SEGMENT_CHANGE);
+
+        Date updated = retrieved.getUpdated();
+        retrieved.setAccounts(2L);
+        segmentEntityMgr.updateSegmentWithoutActionAndAuditing(retrieved, segmentEntityMgr.findByName(segmentName));
+
+        RetryTemplate retry = RetryUtils.getRetryTemplate(5, Collections.singleton(AssertionError.class), null);
+        retrieved = retry.execute(ctx -> {
+            MetadataSegment segment2 = segmentEntityMgr.findByName(segmentName);
+            Assert.assertEquals(segment2.getAccounts(), Long.valueOf(2));
+            return segment2;
+        });
+        Assert.assertEquals(retrieved.getUpdated(), updated);
     }
 
     @Test(groups = "functional", dependsOnMethods = "updateSegment")

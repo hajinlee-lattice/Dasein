@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity
 import com.latticeengines.domain.exposed.spark.cdl.LegacyDeleteJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
-import org.apache.spark.sql.functions.{col, lit, min, map}
+import org.apache.spark.sql.functions.{col, min}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
@@ -76,6 +76,7 @@ class LegacyDeleteJob extends AbstractSparkJob[LegacyDeleteJobConfig] {
           .col(joinColumn.getTransactionTime) < tempDel.col(aggregate_prefix.concat(joinColumn.getTransactionTime)))
           .select("original.*")
         MergeUtils.concat2(partA, partB)
+      case _ => throw new UnsupportedOperationException(s"Unsupported type $operationType!")
     }
   }
 

@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLUpdatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLastUpdatedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfContacts;
@@ -29,6 +30,8 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
 
     private static final Logger log = LoggerFactory.getLogger(GenerateCuratedAttributesTestNG.class);
 
+    private static final String TEMPLATE_UPDATE_TIME_FIELD = String.format("Task_ABC__%s", CDLUpdatedTime.name());
+
     // input schema
     private static final List<Pair<String, Class<?>>> ACC_BATCH_STORE_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
@@ -44,11 +47,17 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
             Pair.of(AccountId.name(), String.class), //
             Pair.of(NumberOfContacts.name(), Long.class) //
     );
+    private static final List<Pair<String, Class<?>>> SYSTEM_STORE_FIELDS = Arrays.asList( //
+            Pair.of(EntityId.name(), String.class), //
+            Pair.of(TEMPLATE_UPDATE_TIME_FIELD, Long.class) //
+    );
 
     private static final List<Pair<String, Class<?>>> OUTPUT_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
             Pair.of(LastActivityDate.name(), Long.class), //
             Pair.of(EntityLastUpdatedDate.name(), Long.class), //
+            Pair.of(TEMPLATE_UPDATE_TIME_FIELD.replace(CDLUpdatedTime.name(), EntityLastUpdatedDate.name()),
+                    Long.class), //
             Pair.of(NumberOfContacts.name(), Long.class) //
     );
 
@@ -103,6 +112,13 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
                 { "A5", 51L }, //
         };
         uploadHdfsDataUnit(numOfContacts, NUM_CONTACT_FIELDS);
+
+        // EntityId, last update time for template
+        Object[][] accountSystemStore = new Object[][] { //
+                { "A1", 163L }, //
+                { "A6", 999L }, //
+        };
+        uploadHdfsDataUnit(accountSystemStore, SYSTEM_STORE_FIELDS);
     }
 
     private GenerateCuratedAttributesConfig baseConfig() {
@@ -112,6 +128,9 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
         config.masterTableIdx = 1;
         config.attrsToMerge.put(1, Collections.singletonMap(CDLUpdatedTime.name(), EntityLastUpdatedDate.name()));
         config.attrsToMerge.put(2, Collections.singletonMap(NumberOfContacts.name(), NumberOfContacts.name()));
+        config.attrsToMerge.put(3, Collections.singletonMap(TEMPLATE_UPDATE_TIME_FIELD,
+                TEMPLATE_UPDATE_TIME_FIELD.replace(CDLUpdatedTime.name(), EntityLastUpdatedDate.name())));
+        config.joinKeys.put(3, EntityId.name());
         return config;
     }
 }
