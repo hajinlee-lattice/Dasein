@@ -9,15 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.dcp.Upload;
-import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.pls.service.dcp.UploadService;
 
 import io.swagger.annotations.Api;
@@ -57,12 +54,5 @@ public class UploadResource {
     @ApiOperation("Generate a token for downloading zip file of the upload results")
     public String getToken(@PathVariable String uploadId) {
         return uploadService.generateToken(uploadId);
-    }
-
-    @PutMapping(value = "/email")
-    @ResponseBody
-    @ApiOperation(value = "Send out email after upload state change")
-    public void sendUploadEmail(@RequestBody UploadEmailInfo uploadEmailInfo) {
-        uploadService.sendUploadEmail(uploadEmailInfo);
     }
 }

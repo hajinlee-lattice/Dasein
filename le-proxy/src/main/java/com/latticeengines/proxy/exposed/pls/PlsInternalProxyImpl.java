@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
@@ -545,13 +546,10 @@ public class PlsInternalProxyImpl extends BaseRestApiProxy implements PlsInterna
     }
 
     @Override
-    public void sendUploadCompletedEmail(String uploadId, List<String> recipientList) {
-        try {
-            String url = constructUrl(combine("/internal/emails/upload/{uploadId}/completed", uploadId));
-            log.info(String.format("Putting to %s", url));
-            put("sendUploadCompletedEmail", url, recipientList);
-        } catch (Exception e) {
-            throw new RuntimeException("sendUploadCompletedEmail: Remote call failure", e);
-        }
+    public void sendUploadEmail(UploadEmailInfo uploadEmailInfo) {
+        String url = constructUrl("/internal/emails/upload");
+        log.info("Send upload email for Upload " + uploadEmailInfo.getUploadId());
+        put("Send Upload Email", url, uploadEmailInfo);
     }
+
 }

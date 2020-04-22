@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
-import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
@@ -94,13 +93,4 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
         log.info("Update latest stats for Upload " + uploadPid + " to " + statsPid);
         put("set Upload latest statistics", url);
     }
-
-    @Override
-    public void sendUploadEmail(String customerSpace, UploadEmailInfo uploadEmailInfo) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/email";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
-        log.info("Send upload email for Upload " + uploadEmailInfo.getUploadId());
-        put("Send Upload Completed Email", url, uploadEmailInfo);
-    }
-
 }

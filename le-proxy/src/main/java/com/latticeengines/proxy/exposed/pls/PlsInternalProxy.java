@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
@@ -102,5 +103,5 @@ public interface PlsInternalProxy {
     List<LeadEnrichmentAttribute> getLeadEnrichmentAttributes(CustomerSpace customerSpace, String attributeDisplayNameFilter, Category category,
                                                               String subcategory, Boolean onlySelectedAttributes, Boolean considerInternalAttributes);
 
-    void sendUploadCompletedEmail(String uploadId, List<String> recipientList);
+    void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
 }
