@@ -146,11 +146,12 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         false, true);
                 break;
             case Partition.EXTERNAL_ID:
+                boolean flag = entityMatchEnabled && !onlyEntityMatchGAEnabled;
                 verifyFlags(config, cat, partition, //
                         Active, false, //
-                        true, true, //
-                        false, true, //
-                        true, true, //
+                        !flag, true, //
+                        flag, true, //
+                        !flag, true, //
                         false, true, //
                         false, false);
                 break;
@@ -166,7 +167,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         false, false);
                 break;
             case Partition.SYSTEM_ID:
-                verifySystemID(config);
+                verifySystemID(config, entityMatchEnabled);
                 break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //
@@ -181,14 +182,20 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         });
     }
 
-    private void verifySystemID(AttrConfig attrConfig) {
+    private void verifySystemID(AttrConfig attrConfig, boolean entityMatchEnabled) {
+        if (!entityMatchEnabled) {
+            return ;
+        }
         Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Subcategory).getSystemValue().toString(),
                 Category.SUB_CAT_ACCOUNT_IDS, attrConfig.getAttrName());
         Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getSystemValue().toString(),
                 "DefaultSystem Account ID", attrConfig.getAttrName());
     }
 
-    private void verifyContactSystemID(AttrConfig attrConfig) {
+    private void verifyContactSystemID(AttrConfig attrConfig, boolean entityMatchEnabled) {
+        if (!entityMatchEnabled) {
+            return ;
+        }
         Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Subcategory).getSystemValue().toString(),
                 Category.SUB_CAT_ACCOUNT_IDS, attrConfig.getAttrName());
         Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getSystemValue().toString(),
@@ -245,7 +252,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
                         false, false);
                 break;
             case Partition.SYSTEM_ID:
-                verifyContactSystemID(config);
+                verifyContactSystemID(config, entityMatchEnabled);
                 break;
             case Partition.OTHERS:
                 verifyFlags(config, cat, partition, //

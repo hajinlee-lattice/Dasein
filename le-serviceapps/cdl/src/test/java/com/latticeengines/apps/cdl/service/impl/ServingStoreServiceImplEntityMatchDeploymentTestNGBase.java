@@ -33,7 +33,7 @@ abstract class ServingStoreServiceImplEntityMatchDeploymentTestNGBase extends Se
                 .withGroups(ColumnSelection.Predefined.Enrichment) //
                 .canEnrich(Boolean.TRUE) //
                 .canSegment(Boolean.TRUE) //
-                .canModel(Boolean.TRUE) //
+                .canModel(Boolean.FALSE) //
                 .build());
         cms.put(InterfaceName.AccountId.name(), new ColumnMetadataBuilder() //
                 .withAttrName(InterfaceName.AccountId.name()) //
