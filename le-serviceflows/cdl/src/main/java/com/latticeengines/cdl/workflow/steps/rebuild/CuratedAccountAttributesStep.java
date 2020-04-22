@@ -2,9 +2,11 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_GENERATE_CURATED_ATTRIBUTES;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_NUMBER_OF_CONTACTS;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTemplate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLUpdatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedSource;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLastUpdatedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
@@ -53,7 +55,9 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
@@ -73,10 +77,11 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
 
     public static final String BEAN_NAME = "curatedAccountAttributesStep";
     public static final String NUMBER_OF_CONTACTS_DISPLAY_NAME = "Number of Contacts";
-    private static final String LAST_ACTIVITY_DATE_DISPLAY_NAME = "Lattice Last Activity Date";
-    private static final String ENTITY_CREATED_DATE_DISPLAY_NAME = "Lattice Created Date";
-    private static final String ENTITY_MODIFIED_DATE_DISPLAY_NAME = "Lattice Last Modified Date";
-    private static final String ENTITY_SYS_MODIFIED_DATE_NAME_FMT = "Lattice Last Modified Date by System %s";
+    private static final String LAST_ACTIVITY_DATE_DISPLAY_NAME = "Lattice - Last Activity Date";
+    private static final String ENTITY_CREATED_DATE_DISPLAY_NAME = "Lattice - Created Date";
+    private static final String ENTITY_MODIFIED_DATE_DISPLAY_NAME = "Lattice - Last Modified Date";
+    private static final String ENTITY_SYS_MODIFIED_DATE_NAME_FMT = "Lattice - Last Modified Date by %s";
+    private static final String ENTITY_CREATED_SOURCE_DISPLAY_NAME = "Lattice - Created Source";
 
     private static final String NUMBER_OF_CONTACTS_DESCRIPTION = "This curated attribute is calculated by counting the "
             + "number of contacts matching each account";
@@ -84,7 +89,8 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
             + "any of the time series data (excluding transactions)";
     private static final String ENTITY_CREATED_DATE_DESCRIPTION = "The date when the account is created";
     private static final String ENTITY_MODIFIED_DATE_DESCRIPTION = "Most recent date when the account is updated";
-    private static final String ENTITY_SYS_MODIFIED_DATE_DESC_FMT = "Most recent date when the account is updated by system %s";
+    private static final String ENTITY_SYS_MODIFIED_DATE_DESC_FMT = "Most recent date when the account is updated by %s";
+    private static final String ENTITY_CREATED_SOURCE_DESCRIPTION = "System and template that created this account";
 
     // <TEMPLATE_NAME>__<ATTR>
     private static final String SYSTEM_ATTR_FORMAT = "%s__%s";
@@ -115,6 +121,7 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
     private List<String> accountTemplates;
     // template name -> system name
     private Map<String, String> templateSystemMap;
+    // system name -> system
     private Map<String, S3ImportSystem> systemMap;
 
     // Set to true if either of the Account or Contact table is missing or empty and we should not
@@ -166,6 +173,11 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
                 enrichDateAttribute(attr, ENTITY_MODIFIED_DATE_DISPLAY_NAME, ENTITY_MODIFIED_DATE_DESCRIPTION);
             } else if (EntityCreatedDate.name().equals(attr.getName())) {
                 enrichDateAttribute(attr, ENTITY_CREATED_DATE_DISPLAY_NAME, ENTITY_CREATED_DATE_DESCRIPTION);
+            } else if (EntityCreatedSource.name().equals(attr.getName())) {
+                attr.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
+                attr.setSubcategory(null);
+                attr.setDisplayName(ENTITY_CREATED_SOURCE_DISPLAY_NAME);
+                attr.setDescription(ENTITY_CREATED_SOURCE_DESCRIPTION);
             } else {
                 enrichSystemAttributes(attr);
             }
@@ -317,6 +329,8 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
         Map<String, String> attrsFromAccountTable = new HashMap<>();
         attrsFromAccountTable.put(CDLCreatedTime.name(), EntityCreatedDate.name());
         attrsFromAccountTable.put(CDLUpdatedTime.name(), EntityLastUpdatedDate.name());
+        attrsFromAccountTable.put(CDLCreatedTemplate.name(), EntityCreatedSource.name());
+        config.templateValueMap = getTemplateValueMap();
         config.attrsToMerge.put(inputIdx, attrsFromAccountTable);
         inputIdx++;
 
@@ -399,6 +413,54 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
     private boolean isShortCutMode() {
         Table table = getTableSummaryFromKey(customerSpace.toString(), CURATED_ACCOUNT_SERVING_TABLE_NAME);
         return table != null;
+    }
+
+    // templateName -> formatted source value
+    private Map<String, String> getTemplateValueMap() {
+        Map<String, DataFeedTask> taskMap = dataFeedProxy.getTemplateToDataFeedTaskMap(customerSpace.toString());
+        Map<String, String> templateValues = new HashMap<>();
+        taskMap.forEach((tmpl, task) -> {
+            if (!templateSystemMap.containsKey(tmpl)) {
+                log.warn("Template {} in data feed task map does not have corresponding system", tmpl);
+                return;
+            }
+            String systemName = templateSystemMap.get(tmpl);
+            if (!systemMap.containsKey(systemName)) {
+                log.warn("System {} for template {} does not exist in system map", systemName, tmpl);
+                return;
+            }
+
+            String systemDisplayName = systemMap.get(systemName).getDisplayName();
+            String entity = getEntity(task);
+            if (StringUtils.isNotBlank(systemDisplayName) && StringUtils.isNotBlank(entity)) {
+                templateValues.put(tmpl, String.format("%s - %s", systemDisplayName, entity));
+            } else {
+                log.warn("Template {} has blank system display name ({}) and/or entity ({})", tmpl, systemDisplayName,
+                        entity);
+            }
+        });
+
+        log.info("template -> source map = {}", templateValues);
+        return templateValues;
+    }
+
+    private String getEntity(DataFeedTask task) {
+        if (task == null || StringUtils.isBlank(task.getEntity())) {
+            return null;
+        }
+
+        String entity = task.getEntity();
+        DataFeedTask.SubType subType = task.getSubType();
+        if (subType != null) {
+            // use more specific name (e.g., Lead, Opportunity)
+            return subType.name();
+        } else if (BusinessEntity.ActivityStream.name().equals(entity)) {
+            // for legacy reason, WebVisit have null as subType and entity is ActivityStream
+            // TODO fix this if we ever add subType to WebVisit
+            return EntityType.WebVisit.name();
+        } else {
+            return StringUtils.isBlank(entity) ? null : entity;
+        }
     }
 
     /*-
@@ -547,7 +609,6 @@ public class CuratedAccountAttributesStep extends BaseTransformWrapperStep<Curat
 
     private boolean shouldResetCuratedAttributesContext() {
         // reset CuratedAccount when account is reset
-        // TODO handle contact reset (erase number of contacts attribute)
         Set<BusinessEntity> entitySet = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         if (isResettingEntity(BusinessEntity.Account)) {
             entitySet.add(BusinessEntity.CuratedAccount);
