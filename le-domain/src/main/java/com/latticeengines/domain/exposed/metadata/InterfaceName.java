@@ -120,7 +120,7 @@ public enum InterfaceName {
     LatticeExportTime, // timestamp for csv export
     CDLBatchSource, // indicator if the source contribute the system batch
 
-    CDLTemplateName,
+    CDLTemplateName, CDLCreatedTemplate,
                        // store
 
     ConsolidateReport, //

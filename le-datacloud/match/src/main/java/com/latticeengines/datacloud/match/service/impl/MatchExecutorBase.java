@@ -203,6 +203,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         List<String> columnNames = matchContext.getColumnSelection().getColumnIds();
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         List<String> inputFields = matchContext.getInput().getFields();
+        int templateFieldIdx = inputFields.indexOf(MatchConstants.ENTITY_TEMPLATE_FIELD);
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludePublicDomain());
 
@@ -303,6 +304,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                 } else if (InterfaceName.ContactId.name().equalsIgnoreCase(field)) {
                     // retrieve Contact EntityId (for entity match)
                     value = getEntityId(internalRecord, BusinessEntity.Contact.name());
+                } else if (InterfaceName.CDLCreatedTemplate.name().equalsIgnoreCase(field)) {
+                    String newEntityId = MapUtils.emptyIfNull(internalRecord.getNewEntityIds())
+                            .get(matchContext.getInput().getTargetEntity());
+                    boolean isNewEntity = StringUtils.isNotBlank(newEntityId);
+                    if (templateFieldIdx >= 0 && isNewEntity) {
+                        // only set created template field for new entity
+                        value = internalRecord.getInput().get(templateFieldIdx);
+                    }
                 } else if (results.containsKey(field)) {
                     Object objInResult = results.get(field);
                     value = (objInResult == null ? value : objInResult);

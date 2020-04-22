@@ -73,6 +73,7 @@ public class SchemaRepository {
             sysAttrs.add(InterfaceName.CDLCreatedTime);
             sysAttrs.add(InterfaceName.CDLUpdatedTime);
             sysAttrs.add(InterfaceName.CDLTemplateName);
+            sysAttrs.add(InterfaceName.CDLCreatedTemplate);
             // special
             if (BusinessEntity.Account.equals(entity)) {
                 sysAttrs.add(InterfaceName.LatticeAccountId);
