@@ -64,7 +64,7 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertNotNull(source);
 
-        Assert.assertFalse(StringUtils.isBlank(source.getFullPath()));
+        Assert.assertFalse(StringUtils.isBlank(source.getDropFullPath()));
 
         List<S3ImportSystem> allSystems = cdlProxy.getS3ImportSystemList(mainCustomerSpace);
         Assert.assertTrue(CollectionUtils.isNotEmpty(allSystems));
