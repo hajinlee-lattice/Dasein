@@ -18,5 +18,9 @@
   {
     "AccountId": "A8",
     "ContactId": "C82"
+  },
+  {
+    "AccountId": "A20",
+    "ContactId": null
   }
 ]

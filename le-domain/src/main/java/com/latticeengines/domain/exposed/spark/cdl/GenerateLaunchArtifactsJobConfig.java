@@ -23,14 +23,14 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
     @JsonProperty("MainEntity")
     private BusinessEntity mainEntity;
 
-    @JsonProperty("SuppressAccountsWithoutContacts")
-    private boolean suppressAccountsWithoutContacts;
+    @JsonProperty("IncludeAccountsWithoutContacts")
+    private boolean includeAccountsWithoutContacts;
 
     public GenerateLaunchArtifactsJobConfig() {
     }
 
     public GenerateLaunchArtifactsJobConfig(DataUnit accountsData, DataUnit contactsData, DataUnit negativeDelta,
-            DataUnit positiveDelta, BusinessEntity mainEntity, boolean suppressAccountsWithoutContacts,
+            DataUnit positiveDelta, BusinessEntity mainEntity, boolean includeAccountsWithoutContacts,
             String workSpace) {
         this.setWorkspace(workSpace);
         this.negativeDelta = negativeDelta;
@@ -38,7 +38,7 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
         this.accountsData = accountsData;
         this.contactsData = contactsData;
         this.mainEntity = mainEntity;
-        this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
+        this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
     }
 
     @Override
@@ -72,12 +72,10 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
 
     public void setMainEntity(BusinessEntity mainEntity) { this.mainEntity = mainEntity; }
 
-    public boolean isSuppressAccountsWithoutContacts() {
-        return mainEntity == BusinessEntity.Contact && suppressAccountsWithoutContacts;
-    }
+    public boolean isIncludeAccountsWithoutContacts() { return includeAccountsWithoutContacts; }
 
-    public void setSuppressAccountsWithoutContacts(boolean suppressAccountsWithoutContacts) {
-        this.suppressAccountsWithoutContacts = suppressAccountsWithoutContacts;
+    public void setIncludeAccountsWithoutContacts(boolean includeAccountsWithoutContacts) {
+        this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
     }
 
 }

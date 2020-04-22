@@ -205,7 +205,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
                 GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
                         contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity,
-                        suppressAccountsWithoutContacts, getRandomWorkspace());
+                        !suppressAccountsWithoutContacts, getRandomWorkspace());
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
                 log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));

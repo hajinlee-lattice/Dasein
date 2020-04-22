@@ -245,7 +245,6 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         config.setPositiveDelta(positiveContacts);
         config.setNegativeDelta(negativeContacts);
         config.setMainEntity(BusinessEntity.Contact);
-        config.setSuppressAccountsWithoutContacts(true);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
         log.info("Config: " + JsonUtils.serialize(config));
@@ -268,7 +267,6 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         config.setPositiveDelta(positiveContacts);
         config.setNegativeDelta(negativeExtraContacts);
         config.setMainEntity(BusinessEntity.Contact);
-        config.setSuppressAccountsWithoutContacts(true);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
         log.info("Config: " + JsonUtils.serialize(config));
@@ -290,7 +288,7 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         config.setContactsData(contactData);
         config.setPositiveDelta(nullPositiveContacts);
         config.setMainEntity(BusinessEntity.Contact);
-        config.setSuppressAccountsWithoutContacts(false);
+        config.setIncludeAccountsWithoutContacts(true);
         config.setWorkspace("testGenerateLaunchArtifactsForContactEntity");
 
         log.info("Config: " + JsonUtils.serialize(config));
@@ -298,10 +296,10 @@ public class GenerateLaunchArtifactsJobTestNG extends SparkJobFunctionalTestNGBa
         log.info("TestGenerateLaunchArtifactsForExtraNegativeContactEntity Results: " + JsonUtils.serialize(result));
 
         Assert.assertEquals(result.getTargets().size(), 5);
-        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 4);
+        Assert.assertEquals(result.getTargets().get(0).getCount().intValue(), 5);
         Assert.assertEquals(result.getTargets().get(1).getCount().intValue(), 0);
-        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 0);
-        Assert.assertEquals(result.getTargets().get(3).getCount().intValue(), 5);
+        Assert.assertEquals(result.getTargets().get(2).getCount().intValue(), 7);
+        Assert.assertEquals(result.getTargets().get(3).getCount().intValue(), 6);
         Assert.assertEquals(result.getTargets().get(4).getCount().intValue(), 0);
     }
 
