@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -364,8 +365,14 @@ abstract class QueryTranslator {
                     if (tempListService == null) {
                         throw new NullPointerException("tempListService is null");
                     }
-                    String tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz,
-                            repository.getRedshiftPartition());
+                    String tenantId = repository.getCustomerSpace().getTenantId();
+                    String tempTableName;
+                    try (PerformanceTimer timer = new PerformanceTimer()) {
+                        tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz,
+                                repository.getRedshiftPartition());
+                        timer.setThreshold(10000L);
+                        timer.setTimerMessage("Created a templist named " + tempTableName + " for tenant " + tenantId);
+                    }
 
                     if (SPARK_BATCH_USER.equals(sqlUser)
                             && ComparisonType.NOT_IN_COLLECTION.equals(restriction.getRelation())) {
