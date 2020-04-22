@@ -269,7 +269,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
         DataCollectionStatus status = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace.toString(),
                 version);
         String partition = StringUtils.defaultIfBlank(status.getRedshiftPartition(), null);
-        return redshiftPartitionService.getBatchUserJdbcTemplate(partition);
+        return redshiftPartitionService.getSegmentUserJdbcTemplate(partition);
     }
 
 }
