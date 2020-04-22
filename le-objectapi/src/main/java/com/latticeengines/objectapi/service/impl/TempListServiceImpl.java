@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -50,6 +51,9 @@ public class TempListServiceImpl implements TempListService {
 
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Value("${redshift.templist.maxsize}")
+    private long maxSize;
 
     @Override
     public String createTempListIfNotExists(ConcreteRestriction restriction, Class<?> fieldClz, String redshiftPartition) {
@@ -88,6 +92,11 @@ public class TempListServiceImpl implements TempListService {
         String tempTableName = TempListUtils.newTempTableName();
         try (PerformanceTimer timer = new PerformanceTimer("Create temp table " + tempTableName)) {
             CollectionLookup collectionLookup = (CollectionLookup) restriction.getRhs();
+            int size = CollectionUtils.size(collectionLookup.getValues());
+            if (size <= 0 || size > maxSize) {
+                throw new IllegalArgumentException("Templist with " + size + " items is not allowed");
+            }
+
             timer.setTimerMessage("Create temp table " + tempTableName + " for a list of " //
                     + CollectionUtils.size(collectionLookup.getValues()) + " values.");
 

@@ -6,10 +6,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.query.CollectionLookup;
@@ -30,9 +28,6 @@ public class TempListServiceSparkSQLImpl implements TempListService {
     @Inject
     private SparkSQLService sparkSQLService;
 
-    @Value("${redshift.templist.maxsize}")
-    private long maxSize;
-
     private LivySession livySession;
 
     @Override
@@ -51,10 +46,6 @@ public class TempListServiceSparkSQLImpl implements TempListService {
     private String createTempListTable(ConcreteRestriction restriction, Class<?> fieldClz) {
         String tableName = TempListUtils.newShortTempTableName();
         CollectionLookup collectionLookup = (CollectionLookup) restriction.getRhs();
-        int size = CollectionUtils.size(collectionLookup.getValues());
-        if (size > maxSize) {
-            throw new IllegalArgumentException("Templist with " + size + " items is not allowed");
-        }
         List<List<Object>> vals = TempListUtils.insertVals(fieldClz, collectionLookup.getValues());
         sparkSQLService.createTempListView(livySession, tableName, fieldClz, vals);
         return tableName;
