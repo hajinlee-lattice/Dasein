@@ -171,17 +171,15 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
     /**
      * check the path from source and upload file to S3 to verify access
-     * @param source
-     * @param response
-     * @param upload
      */
     private void verifySourceAndAccess(Source source, GrantDropBoxAccessResponse response, boolean upload) {
         Assert.assertNotNull(source);
         String bucket = response.getBucket();
-        String fullPath = source.getFullPath();
+        String fullPath = source.getDropFullPath();
         Assert.assertTrue(StringUtils.isNotBlank(source.getRelativePath()));
         Assert.assertTrue(StringUtils.isNotBlank(fullPath));
         String object = fullPath.substring(fullPath.indexOf(bucket) + StringUtils.length(bucket) + 1);
+        object = object.substring(0, object.length() - 5);
         String prefix = object + "drop/";
         Assert.assertTrue(s3Service.objectExist(bucket, object));
         Assert.assertTrue(s3Service.objectExist(bucket, prefix));
