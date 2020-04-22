@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import javax.inject.Inject;
 import javax.persistence.RollbackException;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -317,28 +317,58 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Override
     public Map<String, String> getTemplateToSystemMap(String customerSpace) {
-        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
-        List<DataFeedTask> allTasks = dataFeedTaskEntityMgr.getDataFeedTaskUnderDataFeed(dataFeed);
-        if (CollectionUtils.isNotEmpty(allTasks)) {
-            Map<String, String> templateSystemMap = new HashMap<>();
-            allTasks.forEach(task -> {
-                if (StringUtils.isNotEmpty(task.getImportSystemName())) {
-                    templateSystemMap.put(getDataFeedTaskUniqueName(customerSpace, task), task.getImportSystemName());
-                } else {
+        Map<String, S3ImportSystem> templateSystemMap = getTemplateToSystemObjectMap(customerSpace);
+        if (MapUtils.isNotEmpty(templateSystemMap)) {
+            return templateSystemMap.entrySet().stream().map(entry -> Pair.of(entry.getKey(), entry.getValue().getName())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    @Override
+    public Map<String, S3ImportSystem.SystemType> getTemplateToSystemTypeMap(String customerSpace) {
+        Map<String, S3ImportSystem> templateSystemMap = getTemplateToSystemObjectMap(customerSpace);
+        if (MapUtils.isNotEmpty(templateSystemMap)) {
+            return templateSystemMap.entrySet().stream().map(entry -> Pair.of(entry.getKey(),
+                    entry.getValue().getSystemType())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    @Override
+    public Map<String, S3ImportSystem> getTemplateToSystemObjectMap(String customerSpace) {
+        Map<String, DataFeedTask> templateToDataFeedTaskMap = getTemplateToDataFeedTaskMap(customerSpace);
+        if (MapUtils.isNotEmpty(templateToDataFeedTaskMap)) {
+            return templateToDataFeedTaskMap.entrySet().stream().map(entry -> {
+                DataFeedTask task = entry.getValue();
+                S3ImportSystem importSystem = task.getImportSystem();
+                if (StringUtils.isEmpty(task.getImportSystemName())) {
                     String systemName = getSystemNameFromFeedType(task.getFeedType());
                     if (StringUtils.isNotEmpty(systemName)) {
-                        S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
+                        importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
                                 systemName);
                         if (importSystem != null) {
                             task.setImportSystem(importSystem);
                             dataFeedTaskEntityMgr.updateDataFeedTask(task, true);
-                            templateSystemMap.put(getDataFeedTaskUniqueName(customerSpace, task),
-                                    task.getImportSystemName());
                         }
                     }
                 }
-            });
-            return templateSystemMap;
+                if (importSystem != null) {
+                    importSystem.setTasks(null);
+                }
+                return Pair.of(getDataFeedTaskUniqueName(customerSpace, task), importSystem);
+            }).filter(pair -> pair.getValue() != null).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+        }
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<String, DataFeedTask> getTemplateToDataFeedTaskMap(String customerSpace) {
+        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        List<DataFeedTask> allTasks = dataFeedTaskEntityMgr.getDataFeedTaskUnderDataFeed(dataFeed);
+        if (CollectionUtils.isNotEmpty(allTasks)) {
+            return allTasks.stream().map(task -> Pair.of(getDataFeedTaskUniqueName(customerSpace, task), task)).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         }
         return Collections.emptyMap();
     }

@@ -234,8 +234,32 @@ public class DataFeedTaskResource {
     @GetMapping(value = "/templateToSystemMap")
     @ResponseBody
     @ApiOperation(value = "Get template to import system Map")
-    public Map<String, String> getTemplateName(@PathVariable String customerSpace) {
+    public Map<String, String> getTemplateToSystemMap(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getTemplateToSystemMap(customerSpace);
+    }
+
+    @GetMapping(value = "/templateToSystemObjectMap")
+    @ResponseBody
+    @ApiOperation(value = "Get template to import system Map")
+    public Map<String, S3ImportSystem> getTemplateToSystemObjMap(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getTemplateToSystemObjectMap(customerSpace);
+    }
+
+    @GetMapping(value = "/templateToSystemTypeMap")
+    @ResponseBody
+    @ApiOperation(value = "Get template to import systemType Map")
+    public Map<String, S3ImportSystem.SystemType> getTemplateToSystemTypeMap(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getTemplateToSystemTypeMap(customerSpace);
+    }
+
+    @GetMapping(value = "/templateToDataFeedTaskMap")
+    @ResponseBody
+    @ApiOperation(value = "Get template to DataFeedTask Map")
+    public Map<String, DataFeedTask> getTemplateToDataFeedTaskMap(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getTemplateToDataFeedTaskMap(customerSpace);
     }
 }
