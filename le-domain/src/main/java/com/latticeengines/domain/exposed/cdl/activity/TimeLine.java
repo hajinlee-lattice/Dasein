@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.cdl.activity;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -23,6 +24,8 @@ import org.hibernate.annotations.Type;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -35,6 +38,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class TimeLine implements HasPid, HasTenant, Serializable {
 
     private static final long serialVersionUID = 0L;
+
+    private static final String TIMELINE_ID_PREFIX = "tl_";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -76,7 +81,7 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
     @Column(name = "EVENT_MAPPINGS", columnDefinition = "'JSON'")
     @JsonProperty("event_mappings")
     @Type(type = "json")
-    private Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> eventMappings;
+    private Map<String, Map<String, EventTypeExtractor>> eventMappings;
 
     @Override
     public Long getPid() {
@@ -98,11 +103,11 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
         this.tenant = tenant;
     }
 
-    public Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> getEventMappings() {
+    public Map<String, Map<String, EventTypeExtractor>> getEventMappings() {
         return eventMappings;
     }
 
-    public void setEventMappings(Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> eventMappings) {
+    public void setEventMappings(Map<String, Map<String, EventTypeExtractor>> eventMappings) {
         this.eventMappings = eventMappings;
     }
 
@@ -144,5 +149,14 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
 
     public void setStreamIds(List<String> streamIds) {
         this.streamIds = streamIds;
+    }
+
+    public static String generateId() {
+        String uuid;
+        do {
+            // try until uuid does not start with catalog prefix
+            uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        } while (uuid.startsWith(TIMELINE_ID_PREFIX));
+        return TIMELINE_ID_PREFIX + uuid;
     }
 }

@@ -25,6 +25,9 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.EventTypeExtractor;
+import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -32,8 +35,10 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.CleanupActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
 
 public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
 
@@ -53,6 +58,9 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
     @Inject
     private CDLProxy cdlProxy;
+
+    @Inject
+    private TimeLineProxy timeLineProxy;
 
     @BeforeClass(groups = {"end2end"})
     @Override
@@ -83,7 +91,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
             log.info("Skip marketing setup. {}={}", SKIP_MARKETING, System.getenv(SKIP_MARKETING));
         }
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
-
+        setupTimeline();
         if (isLocalEnvironment()) {
             // run PA with fake current time
             processAnalyzeSkipPublishToS3(CURRENT_PA_TIME.toEpochMilli());
@@ -241,6 +249,64 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         SimpleTemplateMetadata sm = new SimpleTemplateMetadata();
         sm.setEntityType(EntityType.WebVisitSourceMedium);
         cdlProxy.createWebVisitTemplate(mainCustomerSpace, Collections.singletonList(sm));
+    }
+
+    private void setupTimeline() {
+        preparetimeline1();
+        preparetimeline2();
+        preparetimeline3();
+    }
+
+    private void preparetimeline1() {
+        String timelineName1 = "timelineName1";
+        TimeLine timeLine1 = new TimeLine();
+        timeLine1.setName(timelineName1);
+        timeLine1.setEntity(BusinessEntity.Account.name());
+        timeLine1.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
+        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+
+        mappingMap.put(AtlasStream.StreamType.MarketingActivity.name(),
+                TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.MarketingActivity));
+        mappingMap.put(AtlasStream.StreamType.WebVisit.name(),
+                TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.WebVisit));
+
+        timeLine1.setEventMappings(mappingMap);
+        timeLineProxy.createTimeline(mainCustomerSpace, timeLine1);
+    }
+
+    private void preparetimeline2() {
+        String timelineName = "timelineName2";
+        TimeLine timeLine2 = new TimeLine();
+        timeLine2.setName(timelineName);
+        timeLine2.setEntity(BusinessEntity.Contact.name());
+        timeLine2.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
+        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+
+        mappingMap.put(AtlasStream.StreamType.MarketingActivity.name(),
+                TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.MarketingActivity));
+        mappingMap.put(AtlasStream.StreamType.WebVisit.name(),
+                TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.WebVisit));
+
+        timeLine2.setEventMappings(mappingMap);
+        timeLineProxy.createTimeline(mainCustomerSpace, timeLine2);
+    }
+
+    private void preparetimeline3() {
+        String timelineName = "timelineName3";
+
+        TimeLine timeLine3 = new TimeLine();
+        timeLine3.setName(timelineName);
+        timeLine3.setEntity(BusinessEntity.Account.name());
+        timeLine3.setStreamTypes(Arrays.asList(AtlasStream.StreamType.Opportunity, AtlasStream.StreamType.WebVisit));
+        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+
+        mappingMap.put(AtlasStream.StreamType.WebVisit.name(),
+                TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.WebVisit));
+        mappingMap.put(AtlasStream.StreamType.Opportunity.name(),
+                TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.Opportunity));
+
+        timeLine3.setEventMappings(mappingMap);
+        timeLineProxy.createTimeline(mainCustomerSpace, timeLine3);
     }
 
     protected List<String> getCandidateFailingSteps() {

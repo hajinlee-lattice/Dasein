@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.TimeLineEntityMgr;
 import com.latticeengines.apps.cdl.service.TimeLineService;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -55,7 +54,7 @@ public class TimeLineServiceImpl implements TimeLineService {
         }
         if (newTimeLine == null) {
             newTimeLine = new TimeLine();
-            newTimeLine.setTimelineId(NamingUtils.uuid("TimeLine"));
+            newTimeLine.setTimelineId(TimeLine.generateId());
             newTimeLine.setTenant(MultiTenantContext.getTenant());
         }
         newTimeLine.setEntity(timeLine.getEntity());

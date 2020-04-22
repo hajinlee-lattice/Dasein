@@ -49,7 +49,7 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         timeLine1.setTenant(mainTestTenant);
         timeLine1.setEntity(BusinessEntity.Account.name());
         timeLine1.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
-        Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
 
         Map<String, EventTypeExtractor> eventTypeExtractorMapForMarketing = new HashMap<>();
         EventTypeExtractor eventTimeExtractorForMarketing = new EventTypeExtractor();
@@ -79,8 +79,8 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         eventTypeExtractorForWebVisit.setMappingValue("WebVisit");
         eventTypeExtractorMapForWebVisit.put(EVENT_TYPE, eventTypeExtractorForWebVisit);
 
-        mappingMap.put(AtlasStream.StreamType.MarketingActivity, eventTypeExtractorMapForMarketing);
-        mappingMap.put(AtlasStream.StreamType.WebVisit, eventTypeExtractorMapForWebVisit);
+        mappingMap.put(AtlasStream.StreamType.MarketingActivity.name(), eventTypeExtractorMapForMarketing);
+        mappingMap.put(AtlasStream.StreamType.WebVisit.name(), eventTypeExtractorMapForWebVisit);
 
         timeLine1.setEventMappings(mappingMap);
         TimeLine created = timeLineService.createOrUpdateTimeLine(mainCustomerSpace, timeLine1);
@@ -92,9 +92,9 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         created = timeLineList.get(0);
         log.info("timeline is {}.", JsonUtils.serialize(created));
         Assert.assertEquals(created.getName(), timelineName1);
-        Assert.assertTrue(created.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity));
-        Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity).containsKey(MOTION));
-        Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
+        Assert.assertTrue(created.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity.name()));
+        Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
+        Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
 
         String timeline_id = created.getTimelineId();
         created = timeLineService.findByTimelineId(mainCustomerSpace, timeline_id);

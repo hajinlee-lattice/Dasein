@@ -45,6 +45,7 @@ import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.service.ImportMigrateTrackingService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
+import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.ZKConfigService;
 import com.latticeengines.apps.core.util.FeatureFlagUtils;
@@ -66,6 +67,7 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
+import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -158,6 +160,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final DataFeedTaskService dataFeedTaskService;
 
+    private final TimeLineService timeLineService;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataFeedService dataFeedService,
                                            DataCollectionService dataCollectionService, DataFeedTaskService dataFeedTaskService,
@@ -166,7 +170,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                                            ActivityMetricsGroupEntityMgr activityMetricsGroupEntityMgr,
                                            ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService, ZKConfigService zkConfigService,
                                            CDLAttrConfigProxy cdlAttrConfigProxy,
-                                           S3ImportSystemService s3ImportSystemService) {
+                                           S3ImportSystemService s3ImportSystemService, TimeLineService timeLineService) {
         this.dataFeedService = dataFeedService;
         this.dataCollectionService = dataCollectionService;
         this.workflowProxy = workflowProxy;
@@ -180,6 +184,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.cdlAttrConfigProxy = cdlAttrConfigProxy;
         this.s3ImportSystemService = s3ImportSystemService;
         this.dataFeedTaskService = dataFeedTaskService;
+        this.timeLineService = timeLineService;
     }
 
     @WithWorkflowJobPid
@@ -704,6 +709,15 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         cleanupMetricsGroups(groups);
         log.info("Activity metrics groups for tenant {} are {}", customerSpace, JsonUtils.serialize(groups));
 
+        //get timeline list
+        List<TimeLine> timeLineList = timeLineService.findByTenant(customerSpace);
+        log.info("timeline list for tenant {} are {}.", customerSpace, JsonUtils.serialize(timeLineList));
+
+        //get TemplateToSystemTypeMap
+        Map<String, S3ImportSystem.SystemType> templateToSystemTypeMap =
+                dataFeedTaskService.getTemplateToSystemTypeMap(customerSpace);
+        log.info("templateToSystemTypeMap for tenant {} are {}.", customerSpace, JsonUtils.serialize(templateToSystemTypeMap));
+
         Pair<Map<String, String>, Map<String, List<String>>> systemIdMaps = getSystemIdMaps(customerSpace,
                 entityMatchEnabled);
         boolean skipReMatchFlag = true;
@@ -775,6 +789,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .skipDynamoExport(Boolean.TRUE.equals(request.getSkipDynamoExport())) //
                 .skipEntityMatchRematch(needSkipConvertEntities)
                 .setConvertServiceConfig(needConvertBatchStoreMap)
+                .activeTimelineList(timeLineList)
+                .templateToSystemTypeMap(templateToSystemTypeMap)
                 .build();
     }
 

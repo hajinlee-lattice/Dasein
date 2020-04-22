@@ -50,4 +50,32 @@ public class EventTypeExtractor implements Serializable {
     public enum MappingType {
         Constant, Attribute, AttributeWithMapping
     }
+
+    public static final class Builder {
+        private EventTypeExtractor eventTypeExtractor;
+
+        public Builder() {
+            eventTypeExtractor = new EventTypeExtractor();
+        }
+
+        public Builder withMappingType(MappingType mappingType) {
+            eventTypeExtractor.setMappingType(mappingType);
+            return this;
+        }
+
+        public Builder withMappingValue(String mappingValue) {
+            eventTypeExtractor.setMappingValue(mappingValue);
+            return this;
+        }
+
+        public Builder withMappingMap(Map<String, String> mappingMap) {
+            eventTypeExtractor.setMappingMap(mappingMap);
+            return this;
+        }
+
+        public EventTypeExtractor build() {
+            return eventTypeExtractor;
+        }
+
+    }
 }
