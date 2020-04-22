@@ -84,6 +84,7 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         String uploadId = downloadConfig.getUploadId();
         Upload upload = uploadProxy.getUpload(tenantId, Long.parseLong(uploadId));
 
+        Preconditions.checkNotNull(upload, "object should't be null");
         UploadConfig config = upload.getUploadConfig();
         List<String> pathsToDownload = config.getDownloadPaths()
                 .stream()
@@ -97,12 +98,29 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         // uploadImportedFilePath, uploadMatchResultPrefix, uploadImportedErrorFilePath.
         // search csv file under these folders recursively, returned paths are absolute
         // from protocol to file name
+        /*
+        "upload_config": {
+        "upload_ts_prefix": "2020-04-22-18-17-04.697",
+        "upload_raw_file_path": "dropfolder/4lqucmbu/Projects/Project_powlhlh9/Source/Source_s2kqvrwd/
+            upload/2020-04-22-18-17-04.697/RawFile/Account_1_900.csv",
+        "upload_match_result_prefix": "/Projects/Project_powlhlh9/Source/Source_s2kqvrwd/
+            upload/2020-04-22-18-17-04.697/MatchResult/",
+        "upload_imported_error_file_path": "Projects/Project_powlhlh9/Source/Source_s2kqvrwd/
+            upload/2020-04-22-18-17-04.697/ImportResult/ImportError/Account_1_900_error.csv"
+        }
+         */
         List<String> paths = new ArrayList<>();
+        String uploadTS = config.getUploadTSPrefix();
+        String rawPath = config.getUploadRawFilePath();
+        String commonPrefix = rawPath.substring(0, rawPath.indexOf(uploadTS) + uploadTS.length() + 1);
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         for (String path : pathsToDownload) {
+            String specialPart = path.substring(path.indexOf(uploadTS) + uploadTS.length() + 1);
             if (path.endsWith(".csv")) {
-                paths.add(pathBuilder.getS3BucketDir(s3Bucket) + pathBuilder.getPathSeparator() + path);
+                paths.add(pathBuilder.getS3BucketDir(s3Bucket) + pathBuilder.getPathSeparator()
+                        + commonPrefix + specialPart);
             } else {
+                path = commonPrefix + specialPart;
                 final String filter = ".*.csv";
                 List<String> filePaths = importFromS3Service.getFilesForDir(path,
                         filename -> {
@@ -124,7 +142,11 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
             InputStream in = system.open(path);
             ZipEntry zipEntry = new ZipEntry(filePath.substring(filePath.lastIndexOf("/") + 1));
             zipOut.putNextEntry(zipEntry);
-            IOUtils.copyLarge(in, zipOut);
+            try {
+                IOUtils.copyLarge(in, zipOut);
+            } catch (Exception e ) {
+                log.info("unexpected error when copying file: {}", e.getMessage());
+            }
             in.close();
             zipOut.closeEntry();
         }
