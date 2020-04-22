@@ -74,6 +74,24 @@ public interface DataFeedTaskService {
      */
     Map<String, String> getTemplateToSystemMap(String customerSpace);
 
+    /**
+     *
+     * @return templateName -> systemType Map
+     */
+    Map<String, S3ImportSystem.SystemType> getTemplateToSystemTypeMap(String customerSpace);
+
+    /**
+     *
+     * @return templateName -> S3ImportSystemObj
+     */
+    Map<String, S3ImportSystem> getTemplateToSystemObjectMap(String customerSpace);
+
+    /**
+     * \
+     * @return templateName -> DataFeedTask
+     */
+    Map<String, DataFeedTask> getTemplateToDataFeedTaskMap(String customerSpace);
+
     DataFeedTask getDataFeedTaskBySource(String customerSpace, String sourceId);
 
     void setDataFeedTaskDelete(String customerSpace, Long pid, Boolean deleted);
