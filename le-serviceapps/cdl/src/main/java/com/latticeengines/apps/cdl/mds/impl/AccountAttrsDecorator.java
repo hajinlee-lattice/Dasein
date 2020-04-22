@@ -108,8 +108,8 @@ public class AccountAttrsDecorator implements Decorator {
             // do not use CustomerAccountId in segment, as there will always be a system id that can be used
             // M36: still enable it. after asking all customer to move away from CustomerAccountId, can disable it.
             cm.setCanSegment(true);
-            cm.setCanModel(true);
             cm.setCanEnrich(true);
+            cm.setCanModel(false);
             if (onlyEntityMatchGAEnabled) {
                 cm.enableGroup(Segment);
             } else {
