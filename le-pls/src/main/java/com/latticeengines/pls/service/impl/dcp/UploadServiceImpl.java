@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.pls.service.AbstractFileDownloadService;
 import com.latticeengines.pls.service.FileDownloadService;
 import com.latticeengines.pls.service.dcp.UploadService;
@@ -53,6 +55,11 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
     @Inject
     private Configuration yarnConfiguration;
 
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     @Override
     public List<Upload> getAllBySourceId(String sourceId, Upload.Status status) {
@@ -91,14 +98,19 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         // search csv file under these folders recursively, returned paths are absolute
         // from protocol to file name
         List<String> paths = new ArrayList<>();
-        final String filter = ".*.csv";
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
         for (String path : pathsToDownload) {
-            List<String> filePaths = importFromS3Service.getFilesForDir(path,
-                    filename -> {
-                        String name = FilenameUtils.getName(filename);
-                        return name.matches(filter);
-                    });
-            paths.addAll(filePaths);
+            if (path.endsWith(".csv")) {
+                paths.add(pathBuilder.getS3BucketDir(s3Bucket) + pathBuilder.getPathSeparator() + path);
+            } else {
+                final String filter = ".*.csv";
+                List<String> filePaths = importFromS3Service.getFilesForDir(path,
+                        filename -> {
+                            String name = FilenameUtils.getName(filename);
+                            return name.matches(filter);
+                        });
+                paths.addAll(filePaths);
+            }
         }
 
         Preconditions.checkState(CollectionUtils.isNotEmpty(paths),
