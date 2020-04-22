@@ -67,7 +67,7 @@ public class TempListServiceImpl implements TempListService {
             try {
                 LockManager.registerCrossDivisionLock(lockName);
                 LockManager.acquireWriteLock(lockName, 10, TimeUnit.MINUTES);
-                log.info("Won the distributed lock");
+                log.info("Won the distributed lock {}", lockName);
             } catch (Exception e) {
                 log.warn("Error while acquiring zk lock {}", lockName, e);
             }
