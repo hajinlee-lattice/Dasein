@@ -10,33 +10,47 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
 
     @JsonProperty("PositiveDelta")
     private DataUnit positiveDelta;
+
     @JsonProperty("NegativeDelta")
     private DataUnit negativeDelta;
+
     @JsonProperty("AccountsData")
     private DataUnit accountsData;
+
     @JsonProperty("ContactsData")
     private DataUnit contactsData;
+
     @JsonProperty("MainEntity")
     private BusinessEntity mainEntity;
 
-    public GenerateLaunchArtifactsJobConfig() { }
+    @JsonProperty("IncludeAccountsWithoutContacts")
+    private boolean includeAccountsWithoutContacts;
+
+    public GenerateLaunchArtifactsJobConfig() {
+    }
 
     public GenerateLaunchArtifactsJobConfig(DataUnit accountsData, DataUnit contactsData, DataUnit negativeDelta,
-                                            DataUnit positiveDelta, BusinessEntity mainEntity, String workSpace) {
+            DataUnit positiveDelta, BusinessEntity mainEntity, boolean includeAccountsWithoutContacts,
+            String workSpace) {
         this.setWorkspace(workSpace);
         this.negativeDelta = negativeDelta;
         this.positiveDelta = positiveDelta;
         this.accountsData = accountsData;
         this.contactsData = contactsData;
         this.mainEntity = mainEntity;
+        this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
     }
 
     @Override
     @JsonProperty("Name")
-    public String getName() { return NAME; }
+    public String getName() {
+        return NAME;
+    }
 
     @Override
-    public int getNumTargets() { return mainEntity == BusinessEntity.Account ? 3 : 5 ; }
+    public int getNumTargets() {
+        return mainEntity == BusinessEntity.Account ? 3 : 5;
+    }
 
     public DataUnit getPositiveDelta() { return positiveDelta; }
 
@@ -57,4 +71,11 @@ public class GenerateLaunchArtifactsJobConfig extends SparkJobConfig {
     public BusinessEntity getMainEntity() { return mainEntity; }
 
     public void setMainEntity(BusinessEntity mainEntity) { this.mainEntity = mainEntity; }
+
+    public boolean isIncludeAccountsWithoutContacts() { return includeAccountsWithoutContacts; }
+
+    public void setIncludeAccountsWithoutContacts(boolean includeAccountsWithoutContacts) {
+        this.includeAccountsWithoutContacts = includeAccountsWithoutContacts;
+    }
+
 }

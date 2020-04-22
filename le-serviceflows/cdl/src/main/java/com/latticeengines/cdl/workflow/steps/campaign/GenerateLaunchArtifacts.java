@@ -83,8 +83,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    private Set<String> firstAndLastName = Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name())
-            .stream().collect(Collectors.toSet());
+    private Set<String> firstAndLastName = new HashSet<>(
+            Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name()));
 
     private DataCollection.Version version;
     private String evaluationDate;
@@ -161,7 +161,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         SparkJobResult sparkJobResult = executeSparkJob(accountLookups, contactLookups, positiveDeltaDataUnit,
                 negativeDeltaDataUnit,
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
-                contactsDataExists);
+                contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts());
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
     }
 
@@ -177,7 +177,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     private SparkJobResult executeSparkJob(Set<Lookup> accountLookups, Set<Lookup> contactLookups,
             HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit, BusinessEntity mainEntity,
-            boolean contactsDataExists) {
+            boolean contactsDataExists, boolean suppressAccountsWithoutContacts) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -205,7 +205,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
                 GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
                         contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity,
-                        getRandomWorkspace());
+                        !suppressAccountsWithoutContacts, getRandomWorkspace());
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
                 log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
@@ -281,9 +281,9 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         }
 
         /*
-         * PLS-15540 Accumulative Launched = Add - Delete + Previous
-         * Accumulative Launched Suppressed = Selected - Accumulative Launched
-         * Incremental Launched = Add + Delete
+         * PLS-15540 Accumulative Launched = Add - Delete + Previous Accumulative
+         * Launched Suppressed = Selected - Accumulative Launched Incremental Launched =
+         * Add + Delete
          */
         accumulativeAccounts += accountsAdded - accountsDeleted;
         accumulativeContacts += contactsAdded - contactsDeleted;
