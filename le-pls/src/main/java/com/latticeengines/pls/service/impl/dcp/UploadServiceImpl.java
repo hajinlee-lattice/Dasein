@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl.dcp;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -75,23 +76,22 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         Upload upload = uploadProxy.getUpload(tenantId, Long.parseLong(uploadId));
 
         UploadConfig config = upload.getUploadConfig();
-        String rawPath = config.getUploadRawFilePath();
-        String uploadTSPrefix = config.getUploadTSPrefix();
-        int index = rawPath.indexOf(uploadTSPrefix);
-        Preconditions.checkState(index != -1, String.format("invalid upload config %s.", uploadId));
+        List<String> pathsToDownload = config.getDownloadPaths();
 
         // the download part will download files in path in UploadConfig: uploadRawFilePath,
         // uploadImportedFilePath, uploadMatchResultPrefix, uploadImportedErrorFilePath.
-        // from the folder hierarchy the four path has the same parental folder TSPrefix,
-        // search csv file under TSPrefix folder recursively, returned paths are absolute
+        // search csv file under these folders recursively, returned paths are absolute
         // from protocol to file name
-        String parentPath = rawPath.substring(0, index + uploadTSPrefix.length());
+        List<String> paths = new ArrayList<>();
         final String filter = ".*.csv";
-        List<String> paths = importFromS3Service.getFilesForDir(parentPath,
-                filename -> {
-                    String name = FilenameUtils.getName(filename);
-                    return name.matches(filter);
-                });
+        for (String path : pathsToDownload) {
+            List<String> filePaths = importFromS3Service.getFilesForDir(path,
+                    filename -> {
+                        String name = FilenameUtils.getName(filename);
+                        return name.matches(filter);
+                    });
+            paths.addAll(filePaths);
+        }
 
         Preconditions.checkState(CollectionUtils.isNotEmpty(paths), String.format("no file in folder for %s",
                 uploadId));
