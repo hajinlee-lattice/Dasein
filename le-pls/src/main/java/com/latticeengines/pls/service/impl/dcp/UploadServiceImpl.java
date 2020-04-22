@@ -3,6 +3,8 @@ package com.latticeengines.pls.service.impl.dcp;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -76,7 +78,13 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         Upload upload = uploadProxy.getUpload(tenantId, Long.parseLong(uploadId));
 
         UploadConfig config = upload.getUploadConfig();
-        List<String> pathsToDownload = config.getDownloadPaths();
+        List<String> pathsToDownload = config.getDownloadPaths()
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        Preconditions.checkState(CollectionUtils.isNotEmpty(pathsToDownload),
+                String.format("empty settings in upload config for %s", uploadId));
 
         // the download part will download files in path in UploadConfig: uploadRawFilePath,
         // uploadImportedFilePath, uploadMatchResultPrefix, uploadImportedErrorFilePath.
@@ -93,8 +101,8 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
             paths.addAll(filePaths);
         }
 
-        Preconditions.checkState(CollectionUtils.isNotEmpty(paths), String.format("no file in folder for %s",
-                uploadId));
+        Preconditions.checkState(CollectionUtils.isNotEmpty(paths),
+                String.format("no file in folder for %s", uploadId));
 
         log.info("download files: " + paths);
         ZipOutputStream zipOut = new ZipOutputStream(new GzipCompressorOutputStream(response.getOutputStream()));
