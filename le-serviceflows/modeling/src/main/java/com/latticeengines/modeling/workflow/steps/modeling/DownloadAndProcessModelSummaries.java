@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.lp.ModelFeatureImportanceProxy;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -35,6 +36,8 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
+    @Inject
+    private ModelFeatureImportanceProxy featureImportanceProxy;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -58,7 +61,7 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
         for (String event : eventToModelId.keySet()) {
             String modelId = eventToModelId.get(event);
             modelSummaryProxy.update(configuration.getCustomerSpace().toString(), modelId, attrMap);
-
+            featureImportanceProxy.upsertModelFeatureImportances(configuration.getCustomerSpace().toString(), modelId);
             saveOutputValue(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
             putStringValueInContext(SCORING_MODEL_ID, modelId);
             putStringValueInContext(SCORING_MODEL_TYPE, eventToModelSummary.get(event).getModelType());

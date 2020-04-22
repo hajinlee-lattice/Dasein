@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.cdl.util;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -22,9 +23,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.ModelFeatureImportance;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
@@ -59,7 +60,6 @@ public class FeatureImportanceMgr {
 
     private class AttrFeatureImportance {
         private double featureImportance;
-        private int rank;
         private String attributeName;
 
         AttrFeatureImportance(double featureImportance, String attributeName) {
@@ -71,16 +71,8 @@ public class FeatureImportanceMgr {
             return featureImportance;
         }
 
-        public void setFeatureImportance(double featureImportance) {
-            this.featureImportance = featureImportance;
-        }
-
         public String getAttributeName() {
             return attributeName;
-        }
-
-        public void setAttributeName(String attributeName) {
-            this.attributeName = attributeName;
         }
     }
 
@@ -93,32 +85,9 @@ public class FeatureImportanceMgr {
         StopWatch stopWatch = new StopWatch();
         StopWatch splitter = new StopWatch();
         try {
-            String featureImportanceFilePathPattern = "{0}/{1}/models/{2}/{3}/{4}/rf_model.txt";
-
-            String[] filePathParts = modelSummary.getLookupId().split("\\|");
-            String featureImportanceFilePath = MessageFormat.format(featureImportanceFilePathPattern, //
-                    modelingServiceHdfsBaseDir, // 0
-                    filePathParts[0], // 1
-                    filePathParts[1], // 2
-                    filePathParts[2], // 3
-                    ApplicationIdUtils.stripJobId(modelSummary.getApplicationId())); // 4
-            featureImportanceFilePath = getS3Path(customerSpace, featureImportanceFilePath);
-
-            log.info("Feature Importance Compilation (Split: 0 ms Total: 0 ms): Start");
             stopWatch.start();
             splitter.start();
-            if (!HdfsUtils.fileExists(yarnConfiguration, featureImportanceFilePath)) {
-                log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
-                throw new LedpException(LedpCode.LEDP_10011, new String[] { featureImportanceFilePath });
-            }
-            log.info("Attempting to get feature importance from the file: " + featureImportanceFilePath);
-            String featureImportanceRaw = HdfsUtils.getHdfsFileContents(yarnConfiguration, featureImportanceFilePath);
-            if (StringUtils.isEmpty(featureImportanceRaw)) {
-                log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
-                throw new LedpException(LedpCode.LEDP_40037,
-                        new String[] { featureImportanceFilePath, modelSummary.getId(), customerSpace });
-            }
-
+            String featureImportanceRaw = retrieveFeatureImportances(customerSpace, modelSummary);
             log.info(String.format("Feature Importance Compilation (Split: %d ms Total: %d ms): Raw file procurement",
                     splitter.getTime(), stopWatch.getTime()));
             stopWatch.suspend();
@@ -160,14 +129,62 @@ public class FeatureImportanceMgr {
         }
     }
 
+    private String retrieveFeatureImportances(String customerSpace, ModelSummary modelSummary) throws IOException {
+        String featureImportanceFilePathPattern = "{0}/{1}/models/{2}/{3}/{4}/rf_model.txt";
+        String[] filePathParts = modelSummary.getLookupId().split("\\|");
+        String featureImportanceFilePath = MessageFormat.format(featureImportanceFilePathPattern, //
+                modelingServiceHdfsBaseDir, // 0
+                filePathParts[0], // 1
+                filePathParts[1], // 2
+                filePathParts[2], // 3
+                ApplicationIdUtils.stripJobId(modelSummary.getApplicationId())); // 4
+        featureImportanceFilePath = getS3Path(customerSpace, featureImportanceFilePath);
+
+        log.info("Feature Importance Compilation (Split: 0 ms Total: 0 ms): Start");
+        if (!HdfsUtils.fileExists(yarnConfiguration, featureImportanceFilePath)) {
+            log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
+            throw new LedpException(LedpCode.LEDP_10011, new String[] { featureImportanceFilePath });
+        }
+        log.info("Attempting to get feature importance from the file: " + featureImportanceFilePath);
+        String featureImportanceRaw = HdfsUtils.getHdfsFileContents(yarnConfiguration, featureImportanceFilePath);
+        if (StringUtils.isEmpty(featureImportanceRaw)) {
+            log.error("Failed to find the feature importance file: " + featureImportanceFilePath);
+            throw new LedpException(LedpCode.LEDP_40037,
+                    new String[] { featureImportanceFilePath, modelSummary.getId(), customerSpace });
+        }
+        return featureImportanceRaw;
+    }
+
     private String getS3Path(String customerSpace, String featureImportanceFilePath) throws IOException {
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
-        CustomerSpace space = CustomerSpace.parse(customerSpace);
         String s3Path = pathBuilder.exploreS3FilePath(featureImportanceFilePath, s3Bucket);
         if (HdfsUtils.fileExists(yarnConfiguration, s3Path)) {
             featureImportanceFilePath = s3Path;
         }
         return featureImportanceFilePath;
+    }
+
+    public List<ModelFeatureImportance> getModelFeatureImportance(String customerSpace, ModelSummary modelSummary) {
+        List<ModelFeatureImportance> importances = new ArrayList<>();
+        try {
+            String featureImportanceRaw = retrieveFeatureImportances(customerSpace, modelSummary);
+            List<String> lines = Arrays.stream(featureImportanceRaw.split("\n")).collect(Collectors.toList());
+            for (int i = 0; i < lines.size(); i++) {
+                if (i == 0)
+                    continue;
+                String[] tokens = StringUtils.split(lines.get(i), ",", 3);
+                if (tokens.length > 2) {
+                    importances.add(new ModelFeatureImportance(modelSummary, tokens[0], Double.parseDouble(tokens[1]),
+                            StringUtils.strip(tokens[2], " \"")));
+                } else {
+                    importances.add(new ModelFeatureImportance(modelSummary, tokens[0], Double.parseDouble(tokens[1])));
+                }
+            }
+        } catch (Exception e) {
+            log.error(String.format("Unable to populate feature importance for %s, modelId=%s, due to %s",
+                    customerSpace, modelSummary.getId()), e);
+        }
+        return importances;
     }
 
     private Map<String, Integer> convertDerivedAttrNamesToParentAttrNames(Map<String, Integer> importanceOrdering) {
