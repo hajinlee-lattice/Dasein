@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTemplate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LatticeAccountId;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
@@ -138,7 +139,6 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
                 "Input source of EntityIds doesn't have EntityId field");
         List<String> retainFields = new ArrayList<>();
         retainFields.add(ENTITY_ID_FIELD);
-        // TODO retain system/template fields
         if (Account.name().equals(config.getEntity())) {
             entityIds = copyEntityId(entityIds, AccountId.name(), retainFields);
         } else if (Contact.name().equals(config.getEntity())) {
@@ -146,6 +146,9 @@ public class ExtractEmbeddedEntityTable extends ConfigurableFlowBase<ExtractEmbe
         } else {
             String msg = String.format("Extracting embedded %s is not supported", config.getEntity());
             throw new UnsupportedOperationException(msg);
+        }
+        if (CollectionUtils.emptyIfNull(entityIds.getFieldNames()).contains(CDLCreatedTemplate.name())) {
+            retainFields.add(CDLCreatedTemplate.name());
         }
         if (config.isFilterByEntity()) {
             entityIds = entityIds.filter(

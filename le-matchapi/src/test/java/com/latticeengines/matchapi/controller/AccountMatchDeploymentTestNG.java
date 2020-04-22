@@ -584,6 +584,7 @@ public class AccountMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         input.setTargetEntity(BusinessEntity.Account.name());
         input.setAllocateId(true);
         input.setOutputNewEntities(true);
+        input.setIncludeLineageFields(true);
         input.setEntityKeyMaps(
                 prepareKeyMaps(FIELDS, new String[] { InterfaceName.CustomerAccountId.name(), SFDC_ID }, null));
         input.setInputBuffer(prepareBulkData(scenario));

@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -208,27 +209,32 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         // AllocateId Mode
         case ID:
             if (BusinessEntity.Account.name().equals(input.getTargetEntity())) {
-                return Arrays.asList( //
+                List<ColumnMetadata> cms = new ArrayList<>(Arrays.asList( //
                         new ColumnMetadata(InterfaceName.EntityId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()) //
-                );
+                ));
+                addLineageFields(input, cms);
+                return cms;
             }
             if (BusinessEntity.Contact.name().equals(input.getTargetEntity())) {
-                return Arrays.asList( //
+                List<ColumnMetadata> cms = new ArrayList<>(Arrays.asList( //
                         new ColumnMetadata(InterfaceName.EntityId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.ContactId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()), //
                         new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()) //
-                );
+                ));
+                addLineageFields(input, cms);
+                return cms;
             }
             throw new IllegalArgumentException("Unsupported entity " + input.getTargetEntity());
             // FetchOnly mode (Might be retired)
         case Seed:
-            return Arrays
-                    .asList(new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()));
+            return Collections.singletonList(
+                    new ColumnMetadata(InterfaceName.LatticeAccountId.name(), String.class.getSimpleName()));
         case LeadToAcct:
-            return Arrays.asList(new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()));
+            return Collections
+                    .singletonList(new ColumnMetadata(InterfaceName.AccountId.name(), String.class.getSimpleName()));
         default:
             throw new UnsupportedOperationException("Column Metadata parsing for non-ID case is unsupported.");
 
@@ -310,6 +316,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
         context.setInternalResults(records);
         return context;
+    }
+
+    private void addLineageFields(@NotNull MatchInput input, @NotNull List<ColumnMetadata> cms) {
+        if (input.isIncludeLineageFields()) {
+            cms.add(new ColumnMetadata(InterfaceName.CDLCreatedTemplate.name(), String.class.getSimpleName()));
+        }
     }
 
     private Set<String> getKeyFields(Map<MatchKey, List<String>> keyMap) {
