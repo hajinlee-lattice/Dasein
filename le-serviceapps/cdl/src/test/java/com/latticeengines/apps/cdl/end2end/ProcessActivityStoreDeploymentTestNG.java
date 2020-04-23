@@ -85,7 +85,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         } else {
             log.info("Skip opportunity setup. {}={}", SKIP_OPPORTUNITY, System.getenv(SKIP_OPPORTUNITY));
         }
-        if (!Boolean.getBoolean(System.getenv(SKIP_MARKETING))) {
+        if (!Boolean.parseBoolean(System.getenv(SKIP_MARKETING))) {
             setupMarketingTemplates();
         } else {
             log.info("Skip marketing setup. {}={}", SKIP_MARKETING, System.getenv(SKIP_MARKETING));

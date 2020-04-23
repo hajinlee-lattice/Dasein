@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -25,6 +27,12 @@ public class DailyStoreToPeriodStoresJobConfig extends SparkJobConfig implements
 
     @JsonProperty("businessCalendar")
     public BusinessCalendar businessCalendar;
+
+    @JsonProperty
+    public Set<String> incrementalStreams = new HashSet<>();
+
+    @JsonProperty
+    public Set<String> streamsWithNoBatch = new HashSet<>();
 
     @Override
     @JsonProperty("Name")

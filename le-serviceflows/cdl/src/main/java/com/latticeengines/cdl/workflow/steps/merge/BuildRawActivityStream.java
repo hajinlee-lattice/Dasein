@@ -97,6 +97,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         // TODO add diff report
         Map<String, String> rawStreamTables = buildRawStreamBatchStore();
         exportToS3AndAddToContext(rawStreamTables, RAW_ACTIVITY_STREAM_TABLE_NAME);
+        exportToS3AndAddToContext(matchedStreamImportTables, RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME);
     }
 
     @Override
