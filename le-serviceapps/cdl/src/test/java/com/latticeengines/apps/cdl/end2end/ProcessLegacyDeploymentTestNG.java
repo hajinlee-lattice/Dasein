@@ -178,7 +178,8 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     }
 
     protected BusinessEntity[] getEntitiesInStats() {
-        return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount };
+        return new BusinessEntity[] { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.CuratedAccount,
+                BusinessEntity.PurchaseHistory };
     }
 
     protected Map<BusinessEntity, Map<String, Object>> getExpectedReport() {
