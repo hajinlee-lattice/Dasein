@@ -172,7 +172,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         config.setInputPath(PathUtils.toAvroGlob(inputPath));
         config.setPartitionKey(PARTITION_KEY_NAME);
         config.setSortKey(SORT_KEY_NAME);
-        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
+        addToListInContext(TIMELINE_RAWTABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
     private Table getContactTable() {
