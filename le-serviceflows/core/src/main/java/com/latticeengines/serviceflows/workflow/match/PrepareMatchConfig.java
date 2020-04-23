@@ -1,6 +1,7 @@
 package com.latticeengines.serviceflows.workflow.match;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
 import com.latticeengines.domain.exposed.datacloud.match.IOBufferType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
+import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -30,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
@@ -138,7 +141,6 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         matchInput.setRequestSource(getConfiguration().getMatchRequestSource());
 
         matchInput.setTenant(new Tenant(configuration.getCustomerSpace().toString()));
-        matchInput.setOutputBufferType(IOBufferType.AVRO);
 
         Map<MatchKey, List<String>> matchInputKeys = new HashMap<>();
         if (configuration.getSourceSchemaInterpretation() != null && (configuration.getSourceSchemaInterpretation()
@@ -182,21 +184,50 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             }
         }
         matchInput.setKeyMap(matchInputKeys);
-        matchInput.setPrepareForDedupe(!getConfiguration().isSkipDedupe());
+        configMatchInput(preMatchEventTable, matchInput);
+        if (getConfiguration().isEntityMatchEnabled()) {
+            log.info("Entity Match Enabled.");
+            configEntityMatch(preMatchEventTable, matchInput);
+        }
 
+        checkFetchOnly(matchInput);
+        return matchInput;
+    }
+
+    private void configEntityMatch(Table preMatchEventTable, MatchInput matchInput) {
+        matchInput.setOperationalMode(OperationalMode.ENTITY_MATCH_ATTR_LOOKUP);
+        matchInput.setTargetEntity(BusinessEntity.Account.name());
+
+        Map<String, MatchInput.EntityKeyMap> keyMap = new HashMap<>();
+        MatchInput.EntityKeyMap accountMap = new MatchInput.EntityKeyMap();
+        if (configuration.isMapToLatticeAccount()
+                && Arrays.asList(preMatchEventTable.getAttributeNames())
+                        .contains(InterfaceName.CustomerAccountId.name())) {
+            log.info("Adding SystemId with CustomerAccountId.");
+            accountMap.addMatchKey(MatchKey.SystemId, InterfaceName.CustomerAccountId.name());
+        }
+
+        accountMap.setKeyMap(matchInput.getKeyMap());
+        matchInput.setKeyMap(null);
+        keyMap.put(BusinessEntity.Account.name(), accountMap);
+        matchInput.setEntityKeyMaps(keyMap);
+
+        matchInput.setSkipKeyResolution(true);
+        matchInput.setAllocateId(false);
+        matchInput.setDataCloudOnly(false);
+    }
+
+    private void configMatchInput(Table preMatchEventTable, MatchInput matchInput) {
+        matchInput.setOutputBufferType(IOBufferType.AVRO);
+        matchInput.setPrepareForDedupe(!getConfiguration().isSkipDedupe());
         AvroInputBuffer inputBuffer = inputBuffer(preMatchEventTable);
         matchInput.setInputBuffer(inputBuffer);
-
         matchInput.setExcludePublicDomain(getConfiguration().isExcludePublicDomain());
         matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
         if (MatchStepConfiguration.LDC.equals(getConfiguration().getMatchType()) ||
                 MatchStepConfiguration.DCP.equals(getConfiguration().getMatchType())) {
             matchInput.setDataCloudOnly(true);
         }
-
-        checkFetchOnly(matchInput);
-
-        return matchInput;
     }
 
     private AvroInputBuffer inputBuffer(Table preMatchEventTable) {

@@ -1,6 +1,8 @@
 package com.latticeengines.apps.dcp.end2end;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,6 +36,8 @@ import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.DCPProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
+import au.com.bytecode.opencsv.CSVReader;
+
 public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DCPImportWorkflowDeploymentTestNG.class);
@@ -61,7 +65,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private long uploadId;
     private String s3FileKey;
 
-    @BeforeClass(groups = {"deployment"})
+    @BeforeClass(groups = { "deployment" })
     public void setup() {
         setupTestEnvironment();
     }
@@ -119,20 +123,24 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setProjectType(Project.ProjectType.Type1);
         projectDetails = projectProxy.createDCPProject(mainCustomerSpace, projectRequest, "dcp_deployment@dnb.com");
         // Create Source
-        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
+        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
+                TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName("ImportEnd2EndSource");
         sourceRequest.setProjectId(projectDetails.getProjectId());
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
         source = sourceProxy.createSource(mainCustomerSpace, sourceRequest);
+        // Pause this source for s3 import.
+        sourceProxy.pauseSource(mainCustomerSpace, source.getSourceId());
         // Copy test file to drop folder
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropPath = UploadS3PathBuilderUtils.getDropRoot(projectDetails.getProjectId(), source.getSourceId());
         dropPath = UploadS3PathBuilderUtils.combinePath(false, true,
                 UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
         s3FileKey = dropPath + TEST_ACCOUNT_DATA_FILE;
-        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket, s3FileKey);
+        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket,
+                s3FileKey);
     }
 
     private void verifyUploadStats(Upload upload) {
@@ -162,15 +170,32 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
-        String acceptedPath = UploadS3PathBuilderUtils.combinePath(false, false,
-                dropFolder, upload.getUploadConfig().getUploadMatchResultAccepted());
-        String rejectedPath = UploadS3PathBuilderUtils.combinePath(false, false,
-                dropFolder, upload.getUploadConfig().getUploadMatchResultRejected());
+        String acceptedPath = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+                upload.getUploadConfig().getUploadMatchResultAccepted());
+        String rejectedPath = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+                upload.getUploadConfig().getUploadMatchResultRejected());
         String bucket = dropBoxSummary.getBucket();
         System.out.println("acceptedPath=" + acceptedPath);
         System.out.println("rejectedPath=" + rejectedPath);
         Assert.assertTrue(s3Service.objectExist(bucket, acceptedPath));
         Assert.assertTrue(s3Service.objectExist(bucket, rejectedPath));
+        verifyCsvContent(bucket, acceptedPath);
+        verifyCsvContent(bucket, rejectedPath);
+    }
+
+    private void verifyCsvContent(String bucket, String path) {
+        InputStream is = s3Service.readObjectAsStream(bucket, path);
+        InputStreamReader reader = new InputStreamReader(is);
+        try (CSVReader csvReader = new CSVReader(reader)) {
+            String[] nextRecord = csvReader.readNext();
+            int count = 0;
+            while (nextRecord != null && (count++) < 10) {
+                Assert.assertTrue(StringUtils.isNotBlank(nextRecord[0])); // Original Name is non-empty
+                nextRecord = csvReader.readNext();
+            }
+        } catch (IOException e) {
+            Assert.fail("Failed to read output csv", e);
+        }
     }
 
 }

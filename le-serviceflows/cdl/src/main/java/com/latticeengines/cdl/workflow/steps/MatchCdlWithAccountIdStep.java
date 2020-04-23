@@ -13,7 +13,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -35,10 +34,8 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    @Inject
-    private BatonService batonService;
-
     private boolean hasCustomerAccountId = true;
+    private boolean renameIdColumn = false;
 
     @Override
     public void onConfigurationInitialized() {
@@ -55,19 +52,22 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
     private DataFlowParameters createDataFlowParameters() {
         Table inputTable = getInputTable();
         String[] attributeNames = inputTable.getAttributeNames();
-        List<String> inputAttributeList = Arrays.asList(attributeNames);
-        putObjectInContext(CUSTOM_EVENT_MATCH_ATTRIBUTES, inputAttributeList);
+        List<String> inputAttributeList = new ArrayList<>(Arrays.asList(attributeNames));
         Table accountTable = getAccountTable();
         MatchCdlAccountParameters parameters = new MatchCdlAccountParameters(inputTable.getName(),
                 accountTable.getName());
         parameters.setInputMatchFields(Arrays.asList(configuration.getMatchAccountIdColumn()));
         String customerAccountId = InterfaceName.AccountId.name();
-        if (batonService.isEntityMatchEnabled(getConfiguration().getCustomerSpace())) {
-            if (getConfiguration().isMapToLatticeAccount() && inputAttributeList.contains(configuration.getMatchAccountIdColumn())) {
+        if (getConfiguration().isEntityMatchEnabled()) {
+            if (getConfiguration().isMapToLatticeAccount()
+                    && inputAttributeList.contains(configuration.getMatchAccountIdColumn())) {
+                parameters.setRenameIdOnly(true);
+                renameIdColumn = true;
                 customerAccountId = InterfaceName.CustomerAccountId.name();
-            } else {
-                hasCustomerAccountId = false;
+                inputAttributeList.remove(configuration.getMatchAccountIdColumn());
+                inputAttributeList.add(0, InterfaceName.CustomerAccountId.name());
             }
+            hasCustomerAccountId = false;
         }
         parameters.setAccountMatchFields(Arrays.asList(customerAccountId));
         parameters.setHasAccountId(true);
@@ -75,13 +75,14 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         List<String> accountAttributeList = Arrays.asList(accountTable.getAttributeNames());
         List<String> inputSkippedAttributeList = new ArrayList<>(inputAttributeList);
         inputSkippedAttributeList.removeAll(accountAttributeList);
+        putObjectInContext(CUSTOM_EVENT_MATCH_ATTRIBUTES, inputAttributeList);
         putObjectInContext(INPUT_SKIPPED_ATTRIBUTES_KEY, inputSkippedAttributeList);
         return parameters;
     }
 
     @Override
     public void execute() {
-        if (hasCustomerAccountId) {
+        if (hasCustomerAccountId || renameIdColumn) {
             super.execute();
         }
     }
@@ -111,7 +112,10 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
             putObjectInContext(CUSTOM_EVENT_MATCH_ACCOUNT, targetTable);
             putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, targetTable);
         } else {
-            Table targetTable = getInputTable();
+            Table targetTable = renameIdColumn
+                    ? metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                            configuration.getTargetTableName())
+                    : getInputTable();
             putObjectInContext(CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID, targetTable);
             String ns = getParentNamespace();
             ns = ns.lastIndexOf(".") == -1 ? "" : ns.substring(0, ns.lastIndexOf("."));

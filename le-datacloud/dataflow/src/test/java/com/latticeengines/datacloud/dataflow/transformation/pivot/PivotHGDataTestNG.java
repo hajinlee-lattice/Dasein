@@ -132,7 +132,7 @@ public class PivotHGDataTestNG extends DataCloudDataFlowFunctionalTestNGBase {
             Date date = FORMATTER.parse(dateStr);
             return date.getTime();
         } catch (ParseException e) {
-            System.out.println("Date conversion failed.." + e.getStackTrace());
+            System.out.println("Date conversion failed.." + e.getLocalizedMessage());
         }
 
         return -1L;
