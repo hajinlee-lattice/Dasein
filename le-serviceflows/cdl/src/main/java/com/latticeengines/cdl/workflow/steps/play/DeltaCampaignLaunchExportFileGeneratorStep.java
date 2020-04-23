@@ -47,6 +47,10 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
     private boolean createDeleteCsvDataFrame;
 
+    private static final String ADD_FILE_PREFIX = "add";
+
+    private static final String DELETE_FILE_PREFIX = "delete";
+
     @Override
     public void execute() {
         DeltaCampaignLaunchExportFilesGeneratorConfiguration config = getConfiguration();
@@ -77,10 +81,10 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                         DeltaCampaignLaunchWorkflowConfiguration.ADD_CSV_EXPORT_AVRO_HDFS_FILEPATH);
                 List<Callable<String>> fileExporters = new ArrayList<>();
                 Date fileExportTime = new Date();
-                fileExporters.add(
-                        new CsvFileExporter(yarnConfiguration, config, addCsvDataFraneHdfsFilePath, fileExportTime));
-                fileExporters.add(
-                        new JsonFileExporter(yarnConfiguration, config, addCsvDataFraneHdfsFilePath, fileExportTime));
+                fileExporters.add(new CsvFileExporter(yarnConfiguration, config, addCsvDataFraneHdfsFilePath,
+                        fileExportTime, ADD_FILE_PREFIX));
+                fileExporters.add(new JsonFileExporter(yarnConfiguration, config, addCsvDataFraneHdfsFilePath,
+                        fileExportTime, ADD_FILE_PREFIX));
 
                 ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("deltaCampaignlaunch-export",
                         2);
@@ -98,8 +102,8 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                         DeltaCampaignLaunchWorkflowConfiguration.DELETE_CSV_EXPORT_AVRO_HDFS_FILEPATH);
                 List<Callable<String>> fileExporters = new ArrayList<>();
                 Date fileExportTime = new Date();
-                fileExporters.add(
-                        new CsvFileExporter(yarnConfiguration, config, deleteCsvDataFraneHdfsFilePath, fileExportTime));
+                fileExporters.add(new CsvFileExporter(yarnConfiguration, config, deleteCsvDataFraneHdfsFilePath,
+                        fileExportTime, DELETE_FILE_PREFIX));
 
                 ExecutorService executorService = ThreadPoolUtils.getFixedSizeThreadPool("deltaCampaignlaunch-export",
                         2);
@@ -125,8 +129,8 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
     private class CsvFileExporter extends ExportFileCallable {
 
         CsvFileExporter(Configuration yarnConfiguration, DeltaCampaignLaunchExportFilesGeneratorConfiguration config,
-                String recAvroHdfsFilePath, Date date) {
-            super(yarnConfiguration, config, recAvroHdfsFilePath, date);
+                String recAvroHdfsFilePath, Date date, String filePrefix) {
+            super(yarnConfiguration, config, recAvroHdfsFilePath, date, filePrefix);
         }
 
         @Override
@@ -151,8 +155,8 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
     private class JsonFileExporter extends ExportFileCallable {
 
         JsonFileExporter(Configuration yarnConfiguration, DeltaCampaignLaunchExportFilesGeneratorConfiguration config,
-                String recAvroHdfsFilePath, Date date) {
-            super(yarnConfiguration, config, recAvroHdfsFilePath, date);
+                String recAvroHdfsFilePath, Date date, String filePrefix) {
+            super(yarnConfiguration, config, recAvroHdfsFilePath, date, filePrefix);
         }
 
         @Override
@@ -174,13 +178,15 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         DeltaCampaignLaunchExportFilesGeneratorConfiguration config;
         Date fileGeneratedTime;
         String recAvroHdfsFilePath;
+        String filePrefix;
 
         ExportFileCallable(Configuration yarnConfiguration, DeltaCampaignLaunchExportFilesGeneratorConfiguration config,
-                String recAvroHdfsFilePath, Date date) {
+                String recAvroHdfsFilePath, Date date, String filePrefix) {
             this.yarnConfiguration = yarnConfiguration;
             this.config = config;
             this.fileGeneratedTime = date;
             this.recAvroHdfsFilePath = recAvroHdfsFilePath;
+            this.filePrefix = filePrefix;
         }
 
         public abstract void generateFileFromAvro(String recAvroHdfsFilePath, File localFile) throws IOException;
@@ -190,7 +196,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
         @Override
         public String call() {
             try {
-                File localFile = new File(String.format("pl_rec_%s_%s_%s_%s.%s",
+                File localFile = new File(String.format("pl_rec_%s_%s_%s_%s_%s.%s", filePrefix,
                         config.getCustomerSpace().getTenantId(), config.getPlayLaunchId(),
                         config.getDestinationSysType(), fileGeneratedTime.getTime(), getFileFormat()));
 
@@ -202,7 +208,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
                         .toString();
                 path = path.endsWith("/") ? path : path + "/";
 
-                String recFilePathForDestination = (path += String.format("Recommendations_%s.%s",
+                String recFilePathForDestination = (path += String.format("Recommendations_%s_%s.%s", filePrefix,
                         DateTimeUtils.currentTimeAsString(fileGeneratedTime), getFileFormat()));
 
                 try {
