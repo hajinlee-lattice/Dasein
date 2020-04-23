@@ -131,6 +131,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         sourceRequest.setProjectId(projectDetails.getProjectId());
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
         source = sourceProxy.createSource(mainCustomerSpace, sourceRequest);
+        // Pause this source for s3 import.
+        sourceProxy.pauseSource(mainCustomerSpace, source.getSourceId());
         // Copy test file to drop folder
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropPath = UploadS3PathBuilderUtils.getDropRoot(projectDetails.getProjectId(), source.getSourceId());
