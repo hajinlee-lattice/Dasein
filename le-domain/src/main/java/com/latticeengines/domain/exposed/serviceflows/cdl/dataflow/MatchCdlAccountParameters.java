@@ -25,6 +25,9 @@ public class MatchCdlAccountParameters extends DataFlowParameters {
     @JsonProperty("has_account_id")
     private boolean hasAccountId;
 
+    @JsonProperty("rename_id_only")
+    private boolean renameIdOnly;
+
     public MatchCdlAccountParameters() {
     }
 
@@ -55,5 +58,13 @@ public class MatchCdlAccountParameters extends DataFlowParameters {
 
     public void setHasAccountId(boolean hasAccountId) {
         this.hasAccountId = hasAccountId;
+    }
+
+    public boolean isRenameIdOnly() {
+        return renameIdOnly;
+    }
+
+    public void setRenameIdOnly(boolean renameIdOnly) {
+        this.renameIdOnly = renameIdOnly;
     }
 }

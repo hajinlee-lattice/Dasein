@@ -444,6 +444,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            customEventMatchWorkflowConfigurationBuilder.entityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+        
         public Builder mapToLatticeAccount(boolean mapToLatticeAccount) {
             customEventMatchWorkflowConfigurationBuilder.mapToLatticeAccount(mapToLatticeAccount);
             return this;
