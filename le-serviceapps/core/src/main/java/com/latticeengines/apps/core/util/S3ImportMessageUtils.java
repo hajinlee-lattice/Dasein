@@ -16,8 +16,8 @@ public final class S3ImportMessageUtils {
 
     private static String FEED_TYPE_PATTERN = "%s_%s";
     private static final String PS_SHARE = "PS_SHARE";
-    // DCP key : dropfolder/{dropbox}/Projects/{ProjectId}/Source/{SourceId}/drop/{fileName}
-    private static final Pattern DCP_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Projects/([a-zA-Z0-9_]+)/Source/([a-zA-Z0-9_]+)/drop/(.*)");
+    // DCP key : dropfolder/{dropbox}/Projects/{ProjectId}/Sources/{SourceId}/drop/{fileName}
+    private static final Pattern DCP_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Projects/([a-zA-Z0-9_]+)/Source[s]?/([a-zA-Z0-9_]+)/drop/(.*)");
     private static final Pattern ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/Templates/(.*)");
     private static final Pattern LEGACY_ATLAS_PATTERN = Pattern.compile("dropfolder/([a-zA-Z0-9]{8})/([a-zA-Z0-9_]+)/Templates/(.*)");
 

@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 public class Source {
 
     private static final Pattern SOURCE_FULL_PATH_PATTERN = Pattern.compile("(.*)/dropfolder/([a-zA-Z0-9]{8})/" +
-            "(Projects/[a-zA-Z0-9_]+/Source/[a-zA-Z0-9_]+/)");
+            "(Projects/[a-zA-Z0-9_]+/Source[s]?/[a-zA-Z0-9_]+/)");
 
     @JsonProperty("source_id")
     private String sourceId;
@@ -29,11 +29,11 @@ public class Source {
     @JsonProperty("relative_path")
     private String relativePath;
 
-    // The dropfolder full path: {bucket}/dropfolder/{dropbox}/Project/{projectId}/Source/{sourceId}/drop/
+    // The dropfolder full path: {bucket}/dropfolder/{dropbox}/Projects/{projectId}/Sources/{sourceId}/drop/
     @JsonProperty("full_path")
     private String dropFullPath;
 
-    // The source full path: {bucket}/dropfolder/{dropbox}/Project/{projectId}/Source/{sourceId}/
+    // The source full path: {bucket}/dropfolder/{dropbox}/Projects/{projectId}/Sources/{sourceId}/
     @JsonIgnore
     private String sourceFullPath;
 
