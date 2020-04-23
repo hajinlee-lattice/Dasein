@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLUpdatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedSource;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityLastUpdatedDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
@@ -11,7 +12,9 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.NumberOfC
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -35,6 +38,7 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
     // input schema
     private static final List<Pair<String, Class<?>>> ACC_BATCH_STORE_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
+            Pair.of("CDLCreatedTemplate", String.class), // TODO change to interface name
             Pair.of(CDLUpdatedTime.name(), Long.class), //
             Pair.of(CompanyName.name(), String.class), //
             Pair.of(CustomerAccountId.name(), String.class) //
@@ -54,6 +58,7 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
 
     private static final List<Pair<String, Class<?>>> OUTPUT_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
+            Pair.of(EntityCreatedSource.name(), String.class), //
             Pair.of(LastActivityDate.name(), Long.class), //
             Pair.of(EntityLastUpdatedDate.name(), Long.class), //
             Pair.of(TEMPLATE_UPDATE_TIME_FIELD.replace(CDLUpdatedTime.name(), EntityLastUpdatedDate.name()),
@@ -95,11 +100,11 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
 
         // AccountId, CDLUpdatedTime, CompanyName, CustomerAccountId
         Object[][] account = new Object[][] { //
-                { "A1", 123L, "Company 1", "CA1" }, //
-                { "A2", 115L, "Company 2", "CA2" }, //
-                { "A3", 35L, "Company 3", "CA3" }, //
-                { "A4", 10531L, "Company 4", "CA4" }, //
-                { "A5", 1L, "Company 5", "CA5" }, //
+                { "A1", "tmpl1", 123L, "Company 1", "CA1" }, //
+                { "A2", "tmpl2", 115L, "Company 2", "CA2" }, //
+                { "A3", "tmpl1", 35L, "Company 3", "CA3" }, //
+                { "A4", "tmpl1", 10531L, "Company 4", "CA4" }, //
+                { "A5", "tmpl3", 1L, "Company 5", "CA5" }, //
         };
         uploadHdfsDataUnit(account, ACC_BATCH_STORE_FIELDS);
 
@@ -126,11 +131,18 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
         config.joinKey = AccountId.name();
         config.lastActivityDateInputIdx = 0;
         config.masterTableIdx = 1;
-        config.attrsToMerge.put(1, Collections.singletonMap(CDLUpdatedTime.name(), EntityLastUpdatedDate.name()));
+        Map<String, String> templateValues = new HashMap<>();
+        templateValues.put("tmpl1", "system1-Account");
+        templateValues.put("tmpl2", "system1-Contact");
+        Map<String, String> accBatchStoreAttrs = new HashMap<>();
+        accBatchStoreAttrs.put(CDLUpdatedTime.name(), EntityLastUpdatedDate.name());
+        accBatchStoreAttrs.put("CDLCreatedTemplate", EntityCreatedSource.name());
+        config.attrsToMerge.put(1, accBatchStoreAttrs);
         config.attrsToMerge.put(2, Collections.singletonMap(NumberOfContacts.name(), NumberOfContacts.name()));
         config.attrsToMerge.put(3, Collections.singletonMap(TEMPLATE_UPDATE_TIME_FIELD,
                 TEMPLATE_UPDATE_TIME_FIELD.replace(CDLUpdatedTime.name(), EntityLastUpdatedDate.name())));
         config.joinKeys.put(3, EntityId.name());
+        config.templateValueMap.putAll(templateValues);
         return config;
     }
 }
