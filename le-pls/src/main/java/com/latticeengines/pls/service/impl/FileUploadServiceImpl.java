@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
@@ -100,18 +101,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             file.setState(SourceFileState.Uploaded);
             file.setDisplayName(displayName);
 
-            long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream,
-                    outputPath + "/" + outputFileName, maxUploadRows);
-            log.info(String.format("current file outputFileName=%s fileRows = %s", outputFileName, fileRows));
-            if (!outsizeFlag && fileRows > maxUploadRows) {
-                try {
-                    HdfsUtils.rmdir(yarnConfiguration, outputPath + "/" + outputFileName);
-                } catch (Exception e) {
-                    log.error(String.format("error when deleting file %s in hdfs", outputPath + "/" + outputFileName));
-                }
-                double rows = (double) fileRows / 1000000;
-                throw new LedpException(LedpCode.LEDP_18148, new String[] { String.format("%.2f", rows) });
-            }
+            long fileRows = saveFileToHdfs(outputFileName, inputStream, outputPath, !outsizeFlag);
             file.setFileRows(fileRows);
             sourceFileService.create(file);
             return getSourceFilewithRetry(file.getName());
@@ -127,6 +117,59 @@ public class FileUploadServiceImpl implements FileUploadService {
             log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, displayName), e);
             throw new LedpException(LedpCode.LEDP_18053, e, new String[] { displayName });
         }
+    }
+
+    @Override
+    public SourceFile uploadFile(String outputFileName, String displayName, EntityType entityType, InputStream inputStream) {
+        String outputHdfsPath = null;
+        try {
+            Tenant tenant = MultiTenantContext.getTenant();
+            tenant = tenantEntityMgr.findByTenantId(tenant.getId());
+            CustomerSpace space = CustomerSpace.parse(tenant.getId());
+            String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), space).toString();
+            outputHdfsPath = outputPath;
+            SourceFile file = new SourceFile();
+            file.setTenant(tenant);
+            file.setName(outputFileName);
+            file.setPath(outputPath + "/" + outputFileName);
+            file.setSchemaInterpretation(entityType == null ? null : entityType.getSchemaInterpretation());
+            file.setBusinessEntity(entityType == null ? null : entityType.getEntity());
+            file.setState(SourceFileState.Uploaded);
+            file.setDisplayName(displayName);
+
+            long fileRows = saveFileToHdfs(outputFileName, inputStream, outputPath, false);
+            file.setFileRows(fileRows);
+            sourceFileService.create(file);
+            return getSourceFilewithRetry(file.getName());
+        } catch (IOException e) {
+            if (outputHdfsPath != null) {
+                try {
+                    HdfsUtils.rmdir(yarnConfiguration, outputHdfsPath + "/" + outputFileName);
+                } catch (IOException e1) {
+                    log.error(String.format("error when deleting file %s in hdfs",
+                            outputHdfsPath + "/" + outputFileName));
+                }
+            }
+            log.error(String.format("Problems uploading file %s (display name %s)", outputFileName, displayName), e);
+            throw new LedpException(LedpCode.LEDP_18053, e, new String[] { displayName });
+        }
+    }
+
+    private long saveFileToHdfs(String outputFileName, InputStream inputStream, String outputPath, boolean checkSize) throws IOException {
+        long fileRows = HdfsUtils.copyInputStreamToHdfsWithoutBomAndReturnRows(yarnConfiguration, inputStream,
+                outputPath + "/" + outputFileName, maxUploadRows);
+
+        log.info(String.format("current file outputFileName=%s fileRows = %s", outputFileName, fileRows));
+        if (checkSize && fileRows > maxUploadRows) {
+            try {
+                HdfsUtils.rmdir(yarnConfiguration, outputPath + "/" + outputFileName);
+            } catch (Exception e) {
+                log.error(String.format("error when deleting file %s in hdfs", outputPath + "/" + outputFileName));
+            }
+            double rows = (double) fileRows / 1000000;
+            throw new LedpException(LedpCode.LEDP_18148, new String[] { String.format("%.2f", rows) });
+        }
+        return fileRows;
     }
 
     private SourceFile getSourceFilewithRetry(String fileName, boolean withTable) {
