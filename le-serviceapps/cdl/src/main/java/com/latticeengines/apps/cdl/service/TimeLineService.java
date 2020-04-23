@@ -17,5 +17,7 @@ public interface TimeLineService {
 
     TimeLine createOrUpdateTimeLine(String customerSpace, TimeLine timeLine);
 
+    void createDefaultTimeLine(String customerSpace);
+
     void delete(String customerSpace, TimeLine timeLine);
 }

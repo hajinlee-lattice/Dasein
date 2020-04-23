@@ -40,6 +40,14 @@ public final class TimeLineStoreUtils {
         return timelineStandardMappings;
     }
 
+    public static Map<String, Map<String, EventTypeExtractor>> getTimelineStandardStringMappings() {
+        Map<String, Map<String, EventTypeExtractor>> timelineStandardMappings = new HashMap<>();
+        for (AtlasStream.StreamType streamType : AtlasStream.StreamType.values()) {
+            timelineStandardMappings.put(streamType.name(), getTimelineStandardMappingByStreamType(streamType));
+        }
+        return timelineStandardMappings;
+    }
+
     public static Map<String, EventTypeExtractor> getTimelineStandardMappingByStreamType(AtlasStream.StreamType streamType) {
         Map<String, EventTypeExtractor> timelineStandardMapping = new HashMap<>();
         switch (streamType) {

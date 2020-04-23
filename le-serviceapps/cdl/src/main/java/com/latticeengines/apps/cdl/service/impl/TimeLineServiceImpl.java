@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -11,9 +12,11 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.cdl.entitymgr.TimeLineEntityMgr;
 import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 
 import io.micrometer.core.instrument.util.StringUtils;
 
@@ -66,6 +69,13 @@ public class TimeLineServiceImpl implements TimeLineService {
         return newTimeLine;
     }
 
+    //create default Account360/Contact360 timeline
+    @Override
+    public void createDefaultTimeLine(String customerSpace) {
+        createDefaultTimeline(customerSpace, BusinessEntity.Account);
+        createDefaultTimeline(customerSpace, BusinessEntity.Contact);
+    }
+
     @Override
     public void delete(String customerSpace, TimeLine timeLine) {
         TimeLine oldTimeline = timeLineEntityMgr.findByPid(timeLine.getPid());
@@ -75,6 +85,20 @@ public class TimeLineServiceImpl implements TimeLineService {
             return;
         }
         timeLineEntityMgr.delete(timeLine);
+    }
+
+    private void createDefaultTimeline(String customerSpace, BusinessEntity entity) {
+        String defaultTimelineIdFormat = "%s_%s_%s360";
+        String defaultTimelineNameFormat = "%s360";
+        TimeLine defaultTimeline = new TimeLine();
+        defaultTimeline.setName(String.format(defaultTimelineNameFormat, entity.name()));
+        defaultTimeline.setTimelineId(String.format(defaultTimelineIdFormat, TimeLine.TIMELINE_ID_PREFIX,
+                customerSpace, entity.name()));
+        defaultTimeline.setStreamTypes(Arrays.asList(AtlasStream.StreamType.values()));
+        defaultTimeline.setEntity(entity.name());
+        defaultTimeline.setTenant(MultiTenantContext.getTenant());
+        defaultTimeline.setEventMappings(TimeLineStoreUtils.getTimelineStandardStringMappings());
+        timeLineEntityMgr.createOrUpdate(defaultTimeline);
     }
 
 }

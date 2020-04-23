@@ -39,7 +39,7 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String TIMELINE_ID_PREFIX = "tl_";
+    public static final String TIMELINE_ID_PREFIX = "tl_";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
