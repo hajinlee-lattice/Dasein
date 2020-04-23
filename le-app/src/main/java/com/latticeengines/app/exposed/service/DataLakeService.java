@@ -29,6 +29,8 @@ public interface DataLakeService {
 
     List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity);
 
+    String getInternalAccountId(String accountId, Map<String, String> orgInfo);
+
     DataPage getAccountById(String accountID, Predefined predefined, Map<String, String> orgInfo);
 
     DataPage getAccountById(String accountID, Predefined predefined, Map<String, String> orgInfo,

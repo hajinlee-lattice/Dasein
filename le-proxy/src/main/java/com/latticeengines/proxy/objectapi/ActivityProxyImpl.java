@@ -20,8 +20,8 @@ public class ActivityProxyImpl extends MicroserviceRestApiProxy implements Activ
     }
 
     @Override
-    public DataPage getData(String customerSpace, ActivityTimelineQuery activityTimelineQuery,
-            DataCollection.Version version) {
+    public DataPage getData(String customerSpace, DataCollection.Version version,
+            ActivityTimelineQuery activityTimelineQuery) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
             String url = constructUrl("/{customerSpace}/activity/data", customerSpace);
 

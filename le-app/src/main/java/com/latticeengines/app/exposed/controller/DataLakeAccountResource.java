@@ -120,8 +120,10 @@ public class DataLakeAccountResource {
             List<String> requiredAttributes = Collections.singletonList(InterfaceName.SpendAnalyticsSegment.name());
             DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup, requiredAttributes);
             if (accountRawData.getData().size() != 1) {
-                String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account", 0);
-                log.warn("Failed to get account data for account id: " + message);
+                String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account",
+                        accountRawData.getData().size());
+                log.warn(String.format("Failed to get account data for account id:%s Customerspace: %s", accountId,
+                        customerSpace.getTenantId()));
                 return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
             AccountDanteFormatter accountFormatter = accountDanteFormatterProvider.get();
@@ -144,23 +146,27 @@ public class DataLakeAccountResource {
     public FrontEndResponse<List<String>> getAccountsByIdInDanteFormat(RequestEntity<String> requestEntity,
             @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
+        CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
         try {
             DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup);
             if (accountRawData.getData().size() != 1) {
-                String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account", 0);
-                log.warn("Failed to get account data for account id: " + message);
+                String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account",
+                        accountRawData.getData().size());
+                log.warn(String.format("Failed to get account data for account id:%s Customerspace: %s", accountId,
+                        customerSpace.getTenantId()));
                 return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
-            CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
             AccountDanteFormatter accountFormatter = accountDanteFormatterProvider.get();
             accountFormatter.setIsEntityMatchEnabled(batonService.isEntityMatchEnabled(customerSpace));
             return new FrontEndResponse<>(
                     Collections.singletonList(accountFormatter.format(accountRawData.getData().get(0))));
         } catch (LedpException le) {
-            log.error("Failed to get account data for account id: " + accountId, le);
+            log.error("Failed to get account data for account id: " + accountId + ", customerspace:"
+                    + customerSpace.getTenantId(), le);
             return new FrontEndResponse<>(le.getErrorDetails());
         } catch (Exception e) {
-            log.error("Failed to get account data for account id: " + accountId, e);
+            log.error("Failed to get account data for account id: " + accountId + ", customerspace:"
+                    + customerSpace.getTenantId(), e);
             return new FrontEndResponse<>(new LedpException(LedpCode.LEDP_00002, e).getErrorDetails());
         }
     }
@@ -209,8 +215,10 @@ public class DataLakeAccountResource {
             DataPage accountRawData = dataLakeService.getAccountById(accountId,
                     new ArrayList<>(requiredAccountAttributes), tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
             if (accountRawData.getData().size() != 1) {
-                String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account", 0);
-                log.warn("Failed to get account data for account id: " + message);
+                String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account",
+                        accountRawData.getData().size());
+                log.warn(String.format("Failed to get account data for account id:%s customerspace: %s", accountId,
+                        customerSpace));
                 return new FrontEndResponse<>(new ErrorDetails(LedpCode.LEDP_39003, message, null));
             }
 
@@ -241,7 +249,6 @@ public class DataLakeAccountResource {
     public DataPage getContactByAccountIdContactId(RequestEntity<String> requestEntity, @PathVariable String accountId,
             @PathVariable String contactId) {
         Map<String, String> orgInfo = tenantProxy.getOrgInfoFromOAuthRequest(requestEntity);
-
         return dataLakeService.getContactByAccountIdAndContactId(contactId, accountId, orgInfo);
     }
 
