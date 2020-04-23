@@ -134,7 +134,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         generateDiffReport();
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "rawtypes", "unchecked", "NPathComplexity" })
     protected void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
@@ -801,6 +801,9 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                 log.info("already has Transaction legacyDeleteActions");
                 return true;
             }
+            break;
+        default:
+            log.info("Entity type {} doesn't support delete", entity.name());
             break;
         }
         return false;
