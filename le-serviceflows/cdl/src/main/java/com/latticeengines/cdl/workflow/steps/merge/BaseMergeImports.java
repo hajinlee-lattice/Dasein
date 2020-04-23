@@ -317,7 +317,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setAddTimestamps(false);
         config.setCloneSrcFields(cloneSrcFlds);
         config.setRenameSrcFields(renameSrcFlds);
-        setupTemplates(config);
+        setupTemplates(config, inputStep);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         if (StringUtils.isNotBlank(targetTablePrefix)) {
@@ -327,15 +327,33 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    private void setupTemplates(MergeImportsConfig config) {
+    private void setupTemplates(MergeImportsConfig config, int inputStep) {
         if (!hasSystemBatch) {
             return;
         }
         List<String> templates = new ArrayList<>();
-        inputTableNames.forEach(t -> {
-            log.info("inputTable=" + t + ", templateName=" + tableTemplateMap.get(t));
-            templates.add(tableTemplateMap.get(t));
-        });
+        if (inputStep == -1) { // for normal imports
+            inputTableNames.forEach(t -> {
+                log.info("inputTable=" + t + ", templateName=" + tableTemplateMap.get(t));
+                templates.add(tableTemplateMap.get(t));
+            });
+        } else { // for rematch imports
+            // set up the template placeholder for inputStep table
+            templates.add(SystemBatchTemplateName.PLACEHOLDER.name());
+
+            // add templates for rematch imports
+            Map<String, List<String>> rematchTables = getTypedObjectFromContext(REMATCH_TABLE_NAMES,
+                    new TypeReference<Map<String, List<String>>>() {
+                    });
+            if (MapUtils.isNotEmpty(rematchTables)) {
+                List<String> tables = rematchTables.get(entity.name());
+                tables.forEach(table -> {
+                    log.info("rematchTable=" + table + ", templateName=" + tableTemplateMap.get(table));
+                    templates.add(tableTemplateMap.get(table));
+                });
+            }
+        }
+
         config.setTemplates(templates);
     }
 
@@ -532,8 +550,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
     }
 
-    private JsonNode setConsolidateSummary(ObjectNode report, Table diffReport)
-            throws JsonProcessingException {
+    private JsonNode setConsolidateSummary(ObjectNode report, Table diffReport) throws JsonProcessingException {
         ObjectMapper om = JsonUtils.getObjectMapper();
         String path = PathUtils.toAvroGlob(diffReport.getExtracts().get(0).getPath());
         Iterator<GenericRecord> records = AvroUtils.iterateAvroFiles(yarnConfiguration, path);
@@ -570,12 +587,10 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     private void setNewCount(Long chgNewRecords, JsonNode consolidateSummaryNode) {
         long newCnt = 0;
         if (consolidateSummaryNode.has(ReportConstants.NEW)) {
-            newCnt = consolidateSummaryNode.get(ReportConstants.NEW)
-                    .asLong();
+            newCnt = consolidateSummaryNode.get(ReportConstants.NEW).asLong();
             if (chgNewRecords != null) {
                 newCnt = chgNewRecords;
-                ((ObjectNode) consolidateSummaryNode)
-                        .put(ReportConstants.NEW, chgNewRecords);
+                ((ObjectNode) consolidateSummaryNode).put(ReportConstants.NEW, chgNewRecords);
             }
         }
         updateEntityValueMapInContext(entity, NEW_RECORDS, newCnt, Long.class);
@@ -588,8 +603,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             updateCnt = consolidateSummaryNode.get(ReportConstants.UPDATE).asLong();
             if (chgUpdatedRecords != null) {
                 updateCnt = chgUpdatedRecords;
-                ((ObjectNode) consolidateSummaryNode)
-                        .put(ReportConstants.UPDATE, chgUpdatedRecords);
+                ((ObjectNode) consolidateSummaryNode).put(ReportConstants.UPDATE, chgUpdatedRecords);
             }
         }
         updateEntityValueMapInContext(entity, UPDATED_RECORDS, updateCnt, Long.class);

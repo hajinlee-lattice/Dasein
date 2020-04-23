@@ -320,6 +320,11 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     }
 
     private String setupSystemBatchTable(TransformationStepConfig step) {
+        // For the full rematch PA, ignore the existing old system batch store
+        if (Boolean.TRUE.equals(getObjectFromContext(FULL_REMATCH_PA, Boolean.class))) {
+            return null;
+        }
+
         if (StringUtils.isNotBlank(systemBatchTableName)) {
             Table systemBatchTable = metadataProxy.getTable(customerSpace.toString(), systemBatchTableName);
             if (systemBatchTable != null && !systemBatchTable.getExtracts().isEmpty()) {
@@ -348,7 +353,6 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
-
 
     private MergeSystemBatchConfig getMergeSystemBatchConfig() {
         MergeSystemBatchConfig config = new MergeSystemBatchConfig();
@@ -440,8 +444,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     }
 
     /**
-     * Retrieve all system IDs for target entity of current tenant (sorted by
-     * system priority from high to low)
+     * Retrieve all system IDs for target entity of current tenant (sorted by system
+     * priority from high to low)
      *
      * @param entity
      *            target entity
@@ -456,8 +460,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     }
 
     /**
-     * Retrieve default system ID for target entity of current tenant. Return
-     * null if default system is not setup.
+     * Retrieve default system ID for target entity of current tenant. Return null
+     * if default system is not setup.
      *
      * @param entity
      *            target entity
