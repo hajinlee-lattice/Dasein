@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
@@ -181,17 +182,23 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     @Override
     protected void initializeConfiguration() {
+        super.initializeConfiguration();
+
         Map<BusinessEntity, Integer> finalRecordsMap = getMapObjectFromContext(FINAL_RECORDS, BusinessEntity.class, Integer.class);
-        int numAnalyticProducts = finalRecordsMap.getOrDefault(BusinessEntity.Product, 0);
-        hasAnalyticProduct = numAnalyticProducts > 0;
+        if (MapUtils.isNotEmpty(finalRecordsMap)) {
+            int numAnalyticProducts = finalRecordsMap.getOrDefault(BusinessEntity.Product, 0);
+            hasAnalyticProduct = numAnalyticProducts > 0;
+        } else {
+            // no MergeProduct in this PA
+            TableRoleInCollection role = BusinessEntity.Product.getBatchStore();
+            hasAnalyticProduct = StringUtils.isNotBlank(dataCollectionProxy.getTableName(customerSpace.toString(), role, active));
+        }
 
         if (!hasAnalyticProduct) {
             updateEntityValueMapInContext(BusinessEntity.PurchaseHistory, RESET_ENTITIES, true, Boolean.class);
             updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, RESET_ENTITIES, true, Boolean.class);
             return;
         }
-
-        super.initializeConfiguration();
 
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), Arrays.asList( //
                 PH_SERVING_TABLE_NAME, PH_DEPIVOTED_TABLE_NAME, PH_PROFILE_TABLE_NAME, PH_STATS_TABLE_NAME));
