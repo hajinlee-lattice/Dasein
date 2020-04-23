@@ -90,6 +90,7 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
 
             finishing();
         } else {
+            setEvaluationDateStrAndTimestamp();
             if (tablesInCtx.get(0) == null) {
                 log.info("No serving table found, skip profiling");
                 skipTransformation = true;
