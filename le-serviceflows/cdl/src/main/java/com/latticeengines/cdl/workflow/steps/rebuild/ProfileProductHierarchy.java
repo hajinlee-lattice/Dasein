@@ -36,6 +36,8 @@ public class ProfileProductHierarchy extends BaseSingleEntityProfileStep<Process
 
     private String masterTableName;
 
+    private boolean hasHierarchyProduct;
+
     @Override
     protected TableRoleInCollection profileTableRole() {
         return null;
@@ -48,32 +50,42 @@ public class ProfileProductHierarchy extends BaseSingleEntityProfileStep<Process
 
     @Override
     protected void onPostTransformationCompleted() {
-        String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
-        Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
-        servingStoreTableName = renameServingStoreTable(servingStoreTable);
+        if (hasHierarchyProduct) {
+            String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
+            Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
+            servingStoreTableName = renameServingStoreTable(servingStoreTable);
 
-        exportTableRoleToRedshift(servingStoreTableName, getEntity().getServingStore());
+            exportTableRoleToRedshift(servingStoreTableName, getEntity().getServingStore());
 
-        dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, getEntity().getServingStore(),
-                inactive);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, getEntity().getServingStore(),
+                    inactive);
+        }
     }
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
-        masterTableName = masterTable.getName();
-        PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("ProfileProductHierarchy");
-        request.setSubmitter(customerSpace.getTenantId());
-        request.setKeepTemp(false);
-        request.setEnableSlack(false);
+        Map<BusinessEntity, Integer> finalRecordsMap = getMapObjectFromContext(FINAL_RECORDS, BusinessEntity.class, Integer.class);
+        int numAnalyticProducts = finalRecordsMap.getOrDefault(BusinessEntity.ProductHierarchy, 0);
+        hasHierarchyProduct = numAnalyticProducts > 0;
+        if (hasHierarchyProduct) {
+            masterTableName = masterTable.getName();
+            PipelineTransformationRequest request = new PipelineTransformationRequest();
+            request.setName("ProfileProductHierarchy");
+            request.setSubmitter(customerSpace.getTenantId());
+            request.setKeepTemp(false);
+            request.setEnableSlack(false);
 
-        TransformationStepConfig standardization = standardization();
-        TransformationStepConfig sort = sort();
-        // -----------
-        List<TransformationStepConfig> steps = Arrays.asList(standardization, sort);
-        // -----------
-        request.setSteps(steps);
-        return request;
+            TransformationStepConfig standardization = standardization();
+            TransformationStepConfig sort = sort();
+            // -----------
+            List<TransformationStepConfig> steps = Arrays.asList(standardization, sort);
+            // -----------
+            request.setSteps(steps);
+            return request;
+        } else {
+            updateEntityValueMapInContext(BusinessEntity.ProductHierarchy, RESET_ENTITIES, true, Boolean.class);
+            return null;
+        }
     }
 
     private TransformationStepConfig standardization() {

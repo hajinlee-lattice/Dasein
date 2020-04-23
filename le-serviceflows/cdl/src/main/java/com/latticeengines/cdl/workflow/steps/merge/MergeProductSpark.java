@@ -172,6 +172,7 @@ public class MergeProductSpark extends BaseSparkStep<ProcessProductStepConfigura
         finalRecordsMap.put(BusinessEntity.Product, Long.valueOf(mergeReport.getAnalyticProducts()).intValue());
         finalRecordsMap.put(BusinessEntity.ProductHierarchy, Long.valueOf(mergeReport.getHierarchyProducts()).intValue());
         putObjectInContext(FINAL_RECORDS, finalRecordsMap);
+        log.info("FINAL_RECORDS={}", JsonUtils.serialize(finalRecordsMap));
     }
 
 }
