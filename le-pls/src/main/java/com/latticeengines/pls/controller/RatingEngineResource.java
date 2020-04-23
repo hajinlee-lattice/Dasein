@@ -6,6 +6,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.RequestEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,8 +22,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -32,7 +39,9 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
+import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -42,6 +51,7 @@ import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageR
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.pls.service.RatingEngineService;
+import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,8 +62,17 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_RatingEngines')")
 public class RatingEngineResource {
 
+    private static Logger log = LoggerFactory.getLogger(RatingEngineResource.class);
+
+    private static final String RATING_DELETE_FAILED_TITLE = "Cannot delete Model";
+    private static final String RATING_DELETE_FAILED_MODEL_IN_USE_TITLE = "Model In Use";
+    private static final String RATING_DELETE_FAILED_MODEL_IN_USE = "This model is in use and cannot be deleted until the dependency has been removed.";
+
     @Inject
     private RatingEngineService ratingEngineService;
+
+    @Inject
+    private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
     @GetMapping(value = "")
     @ResponseBody
@@ -143,7 +162,15 @@ public class RatingEngineResource {
     public RatingEngine createOrUpdateRatingEngine(@RequestBody RatingEngine ratingEngine,
             @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment, //
             @RequestParam(value = "create-action", required = false, defaultValue = "true") Boolean createAction) {
-        return ratingEngineService.createOrUpdateRatingEngine(ratingEngine, unlinkSegment, createAction);
+        try {
+            return ratingEngineService.createOrUpdateRatingEngine(ratingEngine, unlinkSegment, createAction);
+        } catch (Exception ex) {
+            if (ex instanceof LedpException) {
+                LedpCode code = ((LedpException) ex).getCode();
+                throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, code);
+            }
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+        }
     }
 
     @DeleteMapping(value = "/{ratingEngineId}")
@@ -152,8 +179,26 @@ public class RatingEngineResource {
     @PreAuthorize("hasRole('Edit_PLS_RatingEngines')")
     public Boolean deleteRatingEngine(@PathVariable String ratingEngineId, //
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
-        ratingEngineService.deleteRatingEngine(ratingEngineId, hardDelete);
-        return true;
+        try {
+            return ratingEngineService.deleteRatingEngine(ratingEngineId, hardDelete);
+        } catch (Exception ex) {
+            if (ex instanceof LedpException) {
+                LedpException exp = (LedpException) ex;
+                if (exp.getCode() == LedpCode.LEDP_40042) {
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40042,
+                            View.Modal, RATING_DELETE_FAILED_MODEL_IN_USE_TITLE, RATING_DELETE_FAILED_MODEL_IN_USE);
+                } else if (exp.getCode() == LedpCode.LEDP_18181) {
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_18181,
+                            View.Modal, RATING_DELETE_FAILED_TITLE, null);
+                } else {
+                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, exp.getCode(), View.Banner,
+                            RATING_DELETE_FAILED_TITLE, null);
+                }
+            } else {
+                throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, null, View.Banner,
+                        RATING_DELETE_FAILED_TITLE, null);
+            }
+        }
     }
 
     @PutMapping(value = "/{ratingEngineId}/revertdelete")
@@ -199,7 +244,11 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Create a Rating Model iteration associated with a Rating Engine given its id")
     public RatingModel createModelIteration(@PathVariable String ratingEngineId, @RequestBody RatingModel ratingModel) {
-        return ratingEngineService.createModelIteration(ratingEngineId, ratingModel);
+        try {
+            return ratingEngineService.createModelIteration(ratingEngineId, ratingModel);
+        } catch (Exception ex) {
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+        }
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}")
@@ -214,7 +263,11 @@ public class RatingEngineResource {
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id")
     public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
-        return ratingEngineService.updateRatingModel(ratingModel, ratingEngineId, ratingModelId);
+        try {
+            return ratingEngineService.updateRatingModel(ratingModel, ratingEngineId, ratingModelId);
+        } catch (Exception ex) {
+            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
+        }
     }
 
     @GetMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/metadata", headers = "Accept=application/json")
@@ -271,7 +324,15 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
     public Map<String, UIAction> getRatingEnigneDependenciesModelAndView(@PathVariable String ratingEngineId) {
-        return ratingEngineService.getRatingEnigneDependenciesModelAndView(ratingEngineId);
+        Map<String, List<String>> dependencies = ratingEngineService.getRatingEngineDependencies(ratingEngineId);
+        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model is safe to edit", View.Notice,
+                Status.Success, null);
+        if (MapUtils.isNotEmpty(dependencies)) {
+            String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies, "This model is in use.", null);
+            uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Banner, Status.Warning,
+                    message);
+        }
+        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 
     @PostMapping(value = "/{ratingEngineId}/notes")
@@ -346,7 +407,14 @@ public class RatingEngineResource {
     @ApiOperation(value = "Validate whether the given RatingModel of the Rating Engine is valid for modeling")
     public boolean validateForModeling(@PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId) {
-        return ratingEngineService.validateForModeling(ratingEngineId, ratingModelId);
+        try {
+            return ratingEngineService.validateForModeling(ratingEngineId, ratingModelId);
+        } catch (LedpException e) {
+            throw generateUIActionException(e, ratingEngineId, ratingModelId);
+        } catch (Exception ex) {
+            log.error("Failed to validate due to an unknown server error.", ex);
+            throw new RuntimeException("Unable to validate due to an unknown server error");
+        }
     }
 
     @PostMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model/validate")
@@ -355,7 +423,24 @@ public class RatingEngineResource {
     public boolean validateForModeling(@PathVariable String ratingEngineId, //
             @PathVariable String ratingModelId, //
             @RequestBody RatingEngine ratingEngine) {
-        return ratingEngineService.validateForModeling(ratingEngineId, ratingModelId, ratingEngine);
+        try {
+            return ratingEngineService.validateForModeling(ratingEngineId, ratingModelId, ratingEngine);
+        } catch (LedpException e) {
+            throw generateUIActionException(e, ratingEngineId, ratingModelId);
+        } catch (Exception ex) {
+            log.error("Failed to validate due to an unknown server error.", ex);
+            throw new RuntimeException("Unable to validate due to an unknown server error");
+        }
+    }
+
+    private UIActionException generateUIActionException(LedpException e, String ratingEngineId, String ratingModelId) {
+        log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId, ratingEngineId), e);
+        UIAction uiAction = new UIAction();
+        uiAction.setTitle("Validation Error");
+        uiAction.setView(View.Banner);
+        uiAction.setStatus(Status.Error);
+        uiAction.setMessage(e.getMessage());
+        return new UIActionException(uiAction, LedpCode.LEDP_40046);
     }
 
 }

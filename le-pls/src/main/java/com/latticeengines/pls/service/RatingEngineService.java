@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -79,7 +78,7 @@ public interface RatingEngineService {
 
     Map<String, List<String>> getRatingEngineDependencies(String ratingEngineId);
 
-    Map<String, UIAction> getRatingEnigneDependenciesModelAndView(String ratingEngineId);
+    Map<String, List<String>> getRatingEnigneDependenciesModelAndView(String ratingEngineId);
 
     Boolean createNote(String ratingEngineId, NoteParams noteParams);
 

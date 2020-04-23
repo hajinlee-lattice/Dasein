@@ -12,13 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -31,9 +29,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelWithPublishedHistoryDTO;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.frontend.Status;
-import com.latticeengines.domain.exposed.pls.frontend.UIAction;
-import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -55,10 +50,6 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
 
-    private static final String RATING_DELETE_FAILED_TITLE = "Cannot delete Model";
-    private static final String RATING_DELETE_FAILED_MODEL_IN_USE_TITLE = "Model In Use";
-    private static final String RATING_DELETE_FAILED_MODEL_IN_USE = "This model is in use and cannot be deleted until the dependency has been removed.";
-
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
@@ -67,9 +58,6 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     @Inject
     private RatingCoverageProxy ratingCoverageProxy;
-
-    @Inject
-    private GraphDependencyToUIActionUtil graphDependencyToUIActionUtil;
 
     @Override
     public List<RatingEngineSummary> getRatingEngineSummaries(String status, String type, Boolean publishedRatingsOnly) {
@@ -129,45 +117,15 @@ public class RatingEngineServiceImpl implements RatingEngineService {
         Tenant tenant = MultiTenantContext.getTenant();
         String user = MultiTenantContext.getEmailAddress();
         ratingEngine.setUpdatedBy(user);
-        RatingEngine res;
-        try {
-            cleanupBucketsInRules(ratingEngine);
-            res = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine, user, unlinkSegment,
-                    createAction);
-        } catch (Exception ex) {
-            if (ex instanceof LedpException) {
-                LedpCode code = ((LedpException) ex).getCode();
-                throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, code);
-            }
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
-        }
-        return res;
+        cleanupBucketsInRules(ratingEngine);
+        return ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine, user, unlinkSegment,
+                createAction);
     }
 
     @Override
     public Boolean deleteRatingEngine(String ratingEngineId, Boolean hardDelete) {
         Tenant tenant = MultiTenantContext.getTenant();
-        try {
-            ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete,
-                    MultiTenantContext.getEmailAddress());
-        } catch (Exception ex) {
-            if (ex instanceof LedpException) {
-                LedpException exp = (LedpException) ex;
-                if (exp.getCode() == LedpCode.LEDP_40042) {
-                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40042,
-                            View.Modal, RATING_DELETE_FAILED_MODEL_IN_USE_TITLE, RATING_DELETE_FAILED_MODEL_IN_USE);
-                } else if (exp.getCode() == LedpCode.LEDP_18181) {
-                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_18181,
-                            View.Modal, RATING_DELETE_FAILED_TITLE, null);
-                } else {
-                    throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, exp.getCode(), View.Banner,
-                            RATING_DELETE_FAILED_TITLE, null);
-                }
-            } else {
-                throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, null, View.Banner,
-                        RATING_DELETE_FAILED_TITLE, null);
-            }
-        }
+        ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete, MultiTenantContext.getEmailAddress());
         return true;
     }
 
@@ -207,11 +165,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     @Override
     public RatingModel createModelIteration(String ratingEngineId, RatingModel ratingModel) {
         Tenant tenant = MultiTenantContext.getTenant();
-        try {
-            return ratingEngineProxy.createModelIteration(tenant.getId(), ratingEngineId, ratingModel);
-        } catch (Exception ex) {
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
-        }
+        return ratingEngineProxy.createModelIteration(tenant.getId(), ratingEngineId, ratingModel);
     }
 
     @Override
@@ -224,14 +178,9 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     public RatingModel updateRatingModel(RatingModel ratingModel, String ratingEngineId, String ratingModelId) {
         Tenant tenant = MultiTenantContext.getTenant();
         String user = MultiTenantContext.getEmailAddress();
-        RatingModel res;
-        try {
-            cleanupBucketsInRules(ratingModel);
-            res = ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId, ratingModel, user);
-        } catch (Exception ex) {
-            throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
-        }
-        return res;
+        cleanupBucketsInRules(ratingModel);
+        return ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId, ratingModel, user);
+
     }
 
     @Override
@@ -276,19 +225,10 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     }
 
     @Override
-    public Map<String, UIAction> getRatingEnigneDependenciesModelAndView(String ratingEngineId) {
+    public Map<String, List<String>> getRatingEnigneDependenciesModelAndView(String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));
-        Map<String, List<String>> dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(),
-                ratingEngineId);
-        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model is safe to edit", View.Notice,
-                Status.Success, null);
-        if (MapUtils.isNotEmpty(dependencies)) {
-            String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies, "This model is in use.", null);
-            uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Banner, Status.Warning,
-                    message);
-        }
-        return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
+        return ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngineId);
     }
 
     @Override
@@ -362,21 +302,8 @@ public class RatingEngineServiceImpl implements RatingEngineService {
 
     @Override
     public boolean validateForModeling(String ratingEngineId, String ratingModelId) {
-        try {
-            Tenant tenant = MultiTenantContext.getTenant();
-            return ratingEngineProxy.validateForModelingByRatingEngineId(tenant.getId(), ratingEngineId, ratingModelId);
-        } catch (LedpException e) {
-            log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId, ratingEngineId), e);
-            UIAction uiAction = new UIAction();
-            uiAction.setTitle("Validation Error");
-            uiAction.setView(View.Banner);
-            uiAction.setStatus(Status.Error);
-            uiAction.setMessage(e.getMessage());
-            throw new UIActionException(uiAction, LedpCode.LEDP_40046);
-        } catch (Exception ex) {
-            log.error("Failed to validate due to an unknown server error.", ex);
-            throw new RuntimeException("Unable to validate due to an unknown server error");
-        }
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.validateForModelingByRatingEngineId(tenant.getId(), ratingEngineId, ratingModelId);
     }
 
     @Override
@@ -386,21 +313,8 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             throw new LedpException(LedpCode.LEDP_32000,
                     new String[]{"LatestIteration of the given Model is Null or unsupported for validation"});
         }
-        try {
-            Tenant tenant = MultiTenantContext.getTenant();
-            return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId, ratingModelId, ratingEngine);
-        } catch (LedpException e) {
-            log.error(String.format("Invalid rating model %s in rating engine %s", ratingModelId, ratingEngineId), e);
-            UIAction uiAction = new UIAction();
-            uiAction.setTitle("Validation Error");
-            uiAction.setView(View.Banner);
-            uiAction.setStatus(Status.Error);
-            uiAction.setMessage(e.getMessage());
-            throw new UIActionException(uiAction, LedpCode.LEDP_40046);
-        } catch (Exception ex) {
-            log.error("Failed to validate due to an unknown server error.", ex);
-            throw new RuntimeException("Unable to validate due to an unknown server error");
-        }
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.validateForModeling(tenant.getId(), ratingEngineId, ratingModelId, ratingEngine);
     }
 
     private void cleanupBucketsInRules(RatingEngine re) {
