@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.util;
 
+import static com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar.Mode.STARTING_DATE;
+
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -14,6 +16,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 public class TimeFilterTranslatorUnitTestNG {
 
@@ -137,5 +140,19 @@ public class TimeFilterTranslatorUnitTestNG {
 
     private TimeFilterTranslator getTranslator() {
         return new TimeFilterTranslator(PeriodStrategy.NATURAL_PERIODS, "2018-02-17");
+    }
+
+    @Test(groups = "manual")
+    private void manual() {
+        // for getting period ID, range, etc. with business calendar
+        BusinessCalendar c = new BusinessCalendar();
+        c.setLongerMonth(1);
+        c.setMode(STARTING_DATE);
+        c.setStartingDate("NOV-30");
+        TimeFilterTranslator translator = new TimeFilterTranslator(Collections.singletonList(new PeriodStrategy(c, PeriodStrategy.Template.Week)), "2019-11-30");
+        TimeFilter filter = new TimeFilter(//
+                ComparisonType.WITHIN, PeriodStrategy.Template.Week.name(), Collections.singletonList(2));
+        System.out.println(translator.translateRange(filter));
+        System.out.println(translator.periodIdRangeToDateRange("Week", translator.translateRange(filter)));
     }
 }

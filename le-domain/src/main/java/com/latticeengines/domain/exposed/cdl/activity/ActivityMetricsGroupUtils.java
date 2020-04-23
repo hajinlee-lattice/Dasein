@@ -31,6 +31,9 @@ public final class ActivityMetricsGroupUtils {
     protected ActivityMetricsGroupUtils() {
         throw new UnsupportedOperationException();
     }
+
+    public static final String NO_BATCH = "NO_BATCH";
+
     private static final int GROUPID_UPPER_BOUND = 6;
     private static final int GROUPID_LOWER_BOUND = 3;
     private static final Pattern ATTR_NAME_PATTERN = //

@@ -54,7 +54,7 @@ public class PrepareForActivityStream extends BaseWorkflowStep<ProcessActivitySt
      * return all stream names that requires rebuild
      */
     private Set<String> streamsNeedRebuild(@NotNull Map<String, AtlasStream> previousStreams,
-            @NotNull Map<String, AtlasStream> currentStreams) {
+                                           @NotNull Map<String, AtlasStream> currentStreams) {
         // treat every new stream as rebuild
         Set<String> streamNames = new HashSet<>(Sets.difference(currentStreams.keySet(), previousStreams.keySet()));
 
@@ -114,7 +114,7 @@ public class PrepareForActivityStream extends BaseWorkflowStep<ProcessActivitySt
     }
 
     private void logStreamChanged(@NotNull String varName, @NotNull String streamId, Object previousVal,
-            Object currentVal) {
+                                  Object currentVal) {
         log.info("{} changed for stream {}, require rebuild. previous={}, current={}", varName, streamId, previousVal,
                 currentVal);
     }

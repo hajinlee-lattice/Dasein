@@ -8,12 +8,14 @@ import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatte
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMedium;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.SourceMediumId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.UserId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.WebVisitPageUrl;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__Row_Count__;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.__StreamDateId;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
@@ -37,6 +41,7 @@ import com.latticeengines.domain.exposed.cdl.activity.DimensionMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
+import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata;
 import com.latticeengines.domain.exposed.spark.cdl.AggDailyActivityConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
@@ -57,8 +62,15 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final String STREAM_ID = "daily_agg_stream";
     private static final String DAY_1 = "2019-07-01";
     private static final String DAY_2 = "2019-07-02";
+    private static final String DAY_3 = "2019-07-03";
+    private static final String DAY_9 = "2019-07-09";
     private static final Integer DAY_PERIOD_1 = DateTimeUtils.dateToDayPeriod(DAY_1);
     private static final Integer DAY_PERIOD_2 = DateTimeUtils.dateToDayPeriod(DAY_2);
+    private static final Integer DAY_PERIOD_3 = DateTimeUtils.dateToDayPeriod(DAY_3);
+    private static final Integer DAY_PERIOD_9 = DateTimeUtils.dateToDayPeriod(DAY_9);
+    private static final long DAY_1_EPOCH = 1561964400000L;
+    private static final long DAY_2_EPOCH = 1562050800000L;
+    private static final long DAY_3_EPOCH = 1562137200000L;
     private static final String ALL_CTN_PAGE_PTN_NAME = "all content pages";
     private static final String ALL_CTN_PAGE_PTN_HASH = DimensionGenerator.hashDimensionValue(ALL_CTN_PAGE_PTN_NAME);
     private static final String ALL_CTN_PAGE_PTN_ID = "1";
@@ -88,13 +100,94 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     private void test() {
-        // TODO add another stream
         AggDailyActivityConfig config = baseConfig();
         prepareTestData();
         log.info("Config = {}", JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config);
         log.info("Result = {}", JsonUtils.serialize(result));
         verifyResult(result);
+    }
+
+    @Test(groups = "functional")
+    private void testIncrementalMode() {
+        List<String> inputs = Arrays.asList(setupDeltaImport(), setupDailyBatchStore());
+        AggDailyActivityConfig config = incrConfig(true);
+        SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        Assert.assertNotNull(outputMetadata);
+        Assert.assertTrue(MapUtils.isNotEmpty(outputMetadata.getMetadata()));
+        Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
+        Assert.assertEquals(result.getTargets().size(), 2);
+    }
+
+    @Test(groups = "functional")
+    private void testIncrementalModeNoBatch() {
+        List<String> inputs = Collections.singletonList(setupDeltaImport());
+        AggDailyActivityConfig config = incrConfig(false);
+        SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        Assert.assertNotNull(outputMetadata);
+        Assert.assertTrue(MapUtils.isNotEmpty(outputMetadata.getMetadata()));
+        Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
+        Assert.assertEquals(result.getTargets().size(), 2);
+    }
+
+    private AggDailyActivityConfig incrConfig(boolean withBatch) {
+        AggDailyActivityConfig config = new AggDailyActivityConfig();
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        details.setStartIdx(0);
+        if (!withBatch) {
+            details.setLabels(Collections.singletonList(ActivityMetricsGroupUtils.NO_BATCH));
+        }
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        config.streamDateAttrs.put(STREAM_ID, WebVisitDate.name());
+        config.dimensionMetadataMap.put(STREAM_ID, webVisitMetadata());
+        config.dimensionCalculatorMap.put(STREAM_ID, webVisitDimensionCalculators());
+        config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(SourceMediumId.name(), PathPatternId.name()));
+        config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
+        config.dimensionValueIdMap.putAll(DIMENSION_HASH_ID_MAP);
+        config.incrementalStreams.add(STREAM_ID);
+
+        return config;
+    }
+
+    private String setupDailyBatchStore() {
+        List<Pair<String, Class<?>>> inputFields = Arrays.asList( //
+                Pair.of(PathPatternId.name(), Integer.class), //
+                Pair.of(SourceMediumId.name(), Integer.class), //
+                Pair.of(AccountId.name(), String.class), //
+                Pair.of(__StreamDate.name(), String.class), //
+                Pair.of(__StreamDateId.name(), Integer.class), //
+                Pair.of(__Row_Count__.name(), Integer.class), //
+                Pair.of(LastActivityDate.name(), Integer.class)
+        );
+        Object[][] data = new Object[][]{
+                {1, 3, "a1", DAY_1, DAY_PERIOD_1, 2, DAY_PERIOD_1},
+                {1, 3, "a1", DAY_2, DAY_PERIOD_2, 3, DAY_PERIOD_2},
+                {2, 3, "a1", DAY_1, DAY_PERIOD_1, 1, DAY_PERIOD_1},
+                {2, 3, "a9", DAY_9, DAY_PERIOD_9, 27, DAY_PERIOD_9}
+        };
+        return uploadHdfsDataUnit(data, inputFields);
+    }
+
+    private String setupDeltaImport() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId.name(), String.class), //
+                Pair.of(SourceMedium.name(), String.class), //
+                Pair.of(WebVisitPageUrl.name(), String.class), //
+                Pair.of(WebVisitDate.name(), Long.class));
+        Object[][] data = new Object[][]{
+                {"a1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_3_EPOCH},
+                {"a1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_1_EPOCH},
+                {"a2", "Google/Paid", "https://dnb.com/contents/videos/2", DAY_2_EPOCH}
+        };
+        return uploadHdfsDataUnit(data, fields);
     }
 
     @Override
@@ -115,35 +208,35 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private Map<String, Long> getExpectedRowCounts() {
-        Object[][] expectedResults = new Object[][] { //
-                { "a1", "u1", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 2L }, //
-                { "a1", "u1", GOOGLE_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_ORGANIC_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u2", GOOGLE_ORGANIC_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L }, //
-                { "a1", "u1", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_2, 3L }, //
+        Object[][] expectedResults = new Object[][]{ //
+                {"a1", "u1", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 2L}, //
+                {"a1", "u1", GOOGLE_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L}, //
+                {"a1", "u2", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L}, //
+                {"a1", "u2", GOOGLE_ORGANIC_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L}, //
+                {"a1", "u2", GOOGLE_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L}, //
+                {"a1", "u2", GOOGLE_ORGANIC_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L}, //
+                {"a1", "u1", FACEBOOK_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_1, 1L}, //
+                {"a1", "u1", FACEBOOK_PAID_SRC_ID, VIDEO_CTN_PAGE_PTN_ID, DAY_1, 1L}, //
+                {"a1", "u1", GOOGLE_PAID_SRC_ID, ALL_CTN_PAGE_PTN_ID, DAY_2, 3L}, //
                 /*-
                  * source null
                  */
-                { "a1", "u1", null, ALL_CTN_PAGE_PTN_ID, DAY_2, 2L }, //
-                { "a1", "u1", null, VIDEO_CTN_PAGE_PTN_ID, DAY_2, 1L }, //
-                { "a1", "u2", null, ALL_CTN_PAGE_PTN_ID, DAY_1, 2L }, //
-                { "a1", "u2", null, ALL_CTN_PAGE_PTN_ID, DAY_2, 3L }, //
-                { "a1", "u2", null, VIDEO_CTN_PAGE_PTN_ID, DAY_2, 2L }, //
+                {"a1", "u1", null, ALL_CTN_PAGE_PTN_ID, DAY_2, 2L}, //
+                {"a1", "u1", null, VIDEO_CTN_PAGE_PTN_ID, DAY_2, 1L}, //
+                {"a1", "u2", null, ALL_CTN_PAGE_PTN_ID, DAY_1, 2L}, //
+                {"a1", "u2", null, ALL_CTN_PAGE_PTN_ID, DAY_2, 3L}, //
+                {"a1", "u2", null, VIDEO_CTN_PAGE_PTN_ID, DAY_2, 2L}, //
                 /*-
                  * url null
                  */
-                { "a1", "u1", GOOGLE_PAID_SRC_ID, null, DAY_2, 2L }, //
-                { "a1", "u1", FACEBOOK_PAID_SRC_ID, null, DAY_2, 1L }, //
+                {"a1", "u1", GOOGLE_PAID_SRC_ID, null, DAY_2, 2L}, //
+                {"a1", "u1", FACEBOOK_PAID_SRC_ID, null, DAY_2, 1L}, //
                 /*-
                  * both null
                  */
-                { "a1", "u1", null, null, DAY_1, 3L }, //
-                { "a1", "u2", null, null, DAY_1, 2L }, //
-                { "a1", "u1", null, null, DAY_2, 1L }, //
+                {"a1", "u1", null, null, DAY_1, 3L}, //
+                {"a1", "u2", null, null, DAY_1, 2L}, //
+                {"a1", "u1", null, null, DAY_2, 1L}, //
 
         };
         return Arrays.stream(expectedResults) //
@@ -180,7 +273,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private void prepareTestData() {
-        Object[][] data = new Object[][] { //
+        Object[][] data = new Object[][]{ //
                 /*-
                  * both url & source match
                  * 1. a1,u1,Google/Paid,all_content_pages,Day1 => row=2
@@ -193,14 +286,14 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                  * 8. a1,u1,Facebook/Paid,all_video_content_pages,Day1 => row=1
                  * 9. a1,u1,Google/Paid,all_content_pages,Day2 => row=3
                  */
-                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", "Facebook/Paid", "https://dnb.com/contents/videos/1", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", "Google/Organic", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", "Google/Paid", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/3", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/5", DAY_PERIOD_2, DAY_2 }, //
+                {"a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u1", "Facebook/Paid", "https://dnb.com/contents/videos/1", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u1", "Google/Paid", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u2", "Google/Organic", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u2", "Google/Paid", "https://dnb.com/contents/videos/2", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_PERIOD_2, DAY_2}, //
+                {"a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/3", DAY_PERIOD_2, DAY_2}, //
+                {"a1", "u1", "Google/Paid", "https://dnb.com/contents/audios/5", DAY_PERIOD_2, DAY_2}, //
                 /*-
                  * only source not match
                  * 1. a1,u1,null,all_content_pages,Day2 => row=2
@@ -209,40 +302,46 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                  * 4. a1,u2,null,all_content_pages,Day2 => row=3
                  * 5. a1,u2,null,all_video_content_pages,Day2 => row=2
                  */
-                { "a1", "u1", "Netflix/Paid", "https://dnb.com/contents/videos/4", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "", "https://dnb.com/contents/audio/5", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u2", null, "https://dnb.com/contents/images/3", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", "sdkljflsjk", "https://dnb.com/contents/audios/5", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", "sdkljflsjk", "https://dnb.com/contents/audios/5", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u2", "", "https://dnb.com/contents/videos/6", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u2", "", "https://dnb.com/contents/videos/9", DAY_PERIOD_2, DAY_2 }, //
+                {"a1", "u1", "Netflix/Paid", "https://dnb.com/contents/videos/4", DAY_PERIOD_2, DAY_2}, //
+                {"a1", "u1", "", "https://dnb.com/contents/audio/5", DAY_PERIOD_2, DAY_2}, //
+                {"a1", "u2", null, "https://dnb.com/contents/images/3", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u2", "sdkljflsjk", "https://dnb.com/contents/audios/5", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u2", "sdkljflsjk", "https://dnb.com/contents/audios/5", DAY_PERIOD_2, DAY_2}, //
+                {"a1", "u2", "", "https://dnb.com/contents/videos/6", DAY_PERIOD_2, DAY_2}, //
+                {"a1", "u2", "", "https://dnb.com/contents/videos/9", DAY_PERIOD_2, DAY_2}, //
                 /*-
                  * only url not match
                  * 1. a1,u1,Google/Paid,null,Day2 => row=2
                  * 2. a1,u1,Facebook/Paid,null,Day2 => row=1
                  */
-                { "a1", "u1", "Google/Paid", "https://dnb.com/users/5", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "Facebook/Paid", "https://dnb.com/users/4", DAY_PERIOD_2, DAY_2 }, //
-                { "a1", "u1", "Google/Paid", "https://dnb.com/users/3", DAY_PERIOD_2, DAY_2 }, //
+                {"a1", "u1", "Google/Paid", "https://dnb.com/users/5", DAY_PERIOD_2, DAY_2}, //
+                {"a1", "u1", "Facebook/Paid", "https://dnb.com/users/4", DAY_PERIOD_2, DAY_2}, //
+                {"a1", "u1", "Google/Paid", "https://dnb.com/users/3", DAY_PERIOD_2, DAY_2}, //
                 /*-
                  * both url & source not match any value in dimension value space
                  * 1. a1,u1,null,null,Day1 => row=3
                  * 2. a1,u2,null,null,Day1 => row=2
                  * 3. a1,u1,null,null,Day2 => row=1
                  */
-                { "a1", "u1", "Netflix/Paid", null, DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", "", "/test", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", "", "", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", null, null, DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u2", null, "/hello", DAY_PERIOD_1, DAY_1 }, //
-                { "a1", "u1", "Netflix/Paid", "/hello", DAY_PERIOD_2, DAY_2 }, //
+                {"a1", "u1", "Netflix/Paid", null, DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u1", "", "/test", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u1", "", "", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u2", null, null, DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u2", null, "/hello", DAY_PERIOD_1, DAY_1}, //
+                {"a1", "u1", "Netflix/Paid", "/hello", DAY_PERIOD_2, DAY_2}, //
         };
         uploadHdfsDataUnit(data, RAW_STREAM_FIELDS);
     }
 
     private AggDailyActivityConfig baseConfig() {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
-        config.rawStreamInputIdx.put(STREAM_ID, 0);
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        details.setStartIdx(0);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
         config.streamDateAttrs.put(STREAM_ID, __StreamDateId.name());
         config.dimensionMetadataMap.put(STREAM_ID, webVisitMetadata());
         config.dimensionCalculatorMap.put(STREAM_ID, webVisitDimensionCalculators());

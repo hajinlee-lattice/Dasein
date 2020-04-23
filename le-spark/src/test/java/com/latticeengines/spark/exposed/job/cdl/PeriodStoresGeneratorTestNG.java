@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,8 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -30,6 +33,8 @@ import com.latticeengines.spark.util.DeriveAttrsUtils;
 
 public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(PeriodStoresGeneratorTestNG.class);
+
     private static final String PathPatternId = "PathPatternId";
     private static final String SourceMediumId = "SourceMediumId";
     private static final String AccountId = InterfaceName.AccountId.name();
@@ -46,9 +51,10 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static List<String> OUTPUT_FIELDS_NO_REDUCER;
     private static List<String> OUTPUT_FIELDS_WITH_REDUCER;
     private static List<String> PERIODS = Arrays.asList(PeriodStrategy.Template.Week.name(), PeriodStrategy.Template.Month.name());
-    private static List<String> PERIODS_FOR_REDUCER = Collections.singletonList(PeriodStrategy.Template.Week.name());
+    private static List<String> SINGLE_PERIOD = Collections.singletonList(PeriodStrategy.Template.Week.name());
     private static AtlasStream STREAM;
     private static AtlasStream STREAM_WITH_REDUCER;
+    private static AtlasStream INCREMENTAL_STREAM;
     private static final String STREAM_ID = "abc123";
 
     @Test(groups = "functional")
@@ -78,6 +84,47 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         ActivityStoreSparkIOMetadata metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
         Assert.assertNotNull(metadata);
         verify(result, Collections.singletonList(this::verifyReduced));
+    }
+
+    @Test(groups = "functional")
+    public void testIncr() {
+        List<String> inputs = setupIncrStream(true);
+        DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
+        config.evaluationDate = "2019-10-28";
+        config.streams = Collections.singletonList(INCREMENTAL_STREAM);
+        config.incrementalStreams.add(STREAM_ID);
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, Details> detailsMap = new HashMap<>();
+        Details details = new Details();
+        details.setStartIdx(0);
+        details.setLabels(SINGLE_PERIOD);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+    }
+
+    @Test(groups = "functional")
+    public void testIncrNoBatch() {
+        List<String> inputs = setupIncrStream(false);
+        DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
+        config.evaluationDate = "2019-10-28";
+        config.streams = Collections.singletonList(INCREMENTAL_STREAM);
+        config.incrementalStreams.add(STREAM_ID);
+        config.streamsWithNoBatch.add(STREAM_ID);
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, Details> detailsMap = new HashMap<>();
+        Details details = new Details();
+        details.setStartIdx(0);
+        details.setLabels(Collections.emptyList());
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
     }
 
     private ActivityStoreSparkIOMetadata createInputMetadata() {
@@ -131,6 +178,53 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         return uploadHdfsDataUnit(data, inputFields);
     }
 
+    private List<String> setupIncrStream(boolean withBatch) {
+        if (INCREMENTAL_STREAM == null) {
+            setupIncrStream();
+        }
+        List<String> inputs = new ArrayList<>();
+        if (withBatch) {
+            inputs.add(setupPeriodBatchStore());
+        }
+        inputs.add(setupDeltaImport());
+        return inputs;
+    }
+
+    private String setupDeltaImport() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId, String.class), //
+                Pair.of(PathPatternId, String.class), //
+                Pair.of(SourceMediumId, String.class), //
+                Pair.of(StreamDate, String.class), //
+                Pair.of(Count, Integer.class), //
+                Pair.of(LastActivityDate, Integer.class)
+        );
+        Object[][] data = new Object[][]{ //
+                {"a1", "pp1", "s1", "2019-10-01", 1, 49825}, //
+                {"a1", "pp1", "s1", "2019-10-02", 4, 49826}, //
+                {"a1", "pp1", "s1", "2019-11-01", 3, 49857}, //
+                {"a10", "pp1", "s1", "2019-10-02", 2, 49826}, //
+                {"a10", "pp1", "s1", "2019-11-02", 9, 49858}
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupPeriodBatchStore() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId, String.class), //
+                Pair.of(PathPatternId, String.class), //
+                Pair.of(SourceMediumId, String.class),
+                Pair.of(Count, Integer.class), //
+                Pair.of(LastActivityDate, Integer.class), //
+                Pair.of(PeriodId, Integer.class), //
+                Pair.of(PeriodIdForPartition, Integer.class)
+        );
+        Object[][] data = new Object[][]{ //
+                {"a1", "pp1", "s1", 1, 49825, 1031, 1031}, // 2019-10-01 -> 1031
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
     private void setupStream() {
         AtlasStream stream = new AtlasStream();
         stream.setStreamId(STREAM_ID);
@@ -144,12 +238,22 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private void setupStreamWithReducer() {
         AtlasStream stream = new AtlasStream();
         stream.setStreamId(STREAM_ID);
-        stream.setPeriods(PERIODS_FOR_REDUCER);
+        stream.setPeriods(SINGLE_PERIOD);
         stream.setDimensions(Arrays.asList(prepareDimension(OpportunityId), prepareDimension(Stage)));
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
         stream.setReducer(prepareReducer());
 
         STREAM_WITH_REDUCER = stream;
+    }
+
+    private void setupIncrStream() {
+        AtlasStream stream = new AtlasStream();
+        stream.setStreamId(STREAM_ID);
+        stream.setPeriods(SINGLE_PERIOD);
+        stream.setDimensions(Arrays.asList(prepareDimension(PathPatternId), prepareDimension(SourceMediumId)));
+        stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
+
+        INCREMENTAL_STREAM = stream;
     }
 
     private ActivityRowReducer prepareReducer() {
