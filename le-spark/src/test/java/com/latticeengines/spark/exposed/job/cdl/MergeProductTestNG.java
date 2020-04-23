@@ -28,15 +28,10 @@ public class MergeProductTestNG extends SparkJobFunctionalTestNGBase {
         uploadTestData();
         units = Arrays.asList(1, 0);
 
-        MergeProductConfig config = prepareInput();
+        MergeProductConfig config = new MergeProductConfig();
         SparkJobResult result = runSparkJob(MergeProduct.class, config);
 
         verifyResult(result);
-    }
-
-    private MergeProductConfig prepareInput() {
-        MergeProductConfig config = new MergeProductConfig();
-        return config;
     }
 
     private void uploadTestData() {
@@ -133,7 +128,7 @@ public class MergeProductTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertEquals(report.getInvalidRecords(), 7);
         Assert.assertEquals(report.getBundleProducts(), 9);
         Assert.assertEquals(report.getHierarchyProducts(), 17);
-        Assert.assertEquals(report.getAnalyticProducts(), 8);
+        Assert.assertEquals(report.getAnalyticProducts(), 6);
         Assert.assertEquals(report.getSpendingProducts(), 26);
         Assert.assertTrue(CollectionUtils.isNotEmpty(report.getErrors()));
     }
@@ -141,7 +136,7 @@ public class MergeProductTestNG extends SparkJobFunctionalTestNGBase {
     @Override
     protected Boolean verifySingleTarget(HdfsDataUnit tgt) {
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            System.out.println(record);
+//            System.out.println(record);
         });
         return true;
     }
