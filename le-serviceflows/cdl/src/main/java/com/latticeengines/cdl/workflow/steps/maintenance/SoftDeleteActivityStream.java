@@ -44,6 +44,7 @@ public class SoftDeleteActivityStream extends BaseDeleteActivityStream<ProcessAc
         updateEntityValueMapInContext(PERFORM_SOFT_DELETE, Boolean.TRUE, Boolean.class);
         if (MapUtils.isNotEmpty(rawStreamTables)) {
             putObjectInContext(RAW_STREAM_TABLE_AFTER_DELETE, rawStreamTables);
+            log.info("Put updated raw stream table in context: {}", rawStreamTables);
         }
     }
 
