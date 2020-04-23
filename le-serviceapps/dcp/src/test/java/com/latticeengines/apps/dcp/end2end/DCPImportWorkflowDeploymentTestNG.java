@@ -3,7 +3,6 @@ package com.latticeengines.apps.dcp.end2end;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -66,7 +65,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private long uploadId;
     private String s3FileKey;
 
-    @BeforeClass(groups = {"deployment"})
+    @BeforeClass(groups = { "deployment" })
     public void setup() {
         setupTestEnvironment();
     }
@@ -124,7 +123,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setProjectType(Project.ProjectType.Type1);
         projectDetails = projectProxy.createDCPProject(mainCustomerSpace, projectRequest, "dcp_deployment@dnb.com");
         // Create Source
-        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
+        InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
+                TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName("ImportEnd2EndSource");
@@ -137,7 +137,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         dropPath = UploadS3PathBuilderUtils.combinePath(false, true,
                 UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
         s3FileKey = dropPath + TEST_ACCOUNT_DATA_FILE;
-        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket, s3FileKey);
+        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket,
+                s3FileKey);
     }
 
     private void verifyUploadStats(Upload upload) {
@@ -167,10 +168,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
-        String acceptedPath = UploadS3PathBuilderUtils.combinePath(false, false,
-                dropFolder, upload.getUploadConfig().getUploadMatchResultAccepted());
-        String rejectedPath = UploadS3PathBuilderUtils.combinePath(false, false,
-                dropFolder, upload.getUploadConfig().getUploadMatchResultRejected());
+        String acceptedPath = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+                upload.getUploadConfig().getUploadMatchResultAccepted());
+        String rejectedPath = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder,
+                upload.getUploadConfig().getUploadMatchResultRejected());
         String bucket = dropBoxSummary.getBucket();
         System.out.println("acceptedPath=" + acceptedPath);
         System.out.println("rejectedPath=" + rejectedPath);
