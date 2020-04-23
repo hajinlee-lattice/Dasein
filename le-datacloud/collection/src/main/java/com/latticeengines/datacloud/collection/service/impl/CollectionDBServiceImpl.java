@@ -42,9 +42,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.services.ecs.model.LaunchType;
 import com.amazonaws.services.ecs.model.Task;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.aws.ecs.ECSService;
+import com.latticeengines.aws.ecs.SpawnECSTaskRequest;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -164,6 +166,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Value("${datacloud.collection.high_priority.period}")
     private long highPriorityReqCheckPeriod;
 
+    @Value("${datacloud.collection.securitygroups}")
+    private String securityGroups;
+
     private long prevCollectMillis = 0;
     private long prevCleanupMillis = 0;
     private int prevCollectTasks;
@@ -279,14 +284,18 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             //spawn worker in aws, '-v vendor -w worker_id'
             String cmdLine = "-v " + vendor + " -w " + workerId;
-            String taskArn = ecsService.spawECSTask(
-                    ecsClusterName,
-                    ecsTaskDefName,
-                    "python",
-                    cmdLine,
-                    ecsTaskSubnets);
 
-            //create worker record in
+            // create worker record in
+            SpawnECSTaskRequest request = new SpawnECSTaskRequest();
+            request.setClusterName(ecsClusterName);
+            request.setTaskDefName(ecsTaskDefName);
+            request.setContainerName("python");
+            request.setCmdLine(cmdLine);
+            request.setTaskSubnets(ecsTaskSubnets);
+            request.setLaunchType(LaunchType.FARGATE.name());
+            request.setSecurityGroups(securityGroups);
+            String taskArn = ecsService.spawnECSTask(request);
+
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             CollectionWorker worker = new CollectionWorker();
             worker.setWorkerId(workerId);
@@ -359,14 +368,17 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
             //spawn worker in aws, '-v vendor -w worker_id'
             String cmdLine = "-v " + vendor + " -w " + workerId;
-            String taskArn = ecsService.spawECSTask(
-                    ecsClusterName,
-                    ecsTaskDefName,
-                    "python",
-                    cmdLine,
-                    ecsTaskSubnets);
+            // create worker record in
+            SpawnECSTaskRequest request = new SpawnECSTaskRequest();
+            request.setClusterName(ecsClusterName);
+            request.setTaskDefName(ecsTaskDefName);
+            request.setContainerName("python");
+            request.setCmdLine(cmdLine);
+            request.setTaskSubnets(ecsTaskSubnets);
+            request.setLaunchType(LaunchType.FARGATE.name());
+            request.setSecurityGroups(securityGroups);
+            String taskArn = ecsService.spawnECSTask(request);
 
-            //create worker record in
             Timestamp ts = new Timestamp(System.currentTimeMillis());
             CollectionWorker worker = new CollectionWorker();
             worker.setWorkerId(workerId);
