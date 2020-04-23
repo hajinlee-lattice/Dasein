@@ -40,7 +40,7 @@ import com.google.common.collect.Lists;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.EventTypeExtractor;
+import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -257,7 +257,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         timeLine1.setTimelineId(timelineName1);
         timeLine1.setEntity(BusinessEntity.Account.name());
         timeLine1.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
-        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+        Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
 
         mappingMap.put(AtlasStream.StreamType.MarketingActivity.name(),
                 TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.MarketingActivity));
@@ -275,7 +275,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         timeLine2.setTimelineId(timelineName);
         timeLine2.setEntity(BusinessEntity.Contact.name());
         timeLine2.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
-        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+        Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
 
         mappingMap.put(AtlasStream.StreamType.MarketingActivity.name(),
                 TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.MarketingActivity));
@@ -293,7 +293,7 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         timeLine3.setTimelineId(timelineName);
         timeLine3.setEntity(BusinessEntity.Account.name());
         timeLine3.setStreamTypes(Arrays.asList(AtlasStream.StreamType.Opportunity, AtlasStream.StreamType.WebVisit));
-        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+        Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
 
         mappingMap.put(AtlasStream.StreamType.WebVisit.name(),
                 TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.WebVisit));
@@ -312,7 +312,6 @@ public class TimelineJobTestNG extends SparkJobFunctionalTestNGBase {
         config.timeLineMap = timeLineMap;
         config.sortKey = "sortKey";
         config.partitionKey = "partitionKey";
-        config.customerSpace = "testTimeline";
         config.timelineVersionMap = timelineVersionMap;
         config.templateToSystemTypeMap = templateToSystemTypeMap;
         return config;

@@ -70,7 +70,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private DataCollection.Version inactive;
     private DataCollection.Version active;
 
-    private List<String> needRebuildTimelines;
+    private boolean needRebuild = false;
     //timelineId -> version
     private Map<String, String> timelineVersionMap;
 
@@ -98,23 +98,14 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         bumpVersion();
         dcStatus.setTimelineVersionMap(timelineVersionMap);
         putObjectInContext(CDL_COLLECTION_STATUS, dcStatus);
-        // streamId -> table name
-        Map<String, String> allStreamTables = null;
-        Map<String, String> newStreamImports = null;
         List<DataUnit> inputs = new ArrayList<>();
         TimeLineJobConfig config = new TimeLineJobConfig();
-        config.customerSpace = configuration.getCustomer();
         config.partitionKey = PARTITION_KEY_NAME;
         config.sortKey = SORT_KEY_NAME;
-        if (CollectionUtils.isNotEmpty(needRebuildTimelines)) {
-            allStreamTables = getAllStreamTables();
-        }
-        if (timeLineList.size() != needRebuildTimelines.size()) {
-            newStreamImports = getMapObjectFromContext(ENTITY_MATCH_STREAM_TARGETTABLE, String.class,
-                    String.class);
-        }
+
         //no atlasStreamTable, will skip
-        Map<String, String> sourceTables = MapUtils.isNotEmpty(allStreamTables)? allStreamTables : newStreamImports;
+        // streamId -> table name
+        Map<String, String> sourceTables = getInputStreamTables();
         if (MapUtils.isEmpty(sourceTables)) {
             log.info("can't find the atlasStream Tables, will skip generate timeline.");
             return null;
@@ -138,10 +129,10 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
                 sourceTables.entrySet().stream()
                         .filter(entry -> configuration.getActivityStreamMap().get(entry.getKey()) != null)
                         .map(entry -> Pair.of(entry.getValue(),
-                        configuration.getActivityStreamMap().get(entry.getKey()).getStreamType().name())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+                                configuration.getActivityStreamMap().get(entry.getKey()).getStreamType().name())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         //timelineId -> (BusinessEntity, streamTableName list)
         config.timelineRelatedStreamTables =
-                getTimelineRelatedStreamTables(timeLineList, allStreamTables, newStreamImports, config.timeLineMap);
+                getTimelineRelatedStreamTables(timeLineList, sourceTables, config.timeLineMap);
         config.timelineVersionMap = timelineVersionMap;
         return config;
     }
@@ -220,24 +211,38 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         if (CollectionUtils.isEmpty(tableNames)) {
             return Collections.emptyList();
         }
-
-        return tableNames.stream() //
-            .map(name -> {
-                streamInputIdx.put(name, inputs.size());
-                return metadataProxy.getTable(configuration.getCustomer(), name);
-            }) //
-            .map(table -> {
-                HdfsDataUnit du = table.partitionedToHdfsDataUnit(null, RAWSTREAM_PARTITION_KEYS);
-                inputs.add(du);
-                return du;
-            }) //
-            .collect(Collectors.toList());
+        if (needRebuild) {
+            return tableNames.stream() //
+                    .map(name -> {
+                        streamInputIdx.put(name, inputs.size());
+                        return metadataProxy.getTable(configuration.getCustomer(), name);
+                    }) //
+                    .map(table -> {
+                        HdfsDataUnit du = table.partitionedToHdfsDataUnit(null, RAWSTREAM_PARTITION_KEYS);
+                        inputs.add(du);
+                        return du;
+                    }) //
+                    .collect(Collectors.toList());
+        } else {
+            return tableNames.stream() //
+                    .map(name -> {
+                        streamInputIdx.put(name, inputs.size());
+                        return metadataProxy.getTable(configuration.getCustomer(), name);
+                    }) //
+                    .map(table -> {
+                        HdfsDataUnit du = table.toHdfsDataUnit(null);
+                        inputs.add(du);
+                        return du;
+                    }) //
+                    .collect(Collectors.toList());
+        }
     }
 
     //timeline -> (entity -> streamTableName list)
     private Map<String, Map<String, Set<String>>> getTimelineRelatedStreamTables(List<TimeLine> timeLineList,
-                                                                                           Map<String,
-            String> allStreamTables, Map<String, String> newStreamImports, Map<String, TimeLine> timeLineMap) {
+                                                                                 Map<String,
+                                                                                         String> streamTables,
+                                                                                 Map<String, TimeLine> timeLineMap) {
         Map<String, Map<String, Set<String>>> timelineRelatedStreamTables = new HashMap<>();
 
         for (TimeLine timeLine : timeLineList) {
@@ -245,27 +250,19 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
             Map<String, Set<String>> entityStreamSetMap;
             List<AtlasStream> streams =
                     configuration.getActivityStreamMap().entrySet().stream()
-                            .filter(entry -> validateStream(entry.getValue(), timeLine)).map(Map.Entry::getValue).collect(Collectors.toList());
+                            .filter(entry -> belongToTimeline(entry.getValue(), timeLine)).map(Map.Entry::getValue).collect(Collectors.toList());
             //streamId -> entity
             Map<String, String> streamIdEntityMap = configuration.getActivityStreamMap().entrySet().stream()
-                    .filter(entry -> validateStream(entry.getValue(), timeLine)).map(entry -> Pair.of(entry.getKey(),
+                    .filter(entry -> belongToTimeline(entry.getValue(), timeLine)).map(entry -> Pair.of(entry.getKey(),
                             getAtlasStreamEntityInTimeline(entry.getValue(), timeLine))).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
             if (CollectionUtils.isEmpty(streams)) {
                 continue;
             }
-            if (needRebuildTimelines.contains(timeLine.getTimelineId())) {
-                entityStreamSetMap = allStreamTables.entrySet().stream()
-                                .filter(entry -> (streamIdEntityMap.keySet().contains(entry.getKey()) && StringUtils.isNotEmpty(streamIdEntityMap.get(entry.getKey()))))
-                                .map(entry -> Pair.of(streamIdEntityMap.get(entry.getKey()), entry.getValue()))
-                                .collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue,
-                                        Collectors.toSet())));
-            } else {
-                entityStreamSetMap = newStreamImports.entrySet().stream()
-                                .filter(entry -> (streamIdEntityMap.keySet().contains(entry.getKey()) && StringUtils.isNotEmpty(streamIdEntityMap.get(entry.getKey()))))
-                                .map(entry -> Pair.of(streamIdEntityMap.get(entry.getKey()), entry.getValue()))
-                                .collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue,
-                                        Collectors.toSet())));
-            }
+            entityStreamSetMap = streamTables.entrySet().stream()
+                    .filter(entry -> (streamIdEntityMap.keySet().contains(entry.getKey()) && StringUtils.isNotEmpty(streamIdEntityMap.get(entry.getKey()))))
+                    .map(entry -> Pair.of(streamIdEntityMap.get(entry.getKey()), entry.getValue()))
+                    .collect(Collectors.groupingBy(Pair::getKey, Collectors.mapping(Pair::getValue,
+                            Collectors.toSet())));
             entityStreamSetMap =
                     entityStreamSetMap.entrySet().stream().filter(entry -> CollectionUtils.isNotEmpty(entry.getValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             if (MapUtils.isEmpty(entityStreamSetMap)) {
@@ -279,49 +276,73 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         return timelineRelatedStreamTables;
     }
 
+    //if rebuild or have new timeline which didn't create raw stream before, rebuild all timeline.
     private void checkRebuild() {
-        if (configuration.isShouldRebuild() || MapUtils.isEmpty(timelineVersionMap)) {
-            needRebuildTimelines = configuration.getTimeLineList().stream().map(TimeLine::getTimelineId).collect(Collectors.toList());
-            return;
+        if (configuration.isShouldRebuild()) {
+            needRebuild = true;
+        } else {
+            List<TimeLine> newTimelineList =
+                    configuration.getTimeLineList().stream().filter(timeline -> !timelineVersionMap.containsKey(timeline)).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(newTimelineList)) {
+                needRebuild = true;
+            }
         }
-        Set<String> hasVersionTimelines = timelineVersionMap.keySet();
-        needRebuildTimelines =
-                configuration.getTimeLineList().stream().filter(timeLine -> !hasVersionTimelines.contains(timeLine.getTimelineId())).map(TimeLine::getTimelineId).collect(Collectors.toList());
-
     }
 
     private void bumpVersion() {
+        String newVersion = generateNewVersion();
         Map<String, String> newTimelineVersionMap;
-        if (configuration.isShouldRebuild() || MapUtils.isEmpty(timelineVersionMap)) {
+        if (needRebuild) {
             newTimelineVersionMap =
                     configuration.getTimeLineList().stream().map(timeLine -> Pair.of(timeLine.getTimelineId(),
-                            generateNewVersion())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
+                            newVersion)).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         } else {
             newTimelineVersionMap = configuration.getTimeLineList().stream().map(timeLine -> {
-                String version = timelineVersionMap.containsKey(timeLine.getTimelineId()) ?
-                        timelineVersionMap.get(timeLine.getTimelineId()) : generateNewVersion();
+                String version = timelineVersionMap.getOrDefault(timeLine.getTimelineId(), newVersion);
                 return Pair.of(timeLine.getTimelineId(), version);
             }).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         }
         timelineVersionMap = newTimelineVersionMap;
     }
 
-    private boolean validateStream(AtlasStream atlasStream, TimeLine timeLine) {
-        if (!timeLine.getStreamTypes().contains(atlasStream.getStreamType()) && !timeLine.getStreamIds().contains(atlasStream.getStreamId())) {
+    private boolean belongToTimeline(AtlasStream atlasStream, TimeLine timeLine) {
+        if ((timeLine.getStreamTypes() == null || !timeLine.getStreamTypes().contains(atlasStream.getStreamType()))
+                && (timeLine.getStreamIds() == null || !timeLine.getStreamIds().contains(atlasStream.getStreamId()))) {
+            log.info("stream {} isn't in timeline {}, customerSpace is {}.", atlasStream.getStreamId(),
+                    timeLine.getTimelineId(), configuration.getCustomer());
             return false;
         }
-        if (atlasStream.getAggrEntities().contains(timeLine.getEntity())) {
+        if (atlasStream.getMatchEntities().contains(timeLine.getEntity())) {
             return true;
-        } else return timeLine.getEntity().equalsIgnoreCase(BusinessEntity.Account.name()) && atlasStream.getAggrEntities().contains(Contact.name());
+        } else if (timeLine.getEntity().equalsIgnoreCase(BusinessEntity.Account.name()) && atlasStream.getMatchEntities().contains(Contact.name())) {
+            log.info("stream {} in timeline {}, stream entity is {}, timeline entity is {}, customerSpace is {}.",
+                    atlasStream.getStreamId(), timeLine.getTimelineId(), atlasStream.getMatchEntities(),
+                    timeLine.getEntity(), configuration.getCustomer());
+            return true;
+        } else {
+            log.info("stream {} isn't in timeline {}. stream entity is {}, timeline entity is {}, customerSpace is {}" +
+                    ".", atlasStream.getStreamId(), timeLine.getTimelineId(), atlasStream.getMatchEntities(),
+                    timeLine.getEntity());
+            return false;
+        }
     }
 
     private String getAtlasStreamEntityInTimeline(AtlasStream atlasStream, TimeLine timeLine) {
-        if (atlasStream.getAggrEntities().contains(timeLine.getEntity())) {
+        if (atlasStream.getMatchEntities().contains(timeLine.getEntity())) {
             return timeLine.getEntity();
-        } else if (timeLine.getEntity().equalsIgnoreCase(BusinessEntity.Account.name()) && atlasStream.getAggrEntities().contains(Contact.name())) {
+        } else if (timeLine.getEntity().equalsIgnoreCase(BusinessEntity.Account.name()) && atlasStream.getMatchEntities().contains(Contact.name())) {
             return Contact.name();
         }
         return "";
+    }
+
+    private Map<String, String> getInputStreamTables() {
+        if (needRebuild) {
+            return getAllStreamTables();
+        } else {
+            return getMapObjectFromContext(ENTITY_MATCH_STREAM_TARGETTABLE, String.class,
+                    String.class);
+        }
     }
 
     private String generateNewVersion() {

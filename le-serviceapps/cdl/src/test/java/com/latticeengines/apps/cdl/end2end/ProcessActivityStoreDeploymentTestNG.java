@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.EventTypeExtractor;
+import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -261,9 +261,10 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         String timelineName1 = "timelineName1";
         TimeLine timeLine1 = new TimeLine();
         timeLine1.setName(timelineName1);
+        timeLine1.setTimelineId(timelineName1);
         timeLine1.setEntity(BusinessEntity.Account.name());
         timeLine1.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
-        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+        Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
 
         mappingMap.put(AtlasStream.StreamType.MarketingActivity.name(),
                 TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.MarketingActivity));
@@ -278,9 +279,10 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         String timelineName = "timelineName2";
         TimeLine timeLine2 = new TimeLine();
         timeLine2.setName(timelineName);
+        timeLine2.setTimelineId(timelineName);
         timeLine2.setEntity(BusinessEntity.Contact.name());
         timeLine2.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
-        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+        Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
 
         mappingMap.put(AtlasStream.StreamType.MarketingActivity.name(),
                 TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.MarketingActivity));
@@ -296,9 +298,10 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
         TimeLine timeLine3 = new TimeLine();
         timeLine3.setName(timelineName);
+        timeLine3.setTimelineId(timelineName);
         timeLine3.setEntity(BusinessEntity.Account.name());
         timeLine3.setStreamTypes(Arrays.asList(AtlasStream.StreamType.Opportunity, AtlasStream.StreamType.WebVisit));
-        Map<String, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+        Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
 
         mappingMap.put(AtlasStream.StreamType.WebVisit.name(),
                 TimeLineStoreUtils.getTimelineStandardMappingByStreamType(AtlasStream.StreamType.WebVisit));

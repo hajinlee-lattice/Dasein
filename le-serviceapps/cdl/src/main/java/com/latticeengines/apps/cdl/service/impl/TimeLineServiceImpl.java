@@ -57,9 +57,9 @@ public class TimeLineServiceImpl implements TimeLineService {
         }
         if (newTimeLine == null) {
             newTimeLine = new TimeLine();
-            newTimeLine.setTimelineId(TimeLine.generateId());
-            newTimeLine.setTenant(MultiTenantContext.getTenant());
         }
+        newTimeLine.setTimelineId(uniqueId);
+        newTimeLine.setTenant(MultiTenantContext.getTenant());
         newTimeLine.setEntity(timeLine.getEntity());
         newTimeLine.setEventMappings(timeLine.getEventMappings());
         newTimeLine.setName(timeLine.getName());
@@ -72,8 +72,8 @@ public class TimeLineServiceImpl implements TimeLineService {
     //create default Account360/Contact360 timeline
     @Override
     public void createDefaultTimeLine(String customerSpace) {
-        createDefaultTimeline(customerSpace, BusinessEntity.Account);
-        createDefaultTimeline(customerSpace, BusinessEntity.Contact);
+        createDefaultTimeline(customerSpace, BusinessEntity.Account, TimeLineStoreUtils.ACCOUNT360_TIMELINE_NAME);
+        createDefaultTimeline(customerSpace, BusinessEntity.Contact, TimeLineStoreUtils.CONTACT360_TIMELINE_NAME);
     }
 
     @Override
@@ -87,17 +87,14 @@ public class TimeLineServiceImpl implements TimeLineService {
         timeLineEntityMgr.delete(timeLine);
     }
 
-    private void createDefaultTimeline(String customerSpace, BusinessEntity entity) {
-        String defaultTimelineIdFormat = "%s_%s_%s360";
-        String defaultTimelineNameFormat = "%s360";
+    private void createDefaultTimeline(String customerSpace, BusinessEntity entity, String timelineName) {
         TimeLine defaultTimeline = new TimeLine();
-        defaultTimeline.setName(String.format(defaultTimelineNameFormat, entity.name()));
-        defaultTimeline.setTimelineId(String.format(defaultTimelineIdFormat, TimeLine.TIMELINE_ID_PREFIX,
-                customerSpace, entity.name()));
+        defaultTimeline.setName(timelineName);
+        defaultTimeline.setTimelineId(TimeLineStoreUtils.contructTimelineId(customerSpace, timelineName));
         defaultTimeline.setStreamTypes(Arrays.asList(AtlasStream.StreamType.values()));
         defaultTimeline.setEntity(entity.name());
         defaultTimeline.setTenant(MultiTenantContext.getTenant());
-        defaultTimeline.setEventMappings(TimeLineStoreUtils.getTimelineStandardStringMappings());
+        defaultTimeline.setEventMappings(TimeLineStoreUtils.getTimelineStandardMappings());
         timeLineEntityMgr.createOrUpdate(defaultTimeline);
     }
 

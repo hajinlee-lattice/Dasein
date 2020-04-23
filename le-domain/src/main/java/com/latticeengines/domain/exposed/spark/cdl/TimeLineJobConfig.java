@@ -46,9 +46,6 @@ public class TimeLineJobConfig extends SparkJobConfig implements Serializable {
     @JsonProperty
     public String sortKey;
 
-    @JsonProperty
-    public String customerSpace;
-
     //templateName -> s3ImportSystemType
     @JsonProperty
     public Map<String, String> templateToSystemTypeMap;

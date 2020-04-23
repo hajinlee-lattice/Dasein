@@ -3,8 +3,8 @@ package com.latticeengines.spark.exposed.job.cdl
 import java.util
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId, ContactName, CDLTemplateName}
-import com.latticeengines.domain.exposed.cdl.activity.EventTypeExtractor.MappingType
-import com.latticeengines.domain.exposed.cdl.activity.{EventTypeExtractor, TimeLine}
+import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor.MappingType
+import com.latticeengines.domain.exposed.cdl.activity.{EventFieldExtractor, TimeLine}
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
@@ -30,7 +30,6 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     val timelineVersionMap = config.timelineVersionMap.asScala
     val partitionKey: String = config.partitionKey
     val sortKey: String = config.sortKey
-    val customerSpace: String = config.customerSpace
     val contactTable: DataFrame =
       if (config.contactTableIdx != null) {
         lattice.input(config.contactTableIdx)
@@ -82,11 +81,10 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
           var timelineRawStreamTable: DataFrame = createTimelineRawStreamTable(entityTableMap.toMap, streamTables,
             streamTypeWithTableNameMap.toMap, timelineObj, contactTable)
           val generatePartitionKey = udf {
-                val tenant = customerSpace
                 val version = timelineVersion
                 val id = timelineId
             entityId: String => TimeLineStoreUtils
-              .generatePartitionKey(tenant, version, id, entityId)
+              .generatePartitionKey(version, id, entityId)
           }
           timelineRawStreamTable = timelineRawStreamTable.withColumn(partitionKey, generatePartitionKey
           (timelineRawStreamTable.col(entityIdColumnName)))
@@ -170,7 +168,7 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
     (columnName)):_*)
   }
 
-  def addAllNullsIfMissing(df: DataFrame, requiredCol: String, mapping: EventTypeExtractor,
+  def addAllNullsIfMissing(df: DataFrame, requiredCol: String, mapping: EventFieldExtractor,
                            colType: String): DataFrame = {
     if (mapping != null) {
       mapping.getMappingType match {

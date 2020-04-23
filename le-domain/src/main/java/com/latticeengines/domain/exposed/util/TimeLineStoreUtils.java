@@ -12,74 +12,76 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.EventTypeExtractor;
+import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public final class TimeLineStoreUtils {
 
     private static final Logger log = LoggerFactory.getLogger(TimeLineStoreUtils.class);
     private static final String RECORD_ID_PREFIX = "asr_";
-    //TL_<Tenant>_<TimelineID>_<Version>_<EntityId>
-    private static final String PARTITIONKEY_FORMAT = "TL_%s_%s_%s_%s";
+    //TL_<TimelineID>_<Version>_<EntityId>
+    private static final String PARTITIONKEY_FORMAT = "TL_%s_%s_%s";
     //<Timestamp>_<RecordId>
     private static final String SORTKEY_FORMAT = "%s_%s";
+
+    public static final String ACCOUNT360_TIMELINE_NAME = "Account360";
+    public static final String CONTACT360_TIMELINE_NAME = "Contact360";
 
     protected TimeLineStoreUtils() {
         throw new UnsupportedOperationException();
     }
 
+    public static String contructTimelineId(String customerSpace, String timelineName) {
+        log.info("contruct timeline {} in tenant {}.", timelineName, customerSpace);
+        String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
+        return String.format("%s_%s", tenantId, timelineName);
+    }
+
     /**
      *streamType -> (desCol, srcColExtractor{srcCol, mappingType})
      */
-    public static Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> getTimelineStandardMappings() {
-        Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> timelineStandardMappings = new HashMap<>();
-        for (AtlasStream.StreamType streamType : AtlasStream.StreamType.values()) {
-            timelineStandardMappings.put(streamType, getTimelineStandardMappingByStreamType(streamType));
-        }
-        return timelineStandardMappings;
-    }
-
-    public static Map<String, Map<String, EventTypeExtractor>> getTimelineStandardStringMappings() {
-        Map<String, Map<String, EventTypeExtractor>> timelineStandardMappings = new HashMap<>();
+    public static Map<String, Map<String, EventFieldExtractor>> getTimelineStandardMappings() {
+        Map<String, Map<String, EventFieldExtractor>> timelineStandardMappings = new HashMap<>();
         for (AtlasStream.StreamType streamType : AtlasStream.StreamType.values()) {
             timelineStandardMappings.put(streamType.name(), getTimelineStandardMappingByStreamType(streamType));
         }
         return timelineStandardMappings;
     }
 
-    public static Map<String, EventTypeExtractor> getTimelineStandardMappingByStreamType(AtlasStream.StreamType streamType) {
-        Map<String, EventTypeExtractor> timelineStandardMapping = new HashMap<>();
+    public static Map<String, EventFieldExtractor> getTimelineStandardMappingByStreamType(AtlasStream.StreamType streamType) {
+        Map<String, EventFieldExtractor> timelineStandardMapping = new HashMap<>();
         switch (streamType) {
             case WebVisit:
                 timelineStandardMapping.put(TimelineStandardColumn.EventDate.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.WebVisitDate.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.WebVisitDate.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.AccountId.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.AccountId.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.AccountId.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.EventType.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Constant).withMappingValue("Page Visit").build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Constant).withMappingValue("Page Visit").build());
                 timelineStandardMapping.put(TimelineStandardColumn.ActivityDetail.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.WebVisitPageUrl.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.WebVisitPageUrl.name()).build());
                 break;
             case Opportunity:
                 timelineStandardMapping.put(TimelineStandardColumn.EventDate.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.LastModifiedDate.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.LastModifiedDate.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.AccountId.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.AccountId.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.AccountId.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.EventType.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Constant).withMappingValue("Opportunity Update").build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Constant).withMappingValue("Opportunity Update").build());
                 timelineStandardMapping.put(TimelineStandardColumn.ActivityDetail.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.StageName.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.StageName.name()).build());
                 break;
             case MarketingActivity:
                 timelineStandardMapping.put(TimelineStandardColumn.EventDate.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.ActivityDate.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.ActivityDate.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.AccountId.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.AccountId.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.AccountId.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.EventType.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.ActivityType.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.ActivityType.name()).build());
                 timelineStandardMapping.put(TimelineStandardColumn.ContactId.getColumnName(),
-                        new EventTypeExtractor.Builder().withMappingType(EventTypeExtractor.MappingType.Attribute).withMappingValue(InterfaceName.ContactId.name()).build());
+                        new EventFieldExtractor.Builder().withMappingType(EventFieldExtractor.MappingType.Attribute).withMappingValue(InterfaceName.ContactId.name()).build());
                 break;
             default:break;
         }
@@ -95,9 +97,9 @@ public final class TimeLineStoreUtils {
         return RECORD_ID_PREFIX + uuid;
     }
 
-    public static String generatePartitionKey(String customerSpace, String timelineId, String version,
+    public static String generatePartitionKey(String version, String timelineId,
                                               String entityId) {
-        return String.format(PARTITIONKEY_FORMAT, customerSpace, timelineId, version, entityId);
+        return String.format(PARTITIONKEY_FORMAT, timelineId, version, entityId);
     }
 
     public static String generateSortKey(String recordId) {
@@ -136,15 +138,6 @@ public final class TimeLineStoreUtils {
 
         public static List<String> getColumnNames() {
             return columnNames;
-        }
-
-        public static TimelineStandardColumn fromColumnNameToTimelineStandardColumn(String columnName) {
-            for (TimelineStandardColumn entry : values()) {
-                if (entry.getColumnName().equals(columnName)) {
-                    return entry;
-                }
-            }
-            return null;
         }
 
         public static String getDataTypeFromColumnName(String columnName) {
