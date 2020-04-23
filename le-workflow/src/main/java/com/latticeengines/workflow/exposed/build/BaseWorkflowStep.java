@@ -131,6 +131,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String HARD_DEELETE_ACTIONS = "HARD_DEELETE_ACTIONS";
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
+    public static final String TIMELINE_RAWTABLES_GOING_TO_DYNAMO = "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
@@ -260,6 +261,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
     protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
+    protected static final String TIMELINE_RAWTABLE_NAME = "TIMELINE_RAWTABLE_NAME";
 
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";

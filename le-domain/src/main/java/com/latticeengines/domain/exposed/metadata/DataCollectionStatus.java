@@ -352,4 +352,14 @@ public class DataCollectionStatus implements HasPid, HasTenant, HasAuditingField
     public void setActivityBookkeeping(ActivityBookkeeping activityBookkeeping) {
         this.detail.setBookkeeping(activityBookkeeping);
     }
+
+    @JsonProperty("timelineVersionMap")
+    public void setTimelineVersionMap(Map<String, String> timelineVersionMap) {
+        this.detail.setTimelineVersionMap(timelineVersionMap);
+    }
+
+    @JsonProperty("timelineVersionMap")
+    public Map<String, String> getTimelineVersionMap() {
+        return this.detail.getTimelineVersionMap();
+    }
 }

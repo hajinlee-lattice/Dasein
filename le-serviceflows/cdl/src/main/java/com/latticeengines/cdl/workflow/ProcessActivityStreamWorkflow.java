@@ -13,6 +13,7 @@ import com.latticeengines.cdl.workflow.steps.merge.PrepareForActivityStream;
 import com.latticeengines.cdl.workflow.steps.process.AggActivityStreamToDaily;
 import com.latticeengines.cdl.workflow.steps.process.GenerateDimensionMetadata;
 import com.latticeengines.cdl.workflow.steps.process.GenerateLastActivityDate;
+import com.latticeengines.cdl.workflow.steps.process.GenerateTimeLine;
 import com.latticeengines.cdl.workflow.steps.process.MergeActivityMetricsToEntityStep;
 import com.latticeengines.cdl.workflow.steps.process.MetricsGroupsGenerationStep;
 import com.latticeengines.cdl.workflow.steps.process.PeriodStoresGenerationStep;
@@ -63,6 +64,9 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
     @Inject
     private ProfileContactActivityMetricsWrapper profileContactActivityMetricsWrapper;
 
+    @Inject
+    private GenerateTimeLine generateTimeLine;
+
     @Override
     public Workflow defineWorkflow(ProcessActivityStreamWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -77,6 +81,7 @@ public class ProcessActivityStreamWorkflow extends AbstractWorkflow<ProcessActiv
                 .next(mergeActivityMetricsToEntityStep) //
                 .next(profileAccountActivityMetricsWrapper) //
                 .next(profileContactActivityMetricsWrapper) //
+                .next(generateTimeLine)
                 .build();
     }
 }

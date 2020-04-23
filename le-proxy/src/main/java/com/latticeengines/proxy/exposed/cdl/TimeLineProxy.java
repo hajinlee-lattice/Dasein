@@ -18,8 +18,13 @@ public class TimeLineProxy extends MicroserviceRestApiProxy implements ProxyInte
     }
 
     public TimeLine findByEntity(String customerSpace, BusinessEntity entity) {
-        String url = constructUrl(URL_PREFIX + "/timelines/entity/" + entity, shortenCustomerSpace(customerSpace));
+        String url = constructUrl(URL_PREFIX + "/entity/" + entity, shortenCustomerSpace(customerSpace));
         return get("findByEntity", url, TimeLine.class);
+    }
+
+    public void createTimeline(String customerSpace, TimeLine timeLine) {
+        String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+        post("create timeline", url, timeLine);
     }
 
 }

@@ -50,4 +50,12 @@ public class TimeLineResource {
             @RequestBody TimeLine timeLine) {
         return timeLineService.createOrUpdateTimeLine(customerSpace, timeLine);
     }
+
+    @PostMapping("/createDefault")
+    @ResponseBody
+    @ApiOperation("create default Account360/Contact360 timeline under current tenant, must be unique.")
+    public Boolean createDefaultTimeLine(String customerSpace) {
+        timeLineService.createDefaultTimeLine(customerSpace);
+        return true;
+    }
 }
