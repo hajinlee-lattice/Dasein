@@ -80,7 +80,7 @@ public class SourceServiceImpl implements SourceService {
                 EntityType.fromDisplayNameToEntityType(fieldDefinitionsRecord.getSystemObject()), relativePath,
                 displayName, sourceId);
         Source source = convertToSource(customerSpace, dataFeedTask);
-        if (StringUtils.isNotBlank(source.getFullPath())) {
+        if (StringUtils.isNotBlank(source.getSourceFullPath())) {
             String relativePathUnderDropfolder = source.getRelativePathUnderDropfolder();
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder);
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + DROP_FOLDER);
@@ -148,8 +148,9 @@ public class SourceServiceImpl implements SourceService {
             S3ImportSystem s3ImportSystem = cdlProxy.getS3ImportSystem(customerSpace,
                     dataFeedTask.getImportSystemName());
             Project project = projectService.getProjectByImportSystem(customerSpace, s3ImportSystem);
-            source.setFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
+            source.setSourceFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
                     dropBoxService.getDropBoxPrefix(), project.getRootPath() + dataFeedTask.getRelativePath()));
+            source.setDropFullPath(source.getSourceFullPath() + DROP_FOLDER);
         }
         return source;
     }
