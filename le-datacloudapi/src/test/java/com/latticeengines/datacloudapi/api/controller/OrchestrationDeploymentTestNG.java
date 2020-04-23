@@ -98,7 +98,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         };
     }
 
-    @BeforeClass(groups = "deployment", enabled = true)
+    @BeforeClass(groups = "deployment", enabled = false)
     public void init() {
         prepareCleanPod(POD_ID);
         for (Object[] data : getOrchestrations()) {
