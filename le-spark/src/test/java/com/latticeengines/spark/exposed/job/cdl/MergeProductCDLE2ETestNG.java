@@ -1,6 +1,5 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,27 +18,17 @@ import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
 
-    private List<String> unitNames;
-    private List<Integer> units;
-
     @Test(groups = "functional")
     public void test() {
         uploadTestData();
 
-        MergeProductConfig config = prepareInput();
+        MergeProductConfig config = new MergeProductConfig();
         SparkJobResult result = runSparkJob(MergeProduct.class, config);
 
         verifyResult(result);
     }
 
-    private MergeProductConfig prepareInput() {
-        MergeProductConfig config = new MergeProductConfig();
-        return config;
-    }
-
     private void uploadTestData() {
-        unitNames = new ArrayList<>();
-
         List<Pair<String, Class<?>>> fields = Arrays.asList( //
                 Pair.of(InterfaceName.ProductId.name(), String.class), //
                 Pair.of(InterfaceName.ProductName.name(), String.class), //
@@ -144,7 +133,7 @@ public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
                 { "3EBAB6CC6D5F29C2B4648DA8AD32A75C", null, null, null, null, "Pen", "Writing Tools", "Stationary", null, null, null, null, null },
                 { "416A6D7D9B4F8D19C28BA60AD96341E6", null, null, null, null, "Eraser", "Writing Tools", "Stationary", null, null, null, null, null },
         };
-        unitNames.add(uploadHdfsDataUnit(upload1, fields));
+        uploadHdfsDataUnit(upload1, fields);
     }
 
     @Override
