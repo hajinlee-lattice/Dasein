@@ -10,6 +10,9 @@ public class PrepareMatchDataConfiguration extends SparkJobStepConfiguration {
     @JsonProperty("match_group_id")
     private String matchGroupId;
 
+    @JsonProperty("map_to_lattice_account")
+    private boolean mapToLatticeAccount;
+
     public String getInputTableName() {
         return inputTableName;
     }
@@ -24,5 +27,13 @@ public class PrepareMatchDataConfiguration extends SparkJobStepConfiguration {
 
     public void setMatchGroupId(String matchGroupId) {
         this.matchGroupId = matchGroupId;
+    }
+
+    public void setMapToLatticeAccount(boolean mapToLatticeAccount) {
+        this.mapToLatticeAccount = mapToLatticeAccount;
+    }
+
+    public boolean isMapToLatticeAccount() {
+        return mapToLatticeAccount;
     }
 }

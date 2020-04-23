@@ -205,5 +205,16 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            match.setEntityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
+        public Builder mapToLatticeAccount(boolean mapToLatticeAccount) {
+            match.setMapToLatticeAccount(mapToLatticeAccount);
+            prepareMatchDataConfiguration.setMapToLatticeAccount(mapToLatticeAccount);
+            return this;
+        }
+
     }
 }

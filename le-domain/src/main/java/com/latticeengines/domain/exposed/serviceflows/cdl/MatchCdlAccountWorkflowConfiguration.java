@@ -160,6 +160,16 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
+        public Builder entityMatchEnabled(boolean entityMatchEnabled) {
+            ldcConfigurationBuilder.entityMatchEnabled(entityMatchEnabled);
+            return this;
+        }
+
+        public Builder mapToLatticeAccount(boolean mapToLatticeAccount) {
+            ldcConfigurationBuilder.mapToLatticeAccount(mapToLatticeAccount);
+            return this;
+        }
+
         public Builder matchType(String matchType) {
             ldcConfigurationBuilder.matchType(matchType);
             return this;

@@ -59,6 +59,12 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("fetch_only")
     private boolean fetchOnly;
 
+    @JsonProperty("entity_match_enabled")
+    private boolean entityMatchEnabled;
+
+    @JsonProperty("map_to_lattice_account")
+    private boolean mapToLatticeAccount;
+
     @JsonProperty("match_request_source")
     private MatchRequestSource matchRequestSource;
 
@@ -281,4 +287,21 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     public void setMatchType(String matchType) {
         this.matchType = matchType;
     }
+
+    public boolean isEntityMatchEnabled() {
+        return entityMatchEnabled;
+    }
+
+    public void setEntityMatchEnabled(boolean entityMatchEnabled) {
+        this.entityMatchEnabled = entityMatchEnabled;
+    }
+
+    public void setMapToLatticeAccount(boolean mapToLatticeAccount) {
+        this.mapToLatticeAccount = mapToLatticeAccount;
+    }
+
+    public boolean isMapToLatticeAccount() {
+        return mapToLatticeAccount;
+    }
+
 }
