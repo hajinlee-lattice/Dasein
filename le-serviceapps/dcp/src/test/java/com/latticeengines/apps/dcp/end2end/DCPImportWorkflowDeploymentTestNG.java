@@ -1,6 +1,9 @@
 package com.latticeengines.apps.dcp.end2end;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -33,6 +36,8 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.DCPProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -171,6 +176,23 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         System.out.println("rejectedPath=" + rejectedPath);
         Assert.assertTrue(s3Service.objectExist(bucket, acceptedPath));
         Assert.assertTrue(s3Service.objectExist(bucket, rejectedPath));
+        verifyCsvContent(bucket, acceptedPath);
+        verifyCsvContent(bucket, rejectedPath);
+    }
+
+    private void verifyCsvContent(String bucket, String path) {
+        InputStream is = s3Service.readObjectAsStream(bucket, path);
+        InputStreamReader reader = new InputStreamReader(is);
+        try (CSVReader csvReader = new CSVReader(reader)) {
+            String[] nextRecord = csvReader.readNext();
+            int count = 0;
+            while (nextRecord != null && (count++) < 10) {
+                Assert.assertTrue(StringUtils.isNotBlank(nextRecord[0])); // Original Name is non-empty
+                nextRecord = csvReader.readNext();
+            }
+        } catch (IOException e) {
+            Assert.fail("Failed to read output csv", e);
+        }
     }
 
 }
