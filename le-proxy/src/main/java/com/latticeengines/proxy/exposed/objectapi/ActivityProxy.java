@@ -6,5 +6,5 @@ import com.latticeengines.domain.exposed.query.DataPage;
 
 public interface ActivityProxy {
 
-    DataPage getData(String customerSpace, ActivityTimelineQuery activityTimelineQuery, DataCollection.Version version);
+    DataPage getData(String customerSpace, DataCollection.Version version, ActivityTimelineQuery activityTimelineQuery);
 }

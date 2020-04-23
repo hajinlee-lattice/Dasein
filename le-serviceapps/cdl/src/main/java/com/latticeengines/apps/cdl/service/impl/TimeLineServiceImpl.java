@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -10,11 +11,12 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.TimeLineEntityMgr;
 import com.latticeengines.apps.cdl.service.TimeLineService;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 
 import io.micrometer.core.instrument.util.StringUtils;
 
@@ -55,9 +57,9 @@ public class TimeLineServiceImpl implements TimeLineService {
         }
         if (newTimeLine == null) {
             newTimeLine = new TimeLine();
-            newTimeLine.setTimelineId(NamingUtils.uuid("TimeLine"));
-            newTimeLine.setTenant(MultiTenantContext.getTenant());
         }
+        newTimeLine.setTimelineId(uniqueId);
+        newTimeLine.setTenant(MultiTenantContext.getTenant());
         newTimeLine.setEntity(timeLine.getEntity());
         newTimeLine.setEventMappings(timeLine.getEventMappings());
         newTimeLine.setName(timeLine.getName());
@@ -65,6 +67,13 @@ public class TimeLineServiceImpl implements TimeLineService {
         newTimeLine.setStreamIds(timeLine.getStreamIds());
         timeLineEntityMgr.createOrUpdate(newTimeLine);
         return newTimeLine;
+    }
+
+    //create default Account360/Contact360 timeline
+    @Override
+    public void createDefaultTimeLine(String customerSpace) {
+        createDefaultTimeline(customerSpace, BusinessEntity.Account, TimeLineStoreUtils.ACCOUNT360_TIMELINE_NAME);
+        createDefaultTimeline(customerSpace, BusinessEntity.Contact, TimeLineStoreUtils.CONTACT360_TIMELINE_NAME);
     }
 
     @Override
@@ -76,6 +85,17 @@ public class TimeLineServiceImpl implements TimeLineService {
             return;
         }
         timeLineEntityMgr.delete(timeLine);
+    }
+
+    private void createDefaultTimeline(String customerSpace, BusinessEntity entity, String timelineName) {
+        TimeLine defaultTimeline = new TimeLine();
+        defaultTimeline.setName(timelineName);
+        defaultTimeline.setTimelineId(TimeLineStoreUtils.contructTimelineId(customerSpace, timelineName));
+        defaultTimeline.setStreamTypes(Arrays.asList(AtlasStream.StreamType.values()));
+        defaultTimeline.setEntity(entity.name());
+        defaultTimeline.setTenant(MultiTenantContext.getTenant());
+        defaultTimeline.setEventMappings(TimeLineStoreUtils.getTimelineStandardMappings());
+        timeLineEntityMgr.createOrUpdate(defaultTimeline);
     }
 
 }

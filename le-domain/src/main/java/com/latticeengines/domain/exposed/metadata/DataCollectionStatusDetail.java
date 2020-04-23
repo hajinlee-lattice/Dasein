@@ -82,6 +82,10 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("activityBookKeeping")
     private ActivityBookkeeping bookkeeping;
 
+    //key: timelineId -> value: timelineVersion
+    @JsonProperty("timelineVersionMap")
+    private Map<String, String> timelineVersionMap;
+
     public Integer getMinTxnDate() {
         return minTxnDate;
     }
@@ -236,5 +240,13 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setBookkeeping(ActivityBookkeeping bookkeeping) {
         this.bookkeeping = bookkeeping;
+    }
+
+    public Map<String, String> getTimelineVersionMap() {
+        return timelineVersionMap;
+    }
+
+    public void setTimelineVersionMap(Map<String, String> timelineVersionMap) {
+        this.timelineVersionMap = timelineVersionMap;
     }
 }

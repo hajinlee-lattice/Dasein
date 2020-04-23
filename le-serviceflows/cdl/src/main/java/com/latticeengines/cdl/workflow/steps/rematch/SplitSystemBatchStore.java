@@ -2,11 +2,10 @@ package com.latticeengines.cdl.workflow.steps.rematch;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -46,6 +45,8 @@ public class SplitSystemBatchStore
     @Inject
     private MetadataProxy metadataProxy;
 
+    LinkedHashSet<String> templates = new LinkedHashSet<>();
+
     @Override
     protected Class<SplitSystemBatchStoreJob> getJobClz() {
         return SplitSystemBatchStoreJob.class;
@@ -58,8 +59,6 @@ public class SplitSystemBatchStore
 
     @Override
     protected SplitSystemBatchStoreConfig configureJob(ConvertBatchStoreStepConfiguration stepConfiguration) {
-        Set<String> templates = new HashSet<>();
-
         customerSpace = stepConfiguration.getCustomerSpace();
         TableRoleInCollection role = (configuration.getEntity() == BusinessEntity.Account)
                 ? TableRoleInCollection.SystemAccount
@@ -104,10 +103,20 @@ public class SplitSystemBatchStore
                 : TableRoleInCollection.SystemContact;
 
         int cnt = 1;
+        Map<String, String> tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class,
+                String.class);
+        if (tableTemplateMap == null) {
+            tableTemplateMap = new HashMap<>();
+        }
+        List<String> tempList = templates.stream().collect(Collectors.toList());
+        log.info("tableTemplateMap size " + tableTemplateMap.size() + ", tempList size " + tempList.size());
         for (HdfsDataUnit target : targets) {
             String tableName = NamingUtils.timestamp(role.toString() + "_split" + cnt);
             log.info("Generatd table name is " + tableName);
             Table splitTable = toTable(tableName, target);
+
+            // Update the table template map
+            tableTemplateMap.put(tableName, tempList.get(cnt - 1));
 
             // Register into metadata table
             metadataProxy.createTable(customerSpace.getTenantId(), tableName, splitTable);
@@ -119,5 +128,7 @@ public class SplitSystemBatchStore
 
         // Put new split tables into context for downstream
         putObjectInContext(REMATCH_TABLE_NAMES, rematchTables);
+        // Put the table template map back into context
+        putObjectInContext(CONSOLIDATE_INPUT_TEMPLATES, tableTemplateMap);
     }
 }

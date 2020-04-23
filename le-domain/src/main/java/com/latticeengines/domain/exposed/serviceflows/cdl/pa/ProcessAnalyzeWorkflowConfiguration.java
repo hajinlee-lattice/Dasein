@@ -11,9 +11,11 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -384,6 +386,16 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder setConvertServiceConfig(HashMap<TableRoleInCollection, Table> batchStoresToConvert) {
             convertBatchStoreToDataTableWorkflowBuilder.setConvertServiceConfig(batchStoresToConvert);
+            return this;
+        }
+
+        public Builder activeTimelineList(List<TimeLine> timeLineList) {
+            processActivityStreamWorkflowBuilder.activeTimelineList(timeLineList);
+            return this;
+        }
+
+        public Builder templateToSystemTypeMap(Map<String, S3ImportSystem.SystemType> templateToSystemTypeMap) {
+            processActivityStreamWorkflowBuilder.templateToSystemTypeMap(templateToSystemTypeMap);
             return this;
         }
 

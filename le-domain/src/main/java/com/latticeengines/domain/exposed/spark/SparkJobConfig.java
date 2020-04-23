@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.spark.cdl.RemoveOrphanConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SelectByColumnConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SplitSystemBatchStoreConfig;
+import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig;
 import com.latticeengines.domain.exposed.spark.common.ConvertToCSVConfig;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.CountAvroGlobsConfig;
@@ -116,7 +117,8 @@ import reactor.core.publisher.Flux;
         @JsonSubTypes.Type(value = GenerateCuratedAttributesConfig.class, name = GenerateCuratedAttributesConfig.NAME), //
         @JsonSubTypes.Type(value = CalculateLastActivityDateConfig.class, name = CalculateLastActivityDateConfig.NAME), //
         @JsonSubTypes.Type(value = BucketEncodeConfig.class, name = BucketEncodeConfig.NAME), //
-        @JsonSubTypes.Type(value = MergeProductConfig.class, name = MergeProductConfig.NAME) //
+        @JsonSubTypes.Type(value = MergeProductConfig.class, name = MergeProductConfig.NAME), //
+        @JsonSubTypes.Type(value = TimeLineJobConfig.class, name = TimeLineJobConfig.NAME) //
 })
 public abstract class SparkJobConfig implements Serializable {
 

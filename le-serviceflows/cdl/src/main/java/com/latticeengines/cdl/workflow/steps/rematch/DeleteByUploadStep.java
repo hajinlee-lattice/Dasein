@@ -69,14 +69,22 @@ public class DeleteByUploadStep extends BaseTransformWrapperStep<DeleteByUploadS
 
     @Override
     protected void onPostTransformationCompleted() {
+        Map<String, String> tableTemplateMap = getMapObjectFromContext(CONSOLIDATE_INPUT_TEMPLATES, String.class,
+                String.class);
         List<String> cleanupTableNames = new LinkedList<>();
         masterTables.forEach(masterTable -> {
             String cleanupTablePrefix = CLEANUP_TABLE_PREFIX + "_" + masterTable.getName();
             String cleanupTableName = TableUtils.getFullTableName(cleanupTablePrefix, pipelineVersion);
             cleanupTableNames.add(cleanupTableName);
+            // update the tableTemplateMap with new cleanup tables
+            if (MapUtils.isNotEmpty(tableTemplateMap)) {
+                tableTemplateMap.put(cleanupTableName, tableTemplateMap.get(masterTable.getName()));
+            }
         });
         log.info("cleanupTableNames " + cleanupTableNames);
         setDeletedTableName(cleanupTableNames);
+        // Put the table template map back into context
+        putObjectInContext(CONSOLIDATE_INPUT_TEMPLATES, tableTemplateMap);
     }
 
     private void intializeConfiguration() {

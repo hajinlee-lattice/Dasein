@@ -21,6 +21,7 @@ import com.latticeengines.apps.core.util.S3ImportMessageUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportMessage;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
+import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.jms.S3ImportMessageType;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.dcp.DCPProxy;
+import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 
 @Component("s3ImportService")
 public class S3ImportServiceImpl implements S3ImportService {
@@ -49,6 +51,9 @@ public class S3ImportServiceImpl implements S3ImportService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private SourceProxy  sourceProxy;
 
     @Override
     public boolean saveImportMessage(String bucket, String key, String hostUrl, S3ImportMessageType messageType) {
@@ -140,7 +145,15 @@ public class S3ImportServiceImpl implements S3ImportService {
         String tenantId = CustomerSpace.shortenCustomerSpace(tenant.getId());
         log.info(String.format("Process DCP import with Tenant %s, Project %s, Source %s, File %s", tenantId, projectId,
                 sourceId, fileName));
-
+        Source source = sourceProxy.getSource(tenantId, sourceId);
+        if (source == null) {
+            log.info("Source not setup yet for key: {}", message.getKey());
+            return;
+        }
+        if (DataFeedTask.S3ImportStatus.Pause.equals(source.getImportStatus())) {
+            log.info("Import paused for source: {}", sourceId);
+            return;
+        }
         if (submitDCPImport(tenantId, projectId, sourceId, message.getKey(), message.getHostUrl())) {
             dropBoxSet.add(message.getDropBox().getDropBox());
             s3ImportMessageService.deleteMessage(message);
