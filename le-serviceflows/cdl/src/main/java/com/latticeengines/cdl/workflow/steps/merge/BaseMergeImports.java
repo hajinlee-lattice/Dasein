@@ -317,7 +317,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         config.setAddTimestamps(false);
         config.setCloneSrcFields(cloneSrcFlds);
         config.setRenameSrcFields(renameSrcFlds);
-        setupTemplates(config, inputStep);
+        setupTemplates(config, inputStep, convertedRematchTableNames);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
 
         if (StringUtils.isNotBlank(targetTablePrefix)) {
@@ -327,19 +327,23 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    private void setupTemplates(MergeImportsConfig config, int inputStep) {
+    private void setupTemplates(MergeImportsConfig config, int inputStep, List<String> convertedRematchTableNames) {
+        log.info("inputStep {}, convertedRematchTableNames {}, hasSystemBatch {}", inputStep,
+                convertedRematchTableNames, hasSystemBatch);
         if (!hasSystemBatch) {
             return;
         }
         List<String> templates = new ArrayList<>();
-        if (inputStep == -1) { // for normal imports
+        if (CollectionUtils.isEmpty(convertedRematchTableNames)) { // if only regular imports
             inputTableNames.forEach(t -> {
                 log.info("inputTable=" + t + ", templateName=" + tableTemplateMap.get(t));
                 templates.add(tableTemplateMap.get(t));
             });
-        } else { // for rematch imports
-            // set up the template placeholder for inputStep table
-            templates.add(SystemBatchTemplateName.PLACEHOLDER.name());
+        } else { // if has rematch fake imports
+            if (inputStep != -1) { // for case when both regular imports and fake imports are present
+                // set up template placeholder for merged regular imports
+                templates.add(SystemBatchTemplateName.PLACEHOLDER.name());
+            }
 
             // add templates for rematch imports
             Map<String, List<String>> rematchTables = getTypedObjectFromContext(REMATCH_TABLE_NAMES,
