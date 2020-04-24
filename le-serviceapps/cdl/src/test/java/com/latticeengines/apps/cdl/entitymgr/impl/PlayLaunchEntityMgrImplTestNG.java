@@ -21,7 +21,6 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayTypeService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
@@ -152,8 +151,6 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(playLaunch_org2_2_pid > playLaunch_org2_1_pid);
         Assert.assertNotNull(playLaunch_org2_1.getLaunchId());
         Assert.assertNotNull(playLaunch_org2_2.getLaunchId());
-        System.out.println("Hello");
-        System.out.println(JsonUtils.serialize(playLaunch_org2_2));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateLaunch" })
