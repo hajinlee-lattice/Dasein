@@ -620,7 +620,7 @@ public class TenantServiceImpl implements TenantService {
             log.info("the subscriber number {} has been registered by tenant {}",
                     subNumber, existingName);
             return generateVBOResponse(existingName, "failed",
-                    String.format("the subscriber number has been registered by tenant %s.", existingName));
+                    "A tenant has already existed for this subscriber number");
         }
 
         String tenantName = constructTenantNameFromSubscriber(vboRequest.getSubscriber().getName());
