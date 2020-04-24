@@ -84,10 +84,10 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String uploadDir = UploadS3PathBuilderUtils.getUploadRoot(details.getProjectId(), source.getSourceId());
         String uploadDirKey = UploadS3PathBuilderUtils.combinePath(false, true, dropFolder, uploadDir);
 
-        String timeStamp = "2020-03-20";
-        String errorPath = uploadDirKey + timeStamp + "/error/file1.csv";
-        String importedFilePath = uploadDirKey + timeStamp + "/processed/file2.csv";
-        String rawPath = uploadDirKey + timeStamp + "/raw/file3.csv";
+        String uploadTS = "2020-03-20";
+        String errorPath = uploadDirKey + uploadTS + "/error/file1.csv";
+        String importedFilePath = uploadDirKey + uploadTS + "/processed/file2.csv";
+        String rawPath = uploadDirKey + uploadTS + "/raw/file3.csv";
         config.setUploadImportedErrorFilePath(errorPath);
         Upload upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
@@ -99,7 +99,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         // update config
         config.setUploadRawFilePath(rawPath);
         config.setUploadImportedFilePath(importedFilePath);
-        config.setUploadTSPrefix(timeStamp);
+        config.setUploadTSPrefix(uploadTS);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getPid(), config);
         List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploads);
@@ -107,7 +107,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Upload retrievedUpload = uploads.get(0);
         UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
         Assert.assertEquals(retrievedConfig.getUploadImportedFilePath(), importedFilePath);
-        Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), timeStamp);
+        Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), uploadTS);
         Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
         Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
 
@@ -117,6 +117,13 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(uploads.size(), 1);
         retrievedUpload = uploads.get(0);
         Assert.assertEquals(retrievedUpload.getStatus(), Upload.Status.MATCH_STARTED);
+
+        // create another upload
+        UploadConfig config2 = new UploadConfig();
+        String uploadTS2 = "2020-04-21-02-02-52.645";
+        String rawPath2 = uploadDirKey + uploadTS2 + "/raw/file3.csv";
+        config2.setUploadRawFilePath(rawPath2);
+        uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config2);
     }
 
 
@@ -139,6 +146,14 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         StringInputStream sis3 = new StringInputStream("file3");
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadRawFilePath(), sis3, true);
+
+        // drop file to another upload
+        List<Upload> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW);
+        Assert.assertNotNull(uploads2);
+        Assert.assertEquals(uploads2.size(), 1);
+        Upload upload2 = uploads2.get(0);
+        StringInputStream sis4 = new StringInputStream("file4");
+        s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis4, true);
 
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
