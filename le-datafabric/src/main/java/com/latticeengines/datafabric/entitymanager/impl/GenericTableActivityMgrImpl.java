@@ -14,7 +14,7 @@ public class GenericTableActivityMgrImpl extends BaseFabricEntityMgrImpl<Generic
                 .recordType(String.format("%s_%s", GenericTableActivity.class.getSimpleName(), signature))
                 .store(BaseFabricEntityMgrImpl.STORE_DYNAMO)
                 .enforceRemoteDynamo(true)
-                .repository("TimelineTable")
+                .repository("GenericTable")
         );
     }
 }
