@@ -1,12 +1,12 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
-import com.latticeengines.domain.exposed.datafabric.TimelineTableEntity;
+import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
 
 public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
 
     @Override
     public Class<?> getEntityClass() {
-        return TimelineTableEntity.class;
+        return GenericTableActivity.class;
     }
 
     @Override
