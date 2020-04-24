@@ -2,7 +2,6 @@ package com.latticeengines.spark.aggregation
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus
-import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
 import org.apache.spark.sql.types._
@@ -11,26 +10,40 @@ import scala.collection.JavaConverters._
 
 private[spark] class AnalyticProductAggregation extends UserDefinedAggregateFunction {
 
-   private val Description = InterfaceName.Description.name
+  private val Id = InterfaceName.Id.name
+  private val Description = InterfaceName.Description.name
   private val Bundle = InterfaceName.ProductBundle.name
   private val Status = InterfaceName.ProductStatus.name
   private val Active = ProductStatus.Active.name
   private val Messages = "Messages"
+  private val Priority = "Priority"
+
+  private val idIdx = 0
+  private val bundleIdx = 1
+  private val descIdx = 2
+  private val statusIdx = 3
+  private val priorityIdx = 4
+  private val msgIdx = 5
 
   override def inputSchema: StructType = StructType(List(
-    StructField(Bundle, StringType),
-    StructField(Description, StringType),
-    StructField(Status, StringType)
-  ))
-
-  override def bufferSchema: StructType = StructType(List(
+    StructField(Id, StringType),
     StructField(Bundle, StringType),
     StructField(Description, StringType),
     StructField(Status, StringType),
+    StructField(Priority, IntegerType)
+  ))
+
+  override def bufferSchema: StructType = StructType(List(
+    StructField(Id, StringType),
+    StructField(Bundle, StringType),
+    StructField(Description, StringType),
+    StructField(Status, StringType),
+    StructField(Priority, IntegerType),
     StructField(Messages, ArrayType(StringType))
   ))
 
   override def dataType: DataType = StructType(List(
+    StructField(Id, StringType),
     StructField(Bundle, StringType),
     StructField(Description, StringType),
     StructField(Status, StringType),
@@ -43,53 +56,49 @@ private[spark] class AnalyticProductAggregation extends UserDefinedAggregateFunc
     buffer(0) = null
     buffer(1) = null
     buffer(2) = null
-    buffer(3) = List()
+    buffer(3) = null
+    buffer(4) = 99
+    buffer(5) = List()
   }
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-    val oldBundle = buffer.getAs[String](0)
-    val newBundle = input.getAs[String](0)
-    if (StringUtils.isBlank(oldBundle)) {
-      buffer(0) = newBundle
-    } else if (StringUtils.isNotBlank(newBundle) && !oldBundle.equalsIgnoreCase(newBundle)) {
-      val message = s"Conflicting bundle name $newBundle and $oldBundle: ${input.mkString(", ")}"
-      buffer(3) = message :: buffer.getList[String](3).asScala.toList
-    }
-
-    val newDesc = input.getAs[String](1)
-    if (StringUtils.isNotBlank(newDesc)) {
-      buffer(1) = newDesc
-    }
-
-    val oldStatus = buffer.getAs[String](2)
-    val newStatus = input.getAs[String](2)
-    if (!Active.equals(oldStatus) && newStatus != null) {
-      buffer(2) = newStatus
+    val oldPrio = buffer.getInt(priorityIdx)
+    val newPrio = input.getInt(priorityIdx)
+    if (newPrio >= oldPrio) {
+      val oldId = buffer.getString(idIdx)
+      val newId = buffer.getString(idIdx)
+      val message = s"Conflicting bundle id $newId and $oldId: ${input.mkString(", ")}"
+      buffer(msgIdx) = message :: buffer.getList[String](msgIdx).asScala.toList
+    } else {
+      copyToBuffer(buffer, input)
     }
   }
 
   override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
-    val oldBundle = buffer1.getAs[String](0)
-    val newBundle = buffer2.getAs[String](0)
-    val messages = (buffer1.getList[String](3).asScala ++ buffer2.getList[String](3).asScala).toList
-    if (StringUtils.isBlank(oldBundle)) {
-      buffer1(0) = newBundle
-    } else if (StringUtils.isNotBlank(newBundle) && !oldBundle.equalsIgnoreCase(newBundle)) {
-      val message = s"Conflicting bundle name $newBundle and $oldBundle: ${buffer2.mkString(", ")}"
-      buffer1(3) = message :: messages
-    }
+    update(buffer1, buffer2)
+  }
 
-    val newDesc = buffer2.getAs[String](1)
-    if (StringUtils.isNotBlank(newDesc)) {
-      buffer1(2) = newDesc
-    }
+  override def evaluate(buffer: Row): Any = {
+    Row.fromSeq(Seq(
+      buffer.get(idIdx),
+      buffer.get(bundleIdx),
+      buffer.get(descIdx),
+      buffer.get(statusIdx),
+      buffer.get(msgIdx)
+    ))
+  }
 
-    val oldStatus = buffer1.getAs[String](2)
-    val newStatus = buffer2.getAs[String](2)
+  private def copyToBuffer(buffer: MutableAggregationBuffer, input: Row): Unit = {
+    buffer(priorityIdx) = input.getInt(priorityIdx)
+    buffer(idIdx) = input.getString(idIdx)
+    buffer(bundleIdx) = input.getString(bundleIdx)
+    buffer(descIdx) = input.getString(descIdx)
+
+    val oldStatus = buffer.getString(statusIdx)
+    val newStatus = input.getString(statusIdx)
     if (!Active.equals(oldStatus) && newStatus != null) {
-      buffer1(2) = newStatus
+      buffer(statusIdx) = newStatus
     }
   }
 
-  override def evaluate(buffer: Row): Any = buffer
 }

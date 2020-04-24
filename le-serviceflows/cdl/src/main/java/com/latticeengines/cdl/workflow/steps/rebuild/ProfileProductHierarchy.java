@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -65,8 +67,14 @@ public class ProfileProductHierarchy extends BaseSingleEntityProfileStep<Process
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
         Map<BusinessEntity, Integer> finalRecordsMap = getMapObjectFromContext(FINAL_RECORDS, BusinessEntity.class, Integer.class);
-        int numAnalyticProducts = finalRecordsMap.getOrDefault(BusinessEntity.ProductHierarchy, 0);
-        hasHierarchyProduct = numAnalyticProducts > 0;
+        if (MapUtils.isNotEmpty(finalRecordsMap)) {
+            int numAnalyticProducts = finalRecordsMap.getOrDefault(BusinessEntity.ProductHierarchy, 0);
+            hasHierarchyProduct = numAnalyticProducts > 0;
+        } else {
+            // no MergeProduct in this PA
+            TableRoleInCollection role = BusinessEntity.ProductHierarchy.getBatchStore();
+            hasHierarchyProduct = StringUtils.isNotBlank(dataCollectionProxy.getTableName(customerSpace.toString(), role, active));
+        }
         if (hasHierarchyProduct) {
             masterTableName = masterTable.getName();
             PipelineTransformationRequest request = new PipelineTransformationRequest();

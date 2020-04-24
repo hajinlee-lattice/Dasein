@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -23,6 +24,7 @@ import javax.inject.Inject;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
@@ -104,6 +106,7 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     protected LivySession session;
     private AtomicInteger inputSeq = new AtomicInteger(0);
     private Map<String, DataUnit> inputUnits = new ConcurrentHashMap<>();
+    protected Callable<List<DataUnit>> inputProvider = () -> this.getInputUnits(getInputOrder());
 
     protected String getJobName() {
         return null;
@@ -150,7 +153,8 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     protected String getWorkspace() {
-        return String.format("/tmp/%s/%s", leStack, this.getClass().getSimpleName());
+        return String.format("/tmp/%s/%s/%s", leStack, this.getClass().getSimpleName(),
+                RandomStringUtils.randomAlphanumeric(6));
     }
 
     private void initializeScenario() {
@@ -295,9 +299,12 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         }
     }
 
-    private List<DataUnit> getInputUnitValues() {
-        List<String> orderedInput = getInputOrder();
-        return getInputUnits(orderedInput);
+    protected List<DataUnit> getInputUnitValues() {
+        try {
+            return inputProvider.call();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to provide input units", e);
+        }
     }
 
     private List<DataUnit> getInputUnits(List<String> orderedInput) {
@@ -312,6 +319,10 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
         } else {
             return new ArrayList<>(inputUnits.values());
         }
+    }
+
+    protected DataUnit getUploadedDataSet(int seq) {
+        return inputUnits.get("Input" + seq);
     }
 
     protected String uploadHdfsDataUnit(Object[][] data, List<Pair<String, Class<?>>> columns) {
