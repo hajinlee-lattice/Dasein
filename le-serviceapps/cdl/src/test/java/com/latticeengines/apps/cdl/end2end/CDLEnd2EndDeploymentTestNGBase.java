@@ -257,12 +257,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long CONTACT_UC = 1000L;
     // Number of total contact after ProcessAccount entity match test
     // FIXME change back to 1005 after using new ProcessAccount checkpoint
-    static final Long CONTACT_UA_EM = 1014L;
+    static final Long CONTACT_UA_EM = 1005L;
     // Number of new contact after UpdateContact test
     static final Long NEW_CONTACT_UC = 100L;
     // Number of new contact after UpdateAccount entity match test
     // FIXME change back to 105 after using new ProcessAccount checkpoint
-    static final Long NEW_CONTACT_UA_EM = 114L;
+    static final Long NEW_CONTACT_UA_EM = 105L;
     // Number of new contact after UpdateAccount entity match test for GA tenants
     static final Long NEW_CONTACT_UA_EMGA = 114L;
     // Number of updated contact after UpdateContact test
@@ -291,7 +291,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated daily transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long DAILY_TXN_UT_EM = 50863L;
+    // static final Long DAILY_TXN_UT_EM = 50863L;
+    static final Long DAILY_TXN_UT_EM = 51602L;
     // Number of aggregated period transaction after ProcessTransaction test
     static final Long PERIOD_TRANSACTION_PT = 62550L;
     // Number of aggregated period transaction after ProcessTransaction entity
@@ -303,7 +304,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+    // static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+    static final Long PERIOD_TRANSACTION_UT_EM = 75658L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
     // Number of total purchase history attributes after UpdateTransaction test
