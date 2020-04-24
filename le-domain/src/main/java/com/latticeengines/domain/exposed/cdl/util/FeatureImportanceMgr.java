@@ -182,7 +182,7 @@ public class FeatureImportanceMgr {
             }
         } catch (Exception e) {
             log.error(String.format("Unable to populate feature importance for %s, modelId=%s, due to %s",
-                    customerSpace, modelSummary.getId()), e);
+                    customerSpace, modelSummary.getId(), e.toString()));
         }
         return importances;
     }
