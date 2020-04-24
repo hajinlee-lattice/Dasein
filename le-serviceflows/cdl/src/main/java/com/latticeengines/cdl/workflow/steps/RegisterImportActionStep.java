@@ -23,7 +23,7 @@ public class RegisterImportActionStep extends BaseWorkflowStep<RegisterImportAct
     @Inject
     private ActionProxy actionProxy;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void execute() {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
