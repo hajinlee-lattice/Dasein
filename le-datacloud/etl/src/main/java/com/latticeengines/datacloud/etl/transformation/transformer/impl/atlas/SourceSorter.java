@@ -251,7 +251,7 @@ public class SourceSorter extends AbstractDataflowTransformer<SorterConfig, Sort
         private void split() {
             log.info(String.format("(Attempt = %d) Trying to split file %s", attempt++, avroFile));
             cleanupLocalDir();
-            Iterator<GenericRecord> iterator = AvroUtils.iterator(yarnConfiguration, avroFile);
+            Iterator<GenericRecord> iterator = AvroUtils.iterateAvroFiles(yarnConfiguration, avroFile);
             List<GenericRecord> buffer = new ArrayList<>();
             int bufferedPartition = -1;
             while (iterator.hasNext()) {

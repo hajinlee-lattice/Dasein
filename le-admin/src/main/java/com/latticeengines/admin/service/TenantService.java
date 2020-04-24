@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
+import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 
 public interface TenantService {
 
@@ -46,5 +47,5 @@ public interface TenantService {
 
     boolean updateTenantInfo(String contractId, String tenantId, TenantInfo tenantInfo);
 
-    boolean createVboTenant(VboRequest vboRequest, String userName);
+    VboResponse createVboTenant(VboRequest vboRequest, String userName);
 }

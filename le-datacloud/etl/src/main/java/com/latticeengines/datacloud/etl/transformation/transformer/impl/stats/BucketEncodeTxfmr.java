@@ -144,32 +144,36 @@ public class BucketEncodeTxfmr extends ConfigurableSparkJobTxfmr<BucketEncodeCon
                                      TransformerConfig configuration, List<Schema> baseSchemas) {
 
         Schema baseSchema = baseSchemas.get(dataIdx);
-        Map<String, Schema.Field> inputFields = new HashMap<>();
-        baseSchema.getFields().forEach(field -> inputFields.putIfAbsent(field.name(), field));
-        Schema resultSchema = AvroParquetUtils.parseAvroSchema(yarnConfiguration, result.getPath());
-        Schema parsed = AvroUtils.overwriteFields(resultSchema, inputFields);
-        Map<String, List<BucketedAttribute>> bktAttrMap = bktAttrMap(jobConfig.getEncAttrs());
-        ObjectMapper om = new ObjectMapper();
-        ObjectNode objectNode;
-        try {
-            objectNode = om.readValue(parsed.toString(), ObjectNode.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse avro schema of cascading result table.", e);
-        }
-        ArrayNode fields = (ArrayNode) objectNode.get("fields");
-        for (JsonNode jNode : fields) {
-            ObjectNode field = (ObjectNode) jNode;
-            String fieldName = field.get("name").asText();
-            if (bktAttrMap.containsKey(fieldName)) {
-                field.set("bucketed_attrs", om.valueToTree(bktAttrMap.get(fieldName)));
+        if (baseSchema != null) {
+            Map<String, Schema.Field> inputFields = new HashMap<>();
+            baseSchema.getFields().forEach(field -> inputFields.putIfAbsent(field.name(), field));
+            Schema resultSchema = AvroParquetUtils.parseAvroSchema(yarnConfiguration, result.getPath());
+            Schema parsed = AvroUtils.overwriteFields(resultSchema, inputFields);
+            Map<String, List<BucketedAttribute>> bktAttrMap = bktAttrMap(jobConfig.getEncAttrs());
+            ObjectMapper om = new ObjectMapper();
+            ObjectNode objectNode;
+            try {
+                objectNode = om.readValue(parsed.toString(), ObjectNode.class);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to parse avro schema of cascading result table.", e);
             }
-        }
-        objectNode.set("fields", fields);
-        Schema.Parser parser = new Schema.Parser();
-        try {
-            return parser.parse(om.writeValueAsString(objectNode));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to parse modified schema.", e);
+            ArrayNode fields = (ArrayNode) objectNode.get("fields");
+            for (JsonNode jNode : fields) {
+                ObjectNode field = (ObjectNode) jNode;
+                String fieldName = field.get("name").asText();
+                if (bktAttrMap.containsKey(fieldName)) {
+                    field.set("bucketed_attrs", om.valueToTree(bktAttrMap.get(fieldName)));
+                }
+            }
+            objectNode.set("fields", fields);
+            Schema.Parser parser = new Schema.Parser();
+            try {
+                return parser.parse(om.writeValueAsString(objectNode));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to parse modified schema.", e);
+            }
+        } else {
+            return null;
         }
     }
 

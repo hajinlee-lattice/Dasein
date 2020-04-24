@@ -214,6 +214,7 @@ public class GenerateDimensionMetadata
             }
             // make sure stream & catalog has data TODO maybe add warning
             if (!rawStreamTables.containsKey(streamId)) {
+                // no new import nor batch store
                 log.info("No raw stream data for stream {}, skip generating metadata", streamId);
                 streamErrorMsgs.put(streamId, "No data for this stream");
                 return Stream.empty();

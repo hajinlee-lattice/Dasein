@@ -93,7 +93,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunchChannel.setTenant(MultiTenantContext.getTenant());
         playLaunchChannel.setTenantId(MultiTenantContext.getTenant().getPid());
         playLaunchChannel = playLaunchChannelEntityMgr.createPlayLaunchChannel(playLaunchChannel);
-        playLaunchChannel.setPlay(play); // ensure play exists if used in resource
+        playLaunchChannel.setPlay(play); // ensure play exists if used in
+                                         // resource
         return playLaunchChannel;
     }
 
@@ -113,7 +114,8 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
                     playLaunchChannel.getPlay().getName() });
         }
         playLaunchChannelEntityMgr.updatePlayLaunchChannel(retrievedPlayLaunchChannel, playLaunchChannel);
-        retrievedPlayLaunchChannel.setPlay(play); // ensure play exists if used in resource
+        retrievedPlayLaunchChannel.setPlay(play); // ensure play exists if used
+                                                  // in resource
         retrievedPlayLaunchChannel
                 .setLastLaunch(playLaunchService.findLatestByChannel(retrievedPlayLaunchChannel.getPid()));
         return retrievedPlayLaunchChannel;
@@ -277,8 +279,12 @@ public class PlayLaunchChannelServiceImpl implements PlayLaunchChannelService {
         playLaunch.setAccountsSuppressed(0L);
         playLaunch.setAccountsErrored(0L);
         playLaunch.setAccountsLaunched(0L);
+        playLaunch.setAccountsAdded(0L);
+        playLaunch.setAccountsDeleted(0L);
         playLaunch.setContactsSelected(totalAvailableContacts != null ? totalAvailableContacts : 0L);
         playLaunch.setContactsLaunched(0L);
+        playLaunch.setContactsAdded(0L);
+        playLaunch.setContactsDeleted(0L);
         playLaunch.setContactsSuppressed(0L);
         playLaunch.setContactsErrored(0L);
         return playLaunch;

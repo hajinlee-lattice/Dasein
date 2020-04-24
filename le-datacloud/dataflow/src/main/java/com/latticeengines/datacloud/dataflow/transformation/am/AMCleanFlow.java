@@ -126,7 +126,7 @@ public class AMCleanFlow extends TransformationFlowBase<BasicTransformationConfi
         Fields fieldDeclaration = new Fields(
                 accountMaster.getFieldNames().toArray(new String[accountMaster.getFieldNames().size()]));
         TypeBatchConvertFunction convertFunc = new TypeBatchConvertFunction(fieldDeclaration,
-                attrsAndExpectedType, expectedAMFields, true);
+                attrsAndExpectedType, expectedAMFields, false);
         accountMaster = accountMaster.apply(convertFunc, new FieldList(accountMaster.getFieldNames()), fms,
                 new FieldList(expectedAMFields), Fields.REPLACE);
 

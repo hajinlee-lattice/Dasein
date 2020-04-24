@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.dcp;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -82,5 +85,10 @@ public class UploadConfig {
 
     public void setUploadImportedErrorFilePath(String uploadImportedErrorFilePath) {
         this.uploadImportedErrorFilePath = uploadImportedErrorFilePath;
+    }
+
+    public List<String> getDownloadPaths() {
+        return Arrays.asList(uploadRawFilePath, uploadImportedFilePath,
+                uploadImportedErrorFilePath, uploadMatchResultPrefix);
     }
 }

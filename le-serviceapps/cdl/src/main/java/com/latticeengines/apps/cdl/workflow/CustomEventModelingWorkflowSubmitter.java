@@ -84,7 +84,6 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
     @Inject
     private PlsInternalProxy plsInternalProxy;
 
-
     @Inject
     private DataCollectionService dataCollectionService;
 
@@ -181,8 +180,8 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 && CollectionUtils.isNotEmpty(trainingTable.getPrimaryKey().getAttributes())) {
             idColumnName = trainingTable.getPrimaryKey().getAttributes().get(0);
         }
-        boolean mapToLatticeAccount = s3importSerice
-                .hasSystemMapToLatticeAccount(getCustomerSpace().toString());
+        boolean mapToLatticeAccount = s3importSerice.hasSystemMapToLatticeAccount(getCustomerSpace().toString());
+        boolean entityMatchEnabled = FeatureFlagUtils.isEntityMatchEnabled(flags);
         CustomEventModelingWorkflowConfiguration configuration = new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -246,6 +245,7 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .idColumnName(idColumnName, isLPI) //
                 .cdlMultiModel(!isLPI) //
                 .mapToLatticeAccount(mapToLatticeAccount) //
+                .entityMatchEnabled(entityMatchEnabled) //
                 .dataCollectionVersion(version) //
                 .setUserRefinedAttributes(parameters.getUserRefinedAttributes()) //
                 .modelIteration(parameters.getModelIteration()) //
@@ -258,4 +258,5 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .build();
         return configuration;
     }
+
 }

@@ -23,6 +23,10 @@ public class GenerateCuratedAttributesConfig extends SparkJobConfig {
     @JsonProperty
     public Integer masterTableIdx;
 
+    // template name -> formated source display name
+    @JsonProperty
+    public Map<String, String> templateValueMap = new HashMap<>();
+
     /*-
      * input idx -> map of attributes to be merged (src -> attr name after merge)
      */

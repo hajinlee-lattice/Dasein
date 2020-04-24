@@ -120,7 +120,7 @@ public enum InterfaceName {
     LatticeExportTime, // timestamp for csv export
     CDLBatchSource, // indicator if the source contribute the system batch
 
-    CDLTemplateName,
+    CDLTemplateName, CDLCreatedTemplate,
                        // store
 
     ConsolidateReport, //
@@ -129,7 +129,7 @@ public enum InterfaceName {
     AnnualRevenueCurrency, SpendAnalyticsSegment, RepresentativeAccounts, CustomerParentAccountID, DoNotCall, LeadStatus, LeadType, Cost, TotalCost, //
 
     // These values are for Curated Attributes.
-    NumberOfContacts, EntityLastUpdatedDate, EntityCreatedDate,
+    NumberOfContacts, EntityLastUpdatedDate, EntityCreatedDate, EntityCreatedSource,
 
     // CDL External
     SalesforceSandboxAccountID, SalesforceSandboxContactID, MarketoAccountID, EloquaAccountID,

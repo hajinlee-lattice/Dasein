@@ -50,7 +50,7 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         attachProtectedProxy(testSourceProxy);
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testCreateAndGetSource() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId("testProject",
                 Project.ProjectType.Type1);
@@ -69,7 +69,7 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertNotNull(source);
         Assert.assertEquals(source.getImportStatus(), DataFeedTask.S3ImportStatus.Active);
         Assert.assertFalse(StringUtils.isBlank(source.getSourceId()));
-        Assert.assertFalse(StringUtils.isBlank(source.getFullPath()));
+        Assert.assertFalse(StringUtils.isBlank(source.getDropFullPath()));
 
         sourceRequest.setDisplayName("testSource2");
         Source source2 = testSourceProxy.createSource(sourceRequest);
@@ -88,7 +88,7 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         Set<String> allIds = new HashSet<>(Arrays.asList(source.getSourceId(),  source2.getSourceId()));
         allSources.forEach(s -> {
             Assert.assertTrue(allIds.contains(s.getSourceId()));
-            Assert.assertFalse(StringUtils.isEmpty(s.getFullPath()));
+            Assert.assertFalse(StringUtils.isEmpty(s.getDropFullPath()));
         });
 
         testSourceProxy.deleteSourceById(source.getSourceId());

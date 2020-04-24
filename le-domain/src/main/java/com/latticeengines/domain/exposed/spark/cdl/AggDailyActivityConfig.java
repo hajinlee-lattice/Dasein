@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,13 +20,11 @@ public class AggDailyActivityConfig extends SparkJobConfig {
     public static final String NAME = "aggDailyActivity";
     private static final long serialVersionUID = 2423144672398876823L;
 
-    @JsonProperty
-    public Map<String, Integer> rawStreamInputIdx = new HashMap<>();
-
     // streamId -> date attribute name
     @JsonProperty
     public Map<String, String> streamDateAttrs = new HashMap<>();
 
+    // streamId -> reducer
     @JsonProperty
     public Map<String, ActivityRowReducer> streamReducerMap = new HashMap<>();
 
@@ -53,9 +52,27 @@ public class AggDailyActivityConfig extends SparkJobConfig {
     @JsonProperty
     public Map<String, List<String>> additionalDimAttrMap = new HashMap<>();
 
+    @JsonProperty
+    public Set<String> incrementalStreams = new HashSet<>();
+
+    // two tables in each input section if incremental stream, first one raw stream import, second existing batch
+    @JsonProperty
+    public ActivityStoreSparkIOMetadata inputMetadata;
+
+    @JsonProperty
+    public Map<String, Integer> streamRetentionDays = new HashMap<>();
+
+    @JsonProperty
+    public Long currentEpochMilli;
+
     @Override
     public int getNumTargets() {
-        return MapUtils.isEmpty(rawStreamInputIdx) ? 0 : rawStreamInputIdx.size();
+        if (MapUtils.isEmpty(inputMetadata.getMetadata())) {
+            return 0;
+        }
+        // for normal streams: 1 new batch store
+        // for incremental streams: 1 updated batch store + 1 delta daily stream
+        return inputMetadata.getMetadata().keySet().stream().mapToInt(streamId -> incrementalStreams.contains(streamId) ? 2 : 1).sum();
     }
 
     @Override

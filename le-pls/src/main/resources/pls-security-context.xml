@@ -406,6 +406,15 @@
     </security:http>
 
     <security:http use-expressions="true"
+                   pattern="/pls/activity-timeline/**"
+                   authentication-manager-ref="authenticationManager"
+                   entry-point-ref="restAuthenticationEntryPoint"
+                   create-session="stateless">
+        <security:csrf disabled="false"/>
+        <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
+    </security:http>
+
+    <security:http use-expressions="true"
                    pattern="/pls/modeldetails/**"
                    authentication-manager-ref="authenticationManager"
                    entry-point-ref="restAuthenticationEntryPoint"

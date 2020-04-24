@@ -357,4 +357,34 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         }
         return Collections.emptyMap();
     }
+
+    public Map<String, S3ImportSystem> getTemplateToSystemObjMap(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/templateToSystemObjectMap",
+                shortenCustomerSpace(customerSpace));
+        Map<?, ?> rawMap = get("get template name to system Object map", url, Map.class);
+        if (rawMap != null) {
+            return JsonUtils.convertMap(rawMap, String.class, S3ImportSystem.class);
+        }
+        return Collections.emptyMap();
+    }
+
+    public Map<String, S3ImportSystem.SystemType> getTemplateToSystemTypeMap(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/templateToSystemTypeMap",
+                shortenCustomerSpace(customerSpace));
+        Map<?, ?> rawMap = get("get template name to systemType map", url, Map.class);
+        if (rawMap != null) {
+            return JsonUtils.convertMap(rawMap, String.class, S3ImportSystem.SystemType.class);
+        }
+        return Collections.emptyMap();
+    }
+
+    public Map<String, DataFeedTask> getTemplateToDataFeedTaskMap(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/templateToDataFeedTaskMap",
+                shortenCustomerSpace(customerSpace));
+        Map<?, ?> rawMap = get("get template name to dataFeedTask map", url, Map.class);
+        if (rawMap != null) {
+            return JsonUtils.convertMap(rawMap, String.class, DataFeedTask.class);
+        }
+        return Collections.emptyMap();
+    }
 }

@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -35,6 +36,8 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
 
     private String masterTableName;
 
+    private boolean hasAnalyticProduct;
+
     @Override
     protected TableRoleInCollection profileTableRole() {
         return null;
@@ -42,31 +45,40 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
 
     @Override
     protected void onPostTransformationCompleted() {
-        String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
-        Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
-        servingStoreTableName = renameServingStoreTable(servingStoreTable);
-
-        exportTableRoleToRedshift(servingStoreTableName, getEntity().getServingStore());
-        dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, getEntity().getServingStore(),
-                inactive);
+        if (hasAnalyticProduct) {
+            String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
+            Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
+            servingStoreTableName = renameServingStoreTable(servingStoreTable);
+            exportTableRoleToRedshift(servingStoreTableName, getEntity().getServingStore());
+            dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, getEntity().getServingStore(),
+                    inactive);
+        }
     }
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
-        masterTableName = masterTable.getName();
-        PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("ProfileProduct");
-        request.setSubmitter(customerSpace.getTenantId());
-        request.setKeepTemp(false);
-        request.setEnableSlack(false);
+        Map<BusinessEntity, Integer> finalRecordsMap = getMapObjectFromContext(FINAL_RECORDS, BusinessEntity.class, Integer.class);
+        int numAnalyticProducts = finalRecordsMap.getOrDefault(BusinessEntity.Product, 0);
+        hasAnalyticProduct = numAnalyticProducts > 0;
+        if (hasAnalyticProduct) {
+            masterTableName = masterTable.getName();
+            PipelineTransformationRequest request = new PipelineTransformationRequest();
+            request.setName("ProfileProduct");
+            request.setSubmitter(customerSpace.getTenantId());
+            request.setKeepTemp(false);
+            request.setEnableSlack(false);
 
-        TransformationStepConfig standardization = standardization();
-        TransformationStepConfig sort = sort();
-        // -----------
-        List<TransformationStepConfig> steps = Arrays.asList(standardization, sort);
-        // -----------
-        request.setSteps(steps);
-        return request;
+            TransformationStepConfig standardization = standardization();
+            TransformationStepConfig sort = sort();
+            // -----------
+            List<TransformationStepConfig> steps = Arrays.asList(standardization, sort);
+            // -----------
+            request.setSteps(steps);
+            return request;
+        } else {
+            updateEntityValueMapInContext(BusinessEntity.Product, RESET_ENTITIES, true, Boolean.class);
+            return null;
+        }
     }
 
     private TransformationStepConfig standardization() {

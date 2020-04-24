@@ -81,6 +81,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         if (softDeleteEntities.containsKey(entity)) {
             log.info("Soft delete performed for Activity Stream");
             updatedRawStreamTables = getMapObjectFromContext(RAW_STREAM_TABLE_AFTER_DELETE, String.class, String.class);
+            log.info("Updated raw stream tables = {}", updatedRawStreamTables);
         }
         // in replace mode, delete the records in document db
         if (Boolean.TRUE.equals(configuration.isReplaceMode())) {
@@ -96,6 +97,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         // TODO add diff report
         Map<String, String> rawStreamTables = buildRawStreamBatchStore();
         exportToS3AndAddToContext(rawStreamTables, RAW_ACTIVITY_STREAM_TABLE_NAME);
+        exportToS3AndAddToContext(matchedStreamImportTables, RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME);
     }
 
     @Override

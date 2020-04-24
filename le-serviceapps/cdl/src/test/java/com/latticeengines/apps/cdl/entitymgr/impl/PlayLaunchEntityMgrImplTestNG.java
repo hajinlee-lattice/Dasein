@@ -12,8 +12,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -39,8 +37,6 @@ import com.latticeengines.security.exposed.service.TenantService;
 
 public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(PlayLaunchEntityMgrImplTestNG.class);
-
     @Inject
     private PlayEntityMgr playEntityMgr;
 
@@ -62,7 +58,6 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private PlayLaunch playLaunch_org2_1;
     private PlayLaunch playLaunch_org2_2;
 
-    private List<PlayLaunch> allPlayLaunches;
     private List<PlayType> types;
 
     private String org1 = "org1";
@@ -104,14 +99,15 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1 = createPlayLaunch(null, null, null, null);
         playLaunch2 = createPlayLaunch(null, null, null, null);
 
-        playLaunch_org1_1 = createPlayLaunch(org1, externalSystemType, externalSystemName, destinationAccountIdColumn_1);
-        playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, externalSystemName, destinationAccountIdColumn_1);
+        playLaunch_org1_1 = createPlayLaunch(org1, externalSystemType, externalSystemName,
+                destinationAccountIdColumn_1);
+        playLaunch_org1_2 = createPlayLaunch(org1, externalSystemType, externalSystemName,
+                destinationAccountIdColumn_1);
 
-        playLaunch_org2_1 = createPlayLaunch(org2, externalSystemType, externalSystemName, destinationAccountIdColumn_2);
-        playLaunch_org2_2 = createPlayLaunch(org2, externalSystemType, externalSystemName, destinationAccountIdColumn_2);
-
-        allPlayLaunches = Arrays.asList(playLaunch1, playLaunch2, playLaunch_org1_1, playLaunch_org1_2,
-                playLaunch_org2_1, playLaunch_org2_2);
+        playLaunch_org2_1 = createPlayLaunch(org2, externalSystemType, externalSystemName,
+                destinationAccountIdColumn_2);
+        playLaunch_org2_2 = createPlayLaunch(org2, externalSystemType, externalSystemName,
+                destinationAccountIdColumn_2);
     }
 
     @Test(groups = "functional")
@@ -222,46 +218,48 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 externalSystemType.name());
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
                 externalSystemType.name());
-        playLaunch1 = updatePlayLaunchWithCounts(playLaunch1, LaunchState.Launched, 1L, 5L, 3L, 7L, 1L, 1L);
+        playLaunch1 = updatePlayLaunchWithCounts(playLaunch1, LaunchState.Launched, 1L, 5L, 3L, 7L, 1L, 1L, 1L, 1L, 2L,
+                2L);
 
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 5, null, null);
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org1,
                 externalSystemType.name());
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
                 externalSystemType.name());
-        playLaunch2 = updatePlayLaunchWithCounts(playLaunch2, LaunchState.Launched, 2L, 10L, 5L, 8L, 2L, 2L);
+        playLaunch2 = updatePlayLaunchWithCounts(playLaunch2, LaunchState.Launched, 2L, 10L, 5L, 8L, 2L, 2L, 1L, 1L, 2L,
+                2L);
 
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 4, null, null);
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org1,
                 externalSystemType.name());
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
                 externalSystemType.name());
-        playLaunch_org1_1 = updatePlayLaunchWithCounts(playLaunch_org1_1, LaunchState.Launched, 0L, 12L, 3L, 0L, 0L,
-                0L);
+        playLaunch_org1_1 = updatePlayLaunchWithCounts(playLaunch_org1_1, LaunchState.Launched, 0L, 12L, 3L, 0L, 0L, 0L,
+                1L, 1L, 2L, 2L);
 
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 3, null, null);
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 1, org1,
                 externalSystemType.name());
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
                 externalSystemType.name());
-        playLaunch_org1_2 = updatePlayLaunchWithCounts(playLaunch_org1_2, LaunchState.Launched, 3L, 8L, 6L, 10L, 2L,
-                2L);
+        playLaunch_org1_2 = updatePlayLaunchWithCounts(playLaunch_org1_2, LaunchState.Launched, 3L, 8L, 6L, 10L, 2L, 2L,
+                1L, 1L, 2L, 2L);
 
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, null, null);
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, org1,
                 externalSystemType.name());
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
                 externalSystemType.name());
-        playLaunch_org2_1 = updatePlayLaunchWithCounts(playLaunch_org2_1, LaunchState.Launched, 2L, 17L, 2L, 4L, 1L,
-                1L);
+        playLaunch_org2_1 = updatePlayLaunchWithCounts(playLaunch_org2_1, LaunchState.Launched, 2L, 17L, 2L, 4L, 1L, 1L,
+                1L, 1L, 2L, 2L);
 
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 1, null, null);
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, org1,
                 externalSystemType.name());
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 1, org2,
                 externalSystemType.name());
-        playLaunch_org2_2 = updatePlayLaunchWithCounts(playLaunch_org2_2, LaunchState.Launched, 5L, 4L, 0L, 18L, 2L,
-                2L);
+        playLaunch_org2_2 = updatePlayLaunchWithCounts(playLaunch_org2_2, LaunchState.Launched, 5L, 4L, 0L, 18L, 2L, 2L,
+                1L, 1L, 2L, 2L);
 
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, null, null);
         checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, org1,
@@ -487,7 +485,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     private PlayLaunch createPlayLaunch(String org, CDLExternalSystemType externalSystemType,
-                                        CDLExternalSystemName externalSystemName, String destinationAccountIdColumn) {
+            CDLExternalSystemName externalSystemName, String destinationAccountIdColumn) {
         PlayLaunch launch = new PlayLaunch();
         launch.setTenant(mainTestTenant);
         launch.setLaunchState(LaunchState.UnLaunched);
@@ -511,7 +509,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private PlayLaunch updatePlayLaunchWithCounts(PlayLaunch launch, LaunchState state, long errored,
             long accountsLaunched, long suppressed, long contactsLaunched, long contactsSuppressed,
-            long contactsErrored) throws InterruptedException {
+            long contactsErrored, long accountsAdded, long accountsDeleted, long contactsAdded, long contactsDeleted)
+            throws InterruptedException {
         launch = playLaunchEntityMgr.findByLaunchId(launch.getLaunchId(), false);
         launch.setLaunchState(state);
         launch.setAccountsErrored(errored);
@@ -520,6 +519,10 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         launch.setContactsLaunched(contactsLaunched);
         launch.setContactsSuppressed(contactsSuppressed);
         launch.setContactsErrored(contactsErrored);
+        launch.setAccountsAdded(accountsAdded);
+        launch.setAccountsDeleted(accountsDeleted);
+        launch.setContactsAdded(contactsAdded);
+        launch.setContactsDeleted(contactsDeleted);
         playLaunchEntityMgr.update(launch);
         Thread.sleep(1000);
         return launch;
@@ -667,6 +670,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         if (dashboardEntries.size() > 0) {
             dashboardEntries.forEach(entry -> {
+                PlayLaunch launch = playLaunchEntityMgr.findByLaunchId(entry.getLaunchId(), false);
                 Assert.assertNotNull(entry.getLaunchId());
                 Assert.assertTrue(launchIds.contains(entry.getLaunchId()));
                 Assert.assertNotNull(entry.getLaunchState());
@@ -674,6 +678,10 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 Assert.assertNotNull(entry.getPlayDisplayName());
                 Assert.assertNotNull(entry.getPlayName());
                 Assert.assertNotNull(entry.getSelectedBuckets());
+                Assert.assertEquals(entry.getStats().getContactsWithinRecommendations(),
+                        launch.getContactsAdded().longValue() + launch.getContactsDeleted().longValue());
+                Assert.assertEquals(entry.getStats().getRecommendationsLaunched(),
+                        launch.getAccountsAdded().longValue() + launch.getAccountsDeleted().longValue());
             });
 
             if (descending) {

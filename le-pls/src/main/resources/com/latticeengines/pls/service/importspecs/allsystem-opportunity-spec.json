@@ -11,6 +11,7 @@
           "ID"
         ],
         "required": true,
+        "nullable": false,
         "fundamentalType": "ALPHA",
         "approvedUsage": [
           "None"
@@ -28,6 +29,7 @@
           "LAST MODIFIED DATE"
         ],
         "required": true,
+        "nullable": false,
         "approvedUsage": [
           "None"
         ],
@@ -46,6 +48,7 @@
           "Stage Name"
         ],
         "required": true,
+        "nullable": false,
         "approvedUsage": [
           "None"
         ],

@@ -36,7 +36,7 @@ public class SourceServiceImpl implements SourceService {
     private static final String DATA_FEED_TASK_SOURCE = "DCP";
     private static final String DROP_FOLDER = "drop/";
     private static final String UPLOAD_FOLDER = "upload/";
-    private static final String SOURCE_RELATIVE_PATH_PATTERN = "Source/%s/";
+    private static final String SOURCE_RELATIVE_PATH_PATTERN = "Sources/%s/";
     private static final String RANDOM_SOURCE_ID_PATTERN = "Source_%s";
     private static final String TEMPLATE_NAME = "%s_Template";
     private static final String FEED_TYPE_PATTERN = "%s_%s"; // SystemName_SourceId;
@@ -80,7 +80,7 @@ public class SourceServiceImpl implements SourceService {
                 EntityType.fromDisplayNameToEntityType(fieldDefinitionsRecord.getSystemObject()), relativePath,
                 displayName, sourceId);
         Source source = convertToSource(customerSpace, dataFeedTask);
-        if (StringUtils.isNotBlank(source.getFullPath())) {
+        if (StringUtils.isNotBlank(source.getSourceFullPath())) {
             String relativePathUnderDropfolder = source.getRelativePathUnderDropfolder();
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder);
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + DROP_FOLDER);
@@ -148,8 +148,9 @@ public class SourceServiceImpl implements SourceService {
             S3ImportSystem s3ImportSystem = cdlProxy.getS3ImportSystem(customerSpace,
                     dataFeedTask.getImportSystemName());
             Project project = projectService.getProjectByImportSystem(customerSpace, s3ImportSystem);
-            source.setFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
+            source.setSourceFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
                     dropBoxService.getDropBoxPrefix(), project.getRootPath() + dataFeedTask.getRelativePath()));
+            source.setDropFullPath(source.getSourceFullPath() + DROP_FOLDER);
         }
         return source;
     }

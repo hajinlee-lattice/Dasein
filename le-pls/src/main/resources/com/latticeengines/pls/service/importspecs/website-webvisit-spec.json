@@ -12,6 +12,7 @@
                     "WEB_VISIT_PAGE_URL"
                 ],
                 "required": true,
+                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],
@@ -26,6 +27,7 @@
                     "WEB VISIT DATE"
                 ],
                 "required": true,
+                "nullable": false,
                 "approvedUsage": [
                     "None"
                 ],

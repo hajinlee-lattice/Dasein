@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.CREATED_TEMPLATE_FIELD;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -297,6 +301,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         log.info("Field indices included in newly allocated entity output = {}", newEntityFieldIdxMap);
 
         Schema schema = processorContext.getNewEntitySchema();
+        int templateFieldIdx = input.getFields().indexOf(MatchConstants.ENTITY_TEMPLATE_FIELD);
         log.info("Newly allocated entity output schema = {}", schema);
         for (OutputRecord outputRecord : outputRecords) {
             if (outputRecord == null || MapUtils.isEmpty(outputRecord.getNewEntityIds())) {
@@ -309,21 +314,20 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
                     // filter out the entities that we don't need to output
                     .filter(entry -> EntityMatchUtils.shouldOutputNewEntity(processorContext.getOriginalInput(),
                             entry.getKey())) //
-                    .map(entry -> {
-                        List<Object> row = new ArrayList<>();
-                        row.add(entry.getKey());
-                        row.add(entry.getValue());
-
-                        if (MapUtils.isNotEmpty(newEntityFieldIdxMap)) {
-                            // add input specified fields to output (first 2 will be entity & entityId
-                            schema.getFields().stream().skip(2).forEach(field -> {
-                                int i = newEntityFieldIdxMap.get(field.name());
-                                row.add(outputRecord.getInput().get(i));
-                            });
+                    .map(entry -> schema.getFields().stream().map(field -> {
+                        if (ENTITY_NAME_FIELD.equals(field.name())) {
+                            return entry.getKey();
+                        } else if (ENTITY_ID_FIELD.equals(field.name())) {
+                            return entry.getValue();
+                        } else if (CREATED_TEMPLATE_FIELD.equals(field.name())) {
+                            return templateFieldIdx >= 0 ? outputRecord.getInput().get(templateFieldIdx) : null;
+                        } else if (newEntityFieldIdxMap.containsKey(field.name())) {
+                            int i = newEntityFieldIdxMap.get(field.name());
+                            return outputRecord.getInput().get(i);
+                        } else {
+                            return null;
                         }
-
-                        return row;
-                    }) //
+                    }).collect(Collectors.toCollection(ArrayList::new))) //
                     .collect(Collectors.toList());
             records.addAll(values.stream().map(row -> {
                 // generate avro records

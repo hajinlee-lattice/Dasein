@@ -128,9 +128,12 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
                 TransformationStepConfig mergeSoftDelete = mergeDeleteActions(validActions, idColumn);
                 steps.add(mergeSoftDelete);
                 int mergeDeleteStep = steps.size() - 1;
-                TransformationStepConfig softDelete = softDelete(mergeDeleteStep, tableName, idColumn);
+                String rawStreamTablePrefix = String.format(RAWSTREAM_TABLE_PREFIX_FORMAT, streamId);
+                TransformationStepConfig softDelete = softDelete(mergeDeleteStep, tableName, idColumn, rawStreamTablePrefix);
                 steps.add(softDelete);
                 log.info("Add steps to delete from stream {} via {}", streamId, idColumn);
+                rawStreamTablePrefixes.put(streamId, rawStreamTablePrefix);
+                log.info("Add table prefix {} for stream {}", rawStreamTablePrefix, streamId);
             } else {
                 log.warn("Stream {} does not have the deletion id {}", streamId, idColumn);
             }
@@ -156,10 +159,12 @@ public abstract class BaseDeleteActivityStream<T extends ProcessActivityStreamSt
         return step;
     }
 
-    TransformationStepConfig softDelete(int mergeDeleteStep, String batchTableName, String idColumn) {
+    TransformationStepConfig softDelete(int mergeDeleteStep, String batchTableName, String idColumn,
+                                        String targetPrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_SOFT_DELETE_TXFMR);
         step.setInputSteps(Collections.singletonList(mergeDeleteStep));
+        setTargetTable(step, targetPrefix);
         if (StringUtils.isNotEmpty(batchTableName)) {
             log.info("Add masterTable=" + batchTableName);
             addBaseTables(step, ImmutableList.of(RAWSTREAM_PARTITION_KEYS), batchTableName);

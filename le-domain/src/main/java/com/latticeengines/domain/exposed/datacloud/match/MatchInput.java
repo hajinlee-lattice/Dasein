@@ -240,6 +240,10 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("NewEntityFields")
     private Set<String> newEntityFields;
 
+    // add fields that helps lineage tracking to output
+    @JsonProperty("IncludeLineageFields")
+    private boolean includeLineageFields;
+
     // Temporary flag for entity bulk match test. Will remove after we have
     // workflow for testing
     @JsonProperty("BumpupEntitySeedVersion")
@@ -681,6 +685,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setNewEntityFields(Set<String> newEntityFields) {
         this.newEntityFields = newEntityFields;
+    }
+
+    public boolean isIncludeLineageFields() {
+        return includeLineageFields;
+    }
+
+    public void setIncludeLineageFields(boolean includeLineageFields) {
+        this.includeLineageFields = includeLineageFields;
     }
 
     public boolean bumpupEntitySeedVersion() {

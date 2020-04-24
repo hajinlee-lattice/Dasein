@@ -2,9 +2,11 @@ package com.latticeengines.cdl.workflow.steps.migrate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -23,9 +25,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicy;
+import com.latticeengines.domain.exposed.metadata.retention.RetentionPolicyTimeUnit;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.BaseConvertBatchStoreServiceConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.migrate.ConvertBatchStoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.util.RetentionPolicyUtil;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
@@ -39,6 +44,7 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
 
     private static final String TRANSFORMER = "EntityMatchImportMigrateTransformer";
 
+    @SuppressWarnings("rawtypes")
     private ConvertBatchStoreService convertBatchStoreService;
 
     private BaseConvertBatchStoreServiceConfiguration convertServiceConfig;
@@ -64,7 +70,9 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         String migratedImportTableName = TableUtils.getFullTableName(
                 convertBatchStoreService.getTargetTablePrefix(customerSpace.toString(), convertServiceConfig),
                 pipelineVersion);
-        convertBatchStoreService.setDataTable(migratedImportTableName, customerSpace.toString(), templateTable,
+        Table tempTemplate = getTempTemplate(templateTable, convertBatchStoreService.getAttributes(customerSpace.toString(), templateTable,
+                masterTable, configuration.getDiscardFields(), convertServiceConfig));
+        convertBatchStoreService.setDataTable(migratedImportTableName, customerSpace.toString(), tempTemplate,
                 convertServiceConfig, yarnConfiguration);
 
         Map<String, List<String>> rematchTables = getTypedObjectFromContext(REMATCH_TABLE_NAMES,
@@ -80,6 +88,16 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         addToListInContext(TEMPORARY_CDL_TABLES, migratedImportTableName, String.class);
     }
 
+    private Table getTempTemplate(Table templateTable, List<String> retainFields) {
+        Table tempTemplate = TableUtils.clone(templateTable, "Temp_" + templateTable.getName(), true);
+        Set<String> retainSet = new HashSet<>(retainFields);
+        tempTemplate.getAttributes().removeIf(attr -> !retainSet.contains(attr.getName()));
+        RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(1, RetentionPolicyTimeUnit.DAY);
+        tempTemplate.setRetentionPolicy(RetentionPolicyUtil.retentionPolicyToStr(retentionPolicy));
+        metadataProxy.createImportTable(customerSpace.toString(), tempTemplate.getName(), tempTemplate);
+        return tempTemplate;
+    }
+
     private boolean isShortCutMode() {
         Map<String, List<String>> rematchTables = getTypedObjectFromContext(REMATCH_TABLE_NAMES,
                 new TypeReference<Map<String, List<String>>>() {
@@ -87,11 +105,7 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         if (MapUtils.isEmpty(rematchTables)) {
             return false;
         }
-        if (CollectionUtils.isNotEmpty(rematchTables.get(configuration.getEntity().name()))) {
-            return true;
-        }
-
-        return false;
+        return CollectionUtils.isNotEmpty(rematchTables.get(configuration.getEntity().name()));
     }
 
     @SuppressWarnings("unchecked")

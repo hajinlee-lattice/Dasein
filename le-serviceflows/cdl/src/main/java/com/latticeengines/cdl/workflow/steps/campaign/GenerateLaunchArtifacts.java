@@ -83,8 +83,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    private Set<String> firstAndLastName = Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name())
-            .stream().collect(Collectors.toSet());
+    private Set<String> firstAndLastName = new HashSet<>(
+            Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name()));
 
     private DataCollection.Version version;
     private String evaluationDate;
@@ -161,7 +161,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         SparkJobResult sparkJobResult = executeSparkJob(accountLookups, contactLookups, positiveDeltaDataUnit,
                 negativeDeltaDataUnit,
                 contactsDataExists ? channelConfig.getAudienceType().asBusinessEntity() : BusinessEntity.Account,
-                contactsDataExists);
+                contactsDataExists, channelConfig.isSuppressAccountsWithoutContacts());
         processSparkJobResults(channelConfig.getAudienceType(), sparkJobResult);
     }
 
@@ -177,7 +177,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     private SparkJobResult executeSparkJob(Set<Lookup> accountLookups, Set<Lookup> contactLookups,
             HdfsDataUnit positiveDeltaDataUnit, HdfsDataUnit negativeDeltaDataUnit, BusinessEntity mainEntity,
-            boolean contactsDataExists) {
+            boolean contactsDataExists, boolean suppressAccountsWithoutContacts) {
 
         RetryTemplate retry = RetryUtils.getRetryTemplate(2);
         return retry.execute(ctx -> {
@@ -205,7 +205,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
                 GenerateLaunchArtifactsJobConfig config = new GenerateLaunchArtifactsJobConfig(accountDataUnit,
                         contactDataUnit, negativeDeltaDataUnit, positiveDeltaDataUnit, mainEntity,
-                        getRandomWorkspace());
+                        !suppressAccountsWithoutContacts, getRandomWorkspace());
                 log.info("Executing GenerateLaunchArtifactsJob with config: " + JsonUtils.serialize(config));
                 SparkJobResult result = executeSparkJob(GenerateLaunchArtifactsJob.class, config);
                 log.info("GenerateLaunchArtifactsJob Results: " + JsonUtils.serialize(result));
@@ -218,9 +218,21 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
     private void processSparkJobResults(AudienceType audienceType, SparkJobResult sparkJobResult) {
         GenerateLaunchArtifactsStepConfiguration config = getConfiguration();
+        long accountsAdded = 0L;
+        long accountsDeleted = 0L;
+        long fullContacts = 0L;
+        long contactsAdded = 0L;
+        long contactsDeleted = 0L;
+        long accumulativeAccounts = getLongValueFromContext(PREVIOUS_ACCUMULATIVE_ACCOUNTS) != null
+                ? getLongValueFromContext(PREVIOUS_ACCUMULATIVE_ACCOUNTS)
+                : 0L;
+        long accumulativeContacts = getLongValueFromContext(PREVIOUS_ACCUMULATIVE_CONTACTS) != null
+                ? getLongValueFromContext(PREVIOUS_ACCUMULATIVE_CONTACTS)
+                : 0L;
 
         HdfsDataUnit addedAccountsDataUnit = sparkJobResult.getTargets().get(0);
         if (addedAccountsDataUnit != null && addedAccountsDataUnit.getCount() > 0) {
+            accountsAdded = addedAccountsDataUnit.getCount();
             processHDFSDataUnit(String.format("AddedAccounts_%s", config.getExecutionId()), addedAccountsDataUnit,
                     AudienceType.ACCOUNTS.getInterfaceName(),
                     getAddDeltaTableContextKeyByAudienceType(AudienceType.ACCOUNTS));
@@ -230,6 +242,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
         HdfsDataUnit removedAccountsDataUnit = sparkJobResult.getTargets().get(1);
         if (removedAccountsDataUnit != null && removedAccountsDataUnit.getCount() > 0) {
+            accountsDeleted = removedAccountsDataUnit.getCount();
             processHDFSDataUnit(String.format("RemovedAccounts_%s", config.getExecutionId()), removedAccountsDataUnit,
                     AudienceType.ACCOUNTS.getInterfaceName(),
                     getRemoveDeltaTableContextKeyByAudienceType(AudienceType.ACCOUNTS));
@@ -239,6 +252,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
         HdfsDataUnit fullContactsDataUnit = sparkJobResult.getTargets().get(2);
         if (fullContactsDataUnit != null && fullContactsDataUnit.getCount() > 0) {
+            fullContacts = fullContactsDataUnit.getCount();
             processHDFSDataUnit(String.format("AccountsWithFullContacts_%s", config.getExecutionId()),
                     fullContactsDataUnit, AudienceType.ACCOUNTS.getInterfaceName(), ADDED_ACCOUNTS_FULL_CONTACTS_TABLE);
         } else {
@@ -248,6 +262,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
         if (audienceType == AudienceType.CONTACTS) {
             HdfsDataUnit addedContactsDataUnit = sparkJobResult.getTargets().get(3);
             if (addedContactsDataUnit != null && addedContactsDataUnit.getCount() > 0) {
+                contactsAdded = addedContactsDataUnit.getCount();
                 processHDFSDataUnit(String.format("AddedContacts_%s", config.getExecutionId()), addedContactsDataUnit,
                         audienceType.getInterfaceName(), getAddDeltaTableContextKeyByAudienceType(audienceType));
             } else {
@@ -256,6 +271,7 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
 
             HdfsDataUnit removedContactsDataUnit = sparkJobResult.getTargets().get(4);
             if (removedContactsDataUnit != null && removedContactsDataUnit.getCount() > 0) {
+                contactsDeleted = removedContactsDataUnit.getCount();
                 processHDFSDataUnit(String.format("RemovedContacts_%s", config.getExecutionId()),
                         removedContactsDataUnit, audienceType.getInterfaceName(),
                         getRemoveDeltaTableContextKeyByAudienceType(audienceType));
@@ -263,6 +279,25 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
                 log.info(String.format("No new Removed %ss", audienceType.asBusinessEntity().name()));
             }
         }
+
+        /*
+         * PLS-15540 Accumulative Launched = Add - Delete + Previous Accumulative
+         * Launched Suppressed = Selected - Accumulative Launched Incremental Launched =
+         * Add + Delete
+         */
+        accumulativeAccounts += accountsAdded - accountsDeleted;
+        accumulativeContacts += contactsAdded - contactsDeleted;
+        log.info(String.format("accountsAdded=%d, accountsDeleted=%d, accumulativeAccounts=%d", accountsAdded,
+                accountsDeleted, accumulativeAccounts));
+        log.info(String.format("contactsAdded=%d, contactsDeleted=%d, fullContacts=%d, accumulativeContacts=%d",
+                contactsAdded, contactsDeleted, fullContacts, accumulativeContacts));
+        putLongValueInContext(ACCOUNTS_ADDED, accountsAdded);
+        putLongValueInContext(ACCOUNTS_DELETED, accountsDeleted);
+        putLongValueInContext(ACCUMULATIVE_ACCOUNTS, accumulativeAccounts);
+        putLongValueInContext(CONTACTS_ADDED, contactsAdded);
+        putLongValueInContext(CONTACTS_DELETED, contactsDeleted);
+        putLongValueInContext(FULL_CONTACTS, fullContacts);
+        putLongValueInContext(ACCUMULATIVE_CONTACTS, accumulativeContacts);
     }
 
     private void processHDFSDataUnit(String tableName, HdfsDataUnit dataUnit, String primaryKey, String contextKey) {

@@ -14,7 +14,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -28,8 +27,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "TIME_LINE", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"TIMELINE_ID", "FK_TENANT_ID"})})
+@Table(name = "TIME_LINE")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TimeLine implements HasPid, HasTenant, Serializable {
@@ -48,7 +46,7 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
 
-    @Column(name = "TIMELINE_ID", nullable = false)
+    @Column(name = "TIMELINE_ID", unique = true, nullable = false)
     @JsonProperty("timeline_id")
     private String timelineId;
 
@@ -76,7 +74,7 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
     @Column(name = "EVENT_MAPPINGS", columnDefinition = "'JSON'")
     @JsonProperty("event_mappings")
     @Type(type = "json")
-    private Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> eventMappings;
+    private Map<String, Map<String, EventFieldExtractor>> eventMappings;
 
     @Override
     public Long getPid() {
@@ -98,11 +96,11 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
         this.tenant = tenant;
     }
 
-    public Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> getEventMappings() {
+    public Map<String, Map<String, EventFieldExtractor>> getEventMappings() {
         return eventMappings;
     }
 
-    public void setEventMappings(Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> eventMappings) {
+    public void setEventMappings(Map<String, Map<String, EventFieldExtractor>> eventMappings) {
         this.eventMappings = eventMappings;
     }
 
@@ -145,4 +143,5 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
     public void setStreamIds(List<String> streamIds) {
         this.streamIds = streamIds;
     }
+
 }

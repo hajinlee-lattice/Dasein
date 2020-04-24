@@ -7,15 +7,18 @@ import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityImport;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
+import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ActivityStreamSparkStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessActivityStreamStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProfileAccountActivityMetricsStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProfileContactActivityMetricsStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.TimeLineSparkStepConfiguration;
 
 public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -25,6 +28,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
         private ActivityStreamSparkStepConfiguration activityStreamSparkConfiguration = new ActivityStreamSparkStepConfiguration();
         private ProfileAccountActivityMetricsStepConfiguration profileAccountActivityMetricsStepConfiguration = new ProfileAccountActivityMetricsStepConfiguration();
         private ProfileContactActivityMetricsStepConfiguration profileContactActivityMetricsStepConfiguration = new ProfileContactActivityMetricsStepConfiguration();
+        private TimeLineSparkStepConfiguration timeLineSparkStepConfiguration = new TimeLineSparkStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -32,6 +36,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             activityStreamSparkConfiguration.setCustomer(customerSpace.toString());
             profileAccountActivityMetricsStepConfiguration.setCustomerSpace(customerSpace);
             profileContactActivityMetricsStepConfiguration.setCustomerSpace(customerSpace);
+            timeLineSparkStepConfiguration.setCustomer(customerSpace.toString());
             return this;
         }
 
@@ -41,6 +46,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             activityStreamSparkConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             profileAccountActivityMetricsStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             profileContactActivityMetricsStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            timeLineSparkStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -68,6 +74,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
         public Builder activityStreams(Map<String, AtlasStream> activityStreams) {
             processStepConfiguration.setActivityStreamMap(activityStreams);
             activityStreamSparkConfiguration.setActivityStreamMap(activityStreams);
+            timeLineSparkStepConfiguration.setActivityStreamMap(activityStreams);
             return this;
         }
 
@@ -95,7 +102,18 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities) && entities.contains(BusinessEntity.ActivityStream)) {
                 activityStreamSparkConfiguration.setShouldRebuild(true);
+                timeLineSparkStepConfiguration.setShouldRebuild(true);
             }
+            return this;
+        }
+
+        public Builder activeTimelineList(List<TimeLine> timeLineList) {
+            timeLineSparkStepConfiguration.setTimeLineList(timeLineList);
+            return this;
+        }
+
+        public Builder templateToSystemTypeMap(Map<String, S3ImportSystem.SystemType> templateToSystemTypeMap) {
+            timeLineSparkStepConfiguration.setTemplateToSystemTypeMap(templateToSystemTypeMap);
             return this;
         }
 
@@ -106,6 +124,7 @@ public class ProcessActivityStreamWorkflowConfiguration extends BaseCDLWorkflowC
             configuration.add(activityStreamSparkConfiguration);
             configuration.add(profileAccountActivityMetricsStepConfiguration);
             configuration.add(profileContactActivityMetricsStepConfiguration);
+            configuration.add(timeLineSparkStepConfiguration);
             return configuration;
         }
     }

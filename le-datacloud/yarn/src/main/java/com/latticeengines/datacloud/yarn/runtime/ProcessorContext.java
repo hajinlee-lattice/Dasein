@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.yarn.runtime;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.CREATED_TEMPLATE_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_ID_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_MATCH_ERROR_FIELD;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchConstants.ENTITY_NAME_FIELD;
@@ -537,6 +538,9 @@ public class ProcessorContext {
         fieldMap.put(ENTITY_NAME_FIELD, String.class);
         fieldMap.put(ENTITY_ID_FIELD, String.class);
 
+        if (matchInput.isIncludeLineageFields()) {
+            fieldMap.put(CREATED_TEMPLATE_FIELD, String.class);
+        }
         if (CollectionUtils.isNotEmpty(matchInput.getNewEntityFields())) {
             matchInput.getNewEntityFields().forEach(fieldName -> {
                 Schema.Field field = inputSchema.getField(fieldName);

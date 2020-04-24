@@ -98,6 +98,9 @@ public class PrepareMatchData extends RunSparkJob<PrepareMatchDataConfiguration,
         addIfAbsent(fields, allFields, configuration.getMatchGroupId());
         addIfAbsent(fields, allFields, InterfaceName.Id.name());
         addIfAbsent(fields, allFields, InterfaceName.InternalId.name());
+        if (configuration.isMapToLatticeAccount()) {
+            addIfAbsent(fields, allFields, InterfaceName.CustomerAccountId.name());
+        }
         log.info("Selected fields={}", String.join(",", allFields));
         return allFields;
     }

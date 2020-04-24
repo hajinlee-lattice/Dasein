@@ -1,6 +1,8 @@
 package com.latticeengines.admin.service.impl;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -80,6 +82,7 @@ import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionReque
 import com.latticeengines.domain.exposed.datacloud.match.entity.BumpVersionResponse;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
+import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.security.TenantType;
@@ -609,11 +612,20 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public boolean createVboTenant(VboRequest vboRequest, String userName) {
+    public VboResponse createVboTenant(VboRequest vboRequest, String userName) {
+        String subNumber  = vboRequest.getSubscriber().getSubscriberNumber();
+        Tenant existingTenant = tenantService.findBySubscriberNumber(subNumber);
+        if (existingTenant != null) {
+            String existingName = existingTenant.getName();
+            log.info("the subscriber number {} has been registered by tenant {}",
+                    subNumber, existingName);
+            return generateVBOResponse(existingName, false);
+        }
 
-        String tenantName = String.format("%s_%s", vboRequest.getSubscriber().getName(),
-                vboRequest.getSubscriber().getSubscriberNumber());
-
+        String tenantName = constructTenantNameFromSubscriber(vboRequest.getSubscriber().getName());
+        if (StringUtils.isBlank(tenantName)) {
+            return generateVBOResponse(tenantName, false);
+        }
         List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
 
         // TenantInfo
@@ -671,6 +683,11 @@ public class TenantServiceImpl implements TenantService {
                     node.setData(JsonUtils.serialize(users));
                     componentConfig.getNodes().add(node);
                 }
+                // add subscriberNum node
+                SerializableDocumentDirectory.Node node = new SerializableDocumentDirectory.Node();
+                node.setNode("SubscriberNumber");
+                node.setData(subNumber);
+                componentConfig.getNodes().add(node);
                 // set null as document dir and serializable document dir are not consistent, document directory will
                 // be newly constructed from serializable document dir when needed
                 componentConfig.setDocumentDirectory(null);
@@ -686,7 +703,8 @@ public class TenantServiceImpl implements TenantService {
         registration.setTenantInfo(tenantInfo);
         registration.setConfigDirectories(configDirs);
 
-        return createTenant(tenantName.trim(), tenantName.trim(), registration, userName);
+        return generateVBOResponse(tenantName, createTenant(tenantName, tenantName, registration,
+                userName));
     }
 
     private IDaaSUser constructIDaaSUser(VboRequest.User user, String language) {
@@ -708,6 +726,46 @@ public class TenantServiceImpl implements TenantService {
         Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getPhoneNumber()),
                 "Phone number is required");
         return iDaasuser;
+    }
+
+    private String constructTenantNameFromSubscriber(String subscriberName) {
+        if (StringUtils.isBlank(subscriberName)) {
+            log.info("empty subscriber name");
+            return null;
+        }
+        String tenantName = subscriberName.trim().replace(" ", "_");
+        String encodedName;
+        try {
+            encodedName = URLEncoder.encode(tenantName, StandardCharsets.UTF_8.toString());
+        } catch (Exception e) {
+            encodedName = null;
+        }
+        // compare the tenant name with encoded value, skip installation process if value is different now
+        if (!tenantName.equals(encodedName)) {
+            log.info("tenant name {} is not equal to encoded name {}", tenantName, encodedName);
+            return null;
+        }
+        int suffix = 1;
+        String uniqueTenantName = tenantName;
+        String tenantId = CustomerSpace.parse(uniqueTenantName).toString();
+        while (tenantService.hasTenantId(tenantId)) {
+            uniqueTenantName = String.format("%s_%s", tenantName, suffix++);
+            tenantId = CustomerSpace.parse(uniqueTenantName).toString();
+        }
+        return uniqueTenantName;
+    }
+
+    private VboResponse generateVBOResponse(String tenantName, boolean result) {
+        VboResponse vboResponse = new VboResponse();
+        vboResponse.setTenantName(tenantName);
+        if (result) {
+            vboResponse.setStatus("success");
+            vboResponse.setMessage("tenant created successfully via Vbo request");
+        } else {
+            vboResponse.setStatus("failed");
+            vboResponse.setMessage("tenant created failed via Vbo request");
+        }
+        return vboResponse;
     }
 
     private boolean danteIsEnabled(TenantDocument tenant) {

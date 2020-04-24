@@ -14,5 +14,7 @@ public interface TimeLineRepository extends BaseJpaRepository<TimeLine, Long> {
 
     TimeLine findByTenantAndTimelineId(@Param("tenant") Tenant tenant, @Param("timelineId") String timelineId);
 
+    TimeLine findByTenantAndEntity(@Param("tenant") Tenant tenant, @Param("entity") String entity);
+
     List<TimeLine> findByTenant(@Param("tenant") Tenant tenant);
 }

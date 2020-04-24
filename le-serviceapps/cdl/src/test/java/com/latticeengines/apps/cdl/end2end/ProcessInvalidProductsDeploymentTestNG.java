@@ -15,28 +15,33 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
-    private static long FAILED_PRODUCT_IMPORT_COUNT = 0L;
+//    private static long FAILED_PRODUCT_IMPORT_COUNT = 0L;
     private static long INITIAL_ACCOUNT_COUNT = 0L;
+
+    private DataCollection.Version initialVersion;
 
     @Test(groups = "deployment", priority = 0)
     public void testBundleProductMissingProductBundle() throws Exception {
+        initialVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         importData(4, "ProductBundle_MissingProductBundle");
         processAnalyze();
-        verifyProcess(DataCollection.Version.Green);
+        verifyProcess(8);
     }
 
     @Test(groups = "deployment", priority = 1)
     public void testHierarchyProductMissingCategory() throws Exception {
+        initialVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         importData(5, "ProductHierarchies_MissingCategory");
         processAnalyze();
-        verifyProcess(DataCollection.Version.Blue);
+        verifyProcess(19);
     }
 
     @Test(groups = "deployment", priority = 2)
     public void testHierarchyProductMissingFamily() throws Exception {
+        initialVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         importData(6, "ProductHierarchies_MissingFamily");
         processAnalyze();
-        verifyProcess(DataCollection.Version.Green);
+        verifyProcess(48);
     }
 
     private void importData(int fileIndex, String datafeedType) throws Exception {
@@ -52,10 +57,11 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
         Assert.assertEquals(dataCollectionStatus.getAccountCount(), Long.valueOf(INITIAL_ACCOUNT_COUNT));
     }
 
-    private void verifyProcess(DataCollection.Version activeVersion) {
+    private void verifyProcess(long totalProducts) {
+        DataCollection.Version version = initialVersion.complement();
         clearCache();
         verifyDataFeedStatus(DataFeed.Status.Active);
-        verifyActiveVersion(activeVersion);
+        verifyActiveVersion(version);
 
         Map<String, Object> productReport = new HashMap<>();
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID, PRODUCT_ID_PA);
@@ -67,10 +73,10 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Product, productReport);
         verifyProcessAnalyzeReport(processAnalyzeAppId, expectedReport);
-        verifyDataCollectionStatus(activeVersion);
+        verifyDataCollectionStatus(version);
 
         Map<BusinessEntity, Long> batchStoreCounts = ImmutableMap.of(
-                BusinessEntity.Product, FAILED_PRODUCT_IMPORT_COUNT);
+                BusinessEntity.Product, totalProducts);
         verifyBatchStore(batchStoreCounts);
     }
 }

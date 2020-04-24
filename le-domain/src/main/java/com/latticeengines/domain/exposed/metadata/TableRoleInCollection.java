@@ -38,6 +38,7 @@ public enum TableRoleInCollection {
     CalculatedPurchaseHistory, //
     CalculatedDepivotedPurchaseHistory, //
     AggregatedActivityStream, //
+    AggregatedActivityStreamDelta, //
 
     // Curated Account Attribute
     // has only requires one table for serving for now.

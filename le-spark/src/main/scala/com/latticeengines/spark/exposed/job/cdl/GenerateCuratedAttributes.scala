@@ -1,5 +1,6 @@
 package com.latticeengines.spark.exposed.job.cdl
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{CDLUpdatedTime, LastActivityDate}
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
@@ -21,6 +22,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
     val lastActivityDateIdx = Option(config.lastActivityDateInputIdx)
     val attrsToMerge = config.attrsToMerge.asScala.mapValues(_.asScala)
     val specialJoinKeys = config.joinKeys.asScala
+    val templateValues = config.templateValueMap.asScala
 
     // calculation
     val optLastActivityDf = if (lastActivityDateIdx.isDefined) {
@@ -41,7 +43,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
         val srcJoinKey = specialJoinKeys.getOrElse(args._1, config.joinKey)
         val df = modifyJoinKey(lattice.input(args._1), config.joinKey, srcJoinKey)
         MergeUtils.merge2(
-          accDf, mergeAttr(df, args._2).select(config.joinKey, args._2.valuesIterator.toSeq: _*),
+          accDf, mergeAttr(df, args._2, templateValues).select(config.joinKey, args._2.valuesIterator.toSeq: _*),
           Seq(config.joinKey), Set(), overwriteByNull = false)
       }
       optLastActivityDf match {
@@ -49,7 +51,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
         case _ =>
           val inputIdx = attrsToMerge.head._1
           val srcJoinKey = specialJoinKeys.getOrElse(inputIdx, config.joinKey)
-          val df = mergeAttr(modifyJoinKey(lattice.input(inputIdx), config.joinKey, srcJoinKey), attrsToMerge.head._2)
+          val df = mergeAttr(modifyJoinKey(lattice.input(inputIdx), config.joinKey, srcJoinKey), attrsToMerge.head._2, templateValues)
             .select(config.joinKey, attrsToMerge.head._2.valuesIterator.toSeq: _*)
           attrsToMerge.tail.foldLeft(df)(mergeFn(_, _))
       }
@@ -67,7 +69,8 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
     }
   }
 
-  private def mergeAttr(df: DataFrame, attrs: mutable.Map[String, String]): DataFrame = {
+  private def mergeAttr(df: DataFrame, attrs: mutable.Map[String, String], templateValues: mutable.Map[String, String]): DataFrame = {
+    val mapTemplateValue = udf((s: String) => templateValues.getOrElse(s, null))
     attrs.foldLeft(df)((accDf, args) => {
       val tgtAttr = args._2
       val srcAttr = args._1
@@ -82,6 +85,8 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
         } else {
           accDf.withColumn(tgtAttr, lit(null).cast(StringType))
         }
+      } else if (InterfaceName.CDLCreatedTemplate.name().equals(srcAttr)) {
+        accDf.withColumn(tgtAttr, mapTemplateValue(accDf.col(srcAttr)))
       } else {
         accDf.withColumn(tgtAttr, accDf.col(srcAttr))
       }

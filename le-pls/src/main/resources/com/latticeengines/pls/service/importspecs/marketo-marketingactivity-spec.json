@@ -14,6 +14,7 @@
             "ACTIVITY DATE"
           ],
           "required": true,
+          "nullable": false,
           "approvedUsage": [
             "None"
           ],
@@ -31,6 +32,7 @@
             "ACTIVITY TYPE"
           ],
           "required": true,
+          "nullable": false,
           "approvedUsage": [
             "None"
           ],
