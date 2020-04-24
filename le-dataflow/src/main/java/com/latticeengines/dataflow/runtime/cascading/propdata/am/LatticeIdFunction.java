@@ -1,6 +1,8 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata.am;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 
@@ -14,7 +16,7 @@ import cascading.tuple.TupleEntry;
 
 @SuppressWarnings("rawtypes")
 public class LatticeIdFunction extends BaseOperation implements Function {
-
+    private static final Logger log = LoggerFactory.getLogger(LatticeIdFunction.class);
     private static final long serialVersionUID = 6601729348287655784L;
 
     private String field;
@@ -40,7 +42,9 @@ public class LatticeIdFunction extends BaseOperation implements Function {
             }
             functionCall.getOutputCollector().add(new Tuple(latticeActId));
         } catch (Exception e) {
-            throw new RuntimeException("Fail to standardize LatticeId", e);
+            // throw new RuntimeException("Fail to standardize LatticeId", e);
+            functionCall.getOutputCollector().add(new Tuple());
+            log.warn("Fail to standardize LatticeId", e);
         }
     }
 
