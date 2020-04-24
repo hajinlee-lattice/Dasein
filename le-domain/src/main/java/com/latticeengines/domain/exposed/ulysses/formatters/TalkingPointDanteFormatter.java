@@ -1,4 +1,4 @@
-package com.latticeengines.ulysses.utils;
+package com.latticeengines.domain.exposed.ulysses.formatters;
 
 import java.util.Collections;
 import java.util.Date;

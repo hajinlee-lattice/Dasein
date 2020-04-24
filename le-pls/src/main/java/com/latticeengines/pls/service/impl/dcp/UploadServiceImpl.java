@@ -1,7 +1,10 @@
 package com.latticeengines.pls.service.impl.dcp;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -19,6 +22,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +33,7 @@ import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.service.AbstractFileDownloadService;
 import com.latticeengines.pls.service.FileDownloadService;
@@ -51,9 +56,15 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
 
     @Inject
     private Configuration yarnConfiguration;
-
+  
     @Inject
     private EmailService emailService;
+
+    @Value("${hadoop.use.emr}")
+    private Boolean useEmr;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String s3Bucket;
 
     @Override
     public List<Upload> getAllBySourceId(String sourceId, Upload.Status status) {
@@ -78,23 +89,55 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         String uploadId = downloadConfig.getUploadId();
         Upload upload = uploadProxy.getUpload(tenantId, Long.parseLong(uploadId));
 
+        Preconditions.checkNotNull(upload, "object should't be null");
         UploadConfig config = upload.getUploadConfig();
+        List<String> pathsToDownload = config.getDownloadPaths()
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        Preconditions.checkState(CollectionUtils.isNotEmpty(pathsToDownload),
+                String.format("empty settings in upload config for %s", uploadId));
+
+        // the download part will download files in path in UploadConfig: uploadRawFilePath,
+        // uploadImportedFilePath, uploadMatchResultPrefix, uploadImportedErrorFilePath.
+        // search csv file under these folders recursively, returned paths are absolute
+        // from protocol to file name
+        /*
+        "upload_config": {
+        "upload_ts_prefix": "2020-04-22-18-17-04.697",
+        "upload_raw_file_path": "dropfolder/4lqucmbu/Projects/Project_powlhlh9/Source/Source_s2kqvrwd/
+            upload/2020-04-22-18-17-04.697/RawFile/Account_1_900.csv",
+        "upload_match_result_prefix": "/Projects/Project_powlhlh9/Source/Source_s2kqvrwd/
+            upload/2020-04-22-18-17-04.697/MatchResult/",
+        "upload_imported_error_file_path": "Projects/Project_powlhlh9/Source/Source_s2kqvrwd/
+            upload/2020-04-22-18-17-04.697/ImportResult/ImportError/Account_1_900_error.csv"
+        }
+         */
+        List<String> paths = new ArrayList<>();
+        String uploadTS = config.getUploadTSPrefix();
         String rawPath = config.getUploadRawFilePath();
-        String uploadTSPrefix = config.getUploadTSPrefix();
-        int index = rawPath.indexOf(uploadTSPrefix);
-        Preconditions.checkState(index != -1, String.format("invalid upload config %s.", uploadId));
-        String parentPath = rawPath.substring(0, rawPath.indexOf(uploadTSPrefix));
+        String commonPrefix = rawPath.substring(0, rawPath.indexOf(uploadTS) + uploadTS.length() + 1);
+        HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
+        for (String path : pathsToDownload) {
+            String specialPart = path.substring(path.indexOf(uploadTS) + uploadTS.length() + 1);
+            if (path.endsWith(".csv")) {
+                paths.add(pathBuilder.getS3BucketDir(s3Bucket) + pathBuilder.getPathSeparator()
+                        + commonPrefix + specialPart);
+            } else {
+                path = commonPrefix + specialPart;
+                final String filter = ".*.csv";
+                List<String> filePaths = importFromS3Service.getFilesForDir(path,
+                        filename -> {
+                            String name = FilenameUtils.getName(filename);
+                            return name.matches(filter);
+                        });
+                paths.addAll(filePaths);
+            }
+        }
 
-        // search csv file under TSPrefix folder recursively, returned paths are absolute from protocol to file name
-        final String filter = ".*.csv";
-        List<String> paths = importFromS3Service.getFilesForDir(parentPath,
-                filename -> {
-                    String name = FilenameUtils.getName(filename);
-                    return name.matches(filter);
-                });
-
-        Preconditions.checkState(CollectionUtils.isNotEmpty(paths), String.format("no file in folder for %s",
-                uploadId));
+        Preconditions.checkState(CollectionUtils.isNotEmpty(paths),
+                String.format("no file in folder for %s", uploadId));
 
         log.info("download files: " + paths);
         ZipOutputStream zipOut = new ZipOutputStream(new GzipCompressorOutputStream(response.getOutputStream()));
@@ -104,7 +147,11 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
             InputStream in = system.open(path);
             ZipEntry zipEntry = new ZipEntry(filePath.substring(filePath.lastIndexOf("/") + 1));
             zipOut.putNextEntry(zipEntry);
-            IOUtils.copyLarge(in, zipOut);
+            try {
+                IOUtils.copyLarge(in, zipOut);
+            } catch (Exception e ) {
+                log.info("unexpected error when copying file: {}", e.getMessage());
+            }
             in.close();
             zipOut.closeEntry();
         }

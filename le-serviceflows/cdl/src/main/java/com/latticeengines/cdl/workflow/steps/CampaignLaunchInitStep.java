@@ -160,11 +160,13 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
                 PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
                 playLaunch.setAccountsLaunched(launchedAccountNum);
                 playLaunch.setContactsLaunched(launchedContactNum);
+                playLaunch.setAccountsAdded(launchedAccountNum);
+                playLaunch.setContactsAdded(launchedContactNum);
                 long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
                 playLaunch.setAccountsSuppressed(suppressedAccounts);
                 long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
                 playLaunch.setContactsSuppressed(suppressedContacts);
-                campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
+                playProxy.updatePlayLaunch(customerSpace.getTenantId(), playName, playLaunchId, playLaunch);
                 log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
                 log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
             }

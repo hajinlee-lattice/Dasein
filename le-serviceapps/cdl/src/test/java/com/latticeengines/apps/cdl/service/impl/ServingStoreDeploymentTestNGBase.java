@@ -173,11 +173,11 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
 
     // Currently only verify Category, Subcategory, Groups
     private void verifyColumnMetadata(ColumnMetadata cm, ColumnMetadata cmExpected) {
-        Assert.assertEquals(cm.getCategory(), cmExpected.getCategory());
-        Assert.assertEquals(cm.getSubcategory(), cmExpected.getSubcategory());
-        Assert.assertEquals(cm.getCanEnrich(), cmExpected.getCanEnrich());
-        Assert.assertEquals(cm.getCanSegment(), cmExpected.getCanSegment());
-        Assert.assertEquals(cm.getCanModel(), cmExpected.getCanModel());
+        Assert.assertEquals(cm.getCategory(), cmExpected.getCategory(), JsonUtils.serialize(cm));
+        Assert.assertEquals(cm.getSubcategory(), cmExpected.getSubcategory(), JsonUtils.serialize(cm));
+        Assert.assertEquals(cm.getCanEnrich(), cmExpected.getCanEnrich(), JsonUtils.serialize(cm));
+        Assert.assertEquals(cm.getCanSegment(), cmExpected.getCanSegment(), JsonUtils.serialize(cm));
+        Assert.assertEquals(cm.getCanModel(), cmExpected.getCanModel(), JsonUtils.serialize(cm));
         List<ColumnSelection.Predefined> enabledGroups = cm.getEnabledGroups();
         List<ColumnSelection.Predefined> enabledGroupsExpected = cmExpected.getEnabledGroups();
         if (enabledGroupsExpected == null) {

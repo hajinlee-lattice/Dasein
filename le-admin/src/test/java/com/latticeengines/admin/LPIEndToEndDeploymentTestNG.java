@@ -31,6 +31,7 @@ import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -139,6 +140,8 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         verifyPLSTenantExists();
         verifyIDaasUserExists();
 
+        testExistingSubNumberViolation();
+
         log.info("Uninstall again with wiping out ZK.");
         deleteTenant(contractId, tenantId);
     }
@@ -149,9 +152,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         Assert.assertTrue(user.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT));
     }
 
-    private void provisionEndToEndVboTestTenants() {
-        String url = getRestHostPort() + "/admin/tenants/vboadmin";
-
+    private VboRequest generateVBORequest(String subNumber) {
         VboRequest req = new VboRequest();
         VboRequest.Product pro = new VboRequest.Product();
         VboRequest.User user = new VboRequest.User();
@@ -163,22 +164,43 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         user.setEmailAddress(userEmail);
         user.setTelephoneNumber("1234567");
 
-        pro.setUsers(new ArrayList<VboRequest.User>());
+        pro.setUsers(new ArrayList<>());
         pro.getUsers().add(user);
         req.setProduct(pro);
         VboRequest.Subscriber sub = new VboRequest.Subscriber();
         sub.setLanguage("English");
         sub.setName(tenantId);
-        sub.setSubscriberNumber("1234");
+        sub.setSubscriberNumber(subNumber);
         req.setSubscriber(sub);
+        return req;
+    }
 
-        // rename the
-        tenantId = String.format("%s_%s", sub.getName(), sub.getSubscriberNumber());
-        contractId = tenantId;
+    private void provisionEndToEndVboTestTenants() {
+        String url = getRestHostPort() + "/admin/tenants/vboadmin";
+        VboRequest req = generateVBORequest("1234");
+
         VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);
-
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getStatus(), "success");
+        Assert.assertNotNull(result.getTenantName());
+
+        tenantId = result.getTenantName();
+        contractId = tenantId;
+
+    }
+
+    private void testExistingSubNumberViolation() {
+        // test for vbo request
+        VboRequest request = generateVBORequest("1234");
+        VboResponse result = restTemplate.postForObject(getRestHostPort() + "/admin/tenants/vboadmin",
+                request, VboResponse.class);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(result.getStatus(), "failed");
+        Assert.assertNotNull(result.getTenantName());
+        request = generateVBORequest("5678");
+        result = restTemplate.postForObject(getRestHostPort() + "/admin/tenants/vboadmin",
+                request, VboResponse.class);
+        System.out.println(JsonUtils.pprint(result));
     }
 
     // ==================================================

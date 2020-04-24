@@ -30,13 +30,13 @@ class GenerateLaunchArtifactsJob extends AbstractSparkJob[GenerateLaunchArtifact
 
     val addedAccountsData = accountsDf.join(distinctPositiveAccountsDf, Seq(accountId))
     val removedAccountsData = accountsDf.join(distinctNegativeAccountsDf, Seq(accountId), "right")
-    val fullContactsData = contactsDf.join(distinctPositiveAccountsDf, Seq(accountId))
+    val fullContactsData = contactsDf.join(distinctPositiveAccountsDf, Seq(accountId), if (mainEntity == BusinessEntity.Contact && config.isIncludeAccountsWithoutContacts) "right" else "inner")
 
     lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData)
 
     if (mainEntity == BusinessEntity.Contact) {
-      val addedContactsData = contactsDf.join(positiveDeltaDf.select(contactId), Seq(contactId))
-      val removedContactsData = contactsDf.join(negativeDeltaDf.select(contactId), Seq(contactId), "right")
+      val addedContactsData = contactsDf.drop(accountId).join(positiveDeltaDf, Seq(contactId), if (config.isIncludeAccountsWithoutContacts) "right" else "inner")
+      val removedContactsData = contactsDf.drop(accountId).join(negativeDeltaDf, Seq(contactId), "right")
       lattice.output = List(addedAccountsData, removedAccountsData, fullContactsData, addedContactsData, removedContactsData)
     }
   }

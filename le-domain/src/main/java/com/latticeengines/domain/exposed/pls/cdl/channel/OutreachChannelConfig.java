@@ -44,6 +44,7 @@ public class OutreachChannelConfig implements ChannelConfig {
         this.contactLimit = contactLimit;
     }
 
+    @Override
     public boolean isSuppressContactsWithoutEmails() {
         return suppressContactsWithoutEmails;
     }
@@ -52,6 +53,7 @@ public class OutreachChannelConfig implements ChannelConfig {
         this.suppressContactsWithoutEmails = suppressContactsWithoutEmails;
     }
 
+    @Override
     public boolean isSuppressAccountsWithoutContacts() {
         return suppressAccountsWithoutContacts;
     }
@@ -65,18 +67,26 @@ public class OutreachChannelConfig implements ChannelConfig {
         return suppressAccountsWithoutLookupId;
     }
 
+    public void setSuppressAccountsWithoutLookupId(boolean suppressAccountsWithoutLookupId) {
+        this.suppressAccountsWithoutLookupId = suppressAccountsWithoutLookupId;
+    }
+
+    @Override
     public String getAudienceId() {
         return audienceId;
     }
 
+    @Override
     public void setAudienceId(String audienceId) {
         this.audienceId = audienceId;
     }
 
+    @Override
     public String getAudienceName() {
         return audienceName;
     }
 
+    @Override
     public void setAudienceName(String audienceName) {
         this.audienceName = audienceName;
     }
@@ -126,6 +136,8 @@ public class OutreachChannelConfig implements ChannelConfig {
                 .setSuppressContactsWithoutEmails(newOutreachChannelConfig.isSuppressContactsWithoutEmails());
         outreachChannelConfig
                 .setSuppressAccountsWithoutContacts(newOutreachChannelConfig.isSuppressAccountsWithoutContacts());
+        outreachChannelConfig
+                .setSuppressAccountsWithoutLookupId(newOutreachChannelConfig.isSuppressAccountsWithoutLookupId());
         outreachChannelConfig.setAudienceId(newOutreachChannelConfig.getAudienceId());
         outreachChannelConfig.setAudienceName(newOutreachChannelConfig.getAudienceName());
         outreachChannelConfig.setFolderName(newOutreachChannelConfig.getFolderName());

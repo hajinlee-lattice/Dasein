@@ -54,19 +54,15 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
     private String newAccountTableFromTxnMatch;
 
     private boolean noImports;
-    private boolean useChangeList = false; // TODO:
 
     @Override
     protected void initializeConfiguration() {
         super.initializeConfiguration();
-        List<String> accountTables = new ArrayList<>(Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME));
-        if (hasSystemBatch) {
-            accountTables.add(SYSTEM_ACCOUNT_MASTER_TABLE_NAME);
-        }
-        if (useChangeList) {
-            accountTables.add(ACCOUNT_CHANGELIST_TABLE_NAME);
-            accountTables.add(ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
-        }
+        List<String> accountTables = !hasSystemBatch
+                ? Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, ACCOUNT_CHANGELIST_TABLE_NAME,
+                        ACCOUNT_REPORT_CHANGELIST_TABLE_NAME)
+                : Arrays.asList(ACCOUNT_DIFF_TABLE_NAME, ACCOUNT_MASTER_TABLE_NAME, SYSTEM_ACCOUNT_MASTER_TABLE_NAME,
+                        ACCOUNT_CHANGELIST_TABLE_NAME, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), accountTables);
         shortCutMode = tablesInCtx != null && tablesInCtx.stream().noneMatch(Objects::isNull);
         if (shortCutMode) {
@@ -74,18 +70,14 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             shortCutMode = true;
             diffTableNameInContext = tablesInCtx.get(0).getName();
             batchStoreNameInContext = tablesInCtx.get(1).getName();
+            systemBatchStoreNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(2).getName() : null;
+            chgListTableNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(3).getName()
+                    : tablesInCtx.get(2).getName();
+            reportChgListTableNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(4).getName()
+                    : tablesInCtx.get(3).getName();
             diffTableName = diffTableNameInContext;
-            if (hasSystemBatch) {
-                systemBatchStoreNameInContext = tablesInCtx.size() > 2 ? tablesInCtx.get(2).getName() : null;
-            }
-            if (useChangeList) {
-                chgListTableNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(3).getName()
-                        : tablesInCtx.get(2).getName();
-                changeListTableName = chgListTableNameInContext;
-                reportChgListTableNameInContext = tablesInCtx.size() > 4 ? tablesInCtx.get(4).getName()
-                        : tablesInCtx.get(3).getName();
-                reportChangeListTableName = reportChgListTableNameInContext;
-            }
+            changeListTableName = chgListTableNameInContext;
+            reportChangeListTableName = reportChgListTableNameInContext;
         } else {
             matchedAccountTable = getStringValueFromContext(ENTITY_MATCH_ACCOUNT_TARGETTABLE);
             newAccountTableFromContactMatch = getStringValueFromContext(ENTITY_MATCH_CONTACT_ACCOUNT_TARGETTABLE);
@@ -258,8 +250,12 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         checkAttributeLimit(batchStoreTableName, configuration.isEntityMatchEnabled());
         exportToS3AndAddToContext(batchStoreTableName, ACCOUNT_MASTER_TABLE_NAME);
         if (!noImports) {
-            exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
-            exportToS3AndAddToContext(reportChangeListTableName, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
+            if (StringUtils.isNotBlank(changeListTableName)) {
+                exportToS3AndAddToContext(changeListTableName, ACCOUNT_CHANGELIST_TABLE_NAME);
+            }
+            if (StringUtils.isNotBlank(reportChangeListTableName)) {
+                exportToS3AndAddToContext(reportChangeListTableName, ACCOUNT_REPORT_CHANGELIST_TABLE_NAME);
+            }
             exportToS3AndAddToContext(diffTableName, ACCOUNT_DIFF_TABLE_NAME);
 
         }

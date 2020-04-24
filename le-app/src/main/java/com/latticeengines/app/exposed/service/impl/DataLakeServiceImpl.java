@@ -341,13 +341,16 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
     }
 
-    private String getInternalAccountId(String accountId, Map<String, String> orgInfo) {
+    @Override
+    public String getInternalAccountId(String accountId, Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         if (!StringUtils.isNotEmpty(accountId)) {
             throw new LedpException(LedpCode.LEDP_39001, new String[] { accountId, customerSpace });
         }
 
-        String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
+        String lookupIdColumn = MapUtils.isNotEmpty(orgInfo)
+                ? lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace)
+                : null;
 
         // If AccountLookup table is populated for this tenant,
         // skip both special cache and redshift, go straight to match api
@@ -370,7 +373,6 @@ public class DataLakeServiceImpl implements DataLakeService {
             }
         }
         return internalAccountId;
-
     }
 
     @Override

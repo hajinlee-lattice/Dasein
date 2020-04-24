@@ -26,8 +26,15 @@ public class MatchCdlAccountFlow extends TypesafeDataFlowBuilder<MatchCdlAccount
     @Override
     public Node construct(MatchCdlAccountParameters parameters) {
         Node inputTable = addSource(parameters.inputTable);
+        if (parameters.isRenameIdOnly()) {
+            if (inputTable.getFieldNames().contains(InterfaceName.CustomerAccountId.name())) {
+                return inputTable;
+            }
+            Node result = inputTable.rename(new FieldList(parameters.getInputMatchFields().get(0)),
+                    new FieldList(InterfaceName.CustomerAccountId.name()));
+            return result;
+        }
         Node accountTable = addSource(parameters.accountTable);
-
         List<String> retainFields = buildRetainFields(parameters, inputTable, accountTable);
         FieldList inputMatchFields = new FieldList(parameters.getInputMatchFields());
         FieldList accountMatchFields = new FieldList(parameters.getAccountMatchFields());

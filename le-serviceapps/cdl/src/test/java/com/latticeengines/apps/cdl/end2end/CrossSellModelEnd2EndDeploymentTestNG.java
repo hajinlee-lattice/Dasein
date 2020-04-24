@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.ModelFeatureImportance;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
+import com.latticeengines.proxy.exposed.lp.ModelFeatureImportanceProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 
 public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
@@ -63,6 +65,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
 
     @Inject
     private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
+    private ModelFeatureImportanceProxy featureImportanceProxy;
 
     // Target Products are shared with RefreshRatingDeploymentTestNG
     private static final ImmutableList<String> repeatTargetProducts = ImmutableList.of(
@@ -157,10 +162,11 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         verifyBucketMetadataGenerated(predictionType);
         Assert.assertEquals(ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testModel.getId()).getStatus(),
                 RatingEngineStatus.INACTIVE);
-        verifyModelSummary(testIteration1.getModelSummaryId(), predictionType);
+        ModelSummary modelSummary = verifyModelSummary(testIteration1.getModelSummaryId(), predictionType);
+        verifyFeatureImportancesGenerated(modelSummary);
     }
 
-    private void verifyModelSummary(String modelSummaryId, PredictionType predictionType) {
+    private ModelSummary verifyModelSummary(String modelSummaryId, PredictionType predictionType) {
         ModelSummary modelSummary = modelSummaryProxy.getModelSummary(modelSummaryId);
         Assert.assertNotNull(modelSummary);
         Assert.assertNotNull(modelSummary.getId());
@@ -173,6 +179,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
             Assert.assertNull(modelSummary.getAverageRevenueTestDataset());
             Assert.assertNull(modelSummary.getNormalizationRatio());
         }
+        return modelSummary;
     }
 
     private void setupAndRunRemodel(PredictionType predictionType) {
@@ -216,6 +223,16 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends CDLEnd2EndDeploymentT
         Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
                 .getABCDBucketsByEngineId(mainTestTenant.getId(), testModel.getId());
         Assert.assertTrue(bucketMetadataHistory.isEmpty());
+    }
+
+    private void verifyFeatureImportancesGenerated(ModelSummary modelSummary) {
+        List<ModelFeatureImportance> featureImportances = featureImportanceProxy
+                .getFeatureImportanceByModelGuid(mainTestTenant.getId(), modelSummary.getId());
+        Assert.assertEquals(featureImportances.size(), 50);
+        featureImportanceProxy.upsertModelFeatureImportances(mainTestTenant.getId(), modelSummary.getId());
+        featureImportances = featureImportanceProxy.getFeatureImportanceByModelGuid(mainTestTenant.getId(),
+                modelSummary.getId());
+        Assert.assertEquals(featureImportances.size(), 50);
     }
 
     private void verifyBucketMetadataGenerated(PredictionType predictionType) {

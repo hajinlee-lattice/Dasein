@@ -100,6 +100,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     private String curatedMetricsTableName;
     private boolean shortCut;
 
+    private boolean hasAnalyticProduct;
+
     @Inject
     private Configuration yarnConfiguration;
 
@@ -179,6 +181,16 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     @Override
     protected void initializeConfiguration() {
+        Map<BusinessEntity, Integer> finalRecordsMap = getMapObjectFromContext(FINAL_RECORDS, BusinessEntity.class, Integer.class);
+        int numAnalyticProducts = finalRecordsMap.getOrDefault(BusinessEntity.Product, 0);
+        hasAnalyticProduct = numAnalyticProducts > 0;
+
+        if (!hasAnalyticProduct) {
+            updateEntityValueMapInContext(BusinessEntity.PurchaseHistory, RESET_ENTITIES, true, Boolean.class);
+            updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, RESET_ENTITIES, true, Boolean.class);
+            return;
+        }
+
         super.initializeConfiguration();
 
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), Arrays.asList( //

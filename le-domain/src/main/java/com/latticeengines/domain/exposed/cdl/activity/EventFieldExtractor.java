@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class EventTypeExtractor implements Serializable {
+public class EventFieldExtractor implements Serializable {
 
     private static final long serialVersionUID = 0L;
 
@@ -49,5 +49,33 @@ public class EventTypeExtractor implements Serializable {
 
     public enum MappingType {
         Constant, Attribute, AttributeWithMapping
+    }
+
+    public static final class Builder {
+        private EventFieldExtractor eventFieldExtractor;
+
+        public Builder() {
+            eventFieldExtractor = new EventFieldExtractor();
+        }
+
+        public Builder withMappingType(MappingType mappingType) {
+            eventFieldExtractor.setMappingType(mappingType);
+            return this;
+        }
+
+        public Builder withMappingValue(String mappingValue) {
+            eventFieldExtractor.setMappingValue(mappingValue);
+            return this;
+        }
+
+        public Builder withMappingMap(Map<String, String> mappingMap) {
+            eventFieldExtractor.setMappingMap(mappingMap);
+            return this;
+        }
+
+        public EventFieldExtractor build() {
+            return eventFieldExtractor;
+        }
+
     }
 }

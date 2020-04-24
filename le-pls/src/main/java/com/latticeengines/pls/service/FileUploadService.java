@@ -7,6 +7,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.EntityType;
 
 public interface FileUploadService {
 
@@ -21,6 +22,8 @@ public interface FileUploadService {
             String entity, //
             String displayName, //
             InputStream fileInputStream, boolean outsizeFlag);
+
+    SourceFile uploadFile(String outputFileName, String displayName, EntityType entityType, InputStream inputStream);
 
     SourceFile uploadFile(String outputFileName, String displayName, InputStream fileInputStream);
 

@@ -131,6 +131,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String HARD_DEELETE_ACTIONS = "HARD_DEELETE_ACTIONS";
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
+    public static final String TIMELINE_RAWTABLES_GOING_TO_DYNAMO = "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
@@ -185,6 +186,15 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ADDED_ACCOUNTS_FULL_CONTACTS_TABLE = "ADDED_ACCOUNTS_FULL_CONTACTS_TABLE";
     protected static final String FULL_ACCOUNTS_UNIVERSE = "FULL_ACCOUNTS_UNIVERSE";
     protected static final String FULL_CONTACTS_UNIVERSE = "FULL_CONTACTS_UNIVERSE";
+    protected static final String PREVIOUS_ACCUMULATIVE_ACCOUNTS = "PREVIOUS_ACCUMULATIVE_ACCOUNTS";
+    protected static final String PREVIOUS_ACCUMULATIVE_CONTACTS = "PREVIOUS_ACCUMULATIVE_CONTACTS";
+    protected static final String ACCOUNTS_ADDED = "ACCOUNTS_ADDED";
+    protected static final String ACCOUNTS_DELETED = "ACCOUNTS_DELETED";
+    protected static final String ACCUMULATIVE_ACCOUNTS = "ACCUMULATIVE_ACCOUNTS";
+    protected static final String CONTACTS_ADDED = "CONTACTS_ADDED";
+    protected static final String CONTACTS_DELETED = "CONTACTS_DELETED";
+    protected static final String FULL_CONTACTS = "FULL_CONTACTS";
+    protected static final String ACCUMULATIVE_CONTACTS = "ACCUMULATIVE_CONTACTS";
     protected static final String PREVIOUS_ACCOUNTS_UNIVERSE = "PREVIOUS_ACCOUNTS_UNIVERSE";
     protected static final String PREVIOUS_CONTACTS_UNIVERSE = "PREVIOUS_CONTACTS_UNIVERSE";
     protected static final String FULL_LAUNCH_UNIVERSE = "FULL_LAUNCH_UNIVERSE";
@@ -202,7 +212,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     // set of merged activity metrics groups' serving entities
     protected static final String ACTIVITY_MERGED_METRICS_SERVING_ENTITIES = "MERGED_METRICS_SERVING_ENTITIES";
     protected static final String SCORE_TRAINING_FILE_INCLUDED_FEATURES = "SCORE_TRAINING_FILE_INCLUDED_FEATURES";
-    protected static final String PERIOD_STORE_TABLE_FORMAT = "PERIODSTORE_%s_%s"; // streamId, period
+    // streamId, period
+    protected static final String PERIOD_STORE_TABLE_FORMAT = "PERIODSTORE_%s_%s";
     protected static final String PERIOD_STORE_TABLE_NAME = "PERIOD_STORE_TABLE_NAME";
     protected static final String PERFORM_SOFT_DELETE = "PERFORM_SOFT_DELETE"; //
     protected static final String PERFORM_HARD_DELETE = "PERFORM_HARD_DELETE"; //
@@ -245,11 +256,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE = "ENTITY_MATCH_STREAM_ACCOUNT_TARGETTABLE";
     public static final String ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE = "ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE";
     protected static final String RAW_ACTIVITY_STREAM_TABLE_NAME = "RAW_ACTIVITY_STREAM_TABLE_NAME";
+    protected static final String RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME = "RAW_ACTIVITY_STREAM_DELTA_TABLE_NAME";
     protected static final String AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME = "AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME";
+    protected static final String DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME = "DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME";
     protected static final String LAST_ACTIVITY_DATE_TABLE_NAME = "LAST_ACTIVITY_DATE_TABLE_NAME";
     protected static final String METRICS_GROUP_TABLE_NAME = "METRICS_GROUP_TABLE_NAME";
     protected static final String MERGED_METRICS_GROUP_TABLE_NAME = "MERGED_METRICS_GROUP_TABLE_NAME";
     protected static final String AGG_PERIOD_TRXN_TABLE_NAME = "AGG_PERIOD_TRXN_TABLE_NAME";
+    protected static final String TIMELINE_RAWTABLE_NAME = "TIMELINE_RAWTABLE_NAME";
 
     protected static final String PH_SERVING_TABLE_NAME = "PH_SERVING_TABLE_NAME";
     protected static final String PH_PROFILE_TABLE_NAME = "PH_PROFILE_TABLE_NAME";
@@ -352,6 +366,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             ENTITY_MATCH_STREAM_CONTACT_TARGETTABLE, //
             RAW_ACTIVITY_STREAM_TABLE_NAME, //
             AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME, //
+            DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME, //
             METRICS_GROUP_TABLE_NAME, //
             MERGED_METRICS_GROUP_TABLE_NAME, //
             PERIOD_STORE_TABLE_NAME, //
@@ -604,10 +619,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
      * @param tableNameStrCtxKeys
      *            list of context keys that contain a single table as string
      * @param tableNameListCtxKeys
-     *            list of context keys that contain a list of tables as serialized
-     *            list of string
-     * @return list of tables, null will be inserted if the corresponding table does
-     *         not exist
+     *            list of context keys that contain a list of tables as
+     *            serialized list of string
+     * @return list of tables, null will be inserted if the corresponding table
+     *         does not exist
      */
     protected List<Table> getTableSummariesFromCtxKeys(String customer, List<String> tableNameStrCtxKeys,
             List<String> tableNameListCtxKeys) {

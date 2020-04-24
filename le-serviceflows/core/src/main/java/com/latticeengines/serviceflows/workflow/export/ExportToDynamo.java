@@ -74,6 +74,9 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
     @Value("${eai.export.dynamo.signature}")
     private String signature;
 
+    @Value("${cdl.processAnalyze.skip.dynamo.publication}")
+    private boolean skipPublication;
+
     @Override
     public void execute() {
         List<DynamoExportConfig> configs = getExportConfigs();
@@ -81,8 +84,12 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
         List<Exporter> exporters = new ArrayList<>();
         configs.forEach(config -> {
             if (!Boolean.TRUE.equals(config.getRelink()) || !relinkDynamo(config)) {
-                Exporter exporter = new Exporter(config);
-                exporters.add(exporter);
+                if (skipPublication) {
+                    log.info("Skip exporting {} to DynamoDB, due to property flag.", config.getTableName());
+                } else {
+                    Exporter exporter = new Exporter(config);
+                    exporters.add(exporter);
+                }
             }
         });
         if (CollectionUtils.isEmpty(exporters)) {

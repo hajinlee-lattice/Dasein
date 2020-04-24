@@ -334,7 +334,6 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
         List<IDaaSUser> iDaaSUsers = JsonUtils.convertList(JsonUtils.deserialize(usersInJson, List.class),
                 IDaaSUser.class);
         OperateIDaaSUsers(iDaaSUsers, superAdminEmails, externalAdminEmails);
-
         Tenant tenant;
         if (tenantService.hasTenantId(PLSTenantId)) {
             tenant = tenantService.findByTenantId(PLSTenantId);
@@ -359,6 +358,14 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                     + tenant.getTenantType());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18028, "Failed to retrieve tenants properties", e);
+        }
+
+        String subscriberNumber;
+        try {
+            subscriberNumber = configDir.get("/SubscriberNumber").getDocument().getData();
+            tenant.setSubscriberNumber(subscriberNumber);
+        } catch (Exception e) {
+            log.info("no node exist {}.", e.getMessage());
         }
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails, userName);
     }

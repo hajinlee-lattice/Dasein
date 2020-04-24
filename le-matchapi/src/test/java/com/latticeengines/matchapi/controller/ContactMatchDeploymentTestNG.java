@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.ENT
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Domain;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Name;
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.SystemId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLTemplateName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactName;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.Country;
@@ -58,56 +59,58 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
 
     private static final int DEFAULT_TEST_ID_COL_INDEX = 0; // first col is testId
     private static final String[] DEFAULT_FIELDS = new String[] { TestId, //
+            CDLTemplateName.name(), // input template
             // contact fields (email used in both)
             CustomerContactId.name(), Email.name(), ContactName.name(), PhoneNumber.name(), //
             // account fields
             CustomerAccountId.name(), CompanyName.name(), Country.name(), State.name() };
     private static final String[] DEFAULT_MATCH_RESULT_FIELDS = ArrayUtils
             .addAll(new String[] { InterfaceName.EntityId.name(), InterfaceName.ContactId.name(),
-                    InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name() }, DEFAULT_FIELDS);
+                    InterfaceName.AccountId.name(), InterfaceName.LatticeAccountId.name(),
+                    InterfaceName.CDLCreatedTemplate.name() }, DEFAULT_FIELDS);
     private static final String[] NEW_ENTITY_FIELDS = new String[] { MatchConstants.ENTITY_NAME_FIELD,
-            MatchConstants.ENTITY_ID_FIELD, CompanyName.name(), Country.name() };
+            MatchConstants.ENTITY_ID_FIELD, MatchConstants.CREATED_TEMPLATE_FIELD, CompanyName.name(), Country.name() };
 
     private static final Object[][] EXISTING_DATA = { //
             // Google
             { //
-                    "C0_01", //
+                    "C0_01", "t1", //
                     "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
-                    "C0_02", //
+                    "C0_02", "t1", //
                     "C_CID_02", "h.finch@google.com", "Harold Finch", "888-888-8888", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
-                    "C0_03", //
+                    "C0_03", "t2", //
                     "C_CID_03", "l.fusco@google.com", "Lionel Fusco", "777-777-7777", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
-                    "C0_04", //
+                    "C0_04", "t1", //
                     "C_CID_04", "s.shaw@google.com", "Sameen Shaw", "666-666-6666", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
             { //
-                    "C0_05", //
+                    "C0_05", "t3", //
                     "C_CID_05", "s.groves@google.com", "Samantha Groves", "555-555-5555", //
                     "C_AID_01", "Google", "USA", "CA", //
             }, //
                // netflix
             { //
-                    "C0_11", //
+                    "C0_11", "t4", //
                     "C_CID_11", "j.greer@netflix.com", "John Greer", "444-444-4444", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
             { //
-                    "C0_12", //
+                    "C0_12", "t3", //
                     "C_CID_12", "k.stanton@netflix.com", "Kara Stanton", "333-333-3333", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
             { //
-                    "C0_13", //
+                    "C0_13", "t3", //
                     "C_CID_13", "j.lambert@netflix.com", "Jeremy Lambert", "222-222-2222", //
                     "C_AID_02", "Netflix", "USA", "CA", //
             }, //
@@ -231,28 +234,28 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
                         new ContactBulkMatchTestCase[] { //
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_01", //
+                                                "C1_01", "sdfsdf", //
                                                 "C_CID_01", "j.reese@google.com", "John Reese", "999-999-9999", //
                                                 "C_AID_01", "Google", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_01" //
                                 ), // match with CustomerAccountId & CustomerContactId
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_02", //
+                                                "C1_02", "sdfsdf", //
                                                 null, "j.reese@google.com", null, null, //
                                                 null, "Google", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_01" //
                                 ), // match with Name/Country for account & AccountEntityId + Email for contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_03", //
+                                                "C1_03", "sdfsdf", //
                                                 null, "l.fusco123@google.com", "Lionel Fusco", "777-777-7777", //
                                                 "C_AID_01", "Google Inc.", "USA", "CA", //
                                         }, "C_AID_01", "C_CID_03" //
                                 ), // CustomerAccountId for account & AccountEntityId + N + P for contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_04", //
+                                                "C1_04", "t5", //
                                                 null, null, "Samantha Groves", "555-555-5555", //
                                                 null, "Lyft", "USA", "CA", //
                                         }, null, null //
@@ -260,49 +263,49 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
                                    // does not match even though N+P are the same
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_05", //
+                                                "C1_05", "t6", //
                                                 "C_CID_05", "s.groves@uber.com", "Samantha Groves", "555-555-5555", //
                                                 null, "Uber", "USA", "CA", //
                                         }, null, "C_CID_05" //
                                 ), // New account & CustomerContactId for contact (change company)
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_06", //
+                                                "C1_06", "t7", //
                                                 null, "bear@google.com", null, null, //
                                                 null, "Google", "USA", "CA", //
                                         }, "C_AID_01", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_07", //
+                                                "C1_07", "t8", //
                                                 "C_CID_999", "samaritan@netflix.com", null, null, //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_08", //
+                                                "C1_08", "t9", //
                                                 null, null, "John Doe", "000-000-0000", //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", null //
                                 ), // match with Name/Country for account & new contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_09", //
+                                                "C1_09", "t10", //
                                                 null, null, null, null, //
                                                 null, "Netflix", "USA", "CA", //
                                         }, "C_AID_02", ENTITY_ANONYMOUS_ID //
                                 ), // match with Name/Country for account & anonymous contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_10", //
+                                                "C1_10", "t11", //
                                                 null, null, null, null, //
                                                 null, null, null, null //
                                         }, ENTITY_ANONYMOUS_ID, ENTITY_ANONYMOUS_ID //
                                 ), // anonymous account & contact
                                 new ContactBulkMatchTestCase( //
                                         new Object[] { //
-                                                "C1_11", //
+                                                "C1_11", "t12", //
                                                 "C_CID_13", null, "Jeremy Lambert", "222-222-2222", //
                                                 null, null, null, null //
                                         }, ENTITY_ANONYMOUS_ID, "C_CID_13" //
@@ -485,6 +488,7 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         input.setTargetEntity(BusinessEntity.Contact.name());
         input.setAllocateId(true);
         input.setOutputNewEntities(true);
+        input.setIncludeLineageFields(true);
         if (CollectionUtils.isNotEmpty(newEntityFields)) {
             input.setNewEntityFields(newEntityFields);
         }

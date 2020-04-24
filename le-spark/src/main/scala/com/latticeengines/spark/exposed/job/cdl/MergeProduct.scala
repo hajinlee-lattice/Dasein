@@ -65,11 +65,14 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
       .limit(100).collect().map(r => r.getString(0)).toList
 
     val report: MergeProductReport = new MergeProductReport
-    report.setRecords(newProds.count)
+    val numNewProds = newProds.count
+    val numActiveAnalytic = analytic.filter(col(Status) === ProductStatus.Active.name).count
+    val numActiveSpending = spendings.filter(col(Status) === ProductStatus.Active.name).count
+    report.setRecords(numNewProds)
     report.setBundleProducts(bundles.count)
     report.setHierarchyProducts(hierarchies.count)
-    report.setAnalyticProducts(analytic.count)
-    report.setSpendingProducts(spendings.count)
+    report.setAnalyticProducts(numActiveAnalytic)
+    report.setSpendingProducts(numActiveSpending)
     report.setInvalidRecords(report.getRecords - report.getBundleProducts - report.getHierarchyProducts)
     report.setErrors(errs.asJava)
 
@@ -78,13 +81,20 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
   }
 
   private def mergeId(input: DataFrame): DataFrame = {
-    if (input.columns.contains(Id) && input.columns.contains(ProductId)) {
+    val withId = if (input.columns.contains(Id) && input.columns.contains(ProductId)) {
       input.withColumn(Id, when(col(Id).isNotNull, col(Id)).otherwise(col(ProductId))).drop(ProductId)
     } else if (input.columns.contains(ProductId)) {
       input.withColumnRenamed(ProductId, Id)
     } else {
       input
     }
+    List(Name, Description, Bundle, Line, Family, Category).foldLeft(withId)((prev, c) => {
+      if (!prev.columns.contains(c)) {
+        prev.withColumn(c, lit(null).cast(StringType))
+      } else {
+        prev.withColumn(c, when(col(c) === "", null).otherwise(col(c)))
+      }
+    }).select(Id, Name, Description, Bundle, Line, Family, Category)
   }
 
   private def validate(prods: DataFrame): (DataFrame, DataFrame) = {
@@ -138,16 +148,16 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
 
   // VDB has only bundles
   private def extractVdbBundleMembers(prods: DataFrame): DataFrame = {
-    val filtered = prods.filter(col(Bundle).isNull && col(Category).isNull)
     val idFunc: String => String = id => {
       val compositeId = ProductUtils.getCompositeId(ProductType.Analytic.name, id, null, null, null, null, null)
       HashUtils.getCleanedString(HashUtils.getShortHash(compositeId))
     }
     val idUdf = udf(idFunc)
-    filtered
-      .withColumn(Bundle, col(Name)) // use product name as bundle name
-      .withColumn(Status, lit(ProductStatus.Active.name))
+
+    prods.filter(col(Bundle).isNull && col(Category).isNull)
+      .withColumn(Bundle, col(Name))
       .withColumn(BundleDescription, col(Description))
+      .withColumn(Status, lit(ProductStatus.Active.name))
       .withColumn(BundleId, idUdf(col(Id)))
       .select(Id, Name, Description, Bundle, BundleId, BundleDescription, Status)
   }

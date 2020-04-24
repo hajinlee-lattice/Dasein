@@ -17,7 +17,7 @@ import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
-import com.latticeengines.domain.exposed.cdl.activity.EventTypeExtractor;
+import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -46,22 +46,23 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         timeLine1 = new TimeLine();
         timeLine1.setName(timelineName1);
+        timeLine1.setTimelineId(timelineName1);
         timeLine1.setTenant(mainTestTenant);
         timeLine1.setEntity(BusinessEntity.Account.name());
         timeLine1.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
-        Map<AtlasStream.StreamType, Map<String, EventTypeExtractor>> mappingMap = new HashMap<>();
+        Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
 
-        Map<String, EventTypeExtractor> eventTypeExtractorMapForMarketing = new HashMap<>();
-        EventTypeExtractor eventTimeExtractorForMarketing = new EventTypeExtractor();
-        eventTimeExtractorForMarketing.setMappingType(EventTypeExtractor.MappingType.Attribute);
+        Map<String, EventFieldExtractor> eventTypeExtractorMapForMarketing = new HashMap<>();
+        EventFieldExtractor eventTimeExtractorForMarketing = new EventFieldExtractor();
+        eventTimeExtractorForMarketing.setMappingType(EventFieldExtractor.MappingType.Attribute);
         eventTimeExtractorForMarketing.setMappingValue(InterfaceName.ActivityDate.name());
         eventTypeExtractorMapForMarketing.put(EVENT_TIME, eventTimeExtractorForMarketing);
-        EventTypeExtractor eventTypeExtractorForMarketing = new EventTypeExtractor();
-        eventTypeExtractorForMarketing.setMappingType(EventTypeExtractor.MappingType.Attribute);
-        eventTypeExtractorForMarketing.setMappingValue(InterfaceName.ActivityType.name());
-        eventTypeExtractorMapForMarketing.put(EVENT_TYPE, eventTypeExtractorForMarketing);
-        EventTypeExtractor motionExtractor = new EventTypeExtractor();
-        motionExtractor.setMappingType(EventTypeExtractor.MappingType.AttributeWithMapping);
+        EventFieldExtractor eventFieldExtractorForMarketing = new EventFieldExtractor();
+        eventFieldExtractorForMarketing.setMappingType(EventFieldExtractor.MappingType.Attribute);
+        eventFieldExtractorForMarketing.setMappingValue(InterfaceName.ActivityType.name());
+        eventTypeExtractorMapForMarketing.put(EVENT_TYPE, eventFieldExtractorForMarketing);
+        EventFieldExtractor motionExtractor = new EventFieldExtractor();
+        motionExtractor.setMappingType(EventFieldExtractor.MappingType.AttributeWithMapping);
         motionExtractor.setMappingValue(InterfaceName.ActivityType.name());
         Map<String, String> mappings = new HashMap<>();
         mappings.put("EmailOpen", "Outbound");
@@ -69,18 +70,18 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         motionExtractor.setMappingMap(mappings);
         eventTypeExtractorMapForMarketing.put(MOTION, motionExtractor);
 
-        Map<String, EventTypeExtractor> eventTypeExtractorMapForWebVisit = new HashMap<>();
-        EventTypeExtractor eventTimeExtractorForWebVisit = new EventTypeExtractor();
-        eventTimeExtractorForWebVisit.setMappingType(EventTypeExtractor.MappingType.Attribute);
+        Map<String, EventFieldExtractor> eventTypeExtractorMapForWebVisit = new HashMap<>();
+        EventFieldExtractor eventTimeExtractorForWebVisit = new EventFieldExtractor();
+        eventTimeExtractorForWebVisit.setMappingType(EventFieldExtractor.MappingType.Attribute);
         eventTimeExtractorForWebVisit.setMappingValue(InterfaceName.WebVisitDate.name());
         eventTypeExtractorMapForWebVisit.put(EVENT_TIME, eventTimeExtractorForWebVisit);
-        EventTypeExtractor eventTypeExtractorForWebVisit = new EventTypeExtractor();
-        eventTypeExtractorForWebVisit.setMappingType(EventTypeExtractor.MappingType.Constant);
-        eventTypeExtractorForWebVisit.setMappingValue("WebVisit");
-        eventTypeExtractorMapForWebVisit.put(EVENT_TYPE, eventTypeExtractorForWebVisit);
+        EventFieldExtractor eventFieldExtractorForWebVisit = new EventFieldExtractor();
+        eventFieldExtractorForWebVisit.setMappingType(EventFieldExtractor.MappingType.Constant);
+        eventFieldExtractorForWebVisit.setMappingValue("WebVisit");
+        eventTypeExtractorMapForWebVisit.put(EVENT_TYPE, eventFieldExtractorForWebVisit);
 
-        mappingMap.put(AtlasStream.StreamType.MarketingActivity, eventTypeExtractorMapForMarketing);
-        mappingMap.put(AtlasStream.StreamType.WebVisit, eventTypeExtractorMapForWebVisit);
+        mappingMap.put(AtlasStream.StreamType.MarketingActivity.name(), eventTypeExtractorMapForMarketing);
+        mappingMap.put(AtlasStream.StreamType.WebVisit.name(), eventTypeExtractorMapForWebVisit);
 
         timeLine1.setEventMappings(mappingMap);
         TimeLine created = timeLineService.createOrUpdateTimeLine(mainCustomerSpace, timeLine1);
@@ -92,12 +93,11 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         created = timeLineList.get(0);
         log.info("timeline is {}.", JsonUtils.serialize(created));
         Assert.assertEquals(created.getName(), timelineName1);
-        Assert.assertTrue(created.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity));
-        Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity).containsKey(MOTION));
-        Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
+        Assert.assertTrue(created.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity.name()));
+        Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
+        Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
 
-        String timeline_id = created.getTimelineId();
-        created = timeLineService.findByTimelineId(mainCustomerSpace, timeline_id);
-        Assert.assertEquals(created.getTimelineId(), timeline_id);
+        created = timeLineService.findByTimelineId(mainCustomerSpace, timelineName1);
+        Assert.assertEquals(created.getTimelineId(), timelineName1);
     }
 }
