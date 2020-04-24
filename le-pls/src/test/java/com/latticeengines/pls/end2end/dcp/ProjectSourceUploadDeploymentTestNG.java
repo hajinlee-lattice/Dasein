@@ -47,9 +47,9 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
 import com.latticeengines.pls.service.dcp.ProjectService;
 import com.latticeengines.pls.service.dcp.SourceService;
+import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.DCPProxy;
-import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 
 public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -86,7 +86,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     private DCPProxy dcpProxy;
 
     @Inject
-    private UploadProxy uploadProxy;
+    private UploadService uploadService;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -112,6 +112,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         String bucket = response.getBucket();
         Assert.assertTrue(StringUtils.isNotBlank(bucket));
 
+        // create the first source without specific source ID
         SourceRequest sourceRequest = new SourceRequest();
         sourceRequest.setDisplayName(SOURCE_NAME);
         sourceRequest.setProjectId(PROJECT_ID);
@@ -120,13 +121,15 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         verifySourceAndAccess(source, response, true);
 
 
-        // create another source with id under same project
+        // create another source with specific id under same project
         sourceRequest.setSourceId(SOURCE_ID);
         Source source2 = sourceService.createSource(sourceRequest);
         verifySourceAndAccess(source2, response, true);
         
         // Copy test file to drop folder, then trigger dcp workflow
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
+        // pause source for s3 import
+        sourceService.pauseSource(source.getSourceId());
         String dropPath = UploadS3PathBuilderUtils.getDropRoot(details.getProjectId(), source2.getSourceId());
         dropPath = UploadS3PathBuilderUtils.combinePath(false, true,
                 UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
@@ -141,10 +144,14 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         ApplicationId applicationId = dcpProxy.startImport(customerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        List<Upload> uploads = uploadProxy.getUploads(customerSpace, source.getSourceId(), null);
+        List<Upload> uploads = uploadService.getAllBySourceId(source.getSourceId(), null);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
-
+        Upload upload = uploads.get(0);
+        Upload retrievedUpload = uploadService.getByUploadId(upload.getPid());
+        Assert.assertEquals(JsonUtils.serialize(upload), JsonUtils.serialize(retrievedUpload));
+        String token = uploadService.generateToken(upload.getPid().toString());
+        Assert.assertNotNull(token);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")
