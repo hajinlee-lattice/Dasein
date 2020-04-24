@@ -210,7 +210,7 @@ public class DeltaCampaignLaunchExportFileGeneratorStep
 
                 String recFilePathForDestination = (path += String.format("Recommendations_%s_%s.%s", filePrefix,
                         DateTimeUtils.currentTimeAsString(fileGeneratedTime), getFileFormat()));
-
+                log.info("recFilePathForDestination : {}", recFilePathForDestination);
                 try {
                     HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, localFile.getAbsolutePath(),
                             recFilePathForDestination);
