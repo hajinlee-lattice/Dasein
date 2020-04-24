@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.Counter;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchContext.PlayLaunchContextBuilder;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -232,6 +233,7 @@ public class CampaignLaunchProcessor {
 
         Play play = playProxy.getPlay(customerSpace.toString(), playName);
         PlayLaunch playLaunch = playProxy.getPlayLaunch(customerSpace.toString(), playName, playLaunchId);
+        log.info("PlayLaunch=" + JsonUtils.serialize(playLaunch));
         List<ColumnMetadata> fieldMappingMetadata = null;
 
         PlayLaunchChannel playLaunchChannel = playProxy.getPlayLaunchChannelFromPlayLaunch(customerSpace.toString(),
@@ -313,7 +315,7 @@ public class CampaignLaunchProcessor {
     public void updateLaunchProgress(PlayLaunchContext playLaunchContext) {
         try {
             PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
-
+            log.info("PlayLaunch=" + JsonUtils.serialize(playLaunch));
             playProxy.updatePlayLaunchProgress(playLaunchContext.getCustomerSpace().toString(), //
                     playLaunchContext.getPlay().getName(), playLaunch.getLaunchId(),
                     playLaunch.getLaunchCompletionPercent(), playLaunch.getAccountsLaunched(),

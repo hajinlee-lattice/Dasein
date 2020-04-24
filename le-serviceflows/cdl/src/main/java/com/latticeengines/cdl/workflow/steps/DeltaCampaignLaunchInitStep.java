@@ -108,6 +108,7 @@ public class DeltaCampaignLaunchInitStep
                 playLaunchContext.getFieldMappingMetadata(), processedFieldMappingMetadata);
 
         PlayLaunch playLaunch = playLaunchContext.getPlayLaunch();
+        log.info("PlayLaunch=" + JsonUtils.serialize(playLaunch));
         String addAccounts = playLaunch.getAddAccountsTable();
         String addContacts = playLaunch.getAddContactsTable();
         String delAccounts = playLaunch.getRemoveAccountsTable();
@@ -258,7 +259,6 @@ public class DeltaCampaignLaunchInitStep
 
         long suppressedAccounts = (totalAccountsAvailableForLaunch - launchedAccountNum);
         long suppressedContacts = (totalContactsAvailableForLaunch - launchedContactNum);
-        campaignLaunchProcessor.updateLaunchProgress(playLaunchContext);
         log.info(String.format("Total suppressed account count for launch: %d", suppressedAccounts));
         log.info(String.format("Total suppressed contact count for launch: %d", suppressedContacts));
     }
