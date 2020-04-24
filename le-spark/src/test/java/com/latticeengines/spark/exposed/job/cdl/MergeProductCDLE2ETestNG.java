@@ -1,7 +1,10 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -18,13 +21,24 @@ import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
 public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
 
+    private Consumer<String> outputVerifier;
+    private Function<HdfsDataUnit, Boolean> targetVerifier;
+
     @Test(groups = "functional")
     public void test() {
         uploadTestData();
-
+        inputProvider = () -> Collections.singletonList(getUploadedDataSet(0));
+        outputVerifier = this::verifyFirstOutput;
         MergeProductConfig config = new MergeProductConfig();
         SparkJobResult result = runSparkJob(MergeProduct.class, config);
+        targetVerifier = this::verifyFirstTarget;
+        verifyResult(result);
 
+        HdfsDataUnit oldProds = result.getTargets().get(0);
+        inputProvider = () -> Arrays.asList(getUploadedDataSet(1), oldProds);
+        outputVerifier = this::verifySecondOutput;
+        result = runSparkJob(MergeProduct.class, config);
+        targetVerifier = this::verifySecondTarget;
         verifyResult(result);
     }
 
@@ -134,12 +148,44 @@ public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
                 { "416A6D7D9B4F8D19C28BA60AD96341E6", null, null, null, null, "Eraser", "Writing Tools", "Stationary", null, null, null, null, null },
         };
         uploadHdfsDataUnit(upload1, fields);
+
+        Object[][] upload2 = new Object[][]{ //
+                { "43356888902E7390269D7AF4DCD94E6F", "CMT4: Shaker Accessories (NEW)", "CMT4: Shaker Accessories (NEW)", null, null, null, null, null, null, null, null, null, null }, //
+                { "83882166", "Shaker Accessories", "Accessory 3", null, "CMT4: Shaker Accessories", null, null, null, null, null, null, null, null }, //
+                { "87190632", "Glassware 1", "Glassware 1", null, "CMT3: Glassware (NW)", null, null, null, null, null, null, null, null }, //
+        };
+        uploadHdfsDataUnit(upload2, fields);
     }
 
     @Override
     protected void verifyOutput(String output) {
+        outputVerifier.accept(output);
+    }
+
+    @Override
+    protected Boolean verifySingleTarget(HdfsDataUnit tgt) {
+        return targetVerifier.apply(tgt);
+    }
+
+    private Boolean verifyFirstTarget(HdfsDataUnit tgt) {
+        verifyAndReadTarget(tgt).forEachRemaining(record -> {
+//            System.out.println(record);
+        });
+        return true;
+    }
+
+    private Boolean verifySecondTarget(HdfsDataUnit tgt) {
+        verifyAndReadTarget(tgt).forEachRemaining(record -> {
+            if ("43356888902E7390269D7AF4DCD94E6F".equals(record.get("ProductId").toString()) ||
+                    "43356888902E7390269D7AF4DCD94E6F".equals(record.get("ProductBundleId").toString())) {
+                System.out.println(record);
+            }
+        });
+        return true;
+    }
+
+    private void verifyFirstOutput(String output) {
         MergeProductReport report = JsonUtils.deserialize(output, MergeProductReport.class);
-        System.out.println(JsonUtils.serialize(report));
         Assert.assertEquals(report.getRecords(), 75);
         Assert.assertEquals(report.getInvalidRecords(), 13);
         Assert.assertEquals(report.getBundleProducts(), 42);
@@ -149,12 +195,16 @@ public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertTrue(CollectionUtils.isNotEmpty(report.getErrors()));
     }
 
-    @Override
-    protected Boolean verifySingleTarget(HdfsDataUnit tgt) {
-        verifyAndReadTarget(tgt).forEachRemaining(record -> {
-//            System.out.println(record);
-        });
-        return true;
+    private void verifySecondOutput(String output) {
+        MergeProductReport report = JsonUtils.deserialize(output, MergeProductReport.class);
+        System.out.println(JsonUtils.serialize(report));
+        Assert.assertEquals(report.getRecords(), 3);
+        Assert.assertEquals(report.getInvalidRecords(), 0);
+        Assert.assertEquals(report.getBundleProducts(), 3);
+        Assert.assertEquals(report.getHierarchyProducts(), 0);
+        Assert.assertEquals(report.getAnalyticProducts(), 1);
+        Assert.assertEquals(report.getSpendingProducts(), 0);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(report.getErrors()));
     }
 
 }
