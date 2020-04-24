@@ -3,6 +3,7 @@ package com.latticeengines.apps.dcp.end2end;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,6 +13,12 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -19,6 +26,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Project;
@@ -104,6 +112,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         verifyErrorFile(upload);
         verifyMatchResult(upload);
         verifyUploadStats(upload);
+        verifyDownload(upload);
     }
 
     private void verifyErrorFile(Upload upload) {
@@ -196,6 +205,26 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         } catch (IOException e) {
             Assert.fail("Failed to read output csv", e);
         }
+    }
+
+    private void verifyDownload(Upload upload) {
+        RestTemplate template = testBed.getRestTemplate();
+        String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
+                upload.getPid().toString());
+        String token = template.getForObject(tokenUrl, String.class);
+        SleepUtils.sleep(300);
+        String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.ALL));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<byte[]> response = template.exchange(downloadUrl, HttpMethod.GET, entity, byte[].class);
+        String fileName = response.getHeaders().getFirst("Content-Disposition");
+        Assert.assertTrue(fileName.contains(".zip"));
+        byte[] contents = response.getBody();
+        Assert.assertNotNull(contents);
+        Assert.assertTrue(contents.length > 0);
+
     }
 
 }
