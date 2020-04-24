@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 
 import io.swagger.annotations.Api;
@@ -46,7 +47,7 @@ public class UploadResource {
     @ResponseBody
     @ApiOperation(value = "create an upload")
     public Upload createUpload(@PathVariable String customerSpace,
-                               @PathVariable String sourceId, @RequestBody UploadConfig uploadConfig) {
+                                      @PathVariable String sourceId, @RequestBody UploadConfig uploadConfig) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         if (uploadConfig == null) {
             log.error("Create Upload with empty uploadConfig!");
@@ -58,7 +59,7 @@ public class UploadResource {
     @GetMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation(value = "get upload list")
-    public List<Upload> getUploads(@PathVariable String customerSpace, @PathVariable String sourceId,
+    public List<UploadDetails> getUploads(@PathVariable String customerSpace, @PathVariable String sourceId,
                                   @RequestParam(value = "status", required = false) Upload.Status status) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         if (status != null) {
@@ -68,7 +69,16 @@ public class UploadResource {
         }
     }
 
-    @GetMapping("/{pid}")
+    @GetMapping("/uploadId/{uploadId}")
+    @ResponseBody
+    @ApiOperation(value = "Get upload record by uploadId")
+    public UploadDetails getUploadByUploadId(@PathVariable String customerSpace, @PathVariable String uploadId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        log.info(String.format("Get upload for customer %s, with uploadId %s", customerSpace, uploadId));
+        return uploadService.getUploadByUploadId(customerSpace, uploadId);
+    }
+
+    @GetMapping("/pid/{pid}")
     @ResponseBody
     @ApiOperation(value = "Get upload record by pid")
     public Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {

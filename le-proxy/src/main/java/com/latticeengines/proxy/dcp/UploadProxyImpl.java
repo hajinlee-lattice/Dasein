@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
@@ -32,18 +33,25 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
     }
 
     @Override
-    public List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status) {
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
         String url = constructUrl(baseUrl, customerSpace, sourceId);
         if (status != null) {
             url = url + "?status=" + status;
         }
-        return JsonUtils.convertList(get("get uploads", url, List.class), Upload.class);
+        return JsonUtils.convertList(get("get uploads", url, List.class), UploadDetails.class);
+    }
+
+    @Override
+    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);
+        return get("Get Upload by UploadId", url, UploadDetails.class);
     }
 
     @Override
     public Upload getUpload(String customerSpace, Long uploadPid) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/{pid}";
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/pid/{pid}";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid);
         return get("Get Upload by Pid", url, Upload.class);
     }

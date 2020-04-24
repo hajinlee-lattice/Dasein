@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
@@ -58,7 +59,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private ProjectDetails projectDetails;
     private Source source;
-    private long uploadId;
+    private String uploadId;
     private String s3FileKey;
 
     @BeforeClass(groups = {"deployment"})
@@ -78,17 +79,17 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
 
-        List<Upload> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
+        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploadList);
         Assert.assertEquals(uploadList.size(), 1);
-        Upload upload = uploadList.get(0);
-        uploadId = upload.getPid();
+        UploadDetails upload = uploadList.get(0);
+        uploadId = upload.getUploadId();
 
         verifyImport();
     }
 
     private void verifyImport() {
-        Upload upload = uploadProxy.getUpload(mainCustomerSpace, uploadId);
+        UploadDetails upload = uploadProxy.getUploadByUploadId(mainCustomerSpace, uploadId);
         log.info(JsonUtils.serialize(upload));
         Assert.assertNotNull(upload);
         Assert.assertNotNull(upload.getStatus());
@@ -102,7 +103,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         verifyUploadStats(upload);
     }
 
-    private void verifyErrorFile(Upload upload) {
+    private void verifyErrorFile(UploadDetails upload) {
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadImportedErrorFilePath()));
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
@@ -126,6 +127,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         sourceRequest.setProjectId(projectDetails.getProjectId());
         sourceRequest.setFieldDefinitionsRecord(fieldDefinitionsRecord);
         source = sourceProxy.createSource(mainCustomerSpace, sourceRequest);
+        // Pause this source for s3 import.
+        // sourceProxy.pauseSource(mainCustomerSpace, source.getSourceId());
         // Copy test file to drop folder
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropPath = UploadS3PathBuilderUtils.getDropRoot(projectDetails.getProjectId(), source.getSourceId());
@@ -135,7 +138,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE, s3Bucket, s3FileKey);
     }
 
-    private void verifyUploadStats(Upload upload) {
+    private void verifyUploadStats(UploadDetails upload) {
         UploadStats uploadStats = upload.getStatistics();
         Assert.assertNotNull(uploadStats);
 
@@ -148,7 +151,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertTrue(matchStats.getAcceptedCnt() > 0);
     }
 
-    private void verifyMatchResult(Upload upload) {
+    private void verifyMatchResult(UploadDetails upload) {
         String matchResultName = upload.getMatchResultTableName();
         Assert.assertNotNull(matchResultName);
         Table matchResult = metadataProxy.getTableSummary(mainCustomerSpace, matchResultName);

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -31,6 +33,8 @@ public class UploadServiceImpl implements UploadService {
 
     private static final Logger log = LoggerFactory.getLogger(UploadServiceImpl.class);
 
+    private static final String RANDOM_UPLOAD_ID_PATTERN = "Upload_%s";
+
     @Inject
     private UploadEntityMgr uploadEntityMgr;
 
@@ -41,13 +45,15 @@ public class UploadServiceImpl implements UploadService {
     private MetadataService metadataService;
 
     @Override
-    public List<Upload> getUploads(String customerSpace, String sourceId) {
-        return expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId) {
+        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
+        return uploads.stream().map(this::getUploadDetails).collect(Collectors.toList());
     }
 
     @Override
-    public List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status) {
-        return expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status) {
+        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
+        return uploads.stream().map(this::getUploadDetails).collect(Collectors.toList());
     }
 
     @Override
@@ -61,7 +67,9 @@ public class UploadServiceImpl implements UploadService {
         if (StringUtils.isEmpty(sourceId)) {
             throw new RuntimeException("Cannot create upload bind with empty sourceId!");
         }
+        String uploadId = generateRandomUploadId();
         Upload upload = new Upload();
+        upload.setUploadId(uploadId);
         upload.setSourceId(sourceId);
         upload.setTenant(MultiTenantContext.getTenant());
         upload.setStatus(Upload.Status.NEW);
@@ -186,6 +194,13 @@ public class UploadServiceImpl implements UploadService {
         return upload;
     }
 
+    @Override
+    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
+        log.info("Try find upload in " + customerSpace + " with pid " + uploadId);
+        Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
+        return getUploadDetails(upload);
+    }
+
     private UploadStatsContainer findStats(Long uploadPid, Long statsId) {
         Upload upload = uploadEntityMgr.findByPid(uploadPid);
         if (upload == null) {
@@ -211,4 +226,25 @@ public class UploadServiceImpl implements UploadService {
         return uploads.stream().map(this::expandStatistics).collect(Collectors.toList());
     }
 
+    private String generateRandomUploadId() {
+        String randomUploadId = String.format(RANDOM_UPLOAD_ID_PATTERN,
+                RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        while (uploadEntityMgr.findByUploadId(randomUploadId) != null) {
+            randomUploadId = String.format(RANDOM_UPLOAD_ID_PATTERN,
+                    RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        }
+        return randomUploadId;
+    }
+
+    private UploadDetails getUploadDetails(Upload upload) {
+        UploadDetails details = new UploadDetails();
+        details.setUploadId(upload.getUploadId());
+        details.setStatistics(upload.getStatistics());
+        details.setStatus(upload.getStatus());
+        details.setUploadConfig(upload.getUploadConfig());
+        details.setMatchResultTableName(upload.getMatchResultTableName());
+        details.setMatchCandidatesTableName(upload.getMatchCandidatesTableName());
+        details.setSourceId(upload.getSourceId());
+        return details;
+    }
 }

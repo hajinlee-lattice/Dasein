@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -59,7 +60,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(upload1.getPid());
         Assert.assertNotNull(upload2.getPid());
         Assert.assertNotNull(upload3.getPid());
-        List<Upload> uploads = uploadService.getUploads(mainCustomerSpace, sourceId1);
+        List<UploadDetails> uploads = uploadService.getUploads(mainCustomerSpace, sourceId1);
         Assert.assertTrue(CollectionUtils.isNotEmpty(uploads));
         Assert.assertEquals(uploads.size(), 2);
         uploads.forEach(upload -> {
@@ -73,7 +74,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         uploads = uploadService.getUploads(mainCustomerSpace, sourceId1);
         Assert.assertEquals(uploads.size(), 2);
         uploads.forEach(upload -> {
-            if (upload.getPid().longValue() == upload1.getPid().longValue()) {
+            if (upload.getUploadId().equals(upload1.getUploadId())) {
                 Assert.assertNotNull(upload.getUploadConfig());
             } else {
                 Assert.assertEquals(upload.getStatus(), Upload.Status.IMPORT_STARTED);

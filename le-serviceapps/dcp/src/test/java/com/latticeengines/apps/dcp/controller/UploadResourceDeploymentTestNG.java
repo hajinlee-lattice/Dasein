@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -101,10 +102,10 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadImportedFilePath(importedFilePath);
         config.setUploadTSPrefix(timeStamp);
         uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getPid(), config);
-        List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
+        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
-        Upload retrievedUpload = uploads.get(0);
+        UploadDetails retrievedUpload = uploads.get(0);
         UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
         Assert.assertEquals(retrievedConfig.getUploadImportedFilePath(), importedFilePath);
         Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), timeStamp);
@@ -122,10 +123,10 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testCRUD")
     public void testDownload() throws Exception {
-        List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED);
+        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
-        Upload upload = uploads.get(0);
+        UploadDetails upload = uploads.get(0);
         Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_STARTED);
 
         StringInputStream sis = new StringInputStream("file1");
@@ -142,7 +143,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
-                upload.getPid().toString());
+                upload.getUploadId().toString());
         String token = template.getForObject(tokenUrl, String.class);
         SleepUtils.sleep(300);
         String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);

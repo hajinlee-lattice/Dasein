@@ -4,13 +4,16 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 
 public interface UploadProxy {
 
     Upload createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig);
 
-    List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status);
+    List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status);
+
+    UploadDetails getUploadByUploadId(String customerSpace, String uploadId);
 
     Upload getUpload(String customerSpace, Long uploadPid);
 

@@ -43,7 +43,7 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty("upload_id")
+    @JsonProperty("pid")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
@@ -53,6 +53,10 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private Tenant tenant;
+
+    @Column(name = "UPLOAD_ID", nullable = false)
+    @JsonProperty("upload_id")
+    private String uploadId;
 
     @Column(name = "CREATED", nullable = false)
     @JsonProperty("created")
@@ -108,6 +112,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
+    }
+
+    public String getUploadId() {
+        return uploadId;
+    }
+
+    public void setUploadId(String uploadId) {
+        this.uploadId = uploadId;
     }
 
     @Override

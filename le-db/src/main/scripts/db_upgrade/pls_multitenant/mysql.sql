@@ -5,6 +5,7 @@ BEGIN
     create table `DCP_UPLOAD`
     (
         `PID`             bigint       not null auto_increment,
+        `UPLOAD_ID`       varchar(255) not null,
         `CREATED`         datetime     not null,
         `SOURCE_ID`       varchar(255) not null,
         `STATUS`          varchar(40)
