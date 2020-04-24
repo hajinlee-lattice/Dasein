@@ -44,6 +44,7 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
 
     private static final String TRANSFORMER = "EntityMatchImportMigrateTransformer";
 
+    @SuppressWarnings("rawtypes")
     private ConvertBatchStoreService convertBatchStoreService;
 
     private BaseConvertBatchStoreServiceConfiguration convertServiceConfig;
@@ -104,11 +105,7 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
         if (MapUtils.isEmpty(rematchTables)) {
             return false;
         }
-        if (CollectionUtils.isNotEmpty(rematchTables.get(configuration.getEntity().name()))) {
-            return true;
-        }
-
-        return false;
+        return CollectionUtils.isNotEmpty(rematchTables.get(configuration.getEntity().name()));
     }
 
     @SuppressWarnings("unchecked")
