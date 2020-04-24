@@ -193,11 +193,6 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
 
     // ProductBundle is not null, then use it as the Bundle product's name
     private def filterOldAnalytic(prods: DataFrame): DataFrame = {
-        val idFunc: String => String = name => {
-            val compositeId = ProductUtils.getCompositeId(ProductType.Analytic.name, null, name, null, null, null, null)
-            HashUtils.getCleanedString(HashUtils.getShortHash(compositeId))
-        }
-        val idUdf = udf(idFunc)
         prods.filter(col(Type) === ProductType.Analytic.name)
                 .withColumnRenamed(ProductId, Id)
                 .withColumn(Priority, lit(1).cast(IntegerType))
