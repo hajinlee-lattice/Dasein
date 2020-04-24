@@ -1,20 +1,8 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datafabric.GenericTableEntity;
 
 public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
-
-    @JsonProperty("migrateTable")
-    private Boolean migrateTable;
-
-    public Boolean getMigrateTable() {
-        return migrateTable;
-    }
-
-    public void setMigrateTable(Boolean migrateTable) {
-        this.migrateTable = migrateTable;
-    }
 
     @Override
     public Class<?> getEntityClass() {
@@ -24,5 +12,15 @@ public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfigura
     @Override
     public String getRepoName() {
         return "GenericTable";
+    }
+
+    @Override
+    public String getContextKey() {
+        return "TABLES_GOING_TO_DYNAMO";
+    }
+
+    @Override
+    public boolean needKeyPrefix() {
+        return true;
     }
 }

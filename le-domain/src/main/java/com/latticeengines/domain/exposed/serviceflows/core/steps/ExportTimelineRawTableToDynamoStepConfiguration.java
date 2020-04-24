@@ -11,6 +11,16 @@ public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportT
 
     @Override
     public String getRepoName() {
-        return "TimelineRawTable";
+        return "GenericTable";
+    }
+
+    @Override
+    public String getContextKey() {
+        return "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
+    }
+
+    @Override
+    public boolean needKeyPrefix() {
+        return false;
     }
 }

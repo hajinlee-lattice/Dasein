@@ -19,9 +19,8 @@ public abstract class BaseExportToDynamoConfiguration extends MicroserviceStepCo
     @JsonProperty("dynamoSignature")
     private String dynamoSignature;
 
-    public abstract Class<?> getEntityClass();
-
-    public abstract String getRepoName();
+    @JsonProperty("migrateTable")
+    private Boolean migrateTable;
 
     public String getDynamoSignature() {
         return dynamoSignature;
@@ -30,4 +29,20 @@ public abstract class BaseExportToDynamoConfiguration extends MicroserviceStepCo
     public void setDynamoSignature(String dynamoSignature) {
         this.dynamoSignature = dynamoSignature;
     }
+
+    public Boolean getMigrateTable() {
+        return migrateTable;
+    }
+
+    public void setMigrateTable(Boolean migrateTable) {
+        this.migrateTable = migrateTable;
+    }
+
+    public abstract Class<?> getEntityClass();
+
+    public abstract String getRepoName();
+
+    public abstract String getContextKey();
+
+    public abstract boolean needKeyPrefix();
 }
