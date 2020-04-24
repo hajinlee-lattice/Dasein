@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -777,6 +778,52 @@ public class EmailServiceImpl implements EmailService {
             }
         } catch (Exception e) {
             log.error("Failed to send PLS action cancel success email to " + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendUploadCompletedEmail(UploadEmailInfo uploadEmailInfo) {
+        try {
+            if (uploadEmailInfo.getRecipientList() != null && !uploadEmailInfo.getRecipientList().isEmpty()) {
+                log.info("Sending upload completed email to " + uploadEmailInfo.getRecipientList().toString() + " started.");
+
+                EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                        EmailTemplateBuilder.Template.DCP_UPLOAD_COMPLETED);
+
+                builder.replaceToken("{{uploadId}}", uploadEmailInfo.getUploadId());
+                builder.replaceToken("{{sourceId}}", uploadEmailInfo.getSourceId());
+                builder.replaceToken("{{projectId}}", uploadEmailInfo.getProjectId());
+
+                Multipart mp = builder.buildMultipart();
+                sendMultiPartEmail(EmailSettings.DCP_UPLOAD_COMPLETED_SUBJECT,
+                        mp, uploadEmailInfo.getRecipientList());
+                log.info("Sending upload completed email to " + uploadEmailInfo.getRecipientList().toString() + " succeeded.");
+            }
+        } catch (Exception e) {
+            log.error("Failed to send upload completed email to " + uploadEmailInfo.getRecipientList().toString() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendUploadFailedEmail(UploadEmailInfo uploadEmailInfo) {
+        try {
+            if (uploadEmailInfo.getRecipientList() != null && !uploadEmailInfo.getRecipientList().isEmpty()) {
+                log.info("Sending upload failed email to " + uploadEmailInfo.getRecipientList().toString() + " started.");
+
+                EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                        Template.DCP_UPLOAD_FAILED);
+
+                builder.replaceToken("{{uploadId}}", uploadEmailInfo.getUploadId());
+                builder.replaceToken("{{sourceId}}", uploadEmailInfo.getSourceId());
+                builder.replaceToken("{{projectId}}", uploadEmailInfo.getProjectId());
+
+                Multipart mp = builder.buildMultipart();
+                sendMultiPartEmail(EmailSettings.DCP_UPLOAD_FAILED_SUBJECT,
+                        mp, uploadEmailInfo.getRecipientList());
+                log.info("Sending upload failed email to " + uploadEmailInfo.getRecipientList().toString() + " succeeded.");
+            }
+        } catch (Exception e) {
+            log.error("Failed to send upload failed email to " + uploadEmailInfo.getRecipientList().toString() + " " + e.getMessage());
         }
     }
 }

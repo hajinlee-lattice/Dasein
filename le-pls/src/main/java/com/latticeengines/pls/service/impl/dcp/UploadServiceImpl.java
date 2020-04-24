@@ -31,8 +31,10 @@ import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.service.AbstractFileDownloadService;
 import com.latticeengines.pls.service.FileDownloadService;
 import com.latticeengines.pls.service.dcp.UploadService;
@@ -54,6 +56,9 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
 
     @Inject
     private Configuration yarnConfiguration;
+  
+    @Inject
+    private EmailService emailService;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -159,6 +164,18 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         UploadFileDownloadConfig config = new UploadFileDownloadConfig();
         config.setUploadId(uploadId);
         return fileDownloadService.generateDownload(config);
+    }
+
+    @Override
+    public void sendUploadEmail(UploadEmailInfo uploadEmailInfo) {
+        switch (uploadEmailInfo.getJobStatus()) {
+            case "COMPLETED":
+                emailService.sendUploadCompletedEmail(uploadEmailInfo);
+                break;
+            case "FAILED":
+                emailService.sendUploadFailedEmail(uploadEmailInfo);
+                break;
+        }
     }
 
 }

@@ -36,6 +36,8 @@ public class EmailSettings {
     public static final String PLS_ACTION_CANCEL_SUCCESS_EMAIL_SUBJECT = "Cancel Action - Success";
     public static final String TENANT_RIGHT_NOTICE_SUBJECT = "Remove tenant for user – Place action";
     public static final String TENANT_RIGHT_REMOVE_SUBJECT = "Remove tenant for user – Removed";
+    public static final String DCP_UPLOAD_COMPLETED_SUBJECT = "DCP Upload Completed";
+    public static final String DCP_UPLOAD_FAILED_SUBJECT = "DCP Upload Failed";
 
     private String from;
     private String password;
