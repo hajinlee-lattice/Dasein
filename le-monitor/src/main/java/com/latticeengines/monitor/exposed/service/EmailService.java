@@ -7,6 +7,7 @@ import javax.mail.Multipart;
 
 import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.monitor.EmailSettings;
 import com.latticeengines.domain.exposed.pls.CancelActionEmailInfo;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -82,4 +83,8 @@ public interface EmailService {
     void sendS3TemplateUpdateEmail(User user, Tenant tenant, String hostport, S3ImportEmailInfo emailInfo);
 
     void sendPlsActionCancelSuccessEmail(User user, String hostport, CancelActionEmailInfo cancelActionEmailInfo);
+
+    void sendUploadCompletedEmail(UploadEmailInfo uploadEmailInfo);
+
+    void sendUploadFailedEmail(UploadEmailInfo uploadEmailInfo);
 }

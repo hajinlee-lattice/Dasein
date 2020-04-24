@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.OrphanRecordsExportRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportEmailInfo;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -91,6 +92,7 @@ import com.latticeengines.pls.service.ScoringRequestConfigService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
+import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.lp.ModelSummaryProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -171,6 +173,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private ScoringRequestConfigService scoringRequestConfigService;
+
+    @Inject
+    private UploadService uploadService;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -1150,5 +1155,12 @@ public class InternalResource extends InternalResourceBase {
             throw new LedpException(LedpCode.LEDP_18194, new String[] { configUuid });
         }
         return srcContext;
+    }
+
+    @PutMapping(value = "/emails/upload")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after upload state change")
+    public void sendUploadEmail(@RequestBody UploadEmailInfo uploadEmailInfo) {
+        uploadService.sendUploadEmail(uploadEmailInfo);
     }
 }

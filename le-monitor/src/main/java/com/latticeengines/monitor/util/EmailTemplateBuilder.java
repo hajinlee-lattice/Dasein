@@ -122,7 +122,9 @@ public class EmailTemplateBuilder {
         CDL_INGESTION_SUCCESS("cdl_ingestion_success.html"), //
         CDL_INGESTION_IN_PROCESS("cdl_ingestion_in_progress.html"), //
         S3_TEMPLATE_UPDATE("s3_template_update.html"), //
-        S3_TEMPLATE_CREATE("s3_template_create.html");
+        S3_TEMPLATE_CREATE("s3_template_create.html"), //
+        DCP_UPLOAD_COMPLETED("dcp_upload_completed.html"), //
+        DCP_UPLOAD_FAILED("dcp_upload_failed.html"); //
 
         private static final String templateRoot = "com/latticeengines/monitor/";
         private final String templateFile;
