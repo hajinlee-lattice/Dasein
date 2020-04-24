@@ -98,7 +98,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         };
     }
 
-    @BeforeClass(groups = "deployment", enabled = false)
+    @BeforeClass(groups = "deployment", enabled = true)
     public void init() {
         prepareCleanPod(POD_ID);
         for (Object[] data : getOrchestrations()) {
@@ -138,7 +138,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         }
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment", enabled = false)
     public void testOrchestration() {
         List<OrchestrationProgress> progresses = orchService.scan(POD_ID); // No job should be triggered
         Assert.assertEquals(progresses.size(), 0);
