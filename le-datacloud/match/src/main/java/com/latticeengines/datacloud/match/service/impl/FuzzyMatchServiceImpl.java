@@ -205,8 +205,6 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
             MatchHistoryUtils.processPreferredIds(matchRecord, traveler, entityMatchHistory);
             // Need to copy information from MatchTraveler to a place where we can add it to MatchHistory.
             matchRecord.setEntityMatchHistory(entityMatchHistory);
-        } else {
-            log.error("EntityMatchHistory generate encountered an error.  No history will be created.");
         }
         if (StringUtils.isNotEmpty(result) && !DataCloudConstants.ENTITY_ANONYMOUS_ID.equals(result)) {
             matchRecord.setMatched(true);
@@ -549,7 +547,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // Get Full MatchKeyTuple for Business Entity.
         history.setL2aFullMatchKeyTuple(extractFullMatchKeyTuple(traveler, accountEntity));
         if (history.getL2aFullMatchKeyTuple() == null) {
-            log.error("Traveler missing Lead-to-Account FullMatchKeyTuple");
+            log.debug("Traveler missing Lead-to-Account FullMatchKeyTuple");
             return false;
         }
 
@@ -558,7 +556,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
 
         // Get MatchKeyTuple that found Entity ID, if a match was found.
         if (!checkEntityMatchLookupResults(traveler, accountEntity)) {
-            log.error("Traveler Lead-to-Account EntityMatchLookupResults is malformed.");
+            log.debug("Traveler Lead-to-Account EntityMatchLookupResults is malformed.");
             return false;
         }
         List<String> lookupResultList = new ArrayList<>();
@@ -574,7 +572,7 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
         // Now set the L2aLdcMatchType and the L2aMatchedLdcMatchKeyTuple if LDC Match succeeded.
         Pair<LdcMatchType, MatchKeyTuple> typeTuplePair = MatchHistoryUtils.extractLdcMatchTypeAndTuple(traveler);
         if (typeTuplePair == null) {
-            log.error("Could not extract Lead-to-Account LDC Match Type and Tuple");
+            log.debug("Could not extract Lead-to-Account LDC Match Type and Tuple");
             return false;
         }
         history.setL2aLdcMatchType(typeTuplePair.getLeft());

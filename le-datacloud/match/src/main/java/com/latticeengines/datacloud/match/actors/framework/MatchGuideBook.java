@@ -33,7 +33,7 @@ public class MatchGuideBook extends GuideBook {
     protected boolean stopTravel(Traveler traveler) {
         MatchTraveler matchTraveler = (MatchTraveler) traveler;
         if (matchTraveler.isMatched()) {
-            log.info("Stop traveling, already matched: " + traveler.getResult());
+            log.debug("Stop traveling, already matched: " + traveler.getResult());
         }
         return matchTraveler.isMatched();
     }

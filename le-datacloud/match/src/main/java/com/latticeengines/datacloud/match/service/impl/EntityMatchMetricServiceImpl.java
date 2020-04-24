@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.match.service.impl;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ACTOR_VISIT;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_CONFLICT_COUNT;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_CONFLICT_DISTRIBUTION;
+import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_ASSOCIATION_NULL_ID_COUNT;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DISTRIBUTION_RETRY;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_ERROR_DIST;
 import static com.latticeengines.common.exposed.metric.MetricNames.EntityMatch.METRIC_DYNAMO_CALL_RETRY_DIST;
@@ -32,11 +33,18 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.retry.RetryContext;
 import org.springframework.stereotype.Component;
 
 import com.github.benmanes.caffeine.cache.Cache;
+import com.latticeengines.common.exposed.metric.Dimension;
+import com.latticeengines.common.exposed.metric.Fact;
+import com.latticeengines.common.exposed.metric.RetentionPolicy;
+import com.latticeengines.common.exposed.metric.annotation.MetricField;
+import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.actors.framework.MatchActorSystem;
 import com.latticeengines.datacloud.match.actors.visitor.MatchTraveler;
@@ -48,8 +56,11 @@ import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityLookupEntry;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityRawSeed;
+import com.latticeengines.domain.exposed.monitor.metric.BaseMeasurement;
 import com.latticeengines.domain.exposed.monitor.metric.MetricDB;
+import com.latticeengines.domain.exposed.monitor.metric.RetentionPolicyImpl;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.monitor.exposed.metric.service.MetricService;
 import com.latticeengines.monitor.exposed.service.MeterRegistryFactoryService;
 
 import io.micrometer.core.instrument.Counter;
@@ -62,6 +73,8 @@ import io.micrometer.core.instrument.binder.cache.CaffeineCacheMetrics;
 @Component("entityMatchMetricService")
 public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
+    private static final Logger log = LoggerFactory.getLogger(EntityMatchMetricServiceImpl.class);
+
     private static final String BATCH_MATCH_MODE = MatchActorSystem.BATCH_MODE;
 
     @Lazy
@@ -70,6 +83,9 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
 
     @Inject
     private MatchActorSystem matchActorSystem;
+
+    @Inject
+    private MetricService metricService;
 
     @Override
     public void recordAssociation(Tenant tenant, String entity, boolean hasConcurrentConflict,
@@ -93,6 +109,23 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
                 .tag(TAG_IS_NEWLY_ALLOCATED, String.valueOf(isNewlyAllocated)) //
                 .register(registryFactory.getServiceLevelRegistry()) //
                 .record(hasConcurrentConflict ? 1 : 0);
+    }
+
+    @Override
+    public void recordNullEntityIdCount(Tenant tenant, String entity, long count) {
+        if (tenant == null || StringUtils.isBlank(tenant.getId()) || StringUtils.isBlank(entity)) {
+            return;
+        }
+
+        try {
+            String tenantId = EntityMatchUtils.newStandardizedTenant(tenant).getId();
+            // down cast for now since if it should never exceeds int range
+            EntityCountMeasurement measurement = new EntityCountMeasurement(tenantId, METRIC_ASSOCIATION_NULL_ID_COUNT,
+                    entity, (int) count);
+            metricService.write(MetricDB.LDC_Match, measurement);
+        } catch (Exception e) {
+            log.error("Failed to record null entity ID count", e);
+        }
     }
 
     @Override
@@ -253,5 +286,71 @@ public class EntityMatchMetricServiceImpl implements EntityMatchMetricService {
             return null;
         }
         return EntityMatchUtils.newStandardizedTenant(tenant).getId();
+    }
+
+    private static class Count implements Fact {
+        private final int count;
+
+        Count(int count) {
+            this.count = count;
+        }
+
+        @MetricField(name = "Count", fieldType = MetricField.FieldType.INTEGER)
+        public Integer getCount() {
+            return count;
+        }
+    }
+
+    private static class Entity implements Dimension {
+        private final String tenant;
+        private final String entity;
+        private final String name;
+
+        Entity(String tenant, String name, String entity) {
+            this.tenant = StringUtils.defaultIfBlank(tenant, "");
+            this.name = StringUtils.defaultIfBlank(name, "");
+            this.entity = StringUtils.defaultIfBlank(entity, "");
+        }
+
+        @MetricTag(tag = "Name")
+        public String name() {
+            return name;
+        }
+
+        @MetricTag(tag = TAG_ENTITY)
+        public String entity() {
+            return entity;
+        }
+
+        @MetricTag(tag = TAG_TENANT)
+        public String tenant() {
+            return tenant;
+        }
+    }
+
+    private static class EntityCountMeasurement extends BaseMeasurement<Count, Entity> {
+
+        private final Entity dimension;
+        private final Count fact;
+
+        EntityCountMeasurement(String tenant, String measurementName, String entity, int count) {
+            this.dimension = new Entity(tenant, measurementName, entity);
+            this.fact = new Count(count);
+        }
+
+        @Override
+        public RetentionPolicy getRetentionPolicy() {
+            return RetentionPolicyImpl.ONE_MONTH;
+        }
+
+        @Override
+        public Entity getDimension() {
+            return dimension;
+        }
+
+        @Override
+        public Count getFact() {
+            return fact;
+        }
     }
 }

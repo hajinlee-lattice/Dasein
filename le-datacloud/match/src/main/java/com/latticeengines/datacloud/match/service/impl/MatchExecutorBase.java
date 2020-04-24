@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
+import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,14 +23,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.aws.firehose.FirehoseService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
+import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -46,6 +52,7 @@ import com.latticeengines.domain.exposed.datafabric.generic.GenericRecordRequest
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metric.service.MetricService;
 
 public abstract class MatchExecutorBase implements MatchExecutor {
@@ -65,6 +72,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
     @Autowired
     protected MetricService metricService;
+
+    @Lazy
+    @Inject
+    private EntityMatchMetricService entityMatchMetricService;
 
     @Value("${datacloud.match.publish.match.history:false}")
     private boolean isMatchHistoryEnabled;
@@ -206,6 +217,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         int templateFieldIdx = inputFields.indexOf(MatchConstants.ENTITY_TEMPLATE_FIELD);
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput().getExcludePublicDomain());
+        boolean isAllocateMode = matchContext.getInput().isAllocateId();
 
         List<OutputRecord> outputRecords = new ArrayList<>();
         Integer[] columnMatchCount = new Integer[columns.size()];
@@ -218,6 +230,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         long orphanedUnmatchedAccountIdCount = 0L;
         long matchedByMatchKeyCount = 0L;
         long matchedByAccountIdCount = 0L;
+        Map<String, Long> nullEntityIdCount = new HashMap<>();
         Map<String, Long> newEntityCnt = new HashMap<>();
 
         boolean isEntityMatch = OperationalMode.isEntityMatch(matchContext.getInput().getOperationalMode());
@@ -242,6 +255,14 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             List<Object> output = new ArrayList<>();
 
             Map<String, Object> results = internalRecord.getQueryResult();
+            if (isAllocateMode) {
+                boolean hasNullId = checkNullEntityIds(internalRecord, matchContext.getInput().getTargetEntity(),
+                        nullEntityIdCount);
+                if (hasNullId) {
+                    log.error("Got null entity IDs ({}) when matching record {}", internalRecord.getEntityIds(),
+                            internalRecord.getInput());
+                }
+            }
 
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
@@ -300,10 +321,10 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     }
                 } else if (InterfaceName.AccountId.name().equalsIgnoreCase(field)) {
                     // retrieve Account EntityId (for entity match)
-                    value = getEntityId(internalRecord, BusinessEntity.Account.name());
+                    value = getEntityId(internalRecord, Account.name());
                 } else if (InterfaceName.ContactId.name().equalsIgnoreCase(field)) {
                     // retrieve Contact EntityId (for entity match)
-                    value = getEntityId(internalRecord, BusinessEntity.Contact.name());
+                    value = getEntityId(internalRecord, Contact.name());
                 } else if (InterfaceName.CDLCreatedTemplate.name().equalsIgnoreCase(field)) {
                     String newEntityId = MapUtils.emptyIfNull(internalRecord.getNewEntityIds())
                             .get(matchContext.getInput().getTargetEntity());
@@ -431,12 +452,18 @@ public abstract class MatchExecutorBase implements MatchExecutor {
                     .setOrphanedUnmatchedAccountIdCount(orphanedUnmatchedAccountIdCount);
             matchContext.getOutput().getStatistics().setMatchedByMatchKeyCount(matchedByMatchKeyCount);
             matchContext.getOutput().getStatistics().setMatchedByAccountIdCount(matchedByAccountIdCount);
+            matchContext.getOutput().getStatistics().setNullEntityIdCount(nullEntityIdCount);
 
             log.debug("NewEntityCnt: {}", newEntityCnt);
             log.debug("OrphanedNoMatchCount: " + orphanedNoMatchCount);
             log.debug("OrphanedUnmatchedAccountIdCount: " + orphanedUnmatchedAccountIdCount);
             log.debug("MatchedByMatchKeyCount: " + matchedByMatchKeyCount);
             log.debug("MatchedByAccountIdCount: " + matchedByAccountIdCount);
+            log.debug("NullEntityIdCount: {}", nullEntityIdCount);
+        }
+
+        if (isAllocateMode && isEntityMatch && nullEntityIdCount.values().stream().anyMatch(cnt -> cnt > 0)) {
+            failWithNullIds(nullEntityIdCount, matchContext.getInput().getTenant());
         }
 
         if (columnMatchCount.length <= 10000) {
@@ -444,6 +471,46 @@ public abstract class MatchExecutorBase implements MatchExecutor {
         }
 
         return matchContext;
+    }
+
+    private void failWithNullIds(@NotNull Map<String, Long> nullEntityIdCount, Tenant tenant) {
+        // has null ID in allocate ID mode
+        String msg = String.format("Found null entity ID in allocate mode. nullEntityIdCount = %s", nullEntityIdCount);
+        log.error(msg);
+        nullEntityIdCount.forEach((entity, cnt) -> {
+            if (cnt > 0) {
+                entityMatchMetricService.recordNullEntityIdCount(tenant, entity, cnt);
+            }
+        });
+        try {
+            Thread.sleep(5000L);
+        } catch (InterruptedException e) {
+            log.error("Interrupted while waiting for alert sent");
+        }
+        throw new IllegalStateException(msg);
+    }
+
+    // return whether there are null entity ids in this record
+    private boolean checkNullEntityIds(@NotNull InternalOutputRecord record, @NotNull String entity,
+            @NotNull Map<String, Long> nullEntityIdCount) {
+        if (Contact.name().equals(entity)) {
+            String accId = getEntityId(record, Account.name());
+            String ctkId = getEntityId(record, Contact.name());
+            if (accId == null) {
+                nullEntityIdCount.put(Account.name(), nullEntityIdCount.getOrDefault(Account.name(), 0L) + 1);
+            }
+            if (ctkId == null) {
+                nullEntityIdCount.put(Contact.name(), nullEntityIdCount.getOrDefault(Contact.name(), 0L) + 1);
+            }
+            return accId == null || ctkId == null;
+        } else if (Account.name().equals(entity)) {
+            String accId = getEntityId(record, Account.name());
+            if (accId == null) {
+                nullEntityIdCount.put(Account.name(), nullEntityIdCount.getOrDefault(Account.name(), 0L) + 1);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void populateCandidateData(OutputRecord outputRecord, InternalOutputRecord internalRecord) {
