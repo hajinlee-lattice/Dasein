@@ -522,10 +522,19 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     protected void setupEnd2EndTestEnvironment() throws Exception {
-        setupEnd2EndTestEnvironment(null);
+        setupEnd2EndTestEnvironment("");
+    }
+
+    protected void setupEnd2EndTestEnvironment(String existingTenant) throws Exception {
+        setupEnd2EndTestEnvironment(existingTenant, null);
     }
 
     protected void setupEnd2EndTestEnvironment(Map<String, Boolean> featureFlagMap) throws Exception {
+        setupEnd2EndTestEnvironment(null, featureFlagMap);
+    }
+
+    protected void setupEnd2EndTestEnvironment(String existingTenant, Map<String, Boolean> featureFlagMap)
+            throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
 
         if (featureFlagMap == null) {
@@ -533,7 +542,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         // use non entity match path by default unless its overwritten explicitly
         featureFlagMap.putIfAbsent(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
-        setupTestEnvironmentWithFeatureFlags(featureFlagMap);
+        setupTestEnvironment(existingTenant, featureFlagMap);
         mainTestTenant = testBed.getMainTestTenant();
 
         log.info("Test environment setup finished.");
@@ -547,6 +556,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         // If don't want to remove testing tenant for debug purpose, remove
         // comments on this line but don't check in
         // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+
     }
 
     protected void setupEnd2EndTestEnvironmentByFile(String jsonFileName) {
@@ -714,8 +724,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     /*
-     * Load S3ImportSystem (stored in serialized JSON) from test artifact s3
-     * bucket. Filename format: "System_<SYSTEM_NAME>.json"
+     * Load S3ImportSystem (stored in serialized JSON) from test artifact s3 bucket.
+     * Filename format: "System_<SYSTEM_NAME>.json"
      */
     private S3ImportSystem getMockSystem(@NotNull String systemName) {
         String filename = String.format("System_%s.json", systemName);
@@ -791,16 +801,17 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         importData(entity, s3FileName, feedType, compressed, outsizeFlag, null);
     }
 
-    void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
-                    boolean outsizeFlag, String subType) {
-        ApplicationId applicationId = importDataWithApplicationId(entity, s3FileName, feedType, compressed,
-                outsizeFlag, subType);
+    void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed, boolean outsizeFlag,
+            String subType) {
+        ApplicationId applicationId = importDataWithApplicationId(entity, s3FileName, feedType, compressed, outsizeFlag,
+                subType);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
+
     ApplicationId importDataWithApplicationId(BusinessEntity entity, String s3FileName, String feedType,
-                                              boolean compressed, boolean outsizeFlag, String subType) {
+            boolean compressed, boolean outsizeFlag, String subType) {
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;
@@ -834,9 +845,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a import file for " + entity);
         String outputFileName = String.format("file_%d.csv", DateTime.now().getMillis());
-        SourceFile dataFile = fileUploadProxy.uploadFile(outputFileName, false, s3FileName, entity.name(),
-                csvResource, false);
-        ApplicationId applicationId =  submitS3ImportOnlyData(mainTestTenant.getId(), task, dataFile, INITIATOR);
+        SourceFile dataFile = fileUploadProxy.uploadFile(outputFileName, false, s3FileName, entity.name(), csvResource,
+                false);
+        ApplicationId applicationId = submitS3ImportOnlyData(mainTestTenant.getId(), task, dataFile, INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
@@ -899,9 +910,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     /*
-     * Modify field mapping for match IDs. Fields need to have the following
-     * format to be mapped to other system (for unique ID, need to specify its
-     * own system name)
+     * Modify field mapping for match IDs. Fields need to have the following format
+     * to be mapped to other system (for unique ID, need to specify its own system
+     * name)
      *
      * Format: <PREFIX>_<SystemName>_<Entity>_<map_to_lattice_id> E.g.,
      * LETest_MapTo_DefaultSystem_Account_True will map this column to default
@@ -1043,7 +1054,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private ApplicationId submitS3ImportOnlyData(String customerSpace, DataFeedTask dataFeedTask, SourceFile dataFile,
-                                          String email) {
+            String email) {
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new IllegalArgumentException(
@@ -1059,8 +1070,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         String source = SourceType.FILE.getName();
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
         String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType, subType,
-                "",
-                metaData);
+                "", metaData);
         log.info("Creating a data feed task for " + entity + " with id " + taskId);
         if (StringUtils.isEmpty(taskId)) {
             throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
@@ -1087,7 +1097,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private CSVImportConfig generateDataOnlyImportConfig(String customerSpace, String templateTableName,
-                                                 SourceFile dataSourceFile, String email) {
+            SourceFile dataSourceFile, String email) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         if (StringUtils.isEmpty(templateTableName)) {
             throw new RuntimeException("Template table name cannot be empty!");
@@ -1498,21 +1508,21 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private MetadataSegment constructSegmentForProductBundle() {
-        //bundle1 CMT4: Autosampler Vials and Closures
-        //bundle2 CMT3: Other Plasticware
+        // bundle1 CMT4: Autosampler Vials and Closures
+        // bundle2 CMT3: Other Plasticware
         Bucket.Transaction txn1 = new Bucket.Transaction("4VXsZpo1WU5dpAYAdWTiKD9yZA1sd", TimeFilter.ever(), null, null,
                 false);
         Bucket purchaseBkt1 = Bucket.txnBkt(txn1);
         BucketRestriction purchaseRestriction1 = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_4VXsZpo1WU5dpAYAdWTiKD9yZA1sd__EVER__HP"), purchaseBkt1);
-        Bucket.Transaction txn2 = new Bucket.Transaction("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", TimeFilter.ever(), null, null,
-                false);
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_4VXsZpo1WU5dpAYAdWTiKD9yZA1sd__EVER__HP"),
+                purchaseBkt1);
+        Bucket.Transaction txn2 = new Bucket.Transaction("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", TimeFilter.ever(), null,
+                null, false);
         Bucket purchaseBkt2 = Bucket.txnBkt(txn2);
         BucketRestriction purchaseRestriction2 = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_1iHa3C9UQFBPknqKCNW3L6WgUAARc4o__EVER__HP"), purchaseBkt2);
-        Restriction accountRestriction = Restriction.builder().and(purchaseRestriction1,
-                purchaseRestriction2).build();
-
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_1iHa3C9UQFBPknqKCNW3L6WgUAARc4o__EVER__HP"),
+                purchaseBkt2);
+        Restriction accountRestriction = Restriction.builder().and(purchaseRestriction1, purchaseRestriction2).build();
 
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_PRODUCT_BUNDLE);
@@ -1974,8 +1984,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         for (EntityType entityType : entityTypes) {
             String folderName = S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName());
             if (!allSubFolders.contains(folderName)) {
-                dropBoxProxy.createTemplateFolder(mainTestTenant.getId(), systemName, entityType.getDefaultFeedTypeName(),
-                        null);
+                dropBoxProxy.createTemplateFolder(mainTestTenant.getId(), systemName,
+                        entityType.getDefaultFeedTypeName(), null);
                 log.info("create folder {} success.", folderName);
             }
         }
