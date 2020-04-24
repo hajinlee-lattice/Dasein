@@ -12,6 +12,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -88,7 +89,7 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
                         launch.getLaunchId(), accountsSuppressed, contactsSuppressed));
                 updatePlayLaunchStats(launch, accountsAdded, accountsDeleted, contactsAdded, contactsDeleted,
                         accumulativeAccounts, accumulativeContacts, accountsSuppressed, contactsSuppressed);
-
+                log.info("PlayLaunch=" + JsonUtils.serialize(launch));
                 playProxy.updatePlayLaunch(customerSpace, configuration.getPlayId(), configuration.getLaunchId(),
                         launch);
                 log.info("Updated the scheduled Launch: " + configuration.getLaunchId() + " with delta tables ("
@@ -144,9 +145,10 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
         log.info(String.format("accountsSuppressed=%d, contactsSuppressed=%d", accountsSuppressed, contactsSuppressed));
         updatePlayLaunchStats(launch, accountsAdded, accountsDeleted, contactsAdded, contactsDeleted,
                 accumulativeAccounts, accumulativeContacts, accountsSuppressed, contactsSuppressed);
-
+        log.info("Before create, PlayLaunch=" + JsonUtils.serialize(launch));
         launch = playProxy.createNewLaunchByPlayAndChannel(configuration.getCustomerSpace().toString(),
                 configuration.getPlayId(), configuration.getChannelId(), true, launch);
+        log.info("After create, PlayLaunch=" + JsonUtils.serialize(launch));
         log.info("Queued New Launch: " + launch.getId() + " with delta tables (" + getDeltaTables() + ")");
 
         return launch;
