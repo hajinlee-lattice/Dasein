@@ -208,10 +208,10 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         }
     }
 
-    private void verifyDownload(Upload upload) {
+    private void verifyDownload(UploadDetails upload) {
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
-                upload.getPid().toString());
+                upload.getUploadId());
         String token = template.getForObject(tokenUrl, String.class);
         SleepUtils.sleep(300);
         String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);

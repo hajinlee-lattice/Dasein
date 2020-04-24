@@ -149,10 +149,10 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadRawFilePath(), sis3, true);
 
         // drop file to another upload
-        List<Upload> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW);
+        List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW);
         Assert.assertNotNull(uploads2);
         Assert.assertEquals(uploads2.size(), 1);
-        Upload upload2 = uploads2.get(0);
+        UploadDetails upload2 = uploads2.get(0);
         StringInputStream sis4 = new StringInputStream("file4");
         s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis4, true);
 
