@@ -1738,8 +1738,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         expectedEntityCount.forEach((key, value) -> log.info("Row count for batch store of {}: {} -> {}",
                 key.getBatchStore().name(), countTableRole(key.getBatchStore()), value));
-//        expectedEntityCount.forEach((key, value) -> //
-//        Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
+        expectedEntityCount.forEach((key, value) -> //
+        Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
     }
 
     void verifyServingStore(Map<BusinessEntity, Long> expectedEntityCount) {
@@ -1748,16 +1748,18 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         expectedEntityCount.forEach((key, value) -> log.info("Row count for serving store of {}: {} -> {}",
                 key.getServingStore().name(), countTableRole(key.getServingStore()), value));
-//        expectedEntityCount.forEach((key, value) -> {
-//            Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value,
-//                    key.getServingStore().name());
-//        });
+        expectedEntityCount.forEach((key, value) -> {
+            Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value,
+                    key.getServingStore().name());
+        });
     }
 
     void verifyExtraTableRoles(Map<TableRoleInCollection, Long> expectedTableCount) {
         if (MapUtils.isEmpty(expectedTableCount)) {
             return;
         }
+        expectedTableCount.forEach((key, value) -> log.info("Row count for table role of {}: {} -> {}",
+                key.name(), countTableRole(key), value));
         expectedTableCount.forEach((key, value) -> //
         Assert.assertEquals(Long.valueOf(countTableRole(key)), value, key.name()));
     }
@@ -1768,7 +1770,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         expectedEntityCount
                 .forEach((key, value) -> log.info("Row count for redshift table of {}: {} -> {}", key, countInRedshift(key), value));
-//        expectedEntityCount.forEach((key, value) -> Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
+        expectedEntityCount.forEach((key, value) -> Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
     }
 
     void runCommonPAVerifications() {
