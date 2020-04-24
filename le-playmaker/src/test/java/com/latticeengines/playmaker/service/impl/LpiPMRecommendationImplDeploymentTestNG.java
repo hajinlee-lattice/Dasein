@@ -131,11 +131,14 @@ public class LpiPMRecommendationImplDeploymentTestNG extends AbstractTestNGSprin
     }
 
     private void updatePlayLaunchData(Tenant tenant, Play play, PlayLaunch playLaunch, int recCount) {
-        playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launching);
         Long count = createDummyRecommendations(recCount, playLaunch);
-        playProxy.updatePlayLaunchProgress(tenant.getId(), play.getName(), playLaunch.getLaunchId(), 100.0, count,
-                count, 0L, 0L, 0L, 0L);
-        playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), LaunchState.Launched);
+        PlayLaunch playLaunchToUpdated = playProxy.updatePlayLaunchProgress(tenant.getId(), play.getName(),
+                playLaunch.getLaunchId(), 100.0, count, count, 0L, 0L, 0L, 0L);
+        playLaunchToUpdated.setLaunchState(LaunchState.Launched);
+        long recCount2 = Long.valueOf(recCount);
+        playLaunchToUpdated.setAccountsAdded(recCount2);
+        playLaunchToUpdated.setContactsAdded(recCount2);
+        playProxy.updatePlayLaunch(tenant.getId(), play.getName(), playLaunch.getLaunchId(), playLaunchToUpdated);
     }
 
     private Map<String, String> getOrgInfo() {

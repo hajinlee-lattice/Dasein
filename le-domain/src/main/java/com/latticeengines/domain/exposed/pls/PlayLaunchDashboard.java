@@ -63,6 +63,14 @@ public class PlayLaunchDashboard {
 
         private long contactsWithinRecommendations;
 
+        private long accountsAdded;
+
+        private long accountsDeleted;
+
+        private long contactsAdded;
+
+        private long contactsDeleted;
+
         private long accountsDuplicated;
 
         private long contactsDuplicated;
@@ -145,6 +153,38 @@ public class PlayLaunchDashboard {
 
         public void setContactsDuplicated(long contactsDuplicated) {
             this.contactsDuplicated = contactsDuplicated;
+        }
+
+        public long getAccountsAdded() {
+            return accountsAdded;
+        }
+
+        public void setAccountsAdded(long accountsAdded) {
+            this.accountsAdded = accountsAdded;
+        }
+
+        public long getAccountsDeleted() {
+            return accountsDeleted;
+        }
+
+        public void setAccountsDeleted(long accountsDeleted) {
+            this.accountsDeleted = accountsDeleted;
+        }
+
+        public long getContactsAdded() {
+            return contactsAdded;
+        }
+
+        public void setContactsAdded(long contactsAdded) {
+            this.contactsAdded = contactsAdded;
+        }
+
+        public long getContactsDeleted() {
+            return contactsDeleted;
+        }
+
+        public void setContactsDeleted(long contactsDeleted) {
+            this.contactsDeleted = contactsDeleted;
         }
     }
 }
