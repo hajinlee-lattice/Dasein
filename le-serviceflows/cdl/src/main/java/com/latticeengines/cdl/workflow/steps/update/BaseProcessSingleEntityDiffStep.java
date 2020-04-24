@@ -97,7 +97,7 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         }
         step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
         BucketEncodeConfig config = new BucketEncodeConfig();
-        String confStr = heavyEngine ? appendEngineConf(config, heavyEngineConfig()) : emptyStepConfig(lightEngineConfig());
+        String confStr = heavyEngine ? appendEngineConf(config, heavyEngineConfig()) : appendEngineConf(config, lightEngineConfig());
         step.setConfiguration(confStr);
         return step;
     }
