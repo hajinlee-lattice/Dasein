@@ -122,10 +122,11 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
             case (streamTableName, table) =>
               val withContactTable = if (contactTable != null) {
                 var shapeTableDf = table
-                if (table.columns.contains(AccountId.name())) {
+                val tableColumnNames = table.columns
+                if (tableColumnNames.contains(AccountId.name())) {
                   shapeTableDf = table.drop(AccountId.name())
                 }
-                if (table.columns.contains(ContactName.name())) {
+                if (tableColumnNames.contains(ContactName.name())) {
                   shapeTableDf = shapeTableDf.drop(ContactName.name())
                 }
                 //contactId
@@ -175,24 +176,30 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
 
   def addAllNullsIfMissing(df: DataFrame, requiredCol: String, mapping: EventFieldExtractor,
                            colType: String): DataFrame = {
+    val dfColumnNames = df.columns
+    val mappingValue = mapping.getMappingValue
     if (mapping != null) {
       mapping.getMappingType match {
         case MappingType.Constant =>
           return df.withColumn(requiredCol, lit(mapping.getMappingValue))
         case MappingType.Attribute =>
-          if (df.columns.contains(mapping.getMappingValue)) {
-            return df.withColumn(requiredCol, df.col(mapping.getMappingValue))
+          if (dfColumnNames.contains(mappingValue)) {
+            return df.withColumn(requiredCol, df.col(mappingValue))
           }
         case MappingType.AttributeWithMapping =>
-          if (df.columns.contains(mapping.getMappingValue)) {
+          if (dfColumnNames.contains(mappingValue)) {
             val mapValue = udf((ts: String) => mapping.getMappingMap.get(ts))
-            return df.withColumn(requiredCol, when(df.col(mapping.getMappingValue).isNotNull, mapValue(df.col(mapping
-              .getMappingValue))))
+            return df.withColumn(requiredCol, when(df.col(mappingValue).isNotNull, mapValue(df.col(mappingValue))))
           }
       }
     }
-    if (!df.columns.contains(requiredCol)) {
+    val dfColumnNameMaps = dfColumnNames.map(columnName => (columnName.toLowerCase, columnName)).toMap
+    if (!dfColumnNameMaps.contains(requiredCol.toLowerCase)) {
       return df.withColumn(requiredCol, lit(null).cast(colType))
+    }
+    //solve contactId in timeline but ContactId in rawStreamTable
+    if (!requiredCol.equals(dfColumnNameMaps.getOrElse(requiredCol.toLowerCase, ""))) {
+      return df.withColumnRenamed(dfColumnNameMaps.getOrElse(requiredCol.toLowerCase, ""), requiredCol)
     }
     df
   }
