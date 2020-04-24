@@ -89,6 +89,9 @@ public class ConvertBatchStoreToImport extends BaseTransformWrapperStep<ConvertB
     }
 
     private Table getTempTemplate(Table templateTable, List<String> retainFields) {
+        if (templateTable == null) {
+            return null;
+        }
         Table tempTemplate = TableUtils.clone(templateTable, "Temp_" + templateTable.getName(), true);
         Set<String> retainSet = new HashSet<>(retainFields);
         tempTemplate.getAttributes().removeIf(attr -> !retainSet.contains(attr.getName()));
