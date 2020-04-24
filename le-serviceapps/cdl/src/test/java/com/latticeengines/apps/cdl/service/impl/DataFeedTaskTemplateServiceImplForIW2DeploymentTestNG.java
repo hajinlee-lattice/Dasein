@@ -135,9 +135,9 @@ public class DataFeedTaskTemplateServiceImplForIW2DeploymentTestNG extends CDLDe
         Assert.assertNotNull(template);
         // standard attribute
         Assert.assertNotNull(template.getAttribute(InterfaceName.PathPattern));
-        // ignored attribute
-        Assert.assertNull(template.getAttribute(InterfaceName.PathPatternName));
-        // WebVisit's standard attribute
+        // required attribute cannot be ignored
+        Assert.assertNotNull(template.getAttribute(InterfaceName.PathPatternName));
+        // WebVisit's standard attribute, shouldn't be in path pattern
         Assert.assertNull(template.getAttribute(InterfaceName.WebVisitPageUrl));
 
         // verify catalog is created correctly
