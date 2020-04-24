@@ -54,10 +54,10 @@ public class LaunchSummary {
         stats.setAccountErrors(getCount(launch.getAccountsErrored()));
         stats.setContactErrors(getCount(launch.getContactsErrored()));
         // PLS-15540 incremental accounts = accountsAdded + accountsDeleted
-        long accountsAdded = launch.getAccountsAdded();
-        long accountsDeleted = launch.getAccountsDeleted();
-        long contactsAdded = launch.getContactsAdded();
-        long contactsDeleted = launch.getContactsDeleted();
+        long accountsAdded = getCount(launch.getAccountsAdded());
+        long accountsDeleted = getCount(launch.getAccountsDeleted());
+        long contactsAdded = getCount(launch.getContactsAdded());
+        long contactsDeleted = getCount(launch.getContactsDeleted());
         stats.setRecommendationsLaunched(accountsAdded + accountsDeleted);
         stats.setAccountsSuppressed(getCount(launch.getAccountsSuppressed()));
         stats.setContactsSuppressed(getCount(launch.getContactsSuppressed()));
