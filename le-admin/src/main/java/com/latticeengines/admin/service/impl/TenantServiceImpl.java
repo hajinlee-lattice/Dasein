@@ -619,12 +619,14 @@ public class TenantServiceImpl implements TenantService {
             String existingName = existingTenant.getName();
             log.info("the subscriber number {} has been registered by tenant {}",
                     subNumber, existingName);
-            return generateVBOResponse(existingName, false);
+            return generateVBOResponse(existingName, "failed",
+                    "A tenant has already existed for this subscriber number");
         }
 
         String tenantName = constructTenantNameFromSubscriber(vboRequest.getSubscriber().getName());
         if (StringUtils.isBlank(tenantName)) {
-            return generateVBOResponse(tenantName, false);
+            return generateVBOResponse(tenantName, "failed",
+                    "system can't construct tenant name from subscriber name.");
         }
         List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
 
@@ -702,9 +704,11 @@ public class TenantServiceImpl implements TenantService {
         registration.setSpaceInfo(spaceInfo);
         registration.setTenantInfo(tenantInfo);
         registration.setConfigDirectories(configDirs);
-
-        return generateVBOResponse(tenantName, createTenant(tenantName, tenantName, registration,
-                userName));
+        boolean result = createTenant(tenantName, tenantName, registration, userName);
+        String status = result ? "success" : "failed";
+        String message = result ? "tenant created successfully via Vbo request" :
+                "tenant created failed via Vbo request";
+        return generateVBOResponse(tenantName, status, message);
     }
 
     private IDaaSUser constructIDaaSUser(VboRequest.User user, String language) {
@@ -755,16 +759,11 @@ public class TenantServiceImpl implements TenantService {
         return uniqueTenantName;
     }
 
-    private VboResponse generateVBOResponse(String tenantName, boolean result) {
+    private VboResponse generateVBOResponse(String tenantName, String status, String message) {
         VboResponse vboResponse = new VboResponse();
         vboResponse.setTenantName(tenantName);
-        if (result) {
-            vboResponse.setStatus("success");
-            vboResponse.setMessage("tenant created successfully via Vbo request");
-        } else {
-            vboResponse.setStatus("failed");
-            vboResponse.setMessage("tenant created failed via Vbo request");
-        }
+        vboResponse.setStatus(status);
+        vboResponse.setMessage(message);
         return vboResponse;
     }
 
