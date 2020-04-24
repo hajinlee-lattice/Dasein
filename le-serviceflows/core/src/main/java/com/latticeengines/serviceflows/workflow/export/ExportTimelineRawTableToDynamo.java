@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +23,13 @@ import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportTimelineRawTableToDynamoStepConfiguration;
 
-@Component("exportToDynamo")
+@Component("exportTimelineRawTableToDynamo")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ExportToDynamo extends BaseExportToDynamo<ExportToDynamoStepConfiguration> {
+public class ExportTimelineRawTableToDynamo extends BaseExportToDynamo<ExportTimelineRawTableToDynamoStepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(ExportToDynamo.class);
+    private static final Logger log = LoggerFactory.getLogger(ExportTimelineRawTableToDynamo.class);
 
     @Override
     protected List<Exporter> getExporters(List<DynamoExportConfig> configs) {
@@ -40,7 +39,7 @@ public class ExportToDynamo extends BaseExportToDynamo<ExportToDynamoStepConfigu
                 if (skipPublication) {
                     log.info("Skip exporting {} to DynamoDB, due to property flag.", config.getTableName());
                 } else {
-                    Exporter exporter = new GenericTableExporter(config);
+                    Exporter exporter = new TimelineTableExporter(config);
                     exporters.add(exporter);
                 }
             }
@@ -48,17 +47,18 @@ public class ExportToDynamo extends BaseExportToDynamo<ExportToDynamoStepConfigu
         return exporters;
     }
 
+    @Override
     protected List<DynamoExportConfig> getExportConfigs() {
-        List<DynamoExportConfig> tables = getListObjectFromContext(TABLES_GOING_TO_DYNAMO, DynamoExportConfig.class);
+        List<DynamoExportConfig> tables = getListObjectFromContext(TIMELINE_RAWTABLES_GOING_TO_DYNAMO, DynamoExportConfig.class);
         if (CollectionUtils.isEmpty(tables)) {
-            throw new IllegalStateException("Cannot find tables to be published to dynamo.");
+            throw new IllegalStateException("Cannot find timeline raw tables to be published to dynamo.");
         }
         return tables;
     }
 
-    protected class GenericTableExporter extends Exporter {
+    protected class TimelineTableExporter extends Exporter {
 
-        GenericTableExporter(DynamoExportConfig configuration) {
+        TimelineTableExporter(DynamoExportConfig configuration) {
             super(configuration);
         }
 
@@ -78,7 +78,6 @@ public class ExportToDynamo extends BaseExportToDynamo<ExportToDynamoStepConfigu
 
             String recordClass = configuration.getEntityClass().getCanonicalName();
             String recordType = configuration.getEntityClass().getSimpleName() + "_" + configuration.getDynamoSignature();
-            String tenantId = CustomerSpace.shortenCustomerSpace(configuration.getCustomerSpace().toString());
 
             Map<String, String> properties = new HashMap<>();
             properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
@@ -88,7 +87,6 @@ public class ExportToDynamo extends BaseExportToDynamo<ExportToDynamoStepConfigu
             properties.put(HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME, recordClass);
             properties.put(HdfsToDynamoConfiguration.CONFIG_REPOSITORY, configuration.getRepoName());
             properties.put(HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE, recordType);
-            properties.put(HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX, tenantId + "_" + tableName);
             properties.put(HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY, config.getPartitionKey());
             properties.put(HdfsToDynamoConfiguration.CONFIG_SORT_KEY, config.getSortKey());
             properties.put(HdfsToDynamoConfiguration.CONFIG_AWS_REGION, awsRegion);
@@ -102,26 +100,19 @@ public class ExportToDynamo extends BaseExportToDynamo<ExportToDynamoStepConfigu
             String customerSpace = configuration.getCustomerSpace().toString();
             DynamoDataUnit unit = new DynamoDataUnit();
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
-            if (configuration.getMigrateTable() == null || BooleanUtils.isFalse(configuration.getMigrateTable())) {
-                String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName()
-                        : config.getTableName();
-                unit.setName(srcTbl);
-                if (!unit.getName().equals(config.getTableName())) {
-                    unit.setLinkedTable(config.getTableName());
-                }
-                unit.setPartitionKey(config.getPartitionKey());
-                if (StringUtils.isNotBlank(config.getSortKey())) {
-                    unit.setSortKey(config.getSortKey());
-                }
-                unit.setSignature(configuration.getDynamoSignature());
-                DataUnit created = dataUnitProxy.create(customerSpace, unit);
-                log.info("Registered DataUnit: " + JsonUtils.pprint(created));
-            } else {
-                unit.setName(config.getTableName());
-                dataUnitProxy.updateSignature(customerSpace, unit, configuration.getDynamoSignature());
-                log.info("Update signature to {} for dynamo data unit with name {} and tenant {}.",
-                        configuration.getDynamoSignature(), unit.getName(), customerSpace);
+            String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName()
+                    : config.getTableName();
+            unit.setName(srcTbl);
+            if (!unit.getName().equals(config.getTableName())) {
+                unit.setLinkedTable(config.getTableName());
             }
+            unit.setPartitionKey(config.getPartitionKey());
+            if (StringUtils.isNotBlank(config.getSortKey())) {
+                unit.setSortKey(config.getSortKey());
+            }
+            unit.setSignature(configuration.getDynamoSignature());
+            DataUnit created = dataUnitProxy.create(customerSpace, unit);
+            log.info("Registered DataUnit: " + JsonUtils.pprint(created));
         }
     }
 }

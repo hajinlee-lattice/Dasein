@@ -56,13 +56,18 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
           val origin: DataFrame = lattice.input(idx)
           val recordIdColumn = TimelineStandardColumn.RecordId.getColumnName
           val sourceColumn = TimelineStandardColumn.TrackedBySystem.getColumnName
+          val sourceColumnType = TimelineStandardColumn.TrackedBySystem.getDataType
           val originColumns = origin.columns
           val originWithId = if (!originColumns.contains(recordIdColumn)) {
             origin.withColumn(TimelineStandardColumn.RecordId.getColumnName, generateId())
           } else {
             origin
           }
-          originWithId.withColumn(sourceColumn, getSourceColumn(originWithId.col(CDLTemplateName.name())))
+          if (!originColumns.contains(CDLTemplateName.name())) {
+            originWithId.withColumn(sourceColumn, lit(null).cast(sourceColumnType))
+          } else {
+            originWithId.withColumn(sourceColumn, getSourceColumn(originWithId.col(CDLTemplateName.name())))
+          }
         }
         (streamTableName, streamTable)
       }.toSeq: _*)
