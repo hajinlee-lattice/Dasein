@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -102,6 +103,6 @@ public final class TransactionUtils {
     }
 
     private static String getPath(String avroDir) {
-        return ProductUtils.getPath(avroDir);
+        return PathUtils.toParquetOrAvroDir(avroDir);
     }
 }

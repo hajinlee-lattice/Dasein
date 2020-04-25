@@ -256,12 +256,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total contact after UpdateContact test
     static final Long CONTACT_UC = 1000L;
     // Number of total contact after ProcessAccount entity match test
-    // FIXME change back to 1005 after using new ProcessAccount checkpoint
     static final Long CONTACT_UA_EM = 1005L;
     // Number of new contact after UpdateContact test
     static final Long NEW_CONTACT_UC = 100L;
     // Number of new contact after UpdateAccount entity match test
-    // FIXME change back to 105 after using new ProcessAccount checkpoint
     static final Long NEW_CONTACT_UA_EM = 105L;
     // Number of new contact after UpdateAccount entity match test for GA tenants
     static final Long NEW_CONTACT_UA_EMGA = 114L;
@@ -291,8 +289,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated daily transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    // static final Long DAILY_TXN_UT_EM = 50863L;
-    static final Long DAILY_TXN_UT_EM = 51602L;
+//    static final Long DAILY_TXN_UT_EM = 50863L;
+    static final Long DAILY_TXN_UT_EM = 50881L;
     // Number of aggregated period transaction after ProcessTransaction test
     static final Long PERIOD_TRANSACTION_PT = 62550L;
     // Number of aggregated period transaction after ProcessTransaction entity
@@ -304,8 +302,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    // static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
-    static final Long PERIOD_TRANSACTION_UT_EM = 75658L;
+//    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+    static final Long PERIOD_TRANSACTION_UT_EM = 75222L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
     // Number of total purchase history attributes after UpdateTransaction test
@@ -330,16 +328,13 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String VERIFY_DAILYTXN_PRODUCTID = "650050C066EF46905EC469E9CC2921E0";
     // For verified aid, pid and txn date, daily txn amount after
     // ProcessTransaction test
-    // static final double VERIFY_DAILYTXN_AMOUNT_PT = 1860.;
-    static final double VERIFY_DAILYTXN_AMOUNT_PT = 3720.;
+    static final double VERIFY_DAILYTXN_AMOUNT_PT = 1860.;
     // For verified aid, pid and txn date, daily txn quantity after
     // ProcessTransaction test
-    // static final double VERIFY_DAILYTXN_QUANTITY_PT = 10;
-    static final double VERIFY_DAILYTXN_QUANTITY_PT = 20;
+    static final double VERIFY_DAILYTXN_QUANTITY_PT = 10;
     // For verified aid, pid and txn date, daily txn cost after
     // ProcessTransaction test
-    static final double VERIFY_DAILYTXN_COST_PT = 2109.176778;
-//    static final double VERIFY_DAILYTXN_COST_PT = 1054.588389;
+    static final double VERIFY_DAILYTXN_COST_PT = 1054.588389;
 
     /* Expected product result */
 
@@ -354,7 +349,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Warn message after merging product
     static final String PRODUCT_WARN_MESSAGE = "whatever warn message as it is not null or empty string";
     // Number of products in batch store after ProcessTransaction test
-    static final Long BATCH_STORE_PRODUCT_PT = 123L;
+    static final Long BATCH_STORE_PRODUCT_PT = 103L;
     // Number of products in serving store after ProcessTransaction test
     static final Long SERVING_STORE_PRODUCTS_PT = 34L;
     // Number of product hierarchy in serving store after ProcessTransaction
