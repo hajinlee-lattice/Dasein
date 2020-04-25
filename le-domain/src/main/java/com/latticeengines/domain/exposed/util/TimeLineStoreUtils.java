@@ -116,9 +116,9 @@ public final class TimeLineStoreUtils {
         AccountId("accountId", "String"),
         ContactId("contactId", "String"),
         EventType("eventType", "String"),
-        ActivityDetail("Detail1", "String"),
+        ActivityDetail("detail1", "String"),
         TrackedBySystem("source", "String"),
-        ContactName("ContactName", "String");
+        ContactName("contactName", "String");
 
         private String columnName;
         private String dataType;

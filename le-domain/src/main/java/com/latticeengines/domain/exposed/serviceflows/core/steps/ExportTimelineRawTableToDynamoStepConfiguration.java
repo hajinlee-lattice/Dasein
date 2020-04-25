@@ -1,12 +1,12 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
-import com.latticeengines.domain.exposed.datafabric.GenericTableEntity;
+import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
 
-public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
+public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
 
     @Override
     public Class<?> getEntityClass() {
-        return GenericTableEntity.class;
+        return GenericTableActivity.class;
     }
 
     @Override
@@ -16,11 +16,11 @@ public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfigura
 
     @Override
     public String getContextKey() {
-        return "TABLES_GOING_TO_DYNAMO";
+        return "TIMELINE_RAWTABLES_GOING_TO_DYNAMO";
     }
 
     @Override
     public boolean needKeyPrefix() {
-        return true;
+        return false;
     }
 }

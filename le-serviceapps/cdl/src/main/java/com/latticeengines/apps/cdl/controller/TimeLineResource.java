@@ -54,7 +54,7 @@ public class TimeLineResource {
     @PostMapping("/createDefault")
     @ResponseBody
     @ApiOperation("create default Account360/Contact360 timeline under current tenant, must be unique.")
-    public Boolean createDefaultTimeLine(String customerSpace) {
+    public Boolean createDefaultTimeLine(@PathVariable(value = "customerSpace") String customerSpace) {
         timeLineService.createDefaultTimeLine(customerSpace);
         return true;
     }

@@ -93,7 +93,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = inactive.complement();
         DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        timelineVersionMap = dcStatus.getTimelineVersionMap();
+        timelineVersionMap = MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap());
         checkRebuild();
         bumpVersion();
         dcStatus.setTimelineVersionMap(timelineVersionMap);
@@ -322,7 +322,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         } else {
             log.info("stream {} isn't in timeline {}. stream entity is {}, timeline entity is {}, customerSpace is {}" +
                     ".", atlasStream.getStreamId(), timeLine.getTimelineId(), atlasStream.getMatchEntities(),
-                    timeLine.getEntity());
+                    timeLine.getEntity(), configuration.getCustomer());
             return false;
         }
     }
