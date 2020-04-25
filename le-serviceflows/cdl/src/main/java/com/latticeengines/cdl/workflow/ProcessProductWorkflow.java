@@ -45,10 +45,9 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessProductWorkf
 
     @Override
     public Workflow defineWorkflow(ProcessProductWorkflowConfiguration config) {
-        WorkflowBuilder builder = new WorkflowBuilder(name(), config) //
-                .next(mergeProductImportsWrapper);
+        WorkflowBuilder builder = new WorkflowBuilder(name(), config);
         if (useMergeProductSpark) {
-            builder = builder.next(mergeProductSpark);
+            builder = builder.next(mergeProductImportsWrapper).next(mergeProductSpark);
         } else {
             builder = builder.next(mergeProductWrapper);
         }
