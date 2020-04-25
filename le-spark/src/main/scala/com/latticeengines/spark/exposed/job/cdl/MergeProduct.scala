@@ -55,7 +55,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
             case _ => newAnalytic
         }
         val (mergedAnalytic, err3) = mergeAnalytic(allAnalytic)
-        val newBundleInfo = updateBundleInfo(newProdsWithBundleId, mergedAnalytic)
+        val newBundleInfo = updateBundleInfo(validNewBundle, mergedAnalytic)
 
         val (newProdsWithHierarchyIds, err4) = filterNewHierarchyMembers(validNew)
         val (newSpendings, err5) = mergeSpendings(newProdsWithHierarchyIds, oldProdsOpt)
@@ -77,7 +77,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
         report.setHierarchyProducts(hierarchies.count)
         report.setAnalyticProducts(numActiveAnalytic)
         report.setSpendingProducts(numActiveSpending)
-        report.setInvalidRecords(report.getRecords - report.getBundleProducts - report.getHierarchyProducts)
+        report.setInvalidRecords(report.getRecords - validNew.count)
         report.setErrors(errs.asJava)
 
         lattice.outputStr = serializeJson(report)
