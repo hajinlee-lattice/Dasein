@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = BaseReportStepConfiguration.class, name = "BaseReportStepConfiguration"),
         @Type(value = DataFlowStepConfiguration.class, name = "DataFlowStepConfiguration"),
         @Type(value = ExportToRedshiftStepConfiguration.class, name = "ExportDataToRedshiftConfiguration"),
-        @Type(value = ExportToDynamoStepConfiguration.class, name = "ExportToDynamoStepConfiguration"),
+        @Type(value = BaseExportToDynamoConfiguration.class, name = "BaseExportToDynamoConfiguration"),
         @Type(value = ExportStepConfiguration.class, name = "ExportStepConfiguration"),
         @Type(value = ImportExportS3StepConfiguration.class, name = "ExportToS3StepConfiguration"),
         @Type(value = GenerateRatingStepConfiguration.class, name = "GenerateRatingStepConfiguration"),

@@ -144,4 +144,10 @@ public class TimeLine implements HasPid, HasTenant, Serializable {
         this.streamIds = streamIds;
     }
 
+    @Override
+    public String toString() {
+        return "TimeLine{" + "pid=" + pid + ", tenant=" + tenant + ", timelineId='" + timelineId + '\'' + ", Name='"
+                + Name + '\'' + ", entity='" + entity + '\'' + ", streamTypes=" + streamTypes + ", streamIds="
+                + streamIds + ", eventMappings=" + eventMappings + '}';
+    }
 }

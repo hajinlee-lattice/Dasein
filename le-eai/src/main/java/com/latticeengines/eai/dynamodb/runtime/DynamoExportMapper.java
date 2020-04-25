@@ -29,6 +29,7 @@ import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
+import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
 import com.latticeengines.domain.exposed.datafabric.GenericTableEntity;
 import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordExportCounter;
@@ -140,6 +141,10 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
             String parititionKey = config.get(HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY);
             String sortKey = config.get(HdfsToDynamoConfiguration.CONFIG_SORT_KEY);
             entity = new GenericTableEntity(keyPrefix, parititionKey, sortKey).fromHdfsAvroRecord(record);
+        } else if (GenericTableActivity.class.equals(entityClass)) {
+            String parititionKey = config.get(HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY);
+            String sortKey = config.get(HdfsToDynamoConfiguration.CONFIG_SORT_KEY);
+            entity = new GenericTableActivity(parititionKey, sortKey).fromHdfsAvroRecord(record);
         } else {
             entity = (FabricEntity<?>) FabricEntityFactory.fromHdfsAvroRecord(record, entityClass);
         }
