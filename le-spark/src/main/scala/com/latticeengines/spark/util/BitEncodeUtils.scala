@@ -14,7 +14,6 @@ private[spark] object BitEncodeUtils {
 
   def decode(input: DataFrame, outputCols: Seq[String], codeBookLookup: Map[String, String], codeBooks: Map[String, BitCodeBook]): DataFrame = {
     val encodedAttrs: Seq[String] = codeBookLookup.values.toSeq.intersect(input.columns)
-    println(s"encodedAttrs=$encodedAttrs")
     val retainFields: Seq[StructField] = input.schema.filter(field => outputCols.contains(field.name))
       .filterNot(field => codeBookLookup.keySet.contains(field.name))
     val newFields: Seq[StructField] = getDecodedFields(outputCols, codeBookLookup, codeBooks)
@@ -28,11 +27,9 @@ private[spark] object BitEncodeUtils {
       val pairs: Map[String, Any] = row.toSeq.zip(row.schema.names).flatMap(t => {
         val value = t._1
         val field = t._2
-        println(s"field=$field")
         if (encodedAttrs.contains(field)) {
           val encodedStr = parseEncodedStr(value)
           val lst = decodeValue(field, encodedStr, codeBookLookup, codeBooks).toList
-          println(s"encodedStr=$encodedStr, lst=$lst")
           lst
         } else {
           List((field, value))
