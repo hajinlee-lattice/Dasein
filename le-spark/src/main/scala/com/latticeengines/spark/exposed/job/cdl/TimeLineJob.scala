@@ -2,20 +2,19 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import java.util
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId, ContactName, CDLTemplateName}
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor.MappingType
 import com.latticeengines.domain.exposed.cdl.activity.{EventFieldExtractor, TimeLine}
+import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, CDLTemplateName, ContactId, ContactName}
 import com.latticeengines.domain.exposed.spark.cdl.TimeLineJobConfig
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils.TimelineStandardColumn
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.MergeUtils
 import org.apache.spark.sql.functions._
-
-import scala.collection.JavaConverters._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.json4s.jackson.Serialization
 
+import scala.collection.JavaConverters._
 import scala.collection.immutable
 
 class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
@@ -177,8 +176,8 @@ class TimeLineJob extends AbstractSparkJob[TimeLineJobConfig] {
   def addAllNullsIfMissing(df: DataFrame, requiredCol: String, mapping: EventFieldExtractor,
                            colType: String): DataFrame = {
     val dfColumnNames = df.columns
-    val mappingValue = mapping.getMappingValue
     if (mapping != null) {
+      val mappingValue = mapping.getMappingValue
       mapping.getMappingType match {
         case MappingType.Constant =>
           return df.withColumn(requiredCol, lit(mapping.getMappingValue))
