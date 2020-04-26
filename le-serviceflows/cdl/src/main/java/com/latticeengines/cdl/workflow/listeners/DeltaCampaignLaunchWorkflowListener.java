@@ -14,7 +14,9 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.serviceflows.cdl.DeltaCampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -53,7 +55,7 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
             if (jobExecution.getStatus().isUnsuccessful()) {
                 log.warn(String.format("DeltaCampaignLaunch failed. Update launch %s of Campaign %s for customer %s",
                         playLaunchId, playName, customerSpace));
-                playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, LaunchState.Failed);
+                updateFailedPlayLaunch(playName, playLaunchId);
             } else {
                 log.info(String.format(
                         "DeltaCampaignLaunch is successful. Update launch %s of Campaign %s for customer %s",
@@ -64,6 +66,39 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
         } finally {
             cleanupIntermediateFiles(jobExecution);
         }
+    }
+
+    private void updateFailedPlayLaunch(String playName, String playLaunchId) {
+        PlayLaunch launch = playProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
+        long accountsAdded = getCount(launch.getAccountsAdded());
+        long accountsDeleted = getCount(launch.getAccountsDeleted());
+        long accountsLaunched = getCount(launch.getAccountsLaunched());
+        long contactsAdded = getCount(launch.getContactsAdded());
+        long contactsDeleted = getCount(launch.getContactsDeleted());
+        long contactsLaunched = getCount(launch.getContactsLaunched());
+
+        launch.setLaunchState(LaunchState.Failed);
+        launch.setAccountsAdded(0L);
+        launch.setAccountsDeleted(0L);
+        launch.setAccountsDuplicated(0L);
+        // equal to previous accumulative launched
+        launch.setAccountsLaunched(accountsLaunched - accountsAdded + accountsDeleted);
+        // equal to incremental launched
+        launch.setAccountsErrored(accountsAdded + accountsDeleted);
+        launch.setContactsAdded(0L);
+        launch.setContactsDeleted(0L);
+        launch.setContactsDuplicated(0L);
+        // equal to previous accumulative launched
+        launch.setContactsLaunched(contactsLaunched - contactsAdded + contactsDeleted);
+        // equal to incremental launched
+        launch.setContactsErrored(contactsAdded + contactsDeleted);
+
+        PlayLaunch playLaunch = playProxy.updatePlayLaunch(playLaunchId, playName, playLaunchId, launch);
+        log.info("After updat, PlayLauunch = " + JsonUtils.serialize(playLaunch));
+    }
+
+    private long getCount(Long object) {
+        return object != null ? object.longValue() : 0L;
     }
 
     private void cleanupIntermediateFiles(JobExecution jobExecution) {
