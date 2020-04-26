@@ -3,7 +3,7 @@ package com.latticeengines.apps.dcp.end2end;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -23,6 +23,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -69,6 +70,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     private S3Service s3Service;
 
+    @Inject
+    private UploadService uploadService;
+
     private ProjectDetails projectDetails;
     private Source source;
     private String uploadId;
@@ -82,6 +86,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Test(groups = "deployment")
     public void testImport() {
         prepareTenant();
+
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
 
         DCPImportRequest request = new DCPImportRequest();
         request.setProjectId(projectDetails.getProjectId());
@@ -167,16 +173,18 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     private void verifyMatchResult(UploadDetails upload) {
-        String matchResultName = upload.getMatchResultTableName();
+        String uploadId = upload.getUploadId();
+        String matchResultName = uploadService.getMatchResultTableName(uploadId);
         Assert.assertNotNull(matchResultName);
         Table matchResult = metadataProxy.getTableSummary(mainCustomerSpace, matchResultName);
         Assert.assertNotNull(matchResult);
         Assert.assertEquals(matchResult.getExtracts().size(), 1);
 
-        String matchCandidateTableName = upload.getMatchResultTableName();
-        Table matchCandidate = metadataProxy.getTableSummary(mainCustomerSpace, matchCandidateTableName);
-        Assert.assertNotNull(matchCandidate);
-        Assert.assertEquals(matchCandidate.getExtracts().size(), 1);
+//        String matchCandidateTableName = uploadService.getMatchCandidatesTableName(uploadId);
+//        Assert.assertNotNull(matchCandidateTableName);
+//        Table matchCandidate = metadataProxy.getTableSummary(mainCustomerSpace, matchCandidateTableName);
+//        Assert.assertNotNull(matchCandidate);
+//        Assert.assertEquals(matchCandidate.getExtracts().size(), 1);
 
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
@@ -216,12 +224,12 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         SleepUtils.sleep(300);
         String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.ALL));
+        headers.setAccept(Collections.singletonList(MediaType.ALL));
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = template.exchange(downloadUrl, HttpMethod.GET, entity, byte[].class);
         String fileName = response.getHeaders().getFirst("Content-Disposition");
-        Assert.assertTrue(fileName.contains(".zip"));
+        Assert.assertTrue(StringUtils.isNotBlank(fileName) && fileName.contains(".zip"));
         byte[] contents = response.getBody();
         Assert.assertNotNull(contents);
         Assert.assertTrue(contents.length > 0);

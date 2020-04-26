@@ -7,6 +7,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -84,23 +85,27 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
     }
 
     private void updateMatchResultTable(UploadDetails upload) {
+        String uploadId = upload.getUploadId();
+        String matchResult = uploadService.getMatchResultTableName(uploadId);
+        Assert.assertTrue(StringUtils.isBlank(matchResult));
+
         Table table = createTable();
-        uploadService.registerMatchResult(mainCustomerSpace, upload.getUploadId(), table.getName());
-        UploadDetails uploadWithTable = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
-        String matchedTableName = uploadWithTable.getMatchResultTableName();
-        Assert.assertEquals(matchedTableName, table.getName());
-        Table matchedTable = tableEntityMgr.findByName(matchedTableName);
+        uploadService.registerMatchResult(mainCustomerSpace, uploadId, table.getName());
+        matchResult = uploadService.getMatchResultTableName(uploadId);
+        Assert.assertEquals(matchResult, table.getName());
+        Table matchedTable = tableEntityMgr.findByName(matchResult);
         Assert.assertNotNull(matchedTable);
         Assert.assertEquals(matchedTable.getTenant().getId(), mainTestTenant.getId());
-        Assert.assertEquals(matchedTable.getAttributes().size(), 1);
+
         Table table2 = createTable();
-        uploadService.registerMatchResult(mainCustomerSpace, upload.getUploadId(), table2.getName());
-        uploadWithTable = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
-        matchedTableName = uploadWithTable.getMatchResultTableName();
-        Assert.assertEquals(matchedTableName, table2.getName());
-        table = tableEntityMgr.findByName(table.getName());
-        Assert.assertNotNull(table);
-        Assert.assertNotNull(table.getRetentionPolicy());
+        uploadService.registerMatchResult(mainCustomerSpace, uploadId, table2.getName());
+        matchResult = uploadService.getMatchResultTableName(uploadId);
+        Assert.assertEquals(matchResult, table2.getName());
+        matchedTable = tableEntityMgr.findByName(matchResult);
+        Assert.assertNotNull(matchedTable);
+
+        Table oldTable = tableEntityMgr.findByName(table.getName());
+        Assert.assertNotNull(oldTable.getRetentionPolicy());
     }
 
     private void updateUploadStats(UploadDetails upload) {

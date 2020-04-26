@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -58,11 +60,10 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     private S3Service s3Service;
 
     private String sourceId;
-
     private String projectId;
 
     @BeforeClass(groups = {"deployment"})
-    public void setup() throws Exception {
+    public void setup() {
         setupTestEnvironment();
     }
 
@@ -163,12 +164,12 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         SleepUtils.sleep(300);
         String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.ALL));
+        headers.setAccept(Collections.singletonList(MediaType.ALL));
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<byte[]> response = template.exchange(downloadUrl, HttpMethod.GET, entity, byte[].class);
         String fileName = response.getHeaders().getFirst("Content-Disposition");
-        Assert.assertTrue(fileName.contains(".zip"));
+        Assert.assertTrue(StringUtils.isNotBlank(fileName) && fileName.contains(".zip"));
         byte[] contents = response.getBody();
         Assert.assertNotNull(contents);
         Assert.assertTrue(contents.length > 0);
@@ -195,7 +196,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         File destDir = new File(destPath);
         Assert.assertTrue(destDir.isDirectory());
         String[] files = destDir.list();
-        Assert.assertEquals(files.length, 3);
+        Assert.assertEquals(ArrayUtils.getLength(files), 3);
         FileUtils.forceDelete(destDir);
     }
 

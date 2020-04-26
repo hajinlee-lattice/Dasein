@@ -2,7 +2,6 @@ package com.latticeengines.dcp.workflow.steps;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -30,12 +29,12 @@ public class FinishImportSource extends BaseWorkflowStep<ImportSourceStepConfigu
         String customerSpace = configuration.getCustomerSpace().toString();
         String matchResultName = getStringValueFromContext(MATCH_RESULT_TABLE_NAME);
         uploadProxy.registerMatchResult(customerSpace, uploadId, matchResultName);
-        String matchCandidatesTableName = getStringValueFromContext(MATCH_CANDIDATES_TABLE_NAME);
-        if (StringUtils.isNotBlank(matchCandidatesTableName)) {
-            uploadProxy.registerMatchResult(customerSpace, uploadId, matchCandidatesTableName);
-        } else {
-            log.warn("No match candidates table generate.");
-        }
+//        String matchCandidatesTableName = getStringValueFromContext(MATCH_CANDIDATES_TABLE_NAME);
+//        if (StringUtils.isNotBlank(matchCandidatesTableName)) {
+//            uploadProxy.registerMatchCandidates(customerSpace, uploadPid, matchCandidatesTableName);
+//        } else {
+//            log.warn("No match candidates table generate.");
+//        }
 
         // mark match result table as permanent
         registerTable(matchResultName);
