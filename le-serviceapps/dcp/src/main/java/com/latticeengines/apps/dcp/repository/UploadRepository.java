@@ -13,6 +13,5 @@ public interface UploadRepository extends BaseJpaRepository<Upload, Long> {
 
     Upload findByPid(Long pid);
 
-
-
+    Upload findByUploadId(String uploadId);
 }

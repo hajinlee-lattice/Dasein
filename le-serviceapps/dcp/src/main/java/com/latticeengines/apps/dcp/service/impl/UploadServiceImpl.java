@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -31,6 +33,8 @@ public class UploadServiceImpl implements UploadService {
 
     private static final Logger log = LoggerFactory.getLogger(UploadServiceImpl.class);
 
+    private static final String RANDOM_UPLOAD_ID_PATTERN = "Upload_%s";
+
     @Inject
     private UploadEntityMgr uploadEntityMgr;
 
@@ -41,41 +45,39 @@ public class UploadServiceImpl implements UploadService {
     private MetadataService metadataService;
 
     @Override
-    public List<Upload> getUploads(String customerSpace, String sourceId) {
-        return expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId) {
+        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceId(sourceId));
+        return uploads.stream().map(this::getUploadDetails).collect(Collectors.toList());
     }
 
     @Override
-    public List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status) {
-        return expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status) {
+        List<Upload> uploads = expandStatistics(uploadEntityMgr.findBySourceIdAndStatus(sourceId, status));
+        return uploads.stream().map(this::getUploadDetails).collect(Collectors.toList());
     }
 
     @Override
-    public Upload getUpload(String customerSpace, Long pid) {
-        log.info("Try find upload in " + customerSpace + " with pid " + pid);
-        return expandStatistics(uploadEntityMgr.findByPid(pid));
-    }
-
-    @Override
-    public Upload createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
+    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
         if (StringUtils.isEmpty(sourceId)) {
             throw new RuntimeException("Cannot create upload bind with empty sourceId!");
         }
+        String uploadId = generateRandomUploadId();
         Upload upload = new Upload();
+        upload.setUploadId(uploadId);
         upload.setSourceId(sourceId);
         upload.setTenant(MultiTenantContext.getTenant());
         upload.setStatus(Upload.Status.NEW);
         upload.setUploadConfig(uploadConfig);
         uploadEntityMgr.create(upload);
 
-        return upload;
+        return getUploadDetails(upload);
     }
 
     @Override
-    public void registerMatchResult(String customerSpace, long uploadPid, String tableName) {
-        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+    public void registerMatchResult(String customerSpace, String uploadId, String tableName) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
-            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadId);
         }
         Table table = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
         if (table == null) {
@@ -97,10 +99,10 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public void registerMatchCandidates(String customerSpace, long uploadPid, String tableName) {
-        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+    public void registerMatchCandidates(String customerSpace, String uploadId, String tableName) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
-            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         Table table = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
         if (table == null) {
@@ -122,59 +124,59 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public void updateUploadConfig(String customerSpace, Long uploadPid, UploadConfig uploadConfig) {
-        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+    public void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
-            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         upload.setUploadConfig(uploadConfig);
         uploadEntityMgr.update(upload);
     }
 
     @Override
-    public void updateUploadStatus(String customerSpace, Long uploadPid, Upload.Status status) {
-        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
-            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         upload.setStatus(status);
         uploadEntityMgr.update(upload);
     }
 
     @Override
-    public UploadStatsContainer appendStatistics(Long uploadPid, UploadStatsContainer container) {
-        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+    public UploadStatsContainer appendStatistics(String uploadId, UploadStatsContainer container) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
-            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         container.setUpload(upload);
         return statisticsEntityMgr.save(container);
     }
 
     @Override
-    public void updateStatsWorkflowPid(Long uploadPid, Long statsId, Long workflowPid) {
-        UploadStatsContainer container = findStats(uploadPid, statsId);
+    public void updateStatsWorkflowPid(String uploadId, Long statsId, Long workflowPid) {
+        UploadStatsContainer container = findStats(uploadId, statsId);
         container.setWorkflowPid(workflowPid);
         statisticsEntityMgr.save(container);
     }
 
     @Override
-    public void updateStatistics(Long uploadPid, Long statsId, UploadStats uploadStats) {
-        UploadStatsContainer container = findStats(uploadPid, statsId);
+    public void updateStatistics(String uploadId, Long statsId, UploadStats uploadStats) {
+        UploadStatsContainer container = findStats(uploadId, statsId);
         container.setStatistics(uploadStats);
         statisticsEntityMgr.save(container);
     }
 
     @Override
-    public Upload setLatestStatistics(Long uploadPid, Long statsId) {
-        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+    public UploadDetails setLatestStatistics(String uploadId, Long statsId) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
-            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         UploadStatsContainer container = statisticsEntityMgr.findByUploadAndId(upload, statsId);
         if (container == null) {
             throw new RuntimeException(
-                    "Cannot find a statistics with id " + statsId + " for upload " + uploadPid);
+                    "Cannot find a statistics with id " + statsId + " for upload " + uploadId);
         }
         UploadStatsContainer currentLatest = statisticsEntityMgr.findIsLatest(upload);
         if (currentLatest != null) {
@@ -183,18 +185,25 @@ public class UploadServiceImpl implements UploadService {
         }
         statisticsEntityMgr.setAsLatest(container);
         upload.setStatistics(container.getStatistics());
-        return upload;
+        return getUploadDetails(upload);
     }
 
-    private UploadStatsContainer findStats(Long uploadPid, Long statsId) {
-        Upload upload = uploadEntityMgr.findByPid(uploadPid);
+    @Override
+    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
+        log.info("Try find upload in " + customerSpace + " with pid " + uploadId);
+        Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
+        return getUploadDetails(upload);
+    }
+
+    private UploadStatsContainer findStats(String uploadId, Long statsId) {
+        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
-            throw new RuntimeException("Cannot find Upload record with Pid: " + uploadPid);
+            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
         }
         UploadStatsContainer container = statisticsEntityMgr.findByUploadAndId(upload, statsId);
         if (container == null) {
             throw new RuntimeException(
-                    "Cannot find a statistics with id " + statsId + " for upload " + uploadPid);
+                    "Cannot find a statistics with id " + statsId + " for upload " + uploadId);
         }
         return container;
     }
@@ -211,4 +220,25 @@ public class UploadServiceImpl implements UploadService {
         return uploads.stream().map(this::expandStatistics).collect(Collectors.toList());
     }
 
+    private String generateRandomUploadId() {
+        String randomUploadId = String.format(RANDOM_UPLOAD_ID_PATTERN,
+                RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        while (uploadEntityMgr.findByUploadId(randomUploadId) != null) {
+            randomUploadId = String.format(RANDOM_UPLOAD_ID_PATTERN,
+                    RandomStringUtils.randomAlphanumeric(8).toLowerCase());
+        }
+        return randomUploadId;
+    }
+
+    private UploadDetails getUploadDetails(Upload upload) {
+        UploadDetails details = new UploadDetails();
+        details.setUploadId(upload.getUploadId());
+        details.setStatistics(upload.getStatistics());
+        details.setStatus(upload.getStatus());
+        details.setUploadConfig(upload.getUploadConfig());
+        details.setMatchResultTableName(upload.getMatchResultTableName());
+        details.setMatchCandidatesTableName(upload.getMatchCandidatesTableName());
+        details.setSourceId(upload.getSourceId());
+        return details;
+    }
 }

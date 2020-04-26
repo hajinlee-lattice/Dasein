@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
@@ -25,72 +26,72 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
     }
 
     @Override
-    public Upload createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
+    public UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
         String url = constructUrl(baseUrl, customerSpace, sourceId);
-        return post("create upload", url, uploadConfig, Upload.class);
+        return post("create upload", url, uploadConfig, UploadDetails.class);
     }
 
     @Override
-    public List<Upload> getUploads(String customerSpace, String sourceId, Upload.Status status) {
+    public List<UploadDetails> getUploads(String customerSpace, String sourceId, Upload.Status status) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/sourceId/{sourceId}";
         String url = constructUrl(baseUrl, customerSpace, sourceId);
         if (status != null) {
             url = url + "?status=" + status;
         }
-        return JsonUtils.convertList(get("get uploads", url, List.class), Upload.class);
+        return JsonUtils.convertList(get("get uploads", url, List.class), UploadDetails.class);
     }
 
     @Override
-    public Upload getUpload(String customerSpace, Long uploadPid) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/{pid}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid);
-        return get("Get Upload by Pid", url, Upload.class);
+    public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/uploadId/{uploadId}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);
+        return get("Get Upload by UploadId", url, UploadDetails.class);
     }
 
     @Override
-    public void registerMatchResult(String customerSpace, long uploadPid, String tableName) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadPid}/matchResult/{tableName}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid, tableName);
+    public void registerMatchResult(String customerSpace, String uploadId, String tableName) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/matchResult/{tableName}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, tableName);
         put("register Upload match result", url);
     }
 
     @Override
-    public void registerMatchCandidates(String customerSpace, long uploadPid, String tableName) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadPid}/matchCandidates/{tableName}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid, tableName);
+    public void registerMatchCandidates(String customerSpace, String uploadId, String tableName) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/matchCandidates/{tableName}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, tableName);
         put("register Upload match candidates", url);
     }
 
     @Override
-    public void updateUploadConfig(String customerSpace, Long uploadPid, UploadConfig uploadConfig) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadPid}/config";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid);
-        log.info("Update config for Upload " + uploadPid);
+    public void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/config";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);
+        log.info("Update config for Upload " + uploadId);
         put("update Upload config", url, uploadConfig);
     }
 
     @Override
-    public void updateUploadStatus(String customerSpace, Long uploadPid, Upload.Status status) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadPid}/status/{status}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid, status);
-        log.info("Update status for Upload " + uploadPid + " to " + status);
+    public void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/status/{status}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, status);
+        log.info("Update status for Upload " + uploadId + " to " + status);
         put("update Upload status", url);
     }
 
     @Override
-    public void updateStatsContent(String customerSpace, long uploadPid, long statsPid, UploadStats uploadStats) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/{pid}/stats/{statsPid}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid, statsPid);
-        log.info("Update stats for Upload " + uploadPid + " to " + JsonUtils.serialize(uploadStats));
+    public void updateStatsContent(String customerSpace, String uploadId, long statsPid, UploadStats uploadStats) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/{uploadId}/stats/{statsPid}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, statsPid);
+        log.info("Update stats for Upload " + uploadId + " to " + JsonUtils.serialize(uploadStats));
         put("update Upload status", url, uploadStats);
     }
 
     @Override
-    public void setLatestStats(String customerSpace, long uploadPid, long statsPid) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/{pid}/latest-stats/{statsPid}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadPid, statsPid);
-        log.info("Update latest stats for Upload " + uploadPid + " to " + statsPid);
+    public void setLatestStats(String customerSpace, String uploadId, long statsPid) {
+        String baseUrl = "/customerspaces/{customerSpace}/uploads/{uploadId}/latest-stats/{statsPid}";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, statsPid);
+        log.info("Update latest stats for Upload " + uploadId + " to " + statsPid);
         put("set Upload latest statistics", url);
     }
 }

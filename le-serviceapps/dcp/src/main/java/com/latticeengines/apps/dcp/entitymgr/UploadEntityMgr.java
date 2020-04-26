@@ -13,4 +13,6 @@ public interface UploadEntityMgr extends BaseEntityMgrRepository<Upload, Long> {
 
     Upload findByPid(Long pid);
 
+    Upload findByUploadId(String uploadId);
+
 }

@@ -26,9 +26,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -38,12 +35,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @javax.persistence.Table(name = "DCP_UPLOAD", indexes = { @Index(name = "IX_SOURCE_ID", columnList = "SOURCE_ID") })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty("upload_id")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
@@ -51,52 +46,44 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonIgnore
     private Tenant tenant;
 
+    @Column(name = "UPLOAD_ID", nullable = false)
+    private String uploadId;
+
     @Column(name = "CREATED", nullable = false)
-    @JsonProperty("created")
     @Temporal(TemporalType.TIMESTAMP)
     private Date created;
 
     @Column(name = "UPDATED", nullable = false)
-    @JsonProperty("updated")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
     @Column(name = "SOURCE_ID", nullable = false)
-    @JsonProperty("source_id")
     private String sourceId;
 
     @Column(name = "STATUS", length = 40)
-    @JsonProperty("status")
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @JsonIgnore
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_MATCH_RESULT")
     private Table matchResult;
 
-    @JsonProperty("match_result")
     @Transient
     private String matchResultTableName;
 
-    @JsonIgnore
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_MATCH_CANDIDATES")
     private Table matchCandidates;
 
-    @JsonProperty("match_candidates")
     @Transient
     private String matchCandidatesTableName;
 
-    @JsonProperty("upload_config")
     @Column(name = "UPLOAD_CONFIG", columnDefinition = "'JSON'", length = 8000)
     @Type(type = "json")
     private UploadConfig uploadConfig;
 
-    @JsonProperty("upload_stats")
     @Transient
     public UploadStats statistics;
 
@@ -108,6 +95,14 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @Override
     public void setPid(Long pid) {
         this.pid = pid;
+    }
+
+    public String getUploadId() {
+        return uploadId;
+    }
+
+    public void setUploadId(String uploadId) {
+        this.uploadId = uploadId;
     }
 
     @Override

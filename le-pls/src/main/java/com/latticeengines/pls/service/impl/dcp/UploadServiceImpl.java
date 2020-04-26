@@ -31,6 +31,7 @@ import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
@@ -67,15 +68,15 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
     private String s3Bucket;
 
     @Override
-    public List<Upload> getAllBySourceId(String sourceId, Upload.Status status) {
+    public List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         return uploadProxy.getUploads(customerSpace, sourceId, status);
     }
 
     @Override
-    public Upload getByUploadId(long uploadPid) {
+    public UploadDetails getByUploadId(String uploadId) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return uploadProxy.getUpload(customerSpace, uploadPid);
+        return uploadProxy.getUploadByUploadId(customerSpace, uploadId);
     }
 
     @Override
@@ -87,7 +88,7 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "upload.zip" + "\"");
         String tenantId = MultiTenantContext.getShortTenantId();
         String uploadId = downloadConfig.getUploadId();
-        Upload upload = uploadProxy.getUpload(tenantId, Long.parseLong(uploadId));
+        UploadDetails upload = uploadProxy.getUploadByUploadId(tenantId, uploadId);
 
         Preconditions.checkNotNull(upload, "object should't be null");
         UploadConfig config = upload.getUploadConfig();

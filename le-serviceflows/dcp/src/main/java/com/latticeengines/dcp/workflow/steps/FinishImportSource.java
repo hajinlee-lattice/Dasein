@@ -26,13 +26,13 @@ public class FinishImportSource extends BaseWorkflowStep<ImportSourceStepConfigu
 
     @Override
     public void execute() {
-        Long uploadPid = configuration.getUploadPid();
+        String uploadId = configuration.getUploadId();
         String customerSpace = configuration.getCustomerSpace().toString();
         String matchResultName = getStringValueFromContext(MATCH_RESULT_TABLE_NAME);
-        uploadProxy.registerMatchResult(customerSpace, uploadPid, matchResultName);
+        uploadProxy.registerMatchResult(customerSpace, uploadId, matchResultName);
         String matchCandidatesTableName = getStringValueFromContext(MATCH_CANDIDATES_TABLE_NAME);
         if (StringUtils.isNotBlank(matchCandidatesTableName)) {
-            uploadProxy.registerMatchResult(customerSpace, uploadPid, matchCandidatesTableName);
+            uploadProxy.registerMatchResult(customerSpace, uploadId, matchCandidatesTableName);
         } else {
             log.warn("No match candidates table generate.");
         }
@@ -41,9 +41,9 @@ public class FinishImportSource extends BaseWorkflowStep<ImportSourceStepConfigu
         registerTable(matchResultName);
         UploadStats stats = getObjectFromContext(UPLOAD_STATS, UploadStats.class);
         long statsId = configuration.getStatsPid();
-        uploadProxy.updateStatsContent(customerSpace, uploadPid, statsId, stats);
-        uploadProxy.setLatestStats(customerSpace, uploadPid, statsId);
-        uploadProxy.updateUploadStatus(customerSpace, uploadPid, Upload.Status.FINISHED);
+        uploadProxy.updateStatsContent(customerSpace, uploadId, statsId, stats);
+        uploadProxy.setLatestStats(customerSpace, uploadId, statsId);
+        uploadProxy.updateUploadStatus(customerSpace, uploadId, Upload.Status.FINISHED);
     }
 
 }

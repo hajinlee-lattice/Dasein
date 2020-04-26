@@ -68,9 +68,9 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
             return this;
         }
 
-        public Builder uploadPid(Long uploadPid) {
-            importSourceStepConfiguration.setUploadPid(uploadPid);
-            exportS3StepConfiguration.setUploadPid(uploadPid);
+        public Builder uploadId(String uploadId) {
+            importSourceStepConfiguration.setUploadId(uploadId);
+            exportS3StepConfiguration.setUploadId(uploadId);
             return this;
         }
 

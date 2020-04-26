@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -89,7 +90,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String importedFilePath = uploadDirKey + uploadTS + "/processed/file2.csv";
         String rawPath = uploadDirKey + uploadTS + "/raw/file3.csv";
         config.setUploadImportedErrorFilePath(errorPath);
-        Upload upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
+        UploadDetails upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
         UploadConfig returnedConfig = upload.getUploadConfig();
         Assert.assertEquals(returnedConfig.getUploadImportedErrorFilePath(), errorPath);
@@ -100,18 +101,18 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadRawFilePath(rawPath);
         config.setUploadImportedFilePath(importedFilePath);
         config.setUploadTSPrefix(uploadTS);
-        uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getPid(), config);
-        List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
+        uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
+        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
-        Upload retrievedUpload = uploads.get(0);
+        UploadDetails retrievedUpload = uploads.get(0);
         UploadConfig retrievedConfig = retrievedUpload.getUploadConfig();
         Assert.assertEquals(retrievedConfig.getUploadImportedFilePath(), importedFilePath);
         Assert.assertEquals(retrievedConfig.getUploadTSPrefix(), uploadTS);
         Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
         Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
 
-        uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getPid(), Upload.Status.MATCH_STARTED);
+        uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED);
         uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
@@ -129,10 +130,10 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = "testCRUD")
     public void testDownload() throws Exception {
-        List<Upload> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED);
+        List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.MATCH_STARTED);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
-        Upload upload = uploads.get(0);
+        UploadDetails upload = uploads.get(0);
         Assert.assertEquals(upload.getStatus(), Upload.Status.MATCH_STARTED);
 
         StringInputStream sis = new StringInputStream("file1");
@@ -148,16 +149,16 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3Service.uploadInputStream(bucket, upload.getUploadConfig().getUploadRawFilePath(), sis3, true);
 
         // drop file to another upload
-        List<Upload> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW);
+        List<UploadDetails> uploads2 = uploadProxy.getUploads(mainCustomerSpace, sourceId, Upload.Status.NEW);
         Assert.assertNotNull(uploads2);
         Assert.assertEquals(uploads2.size(), 1);
-        Upload upload2 = uploads2.get(0);
+        UploadDetails upload2 = uploads2.get(0);
         StringInputStream sis4 = new StringInputStream("file4");
         s3Service.uploadInputStream(bucket, upload2.getUploadConfig().getUploadRawFilePath(), sis4, true);
 
         RestTemplate template = testBed.getRestTemplate();
         String tokenUrl = String.format("%s/pls/uploads/uploadId/%s/token", deployedHostPort,
-                upload.getPid().toString());
+                upload.getUploadId().toString());
         String token = template.getForObject(tokenUrl, String.class);
         SleepUtils.sleep(300);
         String downloadUrl = String.format("%s/pls/filedownloads/%s", deployedHostPort, token);
