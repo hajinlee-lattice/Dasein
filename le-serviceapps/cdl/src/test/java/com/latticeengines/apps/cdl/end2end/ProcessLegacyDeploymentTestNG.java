@@ -10,7 +10,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -42,6 +41,8 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     static final String UNDER_SCORE = "_";
     // Number of products in batch store after first PA for legacy tenant
     static final Long BATCH_STORE_PRODUCT = 83L;
+    // Number of products in serving store after first PA for legacy tenant
+    static final Long SERVING_STORE_PRODUCTS = 14L;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -231,7 +232,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_PA);
         map.put(BusinessEntity.Contact, CONTACT_PA);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PT);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         return map;
     }
