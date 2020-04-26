@@ -5,6 +5,11 @@ import com.latticeengines.domain.exposed.datafabric.GenericTableActivity;
 public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
 
     @Override
+    public boolean needEmptyFailed() {
+        return false;
+    }
+
+    @Override
     public Class<?> getEntityClass() {
         return GenericTableActivity.class;
     }

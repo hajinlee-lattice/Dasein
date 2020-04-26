@@ -45,35 +45,39 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
     private static final Long ONE_DAY = TimeUnit.DAYS.toSeconds(1);
 
     @Inject
-    protected JobService jobService;
+    private JobService jobService;
 
     @Inject
-    protected EaiProxy eaiProxy;
+    private EaiProxy eaiProxy;
 
     @Inject
     protected DataUnitProxy dataUnitProxy;
 
     @Value("${aws.region}")
-    protected String awsRegion;
+    private String awsRegion;
 
     @Value("${aws.default.access.key}")
-    protected String awsAccessKey;
+    private String awsAccessKey;
 
     @Value("${aws.default.secret.key.encrypted}")
-    protected String awsSecretKey;
+    private String awsSecretKey;
 
     @Value("${eai.export.dynamo.num.mappers}")
-    protected int numMappers;
+    private int numMappers;
 
     @Value("${eai.export.dynamo.signature}")
     protected String signature;
 
     @Value("${cdl.processAnalyze.skip.dynamo.publication}")
-    protected boolean skipPublication;
+    private boolean skipPublication;
 
     @Override
     public void execute() {
         List<DynamoExportConfig> configs = getExportConfigs();
+        if (CollectionUtils.isEmpty(configs)) {
+            log.warn("No tables need to export, skip execution.");
+            return;
+        }
         log.info("Going to export tables to dynamo: " + configs);
         List<Exporter> exporters = getExporters(configs);
         if (CollectionUtils.isEmpty(exporters)) {
@@ -100,7 +104,7 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
         return exporters;
     }
 
-    protected boolean relinkDynamo(DynamoExportConfig config) {
+    private boolean relinkDynamo(DynamoExportConfig config) {
         String customerSpace = configuration.getCustomerSpace().toString();
         DynamoDataUnit dataUnit = (DynamoDataUnit) dataUnitProxy.getByNameAndType(customerSpace,
                 config.getLinkTableName(), DataUnit.StorageType.Dynamo);
@@ -115,9 +119,9 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
         return true;
     }
 
-    protected List<DynamoExportConfig> getExportConfigs() {
+    private List<DynamoExportConfig> getExportConfigs() {
         List<DynamoExportConfig> tables = getListObjectFromContext(configuration.getContextKey(), DynamoExportConfig.class);
-        if (CollectionUtils.isEmpty(tables)) {
+        if (CollectionUtils.isEmpty(tables) && configuration.needEmptyFailed()) {
             throw new IllegalStateException("Cannot find tables to be published to dynamo.");
         }
         return tables;
@@ -161,7 +165,7 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
             return path;
         }
 
-        protected HdfsToDynamoConfiguration generateEaiConfig() {
+        HdfsToDynamoConfiguration generateEaiConfig() {
             String tableName = config.getTableName();
             String inputPath = getInputPath();
             log.info("Found input path for table " + tableName + ": " + inputPath);
@@ -199,7 +203,7 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
             return eaiConfig;
         }
 
-        protected void registerDataUnit() {
+        void registerDataUnit() {
             String customerSpace = configuration.getCustomerSpace().toString();
             DynamoDataUnit unit = new DynamoDataUnit();
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));

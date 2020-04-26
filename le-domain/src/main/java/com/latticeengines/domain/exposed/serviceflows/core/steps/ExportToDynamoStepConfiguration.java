@@ -23,4 +23,10 @@ public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfigura
     public boolean needKeyPrefix() {
         return true;
     }
+
+    //if empty table list, will throw exception
+    @Override
+    public boolean needEmptyFailed() {
+        return true;
+    }
 }
