@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -100,8 +101,8 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
     @Override
     protected void postJobExecution(SparkJobResult result) {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        Long uploadPid = configuration.getUploadPid();
-        Upload upload = uploadProxy.getUpload(customerSpace.toString(), uploadPid);
+        String uploadId = configuration.getUploadId();
+        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId);
         Source source = sourceProxy.getSource(customerSpace.toString(), configuration.getSourceId());
         ProjectDetails projectDetails = projectProxy.getDCPProjectByProjectId(customerSpace.toString(),
                 configuration.getProjectId());
@@ -116,7 +117,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         String matchResultPath = UploadS3PathBuilderUtils.combinePath(false, false, dropFolder, uploadMatchResultDir);
         if (!s3Service.objectExist(dropBoxSummary.getBucket(), matchResultPath)) {
             s3Service.createFolder(dropBoxSummary.getBucket(), matchResultPath);
-            uploadProxy.updateUploadConfig(customerSpace.toString(), uploadPid, upload.getUploadConfig());
+            uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, upload.getUploadConfig());
         }
 
         // Copy files from spark workspace to upload result location.
@@ -140,7 +141,7 @@ public class SplitImportMatchResult extends RunSparkJob<ImportSourceStepConfigur
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadPid, Upload.Status.MATCH_FINISHED);
+        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.MATCH_FINISHED);
 
         updateUploadStatistics(result);
     }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.pls.service.dcp.UploadService;
 
 import io.swagger.annotations.Api;
@@ -34,14 +35,14 @@ public class UploadResource {
     @GetMapping(value = "/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Get sources by sourceId")
-    public List<Upload> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status) {
+    public List<UploadDetails> getAllBySourceId(@PathVariable String sourceId, @RequestParam(required = false) Upload.Status status) {
         return uploadService.getAllBySourceId(sourceId, status);
     }
 
     @GetMapping(value = "/uploadId/{uploadId}")
     @ResponseBody
-    @ApiOperation("Get sources by sourceId")
-    public Upload getUpload(@PathVariable Long uploadId) {
+    @ApiOperation("Get upload by uploadID")
+    public UploadDetails getUpload(@PathVariable String uploadId) {
         if (uploadId == null) {
             return null;
         } else {

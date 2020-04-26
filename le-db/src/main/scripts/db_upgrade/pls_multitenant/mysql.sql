@@ -5,6 +5,7 @@ BEGIN
     create table `DCP_UPLOAD`
     (
         `PID`             bigint       not null auto_increment,
+        `UPLOAD_ID`       varchar(255) not null,
         `CREATED`         datetime     not null,
         `SOURCE_ID`       varchar(255) not null,
         `STATUS`          varchar(40)
@@ -50,6 +51,10 @@ BEGIN
     ALTER TABLE `DCP_UPLOAD`
         ADD CONSTRAINT `FK_DCPUPLOAD_FKTENANTID_TENANT` FOREIGN KEY (`FK_TENANT_ID`)
             REFERENCES `TENANT` (`TENANT_PID`) ON DELETE CASCADE;
+
+    CREATE INDEX IX_UPLOAD_ID ON `DCP_UPLOAD` (`UPLOAD_ID`);
+    ALTER TABLE `DCP_UPLOAD`
+      ADD CONSTRAINT UX_UPLOAD_ID UNIQUE (`FK_TENANT_ID`, `UPLOAD_ID`);
 END;
 
 CREATE PROCEDURE `UpdateImportMessageTable`()

@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -52,9 +53,9 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
     @Override
     public void execute() {
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        Long uploadPid = configuration.getUploadPid();
-        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadPid, Upload.Status.IMPORT_STARTED);
-        Upload upload = uploadProxy.getUpload(customerSpace.toString(), uploadPid);
+        String uploadId = configuration.getUploadId();
+        uploadProxy.updateUploadStatus(customerSpace.toString(), uploadId, Upload.Status.IMPORT_STARTED);
+        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), uploadId);
         if (upload == null || upload.getUploadConfig() == null || StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath())) {
             throw new RuntimeException("Cannot start DCP import job due to lack of import info!");
         }
@@ -109,6 +110,6 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
             return true;
         });
 
-        uploadProxy.updateUploadConfig(customerSpace.toString(), uploadPid, upload.getUploadConfig());
+        uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, upload.getUploadConfig());
     }
 }

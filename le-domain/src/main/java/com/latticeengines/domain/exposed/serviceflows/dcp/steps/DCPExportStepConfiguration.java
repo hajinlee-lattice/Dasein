@@ -5,8 +5,8 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3S
 
 public class DCPExportStepConfiguration extends ImportExportS3StepConfiguration {
 
-    @JsonProperty("upload_pid")
-    private Long uploadPid;
+    @JsonProperty("upload_id")
+    private String uploadId;
 
     @JsonProperty("source_id")
     private String SourceId;
@@ -14,12 +14,12 @@ public class DCPExportStepConfiguration extends ImportExportS3StepConfiguration 
     @JsonProperty("project_id")
     private String ProjectId;
 
-    public Long getUploadPid() {
-        return uploadPid;
+    public String getUploadId() {
+        return uploadId;
     }
 
-    public void setUploadPid(Long uploadPid) {
-        this.uploadPid = uploadPid;
+    public void setUploadId(String uploadId) {
+        this.uploadId = uploadId;
     }
 
     public String getSourceId() {

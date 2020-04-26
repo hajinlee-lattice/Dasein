@@ -70,4 +70,10 @@ public class UploadEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<UploadRe
         return getReadOrWriteRepository().findByPid(pid);
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Upload findByUploadId(String uploadId) {
+        return getReadOrWriteRepository().findByUploadId(uploadId);
+    }
+
 }
