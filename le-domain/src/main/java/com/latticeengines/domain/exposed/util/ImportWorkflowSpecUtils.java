@@ -141,7 +141,7 @@ public final class ImportWorkflowSpecUtils {
                 .subcategory(definition.getSubcategory()) //
                 // TODO(jwinter): Do we need to set these other fields?
                 //.failImportValidator()
-                //.defaultValueStr("")
+                .defaultValueStr(definition.getDefaultValue())
                 .build();
     }
 
