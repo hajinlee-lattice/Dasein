@@ -66,11 +66,15 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
         inputUnits.add(dataUnit);
 
         try {
-            String candidateDir = matchCommand.getCandidateLocation();
-            candidateDir = PathUtils.toParquetOrAvroDir(candidateDir);
+            String candidateDir = PathUtils.toParquetOrAvroDir(matchCommand.getCandidateLocation());
             if (StringUtils.isNotBlank(candidateDir) && HdfsUtils.isDirectory(yarnConfiguration, candidateDir)) {
                 Table candidateTable = MetadataConverter.getTable(yarnConfiguration, candidateDir);
+                HdfsDataUnit candidatesUnit = new HdfsDataUnit();
+                dataUnit.setName("MatchCandidates");
+                dataUnit.setPath(candidateDir);
+                dataUnit.setCount(candidateTable.getExtracts().get(0).getPid());
                 String candidateTableName = NamingUtils.timestamp("MatchCandidates");
+                candidateTable = toTable(candidateTableName, candidatesUnit);
                 metadataProxy.createTable(configuration.getCustomer(), candidateTableName, candidateTable);
                 putStringValueInContext(MATCH_CANDIDATES_TABLE_NAME, candidateTableName);
             }
