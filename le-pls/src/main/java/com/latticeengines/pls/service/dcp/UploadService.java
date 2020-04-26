@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 
 public interface UploadService {
 
@@ -12,4 +13,6 @@ public interface UploadService {
     UploadDetails getByUploadId(String uploadId);
 
     String generateToken(String uploadId);
+
+    void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
 }

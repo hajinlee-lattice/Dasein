@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -39,11 +40,18 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessProductWorkf
     @Inject
     private ResetProduct resetProduct;
 
+    @Value("${cdl.merge.product.use.spark}")
+    private boolean useMergeProductSpark;
+
     @Override
     public Workflow defineWorkflow(ProcessProductWorkflowConfiguration config) {
-        return new WorkflowBuilder(name(), config) //
-                .next(mergeProductImportsWrapper) //
-                .next(mergeProductSpark) //
+        WorkflowBuilder builder = new WorkflowBuilder(name(), config);
+        if (useMergeProductSpark) {
+            builder = builder.next(mergeProductImportsWrapper).next(mergeProductSpark);
+        } else {
+            builder = builder.next(mergeProductWrapper);
+        }
+        return builder //
                 .next(updateProductWorkflow) //
                 .next(rebuildProductWorkflow) //
                 .next(resetProduct) //

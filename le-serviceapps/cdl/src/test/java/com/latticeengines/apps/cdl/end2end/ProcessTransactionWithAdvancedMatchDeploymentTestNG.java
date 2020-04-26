@@ -62,7 +62,7 @@ public class ProcessTransactionWithAdvancedMatchDeploymentTestNG extends Process
 
     @Override
     protected int expectedUserTestDateCntsBeforePA() {
-        return 3;
+        return 0;
     }
 
     @Override

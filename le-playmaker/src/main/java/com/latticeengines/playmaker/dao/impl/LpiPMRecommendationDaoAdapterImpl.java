@@ -100,7 +100,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             }
         });
         for (LaunchSummary launchSummary : summaries) {
-            long recsLaunchedByCurrentLaunch = launchSummary.getStats().getRecommendationsLaunched();
+            long recsLaunchedByCurrentLaunch = launchSummary.getStats().getAccountsAdded();
             totalLaunchedSoFar += recsLaunchedByCurrentLaunch;
             if (totalLaunchedSoFar == offset) {
                 queryOffset = 0;
@@ -133,7 +133,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
         List<LaunchSummary> launchSummaries = lpiPMPlay.getLaunchSummariesFromDashboard(latestLaunchFlag, start, playIds, 0, orgInfo);
         if (CollectionUtils.isNotEmpty(launchSummaries)) {
             return launchSummaries.stream().map(launchSummary ->
-                    launchSummary.getStats().getRecommendationsLaunched()).reduce(0L, Long::sum).longValue();
+                    launchSummary.getStats().getAccountsAdded()).reduce(0L, Long::sum).longValue();
         }
         else {
             return 0;
@@ -226,7 +226,7 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
             return 0;
         }
         return launchSummaries.stream()
-                .map(launchSummary -> launchSummary.getStats().getContactsWithinRecommendations()).reduce(0L, Long::sum)
+                .map(launchSummary -> launchSummary.getStats().getContactsAdded()).reduce(0L, Long::sum)
                 .longValue();
     }
 

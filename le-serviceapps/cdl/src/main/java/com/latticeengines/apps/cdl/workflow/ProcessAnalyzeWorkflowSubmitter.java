@@ -125,6 +125,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${eai.export.dynamo.signature}")
     private String signature;
 
+    @Value("${eai.export.dynamo.timeline.signature}")
+    private String timelineSignature;
+
     @Value("${cdl.processAnalyze.actions.import.count}")
     private int importActionCount;
 
@@ -764,6 +767,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .currentDataCloudBuildNumber(currentDataCloudBuildNumber) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //
                 .dynamoSignature(signature) //
+                .timelineDynamoSignature(timelineSignature)
                 .maxRatingIteration(maxIteration) //
                 .apsRollingPeriod(apsRollingPeriod) //
                 .apsImputationEnabled(apsImputationEnabled) //

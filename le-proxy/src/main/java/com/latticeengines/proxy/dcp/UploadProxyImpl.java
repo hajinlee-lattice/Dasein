@@ -94,5 +94,4 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
         log.info("Update latest stats for Upload " + uploadId + " to " + statsPid);
         put("set Upload latest statistics", url);
     }
-
 }

@@ -166,7 +166,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String COLLECTION_DATE_FORMAT = "yyyy-MM-dd-HH-mm-ss";
     private static final Logger log = LoggerFactory.getLogger(CDLEnd2EndDeploymentTestNGBase.class);
 
-    public static final int S3_CHECKPOINTS_VERSION = 24;
+    public static final int S3_CHECKPOINTS_VERSION = 25;
     private static final int S3_CROSS_SELL_CHECKPOINTS_VERSION = 24;
 
     private static final String INITIATOR = "test@lattice-engines.com";
@@ -190,7 +190,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total account after ProcessAccount test
     static final Long ACCOUNT_PA = 900L;
     // Number of total account after ProcessAccount entity match test
-    static final Long ACCOUNT_PA_EM = 903L;
+    static final Long ACCOUNT_PA_EM = 900L;
     // Number of total account after ProcessAccount entity match test for GA tenants
     // (implicit accounts excluded)
     static final Long ACCOUNT_PA_EMGA = 900L;
@@ -217,7 +217,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // case insensitive ID match. Anonymous account will be created by
     // ProcessAccount by one of its contact after updating checkpoint (back to
     // 111).
-    static final Long NEW_ACCOUNT_UA_EM = 113L;
+    static final Long NEW_ACCOUNT_UA_EM = 111L;
     // Number of total account after UpdateAccount entity match test for GA tenants
     static final Long NEW_ACCOUNT_UA_EMGA = 106L;
     // Number of updated account after UpdateAccount test
@@ -256,13 +256,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total contact after UpdateContact test
     static final Long CONTACT_UC = 1000L;
     // Number of total contact after ProcessAccount entity match test
-    // FIXME change back to 1005 after using new ProcessAccount checkpoint
-    static final Long CONTACT_UA_EM = 1014L;
+    static final Long CONTACT_UA_EM = 1005L;
     // Number of new contact after UpdateContact test
     static final Long NEW_CONTACT_UC = 100L;
     // Number of new contact after UpdateAccount entity match test
-    // FIXME change back to 105 after using new ProcessAccount checkpoint
-    static final Long NEW_CONTACT_UA_EM = 114L;
+    static final Long NEW_CONTACT_UA_EM = 105L;
     // Number of new contact after UpdateAccount entity match test for GA tenants
     static final Long NEW_CONTACT_UA_EMGA = 114L;
     // Number of updated contact after UpdateContact test
@@ -291,7 +289,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated daily transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long DAILY_TXN_UT_EM = 50863L;
+//    static final Long DAILY_TXN_UT_EM = 50863L;
+    static final Long DAILY_TXN_UT_EM = 50881L;
     // Number of aggregated period transaction after ProcessTransaction test
     static final Long PERIOD_TRANSACTION_PT = 62550L;
     // Number of aggregated period transaction after ProcessTransaction entity
@@ -303,7 +302,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+//    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+    static final Long PERIOD_TRANSACTION_UT_EM = 75222L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
     // Number of total purchase history attributes after UpdateTransaction test
@@ -328,7 +328,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     private static final String VERIFY_DAILYTXN_PRODUCTID = "650050C066EF46905EC469E9CC2921E0";
     // For verified aid, pid and txn date, daily txn amount after
     // ProcessTransaction test
-    static final double VERIFY_DAILYTXN_AMOUNT_PT = 1860;
+    static final double VERIFY_DAILYTXN_AMOUNT_PT = 1860.;
     // For verified aid, pid and txn date, daily txn quantity after
     // ProcessTransaction test
     static final double VERIFY_DAILYTXN_QUANTITY_PT = 10;
@@ -349,7 +349,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Warn message after merging product
     static final String PRODUCT_WARN_MESSAGE = "whatever warn message as it is not null or empty string";
     // Number of products in batch store after ProcessTransaction test
-    static final Long BATCH_STORE_PRODUCT_PT = 123L;
+    static final Long BATCH_STORE_PRODUCT_PT = 103L;
     // Number of products in serving store after ProcessTransaction test
     static final Long SERVING_STORE_PRODUCTS_PT = 34L;
     // Number of product hierarchy in serving store after ProcessTransaction
@@ -1733,8 +1733,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
-        expectedEntityCount.forEach((key, value) -> log.info("Row count for batch store of {}: {}",
-                key.getBatchStore().name(), countTableRole(key.getBatchStore())));
+        expectedEntityCount.forEach((key, value) -> log.info("Row count for batch store of {}: {} -> {}",
+                key.getBatchStore().name(), countTableRole(key.getBatchStore()), value));
         expectedEntityCount.forEach((key, value) -> //
         Assert.assertEquals(Long.valueOf(countTableRole(key.getBatchStore())), value, key.getBatchStore().name()));
     }
@@ -1743,20 +1743,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
-        expectedEntityCount.forEach((key, value) -> log.info("Row count for serving store of {}: {}",
-                key.getServingStore().name(), countTableRole(key.getServingStore())));
+        expectedEntityCount.forEach((key, value) -> log.info("Row count for serving store of {}: {} -> {}",
+                key.getServingStore().name(), countTableRole(key.getServingStore()), value));
         expectedEntityCount.forEach((key, value) -> {
             Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())), value,
                     key.getServingStore().name());
-            // if (key != BusinessEntity.ProductHierarchy) {
-            // Assert.assertEquals(Long.valueOf(countTableRole(key.getServingStore())),
-            // value);
-            // } else {
-            // int count =
-            // periodTransactionProxy.getProductHierarchy(mainCustomerSpace,
-            // null).size();
-            // Assert.assertEquals(Long.valueOf(count), value);
-            // }
         });
     }
 
@@ -1764,6 +1755,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedTableCount)) {
             return;
         }
+        expectedTableCount.forEach((key, value) -> log.info("Row count for table role of {}: {} -> {}",
+                key.name(), countTableRole(key), value));
         expectedTableCount.forEach((key, value) -> //
         Assert.assertEquals(Long.valueOf(countTableRole(key)), value, key.name()));
     }
@@ -1773,9 +1766,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             return;
         }
         expectedEntityCount
-                .forEach((key, value) -> log.info("Row count for redshift table of {}: {}", key, countInRedshift(key)));
-        expectedEntityCount.forEach((key, value) -> //
-        Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
+                .forEach((key, value) -> log.info("Row count for redshift table of {}: {} -> {}", key, countInRedshift(key), value));
+        expectedEntityCount.forEach((key, value) -> Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
     }
 
     void runCommonPAVerifications() {

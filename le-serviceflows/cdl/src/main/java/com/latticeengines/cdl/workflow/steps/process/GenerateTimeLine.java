@@ -62,7 +62,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
     private static final String TIMELINE_TABLE_PREFIX = "Timeline_%s";
     private static final String PARTITION_KEY_NAME = "partitionKey";
     private static final String SORT_KEY_NAME = "sortKey";
-    static final String BEAN_NAME = "profileTimeLine";
+    static final String BEAN_NAME = "generateTimeline";
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -93,7 +93,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = inactive.complement();
         DataCollectionStatus dcStatus = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        timelineVersionMap = dcStatus.getTimelineVersionMap();
+        timelineVersionMap = MapUtils.emptyIfNull(dcStatus.getTimelineVersionMap());
         checkRebuild();
         bumpVersion();
         dcStatus.setTimelineVersionMap(timelineVersionMap);
@@ -282,7 +282,9 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
             needRebuild = true;
         } else {
             List<TimeLine> newTimelineList =
-                    configuration.getTimeLineList().stream().filter(timeline -> !timelineVersionMap.containsKey(timeline)).collect(Collectors.toList());
+                    configuration.getTimeLineList().stream()
+                            .filter(timeline -> !timelineVersionMap.containsKey(timeline.getTimelineId()))
+                            .collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(newTimelineList)) {
                 needRebuild = true;
             }
@@ -322,7 +324,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         } else {
             log.info("stream {} isn't in timeline {}. stream entity is {}, timeline entity is {}, customerSpace is {}" +
                     ".", atlasStream.getStreamId(), timeLine.getTimelineId(), atlasStream.getMatchEntities(),
-                    timeLine.getEntity());
+                    timeLine.getEntity(), configuration.getCustomer());
             return false;
         }
     }

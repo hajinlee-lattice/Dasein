@@ -6,6 +6,7 @@ import java.util.Set;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
+import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
 public class LaunchSummary {
@@ -23,6 +24,8 @@ public class LaunchSummary {
     private Set<RatingBucketName> selectedBuckets;
 
     private LaunchState launchState;
+
+    private LaunchType launchType;
 
     private String uiLaunchState;
 
@@ -54,12 +57,19 @@ public class LaunchSummary {
         stats.setAccountErrors(getCount(launch.getAccountsErrored()));
         stats.setContactErrors(getCount(launch.getContactsErrored()));
         // PLS-15540 incremental accounts = accountsAdded + accountsDeleted
-        stats.setRecommendationsLaunched(getCount(launch.getAccountsAdded()) + getCount(launch.getAccountsDeleted()));
+        long accountsAdded = getCount(launch.getAccountsAdded());
+        long accountsDeleted = getCount(launch.getAccountsDeleted());
+        long contactsAdded = getCount(launch.getContactsAdded());
+        long contactsDeleted = getCount(launch.getContactsDeleted());
+        stats.setRecommendationsLaunched(accountsAdded + accountsDeleted);
         stats.setAccountsSuppressed(getCount(launch.getAccountsSuppressed()));
         stats.setContactsSuppressed(getCount(launch.getContactsSuppressed()));
         stats.setAccountsDuplicated(getCount(launch.getAccountsDuplicated()));
         stats.setContactsDuplicated(getCount(launch.getContactsDuplicated()));
-
+        stats.setAccountsAdded(accountsAdded);
+        stats.setAccountsDeleted(accountsDeleted);
+        stats.setContactsAdded(contactsAdded);
+        stats.setContactsDeleted(contactsDeleted);
         this.setStats(stats);
         this.setLaunchId(launch.getLaunchId());
         this.setLaunchState(launch.getLaunchState());
@@ -71,6 +81,7 @@ public class LaunchSummary {
         this.setDestinationAccountId(launch.getDestinationAccountId());
         this.setAudienceName(launch.getAudienceName());
         this.setFolderName(launch.getFolderName());
+        this.setLaunchType(launch.getLaunchType());
         if (launch.getPlay() != null) {
             this.setPlayName(launch.getPlay().getName());
             this.setPlayDisplayName(launch.getPlay().getDisplayName());
@@ -136,6 +147,10 @@ public class LaunchSummary {
     public void setUiLaunchState(String uiLaunchState) {
         this.uiLaunchState = uiLaunchState;
     }
+
+    public LaunchType getLaunchType() { return launchType; }
+
+    public void setLaunchType(LaunchType launchType) { this.launchType = launchType; }
 
     public Set<RatingBucketName> getSelectedBuckets() {
         return selectedBuckets;

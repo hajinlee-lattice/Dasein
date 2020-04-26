@@ -30,6 +30,7 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.AvroUtils.AvroFilesIterator;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
@@ -144,7 +145,7 @@ public final class TimeSeriesUtils {
                         String[] dirs = fileName.split("/");
                         String avroName = dirs[dirs.length - 1];
                         Integer period = getPeriodFromFileName(avroName);
-                        if ((period != null) && periods.contains(period)) {
+                        if (periods.contains(period)) {
                             if (countRows) {
                                 try {
                                     rowCounts += AvroUtils.count(yarnConfiguration, fileName);
@@ -152,6 +153,7 @@ public final class TimeSeriesUtils {
                                     log.error("Failed to count the rows for file: " + fileName);
                                 }
                             }
+                            log.info("Removing period file {}", fileName);
                             HdfsUtils.rmdir(yarnConfiguration, fileName);
                         }
                     }
@@ -171,7 +173,7 @@ public final class TimeSeriesUtils {
     }
 
     static String getPath(String avroDir) {
-        return ProductUtils.getPath(avroDir);
+        return PathUtils.toParquetOrAvroDir(avroDir);
     }
 
     public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir,
@@ -275,15 +277,16 @@ public final class TimeSeriesUtils {
                 Collections.singletonList(LedpException.class));
         retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
-                log.info("Attempt #{} to distribute daily store", ctx.getRetryCount() + 1);
+                log.info("Attempt #{} to distribute daily store for remaining periods: {}", ctx.getRetryCount() + 1,
+                        periods.stream().map(String::valueOf).collect(Collectors.joining(",")));
                 // only for testing retry purpose: in retry phase, cleanup
                 // injected failed period to let failed period pass
                 injectedFailedPeriods = null;
             }
             // cleanup impacted periods in target dir
-            TimeSeriesUtils.cleanupPeriodData(yarnConfiguration, targetDir, periodsRemained);
+            cleanupPeriodData(yarnConfiguration, targetDir, periodsRemained);
             // distribute to target dir
-            Set<Integer> failedPeriods = TimeSeriesUtils.distributePeriodData(yarnConfiguration, inputDir, targetDir,
+            Set<Integer> failedPeriods = distributePeriodData(yarnConfiguration, inputDir, targetDir,
                     periodsRemained, periodField, ctx.getRetryCount() + 1 == MAX_ATTEMPTS);
             periodsRemained.clear();
             if (CollectionUtils.isNotEmpty(failedPeriods)) {
@@ -320,7 +323,7 @@ public final class TimeSeriesUtils {
             periodFileMap.put(period, targetDir + "/" + getFileNameFromPeriod(period));
         }
         log.info("Distribute period IDs for daily period store: {}",
-                String.join(",", periods.stream().map(String::valueOf).collect(Collectors.toList())));
+                periods.stream().map(String::valueOf).collect(Collectors.joining(",")));
 
         // Day -> set<periodIds>
         Map<String, Set<Integer>> failedPeriods = new HashMap<>();
@@ -357,7 +360,7 @@ public final class TimeSeriesUtils {
             Set<Integer> failedPeriodIds = failedPeriods.get(PeriodStrategy.Template.Day.name());
             if (CollectionUtils.isNotEmpty(failedPeriodIds)) {
                 log.error("Period IDs failed to distribute: {}",
-                        String.join(",", failedPeriodIds.stream().map(String::valueOf).collect(Collectors.toList())));
+                        failedPeriodIds.stream().map(String::valueOf).collect(Collectors.joining(",")));
             }
             return failedPeriodIds;
         } catch (Exception e) {

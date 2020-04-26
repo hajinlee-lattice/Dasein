@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.serviceflows.dcp;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -15,6 +16,9 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStep
 public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfiguration {
 
     public static final String WORKFLOW_NAME = "dcpSourceImportWorkflow";
+    public static final String UPLOAD_ID = "UPLOAD_ID";
+    public static final String SOURCE_ID = "SOURCE_ID";
+    public static final String PROJECT_ID = "PROJECT_ID";
 
     public DCPSourceImportWorkflowConfiguration() {
     }
@@ -86,6 +90,11 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
             return this;
         }
         // END: Match
+
+        public Builder inputProperties(Map<String, String> inputProperties) {
+            configuration.setInputProperties(inputProperties);
+            return this;
+        }
 
         public DCPSourceImportWorkflowConfiguration build() {
             configuration.setContainerConfiguration(WORKFLOW_NAME, configuration.getCustomerSpace(),

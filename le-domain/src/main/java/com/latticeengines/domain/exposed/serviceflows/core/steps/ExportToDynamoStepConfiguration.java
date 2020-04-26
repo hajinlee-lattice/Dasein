@@ -1,30 +1,26 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.datafabric.GenericTableEntity;
 
-public class ExportToDynamoStepConfiguration extends MicroserviceStepConfiguration {
+public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfiguration {
 
-    @NotNull
-    @JsonProperty("dynamoSignature")
-    private String dynamoSignature;
-
-    @JsonProperty("migrateTable")
-    private Boolean migrateTable;
-
-    public String getDynamoSignature() {
-        return dynamoSignature;
+    @Override
+    public Class<?> getEntityClass() {
+        return GenericTableEntity.class;
     }
 
-    public void setDynamoSignature(String dynamoSignature) {
-        this.dynamoSignature = dynamoSignature;
+    @Override
+    public String getRepoName() {
+        return "GenericTable";
     }
 
-    public Boolean getMigrateTable() {
-        return migrateTable;
+    @Override
+    public String getContextKey() {
+        return "TABLES_GOING_TO_DYNAMO";
     }
 
-    public void setMigrateTable(Boolean migrateTable) {
-        this.migrateTable = migrateTable;
+    @Override
+    public boolean needKeyPrefix() {
+        return true;
     }
 }
