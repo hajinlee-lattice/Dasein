@@ -97,6 +97,9 @@ public class FieldDefinition {
     @JsonProperty
     protected Boolean nullable = true;
 
+    @JsonProperty
+    protected String defaultValue;
+
     // TODO(jwinter): Figure out where there is an enum (ApprovedUsage) and a class (ModelingMetadata) with similar
     //     defined values for this field.
     // Defined in Spec
@@ -312,6 +315,14 @@ public class FieldDefinition {
         this.nullable = nullable;
     }
 
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
     public CDLExternalSystemType getExternalSystemType() {
         return externalSystemType;
     }
@@ -353,6 +364,10 @@ public class FieldDefinition {
         }
         output += "\nrequired: " + required;
         output += "\nnullable: " + nullable;
+        output += "\ndefaultValue:";
+        if (StringUtils.isNotBlank(defaultValue)) {
+            output += String.join(" ", defaultValue);
+        }
         output += "\napprovedUsage:";
         if (CollectionUtils.isNotEmpty(approvedUsage)) {
             output += String.join(" ", approvedUsage);
@@ -408,6 +423,13 @@ public class FieldDefinition {
                     return false;
                 }
             } else if (!this.nullable.equals(definition.nullable)) {
+                return false;
+            }
+            if (this.defaultValue == null) {
+                if (definition.defaultValue != null) {
+                    return false;
+                }
+            } else if (!this.defaultValue.equals(definition.defaultValue)) {
                 return false;
             }
             if (this.approvedUsage == null) {

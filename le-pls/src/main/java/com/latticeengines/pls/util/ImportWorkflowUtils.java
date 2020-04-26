@@ -296,6 +296,7 @@ public final class ImportWorkflowUtils {
         definition.setMatchingColumnNames(attribute.getAllowedDisplayNames());
         definition.setRequired(attribute.getRequired());
         definition.setNullable(attribute.isNullable());
+        definition.setDefaultValue(attribute.getDefaultValueStr());
         definition.setApprovedUsage(attribute.getApprovedUsage());
         definition.setLogicalDataType(attribute.getLogicalDataType());
         try {
@@ -318,6 +319,7 @@ public final class ImportWorkflowUtils {
         definition2.setFieldType(definition1.getFieldType());
         definition2.setRequired(definition1.isRequired());
         definition2.setNullable(definition1.isNullable());
+        definition2.setDefaultValue(definition1.getDefaultValue());
         definition2.setApprovedUsage(definition1.getApprovedUsage());
         definition2.setLogicalDataType(definition1.getLogicalDataType());
         definition2.setFundamentalType(definition1.getFundamentalType());
@@ -681,6 +683,7 @@ public final class ImportWorkflowUtils {
         definition.setScreenName(specDefinition.getScreenName());
         definition.setRequired(specDefinition.isRequired());
         definition.setNullable(specDefinition.isNullable());
+        definition.setDefaultValue(specDefinition.getDefaultValue());
         if (autodetectedDefinition != null) {
             definition.setColumnName(autodetectedDefinition.getColumnName());
             definition.setInCurrentImport(true);
