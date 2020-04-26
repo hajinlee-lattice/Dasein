@@ -59,7 +59,7 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                 .uploadId(uploadId) //
                 .statsPid(statsId) //
                 .inputProperties(ImmutableMap.<String, String>builder()
-                        .put(DCPSourceImportWorkflowConfiguration.UPLOAD_ID, String.valueOf(uploadPid)) //
+                        .put(DCPSourceImportWorkflowConfiguration.UPLOAD_ID, uploadId) //
                         .put(DCPSourceImportWorkflowConfiguration.SOURCE_ID, sourceId) //
                         .put(DCPSourceImportWorkflowConfiguration.PROJECT_ID, projectId)
                         .build())
