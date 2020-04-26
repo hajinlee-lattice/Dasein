@@ -46,7 +46,7 @@ public class UploadResource {
     @PostMapping("/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation(value = "create an upload")
-    public Upload createUpload(@PathVariable String customerSpace,
+    public UploadDetails createUpload(@PathVariable String customerSpace,
                                       @PathVariable String sourceId, @RequestBody UploadConfig uploadConfig) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         if (uploadConfig == null) {
@@ -78,68 +78,59 @@ public class UploadResource {
         return uploadService.getUploadByUploadId(customerSpace, uploadId);
     }
 
-    @GetMapping("/pid/{pid}")
-    @ResponseBody
-    @ApiOperation(value = "Get upload record by pid")
-    public Upload getUploadByPid(@PathVariable String customerSpace, @PathVariable Long pid) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        log.info(String.format("Get upload for customer %s, with pid %d", customerSpace, pid));
-        return uploadService.getUpload(customerSpace, pid);
-    }
-
-    @PutMapping("/update/{uploadPid}/matchResult/{tableName}")
+    @PutMapping("/update/{uploadId}/matchResult/{tableName}")
     @ResponseBody
     @ApiOperation(value = "update the upload config")
     public void registerMatchResult(@PathVariable String customerSpace,
-                                    @PathVariable Long uploadPid,
+                                    @PathVariable String uploadId,
                                     @PathVariable String tableName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        uploadService.registerMatchResult(customerSpace, uploadPid, tableName);
+        uploadService.registerMatchResult(customerSpace, uploadId, tableName);
     }
 
-    @PutMapping("/update/{uploadPid}/matchCandidates/{tableName}")
+    @PutMapping("/update/{uploadId}/matchCandidates/{tableName}")
     @ResponseBody
     @ApiOperation(value = "update the upload config")
     public void registerMatchCandidates(@PathVariable String customerSpace,
-                                    @PathVariable Long uploadPid,
+                                    @PathVariable String uploadId,
                                     @PathVariable String tableName) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        uploadService.registerMatchCandidates(customerSpace, uploadPid, tableName);
+        uploadService.registerMatchCandidates(customerSpace, uploadId, tableName);
     }
 
-    @PutMapping("/update/{uploadPid}/config")
+    @PutMapping("/update/{uploadId}/config")
     @ResponseBody
     @ApiOperation(value = "update the upload config")
     public void updateConfig(@PathVariable String customerSpace,
-                             @PathVariable Long uploadPid,
+                             @PathVariable String uploadId,
                              @RequestBody UploadConfig uploadConfig) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        uploadService.updateUploadConfig(customerSpace, uploadPid, uploadConfig);
+        uploadService.updateUploadConfig(customerSpace, uploadId, uploadConfig);
     }
 
-    @PutMapping("/update/{uploadPid}/status/{status}")
+    @PutMapping("/update/{uploadId}/status/{status}")
     @ResponseBody
     @ApiOperation(value = "update the upload status")
     public void updateStatus(@PathVariable String customerSpace,
-                             @PathVariable Long uploadPid,
+                             @PathVariable String uploadId,
                              @PathVariable Upload.Status status) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        uploadService.updateUploadStatus(customerSpace, uploadPid, status);
+        uploadService.updateUploadStatus(customerSpace, uploadId, status);
     }
 
-    @PutMapping("/{pid}/stats/{statsId}")
+    @PutMapping("/{uploadId}/stats/{statsId}")
     @ResponseBody
     @ApiOperation(value = "Get upload record by pid")
-    public void updateStatsContent(@PathVariable String customerSpace, @PathVariable Long pid,
+    public void updateStatsContent(@PathVariable String customerSpace, @PathVariable String uploadId,
                                     @PathVariable Long statsId, @RequestBody UploadStats uploadStats) {
-        uploadService.updateStatistics(pid, statsId, uploadStats);
+        uploadService.updateStatistics(uploadId, statsId, uploadStats);
     }
 
-    @PutMapping("/{pid}/latest-stats/{statsId}")
+    @PutMapping("/{uploadId}/latest-stats/{statsId}")
     @ResponseBody
     @ApiOperation(value = "Get upload record by pid")
-    public Upload setLatestStats(@PathVariable String customerSpace, @PathVariable Long pid, @PathVariable Long statsId) {
-        return uploadService.setLatestStatistics(pid, statsId);
+    public UploadDetails setLatestStats(@PathVariable String customerSpace, @PathVariable String uploadId, @PathVariable Long statsId) {
+        return uploadService.setLatestStatistics(uploadId, statsId);
     }
 
     @PostMapping("/startimport")

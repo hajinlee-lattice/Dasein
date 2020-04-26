@@ -41,25 +41,25 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testCreateGetUpdate() {
-        List<Upload> uploads = createUploads();
-        Upload upload1 = uploads.get(0);
-        Upload uploadx = uploadService.getUpload(mainCustomerSpace, upload1.getPid());
+        List<UploadDetails> uploads = createUploads();
+        UploadDetails upload1 = uploads.get(0);
+        UploadDetails uploadx = uploadService.getUploadByUploadId(mainCustomerSpace, upload1.getUploadId());
         Assert.assertNotNull(uploadx);
-        Assert.assertEquals(uploadx.getPid(), upload1.getPid());
+        Assert.assertEquals(uploadx.getUploadId(), upload1.getUploadId());
 
         updateUploadStats(upload1);
         updateMatchResultTable(upload1);
     }
 
-    private List<Upload> createUploads() {
+    private List<UploadDetails> createUploads() {
         String sourceId1 = "sourceId1";
         String sourceId2 = "sourceId2";
-        Upload upload1 = uploadService.createUpload(mainCustomerSpace, sourceId1, null);
-        Upload upload2 = uploadService.createUpload(mainCustomerSpace, sourceId1, null);
-        Upload upload3 = uploadService.createUpload(mainCustomerSpace, sourceId2, null);
-        Assert.assertNotNull(upload1.getPid());
-        Assert.assertNotNull(upload2.getPid());
-        Assert.assertNotNull(upload3.getPid());
+        UploadDetails upload1 = uploadService.createUpload(mainCustomerSpace, sourceId1, null);
+        UploadDetails upload2 = uploadService.createUpload(mainCustomerSpace, sourceId1, null);
+        UploadDetails upload3 = uploadService.createUpload(mainCustomerSpace, sourceId2, null);
+        Assert.assertNotNull(upload1.getUploadId());
+        Assert.assertNotNull(upload2.getUploadId());
+        Assert.assertNotNull(upload3.getUploadId());
         List<UploadDetails> uploads = uploadService.getUploads(mainCustomerSpace, sourceId1);
         Assert.assertTrue(CollectionUtils.isNotEmpty(uploads));
         Assert.assertEquals(uploads.size(), 2);
@@ -69,8 +69,8 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         });
         UploadConfig uploadConfig = new UploadConfig();
         uploadConfig.setDropFilePath("DummyPath");
-        uploadService.updateUploadConfig(mainCustomerSpace, upload1.getPid(), uploadConfig);
-        uploadService.updateUploadStatus(mainCustomerSpace, upload2.getPid(), Upload.Status.IMPORT_STARTED);
+        uploadService.updateUploadConfig(mainCustomerSpace, upload1.getUploadId(), uploadConfig);
+        uploadService.updateUploadStatus(mainCustomerSpace, upload2.getUploadId(), Upload.Status.IMPORT_STARTED);
         uploads = uploadService.getUploads(mainCustomerSpace, sourceId1);
         Assert.assertEquals(uploads.size(), 2);
         uploads.forEach(upload -> {
@@ -83,10 +83,10 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         return Arrays.asList(upload1, upload2);
     }
 
-    private void updateMatchResultTable(Upload upload) {
+    private void updateMatchResultTable(UploadDetails upload) {
         Table table = createTable();
-        uploadService.registerMatchResult(mainCustomerSpace, upload.getPid(), table.getName());
-        Upload uploadWithTable = uploadService.getUpload(mainCustomerSpace, upload.getPid());
+        uploadService.registerMatchResult(mainCustomerSpace, upload.getUploadId(), table.getName());
+        UploadDetails uploadWithTable = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
         String matchedTableName = uploadWithTable.getMatchResultTableName();
         Assert.assertEquals(matchedTableName, table.getName());
         Table matchedTable = tableEntityMgr.findByName(matchedTableName);
@@ -94,8 +94,8 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertEquals(matchedTable.getTenant().getId(), mainTestTenant.getId());
         Assert.assertEquals(matchedTable.getAttributes().size(), 1);
         Table table2 = createTable();
-        uploadService.registerMatchResult(mainCustomerSpace, upload.getPid(), table2.getName());
-        uploadWithTable = uploadService.getUpload(mainCustomerSpace, upload.getPid());
+        uploadService.registerMatchResult(mainCustomerSpace, upload.getUploadId(), table2.getName());
+        uploadWithTable = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
         matchedTableName = uploadWithTable.getMatchResultTableName();
         Assert.assertEquals(matchedTableName, table2.getName());
         table = tableEntityMgr.findByName(table.getName());
@@ -103,7 +103,7 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         Assert.assertNotNull(table.getRetentionPolicy());
     }
 
-    private void updateUploadStats(Upload upload) {
+    private void updateUploadStats(UploadDetails upload) {
         Long workflowId = createFakeWorkflow(mainTestTenant.getPid());
 
         UploadStatsContainer container0 = new UploadStatsContainer();
@@ -114,20 +114,20 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         stats.setImportStats(importStats);
         container0.setStatistics(stats);
 
-        UploadStatsContainer container = uploadService.appendStatistics(upload.getPid(), container0);
+        UploadStatsContainer container = uploadService.appendStatistics(upload.getUploadId(), container0);
         Assert.assertNotNull(container);
         Assert.assertNotNull(container.getPid());
         Assert.assertEquals(container.getWorkflowPid(), workflowId);
 
-        Upload upload2 = uploadService.getUpload(mainCustomerSpace, upload.getPid());
+        UploadDetails upload2 = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
         Assert.assertNull(upload2.getStatistics());
 
-        upload2 = uploadService.setLatestStatistics(upload.getPid(), container.getPid());
+        upload2 = uploadService.setLatestStatistics(upload.getUploadId(), container.getPid());
         Assert.assertNotNull(upload2.getStatistics());
         RetryTemplate retry = RetryUtils.getRetryTemplate(5,
                 Collections.singleton(AssertionError.class), null);
-        Upload upload3 = retry.execute(ctx -> {
-            Upload u = uploadService.getUpload(mainCustomerSpace, upload.getPid());
+        UploadDetails upload3 = retry.execute(ctx -> {
+            UploadDetails u = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
             Assert.assertNotNull(u.getStatistics());
             return u;
         });
@@ -142,12 +142,12 @@ public class UploadServiceImplTestNG extends DCPFunctionalTestNGBase {
         importStats.setErrorCnt(3L);
         stats.setImportStats(importStats);
         container1.setStatistics(stats);
-        uploadService.appendStatistics(upload.getPid(), container1);
+        uploadService.appendStatistics(upload.getUploadId(), container1);
         Assert.assertNotEquals(container1.getPid(), container.getPid());
-        Upload upload4 = uploadService.setLatestStatistics(upload.getPid(), container1.getPid());
+        UploadDetails upload4 = uploadService.setLatestStatistics(upload.getUploadId(), container1.getPid());
         Assert.assertEquals(upload4.getStatistics().getImportStats().getErrorCnt(), Long.valueOf(3));
         retry.execute(ctx -> {
-            Upload u = uploadService.getUpload(mainCustomerSpace, upload.getPid());
+            UploadDetails u = uploadService.getUploadByUploadId(mainCustomerSpace, upload.getUploadId());
             Assert.assertNotNull(u.getStatistics());
             Assert.assertEquals(u.getStatistics().getImportStats().getErrorCnt(), Long.valueOf(3));
             return u;

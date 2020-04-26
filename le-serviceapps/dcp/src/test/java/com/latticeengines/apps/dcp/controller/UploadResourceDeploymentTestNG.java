@@ -90,7 +90,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         String importedFilePath = uploadDirKey + uploadTS + "/processed/file2.csv";
         String rawPath = uploadDirKey + uploadTS + "/raw/file3.csv";
         config.setUploadImportedErrorFilePath(errorPath);
-        Upload upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
+        UploadDetails upload = uploadProxy.createUpload(mainCustomerSpace, source.getSourceId(), config);
         Assert.assertEquals(upload.getStatus(), Upload.Status.NEW);
         UploadConfig returnedConfig = upload.getUploadConfig();
         Assert.assertEquals(returnedConfig.getUploadImportedErrorFilePath(), errorPath);
@@ -101,7 +101,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         config.setUploadRawFilePath(rawPath);
         config.setUploadImportedFilePath(importedFilePath);
         config.setUploadTSPrefix(uploadTS);
-        uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getPid(), config);
+        uploadProxy.updateUploadConfig(mainCustomerSpace, upload.getUploadId(), config);
         List<UploadDetails> uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);
@@ -112,7 +112,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(retrievedConfig.getUploadImportedErrorFilePath(), errorPath);
         Assert.assertEquals(retrievedConfig.getUploadRawFilePath(), rawPath);
 
-        uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getPid(), Upload.Status.MATCH_STARTED);
+        uploadProxy.updateUploadStatus(mainCustomerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED);
         uploads = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), Upload.Status.MATCH_STARTED);
         Assert.assertNotNull(uploads);
         Assert.assertEquals(uploads.size(), 1);

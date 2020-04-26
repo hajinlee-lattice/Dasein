@@ -16,23 +16,21 @@ public interface UploadService {
 
     UploadDetails getUploadByUploadId(String customerSpace, String uploadId);
 
-    Upload getUpload(String customerSpace, Long pid);
+    UploadDetails createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig);
 
-    Upload createUpload(String customerSpace, String sourceId, UploadConfig uploadConfig);
+    void registerMatchResult(String customerSpace, String uploadId, String tableName);
 
-    void registerMatchResult(String customerSpace, long uploadPid, String tableName);
+    void registerMatchCandidates(String customerSpace, String uploadId, String tableName);
 
-    void registerMatchCandidates(String customerSpace, long uploadPid, String tableName);
+    void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig);
 
-    void updateUploadConfig(String customerSpace, Long uploadPid, UploadConfig uploadConfig);
+    void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status);
 
-    void updateUploadStatus(String customerSpace, Long uploadPid, Upload.Status status);
+    UploadStatsContainer appendStatistics(String uploadId, UploadStatsContainer container);
 
-    UploadStatsContainer appendStatistics(Long uploadPid, UploadStatsContainer container);
+    void updateStatsWorkflowPid(String uploadId, Long statsTimestamp, Long workflowPid);
 
-    void updateStatsWorkflowPid(Long uploadPid, Long statsTimestamp, Long workflowPid);
+    void updateStatistics(String uploadId, Long statsTimestamp, UploadStats uploadStats);
 
-    void updateStatistics(Long uploadPid, Long statsTimestamp, UploadStats uploadStats);
-
-    Upload setLatestStatistics(Long uploadPid, Long statsTimestamp);
+    UploadDetails setLatestStatistics(String uploadId, Long statsTimestamp);
 }

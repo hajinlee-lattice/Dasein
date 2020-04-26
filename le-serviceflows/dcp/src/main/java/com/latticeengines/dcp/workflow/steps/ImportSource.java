@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
 import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
@@ -87,7 +88,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
     public void execute() {
         log.info("Start import DCP file");
         CustomerSpace customerSpace = configuration.getCustomerSpace();
-        Upload upload = uploadProxy.getUpload(customerSpace.toString(), configuration.getUploadPid());
+        UploadDetails upload = uploadProxy.getUploadByUploadId(customerSpace.toString(), configuration.getUploadId());
         if (upload == null || upload.getUploadConfig() == null) {
             throw new RuntimeException("Cannot find upload configuration for import!");
         }
@@ -102,7 +103,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
     }
 
     private String importTable(DataFeedTask dataFeedTask, DropBoxSummary dropBoxSummary,
-                             Upload upload) {
+                               UploadDetails upload) {
         EaiJobConfiguration importConfig = setupConfiguration(dataFeedTask, dropBoxSummary, upload);
         AppSubmission submission = eaiProxy.submitEaiJob(importConfig);
         String applicationId = submission.getApplicationIds().get(0);
@@ -153,7 +154,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
     }
 
     private S3FileToHdfsConfiguration setupConfiguration(DataFeedTask dataFeedTask, DropBoxSummary dropBoxSummary,
-                                                         Upload upload) {
+                                                         UploadDetails upload) {
         S3FileToHdfsConfiguration s3FileToHdfsConfiguration = new S3FileToHdfsConfiguration();
         List<String> identifiers = new ArrayList<>();
 
@@ -173,7 +174,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         return s3FileToHdfsConfiguration;
     }
 
-    private void updateStats(String customerSpace, String eaiAppId, Upload upload, DropBoxSummary dropBoxSummary) {
+    private void updateStats(String customerSpace, String eaiAppId, UploadDetails upload, DropBoxSummary dropBoxSummary) {
         EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(eaiAppId);
         if (eaiImportJobDetail == null) {
             log.error("No data imported for EAI application: " + eaiAppId);
@@ -191,10 +192,10 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         Table eventTable = registerResultAsATable(eaiImportJobDetail);
         copyErrorFile(customerSpace, upload, dropBoxSummary, eaiImportJobDetail, eventTable.getExtractsDirectory());
 
-        uploadProxy.updateUploadStatus(customerSpace, upload.getPid(), Upload.Status.MATCH_STARTED);
+        uploadProxy.updateUploadStatus(customerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED);
     }
 
-    private void copyErrorFile(String customerSpace, Upload upload, DropBoxSummary dropBoxSummary,
+    private void copyErrorFile(String customerSpace, UploadDetails upload, DropBoxSummary dropBoxSummary,
                                EaiImportJobDetail eaiImportJobDetail, String extractPath) {
         if (eaiImportJobDetail.getIgnoredRows().intValue() > 0) {
             String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
@@ -224,7 +225,7 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
             } catch (IOException e) {
                 throw new RuntimeException("Cannot process Error file!");
             }
-            uploadProxy.updateUploadConfig(customerSpace, upload.getPid(), upload.getUploadConfig());
+            uploadProxy.updateUploadConfig(customerSpace, upload.getUploadId(), upload.getUploadConfig());
         }
     }
 
