@@ -38,6 +38,8 @@ public abstract class BaseExportToDynamoConfiguration extends MicroserviceStepCo
         this.migrateTable = migrateTable;
     }
 
+    public abstract boolean needEmptyFailed();
+
     public abstract Class<?> getEntityClass();
 
     public abstract String getRepoName();
