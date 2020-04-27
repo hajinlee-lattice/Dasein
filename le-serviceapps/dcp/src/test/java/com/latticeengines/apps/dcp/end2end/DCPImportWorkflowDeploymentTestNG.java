@@ -227,6 +227,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private void verifyOutputHeaders(List<String> headers) {
         System.out.println(headers);
         Assert.assertTrue(headers.contains("Company Name"));
+        Assert.assertTrue(headers.contains("Test Date")); // in spec
+        Assert.assertTrue(headers.contains("Test Date 2")); // not in spec
     }
 
     private void verifyDownload(UploadDetails upload) {
