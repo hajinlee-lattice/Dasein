@@ -4,6 +4,9 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 
 public interface SourceService {
 
@@ -17,4 +20,9 @@ public interface SourceService {
 
     Boolean pauseSource(String sourceId);
 
+    FetchFieldDefinitionsResponse fetchFieldDefinitions(String sourceId, String entityType,
+                                                        String importFile) throws Exception;
+
+    ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile,
+                                                              ValidateFieldDefinitionsRequest validateRequest);
 }
