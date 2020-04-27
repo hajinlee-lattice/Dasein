@@ -1,30 +1,37 @@
 #!/usr/bin/env bash
 
 BOOTSTRAP_MODE=$1
-ARTIFACT_DIR=${WSHOME}/le-dev/artifacts
+ARTIFACT_DIR="${WSHOME}"/le-dev/artifacts
 
 if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
     TOMCAT_VERSION=9.0.33
 
-    sudo rm -rf ${CATALINA_HOME}
-    sudo mkdir -p ${CATALINA_HOME} || true
-    sudo chown -R ${USER} ${CATALINA_HOME} || true
+    sudo rm -rf "${CATALINA_HOME}"
+    sudo mkdir -p "${CATALINA_HOME}" || true
+    sudo chown -R ${USER} "${CATALINA_HOME}" || true
 
     if [[ ! -f "${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz" ]]; then
         TOMCAT_TGZ_ARCHIVE_URL="https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
         TOMCAT_TGZ="${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz"
-        wget ${TOMCAT_TGZ_ARCHIVE_URL} -O ${TOMCAT_TGZ}
+	      # if active apache mirror cannot find the version, fall back to archive server
+        wget ${TOMCAT_TGZ_URL} -O ${TOMCAT_TGZ} || wget ${TOMCAT_TGZ_ARCHIVE_URL} -O ${TOMCAT_TGZ}
+	      wget "${TOMCAT_TGZ_ARCHIVE_URL}.sha512" -O "${TOMCAT_TGZ}.sha512" || wget "${TOMCAT_TGZ_ARCHIVE_URL}.sha512" -O "${TOMCAT_TGZ}.sha512"
+	      pushd "${ARTIFACT_DIR}"
+	      if command -v shasum &> /dev/null ; then
+	        shasum -a 512 -c "${TOMCAT_TGZ}.sha512"
+	      fi
+      	popd
     fi
 
-    rm -rf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION} || true
-    tar xzf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C ${ARTIFACT_DIR}
-    cp -rf ${ARTIFACT_DIR}/apache-tomcat-${TOMCAT_VERSION}/* ${CATALINA_HOME}
-    rm -rf ${CATALINA_HOME}/webapps/examples
-    rm -rf ${CATALINA_HOME}/webapps/host-manager
-    rm -rf ${CATALINA_HOME}/webapps/docs
-    rm -rf ${CATALINA_HOME}/webapps/ROOT
+    rm -rf "${ARTIFACT_DIR}"/apache-tomcat-${TOMCAT_VERSION} || true
+    tar xzf "${ARTIFACT_DIR}"/apache-tomcat-${TOMCAT_VERSION}.tar.gz -C "${ARTIFACT_DIR}"
+    cp -rf "${ARTIFACT_DIR}"/apache-tomcat-${TOMCAT_VERSION}/* "${CATALINA_HOME}"
+    rm -rf "${CATALINA_HOME}"/webapps/examples
+    rm -rf "${CATALINA_HOME}"/webapps/host-manager
+    rm -rf "${CATALINA_HOME}"/webapps/docs
+    rm -rf "${CATALINA_HOME}"/webapps/ROOT
 
     UNAME=`uname`
     if [[ "${UNAME}" == 'Darwin' ]]; then
@@ -34,24 +41,24 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
         OPENSSL_PATH=`brew --prefix openssl`
         OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
         echo "You installed openssl ${OPENSSL_VERSION}"
-        pushd ${CATALINA_HOME}/bin
+        pushd "${CATALINA_HOME}"/bin
         tar xzf tomcat-native.tar.gz
         cd tomcat-native-*-src/native
         ./configure \
-            --with-java-home=${JAVA_HOME} \
+            --with-java-home="${JAVA_HOME}" \
             --with-apr=/usr/local/Cellar/apr/${APR_VERSION}/ \
-            --with-ssl=${OPENSSL_PATH}/ \
-            --prefix=${CATALINA_HOME}
+            --with-ssl=/usr/local/Cellar/openssl/${OPENSSL_VERSION} \
+            --prefix="${CATALINA_HOME}"
         make && make install
         popd
     else
         echo "You are on ${UNAME}"
-        pushd ${CATALINA_HOME}/bin
+        pushd "${CATALINA_HOME}"/bin
         tar xzf tomcat-native.tar.gz
         cd tomcat-native-*-src/native
         ./configure \
-            --with-java-home=${JAVA_HOME} \
-            --prefix=${CATALINA_HOME}
+            --with-java-home="${JAVA_HOME}" \
+            --prefix="${CATALINA_HOME}"
         make && make install
         popd
     fi
@@ -70,16 +77,16 @@ if [[ "${BOOTSTRAP_MODE}" = "bootstrap" ]]; then
 fi
 
 for file in 'server.xml' 'web.xml' 'context.xml' 'catalina.properties' 'tomcat-users.xml'; do
-    cp -f ${CATALINA_HOME}/conf/${file} ${CATALINA_HOME}/conf/${file}.BAK
-    cp -f ${WSHOME}/le-dev/tomcat/${file} ${CATALINA_HOME}/conf/${file}
+    cp -f "${CATALINA_HOME}"/conf/${file} "${CATALINA_HOME}"/conf/${file}.BAK
+    cp -f "${WSHOME}"/le-dev/tomcat/${file} "${CATALINA_HOME}"/conf/${file}
 done
 
-cp ${CATALINA_HOME}/bin/catalina.sh ${CATALINA_HOME}/bin/catalina.sh.BAK
-cp ${WSHOME}/le-dev/tomcat/catalina.sh ${CATALINA_HOME}/bin/catalina.sh
+cp "${CATALINA_HOME}"/bin/catalina.sh "${CATALINA_HOME}"/bin/catalina.sh.BAK
+cp "${WSHOME}"/le-dev/tomcat/catalina.sh "${CATALINA_HOME}"/bin/catalina.sh
 
-mkdir -p ${CATALINA_HOME}/webapps/ms || true
-cp -r ${CATALINA_HOME}/webapps/manager ${CATALINA_HOME}/webapps/ms
-chmod -R 775 ${CATALINA_HOME}/webapps/ms/manager
+mkdir -p "${CATALINA_HOME}"/webapps/ms || true
+cp -r "${CATALINA_HOME}"/webapps/manager "${CATALINA_HOME}"/webapps/ms
+chmod -R 775 "${CATALINA_HOME}"/webapps/ms/manager
 
 sudo mkdir -p /var/log/ledp || true
 sudo chmod a+w /var/log/ledp
