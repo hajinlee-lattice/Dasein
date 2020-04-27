@@ -65,7 +65,7 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
 
     private String tableName;
 
-    @BeforeClass(groups = "functional")
+    @BeforeClass(groups = "functional", enabled = false)
     private void setup() {
         tableName = "TimelineQueryServiceImplTestNG_" + env + "_" + stack + signature;
         dynamoService.deleteTable(tableName);
@@ -114,14 +114,43 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
 
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     public void testTimelineQuery() {
+        ((ActivityTimelineQueryServiceImpl) activityTimelineQueryService)
+                .setTableName("TimelineQueryServiceImplTestNG_dev_jlmehta");
         ActivityTimelineQuery activityTimelineQuery = new ActivityTimelineQuery();
         activityTimelineQuery.setMainEntity(BusinessEntity.Account);
         activityTimelineQuery.setEntityId("1");
         activityTimelineQuery.setStartTimeStamp(Instant.now().minus(90, ChronoUnit.DAYS));
         activityTimelineQuery.setEndTimeStamp(Instant.now());
         DataPage result = activityTimelineQueryService.getData(TENANT_ID, null, activityTimelineQuery);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
+    }
+
+    @Test(groups = "functional")
+    public void testTimelineQuery1() {
+        TimeLineProxy spiedTimelineProxy = spy(new TimeLineProxy());
+        TimeLine tl = new TimeLine();
+        tl.setTimelineId("slin_tlimeline_1_Account360");
+        doReturn(tl).when(spiedTimelineProxy).findByEntity("slin_tlimeline_1", BusinessEntity.Account);
+        ((ActivityTimelineQueryServiceImpl) activityTimelineQueryService).setTimeLineProxy(spiedTimelineProxy);
+
+        DataCollectionProxy spiedDCProxy = spy(new DataCollectionProxy());
+        DataCollectionStatus dcs = new DataCollectionStatus();
+        dcs.setDetail(new DataCollectionStatusDetail());
+        dcs.getDetail().setTimelineVersionMap(new HashMap<>());
+        dcs.getDetail().getTimelineVersionMap().put("slin_tlimeline_1_Account360", "1587775242801");
+        doReturn(dcs).when(spiedDCProxy).getOrCreateDataCollectionStatus("slin_tlimeline_1", null);
+        ((ActivityTimelineQueryServiceImpl) activityTimelineQueryService).setDataCollectionProxy(spiedDCProxy);
+
+        ActivityTimelineQuery activityTimelineQuery = new ActivityTimelineQuery();
+        activityTimelineQuery.setMainEntity(BusinessEntity.Account);
+        activityTimelineQuery.setEntityId("due0j2mlehd7zv1u");
+        activityTimelineQuery.setStartTimeStamp(Instant.now().minus(90, ChronoUnit.DAYS));
+        activityTimelineQuery.setEndTimeStamp(Instant.now());
+
+        DataPage result = activityTimelineQueryService.getData("slin_tlimeline_1", null, activityTimelineQuery);
         Assert.assertNotNull(result);
         Assert.assertTrue(CollectionUtils.isNotEmpty(result.getData()));
     }
