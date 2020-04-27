@@ -3,6 +3,7 @@ package com.latticeengines.pls.end2end;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -522,17 +523,21 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
         // Two of them have Contact System Id : Test_SalesforceSystem, Test_SalesforceSystemLead
         // One of them has Leads System Id(secondary Id) : Test_SalesforceSystemLead
         List<S3ImportTemplateDisplay> templateList = cdlService.getS3ImportTemplate(mainTestTenant.getId(), "", null);
-        S3ImportTemplateDisplay otherSystemAccount =
-                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
-                        "Test_OtherSystem_AccountData")).findFirst().get();
+        Optional<S3ImportTemplateDisplay> otherSystemAccountOpt = templateList.stream()
+                .filter(templateDisplay -> templateDisplay.getFeedType().equals("Test_OtherSystem_AccountData"))
+                .findFirst();
+        Assert.assertTrue(otherSystemAccountOpt.isPresent());
+        S3ImportTemplateDisplay otherSystemAccount = otherSystemAccountOpt.get();
         Assert.assertNotNull(otherSystemAccount);
         List<S3ImportSystem> filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
                 true, false, otherSystemAccount);
         Assert.assertEquals(filteredS3ImportSystems.size(), 2);
 
-        S3ImportTemplateDisplay sfSystemContact =
-                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
-                        "Test_SalesforceSystemLead_ContactData")).findFirst().get();
+        Optional<S3ImportTemplateDisplay> sfSystemContactOpt = templateList.stream()
+                .filter(templateDisplay -> templateDisplay.getFeedType().equals("Test_SalesforceSystemLead_ContactData"))
+                .findFirst();
+        Assert.assertTrue(sfSystemContactOpt.isPresent());
+        S3ImportTemplateDisplay sfSystemContact = sfSystemContactOpt.get();
         filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
                 false, true, sfSystemContact);
         Assert.assertEquals(filteredS3ImportSystems.size(), 1);
@@ -541,12 +546,66 @@ public class CSVImportSystemDeploymentTestNG extends CSVFileImportDeploymentTest
                 true, false, sfSystemContact);
         Assert.assertEquals(filteredS3ImportSystems.size(), 3);
 
-        S3ImportTemplateDisplay sfSystemLead =
-                templateList.stream().filter(templateDisplay -> templateDisplay.getFeedType().equals(
-                        "Test_SalesforceSystemLead_LeadsData")).findFirst().get();
+        Optional<S3ImportTemplateDisplay> sfSystemLeadOpt = templateList.stream()
+                .filter(templateDisplay -> templateDisplay.getFeedType().equals("Test_SalesforceSystemLead_LeadsData"))
+                .findFirst();
+        Assert.assertTrue(sfSystemLeadOpt.isPresent());
+        S3ImportTemplateDisplay sfSystemLead = sfSystemLeadOpt.get();
         filteredS3ImportSystems = cdlService.getS3ImportSystemWithFilter(mainTestTenant.getId(),
                 false, true, sfSystemLead);
         Assert.assertEquals(filteredS3ImportSystems.size(), 2);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testGetSystemList")
+    public void testMarketoSystem() {
+        // 1. create Marketo system
+        cdlService.createS3ImportSystem(mainTestTenant.getId(), "MKTO_System", S3ImportSystem.SystemType.Marketo,
+                false);
+        List<S3ImportSystem> systemList = cdlService.getAllS3ImportSystem(mainTestTenant.getId());
+        Optional<S3ImportSystem> first = systemList.stream()
+                .filter(s3ImportSystem ->
+                        S3ImportSystem.SystemType.Marketo.equals(s3ImportSystem.getSystemType()) && "MKTO_System".equals(s3ImportSystem.getDisplayName()))
+                .findFirst();
+        Assert.assertTrue(first.isPresent());
+        S3ImportSystem mktoSystem = first.get();
+        String mktoLeadDFId = createMKTOContactTemplateAndVerify(mktoSystem.getName());
+        mktoSystem = cdlService.getS3ImportSystem(mainTestTenant.getId(), mktoSystem.getName());
+        Assert.assertNotNull(mktoSystem);
+        Assert.assertFalse(StringUtils.isEmpty(mktoSystem.getContactSystemId()));
+        Table mktoContact = dataFeedProxy.getDataFeedTask(mainTestTenant.getId(), mktoLeadDFId).getImportTemplate();
+        Assert.assertNotNull(mktoContact);
+        Attribute leadId = mktoContact.getAttribute(mktoSystem.getContactSystemId());
+        Assert.assertEquals(leadId.getDisplayName(), "S_Contact_For_PlatformTest");
+    }
+
+    private String createMKTOContactTemplateAndVerify(String mktoSystemName) {
+        SourceFile mktSourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                CONTACT_SOURCE_FILE, EntityType.Leads,
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
+        String mktLeadFeedType = mktoSystemName + SPLIT_CHART + EntityType.Leads.getDefaultFeedTypeName();
+
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(mktSourceFile.getName(), ENTITY_CONTACT, SOURCE, mktLeadFeedType);
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getUserField().equals("S_Contact_For_PlatformTest")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Lead);
+                fieldMapping.setMapToLatticeId(true);
+                fieldMapping.setMappedToLatticeField(true);
+            }
+            if (fieldMapping.getUserField().equals("Account_ID")) {
+                fieldMapping.setIdType(FieldMapping.IdType.Account);
+                fieldMapping.setMappedToLatticeField(true);
+            }
+        }
+        modelingFileMetadataService.resolveMetadata(mktSourceFile.getName(), fieldMappingDocument, ENTITY_CONTACT, SOURCE,
+                mktLeadFeedType);
+        mktSourceFile = sourceFileService.findByName(mktSourceFile.getName());
+
+        String mktoLeadDFId = cdlService.createS3Template(customerSpace, mktSourceFile.getName(),
+                SOURCE, ENTITY_CONTACT, mktLeadFeedType, DataFeedTask.SubType.Lead.name(), "LeadsData");
+        Assert.assertNotNull(mktSourceFile);
+        Assert.assertNotNull(mktoLeadDFId);
+        return mktoLeadDFId;
     }
 
 }

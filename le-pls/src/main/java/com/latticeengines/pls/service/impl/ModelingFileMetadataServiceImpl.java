@@ -459,7 +459,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
         List<String> unmappedUserFields = fieldMappings.stream()
                 .filter(fieldMapping -> StringUtils.isNotBlank(fieldMapping.getUserField())
-                        && StringUtils.isBlank(fieldMapping.getMappedField())).map(fieldMapping -> fieldMapping.getUserField())
+                        && StringUtils.isBlank(fieldMapping.getMappedField())).map(FieldMapping::getUserField)
                 .collect(Collectors.toList());
         Set<String> mappedFields = fieldMappings.stream().map(FieldMapping::getMappedField).filter(Objects::nonNull)
                 .collect(Collectors.toSet());
@@ -941,16 +941,42 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 }
                 break;
             case Lead:
-                String leadSystemId = importSystem.getSecondaryContactId(entityType);
-                if (StringUtils.isEmpty(leadSystemId)) {
-                    leadSystemId = importSystem.generateContactSystemId();
-                    importSystem.addSecondaryContactId(entityType, leadSystemId);
+                if (EntityType.Leads.equals(importSystem.getSystemType().getPrimaryContact())) {
+                    // This is primary System
+                    String leadSystemId = importSystem.getContactSystemId();
+                    importSystem.setMapToLatticeContact(importSystem.isMapToLatticeContact() || fieldMapping.isMapToLatticeId());
                     cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
-                    fieldMapping.setMappedToLatticeField(false);
+                    importSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
+                    if (StringUtils.isEmpty(leadSystemId)) {
+                        leadSystemId = importSystem.generateContactSystemId();
+                        importSystem.setContactSystemId(leadSystemId);
+                        cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                        fieldMapping.setMappedToLatticeField(false);
+                    } else {
+                        fieldMapping.setMappedToLatticeField(leadSystemId.equals(fieldMapping.getMappedField()));
+                    }
+                    fieldMapping.setMappedField(leadSystemId);
+                    if (importSystem.isMapToLatticeContact()) {
+                        FieldMapping customerLatticeId = new FieldMapping();
+                        customerLatticeId.setUserField(fieldMapping.getUserField());
+                        customerLatticeId.setMappedField(InterfaceName.CustomerContactId.name());
+                        customerLatticeId.setFieldType(fieldMapping.getFieldType());
+                        customerLatticeIdList.add(customerLatticeId);
+                    }
+
                 } else {
-                    fieldMapping.setMappedToLatticeField(leadSystemId.equals(fieldMapping.getMappedField()));
+                    // secondary System
+                    String leadSystemId = importSystem.getSecondaryContactId(entityType);
+                    if (StringUtils.isEmpty(leadSystemId)) {
+                        leadSystemId = importSystem.generateContactSystemId();
+                        importSystem.addSecondaryContactId(entityType, leadSystemId);
+                        cdlService.updateS3ImportSystem(customerSpace.toString(), importSystem);
+                        fieldMapping.setMappedToLatticeField(false);
+                    } else {
+                        fieldMapping.setMappedToLatticeField(leadSystemId.equals(fieldMapping.getMappedField()));
+                    }
+                    fieldMapping.setMappedField(leadSystemId);
                 }
-                fieldMapping.setMappedField(leadSystemId);
                 break;
         }
     }
@@ -1413,7 +1439,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public ValidateFieldDefinitionsResponse validateFieldDefinitions(String systemName, String systemType,
                                                                      String systemObject, String importFile,
-                                                                     ValidateFieldDefinitionsRequest validateRequest) throws Exception {
+                                                                     ValidateFieldDefinitionsRequest validateRequest) {
 
         validateFieldDefinitionRequestParameters("Validate", systemName, systemType, systemObject, importFile);
 
