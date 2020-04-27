@@ -120,11 +120,13 @@ public class HdfsToS3PathBuilderUnitTestNG {
         String result = builder.convertS3CampaignExportDir(csvExportFile, "bucket2", "tenantId2", "playId", "playName");
         Assert.assertTrue(result.startsWith("s3n://bucket2/dropfolder/tenantId2/export/campaigns/playName-playId-"));
         Assert.assertTrue(result.endsWith(".csv"));
+        Assert.assertTrue(result.contains("Recommendations_2019-05-10_20-59-40_UTC.csv"));
 
         String jsonExportFile = "/Pods/Default/Contracts/JLM_1557521565766/Tenants/JLM_1557521565766/Spaces/Production/Data/Files/Exports/FILE_SYSTEM/AWS_S3/Lattice_S3/play__5d328d85-51b6-4b97-a542-c7b866ee986f/launch__9673cea8-fe65-4d57-bc47-7a49d31efb1e/Recommendations_2019-05-10_20-59-40_UTC.json";
         result = builder.convertS3CampaignExportDir(jsonExportFile, "bucket2", "tenantId2", "playId", "playName");
         Assert.assertTrue(result.startsWith("s3n://bucket2/dropfolder/tenantId2/export/campaigns/playName-playId-"));
         Assert.assertTrue(result.endsWith(".json"));
+        Assert.assertTrue(result.contains("Recommendations_2019-05-10_20-59-40_UTC.json"));
     }
 
     @Test(groups = "unit")

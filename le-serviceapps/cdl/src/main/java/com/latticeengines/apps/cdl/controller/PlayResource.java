@@ -33,6 +33,7 @@ import com.latticeengines.apps.cdl.workflow.CampaignLaunchWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.DeltaCampaignLaunchWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -475,6 +476,7 @@ public class PlayResource {
         PlayUtils.validatePlay(play);
 
         PlayLaunch playLaunch = playLaunchService.findByLaunchId(launchId, false);
+        log.info("PlayLaunch=" + JsonUtils.serialize(playLaunch));
         if (playLaunch == null) {
             throw new LedpException(LedpCode.LEDP_32000, new String[] { "No launch found by launchId: " + launchId });
         }
@@ -497,17 +499,24 @@ public class PlayResource {
         }
         playLaunch.setLaunchWorkflowId(workflowPid);
         playLaunch.setLaunchState(LaunchState.Launching);
-        Long totalAvailableRatedAccounts = play.getTargetSegment().getAccounts();
-        Long totalAvailableContacts = play.getTargetSegment().getContacts();
+        Long totalAvailableRatedAccounts = playLaunch.getAccountsSelected() != null ? playLaunch.getAccountsSelected()
+                : play.getTargetSegment().getAccounts();
+        Long totalAvailableContacts = playLaunch.getContactsSelected() != null ? playLaunch.getContactsSelected()
+                : play.getTargetSegment().getContacts();
 
         playLaunch.setAccountsSelected(totalAvailableRatedAccounts != null ? totalAvailableRatedAccounts : 0L);
-        playLaunch.setAccountsSuppressed(0L);
-        playLaunch.setAccountsErrored(0L);
-        playLaunch.setAccountsLaunched(0L);
+        playLaunch.setAccountsSuppressed(
+                playLaunch.getAccountsSuppressed() != null ? playLaunch.getAccountsSuppressed() : 0L);
+        playLaunch.setAccountsErrored(playLaunch.getAccountsErrored() != null ? playLaunch.getAccountsErrored() : 0L);
+        playLaunch
+                .setAccountsLaunched(playLaunch.getAccountsLaunched() != null ? playLaunch.getAccountsLaunched() : 0L);
+
         playLaunch.setContactsSelected(totalAvailableContacts != null ? totalAvailableContacts : 0L);
-        playLaunch.setContactsLaunched(0L);
-        playLaunch.setContactsSuppressed(0L);
-        playLaunch.setContactsErrored(0L);
+        playLaunch
+                .setContactsLaunched(playLaunch.getContactsLaunched() != null ? playLaunch.getContactsLaunched() : 0L);
+        playLaunch.setContactsSuppressed(
+                playLaunch.getContactsSuppressed() != null ? playLaunch.getContactsSuppressed() : 0L);
+        playLaunch.setContactsErrored(playLaunch.getContactsErrored() != null ? playLaunch.getContactsErrored() : 0L);
         playLaunchService.update(playLaunch);
         return workflowPid;
     }

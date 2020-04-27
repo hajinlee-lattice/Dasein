@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
@@ -21,6 +22,8 @@ import com.latticeengines.workflow.listener.LEJobListener;
 
 public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
     private static final Logger log = LoggerFactory.getLogger(CampaignDeltaCalculationWorkflowListener.class);
+
+    private String customerSpace;
 
     @Inject
     private PlayProxy playProxy;
@@ -39,7 +42,7 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
         try {
             if (jobExecution.getStatus().isUnsuccessful()) {
                 WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-                String customerSpace = job.getTenant().getId();
+                customerSpace = job.getTenant().getId();
                 String playId = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_NAME);
                 String channelId = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_LAUNCH_CHANNEL_ID);
                 String launchId = job.getInputContextValue(WorkflowContextConstants.Inputs.PLAY_LAUNCH_ID);
@@ -47,8 +50,8 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
                         "Campaign Delta Calculation Workflow failed for Campaign %s, Channel %s for customer %s",
                         playId, channelId, customerSpace));
                 if (StringUtils.isNotBlank(launchId)) {
-                    playProxy.updatePlayLaunch(customerSpace, playId, launchId, LaunchState.Failed);
                     log.warn(String.format("Updated the launch state to failed for Launch %s ", launchId));
+                    updateFailedPlayLaunch(playId, launchId);
                 } else {
                     PlayLaunch launch = new PlayLaunch();
                     launch.setLaunchState(LaunchState.Failed);
@@ -74,5 +77,38 @@ public class CampaignDeltaCalculationWorkflowListener extends LEJobListener {
         } catch (Exception e) {
             log.error("Failed to execute Listener for CampaignDeltaCalculationWorkflow successfully", e);
         }
+    }
+
+    private void updateFailedPlayLaunch(String playName, String playLaunchId) {
+        PlayLaunch launch = playProxy.getPlayLaunch(customerSpace, playName, playLaunchId);
+        long accountsAdded = getCount(launch.getAccountsAdded());
+        long accountsDeleted = getCount(launch.getAccountsDeleted());
+        long accountsLaunched = getCount(launch.getAccountsLaunched());
+        long contactsAdded = getCount(launch.getContactsAdded());
+        long contactsDeleted = getCount(launch.getContactsDeleted());
+        long contactsLaunched = getCount(launch.getContactsLaunched());
+
+        launch.setLaunchState(LaunchState.Failed);
+        launch.setAccountsAdded(0L);
+        launch.setAccountsDeleted(0L);
+        launch.setAccountsDuplicated(0L);
+        // equal to previous accumulative launched
+        launch.setAccountsLaunched(accountsLaunched - accountsAdded + accountsDeleted);
+        // equal to incremental launched
+        launch.setAccountsErrored(accountsAdded + accountsDeleted);
+        launch.setContactsAdded(0L);
+        launch.setContactsDeleted(0L);
+        launch.setContactsDuplicated(0L);
+        // equal to previous accumulative launched
+        launch.setContactsLaunched(contactsLaunched - contactsAdded + contactsDeleted);
+        // equal to incremental launched
+        launch.setContactsErrored(contactsAdded + contactsDeleted);
+
+        PlayLaunch playLaunch = playProxy.updatePlayLaunch(playLaunchId, playName, playLaunchId, launch);
+        log.info("After updat, PlayLauunch = " + JsonUtils.serialize(playLaunch));
+    }
+
+    private long getCount(Long object) {
+        return object != null ? object.longValue() : 0L;
     }
 }
