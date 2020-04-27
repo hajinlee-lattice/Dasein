@@ -226,7 +226,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
         if (objectMetadata == null) {
             throw new RuntimeException(String.format("Cannot get metadata for file %s : %s", s3Bucket, fileKey));
         }
-        if (objectMetadata.getContentLength() > 10L * GB) {
+        if (objectMetadata.getContentLength() > 100L * GB) {
             throw new LedpException(LedpCode.LEDP_40078);
         }
     }
