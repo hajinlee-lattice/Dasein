@@ -89,8 +89,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     public void testImport() {
         prepareTenant();
 
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-
         DCPImportRequest request = new DCPImportRequest();
         request.setProjectId(projectDetails.getProjectId());
         request.setSourceId(source.getSourceId());
