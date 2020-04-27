@@ -7,6 +7,7 @@
                 "fieldName": "SourceMedium",
                 "fieldType": "TEXT",
                 "screenName": "Referral Source",
+                "columnName": "Referral Source",
                 "matchingColumnNames": [
                     "SOURCE MEDIUM",
                     "Referral Source"

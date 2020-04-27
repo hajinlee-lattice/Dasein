@@ -551,6 +551,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         standardTable.getAttributes().forEach(attribute -> {
             if (StringUtils.isEmpty(attribute.getDisplayName())) {
                 attribute.setDisplayName(attribute.getName());
+                attribute.setSourceAttrName(attribute.getName());
             }
         });
         if (CollectionUtils.isNotEmpty(simpleTemplateMetadata.getCustomerAttributes())) {
@@ -568,6 +569,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         standardTable.getAttributes().forEach(attribute -> {
             if (nameMapping.containsKey(attribute.getName())) {
                 attribute.setDisplayName(nameMapping.get(attribute.getName()).getDisplayName());
+                attribute.setSourceAttrName(nameMapping.get(attribute.getName()).getDisplayName());
                 if (LogicalDataType.Date.equals(attribute.getLogicalDataType())) {
                     if (StringUtils.isNotEmpty(nameMapping.get(attribute.getName()).getDateFormat())) {
                         attribute.setDateFormatString(nameMapping.get(attribute.getName()).getDateFormat());
