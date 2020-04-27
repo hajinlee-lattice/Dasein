@@ -11,8 +11,10 @@ public interface UploadEntityMgr extends BaseEntityMgrRepository<Upload, Long> {
 
     List<Upload> findBySourceIdAndStatus(String sourceId, Upload.Status status);
 
-    Upload findByPid(Long pid);
-
     Upload findByUploadId(String uploadId);
+
+    String findMatchResultTableNameByUploadId(String uploadId);
+
+    String findMatchCandidatesTableNameByUploadId(String uploadId);
 
 }

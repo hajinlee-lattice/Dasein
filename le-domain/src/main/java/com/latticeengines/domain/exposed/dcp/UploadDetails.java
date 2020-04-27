@@ -23,12 +23,6 @@ public class UploadDetails {
     @Enumerated(EnumType.STRING)
     private Upload.Status status;
 
-    @JsonProperty("match_result")
-    private String matchResultTableName;
-
-    @JsonProperty("match_candidates")
-    private String matchCandidatesTableName;
-
     @JsonProperty("upload_config")
     private UploadConfig uploadConfig;
 
@@ -57,22 +51,6 @@ public class UploadDetails {
 
     public void setStatus(Upload.Status status) {
         this.status = status;
-    }
-
-    public String getMatchResultTableName() {
-        return matchResultTableName;
-    }
-
-    public void setMatchResultTableName(String matchResultTableName) {
-        this.matchResultTableName = matchResultTableName;
-    }
-
-    public String getMatchCandidatesTableName() {
-        return matchCandidatesTableName;
-    }
-
-    public void setMatchCandidatesTableName(String matchCandidatesTableName) {
-        this.matchCandidatesTableName = matchCandidatesTableName;
     }
 
     public UploadConfig getUploadConfig() {
