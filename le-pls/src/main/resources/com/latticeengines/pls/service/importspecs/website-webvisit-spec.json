@@ -7,6 +7,7 @@
                 "fieldName": "WebVisitPageUrl",
                 "fieldType": "TEXT",
                 "screenName": "Web Visit Page URL",
+                "columnName": "Web Visit Page URL",
                 "matchingColumnNames": [
                     "PAGE URL",
                     "WEB_VISIT_PAGE_URL"
@@ -22,6 +23,7 @@
                 "fieldName": "WebVisitDate",
                 "fieldType": "DATE",
                 "screenName": "Web Visit Date",
+                "columnName": "Web Visit Date",
                 "matchingColumnNames": [
                     "CREATED DATE",
                     "WEB VISIT DATE"
@@ -38,6 +40,7 @@
                 "fieldName": "UserId",
                 "fieldType": "TEXT",
                 "screenName": "User ID",
+                "columnName": "User ID",
                 "matchingColumnNames": [
                     "ID",
                     "USER ID"
@@ -53,6 +56,7 @@
                 "fieldName": "SourceMedium",
                 "fieldType": "TEXT",
                 "screenName": "Referral Source",
+                "columnName": "Referral Source",
                 "matchingColumnNames": [
                     "SOURCE MEDIUM",
                     "Referral Source"
@@ -68,6 +72,7 @@
                 "fieldName": "CompanyName",
                 "fieldType": "TEXT",
                 "screenName": "Company Name",
+                "columnName": "Company Name",
                 "matchingColumnNames": [
                     "COMPANY",
                     "COMPANY NAME"
@@ -82,6 +87,7 @@
                 "fieldName": "Website",
                 "fieldType": "TEXT",
                 "screenName": "Website",
+                "columnName": "Website",
                 "matchingColumnNames": [
                     "WEBSITE",
                     "DOMAIN"
@@ -97,6 +103,7 @@
                 "fieldName": "City",
                 "fieldType": "TEXT",
                 "screenName": "City",
+                "columnName": "City",
                 "matchingColumnNames": [
                     "CITY",
                     "BILLING CITY"
@@ -111,6 +118,7 @@
                 "fieldName": "State",
                 "fieldType": "TEXT",
                 "screenName": "State",
+                "columnName": "State",
                 "matchingColumnNames": [
                     "STATE",
                     "PROVINCE",
@@ -129,6 +137,7 @@
                 "fieldName": "Country",
                 "fieldType": "TEXT",
                 "screenName": "Country",
+                "columnName": "Country",
                 "matchingColumnNames": [
                     "COUNTRY",
                     "BILLING COUNTRY"
@@ -143,6 +152,7 @@
                 "fieldName": "PostalCode",
                 "fieldType": "TEXT",
                 "screenName": "Postal Code",
+                "columnName": "Postal Code",
                 "matchingColumnNames": [
                     "ZIP",
                     "ZIP CODE",
@@ -161,6 +171,7 @@
                 "fieldName": "DUNS",
                 "fieldType": "TEXT",
                 "screenName": "D-U-N-S",
+                "columnName": "D-U-N-S",
                 "matchingColumnNames": [
                     "DUNS",
                     "DUNS NUMBER"
