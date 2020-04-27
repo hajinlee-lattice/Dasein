@@ -189,6 +189,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     // Number of total account after ProcessAccount test
     static final Long ACCOUNT_PA = 900L;
+    // Number of total account after inserting new accounts ProcessAccount test
+    static final Long ACCOUNT_PA_NEW_ADD = 10L;
+    // Number of total account after updating existing accounts ProcessAccount test
+    static final Long ACCOUNT_PA_UPDATE = 10L;
     // Number of total account after ProcessAccount entity match test
     static final Long ACCOUNT_PA_EM = 900L;
     // Number of total account after ProcessAccount entity match test for GA tenants
@@ -249,6 +253,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     // Number of total contact after ProcessAccount test
     static final Long CONTACT_PA = 900L;
+    // Number of total contact after inserting new contacts ProcessAccount test
+    static final Long CONTACT_PA_NEW_ADD = 10L;
+    // Number of total contact after updating existing contacts ProcessAccount test
+    static final Long CONTACT_PA_UPDATE = 10L;
     // Number of total contact after ProcessAccount entity match test
     static final Long CONTACT_PA_EM = 900L;
     // Number of total contact after ProcessAccount entity match test for GA tenants
