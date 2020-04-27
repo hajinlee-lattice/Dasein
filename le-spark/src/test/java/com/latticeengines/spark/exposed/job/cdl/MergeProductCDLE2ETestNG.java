@@ -201,7 +201,7 @@ public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
         System.out.println(JsonUtils.serialize(report));
         Assert.assertEquals(report.getRecords(), 3);
         // Assert.assertEquals(report.getInvalidRecords(), 0);
-        Assert.assertEquals(report.getBundleProducts(), 3);
+        Assert.assertEquals(report.getBundleProducts(), 2);
         Assert.assertEquals(report.getHierarchyProducts(), 0);
         Assert.assertEquals(report.getAnalyticProducts(), 1);
         Assert.assertEquals(report.getSpendingProducts(), 0);
