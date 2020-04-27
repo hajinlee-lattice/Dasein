@@ -12,7 +12,6 @@ import com.latticeengines.dcp.workflow.steps.FinishImportSource;
 import com.latticeengines.dcp.workflow.steps.ImportSource;
 import com.latticeengines.dcp.workflow.steps.SplitImportMatchResult;
 import com.latticeengines.dcp.workflow.steps.StartImportSource;
-import com.latticeengines.dcp.workflow.steps.export.ExportSourceImportToS3;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -37,9 +36,6 @@ public class DCPSourceImportWorkflow extends AbstractWorkflow<DCPSourceImportWor
     private SplitImportMatchResult splitMatchResult;
 
     @Inject
-    private ExportSourceImportToS3 exportSourceImportToS3;
-
-    @Inject
     private FinishImportSource finish;
 
     @Inject
@@ -52,7 +48,6 @@ public class DCPSourceImportWorkflow extends AbstractWorkflow<DCPSourceImportWor
                 .next(importSource)
                 .next(match)
                 .next(splitMatchResult)
-                .next(exportSourceImportToS3)
                 .next(finish)
                 .listener(sourceImportListener)
                 .build();
