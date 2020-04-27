@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.end2end;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -15,6 +17,9 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(ProcessInvalidProductsDeploymentTestNG.class);
+
 //    private static long FAILED_PRODUCT_IMPORT_COUNT = 0L;
     private static long INITIAL_ACCOUNT_COUNT = 0L;
 
@@ -25,7 +30,7 @@ public class ProcessInvalidProductsDeploymentTestNG extends CDLEnd2EndDeployment
         initialVersion = dataCollectionProxy.getActiveVersion(mainCustomerSpace);
         importData(4, "ProductBundle_MissingProductBundle");
         processAnalyze();
-        verifyProcess(8);
+        verifyProcess(7);
     }
 
     @Test(groups = "deployment", priority = 1)
