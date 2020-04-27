@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.apps.dcp.entitymgr.UpdateStatisticsEntityMgr;
 import com.latticeengines.apps.dcp.entitymgr.UploadEntityMgr;
@@ -83,9 +83,12 @@ public class UploadServiceImpl implements UploadService {
         if (table == null) {
             throw new RuntimeException("Cannot find Upload match result table with name: " + tableName);
         }
-        String oldTableName = upload.getMatchResultTableName();
-        Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
-        boolean hasOldTable = oldTable != null;
+        boolean hasOldTable = false;
+        String oldTableName = getMatchResultTableName(uploadId);
+        if (StringUtils.isNotBlank(oldTableName)) {
+            Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
+            hasOldTable = oldTable != null;
+        }
         upload.setMatchResult(table);
         uploadEntityMgr.update(upload);
         if (hasOldTable) {
@@ -108,9 +111,12 @@ public class UploadServiceImpl implements UploadService {
         if (table == null) {
             throw new RuntimeException("Cannot find Upload match candidates table with name: " + tableName);
         }
-        String oldTableName = upload.getMatchCandidatesTableName();
-        Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
-        boolean hasOldTable = oldTable != null;
+        boolean hasOldTable = false;
+        String oldTableName = getMatchCandidatesTableName(uploadId);
+        if (StringUtils.isNotBlank(oldTableName)) {
+            Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
+            hasOldTable = oldTable != null;
+        }
         upload.setMatchCandidates(table);
         uploadEntityMgr.update(upload);
         if (hasOldTable) {
@@ -190,9 +196,18 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public UploadDetails getUploadByUploadId(String customerSpace, String uploadId) {
-        log.info("Try find upload in " + customerSpace + " with pid " + uploadId);
         Upload upload = expandStatistics(uploadEntityMgr.findByUploadId(uploadId));
         return getUploadDetails(upload);
+    }
+
+    @Override
+    public String getMatchResultTableName(String uploadId) {
+        return uploadEntityMgr.findMatchResultTableNameByUploadId(uploadId);
+    }
+
+    @Override
+    public String getMatchCandidatesTableName(String uploadId) {
+        return uploadEntityMgr.findMatchCandidatesTableNameByUploadId(uploadId);
     }
 
     private UploadStatsContainer findStats(String uploadId, Long statsId) {
@@ -236,8 +251,6 @@ public class UploadServiceImpl implements UploadService {
         details.setStatistics(upload.getStatistics());
         details.setStatus(upload.getStatus());
         details.setUploadConfig(upload.getUploadConfig());
-        details.setMatchResultTableName(upload.getMatchResultTableName());
-        details.setMatchCandidatesTableName(upload.getMatchCandidatesTableName());
         details.setSourceId(upload.getSourceId());
         return details;
     }

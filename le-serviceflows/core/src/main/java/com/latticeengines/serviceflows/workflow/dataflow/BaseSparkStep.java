@@ -139,7 +139,7 @@ public abstract class BaseSparkStep<S extends BaseStepConfiguration> extends Bas
 
     protected boolean exportToS3(Table table) {
         String tableName = table.getName();
-        boolean shouldSkip = getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class);
+        boolean shouldSkip = Boolean.TRUE.equals(getObjectFromContext(SKIP_PUBLISH_PA_TO_S3, Boolean.class));
         if (!shouldSkip) {
             HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder(useEmr);
             String queueName = LedpQueueAssigner.getEaiQueueNameForSubmission();
