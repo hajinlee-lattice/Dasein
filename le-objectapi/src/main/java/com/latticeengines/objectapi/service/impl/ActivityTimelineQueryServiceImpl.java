@@ -1,8 +1,5 @@
 package com.latticeengines.objectapi.service.impl;
 
-import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
-
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +23,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.ActivityTimelineQuery;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 import com.latticeengines.objectapi.service.ActivityTimelineQueryService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
@@ -64,8 +62,15 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
         }
 
         // TODO: switch with timeline version when available
-        String timeLineVersion = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, version)
-                .getApsRollingPeriod();
+        String timeLineVersion = dataCollectionProxy.getOrCreateDataCollectionStatus(customerSpace, version).getDetail()
+                .getTimelineVersionMap().getOrDefault(timeline.getTimelineId(), null);
+
+        if (StringUtils.isBlank(timeLineVersion)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { String.format(
+                            "No registered timeline version found for timelineId: %s, entity %s for customerspace %s",
+                            timeline.getTimelineId(), activityTimelineQuery.getMainEntity().name(), customerSpace) });
+        }
 
         if (StringUtils.isBlank(timeLineVersion)) {
             throw new LedpException(LedpCode.LEDP_32000,
@@ -75,11 +80,12 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
 
         QuerySpec spec = new QuerySpec() //
                 .withHashKey(PARTITION_KEY,
-                        buildPartitionKey(customerSpace, timeline.getTimelineId(), timeLineVersion,
+                        buildPartitionKey(timeline.getTimelineId(), timeLineVersion,
                                 activityTimelineQuery.getEntityId()))
                 .withRangeKeyCondition(new RangeKeyCondition(RANGE_KEY).between(
                         activityTimelineQuery.getStartTimeStamp().toEpochMilli() + "",
-                        activityTimelineQuery.getEndTimeStamp().toEpochMilli() + ""));
+                        activityTimelineQuery.getEndTimeStamp().toEpochMilli() + ""))
+                .withScanIndexForward(false);
         String tableName = TABLE_NAME + signature;
         List<Item> items = dynamoItemService.query(tableName, spec);
 
@@ -87,9 +93,8 @@ public class ActivityTimelineQueryServiceImpl implements ActivityTimelineQuerySe
                 items.stream().map(item -> (Map<String, Object>) item.get(RECORD_KEY)).collect(Collectors.toList()));
     }
 
-    private Object buildPartitionKey(String customerSpace, String timelineId, String timeLineVersion, String entityId) {
-        return MessageFormat.format(PARTITION_KEY_TEMPLATE, shortenCustomerSpace(customerSpace), timelineId,
-                timeLineVersion, entityId);
+    private Object buildPartitionKey(String timelineId, String timeLineVersion, String entityId) {
+        return TimeLineStoreUtils.generatePartitionKey(timeLineVersion, timelineId, entityId);
     }
 
     @VisibleForTesting

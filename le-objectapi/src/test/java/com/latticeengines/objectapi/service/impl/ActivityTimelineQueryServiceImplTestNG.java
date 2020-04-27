@@ -3,7 +3,6 @@ package com.latticeengines.objectapi.service.impl;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
-import java.text.MessageFormat;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -28,9 +27,11 @@ import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.datafabric.GenericTimeseriesRecord;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.query.ActivityTimelineQuery;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
 import com.latticeengines.objectapi.service.ActivityTimelineQueryService;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.TimeLineProxy;
@@ -67,7 +68,9 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
     @BeforeClass(groups = "functional")
     private void setup() {
         tableName = "TimelineQueryServiceImplTestNG_" + env + "_" + stack + signature;
+        dynamoService.deleteTable(tableName);
         if (!dynamoService.hasTable(tableName)) {
+
             long readCapacityUnits = 10;
             long writeCapacityUnits = 10;
             String partitionKeyType = ScalarAttributeType.S.name();
@@ -81,7 +84,7 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
             long end = Instant.now().toEpochMilli();
             for (int i = 0; i < 10000; i++) {
                 GenericTimeseriesRecord event = new GenericTimeseriesRecord();
-                event.setPartitionKey(MessageFormat.format("{0}_{1}_{2}_{3}", TENANT_ID, TIMELINE_ID, VERSION_ID,
+                event.setPartitionKey(TimeLineStoreUtils.generatePartitionKey(VERSION_ID, TIMELINE_ID,
                         Integer.valueOf(i % 2).toString()));
                 event.setRangeKeyTimestamp(Instant.ofEpochMilli(ThreadLocalRandom.current().nextLong(start, end)));
                 event.setRangeKeyID(UUID.randomUUID().toString());
@@ -103,7 +106,9 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
 
         DataCollectionProxy spiedDCProxy = spy(new DataCollectionProxy());
         DataCollectionStatus dcs = new DataCollectionStatus();
-        dcs.setApsRollingPeriod(VERSION_ID);
+        dcs.setDetail(new DataCollectionStatusDetail());
+        dcs.getDetail().setTimelineVersionMap(new HashMap<>());
+        dcs.getDetail().getTimelineVersionMap().put(TIMELINE_ID, VERSION_ID);
         doReturn(dcs).when(spiedDCProxy).getOrCreateDataCollectionStatus(TENANT_ID, null);
         ((ActivityTimelineQueryServiceImpl) activityTimelineQueryService).setDataCollectionProxy(spiedDCProxy);
 
