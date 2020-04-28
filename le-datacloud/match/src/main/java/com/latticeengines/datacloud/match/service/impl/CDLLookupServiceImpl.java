@@ -83,6 +83,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
     public List<ColumnMetadata> parseMetadata(MatchInput input) {
         List<ColumnSelection.Predefined> predefinedList = Collections.emptyList();
         Set<String> extraColumns = Collections.emptySet();
+        boolean isCustomSelection = false;
         if (input.getUnionSelection() != null) {
             if (MapUtils.isNotEmpty(input.getUnionSelection().getPredefinedSelections())) {
                 predefinedList = new ArrayList<>(input.getUnionSelection().getPredefinedSelections().keySet());
@@ -94,6 +95,7 @@ public class CDLLookupServiceImpl implements CDLLookupService {
             predefinedList = Collections.singletonList(input.getPredefinedSelection());
         } else {
             extraColumns = extractColumnNames(input.getCustomSelection());
+            isCustomSelection = true;
         }
 
         String customerSpace = input.getTenant().getId();
@@ -107,8 +109,9 @@ public class CDLLookupServiceImpl implements CDLLookupService {
                 cms.addAll(list);
             }
         }
+        boolean finalIsCustomSelection = isCustomSelection;
         Flux<ColumnMetadata> flux = Flux.fromIterable(cms) //
-                .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()));
+                .filter(cm -> finalIsCustomSelection ? true : !AttrState.Inactive.equals(cm.getAttrState()));
 
         final List<ColumnSelection.Predefined> finalPredefinedList = new ArrayList<>(predefinedList);
         final Set<String> finalExtraColumns = new HashSet<>(extraColumns);
