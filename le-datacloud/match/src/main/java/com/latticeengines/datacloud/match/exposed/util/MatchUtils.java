@@ -51,6 +51,8 @@ public final class MatchUtils {
         mergedStats.setMatchedByMatchKeyCount(stats.getMatchedByMatchKeyCount() + newStats.getMatchedByMatchKeyCount());
         mergedStats.setMatchedByAccountIdCount(stats.getMatchedByAccountIdCount()
                 + newStats.getMatchedByAccountIdCount());
+        mergeNewEntityCnt(mergedStats.getNullEntityIdCount(), stats.getNullEntityIdCount());
+        mergeNewEntityCnt(mergedStats.getNullEntityIdCount(), newStats.getNullEntityIdCount());
         mergeNewEntityCnt(mergedStats.getNewEntityCount(), stats.getNewEntityCount());
         mergeNewEntityCnt(mergedStats.getNewEntityCount(), newStats.getNewEntityCount());
 

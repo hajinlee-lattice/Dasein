@@ -286,13 +286,14 @@ public final class MatchHistoryUtils {
             }
 
             if (!foundResult) {
-                log.error("LDC Match succeeded but Lookup Results has no entry with non-null result");
+                log.debug("LDC Match succeeded but Lookup Results has no entry with non-null result");
                 return null;
             } else if (ldcMatchType == null) {
-                log.error("EntityLdcMatchTypeToTupleList entry " + i + " has null LdcMatchType");
+                log.debug("EntityLdcMatchTypeToTupleList entry " + i + " has null LdcMatchType");
                 return null;
             } else if (ldcMatchedTuple == null) {
-                log.error("EntityLdcMatchTypeToTupleList entry " + i + " has null MatchKeyTuple for type: " + ldcMatchType);
+                log.debug("EntityLdcMatchTypeToTupleList entry " + i + " has null MatchKeyTuple for type: "
+                        + ldcMatchType);
                 return null;
             }
 

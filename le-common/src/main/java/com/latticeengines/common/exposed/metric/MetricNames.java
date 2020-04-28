@@ -37,6 +37,7 @@ public final class MetricNames {
         public static final String METRIC_DISTRIBUTION_RETRY = "match.entity.num.tries.dist.retry";
         public static final String METRIC_HAVE_RETRY_NUM_TRIES = "match.entity.num.tries.count.retry";
         public static final String METRIC_ASSOCIATION_CONFLICT_COUNT = "match.entity.associate.conflict.count";
+        public static final String METRIC_ASSOCIATION_NULL_ID_COUNT = "match.entity.associate.null.id.count";
         public static final String METRIC_ASSOCIATION_CONFLICT_DISTRIBUTION = "match.entity.associate.conflict.dist";
         public static final String METRIC_DYNAMO_THROTTLE = "match.entity.dynamo.throttling.count";
         public static final String METRIC_DYNAMO_CALL_ERROR_DIST = "match.entity.dynamo.call.error.dist";
