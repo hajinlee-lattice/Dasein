@@ -115,6 +115,8 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
     @Value("${aws.region}")
     private String defaultAwsRegion;
 
+    @Value("${aws.dynamo.customer.cmk}")
+    private String customerCMK;
     @Inject
     private SourceService sourceService;
 
@@ -332,7 +334,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
                     awsSecretEncrypted, awsRegion));
             BasicAWSCredentials awsCredentials = new BasicAWSCredentials(CipherUtils.decrypt(awsKeyEncrypted),
                     CipherUtils.decrypt(awsSecretEncrypted));
-            return new DynamoServiceImpl(awsCredentials, null, awsRegion);
+            return new DynamoServiceImpl(awsCredentials, null, awsRegion, customerCMK);
         } else {
             log.info("aws creds parameters are not set, using default dynamo service.");
             return defaultDynamoSerivce;
