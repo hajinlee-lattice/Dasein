@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import java.util.Date;
 import java.util.Set;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
@@ -40,6 +41,8 @@ public class LaunchSummary {
     private String audienceName;
 
     private String folderName;
+
+    private String channelConfig;
 
     private DataIntegrationStatusMonitor integrationStatusMonitor;
 
@@ -82,6 +85,9 @@ public class LaunchSummary {
         this.setAudienceName(launch.getAudienceName());
         this.setFolderName(launch.getFolderName());
         this.setLaunchType(launch.getLaunchType());
+        if (launch.getChannelConfig() != null) {
+            this.setChannelConfig(JsonUtils.serialize(launch.getChannelConfig()));
+        }
         if (launch.getPlay() != null) {
             this.setPlayName(launch.getPlay().getName());
             this.setPlayDisplayName(launch.getPlay().getDisplayName());
@@ -148,9 +154,13 @@ public class LaunchSummary {
         this.uiLaunchState = uiLaunchState;
     }
 
-    public LaunchType getLaunchType() { return launchType; }
+    public LaunchType getLaunchType() {
+        return launchType;
+    }
 
-    public void setLaunchType(LaunchType launchType) { this.launchType = launchType; }
+    public void setLaunchType(LaunchType launchType) {
+        this.launchType = launchType;
+    }
 
     public Set<RatingBucketName> getSelectedBuckets() {
         return selectedBuckets;
@@ -214,6 +224,14 @@ public class LaunchSummary {
 
     public void setIntegrationStatusMonitor(DataIntegrationStatusMonitor integrationStatusMonitor) {
         this.integrationStatusMonitor = integrationStatusMonitor;
+    }
+
+    public void setChannelConfig(String channelConfig) {
+        this.channelConfig = channelConfig;
+    }
+
+    public String getChannelConfig() {
+        return this.channelConfig;
     }
 
 }
