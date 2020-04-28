@@ -3,6 +3,8 @@ package com.latticeengines.apps.dcp.end2end;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -205,13 +207,28 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         try (CSVReader csvReader = new CSVReader(reader)) {
             String[] nextRecord = csvReader.readNext();
             int count = 0;
+            List<String> headers = new ArrayList<>();
+            int nameIdx = -1;
             while (nextRecord != null && (count++) < 10) {
-                Assert.assertTrue(StringUtils.isNotBlank(nextRecord[0])); // Original Name is non-empty
-                nextRecord = csvReader.readNext();
+                if (count == 1) {
+                    headers.addAll(Arrays.asList(nextRecord));
+                    verifyOutputHeaders(headers);
+                    nameIdx = headers.indexOf("Company Name");
+                } else {
+                    Assert.assertTrue(StringUtils.isNotBlank(nextRecord[nameIdx])); // Original Name is non-empty
+                    nextRecord = csvReader.readNext();
+                }
             }
         } catch (IOException e) {
             Assert.fail("Failed to read output csv", e);
         }
+    }
+
+    private void verifyOutputHeaders(List<String> headers) {
+        System.out.println(headers);
+        Assert.assertTrue(headers.contains("Company Name"));
+        Assert.assertTrue(headers.contains("Test Date")); // in spec
+        Assert.assertTrue(headers.contains("Test Date 2")); // not in spec
     }
 
     private void verifyDownload(UploadDetails upload) {
