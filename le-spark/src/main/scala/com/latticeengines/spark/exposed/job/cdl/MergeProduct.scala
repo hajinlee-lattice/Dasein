@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.{ProductStatus, ProductType}
 import com.latticeengines.domain.exposed.spark.cdl.{MergeProductConfig, MergeProductReport}
 import com.latticeengines.domain.exposed.util.ProductUtils
-import com.latticeengines.spark.aggregation.{AnalyticProductAggregation, DedupBundleProductAggregation, DedupHierarchyProductAggregation, MergeSpendingProductAggregation}
+import com.latticeengines.spark.aggregation.{MergeAnalyticProductAggregation, DedupBundleProductAggregation, DedupHierarchyProductAggregation, MergeSpendingProductAggregation}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
@@ -186,7 +186,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
                 .withColumn(Status, lit(ProductStatus.Active.name))
                 .withColumn(BundleDescription, lit(literal = null).cast(StringType))
                 .withColumn(BundleId, idUdf(col(Bundle)))
-                .withColumn(Priority, lit(3).cast(IntegerType))
+                .withColumn(Priority, lit(1).cast(IntegerType))
                 .select(Id, Name, Description, Bundle, BundleId, BundleDescription, Priority, Status)
         (valid, err)
     }
@@ -195,13 +195,13 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
     private def filterOldAnalytic(prods: DataFrame): DataFrame = {
         prods.filter(col(Type) === ProductType.Analytic.name)
                 .withColumnRenamed(ProductId, Id)
-                .withColumn(Priority, lit(1).cast(IntegerType))
+                .withColumn(Priority, lit(3).cast(IntegerType))
                 .withColumn(Status, lit(ProductStatus.Obsolete.name))
                 .select(Id, BundleId, Description, Bundle, Priority, Status)
     }
 
     private def mergeAnalytic(prods: DataFrame): (DataFrame, DataFrame) = {
-        val aggregation = new AnalyticProductAggregation()
+        val aggregation = new MergeAnalyticProductAggregation()
         val groupBy = prods.groupBy(BundleId)
                 .agg(aggregation(col(Id), col(Bundle), col(Description), col(Status), col(Priority)).as("agg"))
                 .withColumn(Id, col(s"agg.$Id"))

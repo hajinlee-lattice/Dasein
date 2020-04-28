@@ -8,7 +8,7 @@ import org.apache.spark.sql.types._
 
 import scala.collection.JavaConverters._
 
-private[spark] class AnalyticProductAggregation extends UserDefinedAggregateFunction {
+private[spark] class MergeAnalyticProductAggregation extends UserDefinedAggregateFunction {
 
   private val Id = InterfaceName.Id.name
   private val Description = InterfaceName.Description.name
@@ -65,10 +65,13 @@ private[spark] class AnalyticProductAggregation extends UserDefinedAggregateFunc
     val oldPrio = buffer.getInt(priorityIdx)
     val newPrio = input.getInt(priorityIdx)
     if (newPrio >= oldPrio) {
-      val oldId = buffer.getString(idIdx)
-      val newId = buffer.getString(idIdx)
-      val message = s"Conflicting bundle id $newId and $oldId: ${input.mkString(", ")}"
-      buffer(msgIdx) = message :: buffer.getList[String](msgIdx).asScala.toList
+      val status = input.get(statusIdx)
+      if (Active.equals(status)) {
+        val oldId = buffer.getString(idIdx)
+        val newId = buffer.getString(idIdx)
+        val message = s"Conflicting bundle $newId: ${input.mkString(", ")}"
+        buffer(msgIdx) = message :: buffer.getList[String](msgIdx).asScala.toList
+      }
     } else {
       copyToBuffer(buffer, input)
     }
