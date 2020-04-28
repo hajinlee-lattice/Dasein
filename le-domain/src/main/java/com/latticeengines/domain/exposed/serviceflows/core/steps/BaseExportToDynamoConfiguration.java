@@ -47,4 +47,6 @@ public abstract class BaseExportToDynamoConfiguration extends MicroserviceStepCo
     public abstract String getContextKey();
 
     public abstract boolean needKeyPrefix();
+
+    public abstract boolean registerDataUnit();
 }

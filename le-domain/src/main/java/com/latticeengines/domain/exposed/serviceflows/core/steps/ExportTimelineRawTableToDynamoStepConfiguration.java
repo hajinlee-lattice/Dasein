@@ -28,4 +28,9 @@ public class ExportTimelineRawTableToDynamoStepConfiguration extends BaseExportT
     public boolean needKeyPrefix() {
         return false;
     }
+
+    @Override
+    public boolean registerDataUnit() {
+        return false;
+    }
 }

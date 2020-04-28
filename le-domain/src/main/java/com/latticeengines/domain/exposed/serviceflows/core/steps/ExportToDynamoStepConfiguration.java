@@ -24,6 +24,11 @@ public class ExportToDynamoStepConfiguration extends BaseExportToDynamoConfigura
         return true;
     }
 
+    @Override
+    public boolean registerDataUnit() {
+        return true;
+    }
+
     //if empty table list, will throw exception
     @Override
     public boolean needEmptyFailed() {
