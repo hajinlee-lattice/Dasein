@@ -11,7 +11,5 @@ public interface AttributeSetEntityMgr extends BaseEntityMgrRepository<Attribute
 
     AttributeSet updateAttributeSet(AttributeSet attributeSet);
 
-    AttributeSet findByDisplayName(String displayName);
-
     void deleteByName(String name);
 }

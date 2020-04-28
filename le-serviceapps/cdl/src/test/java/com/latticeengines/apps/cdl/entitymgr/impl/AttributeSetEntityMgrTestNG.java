@@ -48,8 +48,6 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
         attributeSetEntityMgr.createAttributeSet(attributeSet);
         attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
         verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, contactAttributes);
-        attributeSet = attributeSetEntityMgr.findByDisplayName(displayName);
-        verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, contactAttributes);
         attributeSet.setDisplayName(displayName2);
         Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
         attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), new HashSet<>());

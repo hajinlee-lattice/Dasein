@@ -92,26 +92,12 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         return attributeSetEntityMgr.findAll();
     }
 
-    private void validateAttributeSet(AttributeSet attributeSet) {
-        if (StringUtils.isBlank(attributeSet.getDisplayName())) {
-            throw new LedpException(LedpCode.LEDP_18244);
-        }
-        AttributeSet existingAttributeSet = attributeSetEntityMgr.findByDisplayName(attributeSet.getDisplayName());
-        if (existingAttributeSet != null) {
-            if (StringUtils.isEmpty(attributeSet.getName())) {
-                throw new LedpException(LedpCode.LEDP_18243, new String[]{attributeSet.getDisplayName()});
-            } else {
-                if (!existingAttributeSet.getName().equals(attributeSet.getName())) {
-                    throw new LedpException(LedpCode.LEDP_18243, new String[]{attributeSet.getDisplayName()});
-                }
-            }
-        }
-    }
-
     @Override
     public AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet) {
-        validateAttributeSet(attributeSet);
         if (StringUtils.isNotEmpty(attributeSet.getName())) {
+            if (StringUtils.isBlank(attributeSet.getDisplayName())) {
+                throw new LedpException(LedpCode.LEDP_18243);
+            }
             return attributeSetEntityMgr.updateAttributeSet(attributeSet);
         } else {
             return attributeSetEntityMgr.createAttributeSet(attributeSet);

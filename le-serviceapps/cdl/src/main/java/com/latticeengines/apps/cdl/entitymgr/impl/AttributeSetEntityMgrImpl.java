@@ -60,13 +60,6 @@ public class AttributeSetEntityMgrImpl
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public AttributeSet findByDisplayName(String displayName) {
-        return attributeSetReaderRepository.findByDisplayName(displayName);
-    }
-
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public AttributeSet createAttributeSet(AttributeSet attributeSet) {
         attributeSet.setTenant(MultiTenantContext.getTenant());
