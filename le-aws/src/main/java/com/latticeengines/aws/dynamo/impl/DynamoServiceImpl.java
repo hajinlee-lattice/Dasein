@@ -46,6 +46,7 @@ import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.KeyType;
 import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.amazonaws.services.dynamodbv2.model.SSESpecification;
+import com.amazonaws.services.dynamodbv2.model.SSEType;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.amazonaws.services.dynamodbv2.model.Tag;
 import com.amazonaws.services.dynamodbv2.model.TagResourceRequest;
@@ -65,10 +66,11 @@ public class DynamoServiceImpl implements DynamoService {
     private AmazonDynamoDB remoteClient;
     private AmazonDynamoDB localClient;
     private AWSApplicationAutoScalingClient autoScaleClient;
+    private String customerCMK;
 
     @Inject
     public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint}") String endpoint,
-            @Value("${aws.region}") String region) {
+            @Value("${aws.region}") String region, @Value("${aws.dynamo.customer.cmk}") String customerCMK) {
         log.info("Constructing DynamoDB client using BasicAWSCredentials.");
         remoteClient = AmazonDynamoDBClientBuilder.standard() //
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
@@ -86,6 +88,7 @@ public class DynamoServiceImpl implements DynamoService {
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
                 .withRegion(Regions.fromName(region)) //
                 .build();
+        this.customerCMK = customerCMK;
     }
 
     public DynamoServiceImpl(AmazonDynamoDB client) {
@@ -144,12 +147,16 @@ public class DynamoServiceImpl implements DynamoService {
 
         ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput()
                 .withReadCapacityUnits(readCapacityUnits).withWriteCapacityUnits(writeCapacityUnits);
+        SSESpecification sseSpecification = new SSESpecification().withEnabled(true);
+        if (StringUtils.isNotBlank(customerCMK)) {
+            sseSpecification.withKMSMasterKeyId(customerCMK).withSSEType(SSEType.KMS);
+        }
         CreateTableRequest request = new CreateTableRequest() //
                 .withTableName(tableName) //
                 .withKeySchema(keySchema) //
                 .withAttributeDefinitions(attributeDefinitions) //
                 .withProvisionedThroughput(provisionedThroughput) //
-                .withSSESpecification(new SSESpecification().withEnabled(true));
+                .withSSESpecification(sseSpecification);
 
         try {
             log.info("Creating table " + tableName);
