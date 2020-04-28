@@ -98,4 +98,11 @@ public interface DataFeedTaskTemplateService {
      */
     boolean createMarketingTemplate(String customerSpace, String systemName, String systemType, EntityType entityType,
                                     SimpleTemplateMetadata simpleTemplateMetadata);
+
+    /**
+     *
+     * @param enableGA if true, GA tenant can use setup API to create activity store template
+     * @return true if success
+     */
+    boolean validateGAEnabled(boolean enableGA);
 }

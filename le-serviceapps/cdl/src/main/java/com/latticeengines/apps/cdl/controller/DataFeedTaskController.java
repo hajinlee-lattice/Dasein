@@ -164,7 +164,12 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a WebVisit template")
     public ResponseDocument<Boolean> createWebVisitTemplate(
             @PathVariable String customerSpace,
-            @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+            @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList,
+            @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
+                    "create WebVisit template."));
+        }
         try {
             if (CollectionUtils.isNotEmpty(simpleTemplateMetadataList)) {
                 Boolean result = Boolean.TRUE;
@@ -188,7 +193,12 @@ public class DataFeedTaskController {
     @ApiOperation(value = "Create a WebVisit template with IW 2.0")
     public ResponseDocument<Boolean> createWebVisitTemplate2(
             @PathVariable String customerSpace,
-            @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList) {
+            @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList,
+            @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
+                    "create WebVisit template."));
+        }
         try {
             if (CollectionUtils.isNotEmpty(simpleTemplateMetadataList)) {
                 Boolean result = Boolean.TRUE;
@@ -247,7 +257,12 @@ public class DataFeedTaskController {
     @ResponseBody
     @ApiOperation(value = "Create a default opportunity template")
     public ResponseDocument<Boolean> createDefaultOpportunityTemplate(@PathVariable String customerSpace,
-                                                                      @RequestParam(value = "systemName") String systemName) {
+                                                                      @RequestParam(value = "systemName") String systemName,
+                                                                      @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
+                    "create Opportunity template."));
+        }
         log.info("systemName = {}.", systemName);
         if (StringUtils.isEmpty(systemName)) {
             return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
@@ -272,8 +287,14 @@ public class DataFeedTaskController {
     @ResponseBody
     @ApiOperation(value = "Create a opportunity template")
     public ResponseDocument<Boolean> createOpportunityTemplate(@PathVariable String customerSpace,
-                                                                      @RequestParam(value = "systemName") String systemName,
-                                                                      @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata) {
+                                                               @RequestParam(value = "systemName") String systemName,
+                                                               @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
+                                                               @RequestParam(value = "enableGA", required =
+                                                                       false, defaultValue = "false") boolean enableGA) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
+                    "create Opportunity template."));
+        }
         log.info("systemName = {}.", systemName);
         if (StringUtils.isEmpty(systemName)) {
             return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
@@ -298,8 +319,13 @@ public class DataFeedTaskController {
     @ResponseBody
     @ApiOperation(value = "Create a default marketing template")
     public ResponseDocument<Boolean> createDefaultMarketingTemplate(@PathVariable String customerSpace,
-                                                                      @RequestParam(value = "systemName") String systemName,
-                                                                      @RequestParam(value = "systemType") String systemType) {
+                                                                    @RequestParam(value = "systemName") String systemName,
+                                                                    @RequestParam(value = "systemType") String systemType,
+                                                                    @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
+                    "create Marketing template."));
+        }
         log.info("systemName = {}.", systemName);
         if (StringUtils.isEmpty(systemName)) {
             return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
@@ -324,9 +350,14 @@ public class DataFeedTaskController {
     @ResponseBody
     @ApiOperation(value = "Create a marketing template")
     public ResponseDocument<Boolean> createMarketingTemplate(@PathVariable String customerSpace,
-                                                               @RequestParam(value = "systemName") String systemName,
-                                                               @RequestParam(value = "systemType") String systemType,
-                                                               @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata) {
+                                                             @RequestParam(value = "systemName") String systemName,
+                                                             @RequestParam(value = "systemType") String systemType,
+                                                             @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
+                                                             @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+            return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
+                    "create Marketing template."));
+        }
         log.info("systemName = {}.", systemName);
         if (StringUtils.isEmpty(systemName)) {
             return ResponseDocument.failedResponse(new IllegalArgumentException("systemName cannot be null."));
