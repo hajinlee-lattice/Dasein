@@ -33,13 +33,13 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
 
     @Override
     public void execute() {
-        long accountsAdded = getLongValueFromContext(ACCOUNTS_ADDED);
-        long accountsDeleted = getLongValueFromContext(ACCOUNTS_DELETED);
-        long contactsAdded = getLongValueFromContext(CONTACTS_ADDED);
-        long contactsDeleted = getLongValueFromContext(CONTACTS_DELETED);
-        long fullContacts = getLongValueFromContext(FULL_CONTACTS);
-        long accumulativeAccounts = getLongValueFromContext(ACCUMULATIVE_ACCOUNTS);
-        long accumulativeContacts = getLongValueFromContext(ACCUMULATIVE_CONTACTS);
+        long accountsAdded = getCount(getLongValueFromContext(ACCOUNTS_ADDED));
+        long accountsDeleted = getCount(getLongValueFromContext(ACCOUNTS_DELETED));
+        long contactsAdded = getCount(getLongValueFromContext(CONTACTS_ADDED));
+        long contactsDeleted = getCount(getLongValueFromContext(CONTACTS_DELETED));
+        long fullContacts = getCount(getLongValueFromContext(FULL_CONTACTS));
+        long accumulativeAccounts = getCount(getLongValueFromContext(ACCUMULATIVE_ACCOUNTS));
+        long accumulativeContacts = getCount(getLongValueFromContext(ACCUMULATIVE_CONTACTS));
         log.info(String.format(
                 "accountsAdded=%d, accountsDeleted=%d, accumulativeAccounts=%d, contactsAdded=%d, contactsDeleted=%d, fullContacts=%d, accumulativeContacts=%d",
                 accountsAdded, accountsDeleted, accumulativeAccounts, contactsAdded, contactsDeleted, fullContacts,
@@ -165,6 +165,10 @@ public class QueuePlayLaunches extends BaseWorkflowStep<QueuePlayLaunchesStepCon
         launch.setContactsLaunched(accumulativeContacts);
         launch.setAccountsSuppressed(accountsSuppressed);
         launch.setContactsSuppressed(contactsSuppressed);
+    }
+
+    private long getCount(Long object) {
+        return object != null ? object.longValue() : 0L;
     }
 
     private String getDeltaTables() {
