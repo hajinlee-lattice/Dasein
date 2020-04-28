@@ -32,6 +32,7 @@ public class MatchStatistics {
     private Long timeElapsedInMsec;
     private List<Integer> columnMatchCount;
     private Map<String, Long> newEntityCount = new HashMap<>();
+    private Map<String, Long> nullEntityIdCount = new HashMap<>();
 
     private Long orphanedNoMatchCount = 0L;
     private Long orphanedUnmatchedAccountIdCount = 0L;
@@ -93,6 +94,16 @@ public class MatchStatistics {
     @JsonIgnore
     public void addNewEntityCount(@NotNull String entity, long incr) {
         newEntityCount.put(entity, newEntityCount.getOrDefault(entity, 0L) + incr);
+    }
+
+    @JsonProperty("NullEntityIdCount")
+    public Map<String, Long> getNullEntityIdCount() {
+        return nullEntityIdCount;
+    }
+
+    @JsonProperty("NullEntityIdCount")
+    public void setNullEntityIdCount(Map<String, Long> nullEntityIdCount) {
+        this.nullEntityIdCount = nullEntityIdCount;
     }
 
     public Long getOrphanedNoMatchCount() {

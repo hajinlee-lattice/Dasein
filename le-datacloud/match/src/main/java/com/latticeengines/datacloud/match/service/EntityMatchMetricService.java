@@ -34,6 +34,18 @@ public interface EntityMatchMetricService {
     void recordAssociation(Tenant tenant, String entity, boolean hasConcurrentConflict, boolean isNewlyAllocated);
 
     /**
+     * Record number of null entity ID found in allocate mode
+     *
+     * @param tenant
+     *            target tenant
+     * @param entity
+     *            entity where null id is found
+     * @param count
+     *            number of null id found for this entity
+     */
+    void recordNullEntityIdCount(Tenant tenant, String entity, long count);
+
+    /**
      * Record metrics for dynamo throttling event (read/write capacity exceeded)
      *
      * @param env
