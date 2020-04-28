@@ -43,10 +43,11 @@ public class PublishedTalkingPointDaoImpl extends BaseDaoImpl<PublishedTalkingPo
                 getEntityClass().getSimpleName())
                 + attributes.stream().map(attr -> "content like '%{!" + attr + "}%'")
                         .collect(Collectors.joining(" or "))
-                + ") and tp.play.tenant = :tenant";
+                + ") and tp.play.tenant = :tenant and tp.play.deleted = :deleted";
 
         Query<String> query = session.createQuery(queryStr);
         query.setParameter("tenant", MultiTenantContext.getTenant());
+        query.setParameter("deleted", Boolean.FALSE);
         return query.list();
     }
 }
