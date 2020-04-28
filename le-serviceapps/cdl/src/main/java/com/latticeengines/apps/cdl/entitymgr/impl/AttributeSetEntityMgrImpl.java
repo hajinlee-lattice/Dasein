@@ -73,7 +73,7 @@ public class AttributeSetEntityMgrImpl
     public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
         AttributeSet existingAttributeSet = findByName(attributeSet.getName());
         if (existingAttributeSet != null) {
-            cloneAttributeSet(existingAttributeSet, attributeSet);
+            updateExistingAttributeSet(existingAttributeSet, attributeSet);
             attributeSetDao.update(existingAttributeSet);
             return existingAttributeSet;
         } else {
@@ -81,10 +81,18 @@ public class AttributeSetEntityMgrImpl
         }
     }
 
-    private void cloneAttributeSet(AttributeSet existingAttributeSet, AttributeSet attributeSet) {
-        existingAttributeSet.setDisplayName(attributeSet.getDisplayName());
-        existingAttributeSet.setDescription(attributeSet.getDescription());
-        existingAttributeSet.setAttributesMap(attributeSet.getAttributesMap());
+    private void updateExistingAttributeSet(AttributeSet existingAttributeSet, AttributeSet attributeSet) {
+        if (attributeSet.getDisplayName() != null) {
+            existingAttributeSet.setDisplayName(attributeSet.getDisplayName());
+        }
+        if (attributeSet.getDescription() != null) {
+            existingAttributeSet.setDescription(attributeSet.getDescription());
+        }
+
+        if (attributeSet.getAttributesMap() != null) {
+            existingAttributeSet.setAttributesMap(attributeSet.getAttributesMap());
+        }
+        existingAttributeSet.setUpdatedBy(attributeSet.getUpdatedBy());
     }
 
     @Override

@@ -95,9 +95,6 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     @Override
     public AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet) {
         if (StringUtils.isNotEmpty(attributeSet.getName())) {
-            if (StringUtils.isBlank(attributeSet.getDisplayName())) {
-                throw new LedpException(LedpCode.LEDP_18243);
-            }
             return attributeSetEntityMgr.updateAttributeSet(attributeSet);
         } else {
             return attributeSetEntityMgr.createAttributeSet(attributeSet);
