@@ -234,7 +234,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         if (CollectionUtils.isEmpty(attributeMetadata)) {
             log.warn("No metadata attribute metadata found for tenant: " + customerSpace);
-            // Initilize an empty map so that modeling query generation does not
+            // Initialize an empty map so that modeling query generation does not
             // fail
             attributeMetadata = new HashSet<>();
         }

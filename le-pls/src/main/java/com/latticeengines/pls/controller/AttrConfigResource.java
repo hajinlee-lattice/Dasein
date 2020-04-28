@@ -133,8 +133,8 @@ public class AttrConfigResource {
 
     @PostMapping(value = "/attributeset")
     @ApiOperation(value = "Create a new attribute set")
-    public AttributeSet createOrUpdateAttributeSet() {
-        return attrConfigService.createOrUpdateAttributeSet();
+    public AttributeSet createOrUpdateAttributeSet(@RequestBody AttributeSet attributeSet) {
+        return attrConfigService.createOrUpdateAttributeSet(attributeSet);
     }
 
     @DeleteMapping(value = "/attributeset/name/{name}")

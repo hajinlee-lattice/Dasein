@@ -966,14 +966,21 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Override
     public List<AttributeSet> getAttributeSets() {
+        log.info("Get attribute set list");
         Tenant tenant = MultiTenantContext.getTenant();
         return cdlAttrConfigProxy.getAttributeSets(tenant.getId());
     }
 
     @Override
-    public AttributeSet createOrUpdateAttributeSet() {
+    public AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet) {
         Tenant tenant = MultiTenantContext.getTenant();
-        AttributeSet attributeSet = new AttributeSet();
+        String email = MultiTenantContext.getEmailAddress();
+        if (StringUtils.isEmpty(attributeSet.getCreatedBy())) {
+            attributeSet.setCreatedBy(email);
+        }
+        if (StringUtils.isEmpty(attributeSet.getUpdatedBy())) {
+            attributeSet.setUpdatedBy(email);
+        }
         log.info("Create or update attribute set with display name {} in tenant {}.",
                 attributeSet.getDisplayName(), tenant.getId());
         return cdlAttrConfigProxy.createOrUpdateAttributeSet(tenant.getId(), attributeSet);
