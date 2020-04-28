@@ -124,13 +124,14 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     void verifyProcessAccount(boolean firstPA) {
         verifyDataFeedStatus(DataFeed.Status.Active);
-        verifyActiveVersion(DataCollection.Version.Green);
         verifyUpdateActions();
 
         if (firstPA) {
+            verifyActiveVersion(DataCollection.Version.Green);
             verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
             verifyDataCollectionStatus(DataCollection.Version.Green);
         } else {
+            verifyActiveVersion(DataCollection.Version.Blue);
             verifyProcessAnalyzeReport(processAnalyzeAppId, getUpsertExpectedReport());
             verifyDataCollectionStatus(DataCollection.Version.Blue);
         }
@@ -248,7 +249,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, getUpsertAccountExpectedReport());
         expectedReport.put(BusinessEntity.Contact, getUpsertContactExpectedReport());
-        expectedReport.put(BusinessEntity.Product, getProductExpectedReport());
+        expectedReport.put(BusinessEntity.Product, getUpsertProductExpectedReport());
 
         return expectedReport;
     }
@@ -304,6 +305,19 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 PRODUCT_HIERARCHY_PA);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE,
                 PRODUCT_BUNDLE_PA);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.WARN_MESSAGE,
+                PRODUCT_WARN_MESSAGE);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.ERROR_MESSAGE,
+                PRODUCT_ERROR_MESSAGE);
+        return productReport;
+    }
+
+    protected Map<String, Object> getUpsertProductExpectedReport() {
+        Map<String, Object> productReport = new HashMap<>();
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID, 0L);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_HIERARCHY,
+                0L);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE, 0L);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.WARN_MESSAGE,
                 PRODUCT_WARN_MESSAGE);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.ERROR_MESSAGE,
