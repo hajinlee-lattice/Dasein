@@ -89,8 +89,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         version = parseDataCollectionVersion(configuration);
         attrRepo = parseAttrRepo(configuration);
         evaluationDate = parseEvaluationDateStr(configuration);
-        schemaMap = getExportSchema();
         atlasExport = buildAtlasExport();
+        schemaMap = getExportSchema();
         entityMatchEnabled = batonService.isEntityMatchEnabled(customerSpace);
         WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
         List<String> filesToDelete = new ArrayList<>();
@@ -147,8 +147,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     }
 
     private AtlasExport buildAtlasExport() {
-        String customerSpaceStr = configuration.getCustomerSpace().toString();
-        AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(customerSpaceStr,
+        AtlasExport atlasExport = atlasExportProxy.findAtlasExportById(customerSpace.toString(),
                 configuration.getAtlasExportId());
         WorkflowStaticContext.putObject(ATLAS_EXPORT, atlasExport);
         return atlasExport;
@@ -384,10 +383,18 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         Set<BusinessEntity> entitySet = new HashSet<>(BusinessEntity.EXPORT_ACCOUNT_ENTITIES);
         entitySet.add(BusinessEntity.Contact);
         for (BusinessEntity entity : entitySet) {
-            List<ColumnMetadata> cms = servingStoreProxy //
-                    .getDecoratedMetadata(customerSpace.toString(), entity, groups, version).collectList().block();
-            if (CollectionUtils.isNotEmpty(cms)) {
-                schemaMap.put(entity, cms);
+            List<ColumnMetadata> cms;
+            if (StringUtils.isNotEmpty(atlasExport.getAttributeSetName())) {
+                cms = servingStoreProxy.getDecoratedMetadata(customerSpace.toString(), entity, groups,
+                        atlasExport.getAttributeSetName(), version).collectList().block();
+                if (CollectionUtils.isNotEmpty(cms)) {
+                    schemaMap.put(entity, cms);
+                }
+            } else {
+                cms = servingStoreProxy.getDecoratedMetadata(customerSpace.toString(), entity, groups, version).collectList().block();
+                if (CollectionUtils.isNotEmpty(cms)) {
+                    schemaMap.put(entity, cms);
+                }
             }
             log.info("Found " + CollectionUtils.size(cms) + " attrs to export for " + entity);
         }

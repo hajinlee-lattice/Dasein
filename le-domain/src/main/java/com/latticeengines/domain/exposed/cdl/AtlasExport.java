@@ -145,6 +145,10 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId , HasAuditing
     @Column(name = "UPDATED", nullable = false)
     private Date updated;
 
+    @JsonProperty("attributeSetName")
+    @Column(name = "ATTRIBUTE_SET_NAME")
+    private String attributeSetName;
+
     @Override
     public Long getPid() {
         return pid;
@@ -314,5 +318,13 @@ public class AtlasExport implements HasPid, HasTenant, HasTenantId , HasAuditing
     @Override
     public void setUpdated(Date updated) {
         this.updated = updated;
+    }
+
+    public String getAttributeSetName() {
+        return attributeSetName;
+    }
+
+    public void setAttributeSetName(String attributeSetName) {
+        this.attributeSetName = attributeSetName;
     }
 }

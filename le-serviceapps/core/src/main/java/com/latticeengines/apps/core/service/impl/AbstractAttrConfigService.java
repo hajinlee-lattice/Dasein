@@ -38,6 +38,7 @@ import com.latticeengines.documentdb.entity.AttrConfigEntity;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -886,5 +887,25 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
         }
         return results;
+    }
+
+    @Override
+    public AttributeSet getAttributeSetByName(String name) {
+        return null;
+    }
+
+    @Override
+    public List<AttributeSet> getAttributeSets() {
+        return null;
+    }
+
+    @Override
+    public AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet) {
+        return null;
+    }
+
+    @Override
+    public void deleteAttributeSetByName(String name) {
+
     }
 }

@@ -251,9 +251,9 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
                 + " FROM %s USE INDEX(REC_LAUNCH_ID) " //
                 + " WHERE DELETED = :deleted " //
                 + " AND LAUNCH_ID IN (:launchIds) ";
-        if (launchIds.size() == 1){
+        if (launchIds.size() == 1) {
             queryStr += "ORDER BY PID ";
-        } else{
+        } else {
             queryStr += "ORDER BY LAST_UPDATED_TIMESTAMP, PID ";
         }
         queryStr = String.format(queryStr, recommendationTable);

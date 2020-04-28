@@ -41,13 +41,12 @@ public class ServingStoreResource {
     @GetMapping(value = "/{entity}/decoratedmetadata")
     @ResponseBody
     @ApiOperation(value = "Get decorated serving store metadata")
-    public Flux<ColumnMetadata> getDecoratedMetadata( //
-            @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
-            @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
-            @RequestParam(name = "version", required = false) DataCollection.Version version, // )
-                                                                                              // {
-            @RequestParam(name = "filter", required = false) StoreFilter filter) {
-        return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups, filter);
+    public Flux<ColumnMetadata> getDecoratedMetadata(@PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
+                                                      @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
+                                                      @RequestParam(name = "attributeSetName", required = false) String attributeSetName,
+                                                      @RequestParam(name = "version", required = false) DataCollection.Version version,
+                                                      @RequestParam(name = "filter", required = false) StoreFilter filter) {
+        return servingStoreService.getDecoratedMetadata(customerSpace, entity, version, groups, attributeSetName, filter);
     }
 
     @GetMapping(value = "/systemmetadata")

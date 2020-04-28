@@ -4,7 +4,9 @@ import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Activ
 import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Inactive;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,6 +23,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -45,6 +48,11 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
     @Inject
     private AttrConfigService attrConfigService;
+
+    private Set<String> accountAttributes = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Account, true)
+            .stream().map(InterfaceName::name).collect(Collectors.toSet());
+    private Set<String> contactAttributes = SchemaRepository.getDefaultExportAttributes(BusinessEntity.Contact, true)
+            .stream().map(InterfaceName::name).collect(Collectors.toSet());
 
     private Set<String> accountStandardAttrs = SchemaRepository.getStandardAttributes(BusinessEntity.Account, false)
             .stream() //
@@ -123,6 +131,35 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
 
         testMyAttributes(true, false);
         testContactAttributes(true, false);
+    }
+
+    @Test(groups = "deployment-app", priority = 4)
+    public void testCrudAttributeSet() {
+        String displayName = "TestAttributeSet";
+        String displayName2 = "TestAttributeSet2";
+        AttributeSet attributeSet = createAttributeSet(displayName);
+        attrConfigService.createOrUpdateAttributeSet(attributeSet);
+        attributeSet = attrConfigService.getAttributeSetByName(attributeSet.getName());
+        String name = attributeSet.getName();
+        Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
+        Assert.assertEquals(attributeSet.getDisplayName(), displayName);
+        attributeSet.setDisplayName(displayName2);
+        attrConfigService.createOrUpdateAttributeSet(attributeSet);
+        Assert.assertEquals(attributeSet.getDisplayName(), displayName2);
+        Assert.assertEquals(attributeSet.getName(), name);
+        Assert.assertEquals(attrConfigService.getAttributeSets().size(), 1);
+        attrConfigService.deleteAttributeSetByName(name);
+        Assert.assertEquals(attrConfigService.getAttributeSets().size(), 0);
+    }
+
+    private AttributeSet createAttributeSet(String displayName) {
+        AttributeSet attributeSet = new AttributeSet();
+        attributeSet.setDisplayName(displayName);
+        Map<String, Set<String>> attributesMap = new HashMap<>();
+        attributesMap.put(Category.ACCOUNT_ATTRIBUTES.name(), accountAttributes);
+        attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), contactAttributes);
+        attributeSet.setAttributesMap(attributesMap);
+        return attributeSet;
     }
 
     private void testMyAttributes(boolean entityMatchEnabled, boolean onlyEntityMatchGAEnabled) {
