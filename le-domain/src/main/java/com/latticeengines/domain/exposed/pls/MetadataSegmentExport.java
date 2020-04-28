@@ -132,6 +132,10 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
     @Column(name = "TABLE_NAME", nullable = false)
     private String tableName;
 
+    @JsonProperty("attributeSetName")
+    @Transient
+    private String attributeSetName;
+
     @Column(name = "TENANT_ID", nullable = false)
     @JsonIgnore
     private Long tenantId;
@@ -300,6 +304,14 @@ public class MetadataSegmentExport implements HasPid, HasTenantId, HasAuditingFi
 
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    public String getAttributeSetName() {
+        return attributeSetName;
+    }
+
+    public void setAttributeSetName(String attributeSetName) {
+        this.attributeSetName = attributeSetName;
     }
 
     public enum Status {

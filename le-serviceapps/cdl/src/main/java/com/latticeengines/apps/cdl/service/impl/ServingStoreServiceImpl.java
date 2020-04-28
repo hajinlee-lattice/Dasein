@@ -85,7 +85,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
 
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, StoreFilter filter) {
+            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         filter = filter == null ? StoreFilter.ALL : filter;
@@ -120,7 +120,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             DataCollection.Version version, Collection<ColumnSelection.Predefined> groups) {
-        return getDecoratedMetadata(customerSpace, entity, version, groups, StoreFilter.ALL);
+        return getDecoratedMetadata(customerSpace, entity, version, groups, null, StoreFilter.ALL);
     }
 
     @Override

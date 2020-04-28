@@ -1,12 +1,15 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -36,62 +39,66 @@ public class AtlasExportServiceImplTestNG extends CDLFunctionalTestNGBase {
     public void testAtlasExportCreateAndUpdate() {
         AtlasExport exportRecord = atlasExportService.createAtlasExport(mainCustomerSpace,
                 AtlasExportType.ALL_ACCOUNTS);
-        Assert.assertNotNull(exportRecord);
+        assertNotNull(exportRecord);
         String exportUuid = exportRecord.getUuid();
-        Assert.assertNotNull(exportUuid);
-        Assert.assertNotNull(exportRecord.getDatePrefix());
+        assertNotNull(exportUuid);
+        assertNotNull(exportRecord.getDatePrefix());
         String dropfolderExportPath = s3ExportFolderService.getDropFolderExportPath(mainCustomerSpace,
                 AtlasExportType.ALL_ACCOUNTS, exportRecord.getDatePrefix(), "");
-        Assert.assertNotNull(dropfolderExportPath);
+        assertNotNull(dropfolderExportPath);
 
         List<String> files = new ArrayList<>();
         files.add("TestFile.csv.gz");
         atlasExportService.addFileToDropFolder(mainCustomerSpace, exportUuid, "TestFile.csv.gz", files);
         String systemExportPath = s3ExportFolderService.getSystemExportPath(mainCustomerSpace);
-        Assert.assertNotNull(systemExportPath);
+        assertNotNull(systemExportPath);
         files = new ArrayList<>();
         files.add("Account_" + exportUuid + ".csv.gz");
         atlasExportService.addFileToSystemPath(mainCustomerSpace, exportUuid, "Account_" + exportUuid + ".csv.gz", files);
         exportRecord = atlasExportService.getAtlasExport(mainCustomerSpace, exportUuid);
-        Assert.assertEquals(exportRecord.getFilesUnderDropFolder().size(), 1);
-        Assert.assertEquals(exportRecord.getFilesUnderSystemPath().size(), 1);
-        Assert.assertEquals(exportRecord.getFilesUnderDropFolder().get(0), "TestFile.csv.gz");
-        Assert.assertEquals(exportRecord.getFilesUnderSystemPath().get(0), "Account_" + exportUuid + ".csv.gz");
+        assertEquals(exportRecord.getFilesUnderDropFolder().size(), 1);
+        assertEquals(exportRecord.getFilesUnderSystemPath().size(), 1);
+        assertEquals(exportRecord.getFilesUnderDropFolder().get(0), "TestFile.csv.gz");
+        assertEquals(exportRecord.getFilesUnderSystemPath().get(0), "Account_" + exportUuid + ".csv.gz");
+        atlasExportService.updateAtlasExport(mainCustomerSpace, exportRecord);
 
         AtlasExport atlasExport1 = createAtlasExport(AtlasExportType.ACCOUNT);
         atlasExport1 = atlasExportService.getAtlasExport(mainCustomerSpace, atlasExport1.getUuid());
-        verifyAtlasExport(atlasExport1, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.RUNNING);
+        verifyAtlasExport(atlasExport1, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.RUNNING, null);
         AtlasExport atlasExport2 = createAtlasExport(AtlasExportType.CONTACT);
-        verifyAtlasExport(atlasExport2, AtlasExportType.CONTACT, MetadataSegmentExport.Status.RUNNING);
+        verifyAtlasExport(atlasExport2, AtlasExportType.CONTACT, MetadataSegmentExport.Status.RUNNING, null);
 
         atlasExport1.setStatus(MetadataSegmentExport.Status.COMPLETED);
+        String attributeSetName = UUID.randomUUID().toString();
+        atlasExport1.setAttributeSetName(attributeSetName);
         atlasExportService.updateAtlasExport(mainCustomerSpace, atlasExport1);
         atlasExport1 = atlasExportService.getAtlasExport(mainCustomerSpace, atlasExport1.getUuid());
-        verifyAtlasExport(atlasExport1, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.COMPLETED);
+        verifyAtlasExport(atlasExport1, AtlasExportType.ACCOUNT, MetadataSegmentExport.Status.COMPLETED, attributeSetName);
 
         List<AtlasExport> atlasExports = atlasExportService.findAll(mainCustomerSpace);
-        Assert.assertEquals(atlasExports.size(), 3);
+        assertEquals(atlasExports.size(), 3);
         atlasExportService.deleteAtlasExport(mainCustomerSpace, atlasExport1.getUuid());
         atlasExports = atlasExportService.findAll(mainCustomerSpace);
-        Assert.assertEquals(atlasExports.size(), 2);
+        assertEquals(atlasExports.size(), 2);
     }
 
     private void verifyAtlasExport(AtlasExport atlasExport, AtlasExportType atlasExportType,
-                                   MetadataSegmentExport.Status status) {
-        Assert.assertNotNull(atlasExport.getUuid());
-        Assert.assertNotNull(atlasExport.getDatePrefix());
-        Assert.assertEquals(atlasExport.getExportType(), atlasExportType);
-        Assert.assertNotNull(atlasExport.getAccountFrontEndRestriction());
-        Assert.assertNotNull(atlasExport.getContactFrontEndRestriction());
-        Assert.assertNull(atlasExport.getAccountFrontEndRestriction().getRestriction());
-        Assert.assertNull(atlasExport.getContactFrontEndRestriction().getRestriction());
-        Assert.assertEquals(atlasExport.getCreatedBy(), "default@lattice-engines.com");
-        Assert.assertEquals(atlasExport.getStatus(), status);
+                                   MetadataSegmentExport.Status status, String attributeSetName) {
+        assertNotNull(atlasExport.getUuid());
+        assertNotNull(atlasExport.getDatePrefix());
+        assertEquals(atlasExport.getExportType(), atlasExportType);
+        assertNotNull(atlasExport.getAccountFrontEndRestriction());
+        assertNotNull(atlasExport.getContactFrontEndRestriction());
+        assertNull(atlasExport.getAccountFrontEndRestriction().getRestriction());
+        assertNull(atlasExport.getContactFrontEndRestriction().getRestriction());
+        assertEquals(atlasExport.getCreatedBy(), "default@lattice-engines.com");
+        assertEquals(atlasExport.getStatus(), status);
         Tenant tenant = atlasExport.getTenant();
-        Assert.assertEquals(tenant.getId(), mainCustomerSpace);
-        Assert.assertNull(atlasExport.getFilesToDelete());
-        Assert.assertNotNull(atlasExport.getUpdated());
-        Assert.assertNotNull(atlasExport.getCreated());
+        assertEquals(tenant.getId(), mainCustomerSpace);
+        assertNull(atlasExport.getFilesToDelete());
+        assertNotNull(atlasExport.getUpdated());
+        assertNotNull(atlasExport.getCreated());
+        assertEquals(atlasExport.getAttributeSetName(), attributeSetName);
     }
 
     private AtlasExport createAtlasExport(AtlasExportType atlasExportType) {

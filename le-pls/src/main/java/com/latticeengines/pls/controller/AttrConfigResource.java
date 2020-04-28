@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -7,8 +8,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.SubcategoryDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
@@ -111,7 +115,32 @@ public class AttrConfigResource {
     @ResponseBody
     @ApiOperation("get (attr, stats buckets) pairs for specific category and sub-category")
     public Map<String, AttributeStats> getStats(@PathVariable String categoryName,
-            @RequestParam(value = "subcategory", required = true) String subcatName) {
+            @RequestParam(value = "subcategory") String subcatName) {
         return attrConfigService.getStats(categoryName, subcatName);
+    }
+
+    @GetMapping(value = "/attributeset/name/{name}")
+    @ApiOperation(value = "Get attribute set by name")
+    public AttributeSet getAttributeSet(@PathVariable(value = "name") String name) {
+        return attrConfigService.getAttributeSet(name);
+    }
+
+    @GetMapping(value = "/attributeset")
+    @ApiOperation(value = "Get attribute set list")
+    public List<AttributeSet> getAttributeSets() {
+        return attrConfigService.getAttributeSets();
+    }
+
+    @PostMapping(value = "/attributeset")
+    @ApiOperation(value = "Create a new attribute set")
+    public AttributeSet createOrUpdateAttributeSet() {
+        return attrConfigService.createOrUpdateAttributeSet();
+    }
+
+    @DeleteMapping(value = "/attributeset/name/{name}")
+    @ApiOperation(value = "Delete attribute set")
+    public Boolean deleteAttributeSetByName(@PathVariable("name") String name) {
+        attrConfigService.deleteAttributeSet(name);
+        return true;
     }
 }

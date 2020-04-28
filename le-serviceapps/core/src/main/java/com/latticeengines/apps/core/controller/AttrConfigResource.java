@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -131,6 +132,31 @@ public class AttrConfigResource {
             throw new IllegalArgumentException("Cannot parse category " + categoryName);
         }
         return category;
+    }
+
+    @GetMapping(value = "/attributeset/name/{name}")
+    @ApiOperation(value = "Get attribute set by name")
+    public AttributeSet getAttributeSetByName(@PathVariable String customerSpace, @PathVariable(value = "name") String name) {
+        return attrConfigService.getAttributeSetByName(name);
+    }
+
+    @GetMapping(value = "/attributeset")
+    @ApiOperation(value = "Get attribute set list")
+    public List<AttributeSet> getAttributeSets(@PathVariable String customerSpace) {
+        return attrConfigService.getAttributeSets();
+    }
+
+    @PostMapping(value = "/attributeset")
+    @ApiOperation(value = "Createa or update attribute set")
+    public AttributeSet createOrUpdateAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
+        return attrConfigService.createOrUpdateAttributeSet(attributeSet);
+    }
+
+    @DeleteMapping(value = "/attributeset/name/{name}")
+    @ApiOperation(value = "Delete attribute set")
+    public Boolean deleteAttributeSetByName(@PathVariable String customerSpace, @PathVariable("name") String name) {
+        attrConfigService.deleteAttributeSetByName(name);
+        return true;
     }
 
 }
