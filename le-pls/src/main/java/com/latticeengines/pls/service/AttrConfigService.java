@@ -40,5 +40,5 @@ public interface AttrConfigService {
 
     AttributeSet createOrUpdateAttributeSet();
 
-    Boolean deleteAttributeSet(String name);
+    boolean deleteAttributeSet(String name);
 }

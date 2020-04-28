@@ -980,7 +980,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public Boolean deleteAttributeSet(String name) {
+    public boolean deleteAttributeSet(String name) {
         log.info("Delete attribute set by name {}.", name);
         Tenant tenant = MultiTenantContext.getTenant();
         cdlAttrConfigProxy.deleteAttributeSet(tenant.getId(), name);
