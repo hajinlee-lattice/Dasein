@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -39,6 +41,8 @@ public class SplitSystemBatchStore
 
     static final String BEAN_NAME = "splitSystemBatchStore";
 
+    public static final String LATTICE_ACCOUNT_ID = InterfaceName.LatticeAccountId.name();
+
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
@@ -46,6 +50,8 @@ public class SplitSystemBatchStore
     private MetadataProxy metadataProxy;
 
     LinkedHashSet<String> templates = new LinkedHashSet<>();
+
+    List<String> discardFields;
 
     @Override
     protected Class<SplitSystemBatchStoreJob> getJobClz() {
@@ -69,9 +75,15 @@ public class SplitSystemBatchStore
             throw new IllegalStateException(
                     "Cannot find " + role.toString() + " for this tenant, initial PA might be missing...");
         } else {
+            discardFields = new LinkedList<>();
             // read the table attributes and exact all templates(prefix)
             table.getAttributes().forEach(attr -> {
                 String attrName = attr.getName();
+                // Column LatticeAccountId is generated during matching,
+                // should discard from split imports
+                if (StringUtils.contains(attrName, LATTICE_ACCOUNT_ID)) {
+                    discardFields.add(attrName);
+                }
                 int i = attrName.indexOf("__");
                 if (i != -1) {
                     String template = attrName.substring(0, i);
@@ -79,11 +91,11 @@ public class SplitSystemBatchStore
                 }
             });
         }
-        log.info("templates are " + templates);
+        log.info("templates are {}, discard fields are {}", templates, discardFields);
         SplitSystemBatchStoreConfig config = new SplitSystemBatchStoreConfig();
         config.setInput(Collections.singletonList(table.toHdfsDataUnit(role.toString())));
         config.setTemplates(templates.stream().collect(Collectors.toList()));
-        config.setDiscardFields(configuration.getDiscardFields());
+        config.setDiscardFields(discardFields);
         return config;
     }
 
