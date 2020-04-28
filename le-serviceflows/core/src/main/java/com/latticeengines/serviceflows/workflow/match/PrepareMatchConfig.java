@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -38,6 +39,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfig
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -65,6 +67,9 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
 
     @Override
     public void execute() {
@@ -105,19 +110,36 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         }
 
         ColumnSelection.Predefined predefined = getConfiguration().getPredefinedColumnSelection();
+        
         boolean retainLatticeAccountId = getConfiguration().isRetainLatticeAccountId();
         if (predefined != null) {
             if (retainLatticeAccountId) {
-                log.info("Retaining Lattice Account Id in the match result.");
-                ColumnSelection columnSelection = new ColumnSelection();
-                List<Column> columns = Collections.singletonList(new Column(InterfaceName.LatticeAccountId.name()));
-                columnSelection.setColumns(columns);
-                UnionSelection unionSelection = new UnionSelection();
-                unionSelection.setCustomSelection(columnSelection);
-                Map<Predefined, String> map = new HashMap<>();
-                map.put(predefined, "1.0");
-                unionSelection.setPredefinedSelections(map);
-                matchInput.setUnionSelection(unionSelection);
+                // TODO: use Predefined.Model
+                if (getConfiguration().isEntityMatchEnabled()
+                        && Predefined.RTS.equals(predefined)) {
+                    log.info("Entity Match enabled, use Custom Selection");
+                    List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(predefined,
+                            getConfiguration().getDataCloudVersion());
+                    ColumnSelection columnSelection = new ColumnSelection();
+                    List<Column> columns = new ArrayList<>();
+                    columns.add(new Column(InterfaceName.LatticeAccountId.name()));
+                    amCols.forEach(c -> columns.add(new Column(c.getAttrName())));
+                    columnSelection.setColumns(columns);
+                    matchInput.setCustomSelection(columnSelection);
+                    log.info("Columns count=" + columns.size());
+                    putObjectInContext(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
+                } else {
+                    log.info("Retaining Lattice Account Id in the match result.");
+                    ColumnSelection columnSelection = new ColumnSelection();
+                    List<Column> columns = Collections.singletonList(new Column(InterfaceName.LatticeAccountId.name()));
+                    columnSelection.setColumns(columns);
+                    UnionSelection unionSelection = new UnionSelection();
+                    unionSelection.setCustomSelection(columnSelection);
+                    Map<Predefined, String> map = new HashMap<>();
+                    map.put(predefined, "1.0");
+                    unionSelection.setPredefinedSelections(map);
+                    matchInput.setUnionSelection(unionSelection);
+                }
             } else {
                 matchInput.setPredefinedSelection(predefined);
             }
