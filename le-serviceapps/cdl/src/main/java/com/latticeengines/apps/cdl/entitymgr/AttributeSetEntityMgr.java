@@ -5,4 +5,13 @@ import com.latticeengines.domain.exposed.metadata.AttributeSet;
 
 public interface AttributeSetEntityMgr extends BaseEntityMgrRepository<AttributeSet, Long> {
 
+    AttributeSet findByName(String name);
+
+    AttributeSet createAttributeSet(AttributeSet attributeSet);
+
+    AttributeSet updateAttributeSet(AttributeSet attributeSet);
+
+    AttributeSet findByDisplayName(String displayName);
+
+    void deleteByName(String name);
 }

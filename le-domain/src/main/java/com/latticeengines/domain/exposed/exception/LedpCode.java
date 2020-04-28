@@ -369,6 +369,8 @@ public enum LedpCode {
     LEDP_18240("Total launched {0} count exceeds maximum allowed limit of {1}."), //
     LEDP_18241("Team {0} already exists in tenant {1}."), //
     LEDP_18242("Team name can't be empty."), //
+    LEDP_18243("Cannot create or update attribute set without a Display Name."), //
+    LEDP_18244("Attribute set {0} already exists."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

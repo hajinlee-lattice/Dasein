@@ -32,6 +32,7 @@ public final class MetadataSegmentExportConverter {
         atlasExport.setSegmentName(metadataSegmentExport.getExportPrefix());
         atlasExport.setCreated(metadataSegmentExport.getCreated());
         atlasExport.setUpdated(metadataSegmentExport.getUpdated());
+        atlasExport.setAttributeSetName(metadataSegmentExport.getAttributeSetName());
         return atlasExport;
     }
 
@@ -59,6 +60,7 @@ public final class MetadataSegmentExportConverter {
         metadataSegmentExport.setExportPrefix(atlasExport.getSegmentName());
         metadataSegmentExport.setCreated(atlasExport.getCreated());
         metadataSegmentExport.setUpdated(atlasExport.getUpdated());
+        metadataSegmentExport.setAttributeSetName(atlasExport.getAttributeSetName());
         return metadataSegmentExport;
     }
 

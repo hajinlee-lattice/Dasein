@@ -62,6 +62,8 @@ public class RatingEngineSummary {
     private Boolean deleted;
     @JsonProperty("completed")
     private Boolean completed;
+    @JsonProperty("viewOnly")
+    private boolean viewOnly;
 
     public RatingEngineSummary() {
     }
@@ -258,9 +260,16 @@ public class RatingEngineSummary {
         this.completed = completed;
     }
 
+    public boolean isViewOnly() {
+        return viewOnly;
+    }
+
+    public void setViewOnly(boolean viewOnly) {
+        this.viewOnly = viewOnly;
+    }
+
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
     }
-
 }

@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -59,6 +60,7 @@ import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
@@ -181,7 +183,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             selection.setDisplayName(mapUsageToDisplayName(property));
             selections.add(selection);
             TreeMap<String, Long> categories = new TreeMap<>(Comparator.comparing(a -> //
-            Objects.requireNonNull(Category.fromName(a)).getOrder()));
+                    Objects.requireNonNull(Category.fromName(a)).getOrder()));
             selection.setCategories(categories);
             long selectedNum = 0L;
             for (String category : map.keySet()) {
@@ -246,7 +248,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     private UIAction processUpdateResponse(AttrConfigRequest saveResponse, AttrConfigSelectionRequest request,
-            boolean updateUsage) {
+                                           boolean updateUsage) {
         UIAction uiAction = new UIAction();
         if (saveResponse != null) {
             if (saveResponse.hasError()) {
@@ -260,29 +262,29 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                 int mode = parseModeForRequest(saveResponse, request);
                 // form the uiAction and throw exception
                 switch (mode) {
-                case 0:
-                    // attribute level
-                    uiAction.setTitle(UPDATE_WARNING_ATTRIBUTE_TITLE);
-                    uiAction.setView(View.Modal);
-                    uiAction.setStatus(Status.Error);
-                    uiAction.setMessage(generateAttrLevelMsg(saveResponse, updateUsage));
-                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
-                case 1:
-                    // subcategory level
-                    uiAction.setTitle(UPDATE_WARNING_SUBCATEGORY_TITLE);
-                    uiAction.setView(View.Modal);
-                    uiAction.setStatus(Status.Error);
-                    uiAction.setMessage(generateSubcategoryLevelMsg(saveResponse, updateUsage));
-                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
-                case 2:
-                    // category level
-                    uiAction.setTitle(UPDATE_WARNING_CATEGORY_TITLE);
-                    uiAction.setView(View.Modal);
-                    uiAction.setStatus(Status.Error);
-                    uiAction.setMessage(generateCategoryLevelMsg(saveResponse, updateUsage));
-                    throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
-                default:
-                    return uiAction;
+                    case 0:
+                        // attribute level
+                        uiAction.setTitle(UPDATE_WARNING_ATTRIBUTE_TITLE);
+                        uiAction.setView(View.Modal);
+                        uiAction.setStatus(Status.Error);
+                        uiAction.setMessage(generateAttrLevelMsg(saveResponse, updateUsage));
+                        throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                    case 1:
+                        // subcategory level
+                        uiAction.setTitle(UPDATE_WARNING_SUBCATEGORY_TITLE);
+                        uiAction.setView(View.Modal);
+                        uiAction.setStatus(Status.Error);
+                        uiAction.setMessage(generateSubcategoryLevelMsg(saveResponse, updateUsage));
+                        throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                    case 2:
+                        // category level
+                        uiAction.setTitle(UPDATE_WARNING_CATEGORY_TITLE);
+                        uiAction.setView(View.Modal);
+                        uiAction.setStatus(Status.Error);
+                        uiAction.setMessage(generateCategoryLevelMsg(saveResponse, updateUsage));
+                        throw new UIActionException(uiAction, updateUsage ? LedpCode.LEDP_18190 : LedpCode.LEDP_18195);
+                    default:
+                        return uiAction;
                 }
             } else {
                 if (updateUsage) {
@@ -310,7 +312,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         validations.stream().forEach(validation -> {
             if (validation.getValidationErrors() != null) {
                 Map<ValidationErrors.Type, List<String>> errors = validation.getValidationErrors().getErrors();
-                for (Map.Entry<ValidationErrors.Type, List<String>> entry: errors.entrySet()) {
+                for (Map.Entry<ValidationErrors.Type, List<String>> entry : errors.entrySet()) {
                     ValidationErrors.Type type = entry.getKey();
                     List<String> messages = entry.getValue();
                     errorMap.putIfAbsent(type, new MutablePair<>(0, new HashSet<>()));
@@ -384,7 +386,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         AccessLevel accessLevel = userService.getAccessLevel(MultiTenantContext.getPLSTenantId(),
                 MultiTenantContext.getEmailAddress());
         if (AccessLevel.SUPER_ADMIN != accessLevel && AccessLevel.INTERNAL_ADMIN != accessLevel) {
-            throw new LedpException(LedpCode.LEDP_18185, new String[] { MultiTenantContext.getEmailAddress() });
+            throw new LedpException(LedpCode.LEDP_18185, new String[]{MultiTenantContext.getEmailAddress()});
         }
     }
 
@@ -393,12 +395,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                 MultiTenantContext.getEmailAddress());
         if (AccessLevel.SUPER_ADMIN != accessLevel && AccessLevel.INTERNAL_ADMIN != accessLevel
                 && AccessLevel.EXTERNAL_ADMIN != accessLevel) {
-            throw new LedpException(LedpCode.LEDP_18204, new String[] { MultiTenantContext.getEmailAddress() });
+            throw new LedpException(LedpCode.LEDP_18204, new String[]{MultiTenantContext.getEmailAddress()});
         }
     }
 
     private void updateAttrConfigsForState(Category category, List<AttrConfig> attrConfigs, String attrName,
-            String property, AttrState selectThisAttr) {
+                                           String property, AttrState selectThisAttr) {
         AttrConfig config = new AttrConfig();
         config.setAttrName(attrName);
         // Only Premium Category can will be able to updated with State.
@@ -412,7 +414,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @VisibleForTesting
     void updateAttrConfigsForUsage(Category category, List<AttrConfig> attrConfigs, String attrName, String property,
-            Boolean selectThisAttr) {
+                                   Boolean selectThisAttr) {
         AttrConfig config = new AttrConfig();
         config.setAttrName(attrName);
 
@@ -436,7 +438,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     private void updateAttrConfigsForNameAndDescription(Category category, List<AttrConfig> attrConfigs,
-            AttrDetail request) {
+                                                        AttrDetail request) {
         AttrConfig config = new AttrConfig();
         config.setAttrName(request.getAttribute());
         // Only Accont and Contact can will be able to updated with Name &
@@ -501,7 +503,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     html.append(b(mapTypeToDisplayName(type)).render());
                     html.append(ul().with( //
                             each(warnings.get(type), entity -> //
-                            li(entity))) //
+                                    li(entity))) //
                             .render());
                 }
             }
@@ -509,7 +511,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             html.append(p(UPDATE_ACTIVATION_FAIL_ATTRIBUTE_MSG).render());
             html.append(ul().with( //
                     each(warnings.get(Type.USAGE_ENABLED), entity -> //
-                    li(mapUsageToDisplayName(entity)))) //
+                            li(mapUsageToDisplayName(entity)))) //
                     .render());
         }
         return html.toString();
@@ -528,7 +530,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             html.append((b(k + ":").render()));
             html.append(ul().with( //
                     each(v, attr -> //
-            li(attr))).render());
+                            li(attr))).render());
         });
         return html.toString();
     }
@@ -546,7 +548,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             html.append((b(k + ":").render()));
             html.append(ul().with( //
                     each(v, attr -> //
-            li(attr))).render());
+                            li(attr))).render());
         });
         return html.toString();
     }
@@ -569,16 +571,16 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     private String mapTypeToDisplayName(ImpactWarnings.Type type) {
         switch (type) {
-        case IMPACTED_SEGMENTS:
-            return "Segment(s):";
-        case IMPACTED_RATING_ENGINES:
-            return "Model(s):";
-        case IMPACTED_RATING_MODELS:
-            return "RatingModel(s):";
-        case IMPACTED_PLAYS:
-            return "Campaign(s):";
-        default:
-            throw new IllegalArgumentException("This type conversion is not supported");
+            case IMPACTED_SEGMENTS:
+                return "Segment(s):";
+            case IMPACTED_RATING_ENGINES:
+                return "Model(s):";
+            case IMPACTED_RATING_MODELS:
+                return "RatingModel(s):";
+            case IMPACTED_PLAYS:
+                return "Campaign(s):";
+            default:
+                throw new IllegalArgumentException("This type conversion is not supported");
         }
     }
 
@@ -602,7 +604,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @VisibleForTesting
     AttrConfigRequest generateAttrConfigRequestForUsage(String categoryName, String property,
-            AttrConfigSelectionRequest request) {
+                                                        AttrConfigSelectionRequest request) {
         Category category = resolveCategory(categoryName);
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
@@ -640,7 +642,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         if (saveResponse.hasError()) {
             attrValidations = saveResponse.getDetails().getValidations();
         } else {
-            return ;
+            return;
         }
         Map<String, AttrValidation> nameToAttrValidation =
                 attrValidations.stream().collect(Collectors.toMap(AttrValidation::getAttrName, e -> e));
@@ -675,7 +677,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @SuppressWarnings("unchecked")
     AttrConfigSelectionDetail generateSelectionDetails(String categoryName, AttrConfigRequest attrConfigRequest,
-            String property, boolean applyActivationFilter) {
+                                                       String property, boolean applyActivationFilter) {
         AttrConfigSelectionDetail attrConfigSelectionDetail = new AttrConfigSelectionDetail();
         long totalAttrs = 0L;
         long selected = 0L;
@@ -757,7 +759,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                             if (applyActivationFilter) {
                                 if (Boolean.FALSE.equals(getActualValue(configProp))
                                         && (!configProp.isAllowCustomization()
-                                                || Boolean.TRUE.equals(attrConfig.getShouldDeprecate()))) {
+                                        || Boolean.TRUE.equals(attrConfig.getShouldDeprecate()))) {
                                     continue;
                                 }
                             }
@@ -863,7 +865,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         return defaultDisplayName;
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     private String getDefaultName(Map<String, AttrConfigProp<?>> attrProps) {
         AttrConfigProp<String> displayProp = (AttrConfigProp<String>) attrProps.get(ColumnMetadataKey.DisplayName);
         if (displayProp != null) {
@@ -913,7 +915,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
         Map<String, StatsCube> cubes = dataLakeService.getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
-            return Collections.<String, AttributeStats> emptyMap();
+            return Collections.<String, AttributeStats>emptyMap();
         }
         Map<String, AttributeStats> result = new HashMap<>();
         for (BusinessEntity entity : entities) {
@@ -955,4 +957,33 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         return attrs;
     }
 
+    @Override
+    public AttributeSet getAttributeSet(String name) {
+        log.info("Get attribute set by name {}.", name);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return cdlAttrConfigProxy.getAttributeSet(tenant.getId(), name);
+    }
+
+    @Override
+    public List<AttributeSet> getAttributeSets() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return cdlAttrConfigProxy.getAttributeSets(tenant.getId());
+    }
+
+    @Override
+    public AttributeSet createOrUpdateAttributeSet() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        AttributeSet attributeSet = new AttributeSet();
+        log.info("Create or update attribute set with display name {} in tenant {}.",
+                attributeSet.getDisplayName(), tenant.getId());
+        return cdlAttrConfigProxy.createOrUpdateAttributeSet(tenant.getId(), attributeSet);
+    }
+
+    @Override
+    public Boolean deleteAttributeSet(String name) {
+        log.info("Delete attribute set by name {}.", name);
+        Tenant tenant = MultiTenantContext.getTenant();
+        cdlAttrConfigProxy.deleteAttributeSet(tenant.getId(), name);
+        return true;
+    }
 }

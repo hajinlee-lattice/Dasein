@@ -3,6 +3,7 @@ package com.latticeengines.apps.core.service;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -31,4 +32,11 @@ public interface AttrConfigService {
 
     List<AttrConfig> getRenderedList(String propertyName, Boolean enabled);
 
+    AttributeSet getAttributeSetByName(String name);
+
+    List<AttributeSet> getAttributeSets();
+
+    AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet);
+
+    void deleteAttributeSetByName(String name);
 }

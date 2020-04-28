@@ -2,8 +2,9 @@ package com.latticeengines.domain.exposed.metadata;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -16,9 +17,11 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,8 +38,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -44,15 +49,19 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "METADATA_ATTRIBUTE_SET")
+@Table(name = "METADATA_ATTRIBUTE_SET", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"NAME", "FK_TENANT_ID"})})
 @Filters({ //
-        @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")})
+        @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")})
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFields {
 
     private static final Logger log = LoggerFactory.getLogger(AttributeSet.class);
+
+    private static final String ATTRIBUTE_SET_NAME_PREFIX = "attibute_set";
+    private static final String ATTRIBUTE_SET_NAME_FORMAT = "%s__%s";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,6 +74,10 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
     @JsonProperty("Name")
     private String name;
 
+    @Column(name = "DISPLAY_NAME", nullable = false)
+    @JsonProperty("DisplayName")
+    private String displayName;
+
     @Column(name = "DESCRIPTION")
     @JsonProperty("Description")
     private String description;
@@ -74,22 +87,23 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
     @JsonIgnore
     private byte[] attributes;
 
-    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonProperty("tenant")
     private Tenant tenant;
 
     //  Map<String, List<String>> --> <category --> list of attribute ids>
     @JsonProperty("attributesMap")
     @Transient
-    public Map<String, List<String>> getAttributesMap() {
+    public Map<String, Set<String>> getAttributesMap() {
         if (getAttributes() == null) {
             return null;
         }
         String uncompressedData = new String(CompressionUtils.decompressByteArray(getAttributes()));
         if (StringUtils.isNotEmpty(uncompressedData)) {
             return JsonUtils.deserialize(uncompressedData,
-                    new TypeReference<Map<String, List<String>>>() {
+                    new TypeReference<Map<String, Set<String>>>() {
                     });
         } else {
             return null;
@@ -98,7 +112,7 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
 
     @JsonProperty("attributesMap")
     @Transient
-    public void setAttributesMap(Map<String, List<String>> attributesMap) {
+    public void setAttributesMap(Map<String, Set<String>> attributesMap) {
         if (MapUtils.isEmpty(attributesMap)) {
             setAttributes(null);
             return;
@@ -124,11 +138,11 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
     private Date updated;
 
     @JsonProperty("createdBy")
-    @Column(name = "CREATED_BY", nullable = false)
+    @Column(name = "CREATED_BY")
     private String createdBy;
 
     @JsonProperty("updatedBy")
-    @Column(name = "UPDATED_BY", nullable = false)
+    @Column(name = "UPDATED_BY")
     private String updatedBy;
 
     @Override
@@ -209,5 +223,18 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public static String generateNameStr() {
+        return String.format(ATTRIBUTE_SET_NAME_FORMAT, ATTRIBUTE_SET_NAME_PREFIX,
+                AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID())));
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

@@ -6,8 +6,10 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -15,6 +17,9 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -33,6 +38,9 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
+
+    @Inject
+    private AttributeSetEntityMgr attributeSetEntityMgr;
 
     @Override
     protected List<ColumnMetadata> getSystemMetadata(BusinessEntity entity) {
@@ -72,6 +80,47 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
             timer.setTimerMessage(msg);
         }
         return renderedList;
+    }
+
+    @Override
+    public AttributeSet getAttributeSetByName(String name) {
+        return attributeSetEntityMgr.findByName(name);
+    }
+
+    @Override
+    public List<AttributeSet> getAttributeSets() {
+        return attributeSetEntityMgr.findAll();
+    }
+
+    private void validateAttributeSet(AttributeSet attributeSet) {
+        if (StringUtils.isBlank(attributeSet.getDisplayName())) {
+            throw new LedpException(LedpCode.LEDP_18244);
+        }
+        AttributeSet existingAttributeSet = attributeSetEntityMgr.findByDisplayName(attributeSet.getDisplayName());
+        if (existingAttributeSet != null) {
+            if (StringUtils.isEmpty(attributeSet.getName())) {
+                throw new LedpException(LedpCode.LEDP_18243, new String[]{attributeSet.getDisplayName()});
+            } else {
+                if (!existingAttributeSet.getName().equals(attributeSet.getName())) {
+                    throw new LedpException(LedpCode.LEDP_18243, new String[]{attributeSet.getDisplayName()});
+                }
+            }
+        }
+    }
+
+    @Override
+    public AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet) {
+        validateAttributeSet(attributeSet);
+        if (StringUtils.isNotEmpty(attributeSet.getName())) {
+            return attributeSetEntityMgr.updateAttributeSet(attributeSet);
+        } else {
+            return attributeSetEntityMgr.createAttributeSet(attributeSet);
+        }
+    }
+
+    @Override
+    public void deleteAttributeSetByName(String name) {
+        attributeSetEntityMgr.deleteByName(name);
     }
 
 }
