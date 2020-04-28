@@ -218,10 +218,10 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     public void testFindDependantPlaysAfterDeleting() {
         List<String> attributes = new ArrayList<>();
         attributes.add("Account.DUNS");
-        List<String> plays = cdlDependenciesProxy.getDependantPlayDisplayNames(mainCustomerSpace, attributes);
+        List<String> playNames = cdlDependenciesProxy.getDependantPlayDisplayNames(mainCustomerSpace, attributes);
 
-        Assert.assertNotNull(plays);
-        Assert.assertEquals(plays.size(), 0);
+        Assert.assertNotNull(playNames);
+        Assert.assertEquals(playNames.size(), 0);
     }
 
     @Test(groups = "deployment-app", dependsOnMethods = { "testFindDependantPlaysAfterDeleting" })
