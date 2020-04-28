@@ -17,8 +17,6 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -95,9 +93,6 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     @Override
     public AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet) {
         if (StringUtils.isNotEmpty(attributeSet.getName())) {
-            if (StringUtils.isBlank(attributeSet.getDisplayName())) {
-                throw new LedpException(LedpCode.LEDP_18243);
-            }
             return attributeSetEntityMgr.updateAttributeSet(attributeSet);
         } else {
             return attributeSetEntityMgr.createAttributeSet(attributeSet);

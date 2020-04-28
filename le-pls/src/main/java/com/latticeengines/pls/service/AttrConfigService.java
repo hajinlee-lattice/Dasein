@@ -38,7 +38,7 @@ public interface AttrConfigService {
 
     List<AttributeSet> getAttributeSets();
 
-    AttributeSet createOrUpdateAttributeSet();
+    AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet);
 
     boolean deleteAttributeSet(String name);
 }
