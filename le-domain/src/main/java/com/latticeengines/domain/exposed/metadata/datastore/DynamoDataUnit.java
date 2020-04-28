@@ -16,6 +16,9 @@ public class DynamoDataUnit extends DataUnit {
     // table name used in dynamo pk (optional)
     @JsonProperty("LinkedTable")
     private String linkedTable;
+    //HdfsAvroFabricEntity used in dynamo
+    @JsonProperty("entityClass")
+    private String entityClass;
 
     @Override
     @JsonProperty("StorageType")
@@ -61,5 +64,13 @@ public class DynamoDataUnit extends DataUnit {
 
     public void setLinkedTable(String linkedTable) {
         this.linkedTable = linkedTable;
+    }
+
+    public String getEntityClass() {
+        return entityClass;
+    }
+
+    public void setEntityClass(String entityClass) {
+        this.entityClass = entityClass;
     }
 }

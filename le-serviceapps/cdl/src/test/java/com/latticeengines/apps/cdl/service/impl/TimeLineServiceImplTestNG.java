@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
 import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
@@ -46,7 +47,7 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         timeLine1 = new TimeLine();
         timeLine1.setName(timelineName1);
-        timeLine1.setTimelineId(timelineName1);
+        timeLine1.setTimelineId(String.format("%s_%s", CustomerSpace.shortenCustomerSpace(mainCustomerSpace), timelineName1));
         timeLine1.setTenant(mainTestTenant);
         timeLine1.setEntity(BusinessEntity.Account.name());
         timeLine1.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
@@ -97,7 +98,7 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
         Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
 
-        created = timeLineService.findByTimelineId(mainCustomerSpace, timelineName1);
-        Assert.assertEquals(created.getTimelineId(), timelineName1);
+        created = timeLineService.findByTimelineId(mainCustomerSpace, timeLine1.getTimelineId());
+        Assert.assertEquals(created.getTimelineId(), timeLine1.getTimelineId());
     }
 }
