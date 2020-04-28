@@ -46,8 +46,6 @@ public enum LatticeFeatureFlag {
     ENABLE_FACEBOOK_INTEGRATION("EnableFacebookIntegration", "Enable Facebook integration"), //
     ENABLE_GOOGLE_INTEGRATION("EnableGoogleIntegration", "Enable Google integration"), //
     ENABLE_DELTA_CALCULATION("EnableDeltaCalculation", "Enable Delta Calculation"), //
-    ADVANCED_FILTERING("AdvancedFiltering",
-            "Enable Advanced filtering functionality for Segments, Models and Campaigns"), //
     ATTRIBUTE_TOGGLING("AttributeToggling", "Allow multiclick behavior for Attributes during query building"), //
 
     @Deprecated
@@ -86,7 +84,9 @@ public enum LatticeFeatureFlag {
     @Deprecated
     ENABLE_LINKEDIN_INTEGRATION(true, "EnableLinkedInIntegration", "Enable LinkedIn integration"), //
     @Deprecated
-    ENABLE_OUTREACH_INTEGRATION(true, "EnableOutreachIntegration", "Enable Outreach integration"); //
+    ENABLE_OUTREACH_INTEGRATION(true, "EnableOutreachIntegration", "Enable Outreach integration"), //
+    @Deprecated
+    ADVANCED_FILTERING(true, "AdvancedFiltering", "Enable Advanced filtering functionality for Segments, Models and Campaigns");
 
     private static Set<String> names;
 
