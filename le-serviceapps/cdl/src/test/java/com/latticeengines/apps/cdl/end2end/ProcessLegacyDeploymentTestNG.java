@@ -129,10 +129,11 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         if (firstPA) {
             verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedReport());
+            verifyDataCollectionStatus(DataCollection.Version.Green);
         } else {
             verifyProcessAnalyzeReport(processAnalyzeAppId, getUpsertExpectedReport());
+            verifyDataCollectionStatus(DataCollection.Version.Blue);
         }
-        verifyDataCollectionStatus(DataCollection.Version.Green);
         verifyNumAttrsInAccount();
         verifyAccountFeatures();
         verifyAccountProfile();
@@ -141,10 +142,17 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         // Check that stats cubes only exist for the entities specified below.
         verifyStats(getEntitiesInStats());
-        verifyBatchStore(getExpectedBatchStoreCounts());
-        verifyServingStore(getExpectedServingStoreCounts());
-        verifyExtraTableRoles(getExtraTableRoeCounts());
-        verifyRedshift(getExpectedRedshiftCounts());
+        if (firstPA) {
+            verifyBatchStore(getExpectedBatchStoreCounts());
+            verifyServingStore(getExpectedServingStoreCounts());
+            verifyExtraTableRoles(getExtraTableRoeCounts());
+            verifyRedshift(getExpectedRedshiftCounts());
+        } else {
+            verifyBatchStore(getUpsertExpectedBatchStoreCounts());
+            verifyServingStore(getUpsertExpectedServingStoreCounts());
+            verifyExtraTableRoles(getUpsertExtraTableRoeCounts());
+            verifyRedshift(getUpsertExpectedRedshiftCounts());
+        }
     }
 
     private void verifyAccountProfile() {
@@ -310,10 +318,26 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
                 BusinessEntity.Product, BATCH_STORE_PRODUCT);
     }
 
+    protected Map<BusinessEntity, Long> getUpsertExpectedBatchStoreCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, ACCOUNT_PA + ACCOUNT_PA_NEW_ADD, //
+                BusinessEntity.Contact, CONTACT_PA + CONTACT_PA_NEW_ADD, //
+                BusinessEntity.Product, BATCH_STORE_PRODUCT);
+    }
+
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_PA);
         map.put(BusinessEntity.Contact, CONTACT_PA);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
+        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
+        return map;
+    }
+
+    protected Map<BusinessEntity, Long> getUpsertExpectedServingStoreCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        map.put(BusinessEntity.Account, ACCOUNT_PA + ACCOUNT_PA_NEW_ADD);
+        map.put(BusinessEntity.Contact, CONTACT_PA + CONTACT_PA_NEW_ADD);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         return map;
@@ -326,9 +350,22 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         );
     }
 
+    protected Map<TableRoleInCollection, Long> getUpsertExtraTableRoeCounts() {
+        return ImmutableMap.of(//
+                TableRoleInCollection.AccountFeatures, ACCOUNT_PA + ACCOUNT_PA_NEW_ADD, //
+                TableRoleInCollection.AccountExport, ACCOUNT_PA + CONTACT_PA_NEW_ADD //
+        );
+    }
+
     protected Map<BusinessEntity, Long> getExpectedRedshiftCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_PA, //
                 BusinessEntity.Contact, CONTACT_PA);
+    }
+
+    protected Map<BusinessEntity, Long> getUpsertExpectedRedshiftCounts() {
+        return ImmutableMap.of(//
+                BusinessEntity.Account, ACCOUNT_PA + ACCOUNT_PA_NEW_ADD, //
+                BusinessEntity.Contact, CONTACT_PA + CONTACT_PA_NEW_ADD);
     }
 }
