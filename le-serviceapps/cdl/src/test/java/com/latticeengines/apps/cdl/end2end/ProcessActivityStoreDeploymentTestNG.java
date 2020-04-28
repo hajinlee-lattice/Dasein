@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.SimpleTemplateMetadata;
@@ -261,7 +262,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         String timelineName1 = "timelineName1";
         TimeLine timeLine1 = new TimeLine();
         timeLine1.setName(timelineName1);
-        timeLine1.setTimelineId(String.format("%s_%s", mainCustomerSpace, timelineName1));
+        timeLine1.setTimelineId(String.format("%s_%s", CustomerSpace.shortenCustomerSpace(mainCustomerSpace), timelineName1));
         timeLine1.setEntity(BusinessEntity.Account.name());
         timeLine1.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
         Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
@@ -279,7 +280,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
         String timelineName = "timelineName2";
         TimeLine timeLine2 = new TimeLine();
         timeLine2.setName(timelineName);
-        timeLine2.setTimelineId(String.format("%s_%s", mainCustomerSpace, timelineName));
+        timeLine2.setTimelineId(String.format("%s_%s", CustomerSpace.shortenCustomerSpace(mainCustomerSpace), timelineName));
         timeLine2.setEntity(BusinessEntity.Contact.name());
         timeLine2.setStreamTypes(Arrays.asList(AtlasStream.StreamType.WebVisit, AtlasStream.StreamType.MarketingActivity));
         Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
@@ -298,7 +299,7 @@ public class ProcessActivityStoreDeploymentTestNG extends CDLEnd2EndDeploymentTe
 
         TimeLine timeLine3 = new TimeLine();
         timeLine3.setName(timelineName);
-        timeLine3.setTimelineId(String.format("%s_%s", mainCustomerSpace, timelineName));
+        timeLine3.setTimelineId(String.format("%s_%s", CustomerSpace.shortenCustomerSpace(mainCustomerSpace), timelineName));
         timeLine3.setEntity(BusinessEntity.Account.name());
         timeLine3.setStreamTypes(Arrays.asList(AtlasStream.StreamType.Opportunity, AtlasStream.StreamType.WebVisit));
         Map<String, Map<String, EventFieldExtractor>> mappingMap = new HashMap<>();
