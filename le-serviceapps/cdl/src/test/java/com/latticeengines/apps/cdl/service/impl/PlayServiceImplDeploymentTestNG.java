@@ -214,7 +214,17 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertEquals(deletedPlayIds.get(0), retrievedPlay.getName());
     }
 
-    @Test(groups = "deployment-app", dependsOnMethods = { "testDelete" })
+    @Test(groups = "deployment-app", dependsOnMethods = {"testDelete"})
+    public void testFindDependantPlaysAfterDeleting() {
+        List<String> attributes = new ArrayList<>();
+        attributes.add("Account.DUNS");
+        List<String> playNames = cdlDependenciesProxy.getDependantPlayDisplayNames(mainCustomerSpace, attributes);
+
+        Assert.assertNotNull(playNames);
+        Assert.assertEquals(playNames.size(), 0);
+    }
+
+    @Test(groups = "deployment-app", dependsOnMethods = { "testFindDependantPlaysAfterDeleting" })
     public void testDeleteViaRatingEngine() {
         Play newPlay = playService.createOrUpdate(createDefaultPlay(), mainTestTenant.getId());
         assertPlay(newPlay);
