@@ -71,8 +71,8 @@ public class AttributeSetEntityMgrImpl
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
-        if (attributeSet != null) {
-            AttributeSet existingAttributeSet = findByName(attributeSet.getName());
+        AttributeSet existingAttributeSet = findByName(attributeSet.getName());
+        if (existingAttributeSet != null) {
             cloneAttributeSet(existingAttributeSet, attributeSet);
             attributeSetDao.update(existingAttributeSet);
             return existingAttributeSet;
