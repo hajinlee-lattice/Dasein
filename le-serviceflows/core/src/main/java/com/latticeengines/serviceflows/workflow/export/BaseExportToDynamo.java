@@ -207,6 +207,7 @@ public abstract class BaseExportToDynamo<T extends BaseExportToDynamoConfigurati
             String customerSpace = configuration.getCustomerSpace().toString();
             DynamoDataUnit unit = new DynamoDataUnit();
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
+            unit.setEntityClass(configuration.getEntityClass().getCanonicalName());
             if (configuration.getMigrateTable() == null || BooleanUtils.isFalse(configuration.getMigrateTable())) {
                 String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName()
                         : config.getTableName();
