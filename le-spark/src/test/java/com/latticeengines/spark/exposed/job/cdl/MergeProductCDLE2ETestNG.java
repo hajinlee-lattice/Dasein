@@ -176,9 +176,10 @@ public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
 
     private Boolean verifySecondTarget(HdfsDataUnit tgt) {
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
-            if ("43356888902E7390269D7AF4DCD94E6F".equals(record.get("ProductId").toString()) ||
-                    "43356888902E7390269D7AF4DCD94E6F".equals(record.get("ProductBundleId").toString())) {
-                System.out.println(record);
+            if ("43356888902E7390269D7AF4DCD94E6F".equals(record.get("ProductId").toString())) {
+                Assert.assertEquals(record.get("ProductName").toString(), "CMT4: Shaker Accessories (NEW)");
+                Assert.assertEquals(record.get("ProductBundle").toString(), "CMT4: Shaker Accessories (NEW)");
+                Assert.assertEquals(record.get("ProductBundleId").toString(), "43356888902E7390269D7AF4DCD94E6F");
             }
         });
         return true;
@@ -200,12 +201,12 @@ public class MergeProductCDLE2ETestNG extends SparkJobFunctionalTestNGBase {
         MergeProductReport report = JsonUtils.deserialize(output, MergeProductReport.class);
         System.out.println(JsonUtils.serialize(report));
         Assert.assertEquals(report.getRecords(), 3);
-        // Assert.assertEquals(report.getInvalidRecords(), 0);
+         Assert.assertEquals(report.getInvalidRecords(), 0);
         Assert.assertEquals(report.getBundleProducts(), 2);
         Assert.assertEquals(report.getHierarchyProducts(), 0);
-        Assert.assertEquals(report.getAnalyticProducts(), 1);
+        Assert.assertEquals(report.getAnalyticProducts(), 3);
         Assert.assertEquals(report.getSpendingProducts(), 0);
-        Assert.assertTrue(CollectionUtils.isNotEmpty(report.getErrors()));
+        Assert.assertTrue(CollectionUtils.isEmpty(report.getErrors()));
     }
 
 }
