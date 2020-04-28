@@ -20,6 +20,10 @@ public class FieldValidationMessage {
         ERROR
     }
 
+    public FieldValidationMessage() {
+        super();
+    }
+
     public FieldValidationMessage (String fieldName, String columnName, String message,
                                    FieldValidationMessage.MessageLevel level) {
         this.fieldName = fieldName;

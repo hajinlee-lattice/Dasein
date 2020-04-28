@@ -145,8 +145,7 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         ValidateFieldDefinitionsResponse response = testSourceProxy.validateFieldDefinitions(testSourceFile.getName(),
                 validateRequest);
 
-        System.out.println(JsonUtils.pprint(fetchResponse));
-        Assert.assertEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.PASS);
+        Assert.assertNotEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
 
     }
 

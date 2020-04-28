@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -102,7 +101,7 @@ public class SourceResource {
     // Parameters:
     //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
     //   importFile: The name of the CSV file this template is being generated for.
-    @RequestMapping(value = "/fetch", method = RequestMethod.GET)
+    @GetMapping(value = "/fetch")
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
     public FetchFieldDefinitionsResponse fetchFieldDefinitions(
@@ -112,7 +111,7 @@ public class SourceResource {
         try {
             return sourceService.fetchFieldDefinitions(sourceId, systemObject, importFile);
         } catch (Exception e) {
-            log.error("Fetch Field Definition Failed with Exception: ", e);
+            log.error("Fetch Field Definition Failed with Exception.", e);
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, LedpCode.LEDP_60002);
@@ -123,7 +122,7 @@ public class SourceResource {
     //   importFile: The name of the CSV file this template is being generated for.
     // Body:
     // ValidateFieldDefinitionsRequest representing field definition changes/records
-    @RequestMapping(value = "/validate", method = RequestMethod.POST)
+    @PostMapping(value = "/validate")
     @ResponseBody
     @ApiOperation(value = "Provide validation result and merged field definition to front end")
     public ValidateFieldDefinitionsResponse validateFieldDefinitions(
@@ -135,7 +134,7 @@ public class SourceResource {
                     importFile, validateRequest);
             return validateFieldDefinitionsResponse;
         } catch (Exception e) {
-            log.error("Failed to create source: " + e.getMessage());
+            log.error("Failed to validate definitions", e);
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
             throw new UIActionException(action, LedpCode.LEDP_60003);
