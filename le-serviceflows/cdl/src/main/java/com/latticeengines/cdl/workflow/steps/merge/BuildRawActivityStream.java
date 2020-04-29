@@ -103,8 +103,12 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
     @Override
     protected PipelineTransformationRequest getConsolidateRequest() {
         if (isShortCutMode()) {
+            Map<String, String> rawStreamTableNames = getMapObjectFromContext(RAW_ACTIVITY_STREAM_TABLE_NAME,
+                    String.class, String.class);
             log.info("Already processed this step, use existing checkpoint. Raw stream tables = {}",
-                    getMapObjectFromContext(RAW_ACTIVITY_STREAM_TABLE_NAME, String.class, String.class));
+                    rawStreamTableNames);
+            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), rawStreamTableNames, batchStore,
+                    inactive);
             return null;
         }
         PipelineTransformationRequest request = new PipelineTransformationRequest();
