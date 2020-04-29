@@ -190,9 +190,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total account after ProcessAccount test
     static final Long ACCOUNT_PA = 900L;
     // Number of total account after inserting new accounts ProcessAccount test
-    static final Long ACCOUNT_PA_NEW_ADD = 10L;
+    static final Long NEW_ACCOUNT_PA = 10L;
     // Number of total account after updating existing accounts ProcessAccount test
-    static final Long ACCOUNT_PA_UPDATE = 10L;
+    static final Long UPDATE_ACCOUNT_PA = 10L;
     // Number of total account after ProcessAccount entity match test
     static final Long ACCOUNT_PA_EM = 900L;
     // Number of total account after ProcessAccount entity match test for GA tenants
@@ -254,9 +254,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of total contact after ProcessAccount test
     static final Long CONTACT_PA = 900L;
     // Number of total contact after inserting new contacts ProcessAccount test
-    static final Long CONTACT_PA_NEW_ADD = 10L;
+    static final Long NEW_CONTACT_PA = 10L;
     // Number of total contact after updating existing contacts ProcessAccount test
-    static final Long CONTACT_PA_UPDATE = 10L;
+    static final Long UPDATE_CONTACT_PA = 10L;
     // Number of total contact after ProcessAccount entity match test
     static final Long CONTACT_PA_EM = 900L;
     // Number of total contact after ProcessAccount entity match test for GA tenants
@@ -343,6 +343,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // For verified aid, pid and txn date, daily txn cost after
     // ProcessTransaction test
     static final double VERIFY_DAILYTXN_COST_PT = 1054.588389;
+    // Number of new raw txn after first PA of legacy tenant end2end test
+    static final Long TRANSACTION_LEGACY_FIRST_PA = 24367L;
+    // Number of new raw txn after second PA of legacy tenant end2end test
+    static final Long TRANSACTION_LEGACY_SECOND_PA = 24393L;
+    // Number of total purchase history attributes after PA of legacy tenant end2end test
+    static final Long TOTAL_PURCHASE_HISTORY_PA = 5L;
 
     /* Expected product result */
 
@@ -389,6 +395,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final long SEGMENT_3_CONTACT_1 = 53;
     static final long SEGMENT_3_ACCOUNT_2 = 60;
     static final long SEGMENT_3_CONTACT_2 = 60;
+    static final long SEGMENT_3_ACCOUNT_3 = 52;
+    static final long SEGMENT_3_CONTACT_3 = 52;
 
     static final String SEGMENT_NAME_CURATED_ATTR = NamingUtils.timestamp("E2ESegmentCuratedAttr");
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");

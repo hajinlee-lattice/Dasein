@@ -17,6 +17,8 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAccountAttributesStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -53,6 +55,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         processAnalyzeSkipPublishToS3();
         verifyFirstProcess();
         upsertData();
+        replaceData();
         processAnalyzeSkipPublishToS3();
         verifySecondProcess();
     }
@@ -63,23 +66,23 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     protected void importData() throws InterruptedException {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
-        log.info("Importing new accounts");
+        log.info("Importing accounts");
         mockCSVImport(BusinessEntity.Account, 1, "DefaultSystem_AccountData");
         Thread.sleep(1100);
 
-        log.info("Importing new contacts");
+        log.info("Importing contacts");
         mockCSVImport(BusinessEntity.Contact, 1, "DefaultSystem_ContactData");
         Thread.sleep(1100);
 
-        log.info("Importing new products");
+        log.info("Importing products");
         mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
         Thread.sleep(1100);
 
-        log.info("Importing new product hierarchy");
+        log.info("Importing product hierarchy");
         mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
         Thread.sleep(1100);
 
-        log.info("Importing new transactions");
+        log.info("Importing transactions");
         mockCSVImport(BusinessEntity.Transaction, 1, "DefaultSystem_TransactionData");
         Thread.sleep(2000);
 
@@ -99,6 +102,19 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Thread.sleep(1100);
     }
 
+    // Replace transaction data
+    // Delete all transaction data first, and then importing new data
+    protected void replaceData() throws InterruptedException {
+        log.info("Register replacement action for transaction");
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        String email = MultiTenantContext.getEmailAddress();
+        cdlProxy.cleanupAllByAction(customerSpace.toString(), BusinessEntity.Transaction, email);
+
+        log.info("Importing new transaction data");
+        mockCSVImport(BusinessEntity.Transaction, 2, "DefaultSystem_TransactionData");
+        Thread.sleep(2000);
+    }
+
     protected void verifyFirstProcess() {
         verifyProcess(true);
     }
@@ -112,8 +128,14 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         createTestSegment3();
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
-        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of(//
-                BusinessEntity.Account, SEGMENT_3_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_3_CONTACT_1);
+        Map<BusinessEntity, Long> segment3Counts;
+        if (firstPA) {
+            segment3Counts = ImmutableMap.of(BusinessEntity.Account, SEGMENT_3_ACCOUNT_1, BusinessEntity.Contact,
+                    SEGMENT_3_CONTACT_1);
+        } else {
+            segment3Counts = ImmutableMap.of(BusinessEntity.Account, SEGMENT_3_ACCOUNT_3, BusinessEntity.Contact,
+                    SEGMENT_3_CONTACT_3);
+        }
         verifyTestSegment3Counts(segment3Counts);
 
         // Create a test segment to verify proper behavior of the Curated Attributes
@@ -241,6 +263,8 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         expectedReport.put(BusinessEntity.Account, getAccountExpectedReport());
         expectedReport.put(BusinessEntity.Contact, getContactExpectedReport());
         expectedReport.put(BusinessEntity.Product, getProductExpectedReport());
+        expectedReport.put(BusinessEntity.Transaction, getTransactionExpectedReport());
+        expectedReport.put(BusinessEntity.PurchaseHistory, getPurchaseHistoryExpectedReport());
 
         return expectedReport;
     }
@@ -250,6 +274,8 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         expectedReport.put(BusinessEntity.Account, getUpsertAccountExpectedReport());
         expectedReport.put(BusinessEntity.Contact, getUpsertContactExpectedReport());
         expectedReport.put(BusinessEntity.Product, getUpsertProductExpectedReport());
+        expectedReport.put(BusinessEntity.Transaction, getReplacedTransactionExpectedReport());
+        expectedReport.put(BusinessEntity.PurchaseHistory, getPurchaseHistoryExpectedReport());
 
         return expectedReport;
     }
@@ -268,9 +294,9 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     protected Map<String, Object> getUpsertAccountExpectedReport() {
         Map<String, Object> accountReport = new HashMap<>();
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.NEW,
-                ACCOUNT_PA_NEW_ADD);
+                NEW_ACCOUNT_PA);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UPDATE,
-                ACCOUNT_PA_UPDATE);
+                UPDATE_ACCOUNT_PA);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.UNMATCH, 0L);
         accountReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + UNDER_SCORE + ReportConstants.DELETE, 0L);
         accountReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + UNDER_SCORE + ReportConstants.TOTAL, ACCOUNT_PA);
@@ -288,10 +314,9 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     protected Map<String, Object> getUpsertContactExpectedReport() {
         Map<String, Object> contactReport = new HashMap<>();
-        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
-                CONTACT_PA_NEW_ADD);
+        contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW, NEW_CONTACT_PA);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.UPDATE,
-                CONTACT_PA_UPDATE);
+                UPDATE_CONTACT_PA);
         contactReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         contactReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL, CONTACT_PA);
         return contactReport;
@@ -325,6 +350,34 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return productReport;
     }
 
+    protected Map<String, Object> getTransactionExpectedReport() {
+        Map<String, Object> transactionReport = new HashMap<>();
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
+                TRANSACTION_LEGACY_FIRST_PA);
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
+        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                TRANSACTION_LEGACY_FIRST_PA);
+        return transactionReport;
+    }
+
+    protected Map<String, Object> getReplacedTransactionExpectedReport() {
+        Map<String, Object> transactionReport = new HashMap<>();
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
+                TRANSACTION_LEGACY_SECOND_PA);
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE,
+                TRANSACTION_LEGACY_FIRST_PA);
+        transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                TRANSACTION_LEGACY_SECOND_PA);
+        return transactionReport;
+    }
+
+    protected Map<String, Object> getPurchaseHistoryExpectedReport() {
+        Map<String, Object> purchaseHistoryReport = new HashMap<>();
+        purchaseHistoryReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
+                TOTAL_PURCHASE_HISTORY_PA);
+        return purchaseHistoryReport;
+    }
+
     protected Map<BusinessEntity, Long> getExpectedBatchStoreCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_PA, //
@@ -334,8 +387,8 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     protected Map<BusinessEntity, Long> getUpsertExpectedBatchStoreCounts() {
         return ImmutableMap.of(//
-                BusinessEntity.Account, ACCOUNT_PA + ACCOUNT_PA_NEW_ADD, //
-                BusinessEntity.Contact, CONTACT_PA + CONTACT_PA_NEW_ADD, //
+                BusinessEntity.Account, ACCOUNT_PA + NEW_ACCOUNT_PA, //
+                BusinessEntity.Contact, CONTACT_PA + NEW_CONTACT_PA, //
                 BusinessEntity.Product, BATCH_STORE_PRODUCT);
     }
 
@@ -350,8 +403,8 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     protected Map<BusinessEntity, Long> getUpsertExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
-        map.put(BusinessEntity.Account, ACCOUNT_PA + ACCOUNT_PA_NEW_ADD);
-        map.put(BusinessEntity.Contact, CONTACT_PA + CONTACT_PA_NEW_ADD);
+        map.put(BusinessEntity.Account, ACCOUNT_PA + NEW_ACCOUNT_PA);
+        map.put(BusinessEntity.Contact, CONTACT_PA + NEW_CONTACT_PA);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
         map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
         return map;
@@ -366,8 +419,8 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     protected Map<TableRoleInCollection, Long> getUpsertExtraTableRoeCounts() {
         return ImmutableMap.of(//
-                TableRoleInCollection.AccountFeatures, ACCOUNT_PA + ACCOUNT_PA_NEW_ADD, //
-                TableRoleInCollection.AccountExport, ACCOUNT_PA + CONTACT_PA_NEW_ADD //
+                TableRoleInCollection.AccountFeatures, ACCOUNT_PA + NEW_ACCOUNT_PA, //
+                TableRoleInCollection.AccountExport, ACCOUNT_PA + NEW_CONTACT_PA //
         );
     }
 
@@ -379,7 +432,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
     protected Map<BusinessEntity, Long> getUpsertExpectedRedshiftCounts() {
         return ImmutableMap.of(//
-                BusinessEntity.Account, ACCOUNT_PA + ACCOUNT_PA_NEW_ADD, //
-                BusinessEntity.Contact, CONTACT_PA + CONTACT_PA_NEW_ADD);
+                BusinessEntity.Account, ACCOUNT_PA + NEW_ACCOUNT_PA, //
+                BusinessEntity.Contact, CONTACT_PA + NEW_CONTACT_PA);
     }
 }
