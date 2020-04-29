@@ -127,7 +127,7 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         //TableName -> StreamType
         config.streamTypeWithTableNameMap =
                 sourceTables.entrySet().stream()
-                        .filter(entry -> configuration.getActivityStreamMap().get(entry.getKey()) != null)
+                        .filter(entry -> (configuration.getActivityStreamMap().get(entry.getKey()) != null && configuration.getActivityStreamMap().get(entry.getKey()).getStreamType() != null))
                         .map(entry -> Pair.of(entry.getValue(),
                                 configuration.getActivityStreamMap().get(entry.getKey()).getStreamType().name())).collect(Collectors.toMap(Pair::getKey, Pair::getValue));
         //timelineId -> (BusinessEntity, streamTableName list)
