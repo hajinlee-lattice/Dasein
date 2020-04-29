@@ -72,7 +72,8 @@ public enum TableRoleInCollection {
         ConsolidatedContact.partitionKey = InterfaceName.AccountId;
         ConsolidatedContact.rangeKey = InterfaceName.ContactId;
 
-        CalculatedCuratedContact.primaryKey = InterfaceName.AccountId;
+        CalculatedCuratedContact.primaryKey = InterfaceName.ContactId;
+        CalculatedCuratedContact.partitionKey = InterfaceName.AccountId;
         CalculatedCuratedContact.rangeKey = InterfaceName.ContactId;
 
         SortedContact.primaryKey = ConsolidatedContact.primaryKey;

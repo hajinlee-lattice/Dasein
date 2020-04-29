@@ -2,7 +2,7 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -13,6 +13,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
@@ -56,6 +57,9 @@ public class CuratedContactAttributes
     @Inject
     private MetadataProxy metadataProxy;
 
+    @Inject
+    private CloneTableService cloneTableService;
+
     @Override
     protected CustomerSpace parseCustomerSpace(CuratedContactAttributesStepConfiguration stepConfiguration) {
         if (customerSpace == null) {
@@ -74,14 +78,13 @@ public class CuratedContactAttributes
             CuratedContactAttributesStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        List<String> tempTables = getListObjectFromContext(TEMPORARY_CDL_TABLES, String.class);
-        String contactLastActivityTempTableName = null;
-        for (String table : tempTables) {
-            if (table.startsWith(CONTACT_LAST_ACTIVITY_TABLE_PREFIX))
-                contactLastActivityTempTableName = table;
-        }
+        Map<String, String> lastActivityTables = getMapObjectFromContext(LAST_ACTIVITY_DATE_TABLE_NAME, String.class,
+                String.class);
+        String contactLastActivityTempTableName = lastActivityTables.getOrDefault(BusinessEntity.Contact.name(), "");
+
         if (StringUtils.isBlank(contactLastActivityTempTableName)) {
             log.warn("No temp table for contact activity date found, skipping step");
+            cloneTableService.linkInactiveTable(TABLE_ROLE);
             return null;
         }
 
@@ -114,8 +117,7 @@ public class CuratedContactAttributes
         metadataProxy.createTable(customerSpace.toString(), resultTableName, resultTable);
         dataCollectionProxy.upsertTable(customerSpace.toString(), resultTableName, TABLE_ROLE, inactive);
         exportToS3AndAddToContext(resultTable, ACCOUNT_LOOKUP_TABLE_NAME);
-        exportToDynamo(resultTableName, TableRoleInCollection.CalculatedCuratedContact.getPartitionKey(),
-                TableRoleInCollection.CalculatedCuratedContact.getRangeKey());
+        exportToDynamo(resultTableName, TABLE_ROLE.getPartitionKey(), TABLE_ROLE.getRangeKey());
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
