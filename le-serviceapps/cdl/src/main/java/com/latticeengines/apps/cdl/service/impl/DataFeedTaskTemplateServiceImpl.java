@@ -448,6 +448,11 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return true;
     }
 
+    @Override
+    public boolean validateGAEnabled(boolean enableGA) {
+        return batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace()) || (enableGA && batonService.onlyEntityMatchGAEnabled(MultiTenantContext.getCustomerSpace()));
+    }
+
     private DataFeedTask createOpportunityTemplateOnly(String customerSpace, String systemName, EntityType entityType,
                                                        SimpleTemplateMetadata simpleTemplateMetadata) {
         S3ImportSystem importSystem = s3ImportSystemService.getS3ImportSystem(customerSpace,
