@@ -5,6 +5,7 @@ import java.io.InputStream;
 
 import javax.inject.Inject;
 
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.common.exposed.util.GzipUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -19,6 +22,7 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.dcp.SourceFileUploadService;
+import com.latticeengines.proxy.exposed.dcp.DCPProxy;
 
 @Service
 public class SourceFileUploadServiceImpl implements SourceFileUploadService {
@@ -27,6 +31,9 @@ public class SourceFileUploadServiceImpl implements SourceFileUploadService {
 
     @Inject
     private FileUploadService fileUploadService;
+
+    @Inject
+    private DCPProxy dcpProxy;
 
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
@@ -57,6 +64,15 @@ public class SourceFileUploadServiceImpl implements SourceFileUploadService {
             log.error("Cannot get input stream for file: " + name);
             throw new LedpException(LedpCode.LEDP_18053, new String[] { displayName });
         }
+    }
+
+    @Override
+    public ApplicationId submitSourceImport(String projectId, String sourceId, String sourceFileName) {
+        DCPImportRequest request = new DCPImportRequest();
+        request.setProjectId(projectId);
+        request.setSourceId(sourceId);
+        request.setSourceFileName(sourceFileName);
+        return dcpProxy.startImport(MultiTenantContext.getShortTenantId(), request);
     }
 
     private SourceFileInfo getSourceFileInfo(SourceFile sourceFile) {

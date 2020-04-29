@@ -9,9 +9,11 @@ import com.latticeengines.testframework.exposed.service.TestArtifactService;
 public class DCPDeploymentTestNGBase extends PlsDeploymentTestNGBase {
 
     protected static final String TEST_TEMPLATE_DIR = "le-serviceapps/dcp/deployment/template";
-    protected static final String TEST_TEMPLATE_NAME = "dcp-accounts-hard-coded.json";
-    protected static final String TEST_TEMPLATE_VERSION = "1";
     protected static final String TEST_DATA_DIR = "le-serviceapps/dcp/deployment/testdata";
+    protected static final String TEST_TEMPLATE_NAME = "dcp-accounts-hard-coded.json";
+    protected static final String TEST_TEMPLATE_VERSION = "2";
+    protected static final String TEST_DATA_VERSION = "1";
+    protected static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
 
     protected String customerSpace;
 
