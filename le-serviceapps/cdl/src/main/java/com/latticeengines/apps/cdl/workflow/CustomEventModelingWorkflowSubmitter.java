@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -252,11 +253,25 @@ public class CustomEventModelingWorkflowSubmitter extends AbstractModelWorkflowS
                 .workflowContainerMem(workflowMemMb) //
                 .targetScoreDerivationEnabled(targetScoreDerivationEnabled) //
                 .ratingEngineType(ratingEngineType) //
+                .exportInclusionColumns(getExportInclusionColumns(isLPI)) //
                 .apsRollupPeriod(isLPI ? null
                         : dataCollectionService.getOrCreateDataCollectionStatus(getCustomerSpace().toString(), version)
                                 .getApsRollingPeriod())
                 .build();
         return configuration;
+    }
+
+    private String getExportInclusionColumns(boolean isLPI) {
+        if (isLPI) {
+            return null;
+        }
+        return InterfaceName.CustomerAccountId.name() + ";" //
+                + InterfaceName.AccountId.name() + ";" //
+                + InterfaceName.Event.name() + ";" //
+                + InterfaceName.Target.name() + ";" //
+                + ScoreResultField.Percentile.displayName + ";" //
+                + ScoreResultField.Rating.displayName + ";" //
+                + InterfaceName.__Composite_Key__.name();
     }
 
 }
