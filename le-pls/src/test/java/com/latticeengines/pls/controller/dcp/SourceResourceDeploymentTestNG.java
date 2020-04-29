@@ -125,14 +125,14 @@ public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 TEST_FILE_NAME, EntityType.Accounts.getSchemaInterpretation(),
                 EntityType.Accounts.getEntity().name(), csvResource);
         FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.fetchDefinitions(null,
-                EntityType.Accounts.getDisplayName(),
+                EntityType.Accounts.name(),
                 testSourceFile.getName());
 
         System.out.println(JsonUtils.pprint(fetchResponse));
         Assert.assertTrue(MapUtils.isEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
 
         fetchResponse = testSourceProxy.fetchDefinitions(sourceId,
-                EntityType.Accounts.getDisplayName(),
+                EntityType.Accounts.name(),
                 testSourceFile.getName());
         Assert.assertTrue(MapUtils.isNotEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
 

@@ -104,13 +104,13 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public FetchFieldDefinitionsResponse fetchFieldDefinitions(String sourceId, String systemObject,
+    public FetchFieldDefinitionsResponse fetchFieldDefinitions(String sourceId, String entityType,
                                                                String importFile)
             throws Exception {
 
         // 1a. Convert systemObject to entity.
-        EntityType entityType = StringUtils.isNotBlank(systemObject) ?
-                EntityType.fromDisplayNameToEntityType(systemObject) : EntityType.Accounts;
+        EntityType entityTypeObj = StringUtils.isNotBlank(entityType) ?
+                EntityType.valueOf(entityType) : EntityType.Accounts;
 
         // 1b. Generate sourceFile object.
         SourceFile sourceFile = getSourceFile(importFile);
@@ -119,7 +119,8 @@ public class SourceServiceImpl implements SourceService {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
 
         log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n" +
-                        "   Source File: %s\n   Customer Space: %s", entityType.getEntity(), entityType.getSubType(),
+                        "   Source File: %s\n   Customer Space: %s", entityTypeObj.getEntity(),
+                entityTypeObj.getSubType(),
                 sourceFile.getName(), customerSpace.toString()));
 
         // 2a. Set up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
@@ -127,13 +128,13 @@ public class SourceServiceImpl implements SourceService {
         fetchFieldDefinitionsResponse.setCurrentFieldDefinitionsRecord(
                 new FieldDefinitionsRecord(S3ImportSystem.SystemType.DCP.getDefaultSystemName(),
                         S3ImportSystem.SystemType.DCP.name(),
-                        systemObject));
+                        entityTypeObj.getDisplayName()));
 
         // 2b. Retrieve Spec for given systemType and systemObject.
         fetchFieldDefinitionsResponse.setImportWorkflowSpec(
                 importWorkflowSpecProxy.getImportWorkflowSpec(customerSpace.toString(),
                         S3ImportSystem.SystemType.DCP.name(),
-                        systemObject));
+                        entityTypeObj.getDisplayName()));
 
         // 2c. Find previously saved template matching this customerSpace, source, feedType, and entityType, if it
         // exists.

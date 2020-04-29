@@ -45,14 +45,14 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
         put("pause source", url);
     }
 
-    public FetchFieldDefinitionsResponse fetchDefinitions(String sourceId, String systemObject,
+    public FetchFieldDefinitionsResponse fetchDefinitions(String sourceId, String entityType,
                                                           String importFile) {
         String url = constructUrl("/fetch/?importFile={importFile}", importFile);
         if (StringUtils.isNotBlank(sourceId)) {
             url += "&sourceId=" + sourceId;
         }
-        if (StringUtils.isNotBlank(systemObject)) {
-            url += "&systemObject=" + systemObject;
+        if (StringUtils.isNotBlank(entityType)) {
+            url += "&entityType=" + entityType;
         }
         return get("get definitions", url, FetchFieldDefinitionsResponse.class);
     }

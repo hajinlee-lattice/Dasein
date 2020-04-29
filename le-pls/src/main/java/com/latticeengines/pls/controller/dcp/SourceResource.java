@@ -99,17 +99,17 @@ public class SourceResource {
 
 
     // Parameters:
-    //   systemObject: The entity type of this template (also called EntityType.displayName), eg. Accounts
+    //   entityType: The entity type of this template eg. Accounts
     //   importFile: The name of the CSV file this template is being generated for.
     @GetMapping(value = "/fetch")
     @ResponseBody
     @ApiOperation(value = "Provide field definition to Front End so it can load page of import workflow")
     public FetchFieldDefinitionsResponse fetchFieldDefinitions(
             @RequestParam(value = "sourceId", required = false) String sourceId, //
-            @RequestParam(value = "systemObject", required = false, defaultValue = "Accounts") String systemObject, //
+            @RequestParam(value = "entityType", required = false, defaultValue = "Accounts") String entityType, //
             @RequestParam(value = "importFile") String importFile) {
         try {
-            return sourceService.fetchFieldDefinitions(sourceId, systemObject, importFile);
+            return sourceService.fetchFieldDefinitions(sourceId, entityType, importFile);
         } catch (Exception e) {
             log.error("Fetch Field Definition Failed with Exception.", e);
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
