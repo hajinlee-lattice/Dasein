@@ -159,7 +159,7 @@ public class PrepareImport extends BaseReportStep<PrepareImportConfiguration> {
                     } else {
                         csvMissing.add(entry.getKey());
                         for (Attribute attr : entry.getValue()) {
-                            if (attr.getRequired()) {
+                            if (attr.getRequired() && attr.getDefaultValueStr() == null) {
                                 requiredMissing.add(entry.getKey());
                             }
                         }
