@@ -619,13 +619,14 @@ public class TenantServiceImpl implements TenantService {
             String existingName = existingTenant.getName();
             log.info("the subscriber number {} has been registered by tenant {}",
                     subNumber, existingName);
-            return generateVBOResponse(existingName, "failed",
+            return generateVBOResponse("failed",
                     "A tenant has already existed for this subscriber number");
         }
 
         String tenantName = constructTenantNameFromSubscriber(vboRequest.getSubscriber().getName());
         if (StringUtils.isBlank(tenantName)) {
-            return generateVBOResponse(tenantName, "failed",
+            log.info("system can't construct tenant name from subscriber name.");
+            return generateVBOResponse("failed",
                     "system can't construct tenant name from subscriber name.");
         }
         List<LatticeProduct> productList = Arrays.asList(LatticeProduct.LPA3, LatticeProduct.CG, LatticeProduct.DCP);
@@ -708,7 +709,8 @@ public class TenantServiceImpl implements TenantService {
         String status = result ? "success" : "failed";
         String message = result ? "tenant created successfully via Vbo request" :
                 "tenant created failed via Vbo request";
-        return generateVBOResponse(tenantName, status, message);
+        log.info("create tenant {} from vbo request", tenantName);
+        return generateVBOResponse(status, message);
     }
 
     private IDaaSUser constructIDaaSUser(VboRequest.User user, String language) {
@@ -759,9 +761,8 @@ public class TenantServiceImpl implements TenantService {
         return uniqueTenantName;
     }
 
-    private VboResponse generateVBOResponse(String tenantName, String status, String message) {
+    private VboResponse generateVBOResponse(String status, String message) {
         VboResponse vboResponse = new VboResponse();
-        vboResponse.setTenantName(tenantName);
         vboResponse.setStatus(status);
         vboResponse.setMessage(message);
         return vboResponse;
