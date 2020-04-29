@@ -75,10 +75,10 @@ public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTe
 
     @Test(groups = "deployment")
     public void testUploadFile() throws IOException {
-        MultipartFile multipartFile = new MockMultipartFile("TestFileName.txt",
+        MultipartFile multipartFile = new MockMultipartFile("TestFileName.csv",
                 "Test Content = Hello World!".getBytes());
         SourceFileInfo sourceFileInfo = sourceFileUploadService.uploadFile("file_" + DateTime.now().getMillis() +
-                ".txt", "TestFileName.txt", false, null, multipartFile);
+                ".csv", "TestFileName.csv", false, null, multipartFile);
 
         Assert.assertNotNull(sourceFileInfo);
         Assert.assertFalse(StringUtils.isEmpty(sourceFileInfo.getName()));
