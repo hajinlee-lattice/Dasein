@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
-import com.latticeengines.domain.exposed.dcp.Upload;
+import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
@@ -144,13 +144,13 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         ApplicationId applicationId = dcpProxy.startImport(customerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-        List<Upload> uploads = uploadService.getAllBySourceId(source.getSourceId(), null);
-        Assert.assertNotNull(uploads);
-        Assert.assertEquals(uploads.size(), 1);
-        Upload upload = uploads.get(0);
-        Upload retrievedUpload = uploadService.getByUploadId(upload.getPid());
-        Assert.assertEquals(JsonUtils.serialize(upload), JsonUtils.serialize(retrievedUpload));
-        String token = uploadService.generateToken(upload.getPid().toString());
+        List<UploadDetails> uploadDetails = uploadService.getAllBySourceId(source.getSourceId(), null);
+        Assert.assertNotNull(uploadDetails);
+        Assert.assertEquals(uploadDetails.size(), 1);
+        UploadDetails uploadDetail = uploadDetails.get(0);
+        UploadDetails retrievedDetail = uploadService.getByUploadId(uploadDetail.getUploadId());
+        Assert.assertEquals(JsonUtils.serialize(uploadDetail), JsonUtils.serialize(retrievedDetail));
+        String token = uploadService.generateToken(retrievedDetail.getUploadId().toString());
         Assert.assertNotNull(token);
     }
 
