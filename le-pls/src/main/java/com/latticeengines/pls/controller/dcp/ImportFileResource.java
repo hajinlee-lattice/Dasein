@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -60,7 +59,6 @@ public class ImportFileResource {
     }
 
     private SourceFileInfo uploadFile(String fileName, String csvFileName, MultipartFile file) {
-        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             if (file.getSize() >= maxUploadSize) {
                 throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
@@ -71,15 +69,6 @@ public class ImportFileResource {
             UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
             throw new UIActionException(action, ledp.getCode());
-        } finally {
-            try {
-                closeableResourcePool.close();
-            } catch (IOException e) {
-                LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
-                UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
-                        Status.Error, ledp.getMessage());
-                throw new UIActionException(action, ledp.getCode());
-            }
         }
     }
 
