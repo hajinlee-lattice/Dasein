@@ -88,19 +88,21 @@ public class CuratedContactAttributes
             return null;
         }
 
+        Table contactLastActivityTempTable = metadataProxy.getTable(customerSpace.getTenantId(),
+                contactLastActivityTempTableName);
+        if (contactLastActivityTempTable == null) {
+            log.warn("No Metadata table found for contact activity date by name:" + contactLastActivityTempTableName
+                    + ", skipping step");
+            cloneTableService.linkInactiveTable(TABLE_ROLE);
+            return null;
+        }
+
         GenerateCuratedAttributesConfig jobConfig = new GenerateCuratedAttributesConfig();
         jobConfig.joinKey = InterfaceName.ContactId.name();
         jobConfig.columnsToIncludeFromMaster = Collections.singletonList(InterfaceName.AccountId.name());
         jobConfig.masterTableIdx = 0;
         jobConfig.lastActivityDateInputIdx = 1;
-        Table contactLastActivityTempTable = metadataProxy.getTable(customerSpace.getTenantId(),
-                contactLastActivityTempTableName);
 
-        if (contactLastActivityTempTable == null) {
-            log.warn("No Metadata table found for contact activity date by name:" + contactLastActivityTempTableName
-                    + ", skipping step");
-            return null;
-        }
         Table contactTable = metadataProxy.getTable(customerSpace.getTenantId(), getContactTableName());
 
         jobConfig.setInput(Arrays.asList(HdfsDataUnit.fromPath(contactTable.getExtracts().get(0).getPath()),
