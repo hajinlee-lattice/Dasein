@@ -304,7 +304,7 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
             @Override
             public Collection<EntityType> getEntityTypes() {
                 return Arrays.asList(EntityType.Accounts, EntityType.Contacts,
-                        EntityType.Leads, EntityType.Opportunity, EntityType.OpportunityStageName);
+                        EntityType.Leads);
             }
             @Override
             public String getDefaultSystemName() {
