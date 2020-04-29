@@ -102,6 +102,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final String NULL = "null";
 
+    private static final String CSV_RECORD_ERROR = "CSV_Record_Error";
+    private static final String ALL_FIELDS_EMPTY = "All fields are empty!";
     private static final String SCIENTIFIC_REGEX = "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$";
     private static final Pattern SCIENTIFIC_PTN = Pattern.compile(SCIENTIFIC_REGEX);
     private static final Set<String> VAL_TRUE = Sets.newHashSet("true", "t", "1", "yes", "y");
@@ -547,19 +549,40 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         private void process(CSVRecord csvRecord, long lineNum) throws IOException {
             // capture IO exception produced during dealing with line
             beforeEachRecord();
-            GenericRecord currentAvroRecord = toGenericRecord(csvRecord, lineNum);
-            if (errorMap.size() == 0 && duplicateMap.size() == 0) {
-                hasAvroRecord = true;
-                dataFileWriter.append(currentAvroRecord);
-                importedRecords.increment();
+            if (checkCSVRecord(csvRecord)) {
+                GenericRecord currentAvroRecord = toGenericRecord(csvRecord, lineNum);
+                if (errorMap.size() == 0 && duplicateMap.size() == 0) {
+                    hasAvroRecord = true;
+                    dataFileWriter.append(currentAvroRecord);
+                    importedRecords.increment();
+                } else {
+                    if (errorMap.size() > 0) {
+                        handleError(lineNum, csvRecord);
+                    }
+                    if (duplicateMap.size() > 0) {
+                        handleDuplicate(lineNum);
+                    }
+                }
             } else {
                 if (errorMap.size() > 0) {
                     handleError(lineNum, csvRecord);
                 }
-                if (duplicateMap.size() > 0) {
-                    handleDuplicate(lineNum);
+            }
+        }
+
+        private boolean checkCSVRecord(CSVRecord csvRecord) {
+            // 1. csv record itself cannot be null.
+            if (csvRecord == null) {
+                return false;
+            }
+            // 2. not all values are empty
+            for (String value: csvRecord) {
+                if (StringUtils.isNotEmpty(value)) {
+                    return true;
                 }
             }
+            errorMap.put(CSV_RECORD_ERROR, ALL_FIELDS_EMPTY);
+            return false;
         }
 
         private void validateAttribute(CSVRecord csvRecord, Attribute attr, String csvColumnName) {

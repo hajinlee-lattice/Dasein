@@ -54,7 +54,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DCPImportWorkflowDeploymentTestNG.class);
 
-    private static final String TEST_DATA_VERSION = "2";
+    private static final String TEST_DATA_VERSION = "4";
     private static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
 
     @Inject
@@ -130,6 +130,8 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
                 upload.getUploadConfig().getUploadImportedErrorFilePath());
         System.out.println("Error file path=" + errorFileKey);
         Assert.assertTrue(s3Service.objectExist(dropBoxSummary.getBucket(), errorFileKey));
+        Assert.assertNotNull(upload.getStatistics().getImportStats().getErrorCnt());
+        Assert.assertEquals(upload.getStatistics().getImportStats().getErrorCnt().longValue(), 4L);
     }
 
     private void prepareTenant() {
