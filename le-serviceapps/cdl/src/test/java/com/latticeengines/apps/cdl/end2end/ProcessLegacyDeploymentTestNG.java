@@ -128,20 +128,16 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
 
         createTestSegment3();
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
-        Map<BusinessEntity, Long> segment3Counts;
-        if (firstPA) {
-            segment3Counts = ImmutableMap.of(BusinessEntity.Account, SEGMENT_3_ACCOUNT_1, BusinessEntity.Contact,
-                    SEGMENT_3_CONTACT_1);
-        } else {
-            segment3Counts = ImmutableMap.of(BusinessEntity.Account, SEGMENT_3_ACCOUNT_3, BusinessEntity.Contact,
-                    SEGMENT_3_CONTACT_3);
-        }
+        Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of(BusinessEntity.Account,
+                firstPA ? SEGMENT_3_ACCOUNT_1 : SEGMENT_3_ACCOUNT_3, BusinessEntity.Contact,
+                firstPA ? SEGMENT_3_CONTACT_1 : SEGMENT_3_CONTACT_3);
         verifyTestSegment3Counts(segment3Counts);
 
         // Create a test segment to verify proper behavior of the Curated Attributes
         // step and resulting table.
         createTestSegmentCuratedAttr();
-        verifyTestSegmentCuratedAttrCounts(Collections.singletonMap(BusinessEntity.Account, ACCOUNT_PA));
+        verifyTestSegmentCuratedAttrCounts(
+                Collections.singletonMap(BusinessEntity.Account, firstPA ? ACCOUNT_PA : ACCOUNT_PA + NEW_ACCOUNT_PA));
     }
 
     void verifyProcessAccount(boolean firstPA) {
@@ -364,8 +360,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<String, Object> transactionReport = new HashMap<>();
         transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.NEW,
                 TRANSACTION_LEGACY_SECOND_PA);
-        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE,
-                TRANSACTION_LEGACY_FIRST_PA);
+        transactionReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.DELETE, 0L);
         transactionReport.put(ReportPurpose.ENTITY_STATS_SUMMARY.name() + "_" + ReportConstants.TOTAL,
                 TRANSACTION_LEGACY_SECOND_PA);
         return transactionReport;
