@@ -403,21 +403,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return columnMetadataProxy.latestVersion();
     }
 
-    public DynamoDataUnit getAccountLookupDynamoDataUnit(String customerSpace, DataCollection.Version version) {
+    public DynamoDataUnit getDynamoDataUnitByTableRole(String customerSpace, DataCollection.Version version,
+                                                       TableRoleInCollection role) {
         DynamoDataUnit dynamoDataUnit = null;
-        String tableName = getTableName(customerSpace, TableRoleInCollection.AccountLookup, version);
-        if (StringUtils.isNotBlank(tableName)) {
-            DataUnit dataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName, DataUnit.StorageType.Dynamo);
-            if (dataUnit != null) {
-                dynamoDataUnit = (DynamoDataUnit) dataUnit;
-            }
-        }
-        return dynamoDataUnit;
-    }
-
-    public DynamoDataUnit getContactsByAccountLookupDataUnit(String customerSpace, DataCollection.Version version) {
-        DynamoDataUnit dynamoDataUnit = null;
-        String tableName = getTableName(customerSpace, TableRoleInCollection.ConsolidatedContact, version);
+        String tableName = getTableName(customerSpace, role, version);
         if (StringUtils.isNotBlank(tableName)) {
             DataUnit dataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName, DataUnit.StorageType.Dynamo);
             if (dataUnit != null) {
