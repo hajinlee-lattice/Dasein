@@ -2,7 +2,6 @@ package com.latticeengines.pls.controller.dcp;
 
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.inject.Inject;
 
@@ -19,16 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
-import com.latticeengines.common.exposed.util.CipherUtils;
+import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
-import com.latticeengines.pls.service.FileUploadService;
-import com.latticeengines.pls.service.ModelingFileMetadataService;
+import com.latticeengines.pls.service.dcp.SourceFileUploadService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
@@ -44,10 +41,7 @@ public class ImportFileResource {
     public static final String UPLOAD_FILE_ERROR_TITLE = "Error In File Uploading.";
 
     @Inject
-    private FileUploadService fileUploadService;
-
-    @Inject
-    private ModelingFileMetadataService modelingFileMetadataService;
+    private SourceFileUploadService sourceFileUploadService;
 
     @Value("${pls.fileupload.maxupload.bytes}")
     private long maxUploadSize;
@@ -58,32 +52,21 @@ public class ImportFileResource {
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Upload a file")
-    public SourceFile uploadFile(
+    public SourceFileInfo uploadFile(
             @RequestParam("name") String csvFileName,
             @RequestParam("file") MultipartFile file) {
-        SourceFile response = uploadFile("file_" + DateTime.now().getMillis() + ".csv", csvFileName, file);
-        response.setPath(CipherUtils.encrypt(response.getPath()));
+        SourceFileInfo response = uploadFile("file_" + DateTime.now().getMillis() + ".csv", csvFileName, file);
         return response;
     }
 
-    private SourceFile uploadFile(String fileName, String csvFileName, MultipartFile file) {
+    private SourceFileInfo uploadFile(String fileName, String csvFileName, MultipartFile file) {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         try {
             if (file.getSize() >= maxUploadSize) {
                 throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
             }
 
-            InputStream stream = file.getInputStream();
-
-            stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, csvFileName,
-                    true, "");
-
-            return fileUploadService.uploadFile(fileName, null, "", csvFileName, stream, false);
-        } catch (IOException e) {
-            LedpException ledp = new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
-            UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
-                    Status.Error, ledp.getMessage());
-            throw new UIActionException(action, ledp.getCode());
+            return sourceFileUploadService.uploadFile(fileName, csvFileName, false, null, file);
         } catch (LedpException ledp) {
             UIAction action = graphDependencyToUIActionUtil.generateUIAction(UPLOAD_FILE_ERROR_TITLE, View.Banner,
                     Status.Error, ledp.getMessage());
