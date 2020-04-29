@@ -1,8 +1,10 @@
 package com.latticeengines.spark.exposed.job.cdl;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLCreatedTemplate;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CDLUpdatedTime;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CompanyName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.ContactId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.CustomerAccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityCreatedSource;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.EntityId;
@@ -29,7 +31,9 @@ import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.GenerateCuratedAttributesConfig;
 import com.latticeengines.spark.testframework.SparkJobFunctionalTestNGBase;
 
-public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
+public class
+
+GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(GenerateCuratedAttributesTestNG.class);
 
@@ -38,15 +42,31 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
     // input schema
     private static final List<Pair<String, Class<?>>> ACC_BATCH_STORE_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
-            Pair.of("CDLCreatedTemplate", String.class), // TODO change to interface name
+            Pair.of(CDLCreatedTemplate.name(), String.class), //
             Pair.of(CDLUpdatedTime.name(), Long.class), //
             Pair.of(CompanyName.name(), String.class), //
             Pair.of(CustomerAccountId.name(), String.class) //
     );
+
+    private static final List<Pair<String, Class<?>>> CT_BATCH_STORE_FIELDS = Arrays.asList( //
+            Pair.of(ContactId.name(), String.class), //
+            Pair.of(AccountId.name(), String.class), //
+            Pair.of(CDLCreatedTemplate.name(), String.class), //
+            Pair.of(CDLUpdatedTime.name(), Long.class), //
+            Pair.of(CompanyName.name(), String.class), //
+            Pair.of(CustomerAccountId.name(), String.class) //
+    );
+
     private static final List<Pair<String, Class<?>>> LAST_ACTIVITY_DATE_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
             Pair.of(LastActivityDate.name(), Long.class) //
     );
+
+    private static final List<Pair<String, Class<?>>> CT_LAST_ACTIVITY_DATE_FIELDS = Arrays.asList( //
+            Pair.of(ContactId.name(), String.class), //
+            Pair.of(LastActivityDate.name(), Long.class) //
+    );
+
     private static final List<Pair<String, Class<?>>> NUM_CONTACT_FIELDS = Arrays.asList( //
             Pair.of(AccountId.name(), String.class), //
             Pair.of(NumberOfContacts.name(), Long.class) //
@@ -68,9 +88,19 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
 
     // TODO add other test cases
     @Test(groups = "functional")
-    private void test() {
+    private void testAccounts() {
         GenerateCuratedAttributesConfig config = baseConfig();
         prepareTestData();
+        log.info("Config = {}", JsonUtils.serialize(config));
+        SparkJobResult result = runSparkJob(GenerateCuratedAttributes.class, config);
+        log.info("Result = {}", JsonUtils.serialize(result));
+        verifyResult(result);
+    }
+
+    @Test(groups = "functional")
+    private void testContacts() {
+        GenerateCuratedAttributesConfig config = baseContactConfig();
+        prepareContactTestData();
         log.info("Config = {}", JsonUtils.serialize(config));
         SparkJobResult result = runSparkJob(GenerateCuratedAttributes.class, config);
         log.info("Result = {}", JsonUtils.serialize(result));
@@ -126,6 +156,27 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
         uploadHdfsDataUnit(accountSystemStore, SYSTEM_STORE_FIELDS);
     }
 
+    private void prepareContactTestData() {
+        // ContactId,LastActivityDate
+        Object[][] lastActivityDate = new Object[][] { //
+                { "C1", 123L }, //
+                { "C2", 234L }, //
+                { "C4", 999L }, //
+        };
+        uploadHdfsDataUnit(lastActivityDate, CT_LAST_ACTIVITY_DATE_FIELDS);
+
+        // ContactId, AccountId, CDLUpdatedTime, CompanyName, CustomerContactId
+        Object[][] account = new Object[][] { //
+                { "C1", "A1", "tmpl1", 123L, "Company 1", "CC1" }, //
+                { "C2", "A2", "tmpl2", 115L, "Company 2", "CC2" }, //
+                { "C3", "A3", "tmpl1", 35L, "Company 3", "CC3" }, //
+                { "C4", "A4", "tmpl1", 10531L, "Company 4", "CC4" }, //
+                { "C5", "A5", "tmpl3", 1L, "Company 5", "CC5" }, //
+        };
+        uploadHdfsDataUnit(account, CT_BATCH_STORE_FIELDS);
+
+    }
+
     private GenerateCuratedAttributesConfig baseConfig() {
         GenerateCuratedAttributesConfig config = new GenerateCuratedAttributesConfig();
         config.joinKey = AccountId.name();
@@ -143,6 +194,16 @@ public class GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBas
                 TEMPLATE_UPDATE_TIME_FIELD.replace(CDLUpdatedTime.name(), EntityLastUpdatedDate.name())));
         config.joinKeys.put(3, EntityId.name());
         config.templateValueMap.putAll(templateValues);
+        return config;
+    }
+
+    private GenerateCuratedAttributesConfig baseContactConfig() {
+        GenerateCuratedAttributesConfig config = new GenerateCuratedAttributesConfig();
+        config.joinKey = ContactId.name();
+        config.columnsToIncludeFromMaster = Collections.singletonList(AccountId.name());
+        config.lastActivityDateInputIdx = 4;
+        config.masterTableIdx = 5;
+
         return config;
     }
 }
