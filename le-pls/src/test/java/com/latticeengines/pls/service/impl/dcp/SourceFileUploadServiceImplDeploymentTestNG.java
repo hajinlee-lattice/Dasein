@@ -109,9 +109,9 @@ public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTe
         Source source = sourceService.createSource(sourceRequest);
 
         InputStream dataStream = testArtifactService.readTestArtifactAsStream(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE);
-        MultipartFile multipartFile = new MockMultipartFile("TestFileName.txt", dataStream);
+        MultipartFile multipartFile = new MockMultipartFile("TestFileName.csv", dataStream);
         SourceFileInfo sourceFileInfo = sourceFileUploadService.uploadFile("file_" + DateTime.now().getMillis() +
-                ".txt", "TestFileName.txt", false, null, multipartFile);
+                ".csv", "TestFileName.csv", false, null, multipartFile);
 
         ApplicationId applicationId = sourceFileUploadService.submitSourceImport(projectDetails.getProjectId(),
                 source.getSourceId(), sourceFileInfo.getName());
