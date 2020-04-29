@@ -484,6 +484,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder exportInclusionColumns(String exportInclusionColumns) {
+            exportScoreTrainingFile.setExportInclusionColumns(exportInclusionColumns);
+            return this;
+        }
+
         public Builder targetScoreDerivationEnabled(boolean targetScoreDerivationEnabled) {
             generateAIRating.targetScoreDerivationEnabled(targetScoreDerivationEnabled);
             return this;
