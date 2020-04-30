@@ -16,7 +16,7 @@ public final class UploadS3PathBuilderUtils {
     private static String dropFolder = DROP_FOLDER + SLASH + "%s";
 
     private static String projectDir = "/Projects/%s";
-    private static String sourceDir = projectDir + "/Source/%s";
+    private static String sourceDir = projectDir + "/Sources/%s";
     private static String dropDir = sourceDir + "/drop";
     private static String uploadDir = sourceDir + "/upload";
     private static String uploadRawDir = uploadDir + "/%s/RawFile/";
