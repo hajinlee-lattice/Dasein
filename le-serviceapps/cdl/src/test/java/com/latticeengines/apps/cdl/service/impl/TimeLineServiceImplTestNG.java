@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
@@ -97,7 +98,7 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(created.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity.name()));
         Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
         Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
-
+        SleepUtils.sleep(500l);
         created = timeLineService.findByTimelineId(mainCustomerSpace, timeLine1.getTimelineId());
         Assert.assertEquals(created.getTimelineId(), timeLine1.getTimelineId());
     }
