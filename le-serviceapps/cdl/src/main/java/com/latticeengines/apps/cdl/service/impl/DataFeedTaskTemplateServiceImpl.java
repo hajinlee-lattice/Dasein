@@ -449,8 +449,9 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
     }
 
     @Override
-    public boolean validateGAEnabled(boolean enableGA) {
-        return batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace()) || (enableGA && batonService.onlyEntityMatchGAEnabled(MultiTenantContext.getCustomerSpace()));
+    public boolean validateGAEnabled(String customerSpace, boolean enableGA) {
+        CustomerSpace customerSpace1 = MultiTenantContext.getCustomerSpace();
+        return (batonService.isEntityMatchEnabled(customerSpace1) && !batonService.onlyEntityMatchGAEnabled(customerSpace1)) || (enableGA && batonService.onlyEntityMatchGAEnabled(customerSpace1));
     }
 
     private DataFeedTask createOpportunityTemplateOnly(String customerSpace, String systemName, EntityType entityType,
