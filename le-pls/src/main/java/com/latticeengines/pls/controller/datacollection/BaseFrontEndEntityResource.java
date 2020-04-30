@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -376,9 +377,9 @@ public abstract class BaseFrontEndEntityResource {
         String tenantId = MultiTenantContext.getShortTenantId();
 
         // PLS-15419 Check that columns exist for the searchAttr
-        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         List<String> columnAttrNames = dataLakeService.getCachedServingMetadataForEntity( //
-                customerSpace, searchEntity).stream() //
+                MultiTenantContext.getCustomerSpace().toString(), searchEntity).stream() //
+                .filter(columnMetadata -> columnMetadata.isEnabledFor(ColumnSelection.Predefined.Segment)) //
                 .map(ColumnMetadata::getAttrName) //
                 .collect(Collectors.toList());
 
