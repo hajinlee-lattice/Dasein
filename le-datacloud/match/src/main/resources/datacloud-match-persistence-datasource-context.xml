@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <bean id="propDataMatchDataSource" class="com.latticeengines.datacloud.match.exposed.datasource.MatchClientRoutingDataSource">
+    <bean id="propDataMatchDataSource" class="com.latticeengines.datacloud.match.exposed.datasource.MatchClientRoutingDataSource" lazy-init="true">
         <property name="targetDataSources">
             <map key-type="com.latticeengines.domain.exposed.datacloud.MatchClient"/>
         </property>

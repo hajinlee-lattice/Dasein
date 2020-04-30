@@ -9,13 +9,13 @@
     <import resource="classpath:datacloud-match-persistence-datasource-context.xml" />
 	
 	<!-- Hibernate session factory -->
-    <bean id="sessionFactoryPropDataMatch" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
+    <bean id="sessionFactoryPropDataMatch" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean" lazy-init="true">
 	    <property name="entityManagerFactory" ref="entityManagerFactoryPropDataMatch" />
 	</bean>
 	
 	<!-- Entity manager factory -->
 	<bean id="entityManagerFactoryPropDataMatch" 
-			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+			class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" lazy-init="true">
         <property name="dataSource" ref="propDataMatchDataSource" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud" />
 		<property name="jpaVendorAdapter">
@@ -38,17 +38,17 @@
 	</bean>
 	
     <bean id="transactionManagerPropDataMatch" class="org.springframework.orm.hibernate5.HibernateTransactionManager"
-        p:sessionFactory-ref="sessionFactoryPropDataMatch">
+        p:sessionFactory-ref="sessionFactoryPropDataMatch" lazy-init="true">
         <qualifier value="propdata" />
     </bean>
 
     <tx:annotation-driven/>
 
-    <bean id="commandDao" class="com.latticeengines.datacloud.match.dao.impl.CommandDaoImpl">
+    <bean id="commandDao" class="com.latticeengines.datacloud.match.dao.impl.CommandDaoImpl" lazy-init="true">
         <property name="sessionFactory" ref="sessionFactoryPropDataMatch" />
     </bean>
 
-    <bean id="commandParameterDao" class="com.latticeengines.datacloud.match.dao.impl.CommandParameterDaoImpl">
+    <bean id="commandParameterDao" class="com.latticeengines.datacloud.match.dao.impl.CommandParameterDaoImpl" lazy-init="true">
         <property name="sessionFactory" ref="sessionFactoryPropDataMatch" />
     </bean>
 
