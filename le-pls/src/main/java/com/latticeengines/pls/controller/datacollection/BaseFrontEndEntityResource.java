@@ -23,12 +23,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
+import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -64,6 +67,9 @@ public abstract class BaseFrontEndEntityResource {
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private DataLakeService dataLakeService;
 
     BaseFrontEndEntityResource(EntityProxy entityProxy, SegmentProxy segmentProxy,
             DataCollectionProxy dataCollectionProxy, GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
@@ -228,6 +234,7 @@ public abstract class BaseFrontEndEntityResource {
         Restriction finalContactRestriction = tripleMergeRestrictions( //
                 segmentContactRestriction, frontEndContactRestriction, freeTextContactRestriction //
         );
+
         frontEndQuery.setAccountRestriction(new FrontEndRestriction(finalAccountRestriction));
         frontEndQuery.setContactRestriction(new FrontEndRestriction(finalContactRestriction));
     }
@@ -369,8 +376,16 @@ public abstract class BaseFrontEndEntityResource {
         ConcurrentMap<BusinessEntity, Set<String>> servingStoreAttrs = new ConcurrentHashMap<>();
         String tenantId = MultiTenantContext.getShortTenantId();
 
+        // PLS-15419 Check that columns exist for the searchAttr
+        List<String> columnAttrNames = dataLakeService.getCachedServingMetadataForEntity( //
+                MultiTenantContext.getCustomerSpace().toString(), searchEntity).stream() //
+                .filter(columnMetadata -> columnMetadata.isEnabledFor(ColumnSelection.Predefined.Segment)) //
+                .map(ColumnMetadata::getAttrName) //
+                .collect(Collectors.toList());
+
         List<AttributeLookup> searchAttrs = getFreeTextSearchAttrs(queryEntity).stream() //
                 .filter(attributeLookup -> searchEntity.equals(attributeLookup.getEntity())) //
+                .filter(attributeLookup -> columnAttrNames.contains(attributeLookup.getAttribute())) //
                 .filter(attributeLookup -> {
                     BusinessEntity entity = attributeLookup.getEntity();
                     if (!servingStoreAttrs.containsKey(entity)) {
