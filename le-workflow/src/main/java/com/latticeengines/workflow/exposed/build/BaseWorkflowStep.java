@@ -77,6 +77,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MATCH_INPUT_ID_COLUMN = "MATCH_INPUT_ID_COLUMN";
     protected static final String MATCH_RESULT_TABLE = "MATCH_RESULT_TABLE";
     protected static final String MATCH_RESULT_TABLE_NAME = "MATCH_RESULT_TABLE_NAME";
+    protected static final String MATCH_RESULT_MATCH_COUNT = "MATCH_RESULT_MATCH_COUNT";
+    protected static final String MATCH_RESULT_PUBLIC_DOMAIN_COUNT = "MATCH_RESULT_PUBLIC_DOMAIN_COUNT";
+    protected static final String MATCH_RESULT_TOTAL_COUNT = "MATCH_RESULT_TOTAL_COUNT";
+    protected static final String MATCH_RESULT_MATCH_RATE = "MATCH_RESULT_MATCH_RATE";
+    protected static final String MATCH_RESULT_PUBLIC_DOMAIN_RATE = "MATCH_RESULT_PUBLIC_DOMAIN_RATE";
     protected static final String MATCH_CANDIDATES_TABLE_NAME = "MATCH_CANDIDATES_TABLE_NAME";
     protected static final String MATCH_PREDEFINED_SELECTION = "MATCH_PREDEFINED_SELECTION";
     protected static final String MATCH_PREDEFINED_SELECTION_VERSION = "MATCH_PREDEFINED_SELECTION_VERSION";
