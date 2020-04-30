@@ -115,7 +115,7 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
         VboRequest.Subscriber sub = new VboRequest.Subscriber();
         sub.setLanguage("Chinese");
         sub.setName(fullTenantId);
-        sub.setSubscriberNumber("1234");
+        sub.setSubscriberNumber(String.valueOf(System.currentTimeMillis()));
         req.setSubscriber(sub);
 
         Assert.assertFalse(verifyUserExists(internalUser.getEmailAddress()));
@@ -124,14 +124,13 @@ public class TenantResourceDeploymentTestNG extends AdminDeploymentTestNGBase {
 
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getStatus(), "success");
-        String uniqueTenantName = result.getTenantName();
 
-        waitForTenantInstallation(uniqueTenantName, uniqueTenantName);
+        waitForTenantInstallation(fullTenantId, fullTenantId);
 
         Assert.assertTrue(verifyUserExists(internalUser.getEmailAddress()));
         Assert.assertTrue(verifyUserExists(externalUser.getEmailAddress()));
         try {
-            deleteTenant(uniqueTenantName, uniqueTenantName);
+            deleteTenant(fullTenantId, fullTenantId);
         } catch (Exception ignore) {
         }
     }

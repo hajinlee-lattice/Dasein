@@ -385,13 +385,19 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     private void OperateIDaaSUsers(List<IDaaSUser> iDaaSUsers, List<String> superAdminEmails,
                                    List<String> externalAdminEmails) {
+        log.info("Operating IDaaS users");
         for (IDaaSUser user : iDaaSUsers) {
             String email = user.getEmailAddress();
-            if (iDaaSService.getIDaaSUser(email) == null) {
+            IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
+            if (retrievedUser == null) {
+                log.info("begin creating IDaaS user for {}", email);
                 iDaaSService.createIDaaSUser(user);
-            } else {
+            } else if (!retrievedUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
                 // add product access and default role to user when user already exists in IDaaS
-                iDaaSService.addProductAccessToUser(constructProductRequest(user.getEmailAddress()));
+                log.info("user exist in IDaaS, add product access to user {}", email);
+                iDaaSService.addProductAccessToUser(constructProductRequest(email));
+            } else {
+                log.info("IDaaS user existed for {} and has product access", email);
             }
             if (EmailUtils.isInternalUser(email)) {
                 superAdminEmails.add(email.toLowerCase());
