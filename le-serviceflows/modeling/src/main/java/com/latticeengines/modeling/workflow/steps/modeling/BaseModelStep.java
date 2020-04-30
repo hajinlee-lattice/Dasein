@@ -215,6 +215,8 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .eventColumn(configuration.getEventColumn()) //
                 .setModelSummaryProvenance(configuration.getModelSummaryProvenance()) //
                 .dataCloudVersion(configuration.getDataCloudVersion()) //
+                .matchRate(getMatchRate()) //
+                .publicDomainRate(getPublicDomainRate()) //
                 .swlibVersion(manifestService.getLedpStackVersion(), manifestService.getLedsVersion()) //
                 .runTimeParams(configuration.getRunTimeParams());
         if (getPredefinedSelection() != null) {
@@ -232,6 +234,14 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         }
         ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
         return modelExecutor;
+    }
+
+    private Double getPublicDomainRate() {
+        return getDoubleValueFromContext(MATCH_RESULT_PUBLIC_DOMAIN_RATE);
+    }
+
+    private Double getMatchRate() {
+        return getDoubleValueFromContext(MATCH_RESULT_MATCH_RATE);
     }
 
     @SuppressWarnings("unused")

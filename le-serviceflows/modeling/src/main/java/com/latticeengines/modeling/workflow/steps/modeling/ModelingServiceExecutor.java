@@ -419,7 +419,12 @@ public class ModelingServiceExecutor {
         if (builder.dataCloudVersion != null) {
             props.add("Data_Cloud_Version=" + builder.dataCloudVersion);
         }
-
+        if (builder.matchRate != null) {
+            props.add(String.format("Match_Rate=%.4f", builder.matchRate));
+        }
+        if (builder.publicDomainRate != null) {
+            props.add(String.format("Public_Domain_Rate=%.4f", builder.publicDomainRate));
+        }
         String provenanceProperties = StringUtils.join(props, " ");
         provenanceProperties += " " + resolveProperties();
         provenanceProperties += builder.modelSummaryProvenance.getProvenancePropertyString();
@@ -553,6 +558,8 @@ public class ModelingServiceExecutor {
 
         private Boolean shouldLimitMaxRows;
         private Long maxRowsLimit;
+        private Double matchRate;
+        private Double publicDomainRate;
 
         public Builder() {
         }
@@ -827,6 +834,16 @@ public class ModelingServiceExecutor {
 
         public Builder dataCloudVersion(String dataCloudVersion) {
             this.dataCloudVersion = dataCloudVersion;
+            return this;
+        }
+
+        public Builder matchRate(Double matchRate) {
+            this.matchRate = matchRate;
+            return this;
+        }
+
+        public Builder publicDomainRate(Double publicDomainRate) {
+            this.publicDomainRate = publicDomainRate;
             return this;
         }
 
