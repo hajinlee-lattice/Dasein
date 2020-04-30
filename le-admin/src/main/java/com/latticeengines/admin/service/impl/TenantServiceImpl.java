@@ -617,13 +617,14 @@ public class TenantServiceImpl implements TenantService {
         Tenant existingTenant = tenantService.findBySubscriberNumber(subNumber);
         if (existingTenant != null) {
             String existingName = existingTenant.getName();
-            log.info("the subscriber number {} has been registered by tenant {}",
+            log.error("the subscriber number {} has been registered by tenant {}",
                     subNumber, existingName);
             return generateVBOResponse("failed",
                     "A tenant has already existed for this subscriber number");
         }
 
-        String tenantName = constructTenantNameFromSubscriber(vboRequest.getSubscriber().getName());
+        String subName = vboRequest.getSubscriber().getName();
+        String tenantName = constructTenantNameFromSubscriber(subName);
         if (StringUtils.isBlank(tenantName)) {
             log.info("system can't construct tenant name from subscriber name.");
             return generateVBOResponse("failed",
