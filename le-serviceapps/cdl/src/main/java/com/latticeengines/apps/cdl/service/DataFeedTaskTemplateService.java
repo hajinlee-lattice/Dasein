@@ -104,5 +104,5 @@ public interface DataFeedTaskTemplateService {
      * @param enableGA if true, GA tenant can use setup API to create activity store template
      * @return true if success
      */
-    boolean validateGAEnabled(boolean enableGA);
+    boolean validateGAEnabled(String customerSpace, boolean enableGA);
 }

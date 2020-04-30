@@ -166,7 +166,7 @@ public class DataFeedTaskController {
             @PathVariable String customerSpace,
             @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList,
             @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
-        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create WebVisit template."));
         }
@@ -195,7 +195,7 @@ public class DataFeedTaskController {
             @PathVariable String customerSpace,
             @RequestBody List<SimpleTemplateMetadata> simpleTemplateMetadataList,
             @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
-        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create WebVisit template."));
         }
@@ -259,7 +259,7 @@ public class DataFeedTaskController {
     public ResponseDocument<Boolean> createDefaultOpportunityTemplate(@PathVariable String customerSpace,
                                                                       @RequestParam(value = "systemName") String systemName,
                                                                       @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
-        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create Opportunity template."));
         }
@@ -291,7 +291,7 @@ public class DataFeedTaskController {
                                                                @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
                                                                @RequestParam(value = "enableGA", required =
                                                                        false, defaultValue = "false") boolean enableGA) {
-        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create Opportunity template."));
         }
@@ -322,7 +322,7 @@ public class DataFeedTaskController {
                                                                     @RequestParam(value = "systemName") String systemName,
                                                                     @RequestParam(value = "systemType") String systemType,
                                                                     @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
-        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create Marketing template."));
         }
@@ -354,7 +354,7 @@ public class DataFeedTaskController {
                                                              @RequestParam(value = "systemType") String systemType,
                                                              @RequestBody(required = false) SimpleTemplateMetadata simpleTemplateMetadata,
                                                              @RequestParam(value = "enableGA", required = false, defaultValue = "false") boolean enableGA) {
-        if (!dataFeedTaskTemplateService.validateGAEnabled(enableGA)) {
+        if (!dataFeedTaskTemplateService.validateGAEnabled(customerSpace, enableGA)) {
             return ResponseDocument.failedResponse(new IllegalStateException("EntityMatchGATenant doesn't support to " +
                     "create Marketing template."));
         }
