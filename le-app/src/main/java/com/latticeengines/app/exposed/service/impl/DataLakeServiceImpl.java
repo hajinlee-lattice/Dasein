@@ -3,14 +3,11 @@ package com.latticeengines.app.exposed.service.impl;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.text.MessageFormat;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -18,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -143,7 +139,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     private LoadingCache<String, Boolean> contactsByAccountLookupsPopulatedCache = Caffeine.newBuilder() //
             .maximumSize(1000) //
             .expireAfterWrite(30, TimeUnit.SECONDS) //
-            .build(this::contactsByAccountLookupsPopulated);
+            .build(this::contactsLookupsPopulated);
     private ExecutorService workers = null;
 
     @Inject
@@ -314,8 +310,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Override
     public DataPage getAllContactsByAccountId(String accountIdValue, Map<String, String> orgInfo) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        final Set<String> tenantsForDummyData = new HashSet<>(Arrays.asList("QA_CDL_EntityMatch_jhao_Account360",
-                "QA_CDL_EntityMatch_jhao_Account360_2", "CDL_QA_HardGuarantee_01"));
+
         if (StringUtils.isBlank(accountIdValue)) {
             throw new LedpException(LedpCode.LEDP_39010, new String[] { accountIdValue, "Account", customerSpace });
         }
@@ -324,24 +319,11 @@ public class DataLakeServiceImpl implements DataLakeService {
             String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
             List<Map<String, Object>> data = matchProxy.lookupContacts(customerSpace, lookupIdColumn, accountIdValue,
                     null, null);
-            if (tenantsForDummyData.contains(customerSpace) && CollectionUtils.isNotEmpty(data)) {
-                for (Map<String, Object> datum : data) {
-                    if (MapUtils.isNotEmpty(datum))
-                        datum.put(InterfaceName.LastActivityDate.name(), getRandomActivityDate());
-                }
-            }
             return new DataPage(data);
         } else {
             log.warn(String.format("Contact Data not published in Dynamo for customerSpace: %s", customerSpace));
             return new DataPage(new ArrayList<>());
         }
-    }
-
-    // Sort term dummy data population
-    private long getRandomActivityDate() {
-        long start = Instant.now().minus(30, ChronoUnit.DAYS).toEpochMilli();
-        long end = Instant.now().toEpochMilli();
-        return ThreadLocalRandom.current().nextLong(start, end);
     }
 
     @Override
@@ -360,12 +342,6 @@ public class DataLakeServiceImpl implements DataLakeService {
             String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
             List<Map<String, Object>> data = matchProxy.lookupContacts(customerSpace, lookupIdColumn, accountId,
                     contactId, null);
-            if (CollectionUtils.isNotEmpty(data)) {
-                for (Map<String, Object> datum : data) {
-                    if (MapUtils.isNotEmpty(datum))
-                        datum.put(InterfaceName.LastActivityDate.name(), getRandomActivityDate());
-                }
-            }
             return new DataPage(data);
         } else {
             log.warn(String.format("Contact Data not published in Dynamo for customerSpace: %s", customerSpace));
@@ -762,7 +738,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         return dynamoDataUnit != null;
     }
 
-    private boolean contactsByAccountLookupsPopulated(String customerSpace) {
+    private boolean contactsLookupsPopulated(String customerSpace) {
         DynamoDataUnit dynamoDataUnit = //
                 dataCollectionProxy.getDynamoDataUnitByTableRole(customerSpace, null,
                         TableRoleInCollection.ConsolidatedContact);
