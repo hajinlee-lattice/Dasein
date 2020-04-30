@@ -120,6 +120,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     Map<BusinessEntity, Boolean> hardDeleteEntities;
     protected Map<String, String> tableTemplateMap;
     protected List<String> templatesInOrder = new ArrayList<>();
+    // A set of columns to filter out, which will be generated later during match
+    protected List<String> columnsToFilterOut = new ArrayList<>();
 
     protected boolean hasSystemBatch;
 
@@ -155,6 +157,11 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         diffReportTablePrefix = entity.name() + "_DiffReport";
         changeListTablePrefix = entity.name() + "_ChangeList";
         reportChangeListTablePrefix = entity.name() + "_ReportChangeList";
+
+        // Need to filter out LatticeAccountId and CDLCreatedTemplate
+        // as they will be regenerated later on during match
+        columnsToFilterOut.add(InterfaceName.LatticeAccountId.name());
+        columnsToFilterOut.add(InterfaceName.CDLCreatedTemplate.name());
 
         if (hasKeyInContext(PERFORM_SOFT_DELETE)) {
             softDeleteEntities = getMapObjectFromContext(PERFORM_SOFT_DELETE, BusinessEntity.class, Boolean.class);

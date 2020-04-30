@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MERGE_SYSTEM_BATCH_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SOFT_DELETE_TXFMR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_UPSERT_TXMFR;
@@ -41,6 +42,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProc
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.spark.cdl.MergeSystemBatchConfig;
 import com.latticeengines.domain.exposed.spark.cdl.SoftDeleteConfig;
+import com.latticeengines.domain.exposed.spark.common.CopyConfig;
 import com.latticeengines.domain.exposed.spark.common.UpsertConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
@@ -254,6 +256,18 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             systemBatchTableName = systemBatchTable.getName();
         }
         log.info("Set system batch name=" + systemBatchTableName);
+    }
+
+    TransformationStepConfig filterColumnsFromImports(int inputStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+
+        step.setTransformer(TRANSFORMER_COPY_TXMFR);
+        step.setInputSteps(Collections.singletonList(inputStep));
+        CopyConfig config = new CopyConfig();
+        config.setDropAttrs(columnsToFilterOut);
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+
+        return step;
     }
 
     TransformationStepConfig softDelete(int mergeSoftDeleteStep, int mergeStep) {
