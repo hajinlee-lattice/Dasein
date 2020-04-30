@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -70,7 +69,7 @@ public class ProjectResource {
     @ResponseBody
     @ApiOperation("Get all projects")
     @PreAuthorize("hasRole('View_DCP_Projects')")
-    List<Project> getAllProjects() {
+    List<ProjectDetails> getAllProjects() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);

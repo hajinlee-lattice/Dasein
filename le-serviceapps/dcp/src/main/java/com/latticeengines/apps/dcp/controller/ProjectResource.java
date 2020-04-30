@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -56,7 +55,7 @@ public class ProjectResource {
     @GetMapping(value = "/list")
     @ResponseBody
     @ApiOperation(value = "Get all projects")
-    public List<Project> getAllProject(@PathVariable String customerSpace) {
+    public List<ProjectDetails> getAllProject(@PathVariable String customerSpace) {
         return projectService.getAllProject(customerSpace);
     }
 

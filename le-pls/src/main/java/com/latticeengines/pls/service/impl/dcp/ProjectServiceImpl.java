@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
 import com.latticeengines.pls.service.dcp.ProjectService;
@@ -29,7 +28,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<Project> getAllProjects(String customerSpace) {
+    public List<ProjectDetails> getAllProjects(String customerSpace) {
         return projectProxy.getAllDCPProject(customerSpace);
     }
 
