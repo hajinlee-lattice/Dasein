@@ -626,7 +626,7 @@ public class TenantServiceImpl implements TenantService {
         String subName = vboRequest.getSubscriber().getName();
         String tenantName = constructTenantNameFromSubscriber(subName);
         if (StringUtils.isBlank(tenantName)) {
-            log.info("system can't construct tenant name from subscriber name.");
+            log.error("system can't construct tenant name from subscriber name {}.", subName);
             return generateVBOResponse("failed",
                     "system can't construct tenant name from subscriber name.");
         }
