@@ -23,6 +23,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.pls.GlobalTeamData;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.util.UIActionUtils;
 import com.latticeengines.security.exposed.service.TeamService;
 
 import io.swagger.annotations.Api;
@@ -69,7 +70,11 @@ public class TeamResource {
     @ApiOperation(value = "Create a new team")
     @PreAuthorize("hasRole('Edit_PLS_Teams')")
     public String createTeam(@RequestBody GlobalTeamData globalTeamData) {
-        return teamService.createTeam(MultiTenantContext.getUser().getEmail(), globalTeamData);
+        try {
+            return teamService.createTeam(MultiTenantContext.getUser().getEmail(), globalTeamData);
+        } catch (Exception ex) {
+            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+        }
     }
 
     @PutMapping(value = "/teamId/{teamId}")
@@ -79,7 +84,11 @@ public class TeamResource {
     public Boolean editTeam(@PathVariable("teamId") String teamId, //
                             @RequestBody GlobalTeamData globalTeamData) {
         log.info("Edit team {}.", teamId);
-        return teamService.editTeam(teamId, globalTeamData);
+        try {
+            return teamService.editTeam(teamId, globalTeamData);
+        } catch (Exception ex) {
+            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+        }
     }
 
     @DeleteMapping(value = "/teamId/{teamId}")
