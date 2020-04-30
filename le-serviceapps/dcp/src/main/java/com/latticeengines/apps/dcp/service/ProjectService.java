@@ -14,7 +14,7 @@ public interface ProjectService {
     ProjectDetails createProject(String customerSpace, String projectId, String displayName,
                                  Project.ProjectType projectType, String user);
 
-    List<Project> getAllProject(String customerSpace);
+    List<ProjectDetails> getAllProject(String customerSpace);
 
     Project getProjectByProjectId(String customerSpace, String projectId);
 

@@ -156,7 +156,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")
     public void testGetAndDelete() {
-        List<Project> projects = projectService.getAllProjects(customerSpace);
+        List<ProjectDetails> projects = projectService.getAllProjects(customerSpace);
         Assert.assertNotNull(projects);
         Assert.assertEquals(projects.size(), 1);
         ProjectDetails details = projectService.getProjectByProjectId(customerSpace, PROJECT_ID);
