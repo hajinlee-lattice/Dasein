@@ -41,7 +41,6 @@ import com.latticeengines.pls.service.dcp.SourceFileUploadService;
 import com.latticeengines.pls.service.dcp.SourceService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
-import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -59,9 +58,6 @@ public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTe
 
     @Inject
     private UploadService uploadService;
-
-    @Inject
-    protected WorkflowProxy workflowProxy;
 
     @Inject
     private Configuration yarnConfiguration;
@@ -82,7 +78,7 @@ public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTe
 
         Assert.assertNotNull(sourceFileInfo);
         Assert.assertFalse(StringUtils.isEmpty(sourceFileInfo.getName()));
-        Assert.assertEquals(sourceFileInfo.getDisplayName(), "TestFileName.txt");
+        Assert.assertEquals(sourceFileInfo.getDisplayName(), "TestFileName.csv");
 
         SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, sourceFileInfo.getName());
         Assert.assertNotNull(sourceFile);
@@ -116,7 +112,7 @@ public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTe
         ApplicationId applicationId = sourceFileUploadService.submitSourceImport(projectDetails.getProjectId(),
                 source.getSourceId(), sourceFileInfo.getName());
 
-        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
+        JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
 
         List<UploadDetails> uploadDetailsList = uploadService.getAllBySourceId(source.getSourceId(),
