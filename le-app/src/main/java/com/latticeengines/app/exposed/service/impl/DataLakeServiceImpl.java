@@ -65,6 +65,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -138,7 +139,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     private LoadingCache<String, Boolean> contactsByAccountLookupsPopulatedCache = Caffeine.newBuilder() //
             .maximumSize(1000) //
             .expireAfterWrite(30, TimeUnit.SECONDS) //
-            .build(this::contactsByAccountLookupsPopulated);
+            .build(this::contactsLookupsPopulated);
     private ExecutorService workers = null;
 
     @Inject
@@ -280,6 +281,9 @@ public class DataLakeServiceImpl implements DataLakeService {
         Map<String, ColumnMetadata> attributesMap = getServingMetadataForEntity(customerSpace, BusinessEntity.Account)
                 .collect(HashMap<String, ColumnMetadata>::new, (returnMap, cm) -> returnMap.put(cm.getAttrName(), cm))
                 .block();
+        if (MapUtils.isEmpty(attributesMap)) {
+            throw new LedpException(LedpCode.LEDP_36003, new String[] { BusinessEntity.Account.name(), customerSpace });
+        }
 
         missingReqdAttributes.stream().filter(col -> !attributesMap.containsKey(col)).collect(Collectors.toList())
                 .forEach(col -> accountData.put(col, null));
@@ -313,7 +317,9 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         if (Boolean.TRUE.equals(contactsByAccountLookupsPopulatedCache.get(customerSpace))) {
             String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
-            return new DataPage(matchProxy.lookupContacts(customerSpace, lookupIdColumn, accountIdValue, null, null));
+            List<Map<String, Object>> data = matchProxy.lookupContacts(customerSpace, lookupIdColumn, accountIdValue,
+                    null, null);
+            return new DataPage(data);
         } else {
             log.warn(String.format("Contact Data not published in Dynamo for customerSpace: %s", customerSpace));
             return new DataPage(new ArrayList<>());
@@ -334,7 +340,9 @@ public class DataLakeServiceImpl implements DataLakeService {
 
         if (Boolean.TRUE.equals(contactsByAccountLookupsPopulatedCache.get(customerSpace))) {
             String lookupIdColumn = lookupIdMappingProxy.findLookupIdColumn(orgInfo, customerSpace);
-            return new DataPage(matchProxy.lookupContacts(customerSpace, lookupIdColumn, accountId, contactId, null));
+            List<Map<String, Object>> data = matchProxy.lookupContacts(customerSpace, lookupIdColumn, accountId,
+                    contactId, null);
+            return new DataPage(data);
         } else {
             log.warn(String.format("Contact Data not published in Dynamo for customerSpace: %s", customerSpace));
             return new DataPage(new ArrayList<>());
@@ -725,13 +733,15 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private boolean hasAccountLookupCache(String customerSpace) {
         DynamoDataUnit dynamoDataUnit = //
-                dataCollectionProxy.getAccountLookupDynamoDataUnit(customerSpace, null);
+                dataCollectionProxy.getDynamoDataUnitByTableRole(customerSpace, null,
+                        TableRoleInCollection.AccountLookup);
         return dynamoDataUnit != null;
     }
 
-    private boolean contactsByAccountLookupsPopulated(String customerSpace) {
+    private boolean contactsLookupsPopulated(String customerSpace) {
         DynamoDataUnit dynamoDataUnit = //
-                dataCollectionProxy.getContactsByAccountLookupDataUnit(customerSpace, null);
+                dataCollectionProxy.getDynamoDataUnitByTableRole(customerSpace, null,
+                        TableRoleInCollection.ConsolidatedContact);
         return dynamoDataUnit != null;
     }
 }

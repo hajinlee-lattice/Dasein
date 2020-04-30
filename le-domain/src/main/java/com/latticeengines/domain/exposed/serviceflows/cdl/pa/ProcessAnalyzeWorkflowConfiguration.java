@@ -68,15 +68,12 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
         private ExportToDynamoStepConfiguration exportToDynamo = new ExportToDynamoStepConfiguration();
-        private ExportTimelineRawTableToDynamoStepConfiguration exportTimelineRawTableToDynamo =
-                new ExportTimelineRawTableToDynamoStepConfiguration();
+        private ExportTimelineRawTableToDynamoStepConfiguration exportTimelineRawTableToDynamo = new ExportTimelineRawTableToDynamoStepConfiguration();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
         private ApsGenerationStepConfiguration apsGenerationStepConfiguration = new ApsGenerationStepConfiguration();
         private ImportExportS3StepConfiguration importExportS3 = new ImportExportS3StepConfiguration();
-        private ConvertBatchStoreToDataTableWorkflowConfiguration.Builder convertBatchStoreToDataTableWorkflowBuilder =
-                new ConvertBatchStoreToDataTableWorkflowConfiguration.Builder();
-        private LegacyDeleteWorkflowConfiguration.Builder legacyDeleteWorkFlowBuilder =
-                new LegacyDeleteWorkflowConfiguration.Builder();
+        private ConvertBatchStoreToDataTableWorkflowConfiguration.Builder convertBatchStoreToDataTableWorkflowBuilder = new ConvertBatchStoreToDataTableWorkflowConfiguration.Builder();
+        private LegacyDeleteWorkflowConfiguration.Builder legacyDeleteWorkFlowBuilder = new LegacyDeleteWorkflowConfiguration.Builder();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
             processStepConfiguration.setInitialDataFeedStatus(initialDataFeedStatus);
@@ -116,7 +113,6 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processRatingWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             processTransactionWorkflowBuilder.microServiceHostPort(microServiceHostPort);
-            curatedAttributesWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             importExportS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
@@ -385,7 +381,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processContactWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Contact));
             processProductWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Product));
             processActivityStreamWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
-            convertBatchStoreToDataTableWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
+            convertBatchStoreToDataTableWorkflowBuilder
+                    .setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             matchEntityWorkflowBuilder.setReplaceMode(entities.contains(BusinessEntity.ActivityStream));
             processTransactionWorkflowBuilder.setReplace(entities.contains(BusinessEntity.Transaction));
             return this;

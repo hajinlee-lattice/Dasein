@@ -63,11 +63,13 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
     @Value("${eai.export.dynamo.timeline.signature}")
     private String signature;
 
-    private String tableName;
+    private String table;
 
     @BeforeClass(groups = "functional", enabled = false)
     private void setup() {
-        tableName = "TimelineQueryServiceImplTestNG_" + env + "_" + stack + signature;
+        table = "TimelineQueryServiceImplTestNG_" + env + "_" + stack;
+        String tableName = table + signature;
+
         dynamoService.deleteTable(tableName);
         if (!dynamoService.hasTable(tableName)) {
 
@@ -116,8 +118,7 @@ public class ActivityTimelineQueryServiceImplTestNG extends QueryServiceImplTest
 
     @Test(groups = "functional", enabled = false)
     public void testTimelineQuery() {
-        ((ActivityTimelineQueryServiceImpl) activityTimelineQueryService)
-                .setTableName("TimelineQueryServiceImplTestNG_dev_jlmehta");
+        ((ActivityTimelineQueryServiceImpl) activityTimelineQueryService).setTableName(table);
         ActivityTimelineQuery activityTimelineQuery = new ActivityTimelineQuery();
         activityTimelineQuery.setMainEntity(BusinessEntity.Account);
         activityTimelineQuery.setEntityId("1");

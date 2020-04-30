@@ -29,7 +29,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
       val lastActivityDf = lattice.input(config.lastActivityDateInputIdx)
       Some(masterTableIdx
         .map(lattice.input(_))
-        .map(mergeLastActivityDate(lastActivityDf, _, config.joinKey))
+        .map(mergeLastActivityDate(lastActivityDf, _, config.joinKey, config.columnsToIncludeFromMaster.asScala.toList))
         .getOrElse(lastActivityDf.select(config.joinKey, LastActivityDate.name)))
     } else {
       None: Option[DataFrame]
@@ -93,11 +93,12 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
     })
   }
 
-  private def mergeLastActivityDate(lastActivityDf: DataFrame, accDf: DataFrame, joinKey: String): DataFrame = {
-    accDf.join(lastActivityDf, Seq(joinKey), "left")
-      .select(accDf.col(joinKey), coalesce(
+  private def mergeLastActivityDate(lastActivityDf: DataFrame, masterDf: DataFrame, joinKey: String, additionalColumns: List[String]): DataFrame = {
+    val colsFromMaster = additionalColumns ::: List(joinKey).intersect(masterDf.columns)
+    masterDf.join(lastActivityDf, Seq(joinKey), "left")
+      .select(colsFromMaster.map(col) ::: List(coalesce(
         // pick last activity date first, then last update time
-        lastActivityDf.col(LastActivityDate.name), accDf.col(CDLUpdatedTime.name), lit(null).cast(LongType)
-      ).as(LastActivityDate.name))
+        lastActivityDf.col(LastActivityDate.name), masterDf.col(CDLUpdatedTime.name), lit(null).cast(LongType)
+      ).as(LastActivityDate.name)): _*)
   }
 }

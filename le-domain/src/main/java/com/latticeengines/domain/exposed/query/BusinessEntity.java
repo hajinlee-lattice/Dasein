@@ -58,6 +58,7 @@ public enum BusinessEntity implements GraphNode {
     // Entities can be added for curated
     // attributes based on Contact, Product, etc.
     CuratedAccount, //
+    CuratedContact, //
 
     AnalyticPurchaseState,
 
@@ -71,11 +72,7 @@ public enum BusinessEntity implements GraphNode {
     Catalog, //
 
     // Activity Stream Serving Entities
-    WebVisitProfile,
-    Opportunity,
-    AccountMarketingActivity,
-    ContactMarketingActivity;
-
+    WebVisitProfile, Opportunity, AccountMarketingActivity, ContactMarketingActivity;
 
     public static final Set<BusinessEntity> SEGMENT_ENTITIES = //
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity,
@@ -94,9 +91,9 @@ public enum BusinessEntity implements GraphNode {
                     AccountMarketingActivity, ContactMarketingActivity);
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
     public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, AnalyticPurchaseState);
-    public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME= //
+    public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME = //
             ImmutableSet.of(PurchaseHistory, WebVisitProfile);
-    public static final Set<BusinessEntity> ACTIVITY_METRIC_SERVING_ENTITIES= ImmutableSet.of(WebVisitProfile,
+    public static final Set<BusinessEntity> ACTIVITY_METRIC_SERVING_ENTITIES = ImmutableSet.of(WebVisitProfile,
             Opportunity, AccountMarketingActivity, ContactMarketingActivity);
     public static final Set<BusinessEntity> CAN_REPALCE_ENTITIES = ImmutableSet.of(Account, Contact, Product,
             Transaction, ActivityStream);
@@ -232,7 +229,7 @@ public enum BusinessEntity implements GraphNode {
                 joinCache.put(entity, join);
             }
         });
-        return joinCache.containsKey(target) ? joinCache.get(target) : null;
+        return joinCache.getOrDefault(target, null);
     }
 
     @Override
@@ -247,37 +244,37 @@ public enum BusinessEntity implements GraphNode {
 
     public static Set<BusinessEntity> getAccountExportEntities(ColumnSelection.Predefined group) {
         switch (group) {
-            case Enrichment:
-                return BusinessEntity.EXPORT_ACCOUNT_ENTITIES;
-            case TalkingPoint:
-                return BusinessEntity.TALKING_POINT_ACCOUNT_ENTITIES;
-            case CompanyProfile:
-                return BusinessEntity.COMPANY_PROFILE_ACCOUNT_ENTITIES;
-            default:
-                throw new UnsupportedOperationException("Only support export, " + //
-                        "talking point or company profile in this api");
+        case Enrichment:
+            return BusinessEntity.EXPORT_ACCOUNT_ENTITIES;
+        case TalkingPoint:
+            return BusinessEntity.TALKING_POINT_ACCOUNT_ENTITIES;
+        case CompanyProfile:
+            return BusinessEntity.COMPANY_PROFILE_ACCOUNT_ENTITIES;
+        default:
+            throw new UnsupportedOperationException("Only support export, " + //
+                    "talking point or company profile in this api");
         }
     }
 
     // for example Rating is in fact a part of Account data
     public static BusinessEntity getCentralEntity(BusinessEntity entity) {
         switch (entity) {
-            case Contact:
-            case ContactMarketingActivity:
-                return Contact;
-            case Account:
-            case CuratedAccount:
-            case PurchaseHistory:
-            case AnalyticPurchaseState:
-            case Rating:
-            case WebVisitProfile:
-            case Opportunity:
-            case AccountMarketingActivity:
-                return Account;
-            case LatticeAccount:
-                return LatticeAccount;
-            default:
-                throw new UnsupportedOperationException("The central entity for " + entity + "is not well defined.");
+        case Contact:
+        case ContactMarketingActivity:
+            return Contact;
+        case Account:
+        case CuratedAccount:
+        case PurchaseHistory:
+        case AnalyticPurchaseState:
+        case Rating:
+        case WebVisitProfile:
+        case Opportunity:
+        case AccountMarketingActivity:
+            return Account;
+        case LatticeAccount:
+            return LatticeAccount;
+        default:
+            throw new UnsupportedOperationException("The central entity for " + entity + "is not well defined.");
         }
     }
 
