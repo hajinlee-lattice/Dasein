@@ -43,10 +43,6 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     private static final Logger log = LoggerFactory.getLogger(ProcessLegacyDeploymentTestNG.class);
     static final String CHECK_POINT = "process1";
     static final String UNDER_SCORE = "_";
-    // Number of products in batch store after first PA for legacy tenant
-    static final Long BATCH_STORE_PRODUCT = 83L;
-    // Number of products in serving store after first PA for legacy tenant
-    static final Long SERVING_STORE_PRODUCTS = 14L;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -75,11 +71,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Thread.sleep(1100);
 
         log.info("Importing products");
-        mockCSVImport(BusinessEntity.Product, 1, "ProductBundle");
-        Thread.sleep(1100);
-
-        log.info("Importing product hierarchy");
-        mockCSVImport(BusinessEntity.Product, 2, "ProductHierarchy");
+        mockCSVImport(BusinessEntity.Product, 9, "ProductVDB");
         Thread.sleep(1100);
 
         log.info("Importing transactions");
@@ -102,9 +94,14 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Thread.sleep(1100);
     }
 
+    // Replace product data by importing new product data
     // Replace transaction data
     // Delete all transaction data first, and then importing new data
     protected void replaceData() throws InterruptedException {
+        log.info("Importing new products to replace existing products");
+        mockCSVImport(BusinessEntity.Product, 10, "ProductVDB");
+        Thread.sleep(1100);
+
         log.info("Register replacement action for transaction");
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String email = MultiTenantContext.getEmailAddress();
@@ -377,22 +374,22 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_PA, //
                 BusinessEntity.Contact, CONTACT_PA, //
-                BusinessEntity.Product, BATCH_STORE_PRODUCT);
+                BusinessEntity.Product, BATCH_STORE_PRODUCT_PA);
     }
 
     protected Map<BusinessEntity, Long> getUpsertExpectedBatchStoreCounts() {
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_PA + NEW_ACCOUNT_PA, //
                 BusinessEntity.Contact, CONTACT_PA + NEW_CONTACT_PA, //
-                BusinessEntity.Product, BATCH_STORE_PRODUCT);
+                BusinessEntity.Product, BATCH_STORE_PRODUCT_PA);
     }
 
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_PA);
         map.put(BusinessEntity.Contact, CONTACT_PA);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PA);
+        map.put(BusinessEntity.ProductHierarchy, 0L);
         return map;
     }
 
@@ -400,8 +397,8 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_PA + NEW_ACCOUNT_PA);
         map.put(BusinessEntity.Contact, CONTACT_PA + NEW_CONTACT_PA);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS);
-        map.put(BusinessEntity.ProductHierarchy, SERVING_STORE_PRODUCT_HIERARCHIES_PT);
+        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PA);
+        map.put(BusinessEntity.ProductHierarchy, 0L);
         return map;
     }
 
