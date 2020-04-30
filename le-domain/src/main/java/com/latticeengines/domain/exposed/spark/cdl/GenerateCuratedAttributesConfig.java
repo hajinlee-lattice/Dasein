@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.spark.cdl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,6 +28,11 @@ public class GenerateCuratedAttributesConfig extends SparkJobConfig {
     // template name -> formated source display name
     @JsonProperty
     public Map<String, String> templateValueMap = new HashMap<>();
+
+    // columnsToIncludeFromMaster-> other attributes from master to include in final
+    // table
+    @JsonProperty
+    public List<String> columnsToIncludeFromMaster = new ArrayList<>();
 
     /*-
      * input idx -> map of attributes to be merged (src -> attr name after merge)

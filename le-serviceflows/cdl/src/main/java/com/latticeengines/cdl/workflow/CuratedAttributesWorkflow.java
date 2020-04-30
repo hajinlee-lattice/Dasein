@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAccountAttributesWrapper;
+import com.latticeengines.cdl.workflow.steps.rebuild.CuratedContactAttributes;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileCuratedAccountWrapper;
 import com.latticeengines.cdl.workflow.steps.update.CloneCuratedAccountAttributes;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.CuratedAttributesWorkflowConfiguration;
@@ -27,6 +28,9 @@ public class CuratedAttributesWorkflow extends AbstractWorkflow<CuratedAttribute
     private CuratedAccountAttributesWrapper curatedAccountAttributesWrapper;
 
     @Inject
+    private CuratedContactAttributes curatedContactAttributes;
+
+    @Inject
     private ProfileCuratedAccountWrapper profileCuratedAccountWrapper;
 
     @Override
@@ -34,6 +38,7 @@ public class CuratedAttributesWorkflow extends AbstractWorkflow<CuratedAttribute
         return new WorkflowBuilder(name(), config) //
                 .next(cloneCuratedAccountAttributes) //
                 .next(curatedAccountAttributesWrapper) //
+                .next(curatedContactAttributes) //
                 .next(profileCuratedAccountWrapper) //
                 .build();
     }

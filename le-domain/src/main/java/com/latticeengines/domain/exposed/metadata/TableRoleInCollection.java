@@ -43,6 +43,7 @@ public enum TableRoleInCollection {
     // Curated Account Attribute
     // has only requires one table for serving for now.
     CalculatedCuratedAccountAttribute, //
+    CalculatedCuratedContact, //
 
     AnalyticPurchaseState, //
 
@@ -67,9 +68,13 @@ public enum TableRoleInCollection {
         BucketedAccount.distKey = InterfaceName.AccountId;
 
         ConsolidatedContact.primaryKey = InterfaceName.ContactId;
-        ConsolidatedContact.sortKeys =  ImmutableList.of(InterfaceName.ContactId);
+        ConsolidatedContact.sortKeys = ImmutableList.of(InterfaceName.ContactId);
         ConsolidatedContact.partitionKey = InterfaceName.AccountId;
         ConsolidatedContact.rangeKey = InterfaceName.ContactId;
+
+        CalculatedCuratedContact.primaryKey = InterfaceName.ContactId;
+        CalculatedCuratedContact.partitionKey = InterfaceName.AccountId;
+        CalculatedCuratedContact.rangeKey = InterfaceName.ContactId;
 
         SortedContact.primaryKey = ConsolidatedContact.primaryKey;
         SortedContact.distKey = BucketedAccount.distKey;
@@ -154,7 +159,7 @@ public enum TableRoleInCollection {
 
     // for redshift tables
     private InterfaceName distKey;
-    private ImmutableList<InterfaceName> sortKeys = ImmutableList.<InterfaceName>builder().build();
+    private ImmutableList<InterfaceName> sortKeys = ImmutableList.<InterfaceName> builder().build();
 
     // for dynamo tables
     private InterfaceName partitionKey;
