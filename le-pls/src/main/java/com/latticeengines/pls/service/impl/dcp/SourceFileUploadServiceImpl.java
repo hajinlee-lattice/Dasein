@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,11 +28,18 @@ public class SourceFileUploadServiceImpl implements SourceFileUploadService {
     @Inject
     private FileUploadService fileUploadService;
 
+    @Value("${pls.fileupload.maxupload.bytes}")
+    private long maxUploadSize;
+
     @Override
     public SourceFileInfo uploadFile(String name, String displayName, boolean compressed, EntityType entityType, MultipartFile file) {
 
         try {
             log.info(String.format("Uploading file %s (displayName=%s, compressed=%s)", name, displayName, compressed));
+
+            if (file.getSize() >= maxUploadSize) {
+                throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
+            }
 
             InputStream stream = file.getInputStream();
 
