@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -116,6 +118,30 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
             metadataProxy.deleteTable(customer, upstreamTable.getName());
         }
         removeObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE);
+        setMatchRate(result);
+
+    }
+
+    private void setMatchRate(SparkJobResult result) {
+        String path = PathUtils.toAvroGlob(result.getTargets().get(1).getPath());
+        List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration, path);
+        GenericRecord record = records.get(0);
+        long matchCount = (Long) record.get("MatchCount");
+        long publicCount = (Long) record.get("PublicDomainCount");
+        long totalCount = (Long) record.get("TotalCount");
+        matchCount += hasKeyInContext(MATCH_RESULT_MATCH_COUNT) ? getLongValueFromContext(MATCH_RESULT_MATCH_COUNT) : 0;
+        publicCount += hasKeyInContext(MATCH_RESULT_PUBLIC_DOMAIN_COUNT) ? getLongValueFromContext(MATCH_RESULT_PUBLIC_DOMAIN_COUNT) : 0;
+        totalCount += hasKeyInContext(MATCH_RESULT_TOTAL_COUNT) ? getLongValueFromContext(MATCH_RESULT_TOTAL_COUNT) : 0;
+        putLongValueInContext(MATCH_RESULT_MATCH_COUNT, matchCount);
+        putLongValueInContext(MATCH_RESULT_PUBLIC_DOMAIN_COUNT, publicCount);
+        putLongValueInContext(MATCH_RESULT_TOTAL_COUNT, totalCount);
+
+        Double matchRate = 1.0D * matchCount / totalCount;
+        Double publicDomainRate = 1.0D * publicCount / totalCount;
+        putDoubleValueInContext(MATCH_RESULT_MATCH_RATE, matchRate);
+        putDoubleValueInContext(MATCH_RESULT_PUBLIC_DOMAIN_RATE, publicDomainRate);
+        log.info("MatchRate=" + getDoubleValueFromContext(MATCH_RESULT_MATCH_RATE));
+        log.info("PublicDomainRate=" + getDoubleValueFromContext(MATCH_RESULT_PUBLIC_DOMAIN_RATE));
     }
 
     private void overlayMetadata(Table eventTable) {
@@ -138,6 +164,4 @@ public class ProcessMatchResult extends RunSparkJob<ProcessMatchResultConfigurat
         log.info("Found source columns: " + StringUtils.join(cols, ", "));
         return cols;
     }
-
-
 }
