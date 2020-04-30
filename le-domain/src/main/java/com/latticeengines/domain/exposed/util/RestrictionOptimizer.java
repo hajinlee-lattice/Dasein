@@ -1,5 +1,10 @@
 package com.latticeengines.domain.exposed.util;
 
+import static com.latticeengines.domain.exposed.query.ComparisonType.IN_COLLECTION;
+import static com.latticeengines.domain.exposed.query.ComparisonType.NOT_IN_COLLECTION;
+import static com.latticeengines.domain.exposed.query.LogicalOperator.AND;
+import static com.latticeengines.domain.exposed.query.LogicalOperator.OR;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +24,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.DateRestriction;
 import com.latticeengines.domain.exposed.query.ExistsRestriction;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.MetricRestriction;
@@ -110,9 +116,9 @@ public final class RestrictionOptimizer {
             }
         });
 
-        logicalRestriction.setRestrictions(mergeListOperations(children));
+        logicalRestriction.setRestrictions(mergeListOperations(logicalRestriction.getOperator(), children));
 
-        if (children.isEmpty()) {
+        if (CollectionUtils.isEmpty(logicalRestriction.getRestrictions())) {
             return null;
         } else if (logicalRestriction.getRestrictions().size() == 1) {
             return logicalRestriction.getRestrictions().get(0);
@@ -202,7 +208,7 @@ public final class RestrictionOptimizer {
         return null;
     }
 
-    private static List<Restriction> mergeListOperations(List<Restriction> clauses) {
+    private static List<Restriction> mergeListOperations(LogicalOperator logicalOp, List<Restriction> clauses) {
         Map<ImmutablePair<AttributeLookup, ComparisonType>, List<Object>> listVals = new HashMap<>();
         List<Restriction> merged = new ArrayList<>();
         for (Restriction clause: clauses) {
@@ -213,9 +219,17 @@ public final class RestrictionOptimizer {
                 if (RestrictionUtils.isMultiValueOperator(operator)) {
                     AttributeLookup attr = bucketRestriction.getAttr();
                     ImmutablePair<AttributeLookup, ComparisonType> key = ImmutablePair.of(attr, operator);
-                    List<Object> vals = listVals.getOrDefault(key, new ArrayList<>());
-                    vals.addAll(bucketRestriction.getBkt().getValues());
-                    listVals.put(key, vals);
+                    if (listVals.containsKey(key)) {
+                        List<Object> vals = listVals.getOrDefault(key, new ArrayList<>());
+                        if (isIntersect(logicalOp, operator)) {
+                            vals.retainAll(bucketRestriction.getBkt().getValues());
+                        } else {
+                            vals.addAll(bucketRestriction.getBkt().getValues());
+                        }
+                        listVals.put(key, vals);
+                    } else {
+                        listVals.put(key, new ArrayList<>(bucketRestriction.getBkt().getValues()));
+                    }
                     shouldMerge = true;
                 }
             }
@@ -226,16 +240,24 @@ public final class RestrictionOptimizer {
         if (MapUtils.isNotEmpty(listVals)) {
             listVals.forEach((pair, vals) -> {
                 List<Object> cleanVals = vals.stream().filter(Objects::nonNull).distinct().collect(Collectors.toList());
+                AttributeLookup attr = pair.getLeft();
+                Bucket bkt;
                 if (CollectionUtils.isNotEmpty(cleanVals)) {
-                    AttributeLookup attr = pair.getLeft();
                     ComparisonType operator = pair.getRight();
-                    Bucket bkt = Bucket.valueBkt(operator, cleanVals);
-                    BucketRestriction restriction = new BucketRestriction(attr, bkt);
-                    merged.add(restriction);
+                    bkt = Bucket.valueBkt(operator, cleanVals);
+                } else {
+                    bkt = Bucket.notNullBkt();
                 }
+                BucketRestriction restriction = new BucketRestriction(attr, bkt);
+                merged.add(restriction);
             });
         }
         return merged;
+    }
+
+    private static boolean isIntersect(LogicalOperator logicalOp, ComparisonType op) {
+        return (AND.equals(logicalOp) && IN_COLLECTION.equals(op)) ||
+                (OR.equals(logicalOp) && NOT_IN_COLLECTION.equals(op));
     }
 
 }

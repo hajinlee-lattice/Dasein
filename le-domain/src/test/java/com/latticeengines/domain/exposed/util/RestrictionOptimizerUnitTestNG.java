@@ -2,6 +2,9 @@ package com.latticeengines.domain.exposed.util;
 
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Account;
 import static com.latticeengines.domain.exposed.query.BusinessEntity.Contact;
+import static com.latticeengines.domain.exposed.query.ComparisonType.IN_COLLECTION;
+import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NOT_NULL;
+import static com.latticeengines.domain.exposed.query.ComparisonType.NOT_IN_COLLECTION;
 
 import java.util.Arrays;
 import java.util.List;
@@ -87,13 +90,53 @@ public class RestrictionOptimizerUnitTestNG {
 
     @Test(groups = "unit")
     public void testMergeList() {
-        final Restriction AList1 = listBucket(1);
-        final Restriction AList2 = listBucket(2);
-        final Restriction AList3 = listBucket(3);
-        final Restriction AList4 = listBucket(4);
+        final Restriction AList1 = listBucket(true, 1, 2, 3);
+        final Restriction AList2 = listBucket(true, 2, 3, 4);
+        final Restriction AList3 = listBucket(false, 10, 20, 30);
+        final Restriction AList4 = listBucket(false, 30, 40, 50);
         Restriction res1 = and(AList1, AList2, AList3, AList4);
         Restriction flatten = RestrictionOptimizer.optimize(res1);
         Assert.assertEquals(((LogicalRestriction) flatten).getRestrictions().size(), 2);
+        for (Restriction r: ((LogicalRestriction) flatten).getRestrictions()) {
+            Bucket bkt = ((BucketRestriction) r).getBkt();
+            if (IN_COLLECTION.equals(bkt.getComparisonType())) {
+                Assert.assertEquals(bkt.getValues().size(), 2); // 2, 3
+            } else {
+                Assert.assertEquals(bkt.getValues().size(), 5); // 10, 20, 30, 40, 50
+            }
+        }
+
+        res1 = or(AList1, AList2, AList3, AList4);
+        flatten = RestrictionOptimizer.optimize(res1);
+        Assert.assertEquals(((LogicalRestriction) flatten).getRestrictions().size(), 2);
+        for (Restriction r: ((LogicalRestriction) flatten).getRestrictions()) {
+            Bucket bkt = ((BucketRestriction) r).getBkt();
+            if (IN_COLLECTION.equals(bkt.getComparisonType())) {
+                Assert.assertEquals(bkt.getValues().size(), 4); // 1, 2, 3, 4
+            } else {
+                Assert.assertEquals(bkt.getValues().size(), 1); // 30
+            }
+        }
+
+        final Restriction AList5 = listBucket(true, 1, 2);
+        final Restriction AList6 = listBucket(true,  3, 4);
+        final Restriction AList7 = listBucket(false, 10, 20, 30);
+        final Restriction AList8 = listBucket(false, 40, 50);
+        res1 = and(AList5, AList6, AList7, AList8);
+        flatten = RestrictionOptimizer.optimize(res1);
+        Assert.assertEquals(((LogicalRestriction) flatten).getRestrictions().size(), 2); // one of them is not null
+        for (Restriction r: ((LogicalRestriction) flatten).getRestrictions()) {
+            Bucket bkt = ((BucketRestriction) r).getBkt();
+            Assert.assertTrue(IS_NOT_NULL.equals(bkt.getComparisonType()) || NOT_IN_COLLECTION.equals(bkt.getComparisonType()));
+        }
+
+        res1 = or(AList5, AList6, AList7, AList8);
+        flatten = RestrictionOptimizer.optimize(res1);
+        Assert.assertEquals(((LogicalRestriction) flatten).getRestrictions().size(), 2); // one of them is not null
+        for (Restriction r: ((LogicalRestriction) flatten).getRestrictions()) {
+            Bucket bkt = ((BucketRestriction) r).getBkt();
+            Assert.assertTrue(IS_NOT_NULL.equals(bkt.getComparisonType()) || IN_COLLECTION.equals(bkt.getComparisonType()));
+        }
     }
 
     @Test(groups = "unit", dataProvider = "nullTestData")
@@ -161,9 +204,17 @@ public class RestrictionOptimizerUnitTestNG {
     }
 
     private static BucketRestriction listBucket(int idx) {
-        ComparisonType operator = (idx <= 2) ? ComparisonType.IN_COLLECTION : ComparisonType.NOT_IN_COLLECTION;
+        ComparisonType operator = (idx <= 2) ? IN_COLLECTION : ComparisonType.NOT_IN_COLLECTION;
         List<Object> vals = Arrays.asList(String.valueOf(idx), String.valueOf(idx * 10), String.valueOf(idx * 100));
         Bucket bucket = Bucket.valueBkt(operator, vals);
+        BusinessEntity entity = Account;
+        AttributeLookup attrLookup = new AttributeLookup(entity, entity.name().substring(0, 1));
+        return new BucketRestriction(attrLookup, bucket);
+    }
+
+    private static BucketRestriction listBucket(boolean in, Object... vals) {
+        ComparisonType operator = in ? IN_COLLECTION : ComparisonType.NOT_IN_COLLECTION;
+        Bucket bucket = Bucket.valueBkt(operator, Arrays.asList(vals));
         BusinessEntity entity = Account;
         AttributeLookup attrLookup = new AttributeLookup(entity, entity.name().substring(0, 1));
         return new BucketRestriction(attrLookup, bucket);
