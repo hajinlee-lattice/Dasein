@@ -266,7 +266,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<BusinessEntity, Map<String, Object>> expectedReport = new HashMap<>();
         expectedReport.put(BusinessEntity.Account, getUpsertAccountExpectedReport());
         expectedReport.put(BusinessEntity.Contact, getUpsertContactExpectedReport());
-        expectedReport.put(BusinessEntity.Product, getUpsertProductExpectedReport());
+        expectedReport.put(BusinessEntity.Product, getReplacedProductExpectedReport());
         expectedReport.put(BusinessEntity.Transaction, getReplacedTransactionExpectedReport());
         expectedReport.put(BusinessEntity.PurchaseHistory, getPurchaseHistoryExpectedReport());
 
@@ -318,11 +318,10 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     protected Map<String, Object> getProductExpectedReport() {
         Map<String, Object> productReport = new HashMap<>();
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID,
-                PRODUCT_ID_PA);
+                PRODUCT_ID_VDB_PA);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_HIERARCHY,
-                PRODUCT_HIERARCHY_PA);
-        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE,
-                PRODUCT_BUNDLE_PA);
+                0L);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE, 0L);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.WARN_MESSAGE,
                 PRODUCT_WARN_MESSAGE);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.ERROR_MESSAGE,
@@ -330,9 +329,10 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return productReport;
     }
 
-    protected Map<String, Object> getUpsertProductExpectedReport() {
+    protected Map<String, Object> getReplacedProductExpectedReport() {
         Map<String, Object> productReport = new HashMap<>();
-        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID, 0L);
+        productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_ID,
+                NEW_PRODUCT_ID_VDB_PA);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_HIERARCHY,
                 0L);
         productReport.put(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.name() + "_" + ReportConstants.PRODUCT_BUNDLE, 0L);
@@ -389,7 +389,6 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         map.put(BusinessEntity.Account, ACCOUNT_PA);
         map.put(BusinessEntity.Contact, CONTACT_PA);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PA);
-        map.put(BusinessEntity.ProductHierarchy, 0L);
         return map;
     }
 
@@ -398,7 +397,6 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         map.put(BusinessEntity.Account, ACCOUNT_PA + NEW_ACCOUNT_PA);
         map.put(BusinessEntity.Contact, CONTACT_PA + NEW_CONTACT_PA);
         map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PA);
-        map.put(BusinessEntity.ProductHierarchy, 0L);
         return map;
     }
 

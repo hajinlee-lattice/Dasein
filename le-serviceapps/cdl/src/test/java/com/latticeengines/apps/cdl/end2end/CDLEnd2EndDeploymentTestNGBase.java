@@ -354,6 +354,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     // Number of product id after ProcessAccount test
     static final Long PRODUCT_ID_PA = 40L;
+    // Number of product id after ProcessLegacy test for VDB
+    static final Long PRODUCT_ID_VDB_PA = 10L;
+    // Number of product id after ProcessLegacy test for VDB after new import
+    static final Long NEW_PRODUCT_ID_VDB_PA = 5L;
     // Number of product hierarchy after ProcessAccount test
     static final Long PRODUCT_HIERARCHY_PA = 5L;
     // Number of product bundle after ProcessAccount test
