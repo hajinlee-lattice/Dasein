@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -53,10 +54,12 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
         attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), new HashSet<>());
         attributeSet.setAttributesMap(attributesMap);
         attributeSetEntityMgr.updateAttributeSet(attributeSet);
+        SleepUtils.sleep(500l);
         attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
         verifyAttributeSet(attributeSet, attributeSet.getName(), displayName2, accountAttributes, new HashSet<>());
         assertEquals(attributeSetEntityMgr.findAll().size(), 1);
         attributeSetEntityMgr.deleteByName(attributeSet.getName());
+        SleepUtils.sleep(500l);
         assertEquals(attributeSetEntityMgr.findAll().size(), 0);
     }
 
