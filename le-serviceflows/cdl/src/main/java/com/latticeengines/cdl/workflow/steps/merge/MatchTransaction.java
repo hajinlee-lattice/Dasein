@@ -68,6 +68,9 @@ public class MatchTransaction extends BaseSingleEntityMergeImports<ProcessTransa
                         getConsolidateDataTxmfrConfig(false, true, true), null, ETLEngineLoad.LIGHT,
                         convertedRematchTableNames, steps.size() - 1);
                 steps.add(mergeImportAndBatchStore);
+                // If has rematch fake imports, filter out those columns after concat all imports
+                TransformationStepConfig filterImports = filterColumnsFromImports(steps.size() - 1);
+                steps.add(filterImports);
             }
             TransformationStepConfig matchImportAndBatchStore = matchTransaction(steps.size() - 1,
                     matchTargetTablePrefix, convertedRematchTableNames);
