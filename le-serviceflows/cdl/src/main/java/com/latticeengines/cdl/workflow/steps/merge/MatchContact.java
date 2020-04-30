@@ -125,6 +125,9 @@ public class MatchContact extends BaseSingleEntityMergeImports<ProcessContactSte
             steps.add(mergeBatchStore);
             TransformationStepConfig concatenateBatchStoreContactName = concatenateContactName(steps.size() - 1, null);
             steps.add(concatenateBatchStoreContactName);
+            // If has rematch fake imports, filter out those columns after concat all imports
+            TransformationStepConfig filterImports = filterColumnsFromImports(steps.size() - 1);
+            steps.add(filterImports);
         }
         TransformationStepConfig entityMatch = matchContact(steps.size() - 1, matchTargetTablePrefix,
                 convertedRematchTableNames);

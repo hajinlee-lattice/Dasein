@@ -67,6 +67,9 @@ public class MatchAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
                 TransformationStepConfig mergeSystemBatchStoreAndImport = concatImports(null, preProcessFlds.getLeft(),
                         preProcessFlds.getRight(), convertedRematchTableNames, steps.size() - 1);
                 steps.add(mergeSystemBatchStoreAndImport);
+                // If has rematch fake imports, filter out those columns after concat all imports
+                TransformationStepConfig filterImports = filterColumnsFromImports(steps.size() - 1);
+                steps.add(filterImports);
             }
         } else {
             TransformationStepConfig merge = dedupAndConcatImports(InterfaceName.AccountId.name());
