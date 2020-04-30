@@ -3,6 +3,7 @@ package com.latticeengines.apps.dcp.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -80,8 +81,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<Project> getAllProject(String customerSpace) {
-        return projectEntityMgr.findAll();
+    public List<ProjectDetails> getAllProject(String customerSpace) {
+        List<Project> projectList = projectEntityMgr.findAll();
+        return projectList.stream().map(project-> getProjectDetails(customerSpace, project)).collect(Collectors.toList());
     }
 
     @Override

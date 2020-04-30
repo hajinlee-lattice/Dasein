@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.transaction.{ProductStatus, ProductType}
 import com.latticeengines.domain.exposed.spark.cdl.{MergeProductConfig, MergeProductReport}
 import com.latticeengines.domain.exposed.util.ProductUtils
-import com.latticeengines.spark.aggregation.{MergeAnalyticProductAggregation, DedupBundleProductAggregation, DedupHierarchyProductAggregation, MergeSpendingProductAggregation}
+import com.latticeengines.spark.aggregation.{DedupBundleProductAggregation, DedupHierarchyProductAggregation, MergeAnalyticProductAggregation, MergeSpendingProductAggregation}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
@@ -193,11 +193,18 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
 
     // ProductBundle is not null, then use it as the Bundle product's name
     private def filterOldAnalytic(prods: DataFrame): DataFrame = {
-        prods.filter(col(Type) === ProductType.Analytic.name)
-                .withColumnRenamed(ProductId, Id)
-                .withColumn(Priority, lit(3).cast(IntegerType))
-                .withColumn(Status, lit(ProductStatus.Obsolete.name))
-                .select(Id, BundleId, Description, Bundle, Priority, Status)
+        val filtered = prods.filter(col(Type) === ProductType.Analytic.name)
+        val withId = if (filtered.columns.contains(Id) && filtered.columns.contains(ProductId)) {
+            filtered.withColumn(Id, coalesce(col(Id), col(ProductId)))
+        } else if (filtered.columns.contains(ProductId)) {
+            filtered.withColumnRenamed(ProductId, Id)
+        } else {
+            filtered
+        }
+        withId
+          .withColumn(Priority, lit(3).cast(IntegerType))
+          .withColumn(Status, lit(ProductStatus.Obsolete.name))
+          .select(Id, BundleId, Description, Bundle, Priority, Status)
     }
 
     private def mergeAnalytic(prods: DataFrame): (DataFrame, DataFrame) = {

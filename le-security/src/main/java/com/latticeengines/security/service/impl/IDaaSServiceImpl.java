@@ -160,7 +160,13 @@ public class IDaaSServiceImpl implements IDaaSService {
             try {
                 RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
                 user = retryTemplate.execute(ctx -> {
-                    try (PerformanceTimer timer = new PerformanceTimer("Check user detail in IDaaS.")) {
+                    if (ctx.getRetryCount() > 0) {
+                        log.info("Attempt={} retrying to get IDaaS user for {}", ctx.getRetryCount() + 1,
+                                email, ctx.getLastThrowable());
+                    }
+                    try (PerformanceTimer timer =
+                                 new PerformanceTimer(String.format("Check user detail %s in IDaaS.", email))) {
+                        log.info("sending request to get IDaaS user {}", email);
                         ResponseEntity<IDaaSUser> response = restTemplate.getForEntity(userUri(email), IDaaSUser.class);
                         return response.getBody();
                     } catch (HttpClientErrorException.Unauthorized e) {
@@ -223,7 +229,13 @@ public class IDaaSServiceImpl implements IDaaSService {
             try {
                 RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
                 returnedUser = retryTemplate.execute(ctx -> {
-                    try (PerformanceTimer timer = new PerformanceTimer("create user in IDaaS.")) {
+                    if (ctx.getRetryCount() > 0) {
+                        log.info("Attempt={} retrying to create IDaaS user for {}", ctx.getRetryCount() + 1, email,
+                                ctx.getLastThrowable());
+                    }
+                    try (PerformanceTimer timer =
+                                 new PerformanceTimer(String.format("create user %s in IDaaS.", email))) {
+                        log.info("sending request to create IDaaS user {}", email);
                         ResponseEntity<IDaaSUser> responseEntity = restTemplate.postForEntity(createUserUri(),
                                 user, IDaaSUser.class);
                         return responseEntity.getBody();
@@ -251,7 +263,13 @@ public class IDaaSServiceImpl implements IDaaSService {
             try {
                 RetryTemplate retryTemplate = RetryUtils.getRetryTemplate(3);
                 response = retryTemplate.execute(ctx -> {
-                    try (PerformanceTimer timer = new PerformanceTimer("add product access to user.")){
+                    if (ctx.getRetryCount() > 0) {
+                        log.info("Attempt={} retrying to add product access to IDaaS user {}", ctx.getRetryCount() + 1,
+                                email, ctx.getLastThrowable());
+                    }
+                    try (PerformanceTimer timer =
+                                 new PerformanceTimer(String.format("add product access to user %s.", email))) {
+                        log.info("sending request to add product access to IDaaS user {}", email);
                         HttpEntity<ProductRequest> entity = new HttpEntity<>(request);
                         ResponseEntity<IDaaSResponse> responseEntity =
                                 restTemplate.exchange(addProductUri(email), HttpMethod.PUT, entity,

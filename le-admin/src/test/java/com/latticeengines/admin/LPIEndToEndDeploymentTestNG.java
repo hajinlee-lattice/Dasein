@@ -31,7 +31,6 @@ import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponent;
 import com.latticeengines.admin.tenant.batonadapter.pls.PLSComponentDeploymentTestNG;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.admin.SpaceConfiguration;
@@ -134,13 +133,14 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testVboEnd2End() throws Exception {
-        provisionEndToEndVboTestTenants();
+        String subNumber = String.valueOf(System.currentTimeMillis());
+        provisionEndToEndVboTestTenants(subNumber);
         log.info("Verify installation");
         verifyZKState();
         verifyPLSTenantExists();
         verifyIDaasUserExists();
 
-        testExistingSubNumberViolation();
+        testExistingSubNumberViolation(subNumber);
 
         log.info("Uninstall again with wiping out ZK.");
         deleteTenant(contractId, tenantId);
@@ -175,32 +175,23 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         return req;
     }
 
-    private void provisionEndToEndVboTestTenants() {
+    private void provisionEndToEndVboTestTenants(String subNumber) {
         String url = getRestHostPort() + "/admin/tenants/vboadmin";
-        VboRequest req = generateVBORequest("1234");
+        VboRequest req = generateVBORequest(subNumber);
 
         VboResponse result = restTemplate.postForObject(url, req, VboResponse.class);
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getStatus(), "success");
-        Assert.assertNotNull(result.getTenantName());
-
-        tenantId = result.getTenantName();
-        contractId = tenantId;
 
     }
 
-    private void testExistingSubNumberViolation() {
+    private void testExistingSubNumberViolation(String subNumber) {
         // test for vbo request
-        VboRequest request = generateVBORequest("1234");
+        VboRequest request = generateVBORequest(subNumber);
         VboResponse result = restTemplate.postForObject(getRestHostPort() + "/admin/tenants/vboadmin",
                 request, VboResponse.class);
         Assert.assertNotNull(result);
         Assert.assertEquals(result.getStatus(), "failed");
-        Assert.assertNotNull(result.getTenantName());
-        request = generateVBORequest("5678");
-        result = restTemplate.postForObject(getRestHostPort() + "/admin/tenants/vboadmin",
-                request, VboResponse.class);
-        System.out.println(JsonUtils.pprint(result));
     }
 
     // ==================================================
