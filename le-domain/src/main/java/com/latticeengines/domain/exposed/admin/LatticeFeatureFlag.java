@@ -12,6 +12,7 @@ public enum LatticeFeatureFlag {
     PROTOTYPE_FEATURE("PrototypeFeature", "Allows prototype features"), //
 
     TEAM_FEATURE("TeamFeature", "Allows team features"), //
+    CONFIGURABLE_SEGMENT_EXPORT("ConfigurableSegmentExport", "Allows attribute set features"), //
 
     DANTE("Dante", "Dante"), //
     ALLOW_PIVOT_FILE("AllowPivotFile", "Allow pivot file"), //
