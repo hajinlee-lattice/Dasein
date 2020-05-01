@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +81,8 @@ public class CuratedContactAttributes
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         Map<String, String> lastActivityTables = getMapObjectFromContext(LAST_ACTIVITY_DATE_TABLE_NAME, String.class,
                 String.class);
-        String contactLastActivityTempTableName = lastActivityTables.getOrDefault(BusinessEntity.Contact.name(), "");
+        String contactLastActivityTempTableName = MapUtils.emptyIfNull(lastActivityTables)
+                .getOrDefault(BusinessEntity.Contact.name(), "");
 
         if (StringUtils.isBlank(contactLastActivityTempTableName)) {
             log.warn("No temp table for contact activity date found, skipping step");
