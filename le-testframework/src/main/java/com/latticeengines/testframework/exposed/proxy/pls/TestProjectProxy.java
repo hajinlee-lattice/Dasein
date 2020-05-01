@@ -33,9 +33,9 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         return post("createProject", url, request, ProjectDetails.class);
     }
 
-    public List<Project> getAllProjects() {
+    public List<ProjectDetails> getAllProjects() {
         List<?> raw = get("getAllProjects", constructUrl("/list"), List.class);
-        return JsonUtils.convertList(raw, Project.class);
+        return JsonUtils.convertList(raw, ProjectDetails.class);
     }
 
     public ProjectDetails getProjectByProjectId(String projectId) {
