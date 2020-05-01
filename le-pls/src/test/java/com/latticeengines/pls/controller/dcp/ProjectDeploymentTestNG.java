@@ -34,16 +34,16 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         attachProtectedProxy(testProjectProxy);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testCreateDCPProjectWithProjectId() throws Exception {
+    @Test(groups = "deployment")
+    public void testCreateDCPProjectWithProjectId() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithProjectId(DISPLAY_NAME, PROJECT_ID, Project.ProjectType.Type1);
         assertNotNull(projectDetail);
         assertEquals(projectDetail.getProjectId(), PROJECT_ID);
         testProjectProxy.deleteProject(PROJECT_ID);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testCreateDCPProjectWithOutProjectId() throws Exception {
+    @Test(groups = "deployment")
+    public void testCreateDCPProjectWithOutProjectId() {
         ProjectDetails projectDetail = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail);
         assertEquals(projectDetail.getProjectDisplayName(), DISPLAY_NAME);
@@ -54,14 +54,14 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         Assert.assertEquals(projectDetail.getDeleted(), Boolean.TRUE);
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testGetAllDCPProject() throws Exception {
+    @Test(groups = "deployment")
+    public void testGetAllDCPProject() {
         ProjectDetails projectDetail1 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail1);
         ProjectDetails projectDetail2 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail2);
 
-        List<Project> projectList = testProjectProxy.getAllProjects();
+        List<ProjectDetails> projectList = testProjectProxy.getAllProjects();
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         Assert.assertEquals(projectList.size(), 4);
 
