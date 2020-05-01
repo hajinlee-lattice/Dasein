@@ -35,10 +35,10 @@ import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 @Component("inputFileValidator")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class InputFileValidator extends BaseReportStep<InputFileValidatorConfiguration> {
-    private static final Logger log = LoggerFactory.getLogger(InputFileValidator.class);
-    public static final long CATALOG_RECORDS_LIMIT = 10L;
 
-    private static final long GENERAL_RECORDS_LIMIT = 10000000L;
+    private static final Logger log = LoggerFactory.getLogger(InputFileValidator.class);
+
+    public static final long CATALOG_RECORDS_LIMIT = 10L;
 
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
@@ -73,7 +73,6 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
             log.warn(String.format("Avro path is empty for applicationId=%s, tenantId=%s", applicationId, tenantId));
             return;
         }
-        checkImportedRecordsExceedLimit(eaiImportJobDetail);
         BusinessEntity entity = configuration.getEntity();
         boolean enableEntityMatch = configuration.isEnableEntityMatch();
         log.info(String.format("Begin to validate data with entity %s and entity match %s.", entity.name(),
@@ -134,16 +133,6 @@ public class InputFileValidator extends BaseReportStep<InputFileValidatorConfigu
         super.execute();
         // make sure report first, then fail work flow if necessary
         failWorkflowIfNeeded(entity, errorLineInValidationStep, totalFailed, totalRows, entityValidationSummary);
-    }
-
-    private void checkImportedRecordsExceedLimit(EaiImportJobDetail eaiImportJobDetail) {
-        List<String> processedRecords = eaiImportJobDetail.getPRDetail();
-        if (CollectionUtils.size(processedRecords) > 0) {
-            long totalRecords = processedRecords.stream().mapToLong(Long::parseLong).sum();
-            if (totalRecords > GENERAL_RECORDS_LIMIT) {
-                throw new LedpException(LedpCode.LEDP_40079);
-            }
-        }
     }
 
     private void failWorkflowIfNeeded(BusinessEntity entity, long errorLineInValidationStep, long totalFailed,
