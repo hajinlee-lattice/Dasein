@@ -381,7 +381,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         return ImmutableMap.of(//
                 BusinessEntity.Account, ACCOUNT_PA + NEW_ACCOUNT_PA, //
                 BusinessEntity.Contact, CONTACT_PA + NEW_CONTACT_PA, //
-                BusinessEntity.Product, BATCH_STORE_PRODUCT_PA);
+                BusinessEntity.Product, NEW_BATCH_STORE_PRODUCT_PA);
     }
 
     protected Map<BusinessEntity, Long> getExpectedServingStoreCounts() {
@@ -396,7 +396,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Map<BusinessEntity, Long> map = new HashMap<>();
         map.put(BusinessEntity.Account, ACCOUNT_PA + NEW_ACCOUNT_PA);
         map.put(BusinessEntity.Contact, CONTACT_PA + NEW_CONTACT_PA);
-        map.put(BusinessEntity.Product, SERVING_STORE_PRODUCTS_PA);
+        map.put(BusinessEntity.Product, NEW_SERVING_STORE_PRODUCTS_PA);
         return map;
     }
 

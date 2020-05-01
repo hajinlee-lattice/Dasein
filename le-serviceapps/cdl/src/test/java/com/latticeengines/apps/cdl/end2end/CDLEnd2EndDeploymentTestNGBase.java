@@ -373,10 +373,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of product hierarchy in serving store after ProcessTransaction
     // test
     static final Long SERVING_STORE_PRODUCT_HIERARCHIES_PT = 20L;
-    // Number of products in batch store after ProcessLegacy test
+    // Number of products in batch store after first PA ProcessLegacy test
     static final Long BATCH_STORE_PRODUCT_PA = 10L;
-    // Number of products in serving store after ProcessLegacy test
+    // Number of products in batch store after second PA ProcessLegacy test
+    static final Long NEW_BATCH_STORE_PRODUCT_PA = 15L;
+    // Number of products in serving store after first PA ProcessLegacy test
     static final Long SERVING_STORE_PRODUCTS_PA = 10L;
+    // Number of products in serving store after second PA ProcessLegacy test
+    static final Long NEW_SERVING_STORE_PRODUCTS_PA = 5L;
 
     /* Expected segment result */
 
