@@ -26,29 +26,47 @@ public class S3ChannelConfig implements ChannelConfig {
     @JsonProperty("includeExportAttributes")
     private boolean includeExportAttributes = false;
 
-    public Long getAccountLimit() { return accountLimit; }
+    public Long getAccountLimit() {
+        return accountLimit;
+    }
 
-    public void setAccountLimit(Long accountLimit) { this.accountLimit = accountLimit; }
-
-    @Override
-    public String getAudienceId() { return ""; }
-
-    @Override
-    public void setAudienceId(String audienceId) { }
+    public void setAccountLimit(Long accountLimit) {
+        this.accountLimit = accountLimit;
+    }
 
     @Override
-    public String getAudienceName() { return ""; }
+    public String getAudienceId() {
+        return "";
+    }
 
     @Override
-    public void setAudienceName(String audienceName) { }
+    public void setAudienceId(String audienceId) {
+    }
 
-    public void setAudienceType(AudienceType audienceType) { this.audienceType = audienceType; }
+    @Override
+    public String getAudienceName() {
+        return "";
+    }
 
-    public String getS3CampaignExportDir() { return s3CampaignExportDir; }
+    @Override
+    public void setAudienceName(String audienceName) {
+    }
 
-    public void setS3CampaignExportDir(String s3CampaignExportDir) { this.s3CampaignExportDir = s3CampaignExportDir; }
+    public void setAudienceType(AudienceType audienceType) {
+        this.audienceType = audienceType;
+    }
 
-    public boolean isIncludeExportAttributes() { return includeExportAttributes; }
+    public String getS3CampaignExportDir() {
+        return s3CampaignExportDir;
+    }
+
+    public void setS3CampaignExportDir(String s3CampaignExportDir) {
+        this.s3CampaignExportDir = s3CampaignExportDir;
+    }
+
+    public boolean isIncludeExportAttributes() {
+        return includeExportAttributes;
+    }
 
     public void setIncludeExportAttributes(boolean includeExportAttributes) {
         this.includeExportAttributes = includeExportAttributes;
@@ -56,30 +74,46 @@ public class S3ChannelConfig implements ChannelConfig {
 
     @Override
     @JsonProperty("suppressAccountsWithoutContacts")
-    public boolean isSuppressAccountsWithoutContacts() { return false; }
+    public boolean isSuppressAccountsWithoutContacts() {
+        return false;
+    }
 
     @Override
     @JsonProperty("suppressContactsWithoutEmails")
-    public boolean isSuppressContactsWithoutEmails() { return false; }
+    public boolean isSuppressContactsWithoutEmails() {
+        return false;
+    }
 
     @Override
     @JsonProperty("suppressAccountsWithoutLookupId")
-    public boolean isSuppressAccountsWithoutLookupId() { return false; }
+    public boolean isSuppressAccountsWithoutLookupId() {
+        return false;
+    }
 
     @Override
-    public CDLExternalSystemName getSystemName() { return systemName; }
+    public CDLExternalSystemName getSystemName() {
+        return systemName;
+    }
 
     @Override
     @JsonProperty("audienceType")
     public AudienceType getAudienceType() {
-        if(audienceType == null){
-            audienceType=AudienceType.CONTACTS;
+        if (audienceType == null) {
+            audienceType = AudienceType.CONTACTS;
         }
         return audienceType;
     }
 
     @Override
-    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) { return false; }
+    public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
+        if (!(channelConfig instanceof S3ChannelConfig)) {
+            return false;
+        }
+        S3ChannelConfig updatedConfig = (S3ChannelConfig) channelConfig;
+
+        return (this.audienceType == null ? updatedConfig.audienceType != null //
+                : !this.audienceType.equals(updatedConfig.audienceType));
+    }
 
     @Override
     public void populateLaunchFromChannelConfig(PlayLaunch playLaunch) {
