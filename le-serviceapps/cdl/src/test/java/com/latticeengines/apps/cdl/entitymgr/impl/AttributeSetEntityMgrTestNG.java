@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,13 +12,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -48,19 +50,26 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
         AttributeSet attributeSet = createAttributeSet(displayName);
         attributeSetEntityMgr.createAttributeSet(attributeSet);
         attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
+        String attributeSetName = attributeSet.getName();
         verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, contactAttributes);
         attributeSet.setDisplayName(displayName2);
         Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
         attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), new HashSet<>());
         attributeSet.setAttributesMap(attributesMap);
         attributeSetEntityMgr.updateAttributeSet(attributeSet);
-        SleepUtils.sleep(500l);
-        attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
-        verifyAttributeSet(attributeSet, attributeSet.getName(), displayName2, accountAttributes, new HashSet<>());
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            AttributeSet attributeSet2 = attributeSetEntityMgr.findByName(attributeSetName);
+            verifyAttributeSet(attributeSet2, attributeSet2.getName(), displayName2, accountAttributes, new HashSet<>());
+            return true;
+        });
         assertEquals(attributeSetEntityMgr.findAll().size(), 1);
         attributeSetEntityMgr.deleteByName(attributeSet.getName());
-        SleepUtils.sleep(500l);
-        assertEquals(attributeSetEntityMgr.findAll().size(), 0);
+        retry.execute(context -> {
+            assertEquals(attributeSetEntityMgr.findAll().size(), 0);
+            return true;
+        });
     }
 
     private AttributeSet createAttributeSet(String displayName) {
