@@ -27,7 +27,6 @@ import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.Path;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityBookkeeping;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -49,7 +48,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
     private DataCollectionProxy dataCollectionProxy;
 
     @Value("${cdl.activity.quota}")
-    private String defaultQuotaStr;
+    private long defaultQuota;
 
     static final String BEAN_NAME = "buildRawActivityStream";
 
@@ -66,8 +65,7 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
 
     private String evaluationDate;
     private Integer evaluationDateId;
-    private Map<String, Long> defaultQuotaMap; // Month/Week/Day -> count
-    private Map<String, Map<String, Long>> tenantOverride; // streamId -> quotaMap
+    private Map<String, Long> tenantOverride; // streamId -> count
 
     @Override
     protected void initializeConfiguration() {
@@ -139,7 +137,6 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
 
     private void verifyImportLimit() {
         DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        defaultQuotaMap = getDefaultQuotaMap();
         tenantOverride = getTenantOverride();
         evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
         evaluationDateId = DateTimeUtils.dateToDayPeriod(evaluationDate);
@@ -154,17 +151,10 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
         putObjectInContext(CDL_COLLECTION_STATUS, status);
     }
 
-    private Map<String, Long> getDefaultQuotaMap() {
-        TypeReference<Map<String, Long>> quotaMapTypeRef = new TypeReference<Map<String, Long>>() {
-        };
-        log.info("Default quota: {}", defaultQuotaStr);
-        return JsonUtils.deserializeByTypeRef(defaultQuotaStr, quotaMapTypeRef);
-    }
-
-    private Map<String, Map<String, Long>> getTenantOverride() {
+    private Map<String, Long> getTenantOverride() {
         Camille camille = CamilleEnvironment.getCamille();
         String podId = CamilleEnvironment.getPodId();
-        TypeReference<Map<String, Map<String, Long>>> tenantOverrideTypeRef = new TypeReference<Map<String, Map<String, Long>>>() {
+        TypeReference<Map<String, Long>> tenantOverrideTypeRef = new TypeReference<Map<String, Long>>() {
         };
         try {
             Path path = PathBuilder.buildTenantActivityUploadQuotaConfigPath(podId, customerSpace);
@@ -184,39 +174,21 @@ public class BuildRawActivityStream extends BaseActivityStreamStep<ProcessActivi
 
     private void verifyStreamImportLimit(String streamId, Map<Integer, Long> records) {
         Integer lastMonthLower = DateTimeUtils.subtractDays(evaluationDateId, 29);
-        Integer lastWeekLower = DateTimeUtils.subtractDays(evaluationDateId, 6);
 
-        Long monthCount = getRecordsCount(records, lastMonthLower);
-        Long weekCount = getRecordsCount(records, lastWeekLower);
-        Long dayCount = getRecordsCount(records, evaluationDateId);
+        Long existingCount = getRecordsCount(records, lastMonthLower);
         Long importedCount = getImportCount();
 
         log.info("Verifying imported rows count for stream {} doesn't exceed limit...", streamId);
-        log.info("Uploaded {} records in this month ({} - {})", monthCount, DateTimeUtils.dayPeriodToDate(lastMonthLower), evaluationDate);
-        log.info("Uploaded {} records in this week ({} - {})", weekCount, DateTimeUtils.dayPeriodToDate(lastWeekLower), evaluationDate);
-        log.info("Uploaded {} records today (not including new imports)", dayCount);
+        log.info("Uploaded {} records in total ({} - {})", existingCount, DateTimeUtils.dayPeriodToDate(lastMonthLower), evaluationDate);
         log.info("Imported {} new records", importedCount);
 
-        Map<String, Long> quota = defaultQuotaMap;
+        long totalLimit = defaultQuota;
         if (tenantOverride != null && tenantOverride.containsKey(streamId)) {
-            log.info("Found tenant override quota for stream.");
-            quota.putAll(tenantOverride.get(streamId));
+            totalLimit = tenantOverride.get(streamId);
+            log.info("Found tenant override quota for stream: {}", totalLimit);
         }
-        log.info("Using quota {}", quota);
-        Long monthlyLimit = quota.get(Template.Month.name());
-        Long weeklyLimit = quota.get(Template.Week.name());
-        Long dailyLimit = quota.get(Template.Day.name());
-        Long totalLimit = quota.get("Total");
-        if (monthCount + importedCount > monthlyLimit) {
-            throw new IllegalStateException(String.format("Exceeds monthly quota of %s", monthlyLimit));
-        }
-        if (weekCount + importedCount > weeklyLimit) {
-            throw new IllegalStateException(String.format("Exceeds weekly quota of %s", weeklyLimit));
-        }
-        if (dayCount + importedCount > dailyLimit) {
-            throw new IllegalStateException(String.format("Exceeds daily quota of %s", dailyLimit));
-        }
-        if (monthCount + importedCount >totalLimit) {
+        log.info("Using quota for stream{}: {}", streamId, totalLimit);
+        if (existingCount + importedCount > totalLimit) {
             throw new IllegalStateException(String.format("Exceeds total row count quota of %s", totalLimit));
         }
         updateBookkeeping(records, importedCount);
