@@ -98,7 +98,7 @@ public class GoogleChannelConfig implements ChannelConfig {
 
     @Override
     public boolean shouldResetDeltaCalculations(ChannelConfig channelConfig) {
-        if (!(channelConfig instanceof FacebookChannelConfig)) {
+        if (!(channelConfig instanceof GoogleChannelConfig)) {
             return false;
         }
         GoogleChannelConfig updatedConfig = (GoogleChannelConfig) channelConfig;
@@ -118,8 +118,7 @@ public class GoogleChannelConfig implements ChannelConfig {
         GoogleChannelConfig googleChannelConfig = this;
         GoogleChannelConfig newGoogleChannelConfig = (GoogleChannelConfig) config;
         googleChannelConfig.setContactLimit(newGoogleChannelConfig.getContactLimit());
-        googleChannelConfig
-                .setSuppressContactsWithoutEmails(newGoogleChannelConfig.isSuppressContactsWithoutEmails());
+        googleChannelConfig.setSuppressContactsWithoutEmails(newGoogleChannelConfig.isSuppressContactsWithoutEmails());
         googleChannelConfig.setAudienceId(newGoogleChannelConfig.getAudienceId());
         googleChannelConfig.setAudienceName(newGoogleChannelConfig.getAudienceName());
         googleChannelConfig.setFolderName(newGoogleChannelConfig.getFolderName());
