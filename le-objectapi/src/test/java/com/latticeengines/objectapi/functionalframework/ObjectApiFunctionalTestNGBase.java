@@ -82,8 +82,8 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
                         tblPathMap.put(tblName, path);
                     }
                 }
+                insertPurchaseHistory(attrRepo, version);
                 uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
-                insertPurchaseHistory(attrRepo);
             }
 
             for (TableRoleInCollection role : attrRepo.getTableNameMap().keySet()) {
@@ -96,7 +96,6 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
 
     private Map<TableRoleInCollection, String> readTablePaths(int version) {
         String downloadsDir = "downloads/" + version;
-        FileUtils.deleteQuietly(new File(downloadsDir));
         File downloadedFile = testArtifactService.downloadTestArtifact(ATTR_REPO_S3_DIR, //
                 String.valueOf(version), TABLEJSONS_S3_FILENAME);
         String zipFilePath = downloadedFile.getPath();
@@ -127,8 +126,8 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
         return pathMap;
     }
 
-    private void insertPurchaseHistory(AttributeRepository attrRepo) {
-        String downloadsDir = "downloads";
+    private void insertPurchaseHistory(AttributeRepository attrRepo, int version) {
+        String downloadsDir = "downloads/" +  version;
         TableRoleInCollection role = TableRoleInCollection.CalculatedPurchaseHistory;
         File tableJsonFile = new File(downloadsDir + File.separator + "TableJsons/" + role + ".json");
         try {
@@ -144,8 +143,7 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
     }
 
     private void uploadTablesToHdfs(CustomerSpace customerSpace, int version) {
-        String downloadsDir = "downloads";
-        FileUtils.deleteQuietly(new File(downloadsDir));
+        String downloadsDir = "downloads/" +  version;
         File downloadedFile = testArtifactService.downloadTestArtifact(ATTR_REPO_S3_DIR, //
                 String.valueOf(version), TABLES_S3_FILENAME);
         String zipFilePath = downloadedFile.getPath();
