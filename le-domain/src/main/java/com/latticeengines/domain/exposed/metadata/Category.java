@@ -26,18 +26,19 @@ public enum Category {
     ACCOUNT_ATTRIBUTES("My Attributes", 2), //
     CURATED_ACCOUNT_ATTRIBUTES("Curated Account Attributes", 3), //
     CONTACT_ATTRIBUTES("Contact Attributes", 4), //
-    PRODUCT_SPEND("Product Spend Profile", 5), //
-    INTENT("Intent", 6), //
-    WEBSITE_PROFILE("Website Profile", 7), //
-    TECHNOLOGY_PROFILE("Technology Profile", 8), //
-    ONLINE_PRESENCE("Online Presence", 9), //
-    GROWTH_TRENDS("Growth Trends", 10), //
-    WEBSITE_KEYWORDS("Website Keywords", 11), //
-    ACCOUNT_INFORMATION("Account Information", 12), //
-    LEAD_INFORMATION("Lead Information", 13), //
-    DEFAULT("Default", 14), //
-    AI_INSIGHTS("AI Insights", 15), //
-    WEB_VISIT_PROFILE("My Website Visits", 16) {
+    CURATED_CONTACT_ATTRIBUTES("Curated Contact Attributes", 5), //
+    PRODUCT_SPEND("Product Spend Profile", 6), //
+    INTENT("Intent", 7), //
+    WEBSITE_PROFILE("Website Profile", 8), //
+    TECHNOLOGY_PROFILE("Technology Profile", 9), //
+    ONLINE_PRESENCE("Online Presence", 10), //
+    GROWTH_TRENDS("Growth Trends", 11), //
+    WEBSITE_KEYWORDS("Website Keywords", 12), //
+    ACCOUNT_INFORMATION("Account Information", 13), //
+    LEAD_INFORMATION("Lead Information", 14), //
+    DEFAULT("Default", 15), //
+    AI_INSIGHTS("AI Insights", 16), //
+    WEB_VISIT_PROFILE("My Website Visits", 17) {
         @Override
         public FilterOptions getFilterOptions() {
             return WebVisitUtils.attrFilterOptions();

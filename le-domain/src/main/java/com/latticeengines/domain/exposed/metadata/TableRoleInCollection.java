@@ -75,6 +75,7 @@ public enum TableRoleInCollection {
         CalculatedCuratedContact.primaryKey = InterfaceName.ContactId;
         CalculatedCuratedContact.partitionKey = InterfaceName.AccountId;
         CalculatedCuratedContact.rangeKey = InterfaceName.ContactId;
+        CalculatedCuratedContact.distKey = InterfaceName.ContactId; // join to contact
 
         SortedContact.primaryKey = ConsolidatedContact.primaryKey;
         SortedContact.distKey = BucketedAccount.distKey;

@@ -11,6 +11,7 @@ import com.latticeengines.apps.cdl.mds.AccountAttrsDecoratorFac;
 import com.latticeengines.apps.cdl.mds.ActivityMetricDecoratorFac;
 import com.latticeengines.apps.cdl.mds.ContactAttrsDecoratorFac;
 import com.latticeengines.apps.cdl.mds.CuratedAttrsMetadataStore;
+import com.latticeengines.apps.cdl.mds.CuratedContactAttrsMetadataStore;
 import com.latticeengines.apps.cdl.mds.ExternalSystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.ImportSystemAttrsDecoratorFac;
 import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
@@ -49,7 +50,8 @@ public class SystemMetadataStoreImpl extends
                                     SpendAnalyticMetricsDecoratorFac activityMetricsDecorator, //
                                     RatingDisplayMetadataStore ratingDisplayMetadataStore, //
                                     ExternalSystemMetadataStore externalSystemMetadataStore, //
-                                    CuratedAttrsMetadataStore derivedAttrsMetadataStore,
+                                    CuratedAttrsMetadataStore derivedAttrsMetadataStore, //
+                                    CuratedContactAttrsMetadataStore curatedContactAttrsMetadataStore, //
                                     ActivityMetricDecoratorFac activityMetricDecorator) {
         super(rawSystemMetadataStore, //
                 getDecoratorChain(//
@@ -60,6 +62,7 @@ public class SystemMetadataStoreImpl extends
                         ratingDisplayMetadataStore, //
                         externalSystemMetadataStore, //
                         derivedAttrsMetadataStore, //
+                        curatedContactAttrsMetadataStore, //
                         activityMetricDecorator //
                 ));
     }
@@ -72,6 +75,7 @@ public class SystemMetadataStoreImpl extends
             RatingDisplayMetadataStore ratingDisplayMetadataStore, //
             ExternalSystemMetadataStore externalSystemMetadataStore, //
             CuratedAttrsMetadataStore curatedAttrsMetadataStore, //
+            CuratedContactAttrsMetadataStore curatedContactAttrsMetadataStore, //
             ActivityMetricDecoratorFac activityMetricDecorator) {
         DecoratorFactory<Namespace1<String>> ratingDisplayDecorator = //
                 MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
@@ -79,6 +83,8 @@ public class SystemMetadataStoreImpl extends
                 MdsDecoratorFactory.fromMds("LookupId", externalSystemMetadataStore);
         DecoratorFactory<Namespace2<String, DataCollection.Version>> curatedAttrsDecorator = //
                 MdsDecoratorFactory.fromMds("CuratedAttrs", curatedAttrsMetadataStore);
+        DecoratorFactory<Namespace2<String, DataCollection.Version>> curatedContactAttrsDecorator = //
+                MdsDecoratorFactory.fromMds("CuratedContactAttrs", curatedContactAttrsMetadataStore);
         Decorator apsAttrDecorator = new APSAttrsDecorator();
         Decorator postRenderDecorator = new SystemPostRenderDecorator();
         // order in sync with ChainedDecoratorFactory.project() below
@@ -91,6 +97,7 @@ public class SystemMetadataStoreImpl extends
                 apsAttrDecorator, //
                 ratingDisplayDecorator, //
                 curatedAttrsDecorator, //
+                curatedContactAttrsDecorator, //
                 activityMetricDecorator, //
                 postRenderDecorator //
         );
@@ -111,6 +118,9 @@ public class SystemMetadataStoreImpl extends
                 Namespace curatedNs = Namespace.as(//
                         BusinessEntity.CuratedAccount.equals(entity) ? tenantId : "", //
                         namespace.getCoord2());
+                Namespace curatedContactNs = Namespace.as(//
+                        BusinessEntity.CuratedContact.equals(entity) ? tenantId : "", //
+                        namespace.getCoord2());
                 Namespace activityMetricNs = Namespace.as(BusinessEntity.ACTIVITY_METRIC_SERVING_ENTITIES.contains(entity) //
                         ? tenantId : "");
                 Namespace lookupIdNs = Namespace.as(tenantId, entity);
@@ -124,6 +134,7 @@ public class SystemMetadataStoreImpl extends
                         Namespace0.NS, //
                         ratingNs, //
                         curatedNs, //
+                        curatedContactNs, //
                         activityMetricNs, //
                         Namespace0.NS //
                 );

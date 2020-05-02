@@ -183,7 +183,9 @@ public abstract class BaseFrontEndEntityResource {
         Restriction contactRestriction = (frontEndQuery.getContactRestriction() != null) ? //
                 frontEndQuery.getContactRestriction().getRestriction() : null;
         RestrictionUtils.cleanupBucketsInRestriction(accountRestriction);
+        RestrictionUtils.validateCentralEntity(accountRestriction, BusinessEntity.Account);
         RestrictionUtils.cleanupBucketsInRestriction(contactRestriction);
+        RestrictionUtils.validateCentralEntity(accountRestriction, BusinessEntity.Contact);
         List<BucketRestriction> invalidBkts = new ArrayList<>();
         try {
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(accountRestriction));

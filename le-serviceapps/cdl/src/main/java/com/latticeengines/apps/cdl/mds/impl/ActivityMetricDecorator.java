@@ -191,7 +191,6 @@ public class ActivityMetricDecorator implements Decorator {
             break;
         case ContactMarketingActivity:
             // TODO enable after we support new contact categories in segment/export
-            cm.disableGroup(Segment);
             cm.disableGroup(Enrichment);
             break;
             default:

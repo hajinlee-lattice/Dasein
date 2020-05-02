@@ -16,6 +16,9 @@ import org.testng.Assert;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
 import com.latticeengines.objectapi.service.TransactionService;
@@ -56,8 +59,17 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
         tenant.setName(attrRepo.getCustomerSpace().getTenantId());
         tenant.setPid(1L);
         MultiTenantContext.setTenant(tenant);
-        maxTransactionDate = transactionService.getMaxTransactionDate(DataCollection.Version.Blue);
-        log.info("Max txn date is " + maxTransactionDate);
+        if (hasTransactionDate()) {
+            maxTransactionDate = transactionService.getMaxTransactionDate(DataCollection.Version.Blue);
+            log.info("Max txn date is " + maxTransactionDate);
+        } else {
+            log.info("No transaction in this attr repo.");
+        }
+    }
+
+    private boolean hasTransactionDate() {
+        AttributeLookup attr = new AttributeLookup(BusinessEntity.Transaction, InterfaceName.TransactionDate.name());
+        return attrRepo.getColumnMetadata(attr) != null;
     }
 
     protected void mockDataCollectionProxy(QueryEvaluatorService queryEvaluatorService) {

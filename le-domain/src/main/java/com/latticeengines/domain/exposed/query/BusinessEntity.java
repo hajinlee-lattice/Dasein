@@ -5,6 +5,7 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.A
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedAccountAttribute;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedDepivotedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
@@ -74,29 +75,68 @@ public enum BusinessEntity implements GraphNode {
     // Activity Stream Serving Entities
     WebVisitProfile, Opportunity, AccountMarketingActivity, ContactMarketingActivity;
 
-    public static final Set<BusinessEntity> SEGMENT_ENTITIES = //
-            ImmutableSet.of(Account, Contact, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity,
-                    AccountMarketingActivity, ContactMarketingActivity);
-    public static final Set<BusinessEntity> EXPORT_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity,
-                    AccountMarketingActivity, ContactMarketingActivity);
-    public static final Set<BusinessEntity> TALKING_POINT_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity,
-                    AccountMarketingActivity, ContactMarketingActivity);
-    public static final Set<BusinessEntity> COMPANY_PROFILE_ACCOUNT_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity,
-                    AccountMarketingActivity, ContactMarketingActivity);
-    public static final Set<BusinessEntity> ACCOUNT_MATCH_ENTITIES = //
-            ImmutableSet.of(Account, PurchaseHistory, Rating, CuratedAccount, WebVisitProfile, Opportunity,
-                    AccountMarketingActivity, ContactMarketingActivity);
+    public static final Set<BusinessEntity> SEGMENT_ENTITIES = ImmutableSet.of(
+            Account, //
+            Contact, //
+            PurchaseHistory, //
+            Rating, //
+            CuratedContact, //
+            CuratedAccount, //
+            WebVisitProfile, //
+            Opportunity, //
+            AccountMarketingActivity, //
+            ContactMarketingActivity //
+    );
+    public static final Set<BusinessEntity> EXPORT_ACCOUNT_ENTITIES = ImmutableSet.of( //
+            Account, //
+            PurchaseHistory, //
+            Rating, //
+            CuratedAccount, //
+            WebVisitProfile, //
+            Opportunity, //
+            AccountMarketingActivity, //
+            ContactMarketingActivity //
+    );
+    public static final Set<BusinessEntity> TALKING_POINT_ACCOUNT_ENTITIES = ImmutableSet.of( //
+            Account, //
+            PurchaseHistory, //
+            Rating, //
+            CuratedAccount, //
+            WebVisitProfile, //
+            Opportunity, //
+            AccountMarketingActivity, //
+            ContactMarketingActivity //
+    );
+    public static final Set<BusinessEntity> COMPANY_PROFILE_ACCOUNT_ENTITIES = TALKING_POINT_ACCOUNT_ENTITIES;
+    public static final Set<BusinessEntity> ACCOUNT_MATCH_ENTITIES = ImmutableSet.of( //
+            Account, //
+            PurchaseHistory, //
+            Rating, //
+            CuratedAccount, //
+            WebVisitProfile, //
+            Opportunity, //
+            AccountMarketingActivity, //
+            ContactMarketingActivity //
+    );
     public static final Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
     public static final Set<BusinessEntity> MODELING_ENTITIES = ImmutableSet.of(Account, AnalyticPurchaseState);
-    public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME = //
-            ImmutableSet.of(PurchaseHistory, WebVisitProfile);
-    public static final Set<BusinessEntity> ACTIVITY_METRIC_SERVING_ENTITIES = ImmutableSet.of(WebVisitProfile,
-            Opportunity, AccountMarketingActivity, ContactMarketingActivity);
-    public static final Set<BusinessEntity> CAN_REPALCE_ENTITIES = ImmutableSet.of(Account, Contact, Product,
-            Transaction, ActivityStream);
+    public static final Set<BusinessEntity> ACTIVITY_METRIC_SERVING_ENTITIES = ImmutableSet.of( //
+            WebVisitProfile, //
+            Opportunity, //
+            AccountMarketingActivity, //
+            ContactMarketingActivity //
+    );
+    public static final Set<BusinessEntity> CAN_REPALCE_ENTITIES = ImmutableSet.of( //
+            Account, //
+            Contact, //
+            Product, //
+            Transaction, //
+            ActivityStream //
+    );
+    public static final Set<BusinessEntity> ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME = ImmutableSet.of( //
+            PurchaseHistory, //
+            WebVisitProfile //
+    );
 
     static {
         // Storage
@@ -125,6 +165,7 @@ public enum BusinessEntity implements GraphNode {
         DepivotedPurchaseHistory.setServingStore(CalculatedDepivotedPurchaseHistory);
 
         CuratedAccount.setServingStore(CalculatedCuratedAccountAttribute);
+        CuratedContact.setServingStore(CalculatedCuratedContact);
 
         AnalyticPurchaseState.setServingStore(TableRoleInCollection.AnalyticPurchaseState);
 
@@ -150,15 +191,13 @@ public enum BusinessEntity implements GraphNode {
         Account.addRelationship(PurchaseHistory, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
         Account.addRelationship(DepivotedPurchaseHistory, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(CuratedAccount, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
-
         Account.addRelationship(WebVisitProfile, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
-
         Account.addRelationship(Opportunity, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
+        Account.addRelationship(AccountMarketingActivity, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
 
         Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
-
+        Contact.addRelationship(CuratedContact, Cardinality.ONE_TO_ONE, InterfaceName.ContactId);
         Contact.addRelationship(ContactMarketingActivity, Cardinality.ONE_TO_ONE, InterfaceName.ContactId);
-        Account.addRelationship(AccountMarketingActivity, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
 
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
         Product.addRelationship(PurchaseHistory, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
@@ -260,6 +299,7 @@ public enum BusinessEntity implements GraphNode {
     public static BusinessEntity getCentralEntity(BusinessEntity entity) {
         switch (entity) {
         case Contact:
+        case CuratedContact:
         case ContactMarketingActivity:
             return Contact;
         case Account:
