@@ -101,6 +101,7 @@ public class AccountAttrsDecorator implements Decorator {
         // PLS-15406 setting for attributes corresponds to mappings in section
         // Unique ID, Other IDs, Match IDs, only enable for usage export
         if (InterfaceName.CustomerAccountId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
+            cm.setDisplayName("Account ID");
             cm.enableGroup(Enrichment);
             cm.disableGroup(TalkingPoint);
             cm.disableGroup(CompanyProfile);
