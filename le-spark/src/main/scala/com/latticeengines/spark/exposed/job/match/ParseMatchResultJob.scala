@@ -5,10 +5,10 @@ import com.latticeengines.domain.exposed.datacloud.`match`.MatchConstants.{INT_L
 import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import org.apache.spark.sql.functions.{col, lit}
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.{DataFrame, SparkSession, Row}
-import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.{DataFrame, SparkSession}
+
 import scala.collection.JavaConverters._
 
 class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
@@ -44,7 +44,8 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
     }
     val matchRate = computeMatchRate(spark, result)
     // finish
-    lattice.output = result :: matchRate ::Nil
+    lattice.outputStr = serializeJson(matchRate)
+    lattice.output = result :: Nil
   }
 
   def resolveConflictingFields(result: DataFrame): DataFrame = {
@@ -88,25 +89,15 @@ class ParseMatchResultJob extends AbstractSparkJob[ParseMatchResultJobConfig] {
     val reducedResult = matchResult.drop(dropAttrs:_*)
     sourceTable.join(reducedResult, Seq(joinKey))
   }
-  
-  def computeMatchRate(spark: SparkSession, result: DataFrame): DataFrame = {
+
+  def computeMatchRate(spark: SparkSession, result: DataFrame): Map[String, Long] = {
     val latticeAccountId = InterfaceName.LatticeAccountId.name
     val publicDomain = "IsPublicDomain"
-    val matchCount = 
+    val matchCount =
       if (result.columns.contains(latticeAccountId)) result.filter(col(latticeAccountId).isNotNull).count else 0
-    val publicDomainCount = 
+    val publicDomainCount =
       if (result.columns.contains(publicDomain)) result.filter(col(publicDomain).isNotNull && col(publicDomain) === true).count else 0
     val totalCount = result.count
-    val row = Row(matchCount, publicDomainCount, totalCount)
-    val schema = getMatchRateSchema()
-    val rows = Seq(row)
-    spark.createDataFrame(spark.sparkContext.parallelize(rows), schema)
-  }
-
-  private def getMatchRateSchema(): StructType = {
-    StructType(
-      StructField("MatchCount", LongType, nullable = true) ::
-      StructField("PublicDomainCount", LongType, nullable = true) ::
-      StructField("TotalCount", LongType, nullable = true) :: Nil)
+    Map("MatchCount" -> matchCount, "PublicDomainCount" -> publicDomainCount, "TotalCount" -> totalCount)
   }
 }

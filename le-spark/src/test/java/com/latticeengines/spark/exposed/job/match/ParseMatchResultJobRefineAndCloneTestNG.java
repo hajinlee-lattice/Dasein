@@ -3,6 +3,8 @@ package com.latticeengines.spark.exposed.job.match;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.apache.avro.generic.GenericRecord;
@@ -10,6 +12,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.serviceflows.core.spark.ParseMatchResultJobConfig;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
@@ -27,6 +31,7 @@ public class ParseMatchResultJobRefineAndCloneTestNG extends SparkJobFunctionalT
         return "RefineAndClone";
     }
 
+    private Consumer<String> outputVerifier;
     private Function<HdfsDataUnit, Boolean> verifier;
 
     @Test(groups = "functional")
@@ -36,6 +41,7 @@ public class ParseMatchResultJobRefineAndCloneTestNG extends SparkJobFunctionalT
         config.excludeDataCloudAttrs = true;
         SparkJobResult result = runSparkJob(ParseMatchResultJob.class, config);
         verifier = this::verifyExcludeDCAttrs;
+        outputVerifier = this::verifyExcludeOutput;
         verifyResult(result);
     }
 
@@ -46,6 +52,7 @@ public class ParseMatchResultJobRefineAndCloneTestNG extends SparkJobFunctionalT
         config.excludeDataCloudAttrs = false;
         SparkJobResult result = runSparkJob(ParseMatchResultJob.class, config);
         verifier = this::verifyNotExcludeDCAttrs;
+        outputVerifier = this::verifyNotExcludeOutput;
         verifyResult(result);
     }
 
@@ -67,6 +74,11 @@ public class ParseMatchResultJobRefineAndCloneTestNG extends SparkJobFunctionalT
         return Collections.singletonList(verifier);
     }
 
+    @Override
+    protected void verifyOutput(String output) {
+        outputVerifier.accept(output);
+    }
+
     private Boolean verifyExcludeDCAttrs(HdfsDataUnit target) {
         return verifyNumCols(target, 35);
     }
@@ -80,6 +92,16 @@ public class ParseMatchResultJobRefineAndCloneTestNG extends SparkJobFunctionalT
         int numCols = CollectionUtils.size(firstRecord.getSchema().getFields());
         Assert.assertEquals(numCols, expected);
         return true;
+    }
+
+    private void verifyExcludeOutput(String output) {
+        Map<String, Long> report = JsonUtils.deserialize(output, new TypeReference<Map<String, Long>>() {});
+        Assert.assertEquals(report.get("TotalCount"), Long.valueOf(101));
+    }
+
+    private void verifyNotExcludeOutput(String output) {
+        Map<String, Long> report = JsonUtils.deserialize(output, new TypeReference<Map<String, Long>>() {});
+        Assert.assertEquals(report.get("TotalCount"), Long.valueOf(101));
     }
 
 }
