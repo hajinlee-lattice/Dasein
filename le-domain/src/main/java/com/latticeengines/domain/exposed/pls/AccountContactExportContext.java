@@ -25,9 +25,6 @@ public class AccountContactExportContext implements Serializable {
     @JsonProperty("JoinKey")
     private String joinKey;
 
-    @JsonProperty("EntityMatchEnabled")
-    private boolean entityMatchEnabled;
-
     public AccountContactExportContext() {
         super();
         this.joinKey = DEFAULT_JOIN_KEY;
@@ -41,11 +38,4 @@ public class AccountContactExportContext implements Serializable {
         this.joinKey = joinKey;
     }
 
-    public boolean isEntityMatchEnabled() {
-        return entityMatchEnabled;
-    }
-
-    public void setEntityMatchEnabled(boolean entityMatchEnabled) {
-        this.entityMatchEnabled = entityMatchEnabled;
-    }
 }
