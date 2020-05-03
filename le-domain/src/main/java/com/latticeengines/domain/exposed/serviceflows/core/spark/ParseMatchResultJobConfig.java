@@ -28,11 +28,6 @@ public class ParseMatchResultJobConfig extends SparkJobConfig {
     public boolean joinInternalId;
 
     @Override
-    public int getNumTargets() {
-        return 2;
-    }
-
-    @Override
     @JsonProperty("Name")
     public String getName() {
         return NAME;
