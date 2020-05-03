@@ -1,7 +1,10 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
+
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -19,8 +22,12 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
@@ -124,6 +131,7 @@ public class CuratedContactAttributes
         String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.toString());
         String resultTableName = tenantId + "_" + NamingUtils.timestamp(TABLE_ROLE.name());
         Table resultTable = toTable(resultTableName, InterfaceName.ContactId.name(), result.getTargets().get(0));
+        enrichTableSchema(resultTable);
         metadataProxy.createTable(customerSpace.toString(), resultTableName, resultTable);
         dataCollectionProxy.upsertTable(customerSpace.toString(), resultTableName, TABLE_ROLE, inactive);
         exportToDynamo(resultTableName, TABLE_ROLE.getPartitionKey(), TABLE_ROLE.getRangeKey());
@@ -162,5 +170,26 @@ public class CuratedContactAttributes
             log.info("Found {} (role={}) in inactive version {}", name, role, inactive);
         }
         return tableName;
+    }
+
+    protected void enrichTableSchema(Table servingStoreTable) {
+        List<Attribute> attrs = servingStoreTable.getAttributes();
+        attrs.forEach(attr -> {
+            attr.setCategory(Category.CURATED_CONTACT_ATTRIBUTES);
+            attr.setSubcategory(null);
+            if (LastActivityDate.name().equals(attr.getName())) {
+                enrichDateAttribute(attr, LAST_ACTIVITY_DATE_DISPLAY_NAME, LAST_ACTIVITY_DATE_DESCRIPTION);
+            }
+        });
+    }
+
+    private void enrichDateAttribute(@NotNull Attribute attribute, @NotNull String displayName,
+                                     @NotNull String description) {
+        attribute.setCategory(Category.CURATED_CONTACT_ATTRIBUTES);
+        attribute.setSubcategory(null);
+        attribute.setDisplayName(displayName);
+        attribute.setDescription(description);
+        attribute.setLogicalDataType(LogicalDataType.Date);
+        attribute.setFundamentalType(FundamentalType.DATE.getName());
     }
 }

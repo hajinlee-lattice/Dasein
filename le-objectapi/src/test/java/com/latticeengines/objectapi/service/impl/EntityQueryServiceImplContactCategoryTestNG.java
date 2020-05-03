@@ -16,7 +16,6 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.objectapi.service.EntityQueryService;
-import com.latticeengines.objectapi.service.EventQueryService;
 
 public class EntityQueryServiceImplContactCategoryTestNG extends QueryServiceImplTestNGBase {
 
