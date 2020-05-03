@@ -1,8 +1,10 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Enrichment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
 
 import java.text.ParseException;
 import java.util.Collections;
@@ -129,8 +131,12 @@ public class ActivityMetricDecorator implements Decorator {
         }
 
         cm.enableGroup(Segment);
-        cm.enableGroup(Enrichment);
+        cm.disableGroup(Enrichment);
+        cm.disableGroup(TalkingPoint);
+        cm.disableGroup(CompanyProfile);
         cm.disableGroup(Model);
+        cm.setCanSegment(true);
+        cm.setCanEnrich(true);
         cm.setCanModel(false);
 
         try {
@@ -187,14 +193,11 @@ public class ActivityMetricDecorator implements Decorator {
                     streamsNeedSystemName.get().contains(group.getStream().getName()));
             break;
         case AccountMarketingActivity:
+        case ContactMarketingActivity:
             // do nothing atm
             break;
-        case ContactMarketingActivity:
-            // TODO enable after we support new contact categories in segment/export
-            cm.disableGroup(Enrichment);
-            break;
-            default:
-                log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
+        default:
+            log.warn("Unrecognized activity metrics entity {} for attribute {}", cm.getEntity(), cm.getAttrName());
         }
     }
 

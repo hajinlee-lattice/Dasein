@@ -94,7 +94,11 @@ public enum BusinessEntity implements GraphNode {
             CuratedAccount, //
             WebVisitProfile, //
             Opportunity, //
-            AccountMarketingActivity, //
+            AccountMarketingActivity //
+    );
+    public static final Set<BusinessEntity> EXPORT_CONTACT_ENTITIES = ImmutableSet.of( //
+            Contact, //
+            CuratedContact, //
             ContactMarketingActivity //
     );
     public static final Set<BusinessEntity> TALKING_POINT_ACCOUNT_ENTITIES = ImmutableSet.of( //

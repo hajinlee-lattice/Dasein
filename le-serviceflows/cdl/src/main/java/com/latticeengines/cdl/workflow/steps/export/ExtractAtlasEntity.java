@@ -307,19 +307,21 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private List<Lookup> getContactLookup() {
         List<List<ColumnMetadata>> columnMetadataList = new ArrayList<>();
         Arrays.stream(Category.values()).forEach(category -> columnMetadataList.add(new ArrayList<>()));
-        List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
         MutableBoolean hasAccountId = new MutableBoolean();
         MutableBoolean hasInternalAccountId = new MutableBoolean();
-        boolean hasContactId = false;
         String accountId = entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
         String internalAccountId = InterfaceName.AccountId.name();
         String contactId = entityMatchEnabled ? InterfaceName.CustomerContactId.name() : InterfaceName.ContactId.name();
-        for (ColumnMetadata cm : cms) {
-            determineAccountIdBoolValues(cm, hasAccountId, accountId, hasInternalAccountId, internalAccountId);
-            if (contactId.equals(cm.getAttrName())) {
-                hasContactId = true;
+        boolean hasContactId = false;
+        for (BusinessEntity entity : BusinessEntity.EXPORT_CONTACT_ENTITIES) {
+            List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
+            for (ColumnMetadata cm : cms) {
+                determineAccountIdBoolValues(cm, hasAccountId, accountId, hasInternalAccountId, internalAccountId);
+                if (contactId.equals(cm.getAttrName())) {
+                    hasContactId = true;
+                }
+                columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
             }
-            columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
         }
         if (!hasContactId) {
             addContactId(BusinessEntity.Contact, columnMetadataList, contactId);
@@ -381,7 +383,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         List<ColumnSelection.Predefined> groups = Collections.singletonList(ColumnSelection.Predefined.Enrichment);
         Map<BusinessEntity, List<ColumnMetadata>> schemaMap = new HashMap<>();
         Set<BusinessEntity> entitySet = new HashSet<>(BusinessEntity.EXPORT_ACCOUNT_ENTITIES);
-        entitySet.add(BusinessEntity.Contact);
+        entitySet.addAll(BusinessEntity.EXPORT_CONTACT_ENTITIES);
         for (BusinessEntity entity : entitySet) {
             List<ColumnMetadata> cms;
             if (StringUtils.isNotEmpty(atlasExport.getAttributeSetName())) {

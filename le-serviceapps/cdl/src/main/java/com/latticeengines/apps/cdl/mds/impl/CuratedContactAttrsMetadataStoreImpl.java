@@ -69,13 +69,13 @@ public class CuratedContactAttrsMetadataStoreImpl implements CuratedContactAttrs
                     return cm;
                 }
 
-                cm.disableGroup(ColumnSelection.Predefined.Segment); // disabled by default
+                cm.enableGroup(ColumnSelection.Predefined.Segment);
                 cm.disableGroup(ColumnSelection.Predefined.Enrichment);
                 cm.disableGroup(ColumnSelection.Predefined.TalkingPoint);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
                 cm.disableGroup(ColumnSelection.Predefined.Model);
                 cm.setCanSegment(true);
-                cm.setCanEnrich(false); // TODO: not support export CuratedContact yet
+                cm.setCanEnrich(true);
                 cm.setCanModel(false);
 
                 return cm;
