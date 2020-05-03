@@ -68,7 +68,7 @@ public enum TableRoleInCollection {
         BucketedAccount.distKey = InterfaceName.AccountId;
 
         ConsolidatedContact.primaryKey = InterfaceName.ContactId;
-        ConsolidatedContact.sortKeys = ImmutableList.of(InterfaceName.ContactId);
+        ConsolidatedContact.sortKeys = ImmutableList.of(InterfaceName.ContactId); //FIXME (YSong): I think this is not needed
         ConsolidatedContact.partitionKey = InterfaceName.AccountId;
         ConsolidatedContact.rangeKey = InterfaceName.ContactId;
 

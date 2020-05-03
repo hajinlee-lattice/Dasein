@@ -79,6 +79,12 @@ public class CuratedContactAttributes
             CuratedContactAttributesStepConfiguration stepConfiguration) {
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+
+        if (isShortCutMode()) {
+            log.info("In short cut mode, skip generating curated contact attribute");
+            return null;
+        }
+
         Map<String, String> lastActivityTables = getMapObjectFromContext(LAST_ACTIVITY_DATE_TABLE_NAME, String.class,
                 String.class);
         String contactLastActivityTempTableName = MapUtils.emptyIfNull(lastActivityTables)
@@ -120,8 +126,13 @@ public class CuratedContactAttributes
         Table resultTable = toTable(resultTableName, InterfaceName.ContactId.name(), result.getTargets().get(0));
         metadataProxy.createTable(customerSpace.toString(), resultTableName, resultTable);
         dataCollectionProxy.upsertTable(customerSpace.toString(), resultTableName, TABLE_ROLE, inactive);
-        exportToS3AndAddToContext(resultTable, ACCOUNT_LOOKUP_TABLE_NAME);
         exportToDynamo(resultTableName, TABLE_ROLE.getPartitionKey(), TABLE_ROLE.getRangeKey());
+        exportToS3AndAddToContext(resultTable, CURATED_CONTACT_SERVING_TABLE_NAME);
+    }
+
+    private boolean isShortCutMode() {
+        Table table = getTableSummaryFromKey(customerSpace.toString(), CURATED_CONTACT_SERVING_TABLE_NAME);
+        return table != null;
     }
 
     protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {

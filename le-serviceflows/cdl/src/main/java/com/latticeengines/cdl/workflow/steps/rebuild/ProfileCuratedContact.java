@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedCuratedAccountAttribute;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,27 +20,27 @@ import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedAccountAttributesStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.CuratedContactAttributesStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.util.ScalingUtils;
 
 // Description: Runs a Workflow Step to compute "curated" attributes which are derived from other attributes.  At this
 //     time the only curated attributes is the Number of Contacts per account.  This computation employs the
 //     Transformation framework.
-@Component(ProfileCuratedAccount.BEAN_NAME)
+@Component(ProfileCuratedContact.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAccountAttributesStepConfiguration> {
+public class ProfileCuratedContact extends BaseSingleEntityProfileStep<CuratedContactAttributesStepConfiguration> {
 
-    private static final Logger log = LoggerFactory.getLogger(ProfileCuratedAccount.class);
+    private static final Logger log = LoggerFactory.getLogger(ProfileCuratedContact.class);
 
-    public static final String BEAN_NAME = "profileCuratedAccount";
+    public static final String BEAN_NAME = "profileCuratedContact";
 
     // Set to true if no serving store table generated
     private boolean skipTransformation;
 
     @Override
     protected BusinessEntity getEntity() {
-        return BusinessEntity.CuratedAccount;
+        return BusinessEntity.CuratedContact;
     }
 
     @Override
@@ -72,7 +70,7 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
         super.initializeConfiguration();
 
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), //
-                Arrays.asList(CURATED_ACCOUNT_SERVING_TABLE_NAME, CURATED_ACCOUNT_STATS_TABLE_NAME));
+                Arrays.asList(CURATED_CONTACT_SERVING_TABLE_NAME, CURATED_ACCOUNT_STATS_TABLE_NAME));
         boolean shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
 
         if (shortCut) {
@@ -80,7 +78,7 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
             servingStoreTableName = renameServingStoreTable(tablesInCtx.get(0));
             statsTableName = tablesInCtx.get(1).getName();
 
-            TableRoleInCollection servingStoreRole = BusinessEntity.CuratedAccount.getServingStore();
+            TableRoleInCollection servingStoreRole = BusinessEntity.CuratedContact.getServingStore();
             dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, //
                     servingStoreRole, inactive);
             exportTableRoleToRedshift(servingStoreTableName, servingStoreRole);
@@ -97,7 +95,7 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
                 return;
             }
 
-            servingStoreTableName = renameServingStoreTable(tablesInCtx.get(0));
+            servingStoreTableName = tablesInCtx.get(0).getName();
             log.info("Set serving table name to value in ctx = {}", servingStoreTableName);
             if (!skipTransformation) {
                 double servingTableSize = ScalingUtils.getTableSizeInGb(yarnConfiguration, tablesInCtx.get(0));
@@ -113,7 +111,7 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
     protected PipelineTransformationRequest getTransformRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
 
-        request.setName("ProfileCuratedAccount");
+        request.setName("ProfileCuratedContact");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);
@@ -138,14 +136,12 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
     @Override
     protected void onPostTransformationCompleted() {
         super.onPostTransformationCompleted();
-        exportToS3AndAddToContext(statsTableName, CURATED_ACCOUNT_STATS_TABLE_NAME);
+        exportToS3AndAddToContext(statsTableName, CURATED_CONTACT_STATS_TABLE_NAME);
         finishing();
     }
 
     private void finishing() {
         updateDCStatusForCuratedAccountAttributes();
-        TableRoleInCollection role = CalculatedCuratedAccountAttribute;
-        exportToDynamo(servingStoreTableName, role.getPartitionKey(), role.getRangeKey());
     }
 
     protected void updateDCStatusForCuratedAccountAttributes() {
@@ -157,22 +153,8 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
         if (MapUtils.isEmpty(dateMap)) {
             log.error("No data in DataCollectionStatus Date Map despite running Curated Account Attributes step");
         } else {
-            Long accountCollectionTime = 0L;
-            if (dateMap.containsKey(Category.ACCOUNT_ATTRIBUTES.getName())) {
-                accountCollectionTime = dateMap.get(Category.ACCOUNT_ATTRIBUTES.getName());
-            }
-            Long contactCollectionTime = 0L;
-            if (dateMap.containsKey(Category.CONTACT_ATTRIBUTES.getName())) {
-                contactCollectionTime = dateMap.get(Category.CONTACT_ATTRIBUTES.getName());
-            }
-            long curatedAccountCollectionTime = Long.max(accountCollectionTime, contactCollectionTime);
-            if (curatedAccountCollectionTime == 0L) {
-                log.error("No Account or Contact DataCollectionStatus dates despite running Curated Account "
-                        + "Attributes step");
-            } else {
-                dateMap.put(Category.CURATED_ACCOUNT_ATTRIBUTES.getName(), curatedAccountCollectionTime);
-                putObjectInContext(CDL_COLLECTION_STATUS, status);
-            }
+            dateMap.put(Category.CURATED_CONTACT_ATTRIBUTES.getName(), System.currentTimeMillis());
+            putObjectInContext(CDL_COLLECTION_STATUS, status);
         }
     }
 }
