@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.DataIntegrationStatusMonitor;
 import com.latticeengines.domain.exposed.cdl.LaunchType;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
+import com.latticeengines.domain.exposed.pls.cdl.channel.ChannelConfig;
 
 public class LaunchSummary {
 
@@ -86,7 +87,7 @@ public class LaunchSummary {
         this.setFolderName(launch.getFolderName());
         this.setLaunchType(launch.getLaunchType());
         if (launch.getChannelConfig() != null) {
-            this.setChannelConfig(JsonUtils.serialize(launch.getChannelConfig()));
+            this.setChannelConfig(launch.getChannelConfig());
         }
         if (launch.getPlay() != null) {
             this.setPlayName(launch.getPlay().getName());
@@ -226,12 +227,16 @@ public class LaunchSummary {
         this.integrationStatusMonitor = integrationStatusMonitor;
     }
 
-    public void setChannelConfig(String channelConfig) {
-        this.channelConfig = channelConfig;
+    public void setChannelConfig(ChannelConfig channelConfig) {
+        this.channelConfig = JsonUtils.serialize(channelConfig);
     }
 
-    public String getChannelConfig() {
-        return this.channelConfig;
+    public ChannelConfig getChannelConfig() {
+        ChannelConfig newChannelConfig = null;
+        if (channelConfig != null) {
+            newChannelConfig = JsonUtils.deserialize(channelConfig, ChannelConfig.class);
+        }
+        return newChannelConfig;
     }
 
 }
