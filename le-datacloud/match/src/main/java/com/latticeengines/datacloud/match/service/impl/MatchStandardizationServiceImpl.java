@@ -68,7 +68,6 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                 // Iterate through all positions matching fields in the list of Domain MatchKeys finding the first
                 // valid non-public domain to use as the parsed domain.
                 String cleanDomain = null;
-                boolean foundPublicDomain = false;
                 Set<String> publicDomains = new HashSet<>();
                 for (Integer domainPos : domainPosList) {
                     String originalDomain = (String) inputRecord.get(domainPos);
@@ -88,27 +87,20 @@ public class MatchStandardizationServiceImpl implements MatchStandardizationServ
                             // true
                             record.setMatchEvenIsPublicDomain(true);
                             record.setPublicDomain(true);
-                            record.setParsedDomain(cleanDomain);
                             break;
                         } else {
                             // public domain is not used for match
                             publicDomains.add(cleanDomain);
-                            cleanDomain = null;
-                            foundPublicDomain = true;
                         }
                     } else {
                         record.setPublicDomain(false);
-                        record.setParsedDomain(cleanDomain);
                         break;
                     }
                 }
-                if (StringUtils.isEmpty(cleanDomain)) {
-                    record.setParsedDomain(null);
-                    if (foundPublicDomain) {
-                        record.setPublicDomain(true);
-                        record.addErrorMessages(
-                                "All the domains are public domain: " + String.join(",", publicDomains));
-                    }
+                record.setParsedDomain(cleanDomain);
+                if (StringUtils.isNotBlank(cleanDomain) && publicDomains.contains(cleanDomain)) {
+                    record.setPublicDomain(true);
+                    record.addErrorMessages("All the domains are public domain: " + String.join(",", publicDomains));
                 }
             } catch (Exception e) {
                 record.setFailed(true);
