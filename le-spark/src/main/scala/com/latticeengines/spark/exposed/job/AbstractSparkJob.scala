@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.livy.scalaapi.ScalaJobContext
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
 
@@ -110,11 +111,13 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
       }
     }
     if (fmt.equals("csv")) {
-      spark.read.format(fmt).option("header", value = true)
-        .option("quote", "\"")
-        .option("escape", "\"").load("hdfs://" + path)
-    }
-    else {
+      spark.read.format(fmt) //
+              .option("header", value = true) //
+              .option("multiLine", value = true) // should avoid reading csv, because multiLine is purely on driver
+              .option("quote", "\"") //
+              .option("escape", "\"") //
+              .load("hdfs://" + path)
+    } else {
       spark.read.format(fmt).load("hdfs://" + path)
     }
   }
@@ -124,7 +127,7 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
     val output: List[DataFrame] = latticeCtx.output
     if (targets.length != output.length) {
       throw new IllegalArgumentException(s"${targets.length} targets are declared " //
-        + s"but ${output.length} outputs are generated!")
+              + s"but ${output.length} outputs are generated!")
     }
     val results = targets.zip(output).par.map { t =>
       val tgt = t._1
@@ -134,14 +137,21 @@ abstract class AbstractSparkJob[C <: SparkJobConfig] extends (ScalaJobContext =>
         df = df.coalesce(1)
       }
       val fmt = if (tgt.getDataFormat != null) tgt.getDataFormat.name.toLowerCase else "avro"
+      if (fmt.equals("csv")) {
+        df = df.persist(StorageLevel.DISK_ONLY)
+      }
       val partitionKeys = if (tgt.getPartitionKeys == null) List() else tgt.getPartitionKeys.asScala.toList
       if (partitionKeys.isEmpty) {
         df.write.format(fmt).save(path)
       } else {
         df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
       }
-      val df2 = spark.read.format(fmt).load(path)
-      tgt.setCount(df2.count())
+      if (fmt.equals("csv")) {
+        tgt.setCount(df.count())
+      } else {
+        val df2 = spark.read.format(fmt).load(path)
+        tgt.setCount(df2.count())
+      }
       tgt
     }.toList
     latticeCtx.orphanViews map spark.catalog.dropTempView

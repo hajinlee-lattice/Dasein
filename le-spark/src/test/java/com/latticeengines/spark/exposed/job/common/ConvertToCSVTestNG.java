@@ -75,14 +75,19 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
                 Pair.of("Attr2", Long.class), //
                 Pair.of("Attr3", Long.class) //
         );
-        Object[][] data = new Object[][] { //
+        Object[][] data = getData();
+        uploadHdfsDataUnit(data, fields);
+    }
+
+    private Object[][] getData() {
+        return new Object[][] { //
                 {1, "1", now, now}, //
                 {2, "2", null, now}, //
                 {3, null, now, now}, //
                 {4, "4", now, null}, //
                 {5, "Hello world, \"Aloha\", yeah?", now, now}, //
+                {6, "Another\nline?", now, now}, //
         };
-        uploadHdfsDataUnit(data, fields);
     }
 
     @Override
@@ -113,6 +118,7 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
             verifyRecord(record);
             count++;
         }
+        Assert.assertEquals(count, getData().length);
         Assert.assertEquals(tgt.getCount(), Long.valueOf(count));
         return true;
     }
@@ -147,6 +153,9 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
                     break;
                 case 5:
                     verifyRecord5(id, val1, val2, val3);
+                    break;
+                case 6:
+                    verifyRecord6(id, val1, val2, val3);
                     break;
                 default:
                     Assert.fail("Should not have this line: " + record);
@@ -188,6 +197,13 @@ public class ConvertToCSVTestNG extends SparkJobFunctionalTestNGBase {
     private void verifyRecord5(String id, String val1, String val2, String val3) throws ParseException {
         Assert.assertEquals(id, "5");
         Assert.assertEquals(val1, "Hello world, \"Aloha\", yeah?");
+        Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
+        Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
+    }
+
+    private void verifyRecord6(String id, String val1, String val2, String val3) throws ParseException {
+        Assert.assertEquals(id, "6");
+        Assert.assertEquals(val1, "Another\nline?");
         Assert.assertTrue(withInOneSec(fmtr1.parse(val2).getTime(), now));
         Assert.assertTrue(withInOneSec(fmtr2.parse(val3).getTime(), now));
     }

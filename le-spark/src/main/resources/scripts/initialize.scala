@@ -42,7 +42,16 @@ def loadHdfsUnit(unit: JsonNode): DataFrame = {
       }
     }
   }
-  spark.read.format(fmt).load("hdfs://" + path)
+  if (fmt.equals("csv")) {
+    spark.read.format(fmt) //
+            .option("header", value = true) //
+            .option("multiLine", value = true) //
+            .option("quote", "\"") //
+            .option("escape", "\"") //
+            .load("hdfs://" + path)
+  } else {
+    spark.read.format(fmt).load("hdfs://" + path)
+  }
 }
 
 var scriptInput = rawInput map { input => {

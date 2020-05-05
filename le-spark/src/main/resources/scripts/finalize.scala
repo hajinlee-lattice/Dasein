@@ -32,11 +32,15 @@ var finalTargets: List[JsonNode] = targets.zip(output).par.map { t =>
   } else {
     df.write.partitionBy(partitionKeys: _*).format(fmt).save(path)
   }
-  val df2 = spark.read.format(fmt).load(path)
   val json = mapper.createObjectNode()
   json.put("StorageType", "Hdfs")
   json.put("Path", path)
-  json.put("Count", df2.count())
+  if (fmt.equals("csv")) {
+    json.put("Count", df.count())
+  } else {
+    val df2 = spark.read.format(fmt).load(path)
+    json.put("Count", df2.count())
+  }
   json.set("PartitionKeys", mapper.valueToTree(partitionKeys))
   if (!"avro".equals(fmt)) {
     json.put("DataFormat", tgt.get("DataFormat"))
