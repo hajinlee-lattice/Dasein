@@ -4,10 +4,12 @@ import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Activ
 import static com.latticeengines.domain.exposed.serviceapps.core.AttrState.Inactive;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,11 +19,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -138,8 +142,18 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         String displayName = "TestAttributeSet";
         String displayName2 = "TestAttributeSet2";
         AttributeSet attributeSet = createAttributeSet(displayName);
-        attrConfigService.createOrUpdateAttributeSet(attributeSet);
-        attributeSet = attrConfigService.getAttributeSetByName(attributeSet.getName());
+        attributeSet = attrConfigService.createOrUpdateAttributeSet(attributeSet);
+        String generatedName = attributeSet.getName();
+        log.info("Attribute set name {}", generatedName);
+        AtomicReference<AttributeSet> attributeSetAtom = new AtomicReference<>();
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+        retry.execute(context -> {
+            attributeSetAtom.set(attrConfigService.getAttributeSetByName(generatedName));
+            Assert.assertNotNull(attributeSetAtom.get());
+            return true;
+        });
+        attributeSet = attributeSetAtom.get();
         String name = attributeSet.getName();
         Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
         Assert.assertEquals(attributeSet.getDisplayName(), displayName);
