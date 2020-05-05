@@ -31,7 +31,15 @@ def load_hdfs_unit(unit):
             else:
                 path += "/*" + suffix
     path = "hdfs://%s" % path
-    return spark.read.format(fmt).load(path)
+    if fmt == "csv":
+        return spark.read.format(fmt) \
+                    .option("header", "true") \
+                    .option("multiLine", "true") \
+                    .option("quote", "\"") \
+                    .option("escape", "\"") \
+                    .load("hdfs://" + path)
+    else:
+        return spark.read.format(fmt).load("hdfs://" + path)
 
 
 checkpoint_dir = '''{{CHECKPOINT_DIR}}'''

@@ -10,9 +10,12 @@ for tgt, df in zip(lattice.targets, lattice.output):
         df.write.format(fmt).save(tgt['Path'])
     else:
         df.write.partitionBy(*partition_keys).format(fmt).save(tgt['Path'])
-    df2 = spark.read.format(fmt).load(tgt['Path'])
     tgt['StorageType'] = 'Hdfs'
-    tgt['Count'] = df2.count()
+    if fmt == "csv":
+        tgt['Count'] = df.count()
+    else:
+        df2 = spark.read.format(fmt).load(tgt['Path'])
+        tgt['Count'] = df2.count()
 
 for view in lattice.orphan_views:
     spark.catalog.dropTempView(view)
