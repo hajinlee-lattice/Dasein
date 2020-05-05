@@ -647,6 +647,9 @@ public class BatonServiceImpl implements BatonService {
 
     private boolean canHaveFlag(CustomerSpace customerSpace, LatticeFeatureFlag flag) {
         FeatureFlagDefinition definition = FeatureFlagClient.getDefinition(flag.getName());
+        if (definition == null) {
+            throw new IllegalArgumentException("Cannot find definition for flag: " + flag.getName());
+        }
         return hasAtLeastOneProduct(customerSpace, definition.getAvailableProducts());
     }
 
