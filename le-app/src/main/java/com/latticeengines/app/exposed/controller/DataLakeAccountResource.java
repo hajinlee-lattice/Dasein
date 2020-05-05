@@ -21,9 +21,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.RequestEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -67,7 +68,7 @@ public class DataLakeAccountResource {
     private static final String INSTRUMENT_CL = "CustomList";
 
     private final DataLakeService dataLakeService;
-    private final Oauth2RestApiProxy tenantProxy;
+    private final Oauth2RestApiProxy oauth2RestApiProxy;
     private final PeriodTransactionProxy periodTransactionProxy;
     private final TalkingPointProxy talkingPointProxy;
     private final BatonService batonService;
@@ -80,11 +81,11 @@ public class DataLakeAccountResource {
     private DanteFormatter<TalkingPointDTO> talkingPointDanteFormatter;
 
     @Inject
-    public DataLakeAccountResource(DataLakeService dataLakeService, Oauth2RestApiProxy tenantProxy,
+    public DataLakeAccountResource(DataLakeService dataLakeService, Oauth2RestApiProxy oauth2RestApiProxy,
             PeriodTransactionProxy periodTransactionProxy, BatonService batonService,
             TalkingPointProxy talkingPointProxy) {
         this.dataLakeService = dataLakeService;
-        this.tenantProxy = tenantProxy;
+        this.oauth2RestApiProxy = oauth2RestApiProxy;
         this.periodTransactionProxy = periodTransactionProxy;
         this.batonService = batonService;
         this.talkingPointProxy = talkingPointProxy;
@@ -102,9 +103,10 @@ public class DataLakeAccountResource {
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     @InvocationMeter(name = "talkingpoint", measurment = "ulysses", instrument = INSTRUMENT_TP)
     @InvocationMeter(name = "companyprofile", measurment = "ulysses", instrument = INSTRUMENT_CP)
-    public DataPage getAccountById(RequestEntity<String> requestEntity, @PathVariable String accountId, //
+    public DataPage getAccountById(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+            @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
-        return getAccountById(requestEntity, accountId, attributeGroup, null);
+        return getAccountById(authToken, accountId, attributeGroup, null);
     }
 
     @GetMapping(value = "/{accountId:.+}/{attributeGroup}/danteformat")
@@ -112,13 +114,14 @@ public class DataLakeAccountResource {
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     @InvocationMeter(name = "talkingpoint-dante", measurment = "ulysses", instrument = INSTRUMENT_TP)
     @InvocationMeter(name = "companyprofile-dante", measurment = "ulysses", instrument = INSTRUMENT_CP)
-    public FrontEndResponse<String> getAccountByIdInDanteFormat(RequestEntity<String> requestEntity,
+    public FrontEndResponse<String> getAccountByIdInDanteFormat(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
         try {
             CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
             List<String> requiredAttributes = Collections.singletonList(InterfaceName.SpendAnalyticsSegment.name());
-            DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup, requiredAttributes);
+            DataPage accountRawData = getAccountById(authToken, accountId, attributeGroup, requiredAttributes);
             if (accountRawData.getData().size() != 1) {
                 String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account",
                         accountRawData.getData().size());
@@ -143,12 +146,13 @@ public class DataLakeAccountResource {
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id in dante format")
     @InvocationMeter(name = "talkingpoint-dante-list", measurment = "ulysses", instrument = INSTRUMENT_TP)
     @InvocationMeter(name = "companyprofile-dante-list", measurment = "ulysses", instrument = INSTRUMENT_CP)
-    public FrontEndResponse<List<String>> getAccountsByIdInDanteFormat(RequestEntity<String> requestEntity,
+    public FrontEndResponse<List<String>> getAccountsByIdInDanteFormat(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
             @PathVariable Predefined attributeGroup) {
         CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
         try {
-            DataPage accountRawData = getAccountById(requestEntity, accountId, attributeGroup);
+            DataPage accountRawData = getAccountById(authToken, accountId, attributeGroup);
             if (accountRawData.getData().size() != 1) {
                 String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account",
                         accountRawData.getData().size());
@@ -195,7 +199,8 @@ public class DataLakeAccountResource {
     @ResponseBody
     @ApiOperation(value = "Get account with attributes of the attribute group by its Id ")
     @InvocationMeter(name = "customlist-dante", measurment = "ulysses", instrument = INSTRUMENT_CL)
-    public FrontEndResponse<String> getAccountsAndTalkingpoints(RequestEntity<String> requestEntity,
+    public FrontEndResponse<String> getAccountsAndTalkingpoints(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
             @PathVariable String playId) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
@@ -213,7 +218,8 @@ public class DataLakeAccountResource {
             }
 
             DataPage accountRawData = dataLakeService.getAccountById(accountId,
-                    new ArrayList<>(requiredAccountAttributes), tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
+                    new ArrayList<>(requiredAccountAttributes),
+                    oauth2RestApiProxy.getOrgInfoFromOAuthRequest(authToken));
             if (accountRawData.getData().size() != 1) {
                 String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account",
                         accountRawData.getData().size());
@@ -238,17 +244,19 @@ public class DataLakeAccountResource {
     @GetMapping(value = "/{accountId:.+}/contacts")
     @ResponseBody
     @ApiOperation(value = "Get all contacts for the given account by id")
-    public DataPage getAllContactsByAccountId(RequestEntity<String> requestEntity, @PathVariable String accountId) {
-        Map<String, String> orgInfo = tenantProxy.getOrgInfoFromOAuthRequest(requestEntity);
+    public DataPage getAllContactsByAccountId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+            @PathVariable String accountId) {
+        Map<String, String> orgInfo = oauth2RestApiProxy.getOrgInfoFromOAuthRequest(authToken);
         return dataLakeService.getAllContactsByAccountId(accountId, orgInfo);
     }
 
     @GetMapping(value = "/{accountId:.+}/contacts/{contactId:.+}")
     @ResponseBody
     @ApiOperation(value = "Get contact by given accountid and contactId")
-    public DataPage getContactByAccountIdContactId(RequestEntity<String> requestEntity, @PathVariable String accountId,
+    public DataPage getContactByAccountIdContactId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+            @PathVariable String accountId, //
             @PathVariable String contactId) {
-        Map<String, String> orgInfo = tenantProxy.getOrgInfoFromOAuthRequest(requestEntity);
+        Map<String, String> orgInfo = oauth2RestApiProxy.getOrgInfoFromOAuthRequest(authToken);
         return dataLakeService.getContactByAccountIdAndContactId(contactId, accountId, orgInfo);
     }
 
@@ -258,13 +266,22 @@ public class DataLakeAccountResource {
                 .collect(Collectors.toSet());
     }
 
-    private DataPage getAccountById(RequestEntity<String> requestEntity, String accountId, Predefined attributeGroup,
+    private DataPage getAccountById(String authToken, String accountId, Predefined attributeGroup,
             List<String> requiredAttributes) {
         return CollectionUtils.isEmpty(requiredAttributes) //
-                ? dataLakeService.getAccountById(accountId, attributeGroup,
-                        tenantProxy.getOrgInfoFromOAuthRequest(requestEntity))
-                : dataLakeService.getAccountById(accountId, attributeGroup,
-                        tenantProxy.getOrgInfoFromOAuthRequest(requestEntity), requiredAttributes);
+                ? dataLakeService.getAccountById(accountId, attributeGroup, getOrgInfoFromOAuthRequest(authToken))
+                : dataLakeService.getAccountById(accountId, attributeGroup, getOrgInfoFromOAuthRequest(authToken),
+                        requiredAttributes);
+    }
+
+    private Map<String, String> getOrgInfoFromOAuthRequest(String token) {
+        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
+        try {
+            return oauth2RestApiProxy.getOrgInfoFromOAuthRequest(token);
+        } catch (Exception e) {
+            log.warn("Failed to find orginfo from the authentication token for tenant " + customerSpace);
+        }
+        return null;
     }
 
     private class AccountAndTalkingPoints {

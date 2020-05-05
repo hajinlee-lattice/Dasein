@@ -3,10 +3,11 @@ package com.latticeengines.playmaker.controller;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -68,21 +69,23 @@ public class TenantResource {
     @RequestMapping(value = "/oauthtotenant", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenant info from OAuth token")
-    public String getOauthTokenToTenant(HttpServletRequest request) {
-        return OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+    public String getOauthbearerTokenToTenant(@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return OAuth2Utils.getTenantName(bearerToken, oAuthUserEntityMgr);
     }
 
     @RequestMapping(value = "/oauthtoappid", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get tenant info from OAuth token")
-    public Map<String, String> getAppIdFromOauthToken(HttpServletRequest request) {
-        return OAuth2Utils.getAppId(request, oAuthUserEntityMgr);
+    @ApiOperation(value = "Get tenant info from OAuth bearerToken")
+    public Map<String, String> getAppIdFromOauthbearerToken(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return OAuth2Utils.getAppId(bearerToken, oAuthUserEntityMgr);
     }
 
     @RequestMapping(value = "/oauthtoorginfo", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get tenant info from OAuth token")
-    public Map<String, String> getOrgInfoFromOauthToken(HttpServletRequest request) {
-        return OAuth2Utils.getOrgInfo(request, oAuthUserEntityMgr);
+    @ApiOperation(value = "Get tenant info from OAuth bearerToken")
+    public Map<String, String> getOrgInfoFromOauthbearerToken(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return OAuth2Utils.getOrgInfo(bearerToken, oAuthUserEntityMgr);
     }
 }

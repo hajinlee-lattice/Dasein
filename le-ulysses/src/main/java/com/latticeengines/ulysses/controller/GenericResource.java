@@ -4,8 +4,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.springframework.http.RequestEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,8 +31,8 @@ public class GenericResource {
     @ApiOperation(value = "Health check")
     @NoMetricsLog
     @IgnoreGlobalApiMeter
-    public String oauthToTenant(RequestEntity<String> requestEntity) {
-        return tenantProxy.getTenantNameFromOAuthRequest(requestEntity);
+    public String oauthToTenant(@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return tenantProxy.getTenantNameFromOAuthRequest(bearerToken);
     }
 
     @GetMapping(value = "/oauthtoappid", headers = "Accept=application/json")
@@ -39,7 +40,7 @@ public class GenericResource {
     @ApiOperation(value = "Health check")
     @NoMetricsLog
     @IgnoreGlobalApiMeter
-    public Map<String, String> oauthToAppId(RequestEntity<String> requestEntity) {
-        return tenantProxy.getAppIdFromOAuthRequest(requestEntity);
+    public Map<String, String> oauthToAppId(@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        return tenantProxy.getAppIdFromOAuthRequest(bearerToken);
     }
 }

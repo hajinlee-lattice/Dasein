@@ -98,8 +98,7 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.PROTOTYPE_FEATURE, //
                 LatticeFeatureFlag.ALPHA_FEATURE, //
                 LatticeFeatureFlag.BETA_FEATURE, //
-                LatticeFeatureFlag.ATTRIBUTE_TOGGLING, //
-                LatticeFeatureFlag.CONFIGURABLE_SEGMENT_EXPORT);
+                LatticeFeatureFlag.ATTRIBUTE_TOGGLING);
 
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();

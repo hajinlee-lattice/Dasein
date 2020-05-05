@@ -4,9 +4,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.springframework.http.RequestEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,8 +36,9 @@ public class ContactResource {
     @GetMapping(value = "/accounts/{accountId:.+}")
     @ResponseBody
     @ApiOperation(value = "Get given accountid and contactId")
-    public DataPage getContactsByAccountId(RequestEntity<String> requestEntity, @PathVariable String accountId) {
-        Map<String, String> orgInfo = tenantProxy.getOrgInfoFromOAuthRequest(requestEntity);
+    public DataPage getContactsByAccountId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
+            @PathVariable String accountId) {
+        Map<String, String> orgInfo = tenantProxy.getOrgInfoFromOAuthRequest(authToken);
 
         return dataLakeService.getAllContactsByAccountId(accountId, orgInfo);
     }
