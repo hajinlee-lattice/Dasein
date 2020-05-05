@@ -138,7 +138,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         String displayName = "TestAttributeSet";
         String displayName2 = "TestAttributeSet2";
         AttributeSet attributeSet = createAttributeSet(displayName);
-        attrConfigService.createOrUpdateAttributeSet(attributeSet);
+        attributeSet = attrConfigService.createOrUpdateAttributeSet(attributeSet);
         attributeSet = attrConfigService.getAttributeSetByName(attributeSet.getName());
         String name = attributeSet.getName();
         Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
