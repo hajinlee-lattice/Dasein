@@ -64,7 +64,8 @@ GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
 
     private static final List<Pair<String, Class<?>>> CT_LAST_ACTIVITY_DATE_FIELDS = Arrays.asList( //
             Pair.of(ContactId.name(), String.class), //
-            Pair.of(LastActivityDate.name(), Long.class) //
+            Pair.of(LastActivityDate.name(), Long.class), //
+            Pair.of(AccountId.name(), String.class) //
     );
 
     private static final List<Pair<String, Class<?>>> NUM_CONTACT_FIELDS = Arrays.asList( //
@@ -157,11 +158,11 @@ GenerateCuratedAttributesTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private void prepareContactTestData() {
-        // ContactId,LastActivityDate
+        // ContactId, LastActivityDate, AccountId
         Object[][] lastActivityDate = new Object[][] { //
-                { "C1", 123L }, //
-                { "C2", 234L }, //
-                { "C4", 999L }, //
+                { "C1", 123L, "A1" }, //
+                { "C2", 234L, "A2" }, //
+                { "C4", 999L, "A3" }, //
         };
         uploadHdfsDataUnit(lastActivityDate, CT_LAST_ACTIVITY_DATE_FIELDS);
 

@@ -95,7 +95,7 @@ class GenerateCuratedAttributes extends AbstractSparkJob[GenerateCuratedAttribut
 
   private def mergeLastActivityDate(lastActivityDf: DataFrame, masterDf: DataFrame, joinKey: String, additionalColumns: List[String]): DataFrame = {
     val colsFromMaster = additionalColumns ::: List(joinKey).intersect(masterDf.columns)
-    masterDf.join(lastActivityDf, Seq(joinKey), "left")
+    masterDf.join(lastActivityDf.select(LastActivityDate.name, joinKey), Seq(joinKey), "left")
       .select(colsFromMaster.map(col) ::: List(coalesce(
         // pick last activity date first, then last update time
         lastActivityDf.col(LastActivityDate.name), masterDf.col(CDLUpdatedTime.name), lit(null).cast(LongType)
