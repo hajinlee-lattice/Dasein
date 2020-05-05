@@ -54,7 +54,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DCPImportWorkflowDeploymentTestNG.class);
 
-    private static final String TEST_DATA_VERSION = "1";
+    private static final String TEST_DATA_VERSION = "2";
     private static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
 
     @Inject
@@ -161,6 +161,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private void verifyUploadStats(UploadDetails upload) {
         UploadStats uploadStats = upload.getStatistics();
+        System.out.println(JsonUtils.serialize(uploadStats));
         Assert.assertNotNull(uploadStats);
 
         UploadStats.ImportStats importStats = uploadStats.getImportStats();
@@ -170,6 +171,9 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         UploadStats.MatchStats matchStats = uploadStats.getMatchStats();
         Assert.assertNotNull(matchStats);
         Assert.assertTrue(matchStats.getAcceptedCnt() > 0);
+
+        Assert.assertEquals(Long.valueOf(matchStats.getAcceptedCnt() + //
+                matchStats.getPendingReviewCnt() + matchStats.getRejectedCnt()), importStats.getSuccessCnt());
     }
 
     private void verifyMatchResult(UploadDetails upload) {
@@ -179,12 +183,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         Table matchResult = metadataProxy.getTableSummary(mainCustomerSpace, matchResultName);
         Assert.assertNotNull(matchResult);
         Assert.assertEquals(matchResult.getExtracts().size(), 1);
-
-//        String matchCandidateTableName = uploadService.getMatchCandidatesTableName(uploadId);
-//        Assert.assertNotNull(matchCandidateTableName);
-//        Table matchCandidate = metadataProxy.getTableSummary(mainCustomerSpace, matchCandidateTableName);
-//        Assert.assertNotNull(matchCandidate);
-//        Assert.assertEquals(matchCandidate.getExtracts().size(), 1);
 
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
         String dropFolder = UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox());
