@@ -139,7 +139,17 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         String displayName2 = "TestAttributeSet2";
         AttributeSet attributeSet = createAttributeSet(displayName);
         attributeSet = attrConfigService.createOrUpdateAttributeSet(attributeSet);
-        attributeSet = attrConfigService.getAttributeSetByName(attributeSet.getName());
+        String generatedName = attributeSet.getName();
+        log.info("Attribute set name {}", generatedName);
+        attributeSet = attrConfigService.getAttributeSetByName(generatedName);
+        if (attributeSet == null) {
+            try {
+                Thread.sleep(3000L);
+            } catch (InterruptedException e) {
+                log.error("Sleep interrupt exception!");
+            }
+            attributeSet = attrConfigService.getAttributeSetByName(generatedName);
+        }
         String name = attributeSet.getName();
         Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
         Assert.assertEquals(attributeSet.getDisplayName(), displayName);
