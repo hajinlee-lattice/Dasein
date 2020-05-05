@@ -144,12 +144,14 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         attributeSet = attrConfigService.getAttributeSetByName(generatedName);
         if (attributeSet == null) {
             try {
+                // attributeSet may be null due to some db connection latency
                 Thread.sleep(3000L);
             } catch (InterruptedException e) {
                 log.error("Sleep interrupt exception!");
             }
             attributeSet = attrConfigService.getAttributeSetByName(generatedName);
         }
+        Assert.assertNotNull(attributeSet);
         String name = attributeSet.getName();
         Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
         Assert.assertEquals(attributeSet.getDisplayName(), displayName);
