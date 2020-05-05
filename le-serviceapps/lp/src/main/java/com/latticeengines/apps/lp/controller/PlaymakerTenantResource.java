@@ -5,8 +5,10 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -79,14 +81,14 @@ public class PlaymakerTenantResource {
     @RequestMapping(value = "/oauthtoappid", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenant info from OAuth token")
-    public Map<String, String> getAppIdFromOauthToken(HttpServletRequest request) {
-        return OAuth2Utils.getAppId(request, oAuthUserEntityMgr);
+    public Map<String, String> getAppIdFromOauthToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken) {
+        return OAuth2Utils.getAppId(authToken, oAuthUserEntityMgr);
     }
 
     @RequestMapping(value = "/oauthtoorginfo", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenant info from OAuth token")
-    public Map<String, String> getOrgInfoFromOauthToken(HttpServletRequest request) {
-        return OAuth2Utils.getOrgInfo(request, oAuthUserEntityMgr);
+    public Map<String, String> getOrgInfoFromOauthToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken) {
+        return OAuth2Utils.getOrgInfo(authToken, oAuthUserEntityMgr);
     }
 }
