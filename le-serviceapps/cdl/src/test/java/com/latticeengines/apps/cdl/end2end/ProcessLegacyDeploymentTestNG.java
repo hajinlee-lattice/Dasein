@@ -28,11 +28,14 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
@@ -41,7 +44,6 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
  */
 public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ProcessLegacyDeploymentTestNG.class);
-    static final String CHECK_POINT = "process1";
     static final String UNDER_SCORE = "_";
 
     @Test(groups = "end2end")
@@ -123,7 +125,18 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     protected void verifyProcess(boolean firstPA) {
         verifyProcessAccount(firstPA);
 
-        createTestSegment3();
+        MetadataSegment metadataSegment3 = createTestSegment3();
+        FrontEndQuery frontEndQuery = FrontEndQuery.fromSegment(metadataSegment3);
+        DataPage accountsDataPage = testBed.getRestTemplate()
+                .postForObject(String.format("%s/pls/accounts/data", deployedHostPort), frontEndQuery, DataPage.class);
+        log.info("Print all data for accounts in segment");
+        printData(accountsDataPage);
+
+        DataPage contactsDataPage = testBed.getRestTemplate()
+                .postForObject(String.format("%s/pls/contacts/data", deployedHostPort), frontEndQuery, DataPage.class);
+        log.info("Print all data for contacts in segment");
+        printData(contactsDataPage);
+
         verifySegmentCountsNonNegative(SEGMENT_NAME_3, Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact));
         Map<BusinessEntity, Long> segment3Counts = ImmutableMap.of(BusinessEntity.Account,
                 firstPA ? SEGMENT_3_ACCOUNT_1 : SEGMENT_3_ACCOUNT_3, BusinessEntity.Contact,
@@ -135,6 +148,17 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         createTestSegmentCuratedAttr();
         verifyTestSegmentCuratedAttrCounts(
                 Collections.singletonMap(BusinessEntity.Account, firstPA ? ACCOUNT_PA : ACCOUNT_PA + NEW_ACCOUNT_PA));
+    }
+
+    void printData(DataPage data) {
+        if(data != null && CollectionUtils.isNotEmpty(data.getData())) {
+            log.info("DataPage size: {}", data.getData().size());
+            data.getData().forEach(map -> {
+                map.forEach((k,v) -> {
+                    log.info("{} - {}", k, v);
+                });
+            });
+        }
     }
 
     void verifyProcessAccount(boolean firstPA) {
