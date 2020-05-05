@@ -36,6 +36,7 @@ import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.EntityMatchMetricService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchCandidate;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
@@ -158,7 +159,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             MatchInput matchInput = matchContext.getInput();
             if (matchInput != null) {
                 if (matchInput.getTenant() != null) {
-                    matchHistory.setTenantId(matchInput.getTenant().getId())
+                    matchHistory.setTenantId(CustomerSpace.shortenCustomerSpace(matchInput.getTenant().getId()))
                             .setRootOperationUid(matchInput.getRootOperationUid())
                             .setApplicationId(matchInput.getApplicationId());
                 }

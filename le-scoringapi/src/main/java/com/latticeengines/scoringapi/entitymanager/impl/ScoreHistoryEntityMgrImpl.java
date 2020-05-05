@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.aws.firehose.FirehoseService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRecordHistory;
@@ -134,7 +135,7 @@ public class ScoreHistoryEntityMgrImpl implements ScoreHistoryEntityMgr {
         history.setIdType(request.getIdType());
         history.setRecordId(response.getId());
         history.setLatticeId(response.getLatticeId());
-        history.setTenantId(tenantId);
+        history.setTenantId(CustomerSpace.shortenCustomerSpace(tenantId));
         history.setRequest(JsonUtils.serialize(request));
         history.setResponse(JsonUtils.serialize(response));
         return history;
