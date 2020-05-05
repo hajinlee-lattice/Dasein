@@ -1,22 +1,25 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.support.RetryTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.service.TimeLineService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.SleepUtils;
+import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.EventFieldExtractor;
@@ -43,7 +46,7 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testCRUD() throws Exception {
+    public void testCRUD() {
         String timelineName1 = "timelineName1";
 
         timeLine1 = new TimeLine();
@@ -98,8 +101,15 @@ public class TimeLineServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(created.getEventMappings().containsKey(AtlasStream.StreamType.MarketingActivity.name()));
         Assert.assertTrue(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).containsKey(MOTION));
         Assert.assertEquals(created.getEventMappings().get(AtlasStream.StreamType.MarketingActivity.name()).get(MOTION).getMappingValue(), InterfaceName.ActivityType.name());
-        SleepUtils.sleep(500l);
-        created = timeLineService.findByTimelineId(mainCustomerSpace, timeLine1.getTimelineId());
+        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                Collections.singleton(AssertionError.class), null);
+        AtomicReference<TimeLine> createdAtom = new AtomicReference<>();
+        retry.execute(context -> {
+            createdAtom.set(timeLineService.findByTimelineId(mainCustomerSpace, timeLine1.getTimelineId()));
+            Assert.assertNotNull(createdAtom.get());
+            return true;
+        });
+        created = createdAtom.get();
         Assert.assertEquals(created.getTimelineId(), timeLine1.getTimelineId());
     }
 }
