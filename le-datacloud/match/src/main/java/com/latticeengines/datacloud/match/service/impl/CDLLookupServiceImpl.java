@@ -212,19 +212,19 @@ public class CDLLookupServiceImpl implements CDLLookupService {
         return contactData;
     }
 
-    private List<Map<String, Object>> merge(List<Map<String, Object>> contactData,
+    @SuppressWarnings("SuspiciousMethodCalls")
+    @VisibleForTesting
+    List<Map<String, Object>> merge(List<Map<String, Object>> contactData,
             List<Map<String, Object>> curatedContactData) {
         if (CollectionUtils.isEmpty(curatedContactData))
             return contactData;
 
+        String contactId = InterfaceName.ContactId.name();
         Map<String, Map<String, Object>> mappedData = curatedContactData.stream()
-                .collect(Collectors.toMap(c -> (String) c.get(InterfaceName.ContactId.name()), c -> c));
+                .collect(Collectors.toMap(c -> (String) c.get(contactId), c -> c));
         for (Map<String, Object> contact : contactData) {
-            // noinspection SuspiciousMethodCalls
-            if (mappedData.containsKey(contact.getOrDefault(InterfaceName.ContactId.name(), ""))) {
-                for (String key : mappedData.keySet()) {
-                    contact.put(key, mappedData.get(key));
-                }
+            if (mappedData.containsKey(contact.get(contactId))) {
+                contact.putAll(mappedData.get(contact.get(contactId)));
             }
         }
         return contactData;

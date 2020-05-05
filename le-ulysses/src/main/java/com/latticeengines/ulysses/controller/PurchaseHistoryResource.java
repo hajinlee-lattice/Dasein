@@ -12,10 +12,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.RequestEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,12 +72,13 @@ public class PurchaseHistoryResource {
     @GetMapping(value = "/account/{crmAccountId}/danteformat", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get the purchase history data for the given account")
-    public FrontEndResponse<List<String>> getPurchaseHistoryAccountById(RequestEntity<String> requestEntity,
+    public FrontEndResponse<List<String>> getPurchaseHistoryAccountById(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String crmAccountId) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         try {
             DataPage accountData = dataLakeService.getAccountById(crmAccountId, ColumnSelection.Predefined.TalkingPoint,
-                    tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
+                    tenantProxy.getOrgInfoFromOAuthRequest(authToken));
 
             if (CollectionUtils.isEmpty(accountData.getData())) {
                 throw new LedpException(LedpCode.LEDP_39001, new String[] { crmAccountId, customerSpace });

@@ -32,7 +32,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 
 public final class OAuth2Utils {
@@ -43,6 +42,7 @@ public final class OAuth2Utils {
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2Utils.class);
 
+    @Deprecated
     @SuppressWarnings("unchecked")
     public static String extractHeaderToken(HttpServletRequest request) {
         Enumeration<String> headers = request.getHeaders("Authorization");
@@ -59,6 +59,18 @@ public final class OAuth2Utils {
             }
         }
 
+        return null;
+    }
+
+    public static String extractHeaderToken(String bearerToken) {
+        if ((bearerToken.toLowerCase().startsWith(OAuth2AccessToken.BEARER_TYPE.toLowerCase()))) {
+            String authHeaderValue = bearerToken.substring(OAuth2AccessToken.BEARER_TYPE.length()).trim();
+            int commaIndex = authHeaderValue.indexOf(',');
+            if (commaIndex > 0) {
+                authHeaderValue = authHeaderValue.substring(0, commaIndex);
+            }
+            return authHeaderValue;
+        }
         return null;
     }
 
@@ -81,9 +93,9 @@ public final class OAuth2Utils {
         }
     }
 
-    public static String getTenantName(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
+    public static String getTenantName(String bearerToken, OAuthUserEntityMgr oAuthUserEntityMgr) {
         try {
-            String token = OAuth2Utils.extractHeaderToken(request);
+            String token = OAuth2Utils.extractHeaderToken(bearerToken);
             if (token == null) {
                 throw new LedpException(LedpCode.LEDP_23001);
             }
@@ -104,9 +116,33 @@ public final class OAuth2Utils {
         }
     }
 
-    public static Map<String, String> getAppId(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
+    @Deprecated
+    public static String getTenantName(HttpServletRequest entity, OAuthUserEntityMgr oAuthUserEntityMgr) {
         try {
-            String token = OAuth2Utils.extractHeaderToken(request);
+            String token = OAuth2Utils.extractHeaderToken(entity);
+            if (token == null) {
+                throw new LedpException(LedpCode.LEDP_23001);
+            }
+            String tokenId = OAuth2Utils.extractTokenKey(token);
+            if (tokenId == null) {
+                throw new LedpException(LedpCode.LEDP_23002);
+            }
+            String tenantName = oAuthUserEntityMgr.findTenantNameByAccessToken(tokenId);
+            if (tenantName == null) {
+                throw new LedpException(LedpCode.LEDP_23004);
+            }
+            return tenantName;
+        } catch (Exception ex) {
+            if (ex instanceof LedpException) {
+                throw ex;
+            }
+            throw new LedpException(LedpCode.LEDP_23003, ex);
+        }
+    }
+
+    public static Map<String, String> getAppId(String bearerToken, OAuthUserEntityMgr oAuthUserEntityMgr) {
+        try {
+            String token = OAuth2Utils.extractHeaderToken(bearerToken);
             if (token == null) {
                 throw new LedpException(LedpCode.LEDP_23001);
             }
@@ -123,10 +159,10 @@ public final class OAuth2Utils {
         }
     }
 
-    public static Map<String, String> getOrgInfo(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
+    public static Map<String, String> getOrgInfo(String bearerToken, OAuthUserEntityMgr oAuthUserEntityMgr) {
+        String token = OAuth2Utils.extractHeaderToken(bearerToken);
         try {
-            String token = OAuth2Utils.extractHeaderToken(request);
-            if (token == null) {
+            if (StringUtils.isBlank(token)) {
                 throw new LedpException(LedpCode.LEDP_23001);
             }
             return oAuthUserEntityMgr.findOrgInfoByAccessToken(token);
@@ -136,30 +172,23 @@ public final class OAuth2Utils {
         }
     }
 
+    @Deprecated
     public static CustomerSpace getCustomerSpace(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
         return CustomerSpace.parse(getTenantName(request, oAuthUserEntityMgr));
     }
 
-    public static Tenant getTenant(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
-        CustomerSpace space = getCustomerSpace(request, oAuthUserEntityMgr);
-        Tenant tenant = new Tenant();
-        tenant.setId(space.toString());
-        tenant.setName(space.toString());
-        return tenant;
-    }
-
     public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
-                                                      String clientId) {
+            String clientId) {
         return getOauthTemplate(authHostPort, username, password, clientId, null);
     }
 
     public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
-                                                      String clientId, String appId) {
+            String clientId, String appId) {
         return getOauthTemplate(authHostPort, username, password, clientId, appId, null, null);
     }
 
     public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
-                                                      String clientId, String appId, String orgId, String externalSystemType) {
+            String clientId, String appId, String orgId, String externalSystemType) {
         ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
         resource.setUsername(username);
         resource.setPassword(password);

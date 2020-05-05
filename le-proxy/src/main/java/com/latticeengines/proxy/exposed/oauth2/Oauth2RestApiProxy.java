@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed.oauth2;
 
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
@@ -7,6 +8,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -70,11 +74,31 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
         return get("GetTenant", url, PlaymakerTenant.class);
     }
 
-    public String getTenantNameFromOAuthRequest(RequestEntity<String> requestEntity) {
+    public String getTenantNameFromOAuthRequest(String token) {
         String url = playmakerHostPort + "/playmaker/tenants/oauthtotenant";
-        return get("GetTenantName", url, requestEntity, String.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set(HttpHeaders.AUTHORIZATION, token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        return get("GetTenantName", url, entity, String.class);
     }
 
+    public Map<String, String> getAppIdFromOAuthRequest(String token) {
+        String url = playmakerHostPort + "/playmaker/tenants/oauthtoappid";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set(HttpHeaders.AUTHORIZATION, token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        @SuppressWarnings("rawtypes")
+        Map resObj = get("GetAppId", url, entity, Map.class);
+        Map<String, String> res = null;
+        if (MapUtils.isNotEmpty(resObj)) {
+            res = JsonUtils.convertMap(resObj, String.class, String.class);
+        }
+        return res;
+    }
+
+    @Deprecated
     public Map<String, String> getAppIdFromOAuthRequest(RequestEntity<String> requestEntity) {
         String url = playmakerHostPort + "/playmaker/tenants/oauthtoappid";
         @SuppressWarnings("rawtypes")
@@ -86,10 +110,26 @@ public class Oauth2RestApiProxy extends BaseRestApiProxy implements Oauth2Interf
         return res;
     }
 
-    public Map<String, String> getOrgInfoFromOAuthRequest(RequestEntity<String> requestEntity) {
+    public Map<String, String> getOrgInfoFromOAuthRequest(String token) {
+        String url = playmakerHostPort + "/playmaker/tenants/oauthtoorginfo";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.set(HttpHeaders.AUTHORIZATION, token);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        @SuppressWarnings("rawtypes")
+        Map resObj = get("GetOrgInfo", url, entity, Map.class);
+        Map<String, String> res = null;
+        if (MapUtils.isNotEmpty(resObj)) {
+            res = JsonUtils.convertMap(resObj, String.class, String.class);
+        }
+        return res;
+    }
+
+    @Deprecated
+    public Map<String, String> getOrgInfoFromOAuthRequest(RequestEntity<String> entity) {
         String url = playmakerHostPort + "/playmaker/tenants/oauthtoorginfo";
         @SuppressWarnings("rawtypes")
-        Map resObj = get("GetOrgInfo", url, requestEntity, Map.class);
+        Map resObj = get("GetOrgInfo", url, entity, Map.class);
         Map<String, String> res = null;
         if (MapUtils.isNotEmpty(resObj)) {
             res = JsonUtils.convertMap(resObj, String.class, String.class);

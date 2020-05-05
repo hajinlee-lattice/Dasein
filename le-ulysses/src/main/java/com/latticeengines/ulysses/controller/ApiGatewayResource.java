@@ -3,8 +3,9 @@ package com.latticeengines.ulysses.controller;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.RequestEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,8 +26,9 @@ public class ApiGatewayResource {
     private Oauth2RestApiProxy oauth2RestApiProxy;
 
     @GetMapping(value = "/tenant-config", headers = "Accept=application/json")
-    public GatewayPolicyConfiguration getGatewayPolicyConfiguration(RequestEntity<String> requestEntity) {
-        String tenantName = oauth2RestApiProxy.getTenantNameFromOAuthRequest(requestEntity);
+    public GatewayPolicyConfiguration getGatewayPolicyConfiguration(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        String tenantName = oauth2RestApiProxy.getTenantNameFromOAuthRequest(bearerToken);
 
         if (StringUtils.isBlank(tenantName)) {
             throw new LedpException(LedpCode.LEDP_39002);
