@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 
 public interface ProjectService {
 
@@ -14,7 +15,7 @@ public interface ProjectService {
     ProjectDetails createProject(String customerSpace, String projectId, String displayName,
                                  Project.ProjectType projectType, String user);
 
-    List<ProjectDetails> getAllProject(String customerSpace);
+    List<ProjectSummary> getAllProject(String customerSpace);
 
     Project getProjectByProjectId(String customerSpace, String projectId);
 

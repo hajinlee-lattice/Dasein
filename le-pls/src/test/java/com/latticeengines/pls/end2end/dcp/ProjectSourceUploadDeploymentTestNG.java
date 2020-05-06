@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
@@ -156,7 +157,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
 
     @Test(groups = "deployment", dependsOnMethods = "testFlow")
     public void testGetAndDelete() {
-        List<ProjectDetails> projects = projectService.getAllProjects(customerSpace);
+        List<ProjectSummary> projects = projectService.getAllProjects(customerSpace);
         Assert.assertNotNull(projects);
         Assert.assertEquals(projects.size(), 1);
         ProjectDetails details = projectService.getProjectByProjectId(customerSpace, PROJECT_ID);

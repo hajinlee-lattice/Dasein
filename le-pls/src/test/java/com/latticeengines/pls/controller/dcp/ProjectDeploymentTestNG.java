@@ -16,6 +16,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 
@@ -61,7 +62,7 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
         ProjectDetails projectDetail2 = testProjectProxy.createProjectWithOutProjectId(DISPLAY_NAME, Project.ProjectType.Type1);
         assertNotNull(projectDetail2);
 
-        List<ProjectDetails> projectList = testProjectProxy.getAllProjects();
+        List<ProjectSummary> projectList = testProjectProxy.getAllProjects();
         Assert.assertTrue(CollectionUtils.isNotEmpty(projectList));
         Assert.assertEquals(projectList.size(), 4);
 
@@ -70,6 +71,6 @@ public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         projectList = testProjectProxy.getAllProjects();
         Assert.assertEquals(projectList.size(), 4);
-        projectList.forEach(project -> Assert.assertEquals(project.getDeleted(), Boolean.TRUE));
+        projectList.forEach(project -> Assert.assertEquals(project.getArchieved(), Boolean.TRUE));
     }
 }
