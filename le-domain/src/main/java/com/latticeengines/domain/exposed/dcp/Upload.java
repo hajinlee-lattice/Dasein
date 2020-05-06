@@ -19,6 +19,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -32,7 +33,8 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@javax.persistence.Table(name = "DCP_UPLOAD", indexes = { @Index(name = "IX_SOURCE_ID", columnList = "SOURCE_ID") })
+@javax.persistence.Table(name = "DCP_UPLOAD", indexes = { @Index(name = "IX_SOURCE_ID", columnList = "SOURCE_ID") },
+        uniqueConstraints = {@UniqueConstraint(name = "UX_UPLOAD_ID", columnNames = { "FK_TENANT_ID", "UPLOAD_ID" }) })
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
