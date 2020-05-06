@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.dcp;
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -33,6 +34,15 @@ public class ProjectDetails {
 
     @JsonProperty("recipient_list")
     private List<String> recipientList;
+
+    @JsonProperty("created")
+    private Date created;
+
+    @JsonProperty("updated")
+    private Date updated;
+
+    @JsonProperty("created_by")
+    private String createdBy;
 
     public String getProjectId() {
         return projectId;
@@ -88,5 +98,29 @@ public class ProjectDetails {
 
     public void setRecipientList(List<String> recipientList) {
         this.recipientList = recipientList;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
     }
 }
