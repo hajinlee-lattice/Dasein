@@ -18,6 +18,7 @@ import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
 import io.swagger.annotations.Api;
@@ -55,7 +56,7 @@ public class ProjectResource {
     @GetMapping(value = "/list")
     @ResponseBody
     @ApiOperation(value = "Get all projects")
-    public List<ProjectDetails> getAllProject(@PathVariable String customerSpace) {
+    public List<ProjectSummary> getAllProject(@PathVariable String customerSpace) {
         return projectService.getAllProject(customerSpace);
     }
 

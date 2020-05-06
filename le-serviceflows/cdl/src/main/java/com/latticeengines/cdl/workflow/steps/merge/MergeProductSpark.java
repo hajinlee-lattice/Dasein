@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.spark.cdl.MergeProductReport;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.BaseSparkStep;
 
@@ -54,9 +53,6 @@ public class MergeProductSpark extends BaseSparkStep<ProcessProductStepConfigura
 
     @Inject
     protected MetadataProxy metadataProxy;
-
-    @Inject
-    private MatchProxy matchProxy;
 
     @Inject
     protected CDLAttrConfigProxy cdlAttrConfigProxy;
@@ -92,7 +88,7 @@ public class MergeProductSpark extends BaseSparkStep<ProcessProductStepConfigura
         String tableName = NamingUtils.timestamp(role.name());
         Table productTable = toTable(tableName, result.getTargets().get(0));
         metadataProxy.createTable(customerSpace.toString(), tableName, productTable);
-        dataCollectionProxy.upsertTable(customerSpace.toString(), tableName, role, active);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), tableName, role, inactive);
 
         MergeProductReport report = JsonUtils.deserialize(result.getOutput(), MergeProductReport.class);
         DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
@@ -130,18 +126,10 @@ public class MergeProductSpark extends BaseSparkStep<ProcessProductStepConfigura
                 TableRoleInCollection.ConsolidatedProduct, active);
         if (currentTable != null) {
             log.info("Found consolidated product table with version " + active);
-        } else {
-            currentTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.ConsolidatedProduct,
-                    inactive);
-            if (currentTable != null) {
-                log.info("Found consolidated product table with version " + inactive);
-            }
-        }
-        if (currentTable == null) {
-            log.info("There is no ConsolidatedProduct table with version " + active + " and " + inactive);
-            return null;
-        } else {
             return currentTable.toHdfsDataUnit("old");
+        } else {
+            log.info("There is no ConsolidatedProduct table with version " + active);
+            return null;
         }
     }
 

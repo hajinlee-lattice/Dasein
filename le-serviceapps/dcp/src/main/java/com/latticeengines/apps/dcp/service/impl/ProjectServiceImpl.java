@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
 @Service("projectService")
@@ -81,9 +82,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDetails> getAllProject(String customerSpace) {
+    public List<ProjectSummary> getAllProject(String customerSpace) {
         List<Project> projectList = projectEntityMgr.findAll();
-        return projectList.stream().map(project-> getProjectDetails(customerSpace, project)).collect(Collectors.toList());
+        return projectList.stream().map(project-> getProjectSummary(customerSpace, project)).collect(Collectors.toList());
     }
 
     @Override
@@ -170,6 +171,24 @@ public class ProjectServiceImpl implements ProjectService {
         details.setUpdated(project.getUpdated());
         details.setCreatedBy(project.getCreatedBy());
         return details;
+    }
+
+    private ProjectSummary getProjectSummary(String customerSpace, Project project) {
+        ProjectSummary summary = new ProjectSummary();
+        summary.setProjectId(project.getProjectId());
+        summary.setProjectDisplayName(project.getProjectDisplayName());
+        summary.setArchieved(project.getDeleted());
+        summary.setRecipientList(project.getRecipientList());
+        if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
+            summary.setSources(new ArrayList<>());
+            project.getS3ImportSystem().getTasks()
+                    .forEach(task -> {
+                        if (!Boolean.TRUE.equals(task.getDeleted())) {
+                            summary.getSources().add(sourceService.convertToSource(customerSpace, task));
+                        }
+                    });
+        }
+        return summary;
     }
 
     private Project generateProjectObject(String projectId, String displayName,

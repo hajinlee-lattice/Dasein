@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.pls.service.dcp.ProjectService;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 
@@ -28,7 +29,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDetails> getAllProjects(String customerSpace) {
+    public List<ProjectSummary> getAllProjects(String customerSpace) {
         return projectProxy.getAllDCPProject(customerSpace);
     }
 

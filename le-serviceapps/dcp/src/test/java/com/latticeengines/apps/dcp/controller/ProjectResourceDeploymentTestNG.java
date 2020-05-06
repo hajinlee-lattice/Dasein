@@ -19,6 +19,7 @@ import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
 
 public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
@@ -54,12 +55,12 @@ public class ProjectResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         projectRequest.setProjectId("getalltest2");
         projectProxy.createDCPProject(mainTestTenant.getId(), projectRequest, "test@lattice-engines.com");
 
-        List<ProjectDetails> result = projectProxy.getAllDCPProject(mainTestTenant.getId());
+        List<ProjectSummary> result = projectProxy.getAllDCPProject(mainTestTenant.getId());
         assertNotNull(result);
         Set<String> projectIds = new HashSet<>(Arrays.asList("getalltest1", "getalltest2"));
-        for (ProjectDetails project: result) {
+        for (ProjectSummary project: result) {
             if (project.getProjectId().equals("createtest")) {
-                Assert.assertEquals(project.getDeleted(), Boolean.TRUE);
+                Assert.assertEquals(project.getArchieved(), Boolean.TRUE);
             } else {
                 projectIds.remove(project.getProjectId());
             }
