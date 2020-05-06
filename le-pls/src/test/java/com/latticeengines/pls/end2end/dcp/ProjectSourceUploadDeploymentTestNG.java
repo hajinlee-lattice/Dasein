@@ -150,7 +150,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         UploadDetails uploadDetail = uploadDetails.get(0);
         UploadDetails retrievedDetail = uploadService.getByUploadId(uploadDetail.getUploadId());
         Assert.assertEquals(JsonUtils.serialize(uploadDetail), JsonUtils.serialize(retrievedDetail));
-        String token = uploadService.generateToken(retrievedDetail.getUploadId().toString());
+        String token = uploadService.generateToken(retrievedDetail.getUploadId());
         Assert.assertNotNull(token);
     }
 
@@ -222,7 +222,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         String prefix = object + "drop/";
         Assert.assertTrue(s3Service.objectExist(bucket, object));
         Assert.assertTrue(s3Service.objectExist(bucket, prefix));
-        Assert.assertTrue(s3Service.objectExist(bucket, object + "upload/"));
+        Assert.assertTrue(s3Service.objectExist(bucket, object + "Uploads/"));
 
         BasicAWSCredentialsProvider creds = //
                 new BasicAWSCredentialsProvider(response.getAccessKey(), response.getSecretKey());
