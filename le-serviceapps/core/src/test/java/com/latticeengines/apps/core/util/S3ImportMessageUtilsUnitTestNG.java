@@ -12,7 +12,7 @@ public class S3ImportMessageUtilsUnitTestNG {
         String dcpKey = "dropfolder/08vdzz2k/Projects/Project_xc51mzph/Source/Source_5aggfg55/drop/Account.csv";
         String dcpKey2 = "dropfolder/08vdzz2k/Projects/Project_xc51mzph/Sources/Source_5aggfg55/drop/Account.csv";
         String atlasKey = "dropfolder/08vdzz2k/Templates/DefaultSystem_AccountData/Account part1.CSV";
-        String invalidKey1 = "dropfolder/08vdzz2k/Projects/Project_xc51mzph/Source/Source_5aggfg55/upload/Account.csv";
+        String invalidKey1 = "dropfolder/08vdzz2k/Projects/Project_xc51mzph/Source/Source_5aggfg55/Uploads/Account.csv";
         String invalidKey2 = "dropfolder/08vdzz2k/Projects/Project_xc51mzph/Source/Source_5aggfg55/drop/";
         Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(dcpKey), S3ImportMessageType.DCP);
         Assert.assertEquals(S3ImportMessageUtils.getMessageTypeFromKey(dcpKey2), S3ImportMessageType.DCP);
