@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
+import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -94,6 +95,17 @@ public class MergeProductSpark extends BaseSparkStep<ProcessProductStepConfigura
         dataCollectionProxy.upsertTable(customerSpace.toString(), tableName, role, active);
 
         MergeProductReport report = JsonUtils.deserialize(result.getOutput(), MergeProductReport.class);
+        DataLimit dataLimit = getObjectFromContext(DATAQUOTA_LIMIT, DataLimit.class);
+        if (dataLimit.getProductBundleDataQuotaLimit() < report.getAnalyticProducts()) {
+            throw new IllegalStateException(
+                    "the Analytics Product data quota limit is " + dataLimit.getProductBundleDataQuotaLimit()
+                            + ", The data you uploaded has exceeded the limit.");
+        }
+        if (dataLimit.getProductSkuDataQuotaLimit() < report.getSpendingProducts()) {
+            throw new IllegalStateException(
+                    "the Spending Product data quota limit is " + dataLimit.getProductSkuDataQuotaLimit()
+                            + ", The data you uploaded has exceeded the limit.");
+        }
         updateReport(report);
     }
 
