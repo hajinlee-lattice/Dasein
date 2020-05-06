@@ -180,7 +180,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
         } else if (sourceSchemaInterpretation.equals(SchemaInterpretation.SalesforceLead.name())) {
             return ModelType.CONTACT;
         } else if (sourceSchemaInterpretation.equals(SchemaInterpretation.SalesforceAccount.name()) //
-                || sourceSchemaInterpretation.equals(SchemaInterpretation.Account.name())) {
+                || sourceSchemaInterpretation.equals(SchemaInterpretation.Account.name()) //
+                || sourceSchemaInterpretation.equals(SchemaInterpretation.ModelAccount.name())) {
             return ModelType.ACCOUNT;
         }
         return null;

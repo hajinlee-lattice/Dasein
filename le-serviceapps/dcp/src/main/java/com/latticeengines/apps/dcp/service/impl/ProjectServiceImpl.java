@@ -166,6 +166,9 @@ public class ProjectServiceImpl implements ProjectService {
                     });
         }
         details.setRecipientList(project.getRecipientList());
+        details.setCreated(project.getCreated());
+        details.setUpdated(project.getUpdated());
+        details.setCreatedBy(project.getCreatedBy());
         return details;
     }
 
