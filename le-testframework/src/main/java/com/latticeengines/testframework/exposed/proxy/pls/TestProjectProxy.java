@@ -8,6 +8,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 
 @Component("testProjectProxy")
 public class TestProjectProxy extends PlsRestApiProxyBase {
@@ -33,9 +34,9 @@ public class TestProjectProxy extends PlsRestApiProxyBase {
         return post("createProject", url, request, ProjectDetails.class);
     }
 
-    public List<ProjectDetails> getAllProjects() {
+    public List<ProjectSummary> getAllProjects() {
         List<?> raw = get("getAllProjects", constructUrl("/list"), List.class);
-        return JsonUtils.convertList(raw, ProjectDetails.class);
+        return JsonUtils.convertList(raw, ProjectSummary.class);
     }
 
     public ProjectDetails getProjectByProjectId(String projectId) {

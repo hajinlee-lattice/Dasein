@@ -11,6 +11,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
+import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -45,11 +46,11 @@ public class ProjectProxy extends MicroserviceRestApiProxy implements ProxyInter
         return responseDoc.getResult();
     }
 
-    public List<ProjectDetails> getAllDCPProject(String customerSpace) {
+    public List<ProjectSummary> getAllDCPProject(String customerSpace) {
         String url = "/customerspaces/{customerSpace}/project/list";
         url = constructUrl(url, customerSpace);
         List<?> results = get("get all dcp project", url, List.class);
-        return JsonUtils.convertList(results, ProjectDetails.class);
+        return JsonUtils.convertList(results, ProjectSummary.class);
     }
 
     public ProjectDetails getDCPProjectByProjectId(String customerSpace, String projectId) {
