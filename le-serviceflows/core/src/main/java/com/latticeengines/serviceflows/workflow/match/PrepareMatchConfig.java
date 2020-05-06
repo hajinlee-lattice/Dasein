@@ -167,7 +167,8 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         Map<MatchKey, List<String>> matchInputKeys = new HashMap<>();
         if (configuration.getSourceSchemaInterpretation() != null && (configuration.getSourceSchemaInterpretation()
                 .equals(SchemaInterpretation.SalesforceAccount.toString())
-                || configuration.getSourceSchemaInterpretation().equals(SchemaInterpretation.Account.toString()))) {
+                || configuration.getSourceSchemaInterpretation().equals(SchemaInterpretation.Account.toString())
+                || configuration.getSourceSchemaInterpretation().equals(SchemaInterpretation.ModelAccount.toString()))) {
             if (preMatchEventTable.getAttribute(InterfaceName.Website.name()) == null
                     || (preMatchEventTable.getAttribute(InterfaceName.Website.name()).getApprovedUsage() != null
                             && preMatchEventTable.getAttribute(InterfaceName.Website.name()).getApprovedUsage()
