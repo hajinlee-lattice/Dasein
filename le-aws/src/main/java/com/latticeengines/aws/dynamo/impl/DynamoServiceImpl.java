@@ -151,7 +151,7 @@ public class DynamoServiceImpl implements DynamoService {
          * <code>PAY_PER_REQUEST</code> the value is set to 0
          */
         ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput()
-                .withReadCapacityUnits(0).withWriteCapacityUnits(0);
+                .withReadCapacityUnits(0L).withWriteCapacityUnits(0L);
         SSESpecification sseSpecification = new SSESpecification().withEnabled(true);
         if (StringUtils.isNotBlank(customerCMK)) {
             sseSpecification.withKMSMasterKeyId(customerCMK).withSSEType(SSEType.KMS);
