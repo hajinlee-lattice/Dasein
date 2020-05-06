@@ -1408,11 +1408,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Assert.assertNotNull(segment2);
     }
 
-    MetadataSegment createTestSegment3() {
+    void createTestSegment3() {
         testMetadataSegmentProxy.createOrUpdate(constructTestSegment3());
         MetadataSegment segment3 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_3);
         Assert.assertNotNull(segment3);
-        return segment3;
     }
 
     void createTestSegmentCuratedAttr() {
