@@ -126,18 +126,10 @@ public class MergeProductSpark extends BaseSparkStep<ProcessProductStepConfigura
                 TableRoleInCollection.ConsolidatedProduct, active);
         if (currentTable != null) {
             log.info("Found consolidated product table with version " + active);
-        } else {
-            currentTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.ConsolidatedProduct,
-                    inactive);
-            if (currentTable != null) {
-                log.info("Found consolidated product table with version " + inactive);
-            }
-        }
-        if (currentTable == null) {
-            log.info("There is no ConsolidatedProduct table with version " + active + " and " + inactive);
-            return null;
-        } else {
             return currentTable.toHdfsDataUnit("old");
+        } else {
+            log.info("There is no ConsolidatedProduct table with version " + active);
+            return null;
         }
     }
 
