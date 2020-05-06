@@ -200,7 +200,8 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         if (modelSummary != null
                 && (SchemaInterpretation.SalesforceAccount.name().equals(modelSummary.getSourceSchemaInterpretation()) //
-                        || SchemaInterpretation.Account.name().equals(modelSummary.getSourceSchemaInterpretation()))
+                        || SchemaInterpretation.Account.name().equals(modelSummary.getSourceSchemaInterpretation()) //
+                        || SchemaInterpretation.ModelAccount.name().equals(modelSummary.getSourceSchemaInterpretation())) //
                 && interpreted.getWebsite() != null) {
             keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getWebsite()));
             addToKeyMapIfValueExists(keyMap, MatchKey.PhoneNumber, interpreted.getPhoneNumber(), record);
