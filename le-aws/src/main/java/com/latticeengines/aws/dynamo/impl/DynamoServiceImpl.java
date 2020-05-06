@@ -17,7 +17,6 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.retry.RetryUtils;
 import com.amazonaws.services.applicationautoscaling.AWSApplicationAutoScalingClient;
 import com.amazonaws.services.applicationautoscaling.AWSApplicationAutoScalingClientBuilder;
 import com.amazonaws.services.applicationautoscaling.model.DeleteScalingPolicyRequest;
@@ -55,6 +54,7 @@ import com.amazonaws.services.dynamodbv2.model.TagResourceResult;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.common.exposed.aws.DynamoOperation;
+import com.latticeengines.common.exposed.util.RetryUtils;
 
 @Component("dynamoService")
 public class DynamoServiceImpl implements DynamoService {
@@ -145,13 +145,8 @@ public class DynamoServiceImpl implements DynamoService {
                     .add(new AttributeDefinition().withAttributeName(sortKeyName).withAttributeType(sortKeyType));
         }
 
-        /*
-         * Marking all Dynamo tables as onDemand : As per guidelines in
-         * ProvisionedThroughput class, if read/write capacity mode is
-         * <code>PAY_PER_REQUEST</code> the value is set to 0
-         */
         ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput()
-                .withReadCapacityUnits(0L).withWriteCapacityUnits(0L);
+                .withReadCapacityUnits(readCapacityUnits).withWriteCapacityUnits(writeCapacityUnits);
         SSESpecification sseSpecification = new SSESpecification().withEnabled(true);
         if (StringUtils.isNotBlank(customerCMK)) {
             sseSpecification.withKMSMasterKeyId(customerCMK).withSSEType(SSEType.KMS);
