@@ -21,8 +21,6 @@ public interface UploadProxy {
 
     void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig);
 
-//    void updateUploadStats(String customerSpace, String uploadId, UploadStats uploadStats);
-
     void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status);
 
     void updateStatsContent(String customerSpace, String uploadId, long statsPid, UploadStats uploadStats);

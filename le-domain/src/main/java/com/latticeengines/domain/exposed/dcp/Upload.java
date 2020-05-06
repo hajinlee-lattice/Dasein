@@ -178,13 +178,13 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
         this.matchCandidates = matchCandidates;
     }
 
-    // TODO: more specific status.
     public enum Status{
         NEW,
         IMPORT_STARTED,
         IMPORT_FINISHED,
         MATCH_STARTED,
         MATCH_FINISHED,
-        FINISHED
+        FINISHED,
+        ERROR
     }
 }
