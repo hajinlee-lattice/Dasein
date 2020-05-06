@@ -35,7 +35,7 @@ public class SourceServiceImpl implements SourceService {
 
     private static final String DATA_FEED_TASK_SOURCE = "DCP";
     private static final String DROP_FOLDER = "drop/";
-    private static final String UPLOAD_FOLDER = "upload/";
+    private static final String UPLOAD_FOLDER = "Uploads/";
     private static final String SOURCE_RELATIVE_PATH_PATTERN = "Sources/%s/";
     private static final String RANDOM_SOURCE_ID_PATTERN = "Source_%s";
     private static final String TEMPLATE_NAME = "%s_Template";

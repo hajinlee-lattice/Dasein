@@ -90,7 +90,7 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
         s3Service.objectExist(dropBoxSummary.getBucket(),
                 dropBoxService.getDropBoxPrefix() + "/" + source2.getRelativePathUnderDropfolder() + "drop/");
         s3Service.objectExist(dropBoxSummary.getBucket(),
-                dropBoxService.getDropBoxPrefix() + "/" + source2.getRelativePathUnderDropfolder() + "upload/");
+                dropBoxService.getDropBoxPrefix() + "/" + source2.getRelativePathUnderDropfolder() + "Uploads/");
 
     }
 
