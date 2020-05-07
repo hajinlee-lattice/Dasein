@@ -2,6 +2,7 @@ package com.latticeengines.spark.exposed.job.cdl
 
 import java.util
 
+import com.latticeengines.common.exposed.util.DateTimeUtils
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity.{AtlasStream, StreamAttributeDeriver, StreamDimension}
@@ -28,25 +29,28 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
     val calendar: BusinessCalendar = config.businessCalendar
     val incrementalStreams = config.incrementalStreams
+    val evaluationDate = config.evaluationDate
 
     val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
     val detailsMap = new util.HashMap[String, Details]() // streamId -> details
     var periodStores: Seq[DataFrame] = Seq()
     streams.foreach(stream => {
+      val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(stream.getPeriods, calendar), evaluationDate)
       val streamId: String = stream.getStreamId
       val inputDetails = inputMetadata.getMetadata.get(streamId)
       val outputDetails: Details = new Details()
       outputDetails.setStartIdx(periodStores.size)
       outputDetails.setLabels(stream.getPeriods)
       detailsMap.put(stream.getStreamId, outputDetails)
+
       if (incrementalStreams.contains(stream.getStreamId)) {
         val dailyStoreDelta: DataFrame = input(inputDetails.getStartIdx + inputDetails.getLabels.size) // last one in stream's section
         // get period store delta tables in same order as stream periods list
-        val periodStoreDelta: Seq[DataFrame] = processDailyStore(dailyStoreDelta, stream, config.evaluationDate, calendar)
-        val updatedPeriodStore: Seq[DataFrame] = updatePeriodStoreBatch(stream, periodStoreDelta, lattice)
+        val periodStoreDelta: Seq[DataFrame] = processDailyStore(dailyStoreDelta, stream, translator)
+        val updatedPeriodStore: Seq[DataFrame] = updatePeriodStoreBatch(stream, periodStoreDelta, lattice, translator)
         periodStores = periodStores ++ updatedPeriodStore
       } else {
-        periodStores = periodStores ++ processDailyStore(input(inputDetails.getStartIdx), stream, config.evaluationDate, calendar)
+        periodStores = periodStores ++ processDailyStore(input(inputDetails.getStartIdx), stream, translator)
       }
     })
     outputMetadata.setMetadata(detailsMap)
@@ -57,7 +61,7 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     lattice.outputStr = serializeJson(outputMetadata)
   }
 
-  def updatePeriodStoreBatch(stream: AtlasStream, periodStoreDelta: Seq[DataFrame], lattice: LatticeContext[DailyStoreToPeriodStoresJobConfig]): Seq[DataFrame] = {
+  def updatePeriodStoreBatch(stream: AtlasStream, periodStoreDelta: Seq[DataFrame], lattice: LatticeContext[DailyStoreToPeriodStoresJobConfig], translator: TimeFilterTranslator): Seq[DataFrame] = {
     if (lattice.config.streamsWithNoBatch.contains(stream.getStreamId)) {
       periodStoreDelta
     } else {
@@ -65,7 +69,13 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
       val inputDetails = lattice.config.inputMetadata.getMetadata.get(stream.getStreamId)
       var offset: Int = 0
       periodStoreDelta.foreach(deltaTable => {
-        val periodBatch: DataFrame = lattice.input(inputDetails.getStartIdx + offset)
+        var periodBatch: DataFrame = lattice.input(inputDetails.getStartIdx + offset)
+        val period: String = inputDetails.getLabels()(offset)
+        if (stream.getRetentionDays != null) {
+          val startDate: String = DateTimeUtils.subtractDays(lattice.config.evaluationDate, stream.getRetentionDays)
+          val bound: Integer = translator.dateToPeriod(period, startDate)
+          periodBatch = periodBatch.filter(periodBatch(PeriodId.name).geq(bound))
+        }
         updatedPeriodStore :+= updatePeriodBatchWithDelta(periodBatch, deltaTable, stream)
         offset += 1
       })
@@ -77,22 +87,36 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     val affectedPeriods = deltaTable.select(PeriodId.name).distinct.rdd.map(r => r(0).asInstanceOf[Int]).collect()
     val columns: Seq[String] = DeriveAttrsUtils.getEntityIdColsFromStream(stream) ++ (stream.getDimensions.map(_.getName) :+ PeriodId.name)
 
-    val updatedSubTable: DataFrame = MergeUtils.concat2(periodBatch.filter(col(PeriodId.name).isInCollection(affectedPeriods)), deltaTable)
-      .groupBy(columns.head, columns.tail: _*)
-      .agg(sum(__Row_Count__.name).as(__Row_Count__.name), max(LastActivityDate.name).as(LastActivityDate.name))
+    val affected: DataFrame = periodBatch.filter(col(PeriodId.name).isInCollection(affectedPeriods))
+    val notAffected: DataFrame = periodBatch.filter(!col(PeriodId.name).isInCollection(affectedPeriods))
+    val updatedSubTable: DataFrame = {
+      if (Option(stream.getReducer).isEmpty) {
+        MergeUtils.concat2(affected, deltaTable)
+          .groupBy(columns.head, columns.tail: _*)
+          .agg(sum(__Row_Count__.name).as(__Row_Count__.name), max(LastActivityDate.name).as(LastActivityDate.name))
+      } else {
+        val reducer = Option(stream.getReducer).get
+
+        if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator)) {
+          if (!reducer.getGroupByFields.contains(PeriodId.name)) {
+            reducer.getGroupByFields.append(PeriodId.name) // separate by each period if filter is applied for time
+          }
+        }
+        DeriveAttrsUtils.applyReducer(MergeUtils.concat2(affected, deltaTable), reducer)
+      }
+    }
     MergeUtils.concat2(
       DeriveAttrsUtils.appendPartitionColumns(updatedSubTable, Seq(PeriodId.name)),
-      periodBatch.filter(!periodBatch(PeriodId.name).isInCollection(affectedPeriods))
+      notAffected
     )
   }
 
-  private def processDailyStore(dailyStore: DataFrame, stream: AtlasStream, evaluationDate: String, calendar: BusinessCalendar): Seq[DataFrame] = {
+  private def processDailyStore(dailyStore: DataFrame, stream: AtlasStream, translator: TimeFilterTranslator): Seq[DataFrame] = {
     val periods: Seq[String] = stream.getPeriods.toSeq
     val dimensions: Seq[StreamDimension] = stream.getDimensions.toSeq
     val aggregations: Seq[StreamAttributeDeriver] =
       if (Option(stream.getAttributeDerivers).isEmpty) Seq()
       else stream.getAttributeDerivers.toSeq
-    val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(periods, calendar), evaluationDate)
 
     // for each requested period name (week, month, etc.):
     //  a: append periodId column based on date and period name
@@ -123,7 +147,9 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
       val reducer = Option(stream.getReducer).get
 
       if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator)) {
-        reducer.getGroupByFields.append(PeriodId.name) // separate by each period if filter is applied for time
+        if (!reducer.getGroupByFields.contains(PeriodId.name)) {
+          reducer.getGroupByFields.append(PeriodId.name) // separate by each period if filter is applied for time
+        }
       }
       df = DeriveAttrsUtils.applyReducer(df, reducer)
     }

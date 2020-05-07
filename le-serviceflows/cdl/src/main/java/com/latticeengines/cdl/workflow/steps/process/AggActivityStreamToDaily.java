@@ -98,7 +98,7 @@ public class AggActivityStreamToDaily
         Set<AtlasStream> notSkippedStream = streams.values().stream().filter(stream -> !skippedStreamIds.contains(stream.getStreamId())).collect(Collectors.toSet());
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         config.incrementalStreams = notSkippedStream.stream()
-                .filter(stream -> shouldIncrUpdate(stream) && rawStreamDeltaTables.get(stream.getStreamId()) != null)
+                .filter(stream -> shouldIncrUpdate() && rawStreamDeltaTables.get(stream.getStreamId()) != null)
                 .map(AtlasStream::getStreamId)
                 .collect(Collectors.toSet());
         streamsIncrUpdated.addAll(config.incrementalStreams);
@@ -138,11 +138,12 @@ public class AggActivityStreamToDaily
                 config.dimensionCalculatorMap.put(streamId, calculatorMap);
                 config.hashDimensionMap.put(streamId, hashDimensions);
                 config.additionalDimAttrMap.put(streamId, additionalDimAttrs);
-                config.streamReducerMap.put(streamId, stream.getReducer());
+                if (stream.getReducer() != null) {
+                    config.streamReducerMap.put(streamId, stream.getReducer());
+                }
                 if (stream.getRetentionDays() != null) {
                     config.streamRetentionDays.put(streamId, stream.getRetentionDays());
                 }
-                config.streamRetentionDays.put(streamId, stream.getRetentionDays());
             });
             if (notSkippedStream.isEmpty()) {
                 log.info("All streams are skipped for daily aggregation, skipping step entirely");
@@ -204,8 +205,8 @@ public class AggActivityStreamToDaily
         return allTablesExist(dailyTableNames);
     }
 
-    private boolean shouldIncrUpdate(AtlasStream stream) {
-        return stream.getReducer() == null && !configuration.isShouldRebuild();
+    private boolean shouldIncrUpdate() {
+        return !configuration.isShouldRebuild();
     }
 
     @Override
