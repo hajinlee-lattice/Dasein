@@ -31,6 +31,9 @@ public class UploadConfig {
     @JsonProperty("upload_imported_error_file_path")
     private String uploadImportedErrorFilePath;
 
+    @JsonProperty("source_on_hdfs")
+    private Boolean sourceOnHdfs;
+
     public String getDropFilePath() {
         return dropFilePath;
     }
@@ -85,6 +88,14 @@ public class UploadConfig {
 
     public void setUploadImportedErrorFilePath(String uploadImportedErrorFilePath) {
         this.uploadImportedErrorFilePath = uploadImportedErrorFilePath;
+    }
+
+    public Boolean getSourceOnHdfs() {
+        return sourceOnHdfs;
+    }
+
+    public void setSourceOnHdfs(Boolean sourceOnHdfs) {
+        this.sourceOnHdfs = sourceOnHdfs;
     }
 
     public List<String> getDownloadPaths() {

@@ -1,5 +1,8 @@
 package com.latticeengines.dcp.workflow.steps;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 
 import javax.inject.Inject;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -98,18 +102,44 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
                 uploadRaw, csvFileName));
 
         // Copy file from drop folder to raw input folder.
-        RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
-                Collections.singleton(AmazonS3Exception.class), null);
-        retry.execute(context -> {
-            if (context.getRetryCount() > 0) {
-                log.info(String.format("(Attempt=%d) Retry copying object from %s:%s to %s:%s", //
-                        context.getRetryCount() + 1, dropBoxSummary.getBucket(), sourceKey,
-                        dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath()));
-            }
-            s3Service.copyLargeObjects(dropBoxSummary.getBucket(), sourceKey, dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath());
-            return true;
-        });
-
+        copyFromDropfolder(upload, dropBoxSummary);
         uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, upload.getUploadConfig());
     }
+
+    private void copyFromDropfolder(UploadDetails upload, DropBoxSummary dropBoxSummary) {
+        String sourceKey = upload.getUploadConfig().getDropFilePath();
+        if (Boolean.TRUE.equals(upload.getUploadConfig().getSourceOnHdfs())) {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                    Arrays.asList(AmazonS3Exception.class, RuntimeException.class), null);
+
+            retry.execute(context -> {
+                if (context.getRetryCount() > 0) {
+                    log.info(String.format("(Attempt=%d) Retry copying object from hdfs:%s to %s:%s", //
+                            context.getRetryCount() + 1, sourceKey,
+                            dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath()));
+                }
+                try (InputStream inputStream = HdfsUtils.getInputStream(yarnConfiguration, sourceKey)) {
+                    s3Service.uploadInputStream(dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath(),
+                            inputStream, true);
+                    return true;
+                } catch (IOException e) {
+                    throw new RuntimeException("Cannot get inputstream for hdfs file: " + sourceKey);
+                }
+            });
+        } else {
+            RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
+                    Collections.singleton(AmazonS3Exception.class), null);
+            retry.execute(context -> {
+                if (context.getRetryCount() > 0) {
+                    log.info(String.format("(Attempt=%d) Retry copying object from %s:%s to %s:%s", //
+                            context.getRetryCount() + 1, dropBoxSummary.getBucket(), sourceKey,
+                            dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath()));
+                }
+                s3Service.copyLargeObjects(dropBoxSummary.getBucket(), sourceKey, dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath());
+                return true;
+            });
+        }
+    }
+
+
 }

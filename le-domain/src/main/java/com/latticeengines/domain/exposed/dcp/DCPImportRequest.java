@@ -19,6 +19,9 @@ public class DCPImportRequest {
     @JsonProperty("s3_file_key")
     private String s3FileKey;
 
+    @JsonProperty("source_file_name")
+    private String sourceFileName;
+
     public String getProjectId() {
         return projectId;
     }
@@ -41,5 +44,13 @@ public class DCPImportRequest {
 
     public void setS3FileKey(String s3FileKey) {
         this.s3FileKey = s3FileKey;
+    }
+
+    public String getSourceFileName() {
+        return sourceFileName;
+    }
+
+    public void setSourceFileName(String sourceFileName) {
+        this.sourceFileName = sourceFileName;
     }
 }
