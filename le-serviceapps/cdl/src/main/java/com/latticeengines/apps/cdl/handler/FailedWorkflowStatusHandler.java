@@ -66,10 +66,11 @@ public class FailedWorkflowStatusHandler implements WorkflowStatusHandler {
             }
             log.info(String.format("WorkflowRequestId %s failed with message: %s", statusMonitor.getWorkflowRequestId(),
                     JsonUtils.serialize(eventDetail)));
-            PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), false);
-            playLaunch.setLaunchState(LaunchState.SyncFailed);
-            playLaunchService.update(playLaunch);
         }
+
+        PlayLaunch playLaunch = playLaunchService.findByLaunchId(statusMonitor.getEntityId(), false);
+        playLaunch.setLaunchState(LaunchState.SyncFailed);
+        playLaunchService.update(playLaunch);
 
         return dataIntegrationStatusMonitoringEntityMgr.updateStatus(statusMonitor);
     }
