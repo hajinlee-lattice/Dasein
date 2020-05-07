@@ -59,7 +59,7 @@ public class S3ImportSystem implements HasPid, HasName, HasTenant, HasTenantId {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("tenant")
