@@ -69,7 +69,7 @@ public interface EmailService {
 
     void sendCDLProcessAnalyzeErrorEmail(User user, Tenant tenant, String appPublicUrl);
 
-    void sendPOCTenantStateNoticeEmail(User user, Tenant tenant, String state, int days);
+    void sendTenantStateNoticeEmail(User user, Tenant tenant, String state, int days);
 
     void sendTenantRightStatusNoticeEmail(User user, Tenant tenant, int days);
 

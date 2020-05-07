@@ -55,7 +55,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
     public Boolean call() throws Exception {
         List<Tenant> tempTenants = tenantService.getTenantByTypes(Arrays.asList(TenantType.POC, TenantType.STAGING));
         if (CollectionUtils.isNotEmpty(tempTenants)) {
-            log.info("Tennats size is " + tempTenants.size());
+            log.info("Tenants size is " + tempTenants.size());
             for (Tenant tenant : tempTenants) {
                 log.info("begin dealing with tenant " + tenant.getName());
                 if (tenant.getExpiredTime() == null) {
@@ -69,15 +69,15 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                     List<User> users = userService.getUsers(tenant.getId());
                     users.forEach(user -> {
                         if (userLevels.contains(user.getAccessLevel())) {
-                            emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
-                            log.info(String.format("send POC tenant %s inactive notification to user %s.",
+                            emailService.sendTenantStateNoticeEmail(user, tenant, "Inaccessible", days);
+                            log.info(String.format("send tenant %s inactive notification to user %s.",
                                     tenant.getName(), user.getUsername()));
                         }
                     });
                 } else if (currentTime > expiredTime && TenantStatus.ACTIVE.equals(tenant.getStatus())) {
                     tenant.setStatus(TenantStatus.INACTIVE);
                     tenantService.updateTenant(tenant);
-                    log.info(String.format("change POC tenant %s status to inactive", tenant.getName()));
+                    log.info(String.format("change tenant %s status to inactive", tenant.getName()));
                 } else if (expiredTime + inAcessPeriod - emailPeriod < currentTime
                         && currentTime < expiredTime + inAcessPeriod) {
                     // send email to user who can visit tenant two weeks before
@@ -86,8 +86,8 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                     List<User> users = userService.getUsers(tenant.getId());
                     users.forEach(user -> {
                         if (userLevels.contains(user.getAccessLevel())) {
-                            emailService.sendPOCTenantStateNoticeEmail(user, tenant, "Deleted", days);
-                            log.info(String.format("send POC tenant %s inaccessible notification to user %s.",
+                            emailService.sendTenantStateNoticeEmail(user, tenant, "Deleted", days);
+                            log.info(String.format("send tenant %s inaccessible notification to user %s.",
                                     tenant.getName(), user.getUsername()));
                         }
                     });
@@ -95,7 +95,7 @@ public class AdminRecycleTenantJobCallable implements Callable<Boolean> {
                 } else if (currentTime > expiredTime + inAcessPeriod) {
                     CustomerSpace space = CustomerSpace.parse(tenant.getId());
                     adminTenantService.deleteTenant("_defaultUser", space.getContractId(), space.getTenantId(), true);
-                    log.info(String.format("POC tenant %s has been deleted", tenant.getName()));
+                    log.info(String.format("tenant %s has been deleted", tenant.getName()));
                 }
             }
         }
