@@ -17,8 +17,10 @@ import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStatsContainer;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 
 @Component
 public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
@@ -28,11 +30,13 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private UploadService uploadService;
 
+    @Inject
+    private SourceFileProxy sourceFileProxy;
+
     @WithWorkflowJobPid
     public ApplicationId submit(CustomerSpace customerSpace, DCPImportRequest importRequest,
                                 WorkflowPidWrapper pidWrapper) {
-        UploadConfig uploadConfig = new UploadConfig();
-        uploadConfig.setDropFilePath(importRequest.getS3FileKey());
+        UploadConfig uploadConfig = generateUploadConfig(customerSpace, importRequest);
         UploadDetails upload = uploadService.createUpload(customerSpace.toString(), importRequest.getSourceId(), uploadConfig);
         UploadStatsContainer container = new UploadStatsContainer();
         container = uploadService.appendStatistics(upload.getUploadId(), container);
@@ -43,6 +47,23 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
         Job job = workflowJobService.findByApplicationId(applicationId.toString());
         uploadService.updateStatsWorkflowPid(upload.getUploadId(), container.getPid(), job.getPid());
         return applicationId;
+    }
+
+    private UploadConfig generateUploadConfig(CustomerSpace customerSpace, DCPImportRequest importRequest) {
+        UploadConfig uploadConfig = new UploadConfig();
+        if (StringUtils.isNotEmpty(importRequest.getSourceFileName())) {
+            SourceFile sourceFile = sourceFileProxy.findByName(customerSpace.toString(),
+                    importRequest.getSourceFileName());
+            if (sourceFile == null || StringUtils.isEmpty(sourceFile.getPath())) {
+                throw new IllegalArgumentException(String.format("Not a valid source file %s to import!",
+                        importRequest.getSourceFileName()));
+            }
+            uploadConfig.setSourceOnHdfs(Boolean.TRUE);
+            uploadConfig.setDropFilePath(sourceFile.getPath());
+        } else {
+            uploadConfig.setDropFilePath(importRequest.getS3FileKey());
+        }
+        return uploadConfig;
     }
 
     private DCPSourceImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace, String projectId,
