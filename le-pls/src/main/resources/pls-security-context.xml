@@ -532,7 +532,7 @@
                    create-session="stateless">
         <security:csrf disabled="true"/>
         <security:custom-filter ref="restServicesFilter" before="PRE_AUTH_FILTER"/>
-        <security:intercept-url pattern="/pls/source/**" access="hasRole('View_DCP_Projects')"/>
+        <security:intercept-url pattern="/pls/sources/**" access="hasRole('View_DCP_Projects')"/>
     </security:http>
 
     <security:http use-expressions="true"

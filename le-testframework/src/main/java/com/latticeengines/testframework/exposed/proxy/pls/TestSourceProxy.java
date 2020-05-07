@@ -2,17 +2,21 @@ package com.latticeengines.testframework.exposed.proxy.pls;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
+import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 
 @Component("testSourceProxy")
 public class TestSourceProxy extends PlsRestApiProxyBase {
 
     public TestSourceProxy() {
-        super("pls/source");
+        super("pls/sources");
     }
 
     public Source createSource(SourceRequest sourceRequest) {
@@ -39,5 +43,23 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
     public void pauseSourceById(String sourceId) {
         String url = constructUrl("/sourceId/{sourceId}/pause", sourceId);
         put("pause source", url);
+    }
+
+    public FetchFieldDefinitionsResponse fetchDefinitions(String sourceId, String entityType,
+                                                          String importFile) {
+        String url = constructUrl("/fetch/?importFile={importFile}", importFile);
+        if (StringUtils.isNotBlank(sourceId)) {
+            url += "&sourceId=" + sourceId;
+        }
+        if (StringUtils.isNotBlank(entityType)) {
+            url += "&entityType=" + entityType;
+        }
+        return get("get definitions", url, FetchFieldDefinitionsResponse.class);
+    }
+
+    public ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile,
+                                                                     ValidateFieldDefinitionsRequest validateRequest) {
+        String url = constructUrl("/validate/?importFile={importFile}", importFile);
+        return post("validate definitions", url, validateRequest, ValidateFieldDefinitionsResponse.class);
     }
 }
