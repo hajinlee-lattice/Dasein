@@ -56,6 +56,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final String TEST_DATA_VERSION = "4";
     private static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
+    private static final String TEST_ACCOUNT_ERROR_FILE = "Account_dup_header.csv";
 
     @Inject
     private DropBoxProxy dropBoxProxy;
@@ -104,6 +105,31 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         uploadId = upload.getUploadId();
 
         verifyImport();
+    }
+
+    @Test(groups = "deployment")
+    public void testErrorImport() {
+
+        DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(mainCustomerSpace);
+        String dropPath = UploadS3PathBuilderUtils.getDropRoot(projectDetails.getProjectId(), source.getSourceId());
+        dropPath = UploadS3PathBuilderUtils.combinePath(false, true,
+                UploadS3PathBuilderUtils.getDropFolder(dropBoxSummary.getDropBox()), dropPath);
+        String errorFileKey = dropPath + TEST_ACCOUNT_ERROR_FILE;
+        testArtifactService.copyTestArtifactFile(TEST_DATA_DIR, TEST_DATA_VERSION, TEST_ACCOUNT_ERROR_FILE, s3Bucket,
+                errorFileKey);
+
+        DCPImportRequest request = new DCPImportRequest();
+        request.setProjectId(projectDetails.getProjectId());
+        request.setSourceId(source.getSourceId());
+        request.setS3FileKey(errorFileKey);
+        ApplicationId applicationId = dcpProxy.startImport(mainCustomerSpace, request);
+        JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
+        Assert.assertEquals(completedStatus, JobStatus.FAILED);
+        List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
+        Assert.assertNotNull(uploadList);
+        Assert.assertEquals(uploadList.size(), 2);
+        UploadDetails upload = uploadList.get(1);
+        Assert.assertEquals(upload.getStatus(), Upload.Status.ERROR);
     }
 
     private void verifyImport() {
