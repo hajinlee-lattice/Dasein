@@ -218,8 +218,7 @@ public class DataLakeAccountResource {
             }
 
             DataPage accountRawData = dataLakeService.getAccountById(accountId,
-                    new ArrayList<>(requiredAccountAttributes),
-                    oauth2RestApiProxy.getOrgInfoFromOAuthRequest(authToken));
+                    new ArrayList<>(requiredAccountAttributes), getOrgInfo(authToken));
             if (accountRawData.getData().size() != 1) {
                 String message = MessageFormat.format(LedpCode.LEDP_39003.getMessage(), "Account",
                         accountRawData.getData().size());
@@ -246,7 +245,7 @@ public class DataLakeAccountResource {
     @ApiOperation(value = "Get all contacts for the given account by id")
     public DataPage getAllContactsByAccountId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId) {
-        Map<String, String> orgInfo = oauth2RestApiProxy.getOrgInfoFromOAuthRequest(authToken);
+        Map<String, String> orgInfo = getOrgInfo(authToken);
         return dataLakeService.getAllContactsByAccountId(accountId, orgInfo);
     }
 
@@ -256,7 +255,7 @@ public class DataLakeAccountResource {
     public DataPage getContactByAccountIdContactId(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
             @PathVariable String contactId) {
-        Map<String, String> orgInfo = oauth2RestApiProxy.getOrgInfoFromOAuthRequest(authToken);
+        Map<String, String> orgInfo = getOrgInfo(authToken);
         return dataLakeService.getContactByAccountIdAndContactId(contactId, accountId, orgInfo);
     }
 
@@ -269,12 +268,11 @@ public class DataLakeAccountResource {
     private DataPage getAccountById(String authToken, String accountId, Predefined attributeGroup,
             List<String> requiredAttributes) {
         return CollectionUtils.isEmpty(requiredAttributes) //
-                ? dataLakeService.getAccountById(accountId, attributeGroup, getOrgInfoFromOAuthRequest(authToken))
-                : dataLakeService.getAccountById(accountId, attributeGroup, getOrgInfoFromOAuthRequest(authToken),
-                        requiredAttributes);
+                ? dataLakeService.getAccountById(accountId, attributeGroup, getOrgInfo(authToken))
+                : dataLakeService.getAccountById(accountId, attributeGroup, getOrgInfo(authToken), requiredAttributes);
     }
 
-    private Map<String, String> getOrgInfoFromOAuthRequest(String token) {
+    private Map<String, String> getOrgInfo(String token) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         try {
             return oauth2RestApiProxy.getOrgInfoFromOAuthRequest(token);
