@@ -27,7 +27,7 @@ public class EmailSettings {
     public static final String PLS_METADATA_ORPHAN_RECORDS_EXPORT_IN_PROGRESS_SUBJECT = "Segment Orphan Export – Running";
     public static final String CDL_PA_COMPLETION_EMAIL_SUBJECT = "Lattice Job – Success";
     public static final String CDL_PA_ERROR_EMAIL_SUBJECT = "Lattice Job – Error";
-    public static final String TENANT_STATE_NOTICE_EMAIL_SUBJECT = "POC Tenant State";
+    public static final String TENANT_STATE_NOTICE_EMAIL_SUBJECT = "%s Tenant State";
     public static final String S3_CREDENTIALS_EMAIL_SUBJECT = "S3 Credentials – Generated Key";
     public static final String CDL_INGESTION_STATUS_SUBJECT = "Lattice Ingestion Job - %s";
     public static final String S3_TEMPLATE_UPDATE_SUBJECT = "S3 Credentials – Template updated";

@@ -581,7 +581,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPOCTenantStateNoticeEmail(User user, Tenant tenant, String state, int days) {
+    public void sendTenantStateNoticeEmail(User user, Tenant tenant, String state, int days) {
         try {
             log.info("Sending tenant access change notice email to " + user.getEmail() + " on " + tenant.getName()
                     + " started.");
@@ -594,7 +594,7 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{days}}", String.valueOf(days));
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
-            sendMultiPartEmail(EmailSettings.TENANT_STATE_NOTICE_EMAIL_SUBJECT, mp,
+            sendMultiPartEmail(String.format(EmailSettings.TENANT_STATE_NOTICE_EMAIL_SUBJECT, tenant.getTenantType()), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending tenant access change email to " + user.getEmail() + " on " + tenant.getName()
                     + " succeeded.");
