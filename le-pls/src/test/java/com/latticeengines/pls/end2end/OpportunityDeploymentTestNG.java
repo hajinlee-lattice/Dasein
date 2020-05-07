@@ -3,7 +3,9 @@ package com.latticeengines.pls.end2end;
 import static org.testng.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -17,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -47,7 +50,10 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
 
     @BeforeClass(groups = "deployment-app")
     public void setup() throws Exception {
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
+        String featureFlag = LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName();
+        Map<String, Boolean> flags = new HashMap<>();
+        flags.put(featureFlag, true);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG, flags);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = mainTestTenant.getId();
     }
@@ -128,7 +134,7 @@ public class OpportunityDeploymentTestNG extends CSVFileImportDeploymentTestNGBa
         String csvFileName = "importOpportunity.csv";
         String entity = BusinessEntity.ActivityStream.name();
         SourceFile sourceFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
-                SchemaInterpretation.valueOf(entity), entity, csvFileName,
+                SchemaInterpretation.Opportunity, entity, csvFileName,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + csvFileName));
         ApplicationId applicationId = cdlService.submitS3ImportOnlyData(customerSpace,
                 opportunityDataFeedTask.getUniqueId(), sourceFile.getName());
