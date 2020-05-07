@@ -880,7 +880,10 @@ public enum LedpCode {
 
     // le-dcp
     LEDP_60000("Error when create Project!"), //
-    LEDP_60001("Error when create Source!");
+    LEDP_60001("Error when create Source!"), //
+    LEDP_60002("Error when fetching field definitions"), //
+    LEDP_60003("Error when validating definitions");
+
 
 
     private String message;
