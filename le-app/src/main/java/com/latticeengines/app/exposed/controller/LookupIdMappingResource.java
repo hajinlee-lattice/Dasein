@@ -70,6 +70,11 @@ public class LookupIdMappingResource {
         	String message;
         	
         	switch (e.getCode()) {
+	        	case LEDP_40071:
+	        		log.error("Failed to create connection because of duplicate credentials", e);
+	    			message = "A connection with the credentials you entered already exists. Enter different credentials.";
+	    			break;
+
         		case LEDP_40080:
     				log.error("Failed to create connection because empty org name", e);
     				message = "System name cannot be empty";
