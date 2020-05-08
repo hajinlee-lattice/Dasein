@@ -213,7 +213,8 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             } else if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderSystemPath())) {
                 filePath = atlasExportProxy.getSystemExportPath(customerSpace, false);
                 fileName = atlasExport.getFilesUnderSystemPath().get(0);
-                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), atlasExport.getSegmentName() + fileName, "application/csv",
+                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName),
+                        (atlasExport.getSegmentName() == null ? "" : atlasExport.getSegmentName()) + fileName, "application/csv",
                         request, response, importFromS3Service, batonService);
             } else {
                 throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
