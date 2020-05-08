@@ -17,6 +17,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -47,15 +49,13 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
     public void testCrud() {
         String displayName = "TestAttributeSet";
         String displayName2 = "TestAttributeSet2";
-        AttributeSet attributeSet = createAttributeSet(displayName);
+        AttributeSet attributeSet = createAttributeSet(displayName, accountAttributes, contactAttributes);
         attributeSetEntityMgr.createAttributeSet(attributeSet);
         attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
         String attributeSetName = attributeSet.getName();
         verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, contactAttributes);
         attributeSet.setDisplayName(displayName2);
-        Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
-        attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), new HashSet<>());
-        attributeSet.setAttributesMap(attributesMap);
+        updateContactAttributes(attributeSet, new HashSet<>());
         attributeSetEntityMgr.updateAttributeSet(attributeSet);
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AssertionError.class), null);
@@ -65,19 +65,44 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
             return true;
         });
         assertEquals(attributeSetEntityMgr.findAll().size(), 1);
-        attributeSetEntityMgr.deleteByName(attributeSet.getName());
+
+        Set<String> updatedContactAttributes = Sets.newHashSet(InterfaceName.ContactName.name());
+        attributeSet = createAttributeSet(displayName, null, updatedContactAttributes);
+        attributeSetEntityMgr.createAttributeSet(attributeSetName, attributeSet);
+        attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
+        verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, updatedContactAttributes);
+
+        Set<String> updatedAccountAttributes = Sets.newHashSet(InterfaceName.CompanyName.name());
+        Map<String, Set<String>> attributesMap = Maps.newHashMap();
+        attributesMap.put(Category.ACCOUNT_ATTRIBUTES.name(), updatedAccountAttributes);
+        attributeSet = createAttributeSet(displayName, null, contactAttributes);
+        attributeSetEntityMgr.createAttributeSet(attributesMap, attributeSet);
+        attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
+        verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, updatedAccountAttributes, contactAttributes);
+
+        attributeSetEntityMgr.deleteByName(attributeSetName);
         retry.execute(context -> {
-            assertEquals(attributeSetEntityMgr.findAll().size(), 0);
+            assertEquals(attributeSetEntityMgr.findAll().size(), 2);
             return true;
         });
     }
 
-    private AttributeSet createAttributeSet(String displayName) {
+    private void updateContactAttributes(AttributeSet attributeSet, Set<String> set) {
+        Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
+        attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), set);
+        attributeSet.setAttributesMap(attributesMap);
+    }
+
+    private AttributeSet createAttributeSet(String displayName, Set<String> accountAttributes, Set<String> contactAttributes) {
         AttributeSet attributeSet = new AttributeSet();
         attributeSet.setDisplayName(displayName);
         Map<String, Set<String>> attributesMap = new HashMap<>();
-        attributesMap.put(Category.ACCOUNT_ATTRIBUTES.name(), accountAttributes);
-        attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), contactAttributes);
+        if (accountAttributes != null) {
+            attributesMap.put(Category.ACCOUNT_ATTRIBUTES.name(), accountAttributes);
+        }
+        if (contactAttributes != null) {
+            attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), contactAttributes);
+        }
         attributeSet.setAttributesMap(attributesMap);
         return attributeSet;
     }

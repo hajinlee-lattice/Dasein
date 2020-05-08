@@ -16,7 +16,7 @@ public interface AttributeSetEntityMgr extends BaseEntityMgrRepository<Attribute
 
     void deleteByName(String name);
 
-    AttributeSet cloneAttributeSet(String name, AttributeSet attributeSet);
+    AttributeSet createAttributeSet(String name, AttributeSet attributeSet);
 
-    AttributeSet cloneAttributeSet(Map<String, Set<String>> existingAttributesMap, AttributeSet attributeSet);
+    AttributeSet createAttributeSet(Map<String, Set<String>> existingAttributesMap, AttributeSet attributeSet);
 }

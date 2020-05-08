@@ -1014,12 +1014,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public AttributeSet cloneAttributeSet(String attributeSetName, AttributeSet attributeSet) {
+    public AttributeSet createAttributeSet(String attributeSetName, AttributeSet attributeSet) {
         Tenant tenant = MultiTenantContext.getTenant();
         setAttributeSetFields(attributeSet);
         log.info("Clone attribute set with name {} in tenant {}.",
                 attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
-        return cdlAttrConfigProxy.cloneAttributeSet(tenant.getId(), attributeSetName, attributeSet);
+        return cdlAttrConfigProxy.createAttributeSet(tenant.getId(), attributeSetName, attributeSet);
     }
 
     @Override

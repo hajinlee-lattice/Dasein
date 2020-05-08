@@ -1,11 +1,17 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,13 +93,14 @@ public class AttributeSetEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public AttributeSet cloneAttributeSet(String name, AttributeSet attributeSet) {
+    public AttributeSet createAttributeSet(String name, AttributeSet attributeSet) {
         AttributeSet existingAttributeSet = findByName(name);
         attributeSet.setTenant(MultiTenantContext.getTenant());
         attributeSet.setName(AttributeSet.generateNameStr());
         if (existingAttributeSet != null) {
-            mergeAttributesMap(existingAttributeSet.getAttributesMap(), attributeSet);
-            attributeSet.setAttributesMap(existingAttributeSet.getAttributesMap());
+            Map<String, Set<String>> existingAttributeSetAttributesMap = existingAttributeSet.getAttributesMap();
+            mergeAttributesMap(existingAttributeSetAttributesMap, attributeSet);
+            attributeSet.setAttributesMap(existingAttributeSetAttributesMap);
             attributeSetDao.create(attributeSet);
             return attributeSet;
         } else {
@@ -103,7 +110,7 @@ public class AttributeSetEntityMgrImpl
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public AttributeSet cloneAttributeSet(Map<String, Set<String>> existingAttributesMap, AttributeSet attributeSet) {
+    public AttributeSet createAttributeSet(Map<String, Set<String>> existingAttributesMap, AttributeSet attributeSet) {
         attributeSet.setTenant(MultiTenantContext.getTenant());
         attributeSet.setName(AttributeSet.generateNameStr());
         mergeAttributesMap(existingAttributesMap, attributeSet);
@@ -113,9 +120,9 @@ public class AttributeSetEntityMgrImpl
     }
 
     private void mergeAttributesMap(Map<String, Set<String>> existingAttributeSetAttributesMap, AttributeSet overrideAttributeSet) {
-        if (overrideAttributeSet.getAttributesMap() != null) {
+        if (MapUtils.isNotEmpty(overrideAttributeSet.getAttributesMap())) {
             for (Map.Entry<String, Set<String>> entry : overrideAttributeSet.getAttributesMap().entrySet()) {
-                existingAttributeSetAttributesMap.put(entry.getKey(), entry.getValue());
+                existingAttributeSetAttributesMap.put(entry.getKey(), entry.getValue() == null ? new HashSet<>() : entry.getValue());
             }
         }
     }
@@ -127,7 +134,9 @@ public class AttributeSetEntityMgrImpl
         if (attributeSet.getDescription() != null) {
             existingAttributeSet.setDescription(attributeSet.getDescription());
         }
-        mergeAttributesMap(existingAttributeSet.getAttributesMap(), attributeSet);
+        Map<String, Set<String>> existingAttributeSetAttributesMap = existingAttributeSet.getAttributesMap();
+        mergeAttributesMap(existingAttributeSetAttributesMap, attributeSet);
+        existingAttributeSet.setAttributesMap(existingAttributeSetAttributesMap);
         existingAttributeSet.setUpdatedBy(attributeSet.getUpdatedBy());
     }
 
@@ -143,7 +152,27 @@ public class AttributeSetEntityMgrImpl
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<AttributeSet> findAll() {
-        return getReadOrWriteRepository().findAll();
+        List<Object[]> results = getReadOrWriteRepository().findAttributes();
+        // ignore attribute map when query list
+        return extractResultsToAttributeSets(results);
+    }
+
+    private List<AttributeSet> extractResultsToAttributeSets(List<Object[]> objects) {
+        if (CollectionUtils.isEmpty(objects)) {
+            return new ArrayList<>();
+        }
+        return objects.stream().map(object -> {
+            AttributeSet attributeSet = new AttributeSet();
+            attributeSet.setName((String) object[0]);
+            attributeSet.setDisplayName((String) object[1]);
+            attributeSet.setDescription((String) object[2]);
+            attributeSet.setCreated((Date) object[3]);
+            attributeSet.setUpdated((Date) object[4]);
+            attributeSet.setCreatedBy((String) object[5]);
+            attributeSet.setUpdatedBy((String) object[6]);
+            return attributeSet;
+        }).collect(Collectors.toList());
+
     }
 
 }

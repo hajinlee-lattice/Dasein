@@ -148,15 +148,15 @@ public class AttrConfigResource {
         return true;
     }
 
-    @PostMapping(value = "/attributeset/clone")
-    @ApiOperation(value = "clone attribute set")
-    public AttributeSet cloneAttributeSet(@RequestParam(required = false, value = "attributeSetName") String attributeSetName,
+    @PostMapping(value = "/attributeset")
+    @ApiOperation(value = "create new attribute set based on an existing attribute set")
+    public AttributeSet createAttributeSet(@RequestParam(required = false, value = "attributeSetName") String attributeSetName,
                                           @RequestBody AttributeSet attributeSet) {
-        return attrConfigService.cloneAttributeSet(attributeSetName, attributeSet);
+        return attrConfigService.createAttributeSet(attributeSetName, attributeSet);
     }
 
-    @PutMapping(value = "/attributeset/update")
-    @ApiOperation(value = "clone attribute set")
+    @PutMapping(value = "/attributeset")
+    @ApiOperation(value = "update attribute set")
     public AttributeSet updateAttributeSet(@RequestBody AttributeSet attributeSet) {
         return attrConfigService.updateAttributeSet(attributeSet);
     }

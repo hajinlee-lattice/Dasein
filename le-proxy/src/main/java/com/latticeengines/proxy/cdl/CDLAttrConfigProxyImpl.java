@@ -37,9 +37,9 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
     }
 
     @Override
-    public AttributeSet cloneAttributeSet(String customerSpace, String attributeSetName, AttributeSet attributeSet) {
+    public AttributeSet createAttributeSet(String customerSpace, String attributeSetName, AttributeSet attributeSet) {
         StringBuffer url = new StringBuffer();
-        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/clone", shortenCustomerSpace(customerSpace)));
+        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset", shortenCustomerSpace(customerSpace)));
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotEmpty(attributeSetName)) {
             params.add("attributeSetName=" + attributeSetName);
@@ -48,12 +48,12 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
             url.append("?");
             url.append(StringUtils.join(params, "&"));
         }
-        return post("clone attribute set", url.toString(), attributeSet, AttributeSet.class);
+        return post("create attribute set", url.toString(), attributeSet, AttributeSet.class);
     }
 
     @Override
     public AttributeSet updateAttributeSet(String customerSpace, AttributeSet attributeSet) {
-        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/update",
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset",
                 shortenCustomerSpace(customerSpace));
         return put("update attribute set", url, attributeSet, AttributeSet.class);
     }
