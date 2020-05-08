@@ -33,7 +33,10 @@ public class DynamoServiceImplTestNG extends DynamoFunctionalTestNGBase {
         dynamoService.disableTableAutoScaling(tableName, DynamoOperation.Read);
         dynamoService.disableTableAutoScaling(tableName, DynamoOperation.Write);
         dynamoService.deleteTable(tableName);
-        // To test for onDemand, set read and write capacity to 0
+        /*
+         * To test for onDemand, set read and write capacity to 0 & disable
+         * testAutoScaling as onDemand featured cannot be autoScaled
+         */
         long readCapacityUnits = 10;
         long writeCapacityUnits = 10;
         String partitionKeyType = ScalarAttributeType.S.name();
