@@ -154,7 +154,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         if (StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath())) {
             throw new LedpException(LedpCode.LEDP_60004, new String[]{upload.getUploadId()});
         }
-        if (s3Service.objectExist(dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath())) {
+        if (!s3Service.objectExist(dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath())) {
             throw new LedpException(LedpCode.LEDP_60005,
                     new String[]{dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath()});
         }
