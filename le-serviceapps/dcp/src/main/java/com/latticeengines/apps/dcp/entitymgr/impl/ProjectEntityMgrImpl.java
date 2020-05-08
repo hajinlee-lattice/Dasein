@@ -87,6 +87,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         if (project == null) {
             return;
         }
+        HibernateUtils.inflateDetails(project.getS3ImportSystem());
         HibernateUtils.inflateDetails(project.getS3ImportSystem().getTasks());
         for (DataFeedTask datafeedTask : project.getS3ImportSystem().getTasks()) {
             TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
