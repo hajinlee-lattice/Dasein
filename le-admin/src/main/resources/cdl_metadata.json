@@ -38,6 +38,7 @@
         "Type": "boolean",
         "Required": false
       }
-    }
+    },
+    { "Node": "activityUploadQuota", "Data": {"Type": "string", "Required": false}}
   ]
 }
