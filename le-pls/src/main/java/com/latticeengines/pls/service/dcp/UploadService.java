@@ -15,4 +15,6 @@ public interface UploadService {
     String generateToken(String uploadId);
 
     void sendUploadEmail(UploadEmailInfo uploadEmailInfo);
+
+    UploadDetails startImport(String projectId, String sourceId, String sourceFileName);
 }
