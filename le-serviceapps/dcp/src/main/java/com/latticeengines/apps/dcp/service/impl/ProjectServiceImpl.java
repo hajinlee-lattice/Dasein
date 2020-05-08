@@ -167,8 +167,8 @@ public class ProjectServiceImpl implements ProjectService {
                     });
         }
         details.setRecipientList(project.getRecipientList());
-        details.setCreated(project.getCreated());
-        details.setUpdated(project.getUpdated());
+        details.setCreated(project.getCreated().getTime());
+        details.setUpdated(project.getUpdated().getTime());
         details.setCreatedBy(project.getCreatedBy());
         return details;
     }
@@ -188,8 +188,8 @@ public class ProjectServiceImpl implements ProjectService {
                         }
                     });
         }
-        summary.setCreated(project.getCreated());
-        summary.setUpdated(project.getUpdated());
+        summary.setCreated(project.getCreated().getTime());
+        summary.setUpdated(project.getUpdated().getTime());
         summary.setCreatedBy(project.getCreatedBy());
         return summary;
     }
