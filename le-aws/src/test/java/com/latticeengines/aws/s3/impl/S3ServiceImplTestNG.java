@@ -137,6 +137,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         List<String> subFolders = Arrays.asList("delete", "delete2", "delete3");
         String subFolderToDelete = "delete";
         String pathToDelete = cleanupSubDir + "/" + subFolderToDelete;
+        String dummyFilePath = pathToDelete + "/test.txt";
         Set<String> expectedSubFoldersAfterDelete = subFolders.stream().filter(str -> !subFolderToDelete.equals(str))
                 .collect(Collectors.toSet());
         subFolders.forEach(folder -> s3Service.createFolder(testBucket, cleanupSubDir + "/" + folder));
@@ -150,6 +151,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
         // upload a dummy file that as the same key as folder to be deleted
         s3Service.uploadInputStream(testBucket, pathToDelete, new ByteArrayInputStream("hello".getBytes()), true);
+        s3Service.uploadInputStream(testBucket, dummyFilePath, new ByteArrayInputStream("hello".getBytes()), true);
 
         log.info("{} under directory {} before deleting subfolder {}", rootSubFolders, cleanupSubDir, pathToDelete);
 
@@ -171,6 +173,8 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
                         expectedSubFoldersAfterDelete, rootSubFolders));
         Assert.assertFalse(s3Service.objectExist(testBucket, pathToDelete),
                 String.format("Object with key %s the same as target folder should also be deleted", pathToDelete));
+        Assert.assertFalse(s3Service.objectExist(testBucket, dummyFilePath),
+                String.format("Dummy object with key %s should be deleted", dummyFilePath));
     }
 
     @Test(groups = "functional", enabled = false)
