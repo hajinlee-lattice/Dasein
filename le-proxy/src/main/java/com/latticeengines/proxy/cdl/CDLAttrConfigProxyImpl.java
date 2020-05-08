@@ -23,7 +23,7 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
     @Override
     public AttributeSet getAttributeSet(String customerSpace, String name) {
         StringBuilder url = new StringBuilder();
-        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset",
+        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/name/{name}",
                 shortenCustomerSpace(customerSpace), name));
         return get("get attribute by name", url.toString(), AttributeSet.class);
     }
@@ -61,7 +61,7 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
 
     @Override
     public void deleteAttributeSet(String customerSpace, String name) {
-        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/{name}",
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/name/{name}",
                 shortenCustomerSpace(customerSpace), name);
         delete("Delete a attribute set", url);
     }
