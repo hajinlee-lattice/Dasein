@@ -90,6 +90,7 @@ public class ContactAttrsDecorator implements Decorator {
             // PLS-15406 setting for attributes corresponds to mappings in section
             // Unique ID, Other IDs, Match IDs, only enable for usage export
             if (InterfaceName.CustomerContactId.name().equals(cm.getAttrName()) && entityMatchEnabled) {
+                cm.setDisplayName("Contact ID");
                 cm.enableGroup(Enrichment);
                 cm.disableGroup(TalkingPoint);
                 cm.disableGroup(CompanyProfile);

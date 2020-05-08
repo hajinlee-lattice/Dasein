@@ -36,15 +36,20 @@ public final class QueryTestUtils {
 
     public static Collection<TableRoleInCollection> getRolesInAttrRepo() {
         return Arrays.asList( //
-                TableRoleInCollection.BucketedAccount,
-                TableRoleInCollection.SortedContact,
-                TableRoleInCollection.AggregatedTransaction,
-                TableRoleInCollection.AggregatedPeriodTransaction,
-                TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
-                TableRoleInCollection.CalculatedPurchaseHistory,
-                TableRoleInCollection.PivotedRating,
-                TableRoleInCollection.CalculatedCuratedAccountAttribute,
-                TableRoleInCollection.SortedProduct
+                TableRoleInCollection.BucketedAccount, //
+                TableRoleInCollection.AccountExport, //
+                TableRoleInCollection.SortedContact, //
+                TableRoleInCollection.AggregatedTransaction, //
+                TableRoleInCollection.AggregatedPeriodTransaction, //
+                TableRoleInCollection.CalculatedDepivotedPurchaseHistory, //
+                TableRoleInCollection.CalculatedPurchaseHistory, //
+                TableRoleInCollection.PivotedRating, //
+                TableRoleInCollection.CalculatedCuratedAccountAttribute, //
+                TableRoleInCollection.SortedProduct, //
+                TableRoleInCollection.WebVisitProfile, //
+                TableRoleInCollection.OpportunityProfile, //
+                TableRoleInCollection.AccountMarketingActivityProfile, //
+                TableRoleInCollection.ContactMarketingActivityProfile //
         );
     }
 

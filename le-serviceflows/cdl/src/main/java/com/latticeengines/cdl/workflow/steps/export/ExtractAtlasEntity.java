@@ -18,7 +18,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -81,7 +80,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
     private AttributeRepository attrRepo;
     private Map<BusinessEntity, List<ColumnMetadata>> schemaMap;
     private AccountContactExportContext accountContactExportContext = new AccountContactExportContext();
-    private boolean entityMatchEnabled;
+    private boolean entityMatchGA;
 
     @Override
     public void execute() {
@@ -91,7 +90,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         evaluationDate = parseEvaluationDateStr(configuration);
         atlasExport = buildAtlasExport();
         schemaMap = getExportSchema();
-        entityMatchEnabled = batonService.isEntityMatchEnabled(customerSpace);
+        entityMatchGA = batonService.onlyEntityMatchGAEnabled(customerSpace);
         WorkflowStaticContext.putObject(EXPORT_SCHEMA_MAP, schemaMap);
         List<String> filesToDelete = new ArrayList<>();
         try {
@@ -163,8 +162,8 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             accountContactExportConfig.setInput(Collections.singletonList(accountDataUnit));
         }
         accountContactExportConfig.setAccountContactExportContext(accountContactExportContext);
-        accountContactExportConfig.getAccountContactExportContext().setJoinKey(InterfaceName.AccountId.name());
-        accountContactExportConfig.getAccountContactExportContext().setEntityMatchEnabled(entityMatchEnabled);
+        String joinKey = entityMatchGA ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
+        accountContactExportConfig.getAccountContactExportContext().setJoinKey(joinKey);
         log.info(String.format("workspace in account contact job is %s", accountContactExportConfig.getWorkspace()));
         return accountContactExportConfig;
     }
@@ -250,81 +249,68 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         return lookups;
     }
 
-    private void determineAccountIdBoolValues(ColumnMetadata cm, MutableBoolean hasAccountId, String accountId,
-                                              MutableBoolean hasInternalAccountId, String internalAccountId) {
-        if (entityMatchEnabled) {
-            if (accountId.equals(cm.getAttrName())) {
-                hasAccountId.setTrue();
-            }
-            if (internalAccountId.equals(cm.getAttrName())) {
-                hasInternalAccountId.setTrue();
-            }
-        } else {
-            if (accountId.equals(cm.getAttrName())) {
-                hasAccountId.setTrue();
-                hasInternalAccountId.setTrue();
-            }
-        }
-    }
-
     private List<Lookup> getAccountLookup() {
         List<List<ColumnMetadata>> columnMetadataList = new ArrayList<>();
         Arrays.stream(Category.values()).forEach(category -> columnMetadataList.add(new ArrayList<>()));
-        MutableBoolean hasInternalAccountId = new MutableBoolean();
-        MutableBoolean hasAccountId = new MutableBoolean();
-        String internalAccountId = InterfaceName.AccountId.name();
-        String accountId = entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
+        String accountId = InterfaceName.AccountId.name();
+        String customerAccountId = InterfaceName.CustomerAccountId.name();
+        boolean hasAccountId = false;
+        boolean hasCustomerAccountId = false;
         for (BusinessEntity entity : BusinessEntity.EXPORT_ACCOUNT_ENTITIES) {
             List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
             for (ColumnMetadata cm : cms) {
-                determineAccountIdBoolValues(cm, hasAccountId, accountId, hasInternalAccountId, internalAccountId);
+                if (accountId.equals(cm.getAttrName())) {
+                    hasAccountId = true;
+                }
+                if (customerAccountId.equals(cm.getAttrName())) {
+                    hasCustomerAccountId = true;
+                }
                 columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
             }
         }
-        addAccountId(columnMetadataList, BusinessEntity.Account, hasInternalAccountId, hasAccountId, internalAccountId, accountId);
+        if (!entityMatchGA && !hasAccountId) {
+            addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
+        }
+        if (entityMatchGA && !hasCustomerAccountId) {
+            addAccountId(BusinessEntity.Contact, columnMetadataList, customerAccountId);
+        }
         sortAttribute(columnMetadataList);
         return convertToLookup(columnMetadataList);
-    }
-
-    private void addAccountId(List<List<ColumnMetadata>> columnMetadataList, BusinessEntity entity, MutableBoolean hasInternalAccountId,
-                              MutableBoolean hasAccountId, String internalAccountId, String accountId) {
-        if (atlasExport.getExportType().equals(AtlasExportType.ACCOUNT_AND_CONTACT)) {
-            if (!hasInternalAccountId.booleanValue()) {
-                addAccountId(entity, columnMetadataList, internalAccountId);
-            }
-            if (BusinessEntity.Account.equals(entity) && entityMatchEnabled) {
-                if (!hasAccountId.booleanValue()) {
-                    addAccountId(entity, columnMetadataList, accountId);
-                }
-            }
-        } else {
-            if (!hasAccountId.booleanValue()) {
-                addAccountId(entity, columnMetadataList, accountId);
-            }
-        }
     }
 
     private List<Lookup> getContactLookup() {
         List<List<ColumnMetadata>> columnMetadataList = new ArrayList<>();
         Arrays.stream(Category.values()).forEach(category -> columnMetadataList.add(new ArrayList<>()));
-        List<ColumnMetadata> cms = schemaMap.getOrDefault(BusinessEntity.Contact, Collections.emptyList());
-        MutableBoolean hasAccountId = new MutableBoolean();
-        MutableBoolean hasInternalAccountId = new MutableBoolean();
+        String accountId = InterfaceName.AccountId.name();
+        String customerAccountId = InterfaceName.CustomerAccountId.name();
+        String contactId = entityMatchGA ? InterfaceName.CustomerContactId.name() : InterfaceName.ContactId.name();
+        boolean hasAccountId = false;
         boolean hasContactId = false;
-        String accountId = entityMatchEnabled ? InterfaceName.CustomerAccountId.name() : InterfaceName.AccountId.name();
-        String internalAccountId = InterfaceName.AccountId.name();
-        String contactId = entityMatchEnabled ? InterfaceName.CustomerContactId.name() : InterfaceName.ContactId.name();
-        for (ColumnMetadata cm : cms) {
-            determineAccountIdBoolValues(cm, hasAccountId, accountId, hasInternalAccountId, internalAccountId);
-            if (contactId.equals(cm.getAttrName())) {
-                hasContactId = true;
+        boolean hasCustomerAccountId = false;
+        for (BusinessEntity entity : BusinessEntity.EXPORT_CONTACT_ENTITIES) {
+            List<ColumnMetadata> cms = schemaMap.getOrDefault(entity, Collections.emptyList());
+            for (ColumnMetadata cm : cms) {
+                if (accountId.equals(cm.getAttrName())) {
+                    hasAccountId = true;
+                }
+                if (contactId.equals(cm.getAttrName())) {
+                    hasContactId = true;
+                }
+                if (customerAccountId.equals(cm.getAttrName())) {
+                    hasCustomerAccountId = true;
+                }
+                columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
             }
-            columnMetadataList.get(cm.getCategory().getOrder()).add(cm);
         }
         if (!hasContactId) {
             addContactId(BusinessEntity.Contact, columnMetadataList, contactId);
         }
-        addAccountId(columnMetadataList, BusinessEntity.Contact, hasInternalAccountId, hasAccountId, internalAccountId, accountId);
+        if (!entityMatchGA && !hasAccountId) {
+            addAccountId(BusinessEntity.Contact, columnMetadataList, accountId);
+        }
+        if (entityMatchGA && !hasCustomerAccountId) {
+            addAccountId(BusinessEntity.Contact, columnMetadataList, customerAccountId);
+        }
         sortAttribute(columnMetadataList);
         return convertToLookup(columnMetadataList);
     }
@@ -381,7 +367,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
         List<ColumnSelection.Predefined> groups = Collections.singletonList(ColumnSelection.Predefined.Enrichment);
         Map<BusinessEntity, List<ColumnMetadata>> schemaMap = new HashMap<>();
         Set<BusinessEntity> entitySet = new HashSet<>(BusinessEntity.EXPORT_ACCOUNT_ENTITIES);
-        entitySet.add(BusinessEntity.Contact);
+        entitySet.addAll(BusinessEntity.EXPORT_CONTACT_ENTITIES);
         for (BusinessEntity entity : entitySet) {
             List<ColumnMetadata> cms;
             if (StringUtils.isNotEmpty(atlasExport.getAttributeSetName())) {

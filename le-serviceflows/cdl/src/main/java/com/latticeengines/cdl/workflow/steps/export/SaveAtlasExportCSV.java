@@ -125,7 +125,8 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
 
     private void renameDisplayNameMap(ExportEntity exportEntity, ColumnMetadata cm, String displayName, Map<String, String> displayNameMap) {
         // need to rename contact column name
-        if (ExportEntity.AccountContact.equals(exportEntity) && BusinessEntity.Contact.equals(cm.getEntity())) {
+        if (ExportEntity.AccountContact.equals(exportEntity) && //
+                BusinessEntity.Contact.equals(BusinessEntity.getCentralEntity(cm.getEntity()))) {
             displayNameMap.put(AccountContactExportConfig.CONTACT_ATTR_PREFIX + cm.getAttrName(), displayName);
         } else {
             displayNameMap.put(cm.getAttrName(), displayName);
@@ -217,8 +218,15 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         Map<String, String> dateFmtMap = new HashMap<>();
         schema.forEach(cm -> {
             if (LogicalDataType.Date.equals(cm.getLogicalDataType())) {
-                // for now, use default format for all date attrs
-                dateFmtMap.put(cm.getAttrName(), ISO_8601);
+                // need to rename contact column name
+                if (ExportEntity.AccountContact.equals(exportEntity) && //
+                        BusinessEntity.Contact.equals(BusinessEntity.getCentralEntity(cm.getEntity()))) {
+                    // for now, use default format for all date attrs
+                    dateFmtMap.put(AccountContactExportConfig.CONTACT_ATTR_PREFIX + cm.getAttrName(), ISO_8601);
+                } else {
+                    // for now, use default format for all date attrs
+                    dateFmtMap.put(cm.getAttrName(), ISO_8601);
+                }
             }
         });
         if (configuration.isAddExportTimestamp()) {
@@ -248,15 +256,23 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
     }
 
     @SuppressWarnings("unchecked")
-    private List<ColumnMetadata> getAccountIdColumnMetadata(Map<BusinessEntity, List> schemaMap) {
-        List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(BusinessEntity.Account, Collections.emptyList());
-        List<ColumnMetadata> accountIdColumnMetadata = new ArrayList<>();
-        cms.forEach(cm -> {
-            if (InterfaceName.AccountId.name().equals(cm.getAttrName()) || InterfaceName.CustomerAccountId.name().equals(cm.getAttrName())) {
-                accountIdColumnMetadata.add(cm);
+    private void setContactSchema(Map<BusinessEntity, List> schemaMap, List<ColumnMetadata> schema) {
+        for (BusinessEntity entity : BusinessEntity.EXPORT_CONTACT_ENTITIES) {
+            List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap.getOrDefault(entity, Collections.emptyList());
+            if (CollectionUtils.isNotEmpty(cms)) {
+                if (BusinessEntity.ENTITIES_WITH_HIRERARCHICAL_DISPLAY_NAME.contains(entity)) {
+                    for (ColumnMetadata cm : cms) {
+                        String dispName = cm.getDisplayName();
+                        String subCategory = cm.getSubcategory();
+                        if (StringUtils.isNotBlank(dispName) && StringUtils.isNotBlank(subCategory)
+                                && !Category.SUB_CAT_OTHER.equalsIgnoreCase(subCategory)) {
+                            cm.setDisplayName(subCategory + ": " + dispName);
+                        }
+                    }
+                }
+                schema.addAll(cms);
             }
-        });
-        return accountIdColumnMetadata;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -267,15 +283,10 @@ public class SaveAtlasExportCSV extends RunSparkJob<EntityExportStepConfiguratio
         if (ExportEntity.Account.equals(exportEntity)) {
             setAccountSchema(schemaMap, schema);
         } else if (ExportEntity.Contact.equals(exportEntity)) {
-            List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
-                    .getOrDefault(BusinessEntity.Contact, Collections.emptyList());
-            schema.addAll(cms);
-            schema.addAll(getAccountIdColumnMetadata(schemaMap));
+            setContactSchema(schemaMap, schema);
         } else if (ExportEntity.AccountContact.equals(exportEntity)) {
             setAccountSchema(schemaMap, schema);
-            List<ColumnMetadata> cms = (List<ColumnMetadata>) schemaMap //
-                    .getOrDefault(BusinessEntity.Contact, Collections.emptyList());
-            schema.addAll(cms);
+            setContactSchema(schemaMap, schema);
         } else {
             throw new UnsupportedOperationException("Unknown export entity " + exportEntity);
         }

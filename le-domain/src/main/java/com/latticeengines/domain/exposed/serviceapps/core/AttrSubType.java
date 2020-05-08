@@ -13,5 +13,4 @@ public enum AttrSubType {
     HasPurchased, //
     APS, //
     CuratedAccount, //
-
 }

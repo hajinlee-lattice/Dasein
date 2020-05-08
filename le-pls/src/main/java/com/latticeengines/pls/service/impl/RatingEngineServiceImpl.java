@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.ratings.coverage.ProductsCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingEnginesCoverageResponse;
@@ -332,6 +333,13 @@ public class RatingEngineServiceImpl implements RatingEngineService {
                     ruleMap.values().forEach(rules -> {
                         if (MapUtils.isNotEmpty(rules)) {
                             rules.values().forEach(RestrictionUtils::cleanupBucketsInRestriction);
+                            rules.forEach((k, v) -> {
+                                if (FrontEndQueryConstants.CONTACT_RESTRICTION.equals(k)) {
+                                    RestrictionUtils.validateCentralEntity(v, BusinessEntity.Contact);
+                                } else {
+                                    RestrictionUtils.validateCentralEntity(v, BusinessEntity.Account);
+                                }
+                            });
                         }
                     });
                 }

@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.apache.avro.Schema.Field;
 import org.apache.avro.util.Utf8;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +93,9 @@ public class SparkSQLQueryTester {
         }
 
         String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
-        sparkSQLService.prepareForCrossSellQueries(session, "Month", trxnTable, "MEMORY_AND_DISK_SER");
+        if (StringUtils.isNotBlank(trxnTable)) {
+            sparkSQLService.prepareForCrossSellQueries(session, "Month", trxnTable, "MEMORY_AND_DISK_SER");
+        }
     }
 
     private void setupLivyEnvironment() {
@@ -125,7 +128,9 @@ public class SparkSQLQueryTester {
         teardown();
         setupLivyEnvironment();
         String trxnTable = attrRepo.getTableName(TableRoleInCollection.AggregatedPeriodTransaction);
-        sparkSQLService.prepareForCrossSellQueries(session, "Month", trxnTable, "MEMORY_AND_DISK_SER");
+        if (StringUtils.isNotBlank(trxnTable)) {
+            sparkSQLService.prepareForCrossSellQueries(session, "Month", trxnTable, "MEMORY_AND_DISK_SER");
+        }
     }
 
     private void incrementExecutionCounter() {

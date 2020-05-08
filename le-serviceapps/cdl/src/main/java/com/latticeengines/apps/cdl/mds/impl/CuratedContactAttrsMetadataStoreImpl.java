@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.mds.CuratedAttrsMetadataStore;
+import com.latticeengines.apps.cdl.mds.CuratedContactAttrsMetadataStore;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -28,11 +28,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
 @Component
-public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore {
+public class CuratedContactAttrsMetadataStoreImpl implements CuratedContactAttrsMetadataStore {
 
     // EntityMatch enabled or not doesn't impact curated attrs metadata
     private static final Set<String> systemAttributes = SchemaRepository //
-            .getSystemAttributes(BusinessEntity.CuratedAccount, false).stream() //
+            .getSystemAttributes(BusinessEntity.CuratedContact, false).stream() //
             .map(InterfaceName::name).collect(Collectors.toSet());
 
     @Inject
@@ -58,25 +58,26 @@ public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore 
         if (StringUtils.isNotBlank(tenantId)) {
             cdlNamespaceService.setMultiTenantContext(tenantId);
             DataCollection.Version version = namespace.getCoord2();
-            TableRoleInCollection role = TableRoleInCollection.CalculatedCuratedAccountAttribute;
+            TableRoleInCollection role = TableRoleInCollection.CalculatedCuratedContact;
             Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(role, version);
             ParallelFlux<ColumnMetadata> servingStore = tableRoleTemplate.getUnorderedSchema(trNs);
             cms = servingStore.map(cm -> {
-                cm.setCategory(Category.CURATED_ACCOUNT_ATTRIBUTES);
+                cm.setCategory(Category.CURATED_CONTACT_ATTRIBUTES);
                 cm.setAttrState(AttrState.Active);
 
                 if (systemAttributes.contains(cm.getAttrName())) {
                     return cm;
                 }
 
-                cm.disableGroup(ColumnSelection.Predefined.Segment);
+                cm.enableGroup(ColumnSelection.Predefined.Segment);
                 cm.disableGroup(ColumnSelection.Predefined.Enrichment);
-                cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+                cm.disableGroup(ColumnSelection.Predefined.TalkingPoint);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
                 cm.disableGroup(ColumnSelection.Predefined.Model);
                 cm.setCanSegment(true);
                 cm.setCanEnrich(true);
-                cm.setCanModel(true);
+                cm.setCanModel(false);
+
                 return cm;
             });
         } else {
