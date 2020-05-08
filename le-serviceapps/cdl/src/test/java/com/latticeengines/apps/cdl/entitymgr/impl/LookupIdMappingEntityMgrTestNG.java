@@ -42,7 +42,6 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     private String configId;
     private String configIdWithAuth;
     private String configIdWithFieldMapping;
-    private String dropbox;
     private String orgId = "ABC_s";
     private String orgName = "n1234_1";
     private String accountId = "someAccId";
@@ -57,14 +56,19 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(CollectionUtils.isEmpty(lookupIdsMapping));
         Assert.assertNull(lookupIdMappingEntityMgr.getLookupIdMap("some_bad_id"));
     }
-
+    
     @Test(groups = "functional")
+    public void testFindWithNoExistingMaps() {
+    	List<LookupIdMap> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdMappings(null, null, true);
+        Assert.assertTrue(CollectionUtils.isEmpty(lookupIdsMapping));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testFindWithNoExistingMaps" })
     public void testCreate() {
         lookupIdMap = new LookupIdMap();
         lookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
         lookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
         lookupIdMap.setOrgId(orgId);
-        lookupIdMap.setOrgName(orgName);
         lookupIdMap.setOrgName(orgName);
         lookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(lookupIdMap);
         Assert.assertNotNull(lookupIdMap);
@@ -102,6 +106,25 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testFind" })
+    public void testCreateWithEmptyOrgName() {
+    	LookupIdMap emptyOrgNameLookupIdMap = new LookupIdMap();
+    	emptyOrgNameLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+    	emptyOrgNameLookupIdMap.setOrgId(orgId + "_different");
+    	emptyOrgNameLookupIdMap.setOrgName("");
+        Assert.assertThrows(() -> lookupIdMappingEntityMgr.createExternalSystem(emptyOrgNameLookupIdMap));
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "testCreateWithEmptyOrgName" })
+    public void testCreateWithDuplicateOrgName() {
+    	LookupIdMap duplicateOrgNameLookupIdMap = new LookupIdMap();
+    	duplicateOrgNameLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+    	duplicateOrgNameLookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
+    	duplicateOrgNameLookupIdMap.setOrgId(orgId + "_different");
+    	duplicateOrgNameLookupIdMap.setOrgName(orgName);
+        Assert.assertThrows(() -> lookupIdMappingEntityMgr.createExternalSystem(duplicateOrgNameLookupIdMap));
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "testCreateWithDuplicateOrgName" })
     public void testCreateDuplicate() {
         LookupIdMap duplicateLookupIdMap = new LookupIdMap();
         duplicateLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
@@ -116,7 +139,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         anotherLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
         anotherLookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
         anotherLookupIdMap.setOrgId(orgId + "_different");
-        anotherLookupIdMap.setOrgName(orgName);
+        anotherLookupIdMap.setOrgName(orgName + "_different");
         Assert.assertNotNull(lookupIdMappingEntityMgr.createExternalSystem(anotherLookupIdMap));
         Assert.assertEquals(anotherLookupIdMap.getIsRegistered(), Boolean.TRUE);
     }
@@ -162,14 +185,39 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(extractedLookupIdMap2.getOrgName(), orgName);
         Assert.assertEquals(extractedLookupIdMap2.getIsRegistered(), Boolean.FALSE);
     }
-
+    
     @Test(groups = "functional", dependsOnMethods = { "testUpdate2" })
+    public void testUpdateToEmptyOrgName() {
+    	LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);
+    	extractedLookupIdMap.setOrgName("");
+    	
+    	Assert.assertThrows(() -> lookupIdMappingEntityMgr.updateLookupIdMap(configId, extractedLookupIdMap));
+    }
+    
+    @Test(groups = "functional", dependsOnMethods = { "testUpdateToEmptyOrgName" })
+    public void testUpdateToDuplicateOrgName() {    	
+    	LookupIdMap anotherLookupIdMap = new LookupIdMap();
+        anotherLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        anotherLookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
+        anotherLookupIdMap.setOrgId(orgId + "_unique");
+        anotherLookupIdMap.setOrgName(orgName + "_unique");
+        
+        anotherLookupIdMap = lookupIdMappingEntityMgr.createExternalSystem(anotherLookupIdMap);
+        String orgNameToCopy = anotherLookupIdMap.getOrgName();
+
+    	LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);
+    	extractedLookupIdMap.setOrgName(orgNameToCopy);
+        
+    	Assert.assertThrows(() -> lookupIdMappingEntityMgr.updateLookupIdMap(configId, extractedLookupIdMap));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testUpdateToDuplicateOrgName" })
     public void testDelete() {
         lookupIdMappingEntityMgr.deleteLookupIdMap(configId);
         Assert.assertNull(lookupIdMappingEntityMgr.getLookupIdMap(configId));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = { "testFindWithNoExistingMaps" })
     public void testCreateWithAuthentication() {
         LookupIdMap lookupIdMapWithAuth = new LookupIdMap();
         lookupIdMapWithAuth.setExternalSystemType(CDLExternalSystemType.MAP);
@@ -310,5 +358,4 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertTrue(sourceFields.contains("Address"));
         assertTrue(sourceFields.contains("ZipCode"));
     }
-
 }
