@@ -33,7 +33,7 @@ public class DynamoServiceImplTestNG extends DynamoFunctionalTestNGBase {
         dynamoService.disableTableAutoScaling(tableName, DynamoOperation.Read);
         dynamoService.disableTableAutoScaling(tableName, DynamoOperation.Write);
         dynamoService.deleteTable(tableName);
-
+        // To test for onDemand, set read and write capacity to 0
         long readCapacityUnits = 10;
         long writeCapacityUnits = 10;
         String partitionKeyType = ScalarAttributeType.S.name();
@@ -60,7 +60,7 @@ public class DynamoServiceImplTestNG extends DynamoFunctionalTestNGBase {
         Assert.assertTrue(dynamoService.isCapacityOnDemand(entityMatchTable));
     }
 
-    @Test(groups = "functional", dataProvider = "dynamoOperationProvider", enabled = false)
+    @Test(groups = "functional", dataProvider = "dynamoOperationProvider")
     public void testAutoScaling(DynamoOperation operation) {
         DescribeScalableTargetsResult target = dynamoService.describeScalableTargetsResult(tableName, operation);
         Assert.assertTrue(CollectionUtils.isEmpty(target.getScalableTargets()));
