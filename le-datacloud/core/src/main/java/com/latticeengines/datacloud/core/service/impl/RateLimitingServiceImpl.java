@@ -21,12 +21,16 @@ public class RateLimitingServiceImpl implements RateLimitingService {
     private static final Logger log = LoggerFactory.getLogger(RateLimitingServiceImpl.class);
     private static final String DNB_BULK_REQUEST_REGULATOR = "DnBBulkRequest";
     private static final String DNB_BULK_STATUS_REGULATOR = "DnBBulkStatus";
+    private static final String DPLUS_BATCH_REQUEST_REGULATOR = "DirectPlusBatchRequest";
+    private static final String DPLUS_BATCH_STATUS_REGULATOR = "DirectPlusBatchStatus";
 
     private static final String COUNTER_REQUEST = "Request";
     private static final String COUNTER_ROWS = "Rows";
 
     private static boolean dnbBulkRequestRegulatorRegistered = false;
     private static boolean dnbBulkStatusRegulatorRegistered = false;
+    private static boolean dplusBatchRequestRegulatorRegistered = false;
+    private static boolean dplusBatchStatusRegulatorRegistered = false;
 
     @Value("${datacloud.dnb.bulk.requests.per.second}")
     private int bulkRequestsPerSecond;
@@ -42,6 +46,12 @@ public class RateLimitingServiceImpl implements RateLimitingService {
 
     @Value("${datacloud.dnb.bulk.status.request.per.hour}")
     private int bulkStatusPerHour;
+
+    @Value("${datacloud.dnb.direct.plus.requests.per.hour}")
+    private int dplusRequestsPerHour;
+
+    @Value("${datacloud.dnb.direct.plus.status.request.per.hour}")
+    private int dplusStatusPerHour;
 
     @Override
     public RateLimitedAcquisition acquireDnBBulkRequest(long numRows, boolean attemptOnly) {
@@ -70,6 +80,32 @@ public class RateLimitingServiceImpl implements RateLimitingService {
         return acquisition;
     }
 
+    @Override
+    public RateLimitedAcquisition acquireDirectPlusBatchRequest(boolean attemptOnly) {
+        if (!dplusBatchRequestRegulatorRegistered) {
+            registerDirectPlusBatchRequestRegulator();
+        }
+        Map<String, Long> inquiringQuantities = new HashMap<>();
+        inquiringQuantities.put(COUNTER_REQUEST, 1L);
+        RateLimitedAcquisition acquisition = RateLimitedResourceManager.acquire(DPLUS_BATCH_REQUEST_REGULATOR,
+                inquiringQuantities, 1, TimeUnit.SECONDS, attemptOnly);
+        logRejectedAcquisition(acquisition, DPLUS_BATCH_REQUEST_REGULATOR);
+        return acquisition;
+    }
+
+    @Override
+    public RateLimitedAcquisition acquireDirectPlusBatchStatus(boolean attemptOnly) {
+        if (!dplusBatchStatusRegulatorRegistered) {
+            registerDirectPlusBatchStatusRegulator();
+        }
+        Map<String, Long> inquiringQuantities = new HashMap<>();
+        inquiringQuantities.put(COUNTER_REQUEST, 1L);
+        RateLimitedAcquisition acquisition = RateLimitedResourceManager.acquire(DPLUS_BATCH_STATUS_REGULATOR,
+                inquiringQuantities, 1, TimeUnit.SECONDS, attemptOnly);
+        logRejectedAcquisition(acquisition, DPLUS_BATCH_STATUS_REGULATOR);
+        return acquisition;
+    }
+
     private void registerDnBBulkRequestRegulator() {
         RateLimitDefinition definition = RateLimitDefinition.crossDivisionDefinition();
         definition.addQuota(COUNTER_REQUEST, new RateLimitDefinition.Quota(bulkRequestsPerSecond, 1, TimeUnit.SECONDS));
@@ -85,6 +121,20 @@ public class RateLimitingServiceImpl implements RateLimitingService {
         definition.addQuota(COUNTER_REQUEST, new RateLimitDefinition.Quota(bulkStatusPerHour, 1, TimeUnit.HOURS));
         RateLimitedResourceManager.registerResource(DNB_BULK_STATUS_REGULATOR, definition);
         dnbBulkStatusRegulatorRegistered = true;
+    }
+
+    private void registerDirectPlusBatchRequestRegulator() {
+        RateLimitDefinition definition = RateLimitDefinition.crossDivisionDefinition();
+        definition.addQuota(COUNTER_REQUEST, new RateLimitDefinition.Quota(dplusRequestsPerHour, 1, TimeUnit.HOURS));
+        RateLimitedResourceManager.registerResource(DPLUS_BATCH_REQUEST_REGULATOR, definition);
+        dplusBatchRequestRegulatorRegistered = true;
+    }
+
+    private void registerDirectPlusBatchStatusRegulator() {
+        RateLimitDefinition definition = RateLimitDefinition.crossDivisionDefinition();
+        definition.addQuota(COUNTER_REQUEST, new RateLimitDefinition.Quota(dplusStatusPerHour, 1, TimeUnit.HOURS));
+        RateLimitedResourceManager.registerResource(DPLUS_BATCH_STATUS_REGULATOR, definition);
+        dplusBatchStatusRegulatorRegistered = true;
     }
 
     private void logRejectedAcquisition(RateLimitedAcquisition acquisition, String regulatorName) {

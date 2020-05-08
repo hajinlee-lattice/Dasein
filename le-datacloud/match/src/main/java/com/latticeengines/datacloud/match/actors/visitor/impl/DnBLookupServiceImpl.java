@@ -75,6 +75,9 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Value("${datacloud.dnb.bulk.request.maximum}")
     private int maximumBatchSize;
 
+    @Value("${datacloud.dnb.direct.plus.batch.request.maximum}")
+    private int maxDirectPlusBatchSize;
+
     @Value("${datacloud.match.actor.datasource.dnb.threadpool.count.min}")
     private Integer dnbThreadpoolCountMin;
 
@@ -107,17 +110,29 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Value("${datacloud.dnb.bulk.redirect.realtime.threshold:100}")
     private int bulkToRealtimeThreshold;
 
-    @Inject
+    @Resource(name = "dnbRealTimeLookupService")
     private DnBRealTimeLookupService dnbRealTimeLookupService;
 
-    @Inject
+    @Resource(name = "directPlusRealTimeLookupService")
+    private DnBRealTimeLookupService directPlusRealTimeLookupService;
+
+    @Resource(name = "dnbBulkLookupDispatcher")
     private DnBBulkLookupDispatcher dnbBulkLookupDispatcher;
 
-    @Inject
+    @Resource(name = "dnbBulkLookupFetcher")
     private DnBBulkLookupFetcher dnbBulkLookupFetcher;
 
-    @Inject
+    @Resource(name = "dnbBulkLookupStatusChecker")
     private DnBBulkLookupStatusChecker dnbBulkLookupStatusChecker;
+
+    @Resource(name = "directPlusBulkLookupDispatcher")
+    private DnBBulkLookupDispatcher directPlusBulkLookupDispatcher;
+
+    @Resource(name = "directPlusBulkLookupFetcher")
+    private DnBBulkLookupFetcher directPlusBulkLookupFetcher;
+
+    @Resource(name = "directPlusBulkLookupStatusChecker")
+    private DnBBulkLookupStatusChecker directPlusBulkLookupStatusChecker;
 
     @Inject
     private DnBCacheService dnbCacheService;
@@ -256,6 +271,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         MatchTraveler traveler = request.getMatchTravelerContext();
         context.setDataCloudVersion(traveler.getDataCloudVersion());
         context.setRootOperationUid(traveler.getMatchInput().getRootOperationUid());
+        context.setUseDirectPlus(traveler.getMatchInput().getUseDirectPlus());
         if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             context = dnbRealtimeLookup(context);
             readyToReturn = true;
@@ -299,13 +315,17 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         if (!readyToReturn && Boolean.TRUE.equals(traveler.getMatchInput().getUseRemoteDnB())) {
             saveReq(lookupRequestId, returnAddress, request);
             // Bucket single contexts to batched contexts in unsubmittedReqs
+            boolean isDirectPlus = Boolean.TRUE.equals(traveler.getMatchInput().getUseDirectPlus());
             synchronized (unsubmittedBatches) {
                 // If unsubmittedBatches is empty, or last unsubmitted batch is sealed,
                 // or last unsubmitted batch size is 10K, create a new batch
                 if (unsubmittedBatches.isEmpty() || unsubmittedBatches.get(unsubmittedBatches.size() - 1).isSealed()
                         || unsubmittedBatches.get(unsubmittedBatches.size() - 1).getContexts()
-                                .size() == maximumBatchSize) {
+                                .size() == maxBatchSize(isDirectPlus)) {
                     DnBBatchMatchContext batchContext = new DnBBatchMatchContext();
+                    if (isDirectPlus) {
+                        batchContext.setUserDirectPlus(isDirectPlus);
+                    }
                     batchContext.setLogDnBBulkResult(context.getLogDnBBulkResult());
                     batchContext.setRootOperationUid(context.getRootOperationUid());
                     unsubmittedBatches.add(batchContext);
@@ -354,6 +374,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 batchContext.getRootOperationUid(), batchContext.getContexts().size(), bulkToRealtimeThreshold));
         long duration = 0;
         for (DnBMatchContext context : batchContext.getContexts().values()) {
+            context.setUseDirectPlus(batchContext.isUserDirectPlus()); // somehow this flag is null in context
             dnbRealtimeLookup(context);
             duration += context.getDuration() != null ? context.getDuration() : 0;
         }
@@ -377,7 +398,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
             List<DnBBatchMatchContext> failedBatches = new ArrayList<>();
             List<DnBBatchMatchContext> batchesToSubmit = new ArrayList<>();
             // Get batches to submit if meeting one of the requirements:
-            // 1. batch size = 10K,
+            // 1. batch size >= maxBatchSize (10K),
             // 2. batch is sealed,
             // 3. timestamp of last inserted record is 2 mins ago
             // 4. batch request has been created for 30 mins
@@ -389,7 +410,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     Iterator<DnBBatchMatchContext> iter = unsubmittedBatches.iterator();
                     while (iter.hasNext()) {
                         DnBBatchMatchContext batchContext = iter.next();
-                        if (batchContext.isSealed() || batchContext.getContexts().size() == maximumBatchSize
+                        if (batchContext.isSealed() || batchContext.getContexts().size() >= maxBatchSize(batchContext.isUserDirectPlus())
                                 || (System.currentTimeMillis() - batchContext.getTimestamp().getTime()) >= 120000
                                 || (System.currentTimeMillis() - batchContext.getCreateTime().getTime()) >= 1800000) {
                             batchContext.setSealed(true);
@@ -407,7 +428,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                     continue;
                 }
                 try {
-                    batchContext = dnbBulkLookupDispatcher.sendRequest(batchContext);
+                    batchContext = submitBatchRequest(batchContext);
                 } catch (Exception ex) {
                     log.error(String.format("Exception in dispatching match requests to DnB bulk match service: %s",
                             ex.getMessage()));
@@ -455,7 +476,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 return;
             }
             synchronized (submittedBatches) {
-                dnbBulkLookupStatusChecker.checkStatus(submittedBatches);
+                checkSubmittedBatchStatus(submittedBatches);
                 // If already have retried requests which haven't got response
                 // back, don't retry more
                 boolean hasRetried = false;
@@ -504,7 +525,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
                 dnbMatchCommandService.dnbMatchCommandUpdateStatus(changedBatches);
             }
             // Fetch result for finished batch requests
-            finishedBatches.forEach(finishedBatch -> this.finishedBatches.offer(finishedBatch));
+            finishedBatches.forEach(this.finishedBatches::offer);
             synchronized (this.finishedBatches) {
                 this.finishedBatches.notify();
             }
@@ -556,7 +577,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     private void dnbBatchFetchResult(DnBBatchMatchContext batch) {
         try {
             try {
-                batch = dnbBulkLookupFetcher.getResult(batch);
+                batch = fetchBatchResult(batch);
             } catch (Exception ex) {
                 log.error(String.format("Fail to poll match result for request %s from DnB bulk matchc service: %s",
                         batch.getServiceBatchId(), ex.getMessage()));
@@ -664,30 +685,25 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     }
 
     private Callable<DnBMatchContext> createCallableForRemoteDnBApiCall(final DnBMatchContext context) {
-        Callable<DnBMatchContext> task = new Callable<DnBMatchContext>() {
-
-            @Override
-            public DnBMatchContext call() throws Exception {
-                DnBMatchContext returnedContext = context;
-                try {
-                    returnedContext = dnbRealTimeLookupService.realtimeEntityLookup(context);
-                } catch (Exception ex) {
-                    log.error(ex.getMessage(), ex);
-                }
-                return returnedContext;
+        return  () -> {
+            DnBMatchContext returnedContext = context;
+            DnBRealTimeLookupService lookupService;
+            if (Boolean.TRUE.equals(context.getUseDirectPlus())) {
+                lookupService = directPlusRealTimeLookupService;
+            } else {
+                lookupService = dnbRealTimeLookupService;
             }
+            try {
+                returnedContext = lookupService.realtimeEntityLookup(context);
+            } catch (Exception ex) {
+                log.error(ex.getMessage(), ex);
+            }
+            return returnedContext;
         };
-        return task;
     }
 
     private Runnable createBatchToRealtimeRunnable(final DnBBatchMatchContext batchContext) {
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
-                dnbBatchRedirectToRealtime(batchContext);
-            }
-        };
-        return task;
+        return () -> dnbBatchRedirectToRealtime(batchContext);
     }
 
     /************************ DnB Lookup Service Status ************************/
@@ -745,6 +761,43 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
 
     private boolean isPrimeMatch(DataSourceLookupRequest request) {
         return OperationalMode.PRIME_MATCH.equals(request.getMatchTravelerContext().getOperationalMode());
+    }
+
+    private int maxBatchSize(boolean isDirectPlus) {
+        if (isDirectPlus) {
+            return maxDirectPlusBatchSize;
+        } else {
+            return maximumBatchSize;
+        }
+    }
+
+    private DnBBatchMatchContext submitBatchRequest(DnBBatchMatchContext batch) {
+        if (batch.isUserDirectPlus()) {
+            return directPlusBulkLookupDispatcher.sendRequest(batch);
+        } else {
+            return dnbBulkLookupDispatcher.sendRequest(batch);
+        }
+    }
+
+    private DnBBatchMatchContext fetchBatchResult(DnBBatchMatchContext batch) {
+        if (batch.isUserDirectPlus()) {
+            return directPlusBulkLookupFetcher.getResult(batch);
+        } else {
+            return dnbBulkLookupFetcher.getResult(batch);
+
+        }
+    }
+
+    private void checkSubmittedBatchStatus(List<DnBBatchMatchContext> batches) {
+        boolean useDirectPlus = false;
+        if (CollectionUtils.isNotEmpty(batches)) {
+            useDirectPlus = batches.get(0).isUserDirectPlus();
+            if (useDirectPlus) {
+                directPlusBulkLookupStatusChecker.checkStatus(batches);
+            } else {
+                dnbBulkLookupStatusChecker.checkStatus(batches);
+            }
+        }
     }
 
 }

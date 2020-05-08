@@ -23,7 +23,7 @@ public class GetDnBResponseErrorHandler implements ResponseErrorHandler {
 
     @Override
     public boolean hasError(ClientHttpResponse response) throws IOException {
-        return response.getStatusCode() != HttpStatus.OK;
+        return !HttpStatus.OK.equals(response.getStatusCode()) && !HttpStatus.ACCEPTED.equals(response.getStatusCode());
     }
 
     /*
@@ -36,19 +36,20 @@ public class GetDnBResponseErrorHandler implements ResponseErrorHandler {
     public void handleError(ClientHttpResponse response) throws IOException {
         String responseBody = IOUtils.toString(response.getBody(), "UTF-8");
         log.info(String.format("Response body with HTTPStatus %s: %s", response.getStatusCode().name(), responseBody));
+        HttpClientErrorException cause = new HttpClientErrorException(response.getStatusCode(), response.getStatusCode().name(),
+                responseBody.getBytes(), Charset.defaultCharset());
         switch (response.getStatusCode()) {
         case UNAUTHORIZED:
         case REQUEST_TIMEOUT:
         case FORBIDDEN:
-            throw new HttpClientErrorException(response.getStatusCode(), response.getStatusCode().name(),
-                    responseBody.getBytes(), Charset.forName("UTF-8"));
+            throw cause;
         case BAD_REQUEST:
-            throw new LedpException(LedpCode.LEDP_25037);
+            throw new LedpException(LedpCode.LEDP_25037, cause);
         case NOT_FOUND:
-            throw new LedpException(LedpCode.LEDP_25038);
+            throw new LedpException(LedpCode.LEDP_25038, cause);
         case INTERNAL_SERVER_ERROR:
         case SERVICE_UNAVAILABLE:
-            throw new LedpException(LedpCode.LEDP_25039);
+            throw new LedpException(LedpCode.LEDP_25039, cause);
         default:
             throw new LedpException(LedpCode.LEDP_25040,
                     new String[] { String.valueOf(response.getStatusCode().value()), response.getStatusCode().name() });

@@ -63,6 +63,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
     public void initialize() {
         dnbClient = RestApiClient.newExternalClient(applicationContext);
         dnbClient.setErrorHandler(new GetDnBResponseErrorHandler());
+        dnbClient.setUseUri(true);
     }
 
     void executeLookup(T context, DnBKeyType keyType, DnBAPIType apiType) {
@@ -84,7 +85,7 @@ public abstract class BaseDnBLookupServiceImpl<T> {
     private String sendRequest(String url, HttpEntity<String> entity, DnBAPIType apiType) {
         if (apiType == DnBAPIType.REALTIME_ENTITY || apiType == DnBAPIType.REALTIME_EMAIL) {
             return self().sendCacheableRequest(url, entity);
-        } else if (apiType == DnBAPIType.BATCH_FETCH || apiType == DnBAPIType.BATCH_STATUS) {
+        } else if (DnBAPIType.BATCH_FETCH.equals(apiType) || DnBAPIType.BATCH_STATUS.equals(apiType)) {
             return dnbClient.get(entity, url);
         } else {
             return dnbClient.post(entity, url);
@@ -111,6 +112,9 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             case JSON:
                 errorCode = (String) retrieveJsonValueFromResponse(getErrorCodePath(), response, false);
                 break;
+            case CSV:
+                // no way to parse http error from CSV
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown response type " + getResponseType());
             }
@@ -123,9 +127,15 @@ public abstract class BaseDnBLookupServiceImpl<T> {
             case "SC002":
             case "SC003":
             case "SC004":
+            case "00001":
+            case "00002":
+            case "00003":
+            case "00004":
                 return DnBReturnCode.UNAUTHORIZED;
             case "SC005":
             case "SC006":
+            case "00005":
+            case "00006":
                 return DnBReturnCode.RATE_LIMITING;
             default:
                 return DnBReturnCode.UNKNOWN;
@@ -194,6 +204,6 @@ public abstract class BaseDnBLookupServiceImpl<T> {
     }
 
     public enum ResponseType {
-        XML, JSON
+        XML, JSON, CSV
     }
 }

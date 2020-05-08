@@ -43,7 +43,7 @@ public class DnBMatchCommand implements HasPid, Serializable {
     private String rootOperationUid;
 
     @JsonProperty("BatchID")
-    @Column(name = "BatchID", unique = true, nullable = false, length = 20)
+    @Column(name = "BatchID", unique = true, nullable = false, length = 100)
     private String batchId;
 
     @JsonProperty("RetryForBatchID")
@@ -87,6 +87,10 @@ public class DnBMatchCommand implements HasPid, Serializable {
     @Column(name = "Duration")
     private int duration;
 
+    @JsonProperty("IsDirectPlus")
+    @Column(name = "IsDirectPlus")
+    private boolean isDirectPlus;
+
     public void copyContextData(DnBBatchMatchContext context) {
         // Context data to copy when DnB batch request is successfully submitted
         if (context.getDnbCode() == DnBReturnCode.SUBMITTED) {
@@ -97,6 +101,7 @@ public class DnBMatchCommand implements HasPid, Serializable {
             message = context.getDnbCode().getMessage();
             size = context.getContexts().size();
             startTime = context.getTimestamp();
+            isDirectPlus = context.isUserDirectPlus();
         }
     }
 

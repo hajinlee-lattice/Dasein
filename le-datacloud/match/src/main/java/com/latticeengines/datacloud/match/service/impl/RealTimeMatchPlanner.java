@@ -42,6 +42,12 @@ public class RealTimeMatchPlanner extends MatchPlannerBase implements MatchPlann
         setDataCloudVersion(input);
         setDecisionGraph(input);
         input.setNumRows(input.getData().size());
+
+        //FIXME: for now, not allow DnB Cache for Direct+, to avoid polluting the cache
+        if (Boolean.TRUE.equals(input.getUseDirectPlus())) {
+            input.setUseDnBCache(false);
+        }
+
         MatchContext context = new MatchContext();
         context.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
         input.setMatchEngine(MatchContext.MatchEngine.REAL_TIME.getName());

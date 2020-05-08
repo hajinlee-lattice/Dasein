@@ -117,6 +117,9 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
     @JsonProperty("rootOperationUid")
     private String rootOperationUid;
 
+    @JsonProperty("useDirectPlus")
+    private Boolean useDirectPlus;
+
     @JsonProperty("candidates")
     private List<DnBMatchCandidate> candidates;
 
@@ -151,6 +154,7 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
         cacheId = result.cacheId;
         matchedNameLocation = result.getMatchedNameLocation();
         outOfBusiness = result.isOutOfBusiness();
+        candidates = result.getCandidates();
     }
 
     public void copyResultFromCache(DnBCache cache) {
@@ -469,6 +473,14 @@ public class DnBMatchContext extends DnBMatchContextBase implements Fact, Dimens
 
     public void setCalledRemoteDnB(boolean calledRemoteDnB) {
         this.calledRemoteDnB = calledRemoteDnB;
+    }
+
+    public Boolean getUseDirectPlus() {
+        return useDirectPlus;
+    }
+
+    public void setUseDirectPlus(Boolean useDirectPlus) {
+        this.useDirectPlus = useDirectPlus;
     }
 
     public Date getRequestTime() {

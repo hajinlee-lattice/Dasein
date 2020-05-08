@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -50,11 +51,17 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     @Value("${datacloud.dnb.bulk.api.key}")
     private String batchKey;
 
+    @Value("${datacloud.dnb.dplus.api.key}")
+    private String dplusKey;
+
     @Value("${datacloud.dnb.realtime.password.encrypted}")
     private String realtimePwd;
 
     @Value("${datacloud.dnb.bulk.password.encrypted}")
     private String batchPwd;
+
+    @Value("${datacloud.dnb.dplus.password.encrypted}")
+    private String dplusPwd;
 
     @Value("${datacloud.dnb.user.header}")
     private String username;
@@ -64,6 +71,9 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     @Value("${datacloud.dnb.authority.url}")
     private String url;
+
+    @Value("${datacloud.dnb.direct.plus.token.url}")
+    private String dplusUrl;
 
     @Value("${datacloud.dnb.application.id.header}")
     private String appIdHeader;
@@ -82,6 +92,9 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
 
     @Value("${datacloud.dnb.authentication.token.jsonpath}")
     private String tokenJsonPath;
+
+    @Value("${datacloud.dnb.direct.plus.access.token.jsonpath}")
+    private String dplusAccessTokenJsonPath;
 
     private WatcherCache<DnBKeyType, String> tokenCache;
 
@@ -322,7 +335,14 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
     private String dnbRequest(DnBKeyType type) {
         try {
             String response = dnbAuthenticateRequest(type);
-            String token = parseDnBResponse(response);
+            String token;
+            switch (type) {
+                case DPLUS:
+                    token = parseDplusResponse(response);
+                    break;
+                default:
+                    token = parseDnBResponse(response);
+            }
             log.info("Get new DnB " + type + " token {}", token);
             return token;
         } catch (Exception e) {
@@ -344,6 +364,12 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
             return dnbClient.post(getHttpEntity(realtimeKey, realtimePwd), url);
         case BATCH:
             return dnbClient.post(getHttpEntity(batchKey, batchPwd), url);
+        case DPLUS:
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBasicAuth(dplusKey, dplusPwd);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>("{ \"grant_type\" : \"client_credentials\" }", headers);
+            return dnbClient.post(entity, dplusUrl);
         default:
             throw new UnsupportedOperationException(
                     String.format("DnBKeyType %s is not supported in DnBAuthenticationService.", type.name()));
@@ -366,6 +392,21 @@ public class DnBAuthenticationServiceImpl implements DnBAuthenticationService {
      */
     private String parseDnBResponse(String response) {
         String token = JsonPath.parse(response).read(tokenJsonPath);
+        if (StringUtils.isBlank(token)) {
+            throw new RuntimeException(String.format("Fail to parse DnB token from response: %s", response));
+        }
+        return token;
+    }
+
+    /**
+     * Parse token from Direct+ API response
+     *
+     * @param response:
+     *            Direct+ API response
+     * @return token
+     */
+    private String parseDplusResponse(String response) {
+        String token = JsonPath.parse(response).read(dplusAccessTokenJsonPath);
         if (StringUtils.isBlank(token)) {
             throw new RuntimeException(String.format("Fail to parse DnB token from response: %s", response));
         }

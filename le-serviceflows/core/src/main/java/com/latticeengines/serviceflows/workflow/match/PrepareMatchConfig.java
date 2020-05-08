@@ -251,6 +251,11 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
                 MatchStepConfiguration.DCP.equals(getConfiguration().getMatchType())) {
             matchInput.setDataCloudOnly(true);
         }
+        if (MatchStepConfiguration.DCP.equals(getConfiguration().getMatchType())) {
+            matchInput.setUseDirectPlus(true);
+            matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
+            matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
+        }
     }
 
     private AvroInputBuffer inputBuffer(Table preMatchEventTable) {

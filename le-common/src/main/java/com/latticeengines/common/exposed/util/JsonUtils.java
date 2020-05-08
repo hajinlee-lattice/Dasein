@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public final class JsonUtils {
@@ -317,7 +318,7 @@ public final class JsonUtils {
 
     private static <T> T parseValueAtPath(JsonNode root, Class<T> clz, String... paths) {
         JsonNode node = tryGetJsonNode(root, paths);
-        if (node == null) {
+        if (node == null || node instanceof NullNode) {
             return null;
         } else {
             switch (clz.getSimpleName()) {

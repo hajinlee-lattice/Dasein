@@ -101,6 +101,9 @@ public class ProcessorContext {
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
+    @Value("${datacloud.match.default.decision.graph.prime}")
+    private String primeGraph;
+
     @Value("${datacloud.yarn.actors.num.threads}")
     private int actorsThreadPool;
 
@@ -422,6 +425,9 @@ public class ProcessorContext {
         decisionGraph = originalInput.getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph)) {
             decisionGraph = defaultGraph;
+            if (OperationalMode.PRIME_MATCH.equals(originalInput.getOperationalMode())) {
+                decisionGraph = primeGraph;
+            }
             log.info("Decision graph is not provided, use default " + decisionGraph);
         } else {
             log.info("Use decision graph " + decisionGraph);
@@ -561,6 +567,7 @@ public class ProcessorContext {
     }
 
     Schema getCandidateSchema() {
+        // need to in sync with MatchExecutorBase.candidateOutputFields
         List<Pair<String, Class<?>>> attrs = Arrays.asList( //
                 Pair.of(InterfaceName.InternalId.name(), String.class), //
                 Pair.of(DataCloudConstants.ATTR_LDC_DUNS, String.class), //

@@ -71,7 +71,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
     }
 
     @Test(groups = {"functional"})
-    public void testMatchBlockInYarnContainer() throws Exception {
+    public void testMatchBlockInYarnContainer() {
         String fileName = "BulkMatchInput.avro";
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
@@ -80,6 +80,8 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
         DataCloudJobConfiguration jobConfiguration = jobConfiguration(avroPath);
         jobConfiguration.getMatchInput().setPrepareForDedupe(true);
         jobConfiguration.getMatchInput().setRequestSource(MatchRequestSource.MODELING);
+        jobConfiguration.getMatchInput().setUseDnBCache(false);
+        jobConfiguration.getMatchInput().setUseDirectPlus(true);
 
         ApplicationId applicationId = dataCloudYarnService.submitPropDataJob(jobConfiguration);
         FinalApplicationStatus status = YarnUtils.waitFinalStatusForAppId(yarnClient, applicationId);
@@ -89,7 +91,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
     }
 
     @Test(groups = "functional")
-    public void testRTSNoMatch() throws Exception {
+    public void testRTSNoMatch() {
         String fileName = "BulkMatchInput_NoMatch.avro";
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
@@ -101,7 +103,7 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
     }
 
     @Test(groups = {"functional", "manual"})
-    public void testEnrichment() throws Exception {
+    public void testEnrichment() {
         String fileName = "BulkMatchInput.avro";
         cleanupAvroDir(avroDir);
         uploadDataCsv(avroDir, fileName);
@@ -184,11 +186,11 @@ public class DataCloudYarnServiceImplTestNG extends DataCloudYarnFunctionalTestN
                 .format("Only %.2f %% records has LDC_Name", 100 * notNullLdcName.doubleValue() / count.doubleValue()));
     }
 
-    private void verifyDedupeHelpers(DataCloudJobConfiguration jobConfiguration) throws Exception {
+    private void verifyDedupeHelpers(DataCloudJobConfiguration jobConfiguration) {
         String rootUid = jobConfiguration.getRootOperationUid();
         String blockUid = jobConfiguration.getBlockOperationUid();
         String blockDir = hdfsPathBuilder.constructMatchBlockDir(rootUid, blockUid).toString();
-        AvroUtils.iterator(yarnConfiguration, blockDir + "/*.avro").forEachRemaining(record -> {
+        AvroUtils.iterateAvroFiles(yarnConfiguration, blockDir + "/*.avro").forEachRemaining(record -> {
             Object id = record.get(MatchConstants.INT_LDC_LID);
             Object dedupeId = record.get(MatchConstants.INT_LDC_DEDUPE_ID);
             Object isRemoved = record.get(MatchConstants.INT_LDC_REMOVED);
