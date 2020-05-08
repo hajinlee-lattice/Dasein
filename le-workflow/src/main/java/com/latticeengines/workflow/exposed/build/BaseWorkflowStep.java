@@ -276,6 +276,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String PH_DEPIVOTED_TABLE_NAME = "PH_DEPIVOTED_TABLE_NAME";
     protected static final String CURATED_ACCOUNT_SERVING_TABLE_NAME = "CURATED_ACCOUNT_SERVING_TABLE_NAME";
     protected static final String CURATED_ACCOUNT_STATS_TABLE_NAME = "CURATED_ACCOUNT_STATS_TABLE_NAME";
+    protected static final String CURATED_CONTACT_SERVING_TABLE_NAME = "CURATED_CONTACT_SERVING_TABLE_NAME";
+    protected static final String CURATED_CONTACT_STATS_TABLE_NAME = "CURATED_CONTACT_STATS_TABLE_NAME";
     protected static final String REMATCHED_ACCOUNT_TABLE_NAME = "REMATCHED_ACCOUNT_TABLE_NAME";
     protected static final String ENRICHED_ACCOUNT_DIFF_TABLE_NAME = "ENRICHED_ACCOUNT_DIFF_TABLE_NAME";
 
@@ -361,7 +363,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             PH_PROFILE_TABLE_NAME, //
             PH_STATS_TABLE_NAME, //
             CURATED_ACCOUNT_SERVING_TABLE_NAME, //
-            CURATED_ACCOUNT_STATS_TABLE_NAME);
+            CURATED_ACCOUNT_STATS_TABLE_NAME, //
+            CURATED_CONTACT_SERVING_TABLE_NAME, //
+            CURATED_CONTACT_STATS_TABLE_NAME //
+            );
     protected static final Set<String> TABLE_NAME_LISTS_FOR_PA_RETRY = Sets.newHashSet(PERIOD_TRXN_TABLE_NAME);
 
     protected static final Set<String> TABLE_NAME_MAPS_FOR_PA_RETRY = Sets.newHashSet( //

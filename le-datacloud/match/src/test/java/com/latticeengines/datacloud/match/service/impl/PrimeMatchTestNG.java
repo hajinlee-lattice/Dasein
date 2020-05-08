@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Level;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -31,9 +30,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class PrimeMatchTestNG extends DataCloudMatchFunctionalTestNGBase {
-
-    @Value("${datacloud.match.default.decision.graph.prime}")
-    private String primeMatchDG;
 
     @Inject
     private RealTimeMatchService realTimeMatchService;
@@ -61,7 +57,6 @@ public class PrimeMatchTestNG extends DataCloudMatchFunctionalTestNGBase {
                 "InternalId", "Duns", "CompanyName", "City", "Sate", "Country"
         });
         matchInput.setLogLevelEnum(Level.DEBUG);
-        matchInput.setDecisionGraph(primeMatchDG);
         matchInput.setDataCloudVersion(currentDataCloudVersion);
         matchInput.setRootOperationUid(UUID.randomUUID().toString());
         matchInput.setUseDnBCache(false);
@@ -71,6 +66,7 @@ public class PrimeMatchTestNG extends DataCloudMatchFunctionalTestNGBase {
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
         matchInput.setPredefinedSelection(null);
+        matchInput.setUseDirectPlus(true);
         matchInput.setCustomSelection(getColumnSelection());
         return matchInput;
     }

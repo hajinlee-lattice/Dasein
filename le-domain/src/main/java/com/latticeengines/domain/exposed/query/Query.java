@@ -232,6 +232,10 @@ public class Query implements GraphNode {
             } else if (node instanceof AttributeLookup) {
                 AttributeLookup lookup = (AttributeLookup) node;
                 if (lookup.getEntity() != null) {
+                    if (!BusinessEntity.Contact.equals(lookup.getEntity()) &&
+                            BusinessEntity.Contact.equals(BusinessEntity.getCentralEntity(lookup.getEntity()))) {
+                        entitiesForJoin.add(BusinessEntity.Contact);
+                    }
                     entitiesForJoin.add(lookup.getEntity());
                 }
             } else if (node instanceof ExistsRestriction) {

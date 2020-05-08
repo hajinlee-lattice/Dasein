@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.csv.CSVFormat;
@@ -39,17 +40,17 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
     @Inject
     private CountryCodeService countryCodeService;
 
-    @Inject
-    private DnBRealTimeLookupService dnBRealTimeLookupService;
+    @Resource(name = "dnbRealTimeLookupService")
+    private DnBRealTimeLookupService dnbRealTimeLookupService;
 
-    @Inject
+    @Resource(name = "dnbBulkLookupDispatcher")
     private DnBBulkLookupDispatcher dnBBulkLookupDispatcher;
 
-    @Inject
+    @Resource(name = "dnbBulkLookupStatusChecker")
     private DnBBulkLookupStatusChecker dnbBulkLookupStatusChecker;
 
-    @Inject
-    private DnBBulkLookupFetcher dnBBulkLookupFetcher;
+    @Resource(name = "dnbBulkLookupFetcher")
+    private DnBBulkLookupFetcher dnbBulkLookupFetcher;
 
     @SuppressWarnings("unused")
     private static final String FORTUNE1000_SMALL_FILENAME = "Fortune1000_Small.csv";
@@ -71,9 +72,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
 
     private Map<String, DnBMatchContext> contextsBulk = new HashMap<String, DnBMatchContext>();
 
-    private CSVParser csvFileParser;
-
-    @Test(groups = "dnb", enabled = false)
+    @Test(groups = "dnb", enabled = true)
     public void testConsistency() {
         // prepareFortune1000InputData(FORTUNE1000_SMALL_FILENAME, true, true);
         prepareFortune1000InputData(FORTUNE1000_FILENAME, true, true);
@@ -85,7 +84,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
         // Submit to DnB realtime match
         realtimeLookup();
         // Get result from DnB bulk match
-        batchContext = bulkLookup(batchContext);
+        bulkLookup(batchContext);
         // Compare results
         compareResults();
     }
@@ -93,7 +92,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
     private void realtimeLookup() {
         for (String lookupRequestId : contextsRealtime.keySet()) {
             DnBMatchContext context = contextsRealtime.get(lookupRequestId);
-            DnBMatchContext res = dnBRealTimeLookupService.realtimeEntityLookup(context);
+            DnBMatchContext res = dnbRealTimeLookupService.realtimeEntityLookup(context);
             context.copyMatchResult(res);
             log.info(String.format(
                     "Realtime match result for request %s: Status=%s, Duns=%s, ConfidenceCode=%d, MatchGrade=%s",
@@ -120,7 +119,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             }
             dnbBulkLookupStatusChecker.checkStatus(contexts);
         }
-        batchContext = dnBBulkLookupFetcher.getResult(batchContext);
+        batchContext = dnbBulkLookupFetcher.getResult(batchContext);
         Assert.assertEquals(batchContext.getDnbCode(), DnBReturnCode.OK);
         return batchContext;
     }
@@ -191,7 +190,7 @@ public class DnBLookupVerificationTestNG extends DataCloudMatchFunctionalTestNGB
             InputStream fileStream = ClassLoader.getSystemResourceAsStream("matchinput/" + fileName);
             CSVFormat csvFileFormat = CSVFormat.DEFAULT.withHeader(FORTUNE1000_FILENAME_HEADER)
                     .withRecordSeparator("\n");
-            csvFileParser = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
+            CSVParser csvFileParser = new CSVParser(new InputStreamReader(fileStream), csvFileFormat);
             List<CSVRecord> csvRecords = csvFileParser.getRecords();
             for (int i = 1; i < csvRecords.size(); i++) {
                 CSVRecord record = csvRecords.get(i);

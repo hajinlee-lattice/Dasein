@@ -74,7 +74,9 @@ public class CuratedAttrsMetadataStoreImpl implements CuratedAttrsMetadataStore 
                 cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
                 cm.disableGroup(ColumnSelection.Predefined.CompanyProfile);
                 cm.disableGroup(ColumnSelection.Predefined.Model);
-
+                cm.setCanSegment(true);
+                cm.setCanEnrich(true);
+                cm.setCanModel(true);
                 return cm;
             });
         } else {

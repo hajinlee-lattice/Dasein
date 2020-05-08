@@ -113,7 +113,7 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
     protected PipelineTransformationRequest getTransformRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
 
-        request.setName("CalculateCuratedAttributes");
+        request.setName("ProfileCuratedAccount");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);
@@ -165,12 +165,12 @@ public class ProfileCuratedAccount extends BaseSingleEntityProfileStep<CuratedAc
             if (dateMap.containsKey(Category.CONTACT_ATTRIBUTES.getName())) {
                 contactCollectionTime = dateMap.get(Category.CONTACT_ATTRIBUTES.getName());
             }
-            long curatedAccountcollectionTime = Long.max(accountCollectionTime, contactCollectionTime);
-            if (curatedAccountcollectionTime == 0L) {
+            long curatedAccountCollectionTime = Long.max(accountCollectionTime, contactCollectionTime);
+            if (curatedAccountCollectionTime == 0L) {
                 log.error("No Account or Contact DataCollectionStatus dates despite running Curated Account "
                         + "Attributes step");
             } else {
-                dateMap.put(Category.CURATED_ACCOUNT_ATTRIBUTES.getName(), curatedAccountcollectionTime);
+                dateMap.put(Category.CURATED_ACCOUNT_ATTRIBUTES.getName(), curatedAccountCollectionTime);
                 putObjectInContext(CDL_COLLECTION_STATUS, status);
             }
         }

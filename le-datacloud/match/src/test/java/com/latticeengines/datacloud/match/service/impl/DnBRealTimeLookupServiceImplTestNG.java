@@ -123,7 +123,7 @@ public class DnBRealTimeLookupServiceImplTestNG extends DataCloudMatchFunctional
         log.info(String.format("Match duration: %d", res.getDuration()));
     }
 
-    @Test(groups = "dnb", dataProvider = "entityInputDataTestMatchedNameLocation", enabled = true, priority = 3, retryAnalyzer = SimpleRetryAnalyzer.class)
+    @Test(groups = "dnb", dataProvider = "entityInputDataTestMatchedNameLocation", priority = 3, retryAnalyzer = SimpleRetryAnalyzer.class)
     public void testRealTimeEntityLookupMatchedNameLocation(String inputName, String inputCountry,
             String inputCountryCode, DnBReturnCode dnbCode, String duns, Integer ConfidenceCode,
             DnBMatchGrade matchGrade, String matchedName, String matchedStreet, String matchedCity, String matchedState,

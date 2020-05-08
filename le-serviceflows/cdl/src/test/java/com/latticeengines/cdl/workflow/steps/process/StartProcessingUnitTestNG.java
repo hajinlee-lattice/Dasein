@@ -220,7 +220,7 @@ public class StartProcessingUnitTestNG {
 //            step.putObjectInContext(StartProcessing.CONSOLIDATE_INPUT_IMPORTS, importMap);
 //        }
 //        step.setConfiguration(new ProcessStepConfiguration());
-//        step.getConfiguration().setEntityMatchEnabled(true);
+//        step.getConfiguration().setEntityMatchGA(true);
 //        if (rebuildEntities != null) {
 //            step.getConfiguration().setRebuildEntities(Arrays.stream(rebuildEntities).collect(Collectors.toSet()));
 //        }

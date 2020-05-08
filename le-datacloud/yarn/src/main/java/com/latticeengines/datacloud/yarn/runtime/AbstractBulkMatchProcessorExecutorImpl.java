@@ -155,7 +155,6 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
         matchInput.setUseRemoteDnB(processorContext.isUseRemoteDnB());
         matchInput.setLogDnBBulkResult(processorContext.getJobConfiguration().getMatchInput().isLogDnBBulkResult());
         matchInput.setTimeout(processorContext.getRecordTimeOut());
-        matchInput.setUseRemoteDnB(processorContext.isUseRemoteDnB());
         matchInput.setDisableDunsValidation(processorContext.isDisableDunsValidation());
         matchInput.setMetadatas(processorContext.getMetadatas());
         matchInput.setMetadataFields(processorContext.getMetadataFields());

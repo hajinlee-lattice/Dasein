@@ -31,6 +31,10 @@ public class DnBBatchMatchContext extends DnBMatchContextBase implements Fact, D
 
     private boolean sealed; // contexts is fixed, no longer add new context in
 
+    private boolean userDirectPlus;
+
+    private String resultUrl;
+
     public DnBBatchMatchContext() {
         contexts = new HashMap<>();
         createTime = new Date();
@@ -127,6 +131,22 @@ public class DnBBatchMatchContext extends DnBMatchContextBase implements Fact, D
 
     public void setSealed(boolean sealed) {
         this.sealed = sealed;
+    }
+
+    public boolean isUserDirectPlus() {
+        return userDirectPlus;
+    }
+
+    public void setUserDirectPlus(boolean userDirectPlus) {
+        this.userDirectPlus = userDirectPlus;
+    }
+
+    public String getResultUrl() {
+        return resultUrl;
+    }
+
+    public void setResultUrl(String resultUrl) {
+        this.resultUrl = resultUrl;
     }
 
     public Date getCreateTime() {

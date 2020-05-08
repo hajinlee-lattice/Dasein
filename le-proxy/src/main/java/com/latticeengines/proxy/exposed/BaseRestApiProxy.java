@@ -1,6 +1,7 @@
 package com.latticeengines.proxy.exposed;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,6 +83,7 @@ public abstract class BaseRestApiProxy {
     private long initialWaitMsec = 500;
     private double multiplier = 2D;
     private int maxAttempts = 5;
+    private boolean useUri = false; // when using URI, url request parameters need to be url-encoded.
 
     private ConcurrentMap<String, String> headers = new ConcurrentHashMap<>();
 
@@ -302,13 +305,28 @@ public abstract class BaseRestApiProxy {
         });
     }
 
+    protected void putMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts,
+            final Map<String, String> headers) {
+        exchangeMultiPart(method, HttpMethod.PUT, url, parts, headers, String.class);
+    }
+
     protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts,
-            final Class<T> returnValueClazz) {
-        RetryTemplate retry = getRetryTemplate(method, HttpMethod.POST, url, false, null);
+                                  final Class<T> returnValueClazz) {
+        return exchangeMultiPart(method, HttpMethod.POST, url, parts, null, returnValueClazz);
+    }
+
+    protected <T> T exchangeMultiPart(final String method, final HttpMethod httpMethod, final String url,
+                                      final MultiValueMap<String, Object> parts,
+                                      final Map<String, String> extraHeaders,
+                                      final Class<T> returnValueClazz) {
+        RetryTemplate retry = getRetryTemplate(method, httpMethod, url, false, null);
         return retry.execute(context -> {
-            logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
+            logInvocation(method, url, httpMethod, context.getRetryCount() + 1);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            if (MapUtils.isNotEmpty(extraHeaders)) {
+                extraHeaders.forEach(headers::set);
+            }
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
             RestTemplate newRestTemplate = HttpClientUtils.newRestTemplate();
             List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
@@ -319,7 +337,7 @@ public abstract class BaseRestApiProxy {
                 }
             }
             newRestTemplate.setInterceptors(interceptors);
-            ResponseEntity<T> response = newRestTemplate.exchange(url, HttpMethod.POST, requestEntity,
+            ResponseEntity<T> response = newRestTemplate.exchange(url, httpMethod, requestEntity,
                     returnValueClazz);
             return response.getBody();
         });
@@ -354,20 +372,20 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <B> void put(final String method, final String url, final B body, boolean logBody) {
-        put(method, url, body, null, logBody, false);
+        put(method, url, body,null,  null, logBody, false);
     }
 
     protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz) {
-        return put(method, url, body, returnClz, false, false);
+        return put(method, url, body, null, returnClz, false, false);
     }
 
-    protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz, boolean logBody,
-            boolean kryo) {
+    protected <B, T> T put(final String method, final String url, final B body, final Map<String, String> headers,
+                           final Class<T> returnClz, boolean logBody, boolean kryo) {
         HttpMethod verb = HttpMethod.PUT;
         RetryTemplate retry = getRetryTemplate(method, verb, url, logBody, body);
         return retry.execute(context -> {
             logInvocation(method, url, verb, context.getRetryCount() + 1, body, logBody);
-            ResponseEntity<T> response = exchange(url, verb, body, returnClz, kryo, false);
+            ResponseEntity<T> response = exchange(url, verb, body, headers, returnClz, kryo, false);
             if (returnClz == null || response == null) {
                 return null;
             } else {
@@ -391,7 +409,11 @@ public abstract class BaseRestApiProxy {
         RetryTemplate retry = getRetryTemplate(method, verb, url, false, null);
         return retry.execute(context -> {
             logInvocation(method, url, verb, context.getRetryCount() + 1);
-            return restTemplate.exchange(url, verb, entity, returnValueClazz).getBody();
+            if (useUri) {
+                return restTemplate.exchange(URI.create(url), verb, entity, returnValueClazz).getBody();
+            } else {
+                return restTemplate.exchange(url, verb, entity, returnValueClazz).getBody();
+            }
         });
     }
 
@@ -456,7 +478,19 @@ public abstract class BaseRestApiProxy {
         return exchange(url, method, payload, clz, kryoContent, kryoResponse, true);
     }
 
+    <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Map<String, String> headers, Class<T> clz, //
+                                      boolean kryoContent, boolean kryoResponse) {
+        // trace request by default
+        return exchange(url, method, payload, headers, clz, kryoContent, kryoResponse, true);
+    }
+
     <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
+                                      boolean kryoContent, boolean kryoResponse, boolean instrumentTracing) {
+        // trace request by default
+        return exchange(url, method, payload, null, clz, kryoContent, kryoResponse, true);
+    }
+
+    <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Map<String, String> extraHeaders, Class<T> clz, //
             boolean kryoContent, boolean kryoResponse, boolean instrumentTracing) {
         HttpHeaders headers = new HttpHeaders();
 
@@ -477,6 +511,9 @@ public abstract class BaseRestApiProxy {
                 headers.setContentType(MediaType.APPLICATION_JSON);
             }
         }
+        if (MapUtils.isNotEmpty(extraHeaders)) {
+            extraHeaders.forEach(headers::set);
+        }
         HttpEntity<P> entity;
         if (payload == null) {
             entity = new HttpEntity<>(headers);
@@ -484,11 +521,21 @@ public abstract class BaseRestApiProxy {
             entity = new HttpEntity<>(payload, headers);
         }
         RestTemplate template = instrumentTracing ? restTemplate : noTracingTemplate;
-        if (clz == null) {
-            template.exchange(url, method, entity, Void.class);
-            return ResponseEntity.ok(null);
+        if (useUri) {
+            URI uri = URI.create(url);
+            if (clz == null) {
+                template.exchange(uri, method, entity, Void.class);
+                return ResponseEntity.ok(null);
+            } else {
+                return template.exchange(uri, method, entity, clz);
+            }
         } else {
-            return template.exchange(url, method, entity, clz);
+            if (clz == null) {
+                template.exchange(url, method, entity, Void.class);
+                return ResponseEntity.ok(null);
+            } else {
+                return template.exchange(url, method, entity, clz);
+            }
         }
     }
 
@@ -652,5 +699,9 @@ public abstract class BaseRestApiProxy {
             }
             log.debug(msg);
         }
+    }
+
+    public void setUseUri(boolean useUri) {
+        this.useUri = useUri;
     }
 }

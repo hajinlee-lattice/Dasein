@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAccountAttributesWrapper;
 import com.latticeengines.cdl.workflow.steps.rebuild.CuratedContactAttributes;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileCuratedAccountWrapper;
+import com.latticeengines.cdl.workflow.steps.rebuild.ProfileCuratedContactWrapper;
 import com.latticeengines.cdl.workflow.steps.update.CloneCuratedAccountAttributes;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.CuratedAttributesWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -31,7 +32,10 @@ public class CuratedAttributesWorkflow extends AbstractWorkflow<CuratedAttribute
     private CuratedContactAttributes curatedContactAttributes;
 
     @Inject
-    private ProfileCuratedAccountWrapper profileCuratedAccountWrapper;
+    private ProfileCuratedAccountWrapper profileCuratedAccount;
+
+    @Inject
+    private ProfileCuratedContactWrapper profileCuratedContact;
 
     @Override
     public Workflow defineWorkflow(CuratedAttributesWorkflowConfiguration config) {
@@ -39,7 +43,8 @@ public class CuratedAttributesWorkflow extends AbstractWorkflow<CuratedAttribute
                 .next(cloneCuratedAccountAttributes) //
                 .next(curatedAccountAttributesWrapper) //
                 .next(curatedContactAttributes) //
-                .next(profileCuratedAccountWrapper) //
+                .next(profileCuratedAccount) //
+                .next(profileCuratedContact) //
                 .build();
     }
 }

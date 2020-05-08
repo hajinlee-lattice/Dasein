@@ -49,14 +49,14 @@ public class Project implements HasPid, HasTenant, HasAuditingFields, SoftDeleta
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonProperty("tenant")
     private Tenant tenant;
 
     @JsonProperty("import_system")
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "`FK_IMPORT_SYSTEM_ID`", nullable = false)
     private S3ImportSystem importSystem;

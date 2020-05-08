@@ -6,6 +6,7 @@ import static com.latticeengines.query.functionalframework.QueryTestUtils.TABLEJ
 import static com.latticeengines.query.functionalframework.QueryTestUtils.TABLES_S3_FILENAME;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -41,6 +44,8 @@ import net.lingala.zip4j.exception.ZipException;
 @DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-objectapi-context.xml" })
 public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
+
+    private static final Logger log = LoggerFactory.getLogger(ObjectApiFunctionalTestNGBase.class);
 
     @Inject
     protected QueryEvaluator queryEvaluator;
@@ -71,15 +76,17 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
                 tblPathMap = new HashMap<>();
                 Map<TableRoleInCollection, String> pathMap = readTablePaths(version);
                 for (TableRoleInCollection role : QueryTestUtils.getRolesInAttrRepo()) {
-                    String tblName = QueryTestUtils.getServingStoreName(role, version);
-                    String path = pathMap.get(role);
-                    tblPathMap.put(tblName, path);
+                    if (pathMap.containsKey(role)) {
+                        String tblName = QueryTestUtils.getServingStoreName(role, version);
+                        String path = pathMap.get(role);
+                        tblPathMap.put(tblName, path);
+                    }
                 }
+                insertPurchaseHistory(attrRepo, version);
                 uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);
-                insertPurchaseHistory(attrRepo);
             }
 
-            for (TableRoleInCollection role : QueryTestUtils.getRolesInAttrRepo()) {
+            for (TableRoleInCollection role : attrRepo.getTableNameMap().keySet()) {
                 String tblName = QueryTestUtils.getServingStoreName(role, version);
                 attrRepo.changeServingStoreTableName(role, tblName);
             }
@@ -88,7 +95,7 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
     }
 
     private Map<TableRoleInCollection, String> readTablePaths(int version) {
-        String downloadsDir = "downloads";
+        String downloadsDir = "downloads/" + version;
         File downloadedFile = testArtifactService.downloadTestArtifact(ATTR_REPO_S3_DIR, //
                 String.valueOf(version), TABLEJSONS_S3_FILENAME);
         String zipFilePath = downloadedFile.getPath();
@@ -102,10 +109,16 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
         QueryTestUtils.getRolesInAttrRepo().forEach(role -> {
             try {
                 File tableJsonFile = new File(downloadsDir + File.separator + "TableJsons/" + role + ".json");
-                Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
-                String path = table.getExtracts().get(0).getPath();
-                path = path.replace("/Pods/QA/", "/Pods/" + podId + "/");
-                pathMap.put(role, path);
+                if (tableJsonFile.exists()) {
+                    Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
+                    String path = table.getExtracts().get(0).getPath();
+                    path = path.replace("/Pods/QA/", "/Pods/" + podId + "/");
+                    pathMap.put(role, path);
+                } else {
+                    throw new FileNotFoundException();
+                }
+            } catch (FileNotFoundException e) {
+                log.info("No table json for {}", role);
             } catch (IOException e) {
                 throw new RuntimeException("Cannot open table json file for " + role);
             }
@@ -113,20 +126,24 @@ public class ObjectApiFunctionalTestNGBase extends AbstractTestNGSpringContextTe
         return pathMap;
     }
 
-    private void insertPurchaseHistory(AttributeRepository attrRepo) {
-        String downloadsDir = "downloads";
+    private void insertPurchaseHistory(AttributeRepository attrRepo, int version) {
+        String downloadsDir = "downloads/" +  version;
         TableRoleInCollection role = TableRoleInCollection.CalculatedPurchaseHistory;
         File tableJsonFile = new File(downloadsDir + File.separator + "TableJsons/" + role + ".json");
         try {
-            Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
-            attrRepo.appendServingStore(BusinessEntity.PurchaseHistory, table);
+            if (tableJsonFile.exists()) {
+                Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
+                attrRepo.appendServingStore(BusinessEntity.PurchaseHistory, table);
+            } else {
+                log.info("No table json for {}", role);
+            }
         } catch (IOException e) {
             throw new RuntimeException("Cannot open table json file for " + role, e);
         }
     }
 
     private void uploadTablesToHdfs(CustomerSpace customerSpace, int version) {
-        String downloadsDir = "downloads";
+        String downloadsDir = "downloads/" +  version;
         File downloadedFile = testArtifactService.downloadTestArtifact(ATTR_REPO_S3_DIR, //
                 String.valueOf(version), TABLES_S3_FILENAME);
         String zipFilePath = downloadedFile.getPath();

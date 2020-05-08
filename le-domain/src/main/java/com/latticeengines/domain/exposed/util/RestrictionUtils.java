@@ -113,6 +113,28 @@ public final class RestrictionUtils {
         bucketRestriction.setBkt(bkt);
     }
 
+    public static void validateCentralEntity(Restriction restriction, BusinessEntity center) {
+        if (restriction != null) {
+            if (restriction instanceof BucketRestriction) {
+                AttributeLookup attributeLookup = ((BucketRestriction) restriction).getAttr();
+                if (attributeLookup != null) {
+                    BusinessEntity entity = attributeLookup.getEntity();
+                    if (entity != null && !center.equals(BusinessEntity.getCentralEntity(entity))) {
+                        throw new IllegalArgumentException(String.format("Restriction is not a %s restriction: %s",
+                                center, JsonUtils.serialize(restriction)));
+                    }
+                }
+            } else if (restriction instanceof LogicalRestriction) {
+                List<Restriction> children = ((LogicalRestriction) restriction).getRestrictions();
+                if (CollectionUtils.isNotEmpty(children)) {
+                    for (Restriction child : children) {
+                        validateCentralEntity(child, center);
+                    }
+                }
+            }
+        }
+    }
+
     private static boolean isValueFreeOperator(ComparisonType operator) {
         return IS_NULL.equals(operator) || IS_NOT_NULL.equals(operator) || IS_EMPTY.equals(operator);
     }

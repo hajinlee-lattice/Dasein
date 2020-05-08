@@ -165,6 +165,10 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("UseRemoteDnB")
     private Boolean useRemoteDnB;
 
+    // can be retired after fully cutting over to Direct+
+    @JsonProperty("UseDirectPlus")
+    private Boolean useDirectPlus;
+
     // Flag logDnBBulkResult decides whether DnB bulk match result is logged
     @JsonProperty("LogDnBBulkResult")
     private boolean logDnBBulkResult;
@@ -587,6 +591,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setUseRemoteDnB(Boolean useRemoteDnB) {
         this.useRemoteDnB = useRemoteDnB;
+    }
+
+    public Boolean getUseDirectPlus() {
+        return useDirectPlus;
+    }
+
+    public void setUseDirectPlus(Boolean useDirectPlus) {
+        this.useDirectPlus = useDirectPlus;
     }
 
     public boolean isMatchDebugEnabled() {

@@ -8,11 +8,14 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dcp.ProjectProxy;
+import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.pls.PlsInternalProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -31,6 +34,9 @@ public class SourceImportListener extends LEJobListener {
     @Inject
     private ProjectProxy projectProxy;
 
+    @Inject
+    private UploadProxy uploadProxy;
+
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
 
@@ -46,23 +52,36 @@ public class SourceImportListener extends LEJobListener {
         String tenantId = jobExecution.getJobParameters().getString("CustomerSpace");
         log.info("tenantId=" + tenantId);
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
-        if (job != null) {
-            String uploadId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
-            String projectId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.PROJECT_ID);
-            String sourceId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.SOURCE_ID);
-
-            ProjectDetails project = projectProxy.getDCPProjectByProjectId(tenantId, projectId);
-
-            log.info("tenantId=" + tenantId);
-            BatchStatus jobStatus = jobExecution.getStatus();
-
-            UploadEmailInfo uploadEmailInfo = new UploadEmailInfo();
-            uploadEmailInfo.setProjectId(projectId);
-            uploadEmailInfo.setSourceId(sourceId);
-            uploadEmailInfo.setUploadId(uploadId);
-            uploadEmailInfo.setRecipientList(project.getRecipientList());
-            uploadEmailInfo.setJobStatus(jobStatus.name());
-            plsInternalProxy.sendUploadEmail(uploadEmailInfo);
+        if (job == null) {
+            log.error("Cannot locate workflow job with id {}", jobExecution.getId());
+            throw new IllegalArgumentException("Cannot locate workflow job with id " + jobExecution.getId());
         }
+
+        String uploadId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
+        String projectId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.PROJECT_ID);
+        String sourceId = job.getInputContextValue(DCPSourceImportWorkflowConfiguration.SOURCE_ID);
+
+        ProjectDetails project = projectProxy.getDCPProjectByProjectId(tenantId, projectId);
+
+        BatchStatus jobStatus = jobExecution.getStatus();
+        if (BatchStatus.COMPLETED.equals(jobStatus)) {
+            uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.FINISHED);
+        } else {
+            if (jobStatus.isUnsuccessful()) {
+                log.info("SourceImport workflow job {} failed with status {}", jobExecution.getId(), jobStatus);
+            } else {
+                log.error("SourceImport workflow job {} failed with unknown status {}", jobExecution.getId(), jobStatus);
+            }
+            uploadProxy.updateUploadStatus(tenantId, uploadId, Upload.Status.ERROR);
+        }
+
+        UploadEmailInfo uploadEmailInfo = new UploadEmailInfo();
+        uploadEmailInfo.setProjectId(projectId);
+        uploadEmailInfo.setSourceId(sourceId);
+        uploadEmailInfo.setUploadId(uploadId);
+        uploadEmailInfo.setRecipientList(project.getRecipientList());
+        uploadEmailInfo.setJobStatus(jobStatus.name());
+        log.info("Send SourceImport workflow status email {}", JsonUtils.serialize(uploadEmailInfo));
+        plsInternalProxy.sendUploadEmail(uploadEmailInfo);
     }
 }

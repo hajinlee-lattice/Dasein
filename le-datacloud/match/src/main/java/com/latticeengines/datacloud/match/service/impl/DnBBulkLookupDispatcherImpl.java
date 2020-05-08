@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Map;
 
@@ -17,12 +18,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.LocationUtils;
-import com.latticeengines.datacloud.core.service.RateLimitingService;
-import com.latticeengines.datacloud.match.exposed.service.DnBAuthenticationService;
 import com.latticeengines.datacloud.match.service.DnBBulkLookupDispatcher;
 import com.latticeengines.domain.exposed.camille.locks.RateLimitedAcquisition;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBAPIType;
@@ -31,21 +29,13 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBKeyType;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchContext;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBReturnCode;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
-import com.latticeengines.domain.exposed.exception.LedpException;
 
 @Component("dnbBulkLookupDispatcher")
-public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBatchMatchContext>
-        implements DnBBulkLookupDispatcher {
+public class DnBBulkLookupDispatcherImpl extends BaseDnBBulkLookupDispatcherImpl implements DnBBulkLookupDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(DnBBulkLookupDispatcherImpl.class);
 
     private static final String DNB_BULK_BODY_FILE_NAME = "com/latticeengines/datacloud/match/BulkApiBodyTemplate.xml";
-
-    @Inject
-    private DnBAuthenticationService dnBAuthenticationService;
-
-    @Inject
-    private RateLimitingService rateLimitingService;
 
     @Inject
     private DnBBulkLookupDispatcherImpl _self;
@@ -88,81 +78,41 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
         if (is == null) {
             throw new RuntimeException("Cannot find resource " + DNB_BULK_BODY_FILE_NAME);
         }
-        dnBBulkApiBody = IOUtils.toString(is, "UTF-8");
+        dnBBulkApiBody = IOUtils.toString(is, Charset.defaultCharset());
     }
 
     @Override
-    public DnBBatchMatchContext sendRequest(DnBBatchMatchContext batchContext) {
-        // Immediate retry is only for case that token expires (Other retriable
-        // cases will wait for next schedule)
-        for (int i = 0; i < retries; i++) {
-            // Don't actually acquire quota because submission might not be
-            // successful. Only check quota availability
-            RateLimitedAcquisition rlAcq = rateLimitingService.acquireDnBBulkRequest(batchContext.getContexts().size(),
-                    true);
-            if (!rlAcq.isAllowed()) {
-                logRateLimitingRejection(rlAcq, DnBAPIType.BATCH_DISPATCH);
-                batchContext.setDnbCode(DnBReturnCode.RATE_LIMITING);
-                return batchContext;
-            }
-            executeLookup(batchContext, DnBKeyType.BATCH, DnBAPIType.BATCH_DISPATCH);
-            if (batchContext.getDnbCode().isSubmittedStatus()) {
-                // After request is successfully submitted, log the used quota.
-                // Has potential issue that probably during 2 calls of
-                // acquireDnBBulkRequest, maybe another job logs its quota and
-                // we reach the upper limit of quota. Then quota of this request
-                // is not logged.
-                // Not a serious issue. We don't need to control DnB quota usage
-                // very accurately. If exceeding quota limit, DnB will simply
-                // fail the request.
-                rateLimitingService.acquireDnBBulkRequest(batchContext.getContexts().size(), false);
-            }
-            if (!batchContext.getDnbCode().isImmediateRetryStatus()) {
-                log.info("Sent batched request to dnb bulk match api, status={}, size={}, timestamp={}, serviceId={}",
-                        batchContext.getDnbCode(), batchContext.getContexts().size(), batchContext.getTimestamp(),
-                        batchContext.getServiceBatchId());
-                return batchContext;
-            }
-            log.info("Attempting to refresh DnB token which was found invalid: " + batchContext.getToken());
-            dnBAuthenticationService.requestToken(DnBKeyType.BATCH, batchContext.getToken());
-        }
-        log.error("Failed to submit batched request due to invalid token and failed to refresh");
-        return batchContext;
+    protected String url() {
+        return url;
     }
 
     @Override
-    protected void parseError(Exception ex, DnBBatchMatchContext batchContext) {
-        if (ex instanceof HttpClientErrorException) {
-            HttpClientErrorException httpEx = (HttpClientErrorException) ex;
-            batchContext.setDnbCode(parseDnBHttpError(httpEx));
-        } else if (ex instanceof LedpException) {
-            LedpException ledpEx = (LedpException) ex;
-            log.error(String.format("LedpException in DnB batch dispatching request: %s %s",
-                    ((LedpException) ex).getCode().name(), ((LedpException) ex).getCode().getMessage()));
-            switch (ledpEx.getCode()) {
-            case LEDP_25027:
-                batchContext.setDnbCode(DnBReturnCode.UNAUTHORIZED);
-                break;
-            case LEDP_25037:
-                batchContext.setDnbCode(DnBReturnCode.BAD_REQUEST);
-                break;
-            case LEDP_25039:
-                batchContext.setDnbCode(DnBReturnCode.SERVICE_UNAVAILABLE);
-                break;
-            default:
-                batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
-                break;
-            }
-        } else {
-            log.error("Unhandled exception in DnB batch match dispatching request: " + ex.getMessage(), ex);
-            batchContext.setDnbCode(DnBReturnCode.UNKNOWN);
-        }
-
+    protected DnBKeyType keyType() {
+        return DnBKeyType.BATCH;
     }
 
+    @Override
+    protected String getErrorCodePath() {
+        return errorCodeXpath;
+    }
 
     @Override
-    protected void parseResponse(String response, DnBBatchMatchContext batchContext, DnBAPIType apiType) {
+    protected ResponseType getResponseType() {
+        return ResponseType.XML;
+    }
+
+    @Override
+    protected RateLimitedAcquisition acquireQuota(long numRows, boolean attemptOnly) {
+        return rateLimitingService.acquireDnBBulkRequest(numRows, attemptOnly);
+    }
+
+    @Override
+    protected void executeLookup(DnBBatchMatchContext batchContext) {
+        executeLookup(batchContext, keyType(), DnBAPIType.BATCH_DISPATCH);
+    }
+
+    @Override
+    protected void parseResponse(String response, DnBBatchMatchContext batchContext) {
         String serviceBatchId = (String) retrieveXmlValueFromResponse(serviceIdXpath, response);
         if (!StringUtils.isEmpty(serviceBatchId)) {
             batchContext.setServiceBatchId(serviceBatchId);
@@ -180,29 +130,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
         headers.setContentType(MediaType.APPLICATION_XML);
         headers.add(applicationIdHeader, applicationId);
         headers.add(authorizationHeader, token);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(body, headers);
-        return requestEntity;
-    }
-
-    @Override
-    protected String constructUrl(DnBBatchMatchContext batchContext, DnBAPIType apiType) {
-        return url;
-    }
-
-    @Override
-    protected String getErrorCodePath() {
-        return errorCodeXpath;
-    }
-
-    @Override
-    protected ResponseType getResponseType() {
-        return ResponseType.XML;
-    }
-
-    @Override
-    protected void updateTokenInContext(DnBBatchMatchContext context, String token) {
-        context.setToken(token);
+        return new HttpEntity<>(body, headers);
     }
 
     private String constructBulkRequestBody(DnBBatchMatchContext batchContext) {
@@ -214,8 +142,7 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
         if (batchContext.getLogDnBBulkResult()) {
             log.info("Submitted encoded match input: {}", inputObjectBase64);
         }
-        return String.format(dnBBulkApiBody, createdDateUTC.toString(), inputObjectBase64,
-                String.valueOf(batchContext.getContexts().size()));
+        return String.format(dnBBulkApiBody, createdDateUTC, inputObjectBase64, batchContext.getContexts().size());
     }
 
     private String convertTuplesToString(DnBBatchMatchContext batchContext) {
@@ -240,7 +167,5 @@ public class DnBBulkLookupDispatcherImpl extends BaseDnBLookupServiceImpl<DnBBat
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getCountryCode(), ""),
                 StringUtils.defaultIfEmpty(matchContext.getInputNameLocation().getPhoneNumber(), ""));
     }
-
-
 
 }

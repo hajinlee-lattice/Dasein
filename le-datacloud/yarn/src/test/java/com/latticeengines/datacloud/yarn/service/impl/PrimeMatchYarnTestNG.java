@@ -95,7 +95,7 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
             Assert.assertNotNull(record.get(InterfaceName.InternalId.name()));
             candidateCount++;
         }
-        Assert.assertTrue(candidateCount > count);
+        Assert.assertTrue(candidateCount >= count);
     }
 
     private String getBlockOutputDir(DataCloudJobConfiguration jobConfiguration) {
@@ -124,6 +124,7 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         matchInput.setDecisionGraph(primeMatchDG);
         matchInput.setUseDnBCache(false);
         matchInput.setUseRemoteDnB(true);
+        matchInput.setUseDirectPlus(true);
         matchInput.setAllocateId(false);
         matchInput.setEntityKeyMaps(prepareEntityKeyMap());
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());

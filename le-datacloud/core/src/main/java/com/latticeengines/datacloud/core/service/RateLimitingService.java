@@ -21,4 +21,8 @@ public interface RateLimitingService {
      */
     RateLimitedAcquisition acquireDnBBulkStatus(boolean attemptOnly);
 
+    RateLimitedAcquisition acquireDirectPlusBatchRequest(boolean attemptOnly);
+
+    RateLimitedAcquisition acquireDirectPlusBatchStatus(boolean attemptOnly);
+
 }

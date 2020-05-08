@@ -1,5 +1,8 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -46,36 +49,6 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
     @Value("${datacloud.dnb.authorization.header}")
     private String authorizationHeader;
 
-    @Value("${datacloud.dnb.realtime.duns.jsonpath}")
-    private String entityDunsJsonPath;
-
-    @Value("${datacloud.dnb.realtime.name.jsonpath}")
-    private String entityNameJsonPath;
-
-    @Value("${datacloud.dnb.realtime.street.jsonpath}")
-    private String entityStreetJsonPath;
-
-    @Value("${datacloud.dnb.realtime.city.jsonpath}")
-    private String entityCityJsonPath;
-
-    @Value("${datacloud.dnb.realtime.state.jsonpath}")
-    private String entityStateJsonPath;
-
-    @Value("${datacloud.dnb.realtime.countrycode.jsonpath}")
-    private String entityCountryCodeJsonPath;
-
-    @Value("${datacloud.dnb.realtime.zipcode.jsonpath}")
-    private String entityZipCodeJsonPath;
-
-    @Value("${datacloud.dnb.realtime.phonenumber.jsonpath}")
-    private String entityPhoneNumberJsonPath;
-
-    @Value("${datacloud.dnb.realtime.confidencecode.jsonpath}")
-    private String entityConfidenceCodeJsonPath;
-
-    @Value("${datacloud.dnb.realtime.matchgrade.jsonpath}")
-    private String entityMatchGradeJsonPath;
-
     @Value("${datacloud.dnb.realtime.email.duns.jsonpath}")
     private String emailDunsJsonPath;
 
@@ -84,9 +57,6 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
 
     @Value("${datacloud.dnb.realtime.reasoncode.de}")
     private String reasonCodeDe;
-
-    @Value("${datacloud.dnb.realtime.operatingstatus.jsonpath}")
-    private String operatingStatusJsonPath;
 
     @Value("${datacloud.dnb.realtime.operatingstatus.outofbusiness}")
     private String outOfBusinessValue;
@@ -238,7 +208,7 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             url.append(realTimeUrlPrefix);
             if (!StringUtils.isEmpty(context.getInputNameLocation().getName())) {
                 url.append("SubjectName=");
-                url.append(context.getInputNameLocation().getName());
+                url.append(urlEncode(context.getInputNameLocation().getName()));
                 url.append("&");
             } else {
                 throw new LedpException(LedpCode.LEDP_25023);
@@ -257,23 +227,23 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
             }
             if (!StringUtils.isEmpty(context.getInputNameLocation().getCity())) {
                 url.append("PrimaryTownName=");
-                url.append(context.getInputNameLocation().getCity());
+                url.append(urlEncode(context.getInputNameLocation().getCity()));
                 url.append("&");
             }
             if (!StringUtils.isEmpty(context.getInputNameLocation().getState())) {
                 url.append("TerritoryName=");
-                url.append(LocationUtils.getStardardStateCode(context.getInputNameLocation().getCountry(),
-                        context.getInputNameLocation().getState()));
+                url.append(urlEncode(LocationUtils.getStardardStateCode(context.getInputNameLocation().getCountry(),
+                        context.getInputNameLocation().getState())));
                 url.append("&");
             }
             if (StringUtils.isNotEmpty(context.getInputNameLocation().getZipcode())) {
                 url.append("FullPostalCode=");
-                url.append(context.getInputNameLocation().getZipcode());
+                url.append(urlEncode(context.getInputNameLocation().getZipcode()));
                 url.append("&");
             }
             if (StringUtils.isNotEmpty(context.getInputNameLocation().getPhoneNumber())) {
                 url.append("TelephoneNumber=");
-                url.append(context.getInputNameLocation().getPhoneNumber());
+                url.append(urlEncode(context.getInputNameLocation().getPhoneNumber()));
                 url.append("&");
             }
             url.append(
@@ -306,5 +276,12 @@ public class DnBRealTimeLookupServiceImpl extends BaseDnBLookupServiceImpl<DnBMa
         context.setToken(token);
     }
 
+    private static String urlEncode(String val) {
+        try {
+            return URLEncoder.encode(val, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
