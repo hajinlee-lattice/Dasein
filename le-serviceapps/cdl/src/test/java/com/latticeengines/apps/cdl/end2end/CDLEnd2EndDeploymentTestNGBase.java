@@ -297,7 +297,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated daily transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-//    static final Long DAILY_TXN_UT_EM = 50863L;
+    // static final Long DAILY_TXN_UT_EM = 50863L;
     static final Long DAILY_TXN_UT_EM = 50881L;
     // Number of aggregated period transaction after ProcessTransaction test
     static final Long PERIOD_TRANSACTION_PT = 62550L;
@@ -310,7 +310,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-//    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+    // static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
     static final Long PERIOD_TRANSACTION_UT_EM = 75691L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
@@ -347,7 +347,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final Long TRANSACTION_LEGACY_FIRST_PA = 24367L;
     // Number of new raw txn after second PA of legacy tenant end2end test
     static final Long TRANSACTION_LEGACY_SECOND_PA = 24393L;
-    // Number of total purchase history attributes after PA of legacy tenant end2end test
+    // Number of total purchase history attributes after PA of legacy tenant end2end
+    // test
     static final Long TOTAL_PURCHASE_HISTORY_PA = 5L;
 
     /* Expected product result */
@@ -550,19 +551,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     protected void setupEnd2EndTestEnvironment() throws Exception {
-        setupEnd2EndTestEnvironment("");
-    }
-
-    protected void setupEnd2EndTestEnvironment(String existingTenant) throws Exception {
-        setupEnd2EndTestEnvironment(existingTenant, null);
+        setupEnd2EndTestEnvironment(null);
     }
 
     protected void setupEnd2EndTestEnvironment(Map<String, Boolean> featureFlagMap) throws Exception {
-        setupEnd2EndTestEnvironment(null, featureFlagMap);
-    }
-
-    protected void setupEnd2EndTestEnvironment(String existingTenant, Map<String, Boolean> featureFlagMap)
-            throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
 
         if (featureFlagMap == null) {
@@ -570,7 +562,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
         // use non entity match path by default unless its overwritten explicitly
         featureFlagMap.putIfAbsent(LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA.getName(), false);
-        setupTestEnvironment(existingTenant, featureFlagMap);
+        setupTestEnvironmentWithFeatureFlags(featureFlagMap);
         mainTestTenant = testBed.getMainTestTenant();
 
         log.info("Test environment setup finished.");
@@ -1793,8 +1785,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedTableCount)) {
             return;
         }
-        expectedTableCount.forEach((key, value) -> log.info("Row count for table role of {}: {} -> {}",
-                key.name(), countTableRole(key), value));
+        expectedTableCount.forEach((key, value) -> log.info("Row count for table role of {}: {} -> {}", key.name(),
+                countTableRole(key), value));
         expectedTableCount.forEach((key, value) -> //
         Assert.assertEquals(Long.valueOf(countTableRole(key)), value, key.name()));
     }
@@ -1803,8 +1795,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
-        expectedEntityCount
-                .forEach((key, value) -> log.info("Row count for redshift table of {}: {} -> {}", key, countInRedshift(key), value));
+        expectedEntityCount.forEach((key, value) -> log.info("Row count for redshift table of {}: {} -> {}", key,
+                countInRedshift(key), value));
         expectedEntityCount.forEach((key, value) -> Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
     }
 
