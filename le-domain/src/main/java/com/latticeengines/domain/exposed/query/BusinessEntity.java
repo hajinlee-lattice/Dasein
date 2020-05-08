@@ -308,6 +308,8 @@ public enum BusinessEntity implements GraphNode {
             return Contact;
         case Account:
         case CuratedAccount:
+        case Transaction:
+        case PeriodTransaction:
         case PurchaseHistory:
         case AnalyticPurchaseState:
         case Rating:

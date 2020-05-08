@@ -163,7 +163,7 @@ public class ActivityMetricsGroupServiceImpl implements ActivityMetricsGroupServ
                 InterfaceName.__Row_Count__.name(), StreamAttributeDeriver.Calculation.SUM));
         stage.setCategory(Category.OPPORTUNITY_PROFILE);
         stage.setSubCategoryTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_SUBCATEGORY));
-        stage.setDisplayNameTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_STAGENAME_DISPLAYNAME));
+        stage.setDisplayNameTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_NAME_DISPLAYNAME));
         stage.setDescriptionTmpl(getTemplate(StringTemplateConstants.OPPORTUNITY_METRICS_GROUP_STAGENAME_DESCRIPTION));
         stage.setNullImputation(NullMetricsImputation.ZERO);
         stage.setReducer(prepareReducer());

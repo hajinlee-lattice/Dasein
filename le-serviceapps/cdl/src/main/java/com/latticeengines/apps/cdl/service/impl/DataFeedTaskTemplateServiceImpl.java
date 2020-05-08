@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.ActivityTypeId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageNameId;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,7 +53,6 @@ import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
-import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
 import com.latticeengines.domain.exposed.cdl.activity.StreamDimension;
@@ -704,8 +704,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         Catalog stageCatalog = createCatalog(tenant, opportunityAtlasStreamName, stageDataFeedTask);
         catalogEntityMgr.create(stageCatalog);
         log.info("stageCatalog is {}.", JsonUtils.serialize(stageCatalog));
-        StreamDimension dimension = createHashDimension(opportunityAtlasStream, stageCatalog,
-                InterfaceName.StageNameId.name(), StreamDimension.Usage.Pivot, InterfaceName.StageName.name());
+        StreamDimension dimension = createStageDimension(opportunityAtlasStream, stageCatalog);
         dimensionEntityMgr.create(dimension);
         log.info("dimension is {}.", JsonUtils.serialize(dimension));
         ActivityMetricsGroup defaultGroup = activityMetricsGroupService.setUpDefaultOpportunityProfile(tenant.getId(),
@@ -858,27 +857,26 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return catalog;
     }
 
-    private StreamDimension createHashDimension(@NotNull AtlasStream stream, Catalog catalog,
-                                                      String dimensionName, StreamDimension.Usage usage,
-                                                      String attributeName) {
+    private StreamDimension createStageDimension(@NotNull AtlasStream stream, Catalog catalog) {
         StreamDimension dim = new StreamDimension();
-        dim.setName(dimensionName);
+        dim.setName(StageNameId.name());
         dim.setDisplayName(dim.getName());
         dim.setTenant(stream.getTenant());
         dim.setStream(stream);
-        dim.addUsages(usage);
+        dim.addUsages(StreamDimension.Usage.Pivot);
         dim.setCatalog(catalog);
 
         // hash
         DimensionGenerator generator = new DimensionGenerator();
-        generator.setAttribute(attributeName);
+        generator.setAttribute(InterfaceName.Name.name());
         generator.setFromCatalog(true);
         generator.setOption(DimensionGenerator.DimensionGeneratorOption.HASH);
         dim.setGenerator(generator);
 
-        DimensionCalculator calculator = new DimensionCalculator();
-        calculator.setName(attributeName);
-        calculator.setAttribute(attributeName);
+        DimensionCalculatorRegexMode calculator = new DimensionCalculatorRegexMode();
+        calculator.setName(InterfaceName.StageName.name());
+        calculator.setPatternAttribute(InterfaceName.StageName.name());
+        calculator.setPatternFromCatalog(true);
         dim.setCalculator(calculator);
         return dim;
     }

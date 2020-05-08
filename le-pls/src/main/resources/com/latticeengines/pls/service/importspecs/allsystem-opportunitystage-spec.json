@@ -3,6 +3,23 @@
   "fieldDefinitionsRecordsMap": {
     "General": [
       {
+        "fieldName": "Name",
+        "fieldType": "TEXT",
+        "columnName": "Name",
+        "screenName": "Name",
+        "matchingColumnNames": [
+          "NAME",
+          "Name",
+          "name"
+        ],
+        "required": true,
+        "nullable": false,
+        "approvedUsage": [
+          "None"
+        ],
+        "fundamentalType": "ALPHA"
+      },
+      {
         "fieldName": "StageName",
         "fieldType": "TEXT",
         "columnName": "Stage Name",
