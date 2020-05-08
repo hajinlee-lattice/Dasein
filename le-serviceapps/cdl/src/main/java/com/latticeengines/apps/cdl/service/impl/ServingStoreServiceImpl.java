@@ -24,6 +24,7 @@ import com.latticeengines.apps.cdl.mds.CustomizedMetadataStore;
 import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
+import com.latticeengines.apps.cdl.util.AttributeSetContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -83,6 +84,17 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 .block();
     }
 
+    private void setAttributeSetName(String attributeSetName, Collection<ColumnSelection.Predefined> groups) {
+        // only support enrichment group
+        if (!StringUtils.isEmpty(attributeSetName) && isEnrichmentGroup(groups)) {
+            AttributeSetContext.setAttributeSetName(attributeSetName);
+        }
+    }
+
+    private boolean isEnrichmentGroup(Collection<ColumnSelection.Predefined> groups) {
+        return CollectionUtils.isNotEmpty(groups) && groups.size() == 1 && groups.contains(ColumnSelection.Predefined.Enrichment);
+    }
+
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter) {
@@ -90,6 +102,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
         AtomicLong counter = new AtomicLong();
         filter = filter == null ? StoreFilter.ALL : filter;
         Flux<ColumnMetadata> flux;
+        setAttributeSetName(attributeSetName, groups);
         if (version == null) {
             flux = getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace), filter)
                     .sequential();

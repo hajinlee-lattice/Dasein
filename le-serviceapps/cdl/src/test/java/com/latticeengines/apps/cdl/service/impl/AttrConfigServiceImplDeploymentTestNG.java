@@ -142,7 +142,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         String displayName = "TestAttributeSet";
         String displayName2 = "TestAttributeSet2";
         AttributeSet attributeSet = createAttributeSet(displayName);
-        attributeSet = attrConfigService.createOrUpdateAttributeSet(attributeSet);
+        attributeSet = attrConfigService.createAttributeSet(attributeSet);
         String generatedName = attributeSet.getName();
         log.info("Attribute set name {}", generatedName);
         AtomicReference<AttributeSet> attributeSetAtom = new AtomicReference<>();
@@ -158,7 +158,7 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
         Assert.assertEquals(attributeSet.getDisplayName(), displayName);
         attributeSet.setDisplayName(displayName2);
-        attrConfigService.createOrUpdateAttributeSet(attributeSet);
+        attrConfigService.createAttributeSet(attributeSet);
         Assert.assertEquals(attributeSet.getDisplayName(), displayName2);
         Assert.assertEquals(attributeSet.getName(), name);
         Assert.assertEquals(attrConfigService.getAttributeSets().size(), 1);

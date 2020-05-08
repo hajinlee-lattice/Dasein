@@ -19,4 +19,5 @@ public interface MetadataStore3<T1 extends Serializable, T2 extends Serializable
     default ParallelFlux<ColumnMetadata> getMetadataInParallel(T1 coord1, T2 coord2, T3 coord3) {
         return getMetadataInParallel(Namespace.as(coord1, coord2, coord3));
     }
+
 }

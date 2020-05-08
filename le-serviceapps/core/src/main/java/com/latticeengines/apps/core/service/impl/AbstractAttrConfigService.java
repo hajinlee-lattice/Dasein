@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -134,7 +136,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
-            List<String> propertyNames, boolean activeOnly) {
+                                                                            List<String> propertyNames, boolean activeOnly) {
+        return getAttrConfigOverview(categories, propertyNames, activeOnly, null);
+    }
+
+    @Override
+    public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
+            List<String> propertyNames, boolean activeOnly, String attributeName) {
         ConcurrentMap<String, AttrConfigCategoryOverview<?>> attrConfigOverview = new ConcurrentHashMap<>();
         log.info("categories are" + categories + ", propertyNames are " + propertyNames + ", activeOnly " + activeOnly);
         final Tenant tenant = MultiTenantContext.getTenant();
@@ -145,7 +153,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             Runnable runnable = () -> {
                 MultiTenantContext.setTenant(tenant);
                 AttrConfigCategoryOverview<?> attrConfigCategoryOverview = getAttrConfigOverview(
-                        getRenderedList(category, entityMatchEnabled), category, propertyNames, activeOnly);
+                        getRenderedList(category, entityMatchEnabled, attributeName), category, propertyNames, activeOnly);
                 attrConfigOverview.put(category.getName(), attrConfigCategoryOverview);
             };
             runnables.add(runnable);
@@ -324,11 +332,20 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public List<AttrConfig> getRenderedList(Category category) {
+        return getRenderedList(category, null);
+    }
+
+    @Override
+    public List<AttrConfig> getRenderedList(Category category, String attributeSetName) {
         boolean entityMatchEnabled = batonService.isEntityMatchEnabled(MultiTenantContext.getCustomerSpace());
-        return getRenderedList(category, entityMatchEnabled);
+        return getRenderedList(category, entityMatchEnabled, attributeSetName);
     }
 
     private List<AttrConfig> getRenderedList(Category category, boolean entityMatchEnabled) {
+        return getRenderedList(category, entityMatchEnabled, null);
+    }
+
+    private List<AttrConfig> getRenderedList(Category category, boolean entityMatchEnabled, String attributeSetName) {
         List<AttrConfig> renderedList;
         String tenantId = MultiTenantContext.getShortTenantId();
         List<BusinessEntity> entities = CategoryUtils.getEntity(category);
@@ -341,7 +358,19 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             .equals(attrConfig.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class))
                             || columnsInSystem.contains(attrConfig.getAttrName()))
                     .collect(Collectors.toList());
-            renderedList = render(columns, customConfigInCategory, entityMatchEnabled);
+            Set<String> attributesInSet = null;
+            if (StringUtils.isNotEmpty(attributeSetName)) {
+                AttributeSet attributeSet = getAttributeSetByName(attributeSetName);
+                if (attributeSet != null) {
+                    Map<String, Set<String>> attributeMap = attributeSet.getAttributesMap();
+                    if (MapUtils.isNotEmpty(attributeMap)) {
+                        attributesInSet = attributeMap.getOrDefault(category.name(), new HashSet<>());
+                    } else {
+                        attributesInSet = new HashSet<>();
+                    }
+                }
+            }
+            renderedList = render(columns, customConfigInCategory, entityMatchEnabled, attributesInSet);
             modifyInactivateState(renderedList);
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
             String msg = String.format("Rendered %d attr configs for entities %s", count,
@@ -671,18 +700,95 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         attrConfigEntityMgr.deleteAllForEntity(tenantId, entity);
     }
 
+    public List<AttrConfig> render(List<ColumnMetadata> systemMetadata, List<AttrConfig> customConfigs,
+                                   boolean entityMatchEnabled) {
+        return render(systemMetadata, customConfigs, entityMatchEnabled, null);
+    }
+
+    private void setStringProperty(AttrConfig mergeConfig, String key,
+                                   String value, Boolean allowCustomization, Map<String, AttrConfigProp<?>> attrProps) {
+        AttrConfigProp<String> prop = (AttrConfigProp<String>) attrProps.getOrDefault(key, new AttrConfigProp<String>());
+        prop.setSystemValue(value);
+        prop.setAllowCustomization(allowCustomization);
+        mergeConfig.putProperty(key, prop);
+    }
+
+    private void setCategoryProperty(AttrConfig mergeConfig, Category value,
+                                     Boolean allowCustomization, Map<String, AttrConfigProp<?>> attrProps) {
+        AttrConfigProp<Category> cateProp = (AttrConfigProp<Category>) attrProps
+                .getOrDefault(ColumnMetadataKey.Category, new AttrConfigProp<Category>());
+        cateProp.setSystemValue(value);
+        cateProp.setAllowCustomization(allowCustomization);
+        mergeConfig.putProperty(ColumnMetadataKey.Category, cateProp);
+    }
+
+    private void setStateProperty(AttrConfig mergeConfig, ColumnMetadata metadata,
+                                  AttrSpecification attrSpec, Map<String, AttrConfigProp<?>> attrProps) {
+        AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) attrProps
+                .getOrDefault(ColumnMetadataKey.State, new AttrConfigProp<AttrState>());
+        AttrState state;
+        if (metadata.getAttrState() == null) {
+            state = AttrState.Active;
+        } else {
+            state = metadata.getAttrState();
+        }
+        stateProp.setSystemValue(state);
+        stateProp.setAllowCustomization(attrSpec == null || attrSpec.stateChange());
+        mergeConfig.putProperty(ColumnMetadataKey.State, stateProp);
+    }
+
+    private AttrConfig getAttrConfig(AttrType type, AttrSubType subType, ColumnMetadata metadata,
+                                     Map<String, AttrConfig> customConfigMap, Set<String> renderedAttrNames, Set<String> attributesInSet) {
+        AttrSpecification attrSpec = AttrSpecification.getAttrSpecification(type, subType, metadata.getEntity());
+        if (attrSpec == null) {
+            log.warn(String.format("Cannot get Attr Specification for Type %s, SubType %s", type.name(),
+                    subType.name()));
+        }
+        AttrConfig mergeConfig = customConfigMap.get(metadata.getAttrName());
+        if (mergeConfig == null) {
+            mergeConfig = new AttrConfig();
+            mergeConfig.setAttrName(metadata.getAttrName());
+            mergeConfig.setAttrProps(new HashMap<>());
+        } else {
+            renderedAttrNames.remove(mergeConfig.getAttrName());
+        }
+        mergeConfig.setAttrType(type);
+        mergeConfig.setAttrSubType(subType);
+        mergeConfig.setEntity(metadata.getEntity());
+        mergeConfig.setDataLicense(metadata.getDataLicense());
+        overwriteAttrSpecsByColMetadata(attrSpec, metadata);
+        Map<String, AttrConfigProp<?>> attrProps = mergeConfig.getAttrProps();
+        if (attrProps == null) {
+            attrProps = new HashMap<>();
+        }
+        setCategoryProperty(mergeConfig, metadata.getCategory(),
+                attrSpec == null || attrSpec.categoryNameChange(), attrProps);
+        setStringProperty(mergeConfig, ColumnMetadataKey.Subcategory, metadata.getSubcategory(),
+                attrSpec == null || attrSpec.categoryNameChange(), attrProps);
+        setStateProperty(mergeConfig, metadata, attrSpec, attrProps);
+        modifyDeprecatedAttrState(mergeConfig, metadata);
+        setStringProperty(mergeConfig, ColumnMetadataKey.DisplayName, metadata.getDisplayName(),
+                attrSpec == null || attrSpec.displayNameChange(), attrProps);
+        setStringProperty(mergeConfig, ColumnMetadataKey.Description, metadata.getDescription(),
+                attrSpec == null || attrSpec.descriptionChange(), attrProps);
+        setStringProperty(mergeConfig, ColumnMetadataKey.ApprovedUsage, metadata.getApprovedUsageString(),
+                attrSpec == null || attrSpec.approvedUsageChange(), attrProps);
+        setUsageGroup(mergeConfig, attrProps, metadata, attrSpec, attributesInSet);
+        return mergeConfig;
+    }
+
     @SuppressWarnings("unchecked")
     public List<AttrConfig> render(List<ColumnMetadata> systemMetadata, List<AttrConfig> customConfigs,
-            boolean entityMatchEnabled) {
+            boolean entityMatchEnabled, Set<String> attributesInSet) {
         if (systemMetadata == null) {
             throw new LedpException(LedpCode.LEDP_40022);
         } else if (customConfigs == null) {
             customConfigs = new ArrayList<>();
         }
-        Map<String, AttrConfig> map = new HashMap<>();
+        Map<String, AttrConfig> customConfigMap = new HashMap<>();
         Map<String, AttrConfig> renderedMap = new HashMap<>();
         for (AttrConfig config : customConfigs) {
-            map.put(config.getAttrName(), config);
+            customConfigMap.put(config.getAttrName(), config);
         }
         Set<String> renderedAttrNames = customConfigs.stream().map(config -> config.getAttrName())
                 .collect(Collectors.toSet());
@@ -695,93 +801,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 }
                 continue;
             }
-
-            AttrSpecification attrSpec = AttrSpecification.getAttrSpecification(type, subType, metadata.getEntity());
-            if (attrSpec == null) {
-                log.warn(String.format("Cannot get Attr Specification for Type %s, SubType %s", type.name(),
-                        subType.name()));
-            }
-            AttrConfig mergeConfig = map.get(metadata.getAttrName());
-            if (mergeConfig == null) {
-                mergeConfig = new AttrConfig();
-                mergeConfig.setAttrName(metadata.getAttrName());
-                mergeConfig.setAttrProps(new HashMap<>());
-            } else {
-                renderedAttrNames.remove(mergeConfig.getAttrName());
-            }
-            mergeConfig.setAttrType(type);
-            mergeConfig.setAttrSubType(subType);
-            mergeConfig.setEntity(metadata.getEntity());
-            mergeConfig.setDataLicense(metadata.getDataLicense());
-            overwriteAttrSpecsByColMetadata(attrSpec, metadata);
-
-            Map<String, AttrConfigProp<?>> attrProps = mergeConfig.getAttrProps();
-            if (attrProps == null) {
-                attrProps = new HashMap<>();
-            }
-
-            AttrConfigProp<Category> cateProp = (AttrConfigProp<Category>) attrProps
-                    .getOrDefault(ColumnMetadataKey.Category, new AttrConfigProp<Category>());
-            cateProp.setSystemValue(metadata.getCategory());
-            cateProp.setAllowCustomization(attrSpec == null || attrSpec.categoryNameChange());
-            mergeConfig.putProperty(ColumnMetadataKey.Category, cateProp);
-
-            AttrConfigProp<String> subCateProp = (AttrConfigProp<String>) attrProps
-                    .getOrDefault(ColumnMetadataKey.Subcategory, new AttrConfigProp<String>());
-            subCateProp.setSystemValue(metadata.getSubcategory());
-            subCateProp.setAllowCustomization(attrSpec == null || attrSpec.categoryNameChange());
-            mergeConfig.putProperty(ColumnMetadataKey.Subcategory, subCateProp);
-
-            AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) attrProps
-                    .getOrDefault(ColumnMetadataKey.State, new AttrConfigProp<AttrState>());
-            AttrState state;
-            if (metadata.getAttrState() == null) {
-                state = AttrState.Active;
-            } else {
-                state = metadata.getAttrState();
-            }
-            stateProp.setSystemValue(state);
-            stateProp.setAllowCustomization(attrSpec == null || attrSpec.stateChange());
-            mergeConfig.putProperty(ColumnMetadataKey.State, stateProp);
-            modifyDeprecatedAttrState(mergeConfig, metadata);
-
-            AttrConfigProp<String> displayNameProp = (AttrConfigProp<String>) attrProps
-                    .getOrDefault(ColumnMetadataKey.DisplayName, new AttrConfigProp<String>());
-            displayNameProp.setSystemValue(metadata.getDisplayName());
-            displayNameProp.setAllowCustomization(attrSpec == null || attrSpec.displayNameChange());
-            mergeConfig.putProperty(ColumnMetadataKey.DisplayName, displayNameProp);
-
-            AttrConfigProp<String> descriptionProp = (AttrConfigProp<String>) attrProps
-                    .getOrDefault(ColumnMetadataKey.Description, new AttrConfigProp<String>());
-            descriptionProp.setSystemValue(metadata.getDescription());
-            descriptionProp.setAllowCustomization(attrSpec == null || attrSpec.descriptionChange());
-            mergeConfig.putProperty(ColumnMetadataKey.Description, descriptionProp);
-
-            AttrConfigProp<String> approvedUsageProp = (AttrConfigProp<String>) attrProps
-                    .getOrDefault(ColumnMetadataKey.ApprovedUsage, new AttrConfigProp<String>());
-            approvedUsageProp.setSystemValue(metadata.getApprovedUsageString());
-            approvedUsageProp.setAllowCustomization(attrSpec == null || attrSpec.approvedUsageChange());
-            mergeConfig.putProperty(ColumnMetadataKey.ApprovedUsage, approvedUsageProp);
-
-            for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
-                AttrConfigProp<Boolean> usageProp;
-                switch (group) {
-                case CompanyProfile:
-                case Enrichment:
-                case Model:
-                case Segment:
-                case TalkingPoint:
-                    usageProp = (AttrConfigProp<Boolean>) attrProps.getOrDefault(group.name(),
-                            new AttrConfigProp<Boolean>());
-                    usageProp.setSystemValue(metadata.isEnabledFor(group));
-                    usageProp.setAllowCustomization(attrSpec == null || attrSpec.allowChange(group));
-                    break;
-                default:
-                    continue;
-                }
-                mergeConfig.putProperty(group.name(), usageProp);
-            }
-
+            AttrConfig mergeConfig = getAttrConfig(type, subType, metadata, customConfigMap, renderedAttrNames, attributesInSet);
             renderedMap.put(metadata.getAttrName(), mergeConfig);
         }
         // make sure the system metadata include the customer config
@@ -792,23 +812,54 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return new ArrayList<>(renderedMap.values());
     }
 
+    private void setUsageGroup(AttrConfig mergeConfig, Map<String, AttrConfigProp<?>> attrProps,
+                               ColumnMetadata metadata, AttrSpecification attrSpec, Set<String> attributesInSet) {
+        for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
+            AttrConfigProp<Boolean> usageProp;
+            switch (group) {
+                case CompanyProfile:
+                case Enrichment:
+                case Model:
+                case Segment:
+                case TalkingPoint:
+                    usageProp = (AttrConfigProp<Boolean>) attrProps.getOrDefault(group.name(),
+                            new AttrConfigProp<Boolean>());
+                    usageProp.setSystemValue(metadata.isEnabledFor(group));
+                    usageProp.setAllowCustomization(attrSpec == null || attrSpec.allowChange(group));
+                    if (attributesInSet != null && ColumnSelection.Predefined.Enrichment.equals(group)) {
+                        if (attributesInSet.contains(metadata.getAttrName())) {
+                            usageProp.setCustomValue(Boolean.TRUE);
+                        } else {
+                            usageProp.setCustomValue(Boolean.FALSE);
+                        }
+                    }
+                    break;
+                default:
+                    continue;
+            }
+            mergeConfig.putProperty(group.name(), usageProp);
+        }
+    }
+
     private void overwriteAttrSpecsByColMetadata(AttrSpecification attrSpec, ColumnMetadata cm) {
-        // do not overwrite anything if can flag is empty
-        if (Boolean.FALSE.equals(cm.getCanEnrich())) {
-            attrSpec.setEnrichmentChange(false);
-            attrSpec.setTalkingPointChange(false);
-            attrSpec.setCompanyProfileChange(false);
-        }
-        if (Boolean.FALSE.equals(cm.getCanSegment())) {
-            attrSpec.setSegmentationChange(false);
-        }
-        if (Boolean.FALSE.equals(cm.getCanEnrich()) //
-                && Boolean.FALSE.equals(cm.getCanSegment()) //
-                && Boolean.FALSE.equals(cm.getCanModel())) {
-            attrSpec.disableStateChange();
-        }
-        if (Boolean.FALSE.equals(cm.getCanModel())) {
-            attrSpec.setModelChange(false);
+        if (attrSpec != null) {
+            // do not overwrite anything if can flag is empty
+            if (Boolean.FALSE.equals(cm.getCanEnrich())) {
+                attrSpec.setEnrichmentChange(false);
+                attrSpec.setTalkingPointChange(false);
+                attrSpec.setCompanyProfileChange(false);
+            }
+            if (Boolean.FALSE.equals(cm.getCanSegment())) {
+                attrSpec.setSegmentationChange(false);
+            }
+            if (Boolean.FALSE.equals(cm.getCanEnrich()) //
+                    && Boolean.FALSE.equals(cm.getCanSegment()) //
+                    && Boolean.FALSE.equals(cm.getCanModel())) {
+                attrSpec.disableStateChange();
+            }
+            if (Boolean.FALSE.equals(cm.getCanModel())) {
+                attrSpec.setModelChange(false);
+            }
         }
     }
 
@@ -891,21 +942,31 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public AttributeSet getAttributeSetByName(String name) {
-        return null;
+        throw new UnsupportedOperationException("Not supported!");
     }
 
     @Override
     public List<AttributeSet> getAttributeSets() {
-        return null;
+        throw new UnsupportedOperationException("Not supported!");
     }
 
     @Override
-    public AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet) {
-        return null;
+    public AttributeSet cloneAttributeSet(String attributeSetName, AttributeSet attributeSet) {
+        throw new UnsupportedOperationException("Not supported!");
+    }
+
+    @Override
+    public AttributeSet createAttributeSet(AttributeSet attributeSet) {
+        throw new UnsupportedOperationException("Not supported!");
+    }
+
+    @Override
+    public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
+        throw new UnsupportedOperationException("Not supported!");
     }
 
     @Override
     public void deleteAttributeSetByName(String name) {
-
+        throw new UnsupportedOperationException("Not supported!");
     }
 }

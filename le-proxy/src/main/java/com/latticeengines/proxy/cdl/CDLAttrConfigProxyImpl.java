@@ -2,8 +2,11 @@ package com.latticeengines.proxy.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -27,18 +30,34 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
 
     @Override
     public List<AttributeSet> getAttributeSets(String customerSpace) {
-        StringBuilder url = new StringBuilder();
-        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset",
-                shortenCustomerSpace(customerSpace)));
-        List<?> list = get("get attribute list", url.toString(), List.class);
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset",
+                shortenCustomerSpace(customerSpace));
+        List<?> list = get("get attribute list", url, List.class);
         return JsonUtils.convertList(list, AttributeSet.class);
     }
 
     @Override
-    public AttributeSet createOrUpdateAttributeSet(String customerSpace, AttributeSet attributeSet) {
-        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset", shortenCustomerSpace(customerSpace));
-        return post("create or update attribute set", url, attributeSet, AttributeSet.class);
+    public AttributeSet cloneAttributeSet(String customerSpace, String attributeSetName, AttributeSet attributeSet) {
+        StringBuffer url = new StringBuffer();
+        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/clone", shortenCustomerSpace(customerSpace)));
+        List<String> params = new ArrayList<>();
+        if (StringUtils.isNotEmpty(attributeSetName)) {
+            params.add("attributeSetName=" + attributeSetName);
+        }
+        if (CollectionUtils.isNotEmpty(params)) {
+            url.append("?");
+            url.append(StringUtils.join(params, "&"));
+        }
+        return post("clone attribute set", url.toString(), attributeSet, AttributeSet.class);
     }
+
+    @Override
+    public AttributeSet updateAttributeSet(String customerSpace, AttributeSet attributeSet) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/update",
+                shortenCustomerSpace(customerSpace));
+        return put("update attribute set", url, attributeSet, AttributeSet.class);
+    }
+
 
     @Override
     public void deleteAttributeSet(String customerSpace, String name) {

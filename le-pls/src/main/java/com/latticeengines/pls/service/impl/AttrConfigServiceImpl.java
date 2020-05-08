@@ -35,7 +35,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -86,6 +88,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private static final Logger log = LoggerFactory.getLogger(AttrConfigServiceImpl.class);
 
     private static final List<String> usagePropertyList = Arrays.asList(ColumnSelection.Predefined.usageProperties);
+
+    private static final List<String> usageWithoutEnrichment = Arrays.asList(ColumnSelection.Predefined.Segment.getName(),
+            ColumnSelection.Predefined.Model.getName(), ColumnSelection.Predefined.TalkingPoint.getName(), ColumnSelection.Predefined.CompanyProfile.getName());
+
+    private static final String DEFAULT_ATTRIBUTE_SET = "Default Group";
+
+    private static final List<String> enrichmentGroup = Arrays.asList(ColumnSelection.Predefined.Enrichment.getName());
+
     private static final HashMap<String, String> usageToDisplayName = new HashMap<>();
     private static final HashMap<String, String> displayNameToUsage = new HashMap<>();
     private static final String defaultDisplayName = "Default Name";
@@ -138,6 +148,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     @Inject
     private CommonTenantConfigService appTenantConfigService;
 
+    @Inject
+    private BatonService batonService;
+
     @SuppressWarnings("unchecked")
     @Override
     public AttrConfigStateOverview getOverallAttrConfigActivationOverview() {
@@ -166,11 +179,23 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Override
     public AttrConfigUsageOverview getOverallAttrConfigUsageOverview() {
+        boolean configSegmentExport = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.CONFIGURABLE_SEGMENT_EXPORT);
+        return getOverallAttrConfigUsageOverview(null, configSegmentExport ? usageWithoutEnrichment : usagePropertyList);
+    }
+
+    // right now attribute set is only supported with enrichment group
+    @Override
+    public AttrConfigUsageOverview getOverallAttrConfigUsageOverview(String attributeSetName) {
+        return getOverallAttrConfigUsageOverview(attributeSetName, enrichmentGroup);
+    }
+
+    @Override
+    public AttrConfigUsageOverview getOverallAttrConfigUsageOverview(String attributeSetName, List<String> usagePropertyList) {
         AttrConfigUsageOverview usageOverview = new AttrConfigUsageOverview();
         List<AttrConfigSelection> selections = new ArrayList<>();
         usageOverview.setSelections(selections);
         Map<String, AttrConfigCategoryOverview<?>> map = cdlAttrConfigProxy
-                .getAttrConfigOverview(MultiTenantContext.getShortTenantId(), null, usagePropertyList, true);
+                .getAttrConfigOverview(MultiTenantContext.getShortTenantId(), null, usagePropertyList, true, attributeSetName);
         log.info("map is " + map);
 
         for (String property : usagePropertyList) {
@@ -664,19 +689,24 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName) {
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getShortTenantId(), categoryName);
-        return generateSelectionDetails(categoryName, attrConfigRequest, ColumnMetadataKey.State, false);
+        return generateSelectionDetails(attrConfigRequest, ColumnMetadataKey.State, false);
+    }
+
+    @Override
+    public AttrConfigSelectionDetail getAttrConfigSelectionDetailForUsage(String categoryName, String usageName, String attributeSetName) {
+        String property = mapDisplayNameToUsage(usageName);
+        AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
+                .getAttrConfigByCategory(MultiTenantContext.getShortTenantId(), categoryName, attributeSetName);
+        return generateSelectionDetails(attrConfigRequest, property, true);
     }
 
     @Override
     public AttrConfigSelectionDetail getAttrConfigSelectionDetailForUsage(String categoryName, String usageName) {
-        String property = mapDisplayNameToUsage(usageName);
-        AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
-                .getAttrConfigByCategory(MultiTenantContext.getShortTenantId(), categoryName);
-        return generateSelectionDetails(categoryName, attrConfigRequest, property, true);
+        return getAttrConfigSelectionDetailForUsage(categoryName, usageName, null);
     }
 
     @SuppressWarnings("unchecked")
-    AttrConfigSelectionDetail generateSelectionDetails(String categoryName, AttrConfigRequest attrConfigRequest,
+    AttrConfigSelectionDetail generateSelectionDetails(AttrConfigRequest attrConfigRequest,
                                                        String property, boolean applyActivationFilter) {
         AttrConfigSelectionDetail attrConfigSelectionDetail = new AttrConfigSelectionDetail();
         long totalAttrs = 0L;
@@ -968,12 +998,40 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public List<AttributeSet> getAttributeSets() {
         log.info("Get attribute set list");
         Tenant tenant = MultiTenantContext.getTenant();
-        return cdlAttrConfigProxy.getAttributeSets(tenant.getId());
+        List<AttributeSet> attributeSets = new ArrayList<>();
+        attributeSets.add(getDefaultAttributeSet());
+        List<AttributeSet> returnedAttributeSets = cdlAttrConfigProxy.getAttributeSets(tenant.getId());
+        if (CollectionUtils.isNotEmpty(returnedAttributeSets)) {
+            attributeSets.addAll(returnedAttributeSets);
+        }
+        return attributeSets;
+    }
+
+    public AttributeSet getDefaultAttributeSet() {
+        AttributeSet attributeSet = new AttributeSet();
+        attributeSet.setDisplayName(DEFAULT_ATTRIBUTE_SET);
+        return attributeSet;
     }
 
     @Override
-    public AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet) {
+    public AttributeSet cloneAttributeSet(String attributeSetName, AttributeSet attributeSet) {
         Tenant tenant = MultiTenantContext.getTenant();
+        setAttributeSetFields(attributeSet);
+        log.info("Clone attribute set with name {} in tenant {}.",
+                attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
+        return cdlAttrConfigProxy.cloneAttributeSet(tenant.getId(), attributeSetName, attributeSet);
+    }
+
+    @Override
+    public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        setAttributeSetFields(attributeSet);
+        log.info("Update attribute set with name {} in tenant {}.",
+                attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
+        return cdlAttrConfigProxy.updateAttributeSet(tenant.getId(), attributeSet);
+    }
+
+    private void setAttributeSetFields(AttributeSet attributeSet) {
         String email = MultiTenantContext.getEmailAddress();
         if (StringUtils.isEmpty(attributeSet.getCreatedBy())) {
             attributeSet.setCreatedBy(email);
@@ -981,9 +1039,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         if (StringUtils.isEmpty(attributeSet.getUpdatedBy())) {
             attributeSet.setUpdatedBy(email);
         }
-        log.info("Create or update attribute set with display name {} in tenant {}.",
-                attributeSet.getDisplayName(), tenant.getId());
-        return cdlAttrConfigProxy.createOrUpdateAttributeSet(tenant.getId(), attributeSet);
     }
 
     @Override
