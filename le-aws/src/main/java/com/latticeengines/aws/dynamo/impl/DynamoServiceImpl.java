@@ -39,6 +39,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
+import com.amazonaws.services.dynamodbv2.model.BillingMode;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
@@ -144,9 +145,6 @@ public class DynamoServiceImpl implements DynamoService {
             attributeDefinitions
                     .add(new AttributeDefinition().withAttributeName(sortKeyName).withAttributeType(sortKeyType));
         }
-
-        ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput()
-                .withReadCapacityUnits(readCapacityUnits).withWriteCapacityUnits(writeCapacityUnits);
         SSESpecification sseSpecification = new SSESpecification().withEnabled(true);
         if (StringUtils.isNotBlank(customerCMK)) {
             sseSpecification.withKMSMasterKeyId(customerCMK).withSSEType(SSEType.KMS);
@@ -155,7 +153,7 @@ public class DynamoServiceImpl implements DynamoService {
                 .withTableName(tableName) //
                 .withKeySchema(keySchema) //
                 .withAttributeDefinitions(attributeDefinitions) //
-                .withProvisionedThroughput(provisionedThroughput) //
+                .withBillingMode(BillingMode.PAY_PER_REQUEST) //
                 .withSSESpecification(sseSpecification);
 
         try {

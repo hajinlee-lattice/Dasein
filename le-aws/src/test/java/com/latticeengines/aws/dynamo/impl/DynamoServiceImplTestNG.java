@@ -60,7 +60,7 @@ public class DynamoServiceImplTestNG extends DynamoFunctionalTestNGBase {
         Assert.assertTrue(dynamoService.isCapacityOnDemand(entityMatchTable));
     }
 
-    @Test(groups = "functional", dataProvider = "dynamoOperationProvider")
+    @Test(groups = "functional", dataProvider = "dynamoOperationProvider", enabled = false)
     public void testAutoScaling(DynamoOperation operation) {
         DescribeScalableTargetsResult target = dynamoService.describeScalableTargetsResult(tableName, operation);
         Assert.assertTrue(CollectionUtils.isEmpty(target.getScalableTargets()));
