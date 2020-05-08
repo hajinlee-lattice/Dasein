@@ -58,7 +58,7 @@ public class ImportFromS3ServiceImplTestNG extends AppFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void cleanUp() {
-        s3Service.cleanupPrefix(s3Bucket, tenantId + "/");
+        s3Service.cleanupDirectory(s3Bucket, tenantId + "/");
     }
 
     @Test(groups = "functional")

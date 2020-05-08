@@ -100,7 +100,7 @@ public class AdminCleanupErrorTenantJobCallable implements Callable<Boolean> {
     private void cleanupS3(String tenantId) {
         log.info("Removing S3 folder: " + tenantId);
         try {
-            s3Service.cleanupPrefix(customerBucket, tenantId);
+            s3Service.cleanupDirectory(customerBucket, tenantId);
         } catch (Exception e) {
             log.error("Failed to remove S3 folder: " + tenantId, e);
         }

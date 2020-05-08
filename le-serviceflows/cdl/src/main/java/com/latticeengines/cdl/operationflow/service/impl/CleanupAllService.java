@@ -316,7 +316,7 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
                     String tenantId = CustomerSpace.parse(customSpace).getTenantId();
                     String tgtDir = pathBuilder.convertAtlasTableDir(srcDir, podId, tenantId, s3Bucket);
                     String prefix = tgtDir.substring(tgtDir.indexOf(s3Bucket) + s3Bucket.length() + 1);
-                    s3Service.cleanupPrefix(s3Bucket, prefix);
+                    s3Service.cleanupDirectory(s3Bucket, prefix);
                 } else {
                     log.warn("Cannot find table for table role: " + role.name());
                 }

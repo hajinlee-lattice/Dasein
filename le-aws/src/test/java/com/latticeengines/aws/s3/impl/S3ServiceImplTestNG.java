@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -108,7 +109,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     @AfterClass(groups = "functional")
     public void teardown() {
-        s3Service.cleanupPrefix(testBucket, dropBoxDir);
+        s3Service.cleanupDirectory(testBucket, dropBoxDir);
         s3Client.deleteBucketPolicy(testBucket);
     }
 
@@ -127,6 +128,49 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
         Assert.assertEquals(secondarySubFolders.size(), 3);
         Assert.assertTrue(secondarySubFolders.containsAll(secondaryFolders));
 
+    }
+
+    @Test(groups = "functional", dependsOnMethods = "testListSubFolders")
+    private void testCleanupDirectory() throws Exception {
+        String cleanupSubDir = dropBoxDir + "/cleanup";
+        // sub folder sharing common prefix
+        List<String> subFolders = Arrays.asList("delete", "delete2", "delete3");
+        String subFolderToDelete = "delete";
+        String pathToDelete = cleanupSubDir + "/" + subFolderToDelete;
+        Set<String> expectedSubFoldersAfterDelete = subFolders.stream().filter(str -> !subFolderToDelete.equals(str))
+                .collect(Collectors.toSet());
+        subFolders.forEach(folder -> s3Service.createFolder(testBucket, cleanupSubDir + "/" + folder));
+
+        List<String> rootSubFolders = s3Service.listSubFolders(testBucket, cleanupSubDir);
+        Assert.assertNotNull(rootSubFolders);
+        Assert.assertEquals(rootSubFolders.size(), 3);
+        Assert.assertTrue(rootSubFolders.containsAll(subFolders),
+                String.format("Sub-folder under directory %s should be %s, got %s instead", cleanupSubDir, subFolders,
+                        rootSubFolders));
+
+        // upload a dummy file that as the same key as folder to be deleted
+        s3Service.uploadInputStream(testBucket, pathToDelete, new ByteArrayInputStream("hello".getBytes()), true);
+
+        log.info("{} under directory {} before deleting subfolder {}", rootSubFolders, cleanupSubDir, pathToDelete);
+
+        Thread.sleep(1000L);
+
+        s3Service.cleanupDirectory(testBucket, pathToDelete);
+
+        Thread.sleep(1000L);
+
+        rootSubFolders = s3Service.listSubFolders(testBucket, cleanupSubDir);
+        log.info("{} under directory {} after deleting subfolder {}", rootSubFolders, cleanupSubDir,
+                cleanupSubDir + "/" + subFolderToDelete);
+
+        // make sure other subfolders are not deleted due to common prefix
+        Assert.assertNotNull(rootSubFolders);
+        Assert.assertEquals(rootSubFolders.size(), 2);
+        Assert.assertTrue(rootSubFolders.containsAll(expectedSubFoldersAfterDelete),
+                String.format("Sub-folder under directory %s should be %s after delete, got %s instead", cleanupSubDir,
+                        expectedSubFoldersAfterDelete, rootSubFolders));
+        Assert.assertFalse(s3Service.objectExist(testBucket, pathToDelete),
+                String.format("Object with key %s the same as target folder should also be deleted", pathToDelete));
     }
 
     @Test(groups = "functional", enabled = false)
@@ -161,7 +205,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
             return;
         }
         if (s3Service.objectExist(testBucket, destKey)) {
-            s3Service.cleanupPrefix(testBucket, destKey);
+            s3Service.cleanupDirectory(testBucket, destKey);
             Assert.assertFalse(s3Service.objectExist(testBucket, destKey));
         }
         s3Service.copyLargeObjects(SOURCE_S3_BUCKET, sourceKey, testBucket, destKey);
@@ -236,7 +280,7 @@ public class S3ServiceImplTestNG extends AbstractTestNGSpringContextTests {
 
     private void clearS3Prefix(String prefix) {
         if (s3Service.isNonEmptyDirectory(testBucket, prefix)) {
-            s3Service.cleanupPrefix(testBucket, prefix);
+            s3Service.cleanupDirectory(testBucket, prefix);
         }
     }
 

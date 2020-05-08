@@ -163,7 +163,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
 
                 // delete s3
                 destroy(customerSpace);
-                s3Service.cleanupPrefix(customersBucket, cs.getContractId());
+                s3Service.cleanupDirectory(customersBucket, cs.getContractId());
 
                 log.info("Clean up DataCollection(DataFeed_xxx, MetadataSegment, RatingEngine, Play)");
                 DataCollection dataCollection = dataCollectionEntityMgr.findDefaultCollection();

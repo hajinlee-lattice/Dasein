@@ -171,20 +171,26 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public boolean isNonEmptyDirectory(String bucket, String prefix) {
         prefix = sanitizePathToKey(prefix);
-        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(bucket).withPrefix(prefix);
+        ListObjectsV2Request request = new ListObjectsV2Request() //
+                .withBucketName(bucket) //
+                .withPrefix(StringUtils.appendIfMissing(prefix, "/"));
         ListObjectsV2Result result = s3Client.listObjectsV2(request);
         return result.getKeyCount() > 0;
     }
 
     @Override
-    public void cleanupPrefix(String bucket, String prefix) {
-        prefix = sanitizePathToKey(prefix);
-        List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();
-        log.info("Deleting " + CollectionUtils.size(objects) + " s3 objects under " + prefix + " from " + bucket);
+    public void cleanupDirectory(String bucket, String dirPath) {
+        dirPath = sanitizePathToKey(dirPath);
+        // add trailing space so that objects in other "directory" with the same prefix
+        // won't be deleted. E.g., dir_1/file.txt when deleting directory dir/
+        List<S3ObjectSummary> objects = s3Client //
+                .listObjectsV2(bucket, StringUtils.appendIfMissing(dirPath, "/")) //
+                .getObjectSummaries();
+        log.info("Deleting " + CollectionUtils.size(objects) + " s3 objects under " + dirPath + " from " + bucket);
         for (S3ObjectSummary summary : objects) {
             s3Client.deleteObject(bucket, summary.getKey());
         }
-        s3Client.deleteObject(bucket, prefix);
+        s3Client.deleteObject(bucket, dirPath);
     }
 
     @Override
