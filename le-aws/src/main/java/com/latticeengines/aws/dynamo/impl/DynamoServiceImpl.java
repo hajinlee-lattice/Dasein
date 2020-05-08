@@ -39,6 +39,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
+import com.amazonaws.services.dynamodbv2.model.BillingMode;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableRequest;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
@@ -144,7 +145,6 @@ public class DynamoServiceImpl implements DynamoService {
             attributeDefinitions
                     .add(new AttributeDefinition().withAttributeName(sortKeyName).withAttributeType(sortKeyType));
         }
-
         ProvisionedThroughput provisionedThroughput = new ProvisionedThroughput()
                 .withReadCapacityUnits(readCapacityUnits).withWriteCapacityUnits(writeCapacityUnits);
         SSESpecification sseSpecification = new SSESpecification().withEnabled(true);
@@ -155,8 +155,13 @@ public class DynamoServiceImpl implements DynamoService {
                 .withTableName(tableName) //
                 .withKeySchema(keySchema) //
                 .withAttributeDefinitions(attributeDefinitions) //
-                .withProvisionedThroughput(provisionedThroughput) //
                 .withSSESpecification(sseSpecification);
+
+        if (readCapacityUnits == 0 && writeCapacityUnits == 0) {
+            request.withBillingMode(BillingMode.PAY_PER_REQUEST);
+        } else {
+            request.withProvisionedThroughput(provisionedThroughput);
+        }
 
         try {
             log.info("Creating table " + tableName);
