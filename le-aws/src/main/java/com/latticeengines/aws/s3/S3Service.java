@@ -38,7 +38,9 @@ public interface S3Service {
      * </pre>
      *
      * @param bucket
+     *            s3 bucket
      * @param dirPath
+     *            s3 "directory" (emulated with slashes) path
      */
     void cleanupDirectory(String bucket, String dirPath);
 

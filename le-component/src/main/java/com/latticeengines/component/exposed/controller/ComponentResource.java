@@ -52,11 +52,4 @@ public class ComponentResource {
     public void setComponentStatus(@PathVariable String customerSpace, @PathVariable ComponentStatus status) {
         componentService.updateComponentStatus(customerSpace, status);
     }
-
-    @RequestMapping(value = "/reset", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Reset component")
-    public boolean resetComponent(@PathVariable String customerSpace) {
-        return componentService.reset(customerSpace);
-    }
 }

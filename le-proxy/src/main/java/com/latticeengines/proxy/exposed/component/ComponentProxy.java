@@ -43,12 +43,6 @@ public class ComponentProxy extends MicroserviceRestApiProxy implements ProxyInt
         put("Set component status", path);
     }
 
-    public boolean reset(String customerSpace, String serviceName) {
-        String path = "{serviceName}/component/customerSpace/{customerSpace}/reset";
-        path = constructUrl(path, getRootpath(serviceName), shortenCustomerSpace(customerSpace));
-        return post("Reset component", path, null, Boolean.class);
-    }
-
     private String getRootpath(String serivceName) {
         if (StringUtils.isEmpty(serivceName)) {
             throw new IllegalArgumentException("Service name cannot be empty!");
