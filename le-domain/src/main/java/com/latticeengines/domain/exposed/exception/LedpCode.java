@@ -882,7 +882,12 @@ public enum LedpCode {
     LEDP_60000("Error when create Project!"), //
     LEDP_60001("Error when create Source!"), //
     LEDP_60002("Error when fetching field definitions"), //
-    LEDP_60003("Error when validating definitions");
+    LEDP_60003("Error when validating definitions"), //
+    LEDP_60004("No input file for upload {0}"), //
+    LEDP_60005("Cannot locate raw input file {0}: {1} on S3"), //
+    LEDP_60006("CSV file {0} is empty!"), //
+    LEDP_60007("Cannot read raw input file {0}: {1}"), //
+    LEDP_60008("Invalid CSV file: {0}");
 
 
 

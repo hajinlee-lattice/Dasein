@@ -2,11 +2,16 @@ package com.latticeengines.dcp.workflow.steps;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
 import javax.inject.Inject;
 
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.io.ByteOrderMark;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
+import com.latticeengines.common.exposed.csv.LECSVFormat;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -25,6 +31,8 @@ import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
@@ -104,6 +112,7 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         // Copy file from drop folder to raw input folder.
         copyFromDropfolder(upload, dropBoxSummary);
         uploadProxy.updateUploadConfig(customerSpace.toString(), uploadId, upload.getUploadConfig());
+        checkCSVFile(upload, dropBoxSummary);
     }
 
     private void copyFromDropfolder(UploadDetails upload, DropBoxSummary dropBoxSummary) {
@@ -141,5 +150,30 @@ public class StartImportSource extends BaseWorkflowStep<ImportSourceStepConfigur
         }
     }
 
+    private void checkCSVFile(UploadDetails upload, DropBoxSummary dropBoxSummary) {
+        if (StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath())) {
+            throw new LedpException(LedpCode.LEDP_60004, new String[]{upload.getUploadId()});
+        }
+        if (s3Service.objectExist(dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath())) {
+            throw new LedpException(LedpCode.LEDP_60005,
+                    new String[]{dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath()});
+        }
+        try (InputStream inputStream = s3Service.readObjectAsStream(dropBoxSummary.getBucket(),
+                upload.getUploadConfig().getUploadRawFilePath())) {
+            InputStreamReader reader = new InputStreamReader(
+                    new BOMInputStream(inputStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE,
+                            ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE),
+                    StandardCharsets.UTF_8);
+            CSVParser parser = new CSVParser(reader, LECSVFormat.format);
+            if (!parser.iterator().hasNext()) {
+                throw new LedpException(LedpCode.LEDP_60006, new String[]{upload.getUploadConfig().getUploadRawFilePath()});
+            }
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_60007,
+                    new String[]{dropBoxSummary.getBucket(), upload.getUploadConfig().getUploadRawFilePath()});
+        } catch (IllegalArgumentException e) {
+            throw new LedpException(LedpCode.LEDP_60008, new String[]{e.getMessage()});
+        }
+    }
 
 }
