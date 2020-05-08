@@ -311,6 +311,7 @@ public enum BusinessEntity implements GraphNode {
         case Transaction:
         case PeriodTransaction:
         case PurchaseHistory:
+        case DepivotedPurchaseHistory:
         case AnalyticPurchaseState:
         case Rating:
         case WebVisitProfile:
@@ -319,8 +320,10 @@ public enum BusinessEntity implements GraphNode {
             return Account;
         case LatticeAccount:
             return LatticeAccount;
+        case Product:
+            return Product;
         default:
-            throw new UnsupportedOperationException("The central entity for " + entity + "is not well defined.");
+            throw new UnsupportedOperationException("The central entity for " + entity + " is not well defined.");
         }
     }
 
