@@ -54,8 +54,6 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(DCPImportWorkflowDeploymentTestNG.class);
 
-    private static final String TEST_DATA_VERSION = "4";
-    private static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
     private static final String TEST_ACCOUNT_ERROR_FILE = "Account_dup_header.csv";
 
     @Inject
