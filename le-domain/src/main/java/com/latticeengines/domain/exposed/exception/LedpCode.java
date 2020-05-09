@@ -367,7 +367,7 @@ public enum LedpCode {
     LEDP_18238("PlayLaunch id {0} has Play null {1} and PlayLaunchChannel null {2}"), //
     LEDP_18239("All records in {0} batch store has been deleted!"), //
     LEDP_18240("Total launched {0} count exceeds maximum allowed limit of {1}."), //
-    LEDP_18241("Team \"{0}\" already exists in tenant {1}."), //
+    LEDP_18241("Team name \"{0}\" already exists in tenant {1}."), //
     LEDP_18242("Team name can't be empty."), //
 
     // le-security 19000-19100
