@@ -106,33 +106,24 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             List<ColumnSelection.Predefined> groups) {
-        String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
-                shortenCustomerSpace(customerSpace), entity);
-        if (CollectionUtils.isNotEmpty(groups)) {
-            url += "?groups=" + StringUtils.join(groups, ",");
-        }
-        List<ColumnMetadata> list = getList("serving store metadata", url, ColumnMetadata.class);
-        if (CollectionUtils.isNotEmpty(list)) {
-            return Flux.fromIterable(list);
-        } else {
-            return Flux.empty();
-        }
+        return getDecoratedMetadata(customerSpace, entity, groups, null);
     }
 
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
+                                                     List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
         return getDecoratedMetadata(customerSpace, entity, groups, version, null);
     }
 
     @Override
-    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, List<Predefined> groups, String attributeSetName, Version version) {
-        return null;
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+                                                     List<Predefined> groups, Version version, String attributeSetName) {
+        return getDecoratedMetadata(customerSpace, entity, groups, version, attributeSetName, null);
     }
 
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            List<ColumnSelection.Predefined> groups, Version version, StoreFilter filter) {
+            List<ColumnSelection.Predefined> groups, Version version, String attributeSetName, StoreFilter filter) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
                 shortenCustomerSpace(customerSpace), entity);
         url += getVersionGroupFilterParam(version, groups, filter);
@@ -145,7 +136,12 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     private String getVersionGroupFilterParam(DataCollection.Version version,
-            Collection<ColumnSelection.Predefined> groups, StoreFilter filter) {
+                                              Collection<ColumnSelection.Predefined> groups, StoreFilter filter){
+        return getVersionGroupFilterParam(version, groups, filter, null);
+    }
+
+    private String getVersionGroupFilterParam(DataCollection.Version version,
+            Collection<ColumnSelection.Predefined> groups, StoreFilter filter, String attributeSetName) {
         StringBuilder url = new StringBuilder();
         boolean firstParam = true;
         if (version != null) {
@@ -163,8 +159,16 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
         if (filter != null) {
             if (firstParam) {
                 url.append("?filter=").append(filter.toString());
+                firstParam = false;
             } else {
                 url.append("&filter=").append(filter.toString());
+            }
+        }
+        if (StringUtils.isNotEmpty(attributeSetName)) {
+            if (firstParam) {
+                url.append("?attributeSetName=").append(attributeSetName);
+            } else {
+                url.append("&attributeSetName=").append(attributeSetName);
             }
         }
         return url.toString();

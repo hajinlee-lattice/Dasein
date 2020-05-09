@@ -164,7 +164,7 @@ public class AttrConfigResource {
 
     @DeleteMapping(value = "/attributeset/name/{name}")
     @ApiOperation(value = "Delete attribute set")
-    public Boolean deleteAttributeSetByName(@PathVariable String customerSpace, @PathVariable("name") String name) {
+    public Boolean deleteAttributeSet(@PathVariable String customerSpace, @PathVariable("name") String name) {
         attrConfigService.deleteAttributeSetByName(name);
         return true;
     }
