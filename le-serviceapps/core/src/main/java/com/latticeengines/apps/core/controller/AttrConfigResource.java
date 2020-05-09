@@ -138,7 +138,7 @@ public class AttrConfigResource {
 
     @GetMapping(value = "/attributeset/name/{name}")
     @ApiOperation(value = "Get attribute set by name")
-    public AttributeSet getAttributeSetByName(@PathVariable String customerSpace, @PathVariable(value = "name") String name) {
+    public AttributeSet getAttributeSet(@PathVariable String customerSpace, @PathVariable(value = "name") String name) {
         return attrConfigService.getAttributeSetByName(name);
     }
 
