@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.manage.SourceColumn.Calculation;
@@ -33,8 +35,9 @@ public class ColumnCurationParameters extends TransformationFlowParameters {
     public List<String> getValues(Calculation opType) {
         List<String> values = new LinkedList<>();
 
-        for (String field : getFields(opType)) {
-            values.add(fieldValueMap.get(field));
+        List<String> fields = getFields(opType);
+        if (CollectionUtils.isNotEmpty(fields)) {
+            fields.forEach(field -> values.add(fieldValueMap.get(field)));
         }
 
         return values;
