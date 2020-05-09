@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.proxy.pls.ImportFileProxy;
 
@@ -33,7 +33,7 @@ public class ImportFileDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void testImportFile() throws Exception {
         Resource csvResource = new ClassPathResource(PATH,
                 Thread.currentThread().getContextClassLoader());
-        SourceFile testSourceFile = importFileProxy.uploadFile(fileName, csvResource);
+        SourceFileInfo testSourceFile = importFileProxy.uploadFile(fileName, csvResource);
         Assert.assertNotNull(testSourceFile);
     }
 }

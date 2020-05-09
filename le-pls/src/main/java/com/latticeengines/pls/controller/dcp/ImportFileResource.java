@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller.dcp;
 
 import javax.inject.Inject;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,7 +37,7 @@ public class ImportFileResource {
     public SourceFileInfo uploadFile(
             @RequestParam("name") String csvFileName,
             @RequestParam("file") MultipartFile file) {
-        return sourceFileUploadService.uploadFile(csvFileName, csvFileName, false, null, file);
+        return sourceFileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv", csvFileName, false, null, file);
     }
 
 }
