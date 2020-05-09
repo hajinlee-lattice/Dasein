@@ -112,7 +112,7 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
                                                      List<ColumnSelection.Predefined> groups, DataCollection.Version version) {
-        return getDecoratedMetadata(customerSpace, entity, groups, version, null);
+        return getDecoratedMetadata(customerSpace, entity, groups, version, (String) null);
     }
 
     @Override
@@ -122,11 +122,16 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     }
 
     @Override
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, List<Predefined> groups, Version version, StoreFilter filter) {
+        return getDecoratedMetadata(customerSpace, entity, groups, version, null, null);
+    }
+
+    @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            List<ColumnSelection.Predefined> groups, Version version, String attributeSetName, StoreFilter filter) {
+                                                     List<ColumnSelection.Predefined> groups, Version version, String attributeSetName, StoreFilter filter) {
         String url = constructUrl("/customerspaces/{customerSpace}/servingstore/{entity}/decoratedmetadata", //
                 shortenCustomerSpace(customerSpace), entity);
-        url += getVersionGroupFilterParam(version, groups, filter);
+        url += getVersionGroupFilterParam(version, groups, filter, attributeSetName);
         List<ColumnMetadata> list = getList("serving store metadata", url, ColumnMetadata.class);
         if (CollectionUtils.isNotEmpty(list)) {
             return Flux.fromIterable(list);

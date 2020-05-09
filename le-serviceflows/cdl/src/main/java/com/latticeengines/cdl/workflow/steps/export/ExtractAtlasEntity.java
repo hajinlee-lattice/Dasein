@@ -372,7 +372,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             List<ColumnMetadata> cms;
             if (StringUtils.isNotEmpty(atlasExport.getAttributeSetName())) {
                 cms = servingStoreProxy.getDecoratedMetadata(customerSpace.toString(), entity, groups,
-                        atlasExport.getAttributeSetName(), version).collectList().block();
+                        version, atlasExport.getAttributeSetName()).collectList().block();
                 if (CollectionUtils.isNotEmpty(cms)) {
                     schemaMap.put(entity, cms);
                 }

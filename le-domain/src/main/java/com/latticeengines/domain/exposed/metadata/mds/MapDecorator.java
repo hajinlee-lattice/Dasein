@@ -36,6 +36,7 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
         long duration = System.currentTimeMillis() - start;
         log.debug(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration
                 + " msecs.");
+        loaded.set(true);
     }
 
     @Override
