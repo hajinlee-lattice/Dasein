@@ -494,8 +494,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         dataFeedProxy.updateEarliestLatestTransaction(customerSpace.toString(), earliestDayPeriod, latestDayPeriod);
 
         DataCollectionStatus detail = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
-        detail.setMaxTxnDate(earliestDayPeriod);
-        detail.setMinTxnDate(latestDayPeriod);
+        detail.setMaxTxnDate(latestDayPeriod);
+        detail.setMinTxnDate(earliestDayPeriod);
         log.info("MergeTransaction step : dataCollection Status is " + JsonUtils.serialize(detail));
         putObjectInContext(CDL_COLLECTION_STATUS, detail);
     }
