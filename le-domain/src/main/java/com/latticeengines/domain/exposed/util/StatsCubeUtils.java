@@ -124,8 +124,10 @@ public final class StatsCubeUtils {
                 for (String token : tokens) {
                     String[] parts = token.split(":");
                     int bktId = Integer.valueOf(parts[0]);
-                    long bktCnt = Long.valueOf(parts[1]);
-                    bktCounts.put(bktId, bktCnt);
+                    if (bktId > 0) {
+                        long bktCnt = Long.valueOf(parts[1]);
+                        bktCounts.put(bktId, bktCnt);
+                    }
                 }
             }
             String bktAlgoSerialized = record.get(STATS_ATTR_ALGO).toString();
@@ -152,9 +154,20 @@ public final class StatsCubeUtils {
         if (bucketList.isEmpty()) {
             return buckets;
         } else {
+            if (isCumulativeBucket(algorithm)) {
+                long cumCnt = 0L;
+                for (Bucket bkt: bucketList) {
+                    cumCnt += bkt.getCount();
+                    bkt.setCount(cumCnt);
+                }
+            }
             buckets.setBucketList(bucketList);
             return buckets;
         }
+    }
+
+    private static boolean isCumulativeBucket(BucketAlgorithm algorithm) {
+        return algorithm instanceof DateBucket;
     }
 
     private static List<Bucket> initializeBucketList(BucketAlgorithm algorithm) {

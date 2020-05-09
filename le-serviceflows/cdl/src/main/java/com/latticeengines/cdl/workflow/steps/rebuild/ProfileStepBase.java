@@ -2,9 +2,9 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CALC_STATS_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -29,7 +29,6 @@ import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.atlas.SorterConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -42,6 +41,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
+import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -139,21 +139,33 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return step;
     }
 
-    protected TransformationStepConfig calcStats(int profileStep, int bucketStep, String statsTablePrefix,
-            List<String> dedupFields) {
+    protected TransformationStepConfig calcStats(int profileStep, String inputTableName, String statsTablePrefix) {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(bucketStep, profileStep));
-        step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
+        step.setInputSteps(Collections.singletonList(profileStep));
+        addBaseTables(step, inputTableName);
+        step.setTransformer(TRANSFORMER_CALC_STATS_TXMFR);
 
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(statsTablePrefix);
         step.setTargetTable(targetTable);
 
-        CalculateStatsConfig conf = new CalculateStatsConfig();
-        if (CollectionUtils.isNotEmpty(dedupFields)) {
-            conf.setDedupFields(dedupFields);
-        }
+        CalcStatsConfig conf = new CalcStatsConfig();
+        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
+        return step;
+    }
+
+    protected TransformationStepConfig calcStats(int profileStep, int inputStep, String statsTablePrefix) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Arrays.asList(inputStep, profileStep));
+        step.setTransformer(TRANSFORMER_CALC_STATS_TXMFR);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(statsTablePrefix);
+        step.setTargetTable(targetTable);
+
+        CalcStatsConfig conf = new CalcStatsConfig();
         step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
         return step;
     }

@@ -134,7 +134,6 @@ public final class DataCloudConstants {
     public static final String STATS_ATTR_BKTS = "BktCounts";
     public static final String STATS_ATTR_ALGO = PROFILE_ATTR_BKTALGO;
 
-
     public static final String TRANSFORMER_AM_ENRICHER = "AMAttrEnricher";
     public static final String TRANSFORMER_COPIER = "sourceCopier";
     public static final String TRANSFORMER_PROFILER = "SourceProfiler";
@@ -162,6 +161,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_MERGE_SYSTEM_BATCH_TXMFR = "MergeSystemBatchTxmfr";
     public static final String TRANSFORMER_PROFILE_TXMFR = "ProfileTxmfr";
     public static final String TRANSFORMER_BUCKET_TXMFR = "BucketEncodeTxmfr";
+    public static final String TRANSFORMER_CALC_STATS_TXMFR = "CalcStatsTxmfr";
     public static final String TRANSFORMER_MERGE_IMPORTS = "MergeImports";
     public static final String TRANSFORMER_APPEND_RAWSTREAM = "AppendRawStreamTxmfr";
     public static final String TRANSFORMER_GENERATE_CURATED_ATTRIBUTES = "GenerateCuratedAttrsTxmfr";

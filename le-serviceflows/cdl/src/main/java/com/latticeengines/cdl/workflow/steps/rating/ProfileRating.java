@@ -61,11 +61,9 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         int bucketStep = 1;
 
         TransformationStepConfig profile = profile(pivotedTableName);
-        TransformationStepConfig bucket = bucket(profileStep, pivotedTableName, null);
-        TransformationStepConfig calc = calcStats(profileStep, bucketStep, statsTablePrefix, null);
+        TransformationStepConfig calc = calcStats(profileStep, pivotedTableName, statsTablePrefix);
 
         steps.add(profile);
-        steps.add(bucket);
         steps.add(calc);
 
         request.setSteps(steps);

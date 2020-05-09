@@ -1,10 +1,9 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKET_TXMFR;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_CALC_STATS_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_COPY_TXMFR;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILE_TXMFR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +27,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.datacloud.match.RefreshFrequency;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
-import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.CalculateStatsConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -41,7 +38,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.spark.common.CopyConfig;
-import com.latticeengines.domain.exposed.spark.stats.BucketEncodeConfig;
+import com.latticeengines.domain.exposed.spark.stats.CalcStatsConfig;
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -56,19 +53,17 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     static final String BEAN_NAME = "profileAccount";
 
     private static final Logger log = LoggerFactory.getLogger(ProfileAccount.class);
+
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
 
     private int filterStep;
     private int profileStep;
-    private int bucketStep;
 
     private String fullAccountTableName;
     private String masterTableName;
     private String statsTableName;
     private String statsTablePrefix = "Stats";
-    private String profileTablePrefix = "FullProfile";
-    private String encodedTablePrefix = "FullEncoded";
 
     private DataCollection.Version active;
     private DataCollection.Version inactive;
@@ -138,15 +133,6 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
         finishing(true);
         exportToS3AndAddToContext(statsTableName, FULL_ACCOUNT_STATS_TABLE_NAME);
-
-        // no need to make them work for retry, as retry can regenerate them in bucket account step
-        String profileTableName = TableUtils.getFullTableName(profileTablePrefix, pipelineVersion);
-        putStringValueInContext(FULL_ACCOUNT_PROFILE_TABLE_NAME, profileTableName);
-        addToListInContext(TEMPORARY_CDL_TABLES, profileTableName, String.class);
-
-        String encodedTableName = TableUtils.getFullTableName(encodedTablePrefix, pipelineVersion);
-        putStringValueInContext(FULL_ACCOUNT_ENCODED_TABLE_NAME, encodedTableName);
-        addToListInContext(TEMPORARY_CDL_TABLES, encodedTableName, String.class);
     }
 
     private PipelineTransformationRequest getTransformRequest() {
@@ -160,12 +146,10 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             filterStep = step++;
         }
         profileStep = step++;
-        bucketStep = step;
         // -----------
         TransformationStepConfig filter = hasFilter ? filter() : null;
         TransformationStepConfig profile = profile(hasFilter);
-        TransformationStepConfig encode = bucketEncode(hasFilter);
-        TransformationStepConfig calc = calcStats();
+        TransformationStepConfig calc = calcStats(hasFilter);
 
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
@@ -173,7 +157,6 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             steps.add(filter); //
         }
         steps.add(profile); //
-        steps.add(encode); //
         steps.add(calc); //
         // -----------
         request.setSteps(steps);
@@ -220,11 +203,6 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         }
         step.setTransformer(TRANSFORMER_PROFILE_TXMFR);
 
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(profileTablePrefix);
-        step.setTargetTable(targetTable);
-
         ProfileJobConfig conf = new ProfileJobConfig();
         conf.setEncAttrPrefix(CEAttr);
         // Pass current timestamp as a configuration parameter to the profile
@@ -235,7 +213,7 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         return step;
     }
 
-    private TransformationStepConfig bucketEncode(boolean hasFilter) {
+    private TransformationStepConfig calcStats(boolean hasFilter) {
         TransformationStepConfig step = new TransformationStepConfig();
         if (hasFilter) {
             step.setInputSteps(Arrays.asList(filterStep, profileStep));
@@ -243,26 +221,10 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
             addBaseTables(step, fullAccountTableName);
             step.setInputSteps(Collections.singletonList(profileStep));
         }
-        step.setTransformer(TRANSFORMER_BUCKET_TXMFR);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(encodedTablePrefix);
-        targetTable.setExpandBucketedAttrs(true);
-        step.setTargetTable(targetTable);
-
-        BucketEncodeConfig config = new BucketEncodeConfig();
-        step.setConfiguration(appendEngineConf(config, heavyEngineConfig()));
-        return step;
-    }
-
-    private TransformationStepConfig calcStats() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(bucketStep, profileStep));
-        step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
+        step.setTransformer(TRANSFORMER_CALC_STATS_TXMFR);
         setTargetTable(step, statsTablePrefix);
-        CalculateStatsConfig conf = new CalculateStatsConfig();
-        step.setConfiguration(appendEngineConf(conf, extraHeavyEngineConfig()));
+        CalcStatsConfig conf = new CalcStatsConfig();
+        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
         return step;
     }
 

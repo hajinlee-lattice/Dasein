@@ -122,10 +122,8 @@ public class ProfileCuratedContact extends BaseSingleEntityProfileStep<CuratedCo
 
         // PBS
         TransformationStepConfig profile = profile(servingStoreTableName);
-        TransformationStepConfig bucket = bucket(profileStep, servingStoreTableName, null);
-        TransformationStepConfig calcStats = calcStats(profileStep, bucketStep, statsTablePrefix, null);
+        TransformationStepConfig calcStats = calcStats(profileStep, servingStoreTableName, statsTablePrefix);
         steps.add(profile);
-        steps.add(bucket);
         steps.add(calcStats);
 
         // -----------

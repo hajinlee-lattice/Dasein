@@ -1,4 +1,4 @@
-package com.latticeengines.datacloud.dataflow.utils;
+package com.latticeengines.domain.exposed.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;

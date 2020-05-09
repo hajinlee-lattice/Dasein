@@ -148,7 +148,7 @@ public final class BucketTestUtils {
         };
     }
 
-    private static Object[] relayAttr(String attrName, String srcAttr) {
+    protected static Object[] relayAttr(String attrName, String srcAttr) {
         Object[] data = new Object[7];
         data[0] = attrName;
         data[1] = srcAttr;

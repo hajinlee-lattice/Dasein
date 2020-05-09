@@ -137,39 +137,28 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
 
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        if (shouldExcludeDataCloudAttrs() && hasFullProfleAndEncoded()) {
-            String fullProfileTableName = getStringValueFromContext(FULL_ACCOUNT_PROFILE_TABLE_NAME);
-            TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, fullProfileTableName);
-            steps.add(sortProfile);
+        int step = 0;
+        filterStep = step++;
+        profileStep = step++;
+        encodeStep = step;
 
-            servingStoreTableName = getStringValueFromContext(FULL_ACCOUNT_ENCODED_TABLE_NAME);
-            removeFromListInContext(TEMPORARY_CDL_TABLES, servingStoreTableName, String.class);
-            log.info("Use fulll Account table.");
+        // -----------
+        TransformationStepConfig filter = filter();
+        TransformationStepConfig profile = profile();
+        TransformationStepConfig encode = bucketEncode();
+        TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, null);
+        TransformationStepConfig calc = null;
+        if (!doFullProfile) {
+            calc = calcStats(profileStep, filterStep, statsTablePrefix);
+        }
 
-        } else {
-            int step = 0;
-            filterStep = step++;
-            profileStep = step++;
-            encodeStep = step;
-
-            // -----------
-            TransformationStepConfig filter = filter();
-            TransformationStepConfig profile = profile();
-            TransformationStepConfig encode = bucketEncode();
-            TransformationStepConfig sortProfile = sortProfile(profileTablePrefix, null);
-            TransformationStepConfig calc = null;
-            if (!doFullProfile) {
-                calc = calcStats(profileStep, encodeStep, statsTablePrefix, null);
-            }
-
-            // -----------
-            steps.add(filter);
-            steps.add(profile);
-            steps.add(encode);
-            steps.add(sortProfile);
-            if (calc != null) {
-                steps.add(calc);
-            }
+        // -----------
+        steps.add(filter);
+        steps.add(profile);
+        steps.add(encode);
+        steps.add(sortProfile);
+        if (calc != null) {
+            steps.add(calc);
         }
 
         request.setSteps(steps);
@@ -341,14 +330,6 @@ public class GenerateBucketedAccount extends BaseSingleEntityProfileStep<Process
         } else {
             return str;
         }
-    }
-
-    private boolean hasFullProfleAndEncoded() {
-        String profileTableName = getStringValueFromContext(FULL_ACCOUNT_PROFILE_TABLE_NAME);
-        String encodedTableName = getStringValueFromContext(FULL_ACCOUNT_ENCODED_TABLE_NAME);
-        String statsTableName = getStringValueFromContext(FULL_ACCOUNT_STATS_TABLE_NAME);
-        return StringUtils.isNotBlank(profileTableName) && StringUtils.isNotBlank(encodedTableName)
-                && StringUtils.isNotBlank(statsTableName);
     }
 
 }
