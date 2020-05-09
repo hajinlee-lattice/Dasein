@@ -10,11 +10,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.pls.service.dcp.UploadService;
@@ -58,12 +60,10 @@ public class UploadResource {
         return uploadService.generateToken(uploadId);
     }
 
-    @PostMapping("/startimport")
+    @PostMapping("/import")
     @ResponseBody
-    @ApiOperation(value = "Invoke DCP import workflow. Returns the job id.")
-    public UploadDetails startImport(@RequestParam("projectId") String projectId,
-                              @RequestParam("sourceId") String sourceId,
-                              @RequestParam("sourceFileName") String sourceFileName) {
-        return uploadService.startImport(projectId, sourceId, sourceFileName);
+    @ApiOperation(value = "Invoke DCP import workflow. Returns the upload details.")
+    public UploadDetails startImport(@RequestBody DCPImportRequest importRequest) {
+        return uploadService.startImport(importRequest);
     }
 }

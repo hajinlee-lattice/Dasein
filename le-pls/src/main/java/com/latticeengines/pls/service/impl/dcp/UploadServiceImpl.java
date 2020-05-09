@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Preconditions;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
@@ -191,8 +192,8 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
     }
 
     @Override
-    public UploadDetails startImport(String projectId, String sourceId, String sourceFileName) {
-        ApplicationId appId = sourceFileUploadService.submitSourceImport(projectId, sourceId, sourceFileName);
+    public UploadDetails startImport(DCPImportRequest importRequest) {
+        ApplicationId appId = sourceFileUploadService.submitSourceImport(importRequest);
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
         String uploadId = job.getInputs().get(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
