@@ -4,15 +4,9 @@
     "fieldDefinitionsRecordsMap": {
         "Unique IDs": [
             {
-                "fieldName": "CustomerAccountId",
+                "fieldName": "CustomerId",
                 "fieldType": "TEXT",
-                "columnName": "Customer Account ID",
-                "inCurrentImport": true
-            },
-            {
-                "fieldName": "InternalId",
-                "fieldType": "TEXT",
-                "columnName": "Internal ID",
+                "columnName": "Customer ID",
                 "inCurrentImport": true
             }
         ],
