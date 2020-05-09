@@ -86,7 +86,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
 
     private void setAttributeSetName(String attributeSetName, Collection<ColumnSelection.Predefined> groups) {
         // only support enrichment group
-        if (!StringUtils.isEmpty(attributeSetName) && isEnrichmentGroup(groups)) {
+        if (StringUtils.isNotEmpty(attributeSetName) && isEnrichmentGroup(groups)) {
             AttributeSetContext.setAttributeSetName(attributeSetName);
         }
     }
@@ -96,38 +96,42 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     @Override
-    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter) {
-        AtomicLong timer = new AtomicLong();
-        AtomicLong counter = new AtomicLong();
-        filter = filter == null ? StoreFilter.ALL : filter;
-        Flux<ColumnMetadata> flux;
-        setAttributeSetName(attributeSetName, groups);
-        if (version == null) {
-            flux = getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace), filter)
-                    .sequential();
-        } else {
-            flux = getFullyDecoratedMetadata(entity, version, filter).sequential();
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, DataCollection.Version version,
+                                                     Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter) {
+        try {
+            AtomicLong timer = new AtomicLong();
+            AtomicLong counter = new AtomicLong();
+            filter = filter == null ? StoreFilter.ALL : filter;
+            Flux<ColumnMetadata> flux;
+            setAttributeSetName(attributeSetName, groups);
+            if (version == null) {
+                flux = getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace), filter)
+                        .sequential();
+            } else {
+                flux = getFullyDecoratedMetadata(entity, version, filter).sequential();
+            }
+            flux = flux //
+                    .doOnSubscribe(s -> {
+                        timer.set(System.currentTimeMillis());
+                        log.info("Start serving decorated metadata for " + customerSpace + ":" + entity);
+                    }) //
+                    .doOnNext(cm -> counter.getAndIncrement()) //
+                    .doOnComplete(() -> {
+                        long duration = System.currentTimeMillis() - timer.get();
+                        log.info("Finished serving decorated metadata for " + counter.get() + " attributes from "
+                                + customerSpace + ":" + entity + " TimeElapsed=" + duration + " msec");
+                    });
+            Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
+            if (CollectionUtils.isNotEmpty(groups)) {
+                filterGroups.addAll(groups);
+            }
+            if (CollectionUtils.isNotEmpty(filterGroups)) {
+                flux = flux.filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor));
+            }
+            return flux;
+        } finally {
+            AttributeSetContext.remove();
         }
-        flux = flux //
-                .doOnSubscribe(s -> {
-                    timer.set(System.currentTimeMillis());
-                    log.info("Start serving decorated metadata for " + customerSpace + ":" + entity);
-                }) //
-                .doOnNext(cm -> counter.getAndIncrement()) //
-                .doOnComplete(() -> {
-                    long duration = System.currentTimeMillis() - timer.get();
-                    log.info("Finished serving decorated metadata for " + counter.get() + " attributes from "
-                            + customerSpace + ":" + entity + " TimeElapsed=" + duration + " msec");
-                });
-        Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
-        if (CollectionUtils.isNotEmpty(groups)) {
-            filterGroups.addAll(groups);
-        }
-        if (CollectionUtils.isNotEmpty(filterGroups)) {
-            flux = flux.filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor));
-        }
-        return flux;
     }
 
     @Override

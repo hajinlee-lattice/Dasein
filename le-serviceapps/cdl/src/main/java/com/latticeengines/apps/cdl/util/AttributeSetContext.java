@@ -16,4 +16,7 @@ public final class AttributeSetContext {
         return attributeSetNameThreadLocal.get();
     }
 
+    public static void remove() {
+        attributeSetNameThreadLocal.remove();
+    }
 }
