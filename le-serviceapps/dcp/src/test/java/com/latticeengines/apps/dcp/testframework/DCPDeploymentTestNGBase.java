@@ -150,6 +150,7 @@ public abstract class DCPDeploymentTestNGBase extends AbstractTestNGSpringContex
     }
 
     protected JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
+        log.info("Running workflow as " + applicationId);
         String trueAppId = waitForTrueApplicationId(applicationId);
         if (!trueAppId.equals(applicationId)) {
             log.info("Convert fake app id " + applicationId + " to true app id " + trueAppId);
