@@ -275,7 +275,9 @@ public class SparkSQLServiceImpl implements SparkSQLService {
     }
 
     private boolean isParquet(String path) {
-        if (path.endsWith(".parquet")) {
+        if (StringUtils.isBlank(path)) {
+            return false;
+        } else if (path.endsWith(".parquet")) {
             return true;
         } else if (path.endsWith(".avro")) {
             return false;

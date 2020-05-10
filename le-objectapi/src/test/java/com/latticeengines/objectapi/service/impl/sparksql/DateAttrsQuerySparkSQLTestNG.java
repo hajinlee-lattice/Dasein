@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -20,7 +21,9 @@ import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.objectapi.service.impl.QueryServiceImplTestNGBase;
 import com.latticeengines.objectapi.service.sparksql.impl.EventQueryServiceSparkSQLImpl;
 import com.latticeengines.query.evaluator.sparksql.SparkSQLQueryTester;
+import com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor;
 
+@Listeners(SparkSQLTestInterceptor.class)
 public class DateAttrsQuerySparkSQLTestNG extends QueryServiceImplTestNGBase
     implements RedshiftAndSparkQueryObjectAPITester {
 
