@@ -189,6 +189,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     // Number of total account after ProcessAccount test
     static final Long ACCOUNT_PA = 900L;
+    // Number of total account after inserting new accounts ProcessAccount test
+    static final Long NEW_ACCOUNT_PA = 10L;
+    // Number of total account after updating existing accounts ProcessAccount test
+    static final Long UPDATE_ACCOUNT_PA = 10L;
     // Number of total account after ProcessAccount entity match test
     static final Long ACCOUNT_PA_EM = 900L;
     // Number of total account after ProcessAccount entity match test for GA tenants
@@ -249,6 +253,10 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
 
     // Number of total contact after ProcessAccount test
     static final Long CONTACT_PA = 900L;
+    // Number of total contact after inserting new contacts ProcessAccount test
+    static final Long NEW_CONTACT_PA = 10L;
+    // Number of total contact after updating existing contacts ProcessAccount test
+    static final Long UPDATE_CONTACT_PA = 10L;
     // Number of total contact after ProcessAccount entity match test
     static final Long CONTACT_PA_EM = 900L;
     // Number of total contact after ProcessAccount entity match test for GA tenants
@@ -289,7 +297,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated daily transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-//    static final Long DAILY_TXN_UT_EM = 50863L;
+    // static final Long DAILY_TXN_UT_EM = 50863L;
     static final Long DAILY_TXN_UT_EM = 50881L;
     // Number of aggregated period transaction after ProcessTransaction test
     static final Long PERIOD_TRANSACTION_PT = 62550L;
@@ -302,7 +310,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of aggregated period transaction after UpdateTransaction entity
     // match test (txn data distribution is different for txn test with and
     // without entity match)
-//    static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
+    // static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
     static final Long PERIOD_TRANSACTION_UT_EM = 75691L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
@@ -335,11 +343,22 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // For verified aid, pid and txn date, daily txn cost after
     // ProcessTransaction test
     static final double VERIFY_DAILYTXN_COST_PT = 1054.588389;
+    // Number of new raw txn after first PA of legacy tenant end2end test
+    static final Long TRANSACTION_LEGACY_FIRST_PA = 24367L;
+    // Number of new raw txn after second PA of legacy tenant end2end test
+    static final Long TRANSACTION_LEGACY_SECOND_PA = 24393L;
+    // Number of total purchase history attributes after PA of legacy tenant end2end
+    // test
+    static final Long TOTAL_PURCHASE_HISTORY_PA = 5L;
 
     /* Expected product result */
 
     // Number of product id after ProcessAccount test
     static final Long PRODUCT_ID_PA = 40L;
+    // Number of product id after ProcessLegacy test for VDB
+    static final Long PRODUCT_ID_VDB_PA = 10L;
+    // Number of product id after ProcessLegacy test for VDB after new import
+    static final Long NEW_PRODUCT_ID_VDB_PA = 5L;
     // Number of product hierarchy after ProcessAccount test
     static final Long PRODUCT_HIERARCHY_PA = 5L;
     // Number of product bundle after ProcessAccount test
@@ -355,6 +374,14 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // Number of product hierarchy in serving store after ProcessTransaction
     // test
     static final Long SERVING_STORE_PRODUCT_HIERARCHIES_PT = 20L;
+    // Number of products in batch store after first PA ProcessLegacy test
+    static final Long BATCH_STORE_PRODUCT_PA = 10L;
+    // Number of products in batch store after second PA ProcessLegacy test
+    static final Long NEW_BATCH_STORE_PRODUCT_PA = 15L;
+    // Number of products in serving store after first PA ProcessLegacy test
+    static final Long SERVING_STORE_PRODUCTS_PA = 10L;
+    // Number of products in serving store after second PA ProcessLegacy test
+    static final Long NEW_SERVING_STORE_PRODUCTS_PA = 5L;
 
     /* Expected segment result */
 
@@ -381,6 +408,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     static final long SEGMENT_3_CONTACT_1 = 53;
     static final long SEGMENT_3_ACCOUNT_2 = 60;
     static final long SEGMENT_3_CONTACT_2 = 60;
+    static final long SEGMENT_3_ACCOUNT_3 = 52;
+    static final long SEGMENT_3_CONTACT_3 = 52;
 
     static final String SEGMENT_NAME_CURATED_ATTR = NamingUtils.timestamp("E2ESegmentCuratedAttr");
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
@@ -547,6 +576,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         // If don't want to remove testing tenant for debug purpose, remove
         // comments on this line but don't check in
         // testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+
     }
 
     protected void setupEnd2EndTestEnvironmentByFile(String jsonFileName) {
@@ -714,8 +744,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     /*
-     * Load S3ImportSystem (stored in serialized JSON) from test artifact s3
-     * bucket. Filename format: "System_<SYSTEM_NAME>.json"
+     * Load S3ImportSystem (stored in serialized JSON) from test artifact s3 bucket.
+     * Filename format: "System_<SYSTEM_NAME>.json"
      */
     private S3ImportSystem getMockSystem(@NotNull String systemName) {
         String filename = String.format("System_%s.json", systemName);
@@ -791,16 +821,17 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         importData(entity, s3FileName, feedType, compressed, outsizeFlag, null);
     }
 
-    void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed,
-                    boolean outsizeFlag, String subType) {
-        ApplicationId applicationId = importDataWithApplicationId(entity, s3FileName, feedType, compressed,
-                outsizeFlag, subType);
+    void importData(BusinessEntity entity, String s3FileName, String feedType, boolean compressed, boolean outsizeFlag,
+            String subType) {
+        ApplicationId applicationId = importDataWithApplicationId(entity, s3FileName, feedType, compressed, outsizeFlag,
+                subType);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
+
     ApplicationId importDataWithApplicationId(BusinessEntity entity, String s3FileName, String feedType,
-                                              boolean compressed, boolean outsizeFlag, String subType) {
+            boolean compressed, boolean outsizeFlag, String subType) {
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName, outsizeFlag), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
         String outputFileName = s3FileName;
@@ -834,9 +865,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName), s3FileName);
         log.info("Streaming S3 file " + s3FileName + " as a import file for " + entity);
         String outputFileName = String.format("file_%d.csv", DateTime.now().getMillis());
-        SourceFile dataFile = fileUploadProxy.uploadFile(outputFileName, false, s3FileName, entity.name(),
-                csvResource, false);
-        ApplicationId applicationId =  submitS3ImportOnlyData(mainTestTenant.getId(), task, dataFile, INITIATOR);
+        SourceFile dataFile = fileUploadProxy.uploadFile(outputFileName, false, s3FileName, entity.name(), csvResource,
+                false);
+        ApplicationId applicationId = submitS3ImportOnlyData(mainTestTenant.getId(), task, dataFile, INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         log.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
@@ -899,9 +930,9 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     /*
-     * Modify field mapping for match IDs. Fields need to have the following
-     * format to be mapped to other system (for unique ID, need to specify its
-     * own system name)
+     * Modify field mapping for match IDs. Fields need to have the following format
+     * to be mapped to other system (for unique ID, need to specify its own system
+     * name)
      *
      * Format: <PREFIX>_<SystemName>_<Entity>_<map_to_lattice_id> E.g.,
      * LETest_MapTo_DefaultSystem_Account_True will map this column to default
@@ -1043,7 +1074,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private ApplicationId submitS3ImportOnlyData(String customerSpace, DataFeedTask dataFeedTask, SourceFile dataFile,
-                                          String email) {
+            String email) {
         log.info(String.format("The email of the s3 file upload initiator is %s", email));
         if (dataFeedTask == null || dataFeedTask.getImportTemplate() == null) {
             throw new IllegalArgumentException(
@@ -1059,8 +1090,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         String source = SourceType.FILE.getName();
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
         String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType, subType,
-                "",
-                metaData);
+                "", metaData);
         log.info("Creating a data feed task for " + entity + " with id " + taskId);
         if (StringUtils.isEmpty(taskId)) {
             throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
@@ -1087,7 +1117,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private CSVImportConfig generateDataOnlyImportConfig(String customerSpace, String templateTableName,
-                                                 SourceFile dataSourceFile, String email) {
+            SourceFile dataSourceFile, String email) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         if (StringUtils.isEmpty(templateTableName)) {
             throw new RuntimeException("Template table name cannot be empty!");
@@ -1498,21 +1528,21 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     }
 
     private MetadataSegment constructSegmentForProductBundle() {
-        //bundle1 CMT4: Autosampler Vials and Closures
-        //bundle2 CMT3: Other Plasticware
+        // bundle1 CMT4: Autosampler Vials and Closures
+        // bundle2 CMT3: Other Plasticware
         Bucket.Transaction txn1 = new Bucket.Transaction("4VXsZpo1WU5dpAYAdWTiKD9yZA1sd", TimeFilter.ever(), null, null,
                 false);
         Bucket purchaseBkt1 = Bucket.txnBkt(txn1);
         BucketRestriction purchaseRestriction1 = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_4VXsZpo1WU5dpAYAdWTiKD9yZA1sd__EVER__HP"), purchaseBkt1);
-        Bucket.Transaction txn2 = new Bucket.Transaction("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", TimeFilter.ever(), null, null,
-                false);
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_4VXsZpo1WU5dpAYAdWTiKD9yZA1sd__EVER__HP"),
+                purchaseBkt1);
+        Bucket.Transaction txn2 = new Bucket.Transaction("1iHa3C9UQFBPknqKCNW3L6WgUAARc4o", TimeFilter.ever(), null,
+                null, false);
         Bucket purchaseBkt2 = Bucket.txnBkt(txn2);
         BucketRestriction purchaseRestriction2 = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_1iHa3C9UQFBPknqKCNW3L6WgUAARc4o__EVER__HP"), purchaseBkt2);
-        Restriction accountRestriction = Restriction.builder().and(purchaseRestriction1,
-                purchaseRestriction2).build();
-
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_1iHa3C9UQFBPknqKCNW3L6WgUAARc4o__EVER__HP"),
+                purchaseBkt2);
+        Restriction accountRestriction = Restriction.builder().and(purchaseRestriction1, purchaseRestriction2).build();
 
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_PRODUCT_BUNDLE);
@@ -1755,8 +1785,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedTableCount)) {
             return;
         }
-        expectedTableCount.forEach((key, value) -> log.info("Row count for table role of {}: {} -> {}",
-                key.name(), countTableRole(key), value));
+        expectedTableCount.forEach((key, value) -> log.info("Row count for table role of {}: {} -> {}", key.name(),
+                countTableRole(key), value));
         expectedTableCount.forEach((key, value) -> //
         Assert.assertEquals(Long.valueOf(countTableRole(key)), value, key.name()));
     }
@@ -1765,8 +1795,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         if (MapUtils.isEmpty(expectedEntityCount)) {
             return;
         }
-        expectedEntityCount
-                .forEach((key, value) -> log.info("Row count for redshift table of {}: {} -> {}", key, countInRedshift(key), value));
+        expectedEntityCount.forEach((key, value) -> log.info("Row count for redshift table of {}: {} -> {}", key,
+                countInRedshift(key), value));
         expectedEntityCount.forEach((key, value) -> Assert.assertEquals(Long.valueOf(countInRedshift(key)), value));
     }
 
@@ -1974,8 +2004,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         for (EntityType entityType : entityTypes) {
             String folderName = S3PathBuilder.getFolderName(systemName, entityType.getDefaultFeedTypeName());
             if (!allSubFolders.contains(folderName)) {
-                dropBoxProxy.createTemplateFolder(mainTestTenant.getId(), systemName, entityType.getDefaultFeedTypeName(),
-                        null);
+                dropBoxProxy.createTemplateFolder(mainTestTenant.getId(), systemName,
+                        entityType.getDefaultFeedTypeName(), null);
                 log.info("create folder {} success.", folderName);
             }
         }
