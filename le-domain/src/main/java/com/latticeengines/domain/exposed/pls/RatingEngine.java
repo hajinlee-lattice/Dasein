@@ -142,6 +142,10 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private RatingModel publishedIteration;
 
+    @Column(name = "TEAM_ID")
+    @JsonProperty("teamId")
+    private String teamId;
+
     public static String generateIdStr() {
         String uuid;
         do {
