@@ -12,6 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -21,7 +22,9 @@ import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.impl.EntityQueryServiceImplContactCategoryTestNG;
 import com.latticeengines.objectapi.service.sparksql.impl.EntityQueryServiceSparkSQLImpl;
 import com.latticeengines.query.evaluator.sparksql.SparkSQLQueryTester;
+import com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor;
 
+@Listeners(SparkSQLTestInterceptor.class)
 public class EntityQueryServiceImplContactCategorySparkSQLTestNG extends EntityQueryServiceImplContactCategoryTestNG //
         implements RedshiftAndSparkQueryObjectAPITester {
 
