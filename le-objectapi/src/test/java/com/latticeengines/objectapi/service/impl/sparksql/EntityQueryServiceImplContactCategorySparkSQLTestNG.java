@@ -6,12 +6,14 @@ import static com.latticeengines.query.factory.SparkQueryProvider.SPARK_BATCH_US
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.latticeengines.query.evaluator.sparksql.SparkSQLTestInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -22,6 +24,7 @@ import com.latticeengines.objectapi.service.impl.EntityQueryServiceImplContactCa
 import com.latticeengines.objectapi.service.sparksql.impl.EntityQueryServiceSparkSQLImpl;
 import com.latticeengines.query.evaluator.sparksql.SparkSQLQueryTester;
 
+@Listeners(SparkSQLTestInterceptor.class)
 public class EntityQueryServiceImplContactCategorySparkSQLTestNG extends EntityQueryServiceImplContactCategoryTestNG //
         implements RedshiftAndSparkQueryObjectAPITester {
 

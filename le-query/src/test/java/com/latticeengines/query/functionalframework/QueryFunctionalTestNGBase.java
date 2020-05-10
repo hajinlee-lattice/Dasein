@@ -224,12 +224,14 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         QueryTestUtils.getRolesInAttrRepo().forEach(role -> {
             try {
                 File tableJsonFile = new File(downloadsDir + File.separator + "TableJsons/" + role + ".json");
-                Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
-                String path = table.getExtracts().get(0).getPath();
-                path = path.replace("/Pods/QA/", "/Pods/" + podId + "/");
-                pathMap.put(role, path);
+                if (tableJsonFile.exists()) {
+                    Table table = JsonUtils.deserialize(FileUtils.openInputStream(tableJsonFile), Table.class);
+                    String path = table.getExtracts().get(0).getPath();
+                    path = path.replace("/Pods/QA/", "/Pods/" + podId + "/");
+                    pathMap.put(role, path);
+                }
             } catch (IOException e) {
-                throw new RuntimeException("Cannot open table json file for " + role);
+                throw new RuntimeException("Cannot open table json file for " + role, e);
             }
         });
         return pathMap;
