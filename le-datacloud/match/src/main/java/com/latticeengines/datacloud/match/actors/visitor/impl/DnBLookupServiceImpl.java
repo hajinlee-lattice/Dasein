@@ -240,7 +240,7 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
     @Override
     protected void asyncLookupFromService(String lookupRequestId, DataSourceLookupRequest request,
             String returnAddress) {
-        if (!isBatchMode() || isPrimeMatch(request)) {
+        if (!isBatchMode()) {
             DnBMatchContext result = (DnBMatchContext) lookupFromService(lookupRequestId, request);
             sendResponse(lookupRequestId, result, returnAddress);
         } else {
