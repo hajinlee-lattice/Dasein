@@ -86,7 +86,7 @@ public class SourceResource {
             log.error("Failed to update source", e);
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
                     Status.Error, e.getMessage());
-            throw new UIActionException(action, LedpCode.LEDP_60004);
+            throw new UIActionException(action, LedpCode.LEDP_60009);
         }
     }
 
