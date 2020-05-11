@@ -4,7 +4,6 @@ import java.sql.Timestamp;
 import java.util.BitSet;
 import java.util.List;
 
-
 import com.latticeengines.ldc_collectiondb.entity.RawCollectionRequest;
 
 public interface RawCollectionRequestService {

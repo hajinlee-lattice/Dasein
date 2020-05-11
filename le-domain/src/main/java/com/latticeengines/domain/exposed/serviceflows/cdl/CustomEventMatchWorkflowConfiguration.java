@@ -227,14 +227,14 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public Builder entityMatchEnabled(boolean entityMatchEnabled) {
-            matchAccountWithoutIdBuilder.entityMatchEnabled(entityMatchEnabled);
+            // matchAccountWithoutIdBuilder.entityMatchEnabled(entityMatchEnabled);
             matchCdlAccount.setEntityMatchEnabled(entityMatchEnabled);
             return this;
         }
 
         public Builder mapToLatticeAccount(boolean mapToLatticeAccount) {
-            matchAccountWithoutIdBuilder.mapToLatticeAccount(mapToLatticeAccount);
-            matchCdlAccount.setMapToLatticeAccount(mapToLatticeAccount);
+            // matchAccountWithoutIdBuilder.mapToLatticeAccount(mapToLatticeAccount);
+            // matchCdlAccount.setMapToLatticeAccount(mapToLatticeAccount);
             return this;
         }
 

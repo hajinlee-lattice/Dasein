@@ -177,114 +177,82 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     private long prevHighPirorityReqHandledMillis = 0;
 
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
-
         return rawCollectionRequestService.addNewDomains(domains, vendor, reqId);
-
     }
 
     public void addNewDomains(List<String> domains, String reqId) {
-
         Iterable<String> vendors = VendorConfig.EFFECTIVE_VENDOR_SET;
-
         vendors.forEach(vendor -> addNewDomains(domains, vendor, reqId));
-
     }
 
     private int transferRawRequests(boolean deleteFilteredReqs) {
-
         List<RawCollectionRequest> rawReqs = rawCollectionRequestService.getNonTransferred();
         if (rawReqs.size() == 0) {
-
             return 0;
-
         }
-
         log.info("fetch " + rawReqs.size() + " reqs from raw req table");
-
         BitSet filter = collectionRequestService.addNonTransferred(rawReqs);
-
         rawCollectionRequestService.updateTransferredStatus(rawReqs, filter, deleteFilteredReqs);
-
         log.info("TRANSFER_RAW_COLLECTION_REQ=" + rawReqs.size() + "," + filter.cardinality());
         log.info("CREATE_COLLECTION_REQ=" + (rawReqs.size() - filter.cardinality()));
-
         return rawReqs.size() - filter.cardinality();
 
     }
 
     private File generateCsvEx(List<CollectionRequest> readyReqs) throws Exception {
-
-        List<String> domains = readyReqs.stream().map( req -> req.getDomain() ).collect(Collectors.toList());
+        List<String> domains = readyReqs.stream().map(req -> req.getDomain()).collect(Collectors.toList());
         File ret = generateCsv("Domain", domains);
         domains.clear();
         return ret;
     }
 
     private File generateCsv(String domainField, List<String> domains) throws Exception {
-
         File tempFile = File.createTempFile("temp-", ".csv");
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
-
             writer.write(domainField);
             writer.newLine();
-
             for (String domain : domains) {
-
                 writer.write(domain);
                 writer.newLine();
-
             }
-
         }
-
         return tempFile;
-
     }
 
     private void spawnHighPriorityCollectionWorker() throws Exception {
-
-        //find high priority reqs in csv file
-        List<S3ObjectSummary> summaries =
-                s3Service.listObjects(s3Bucket, s3BucketHighPriorityReqPrefix).stream()
-                        .filter(summary -> summary.getKey().endsWith(".csv"))
-                        .collect(Collectors.toList());
+        // find high priority reqs in csv file
+        List<S3ObjectSummary> summaries = s3Service.listObjects(s3Bucket, s3BucketHighPriorityReqPrefix).stream()
+                .filter(summary -> summary.getKey().endsWith(".csv")).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(summaries)) {
             return;
         }
 
-        //load input domains
+        // load input domains
         List<String> domains = new ArrayList<>();
         List<File> files = new ArrayList<>();
-        for (S3ObjectSummary summary: summaries) {
-
+        for (S3ObjectSummary summary : summaries) {
             File tmpFile = File.createTempFile("temp-", ".csv");
             tmpFile.deleteOnExit();
             files.add(tmpFile);
             s3Service.downloadS3File(summary, tmpFile);
-
             List<String> ret = loadDomainsFromCsv("Domain", tmpFile);
             domains.addAll(ret);
             ret.clear();
         }
         log.info("found " + domains.size() + " high-priority domains to collect");
-
-        //generate csv file
+        // generate csv file
         File csvFile = generateCsv("Domain", domains);
         files.add(csvFile);
 
-        //spawn collector task
-        for (String vendor: VendorConfig.EFFECTIVE_VENDOR_SET) {
-            //generate worker id
+        // spawn collector task
+        for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
+            // generate worker id
             String workerId = UUID.randomUUID().toString().toUpperCase();
-
-            //upload to s3
+            // upload to s3
             String prefix = s3BucketPrefix + workerId + "/input/domains.csv";
             s3Service.uploadLocalFile(s3Bucket, prefix, csvFile, true);
-
-            //spawn worker in aws, '-v vendor -w worker_id'
+            // spawn worker in aws, '-v vendor -w worker_id'
             String cmdLine = "-v " + vendor + " -w " + workerId;
-
             // create worker record in
             SpawnECSTaskRequest request = new SpawnECSTaskRequest();
             request.setClusterName(ecsClusterName);
@@ -306,67 +274,48 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             worker.setHighPriority(true);
 
             log.info("BEG_COLLECTING_REQ=" + vendor + "," + domains.size());
-
             collectionWorkerService.getEntityMgr().create(worker);
         }
 
-        //clean every thing
-        for (File file: files) {
-
+        // clean every thing
+        for (File file : files) {
             FileUtils.deleteQuietly(file);
-
         }
-
         s3Service.cleanupByObjectList(summaries);
     }
 
     private int spawnCollectionWorker(boolean forceCollect) throws Exception {
-
         int spawnedTasks = 0;
-
         int maxRetries = vendorConfigService.getDefMaxRetries();
         int collectingBatch = vendorConfigService.getDefCollectionBatch();
         int minCollectingBatch = vendorConfigService.getMinCollectionBatch();
         for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
-
             List<CollectionWorker> activeTasks = collectionWorkerService.getActiveWorker(vendor);
-
-            //modify req status to READY | FAILED based on retry times
+            // modify req status to READY | FAILED based on retry times
             int modified = collectionRequestService.handlePending(vendor, maxRetries, activeTasks);
             if (modified > 0) {
-
                 log.info(modified + " pending " + vendor + " collection requests reset to ready");
-
             }
-
-            //check rate limit
+            // check rate limit
             int taskLimit = vendorConfigService.getMaxActiveTasks(vendor);
             if (activeTasks.size() >= taskLimit) {
-
                 continue;
-
             }
-
-            //get ready reqs
+            // get ready reqs
             List<CollectionRequest> readyReqs = collectionRequestService.getReady(vendor, collectingBatch);
             if (CollectionUtils.isEmpty(readyReqs) || (!forceCollect && readyReqs.size() < minCollectingBatch)) {
-
                 continue;
-
             }
 
-            //generate input csv
+            // generate input csv
             File tempCsv = generateCsvEx(readyReqs);
-
-            //generate worker id
+            // generate worker id
             String workerId = UUID.randomUUID().toString().toUpperCase();
-
-            //upload to s3
+            // upload to s3
             String prefix = s3BucketPrefix + workerId + "/input/domains.csv";
             s3Service.uploadLocalFile(s3Bucket, prefix, tempCsv, true);
             FileUtils.deleteQuietly(tempCsv);
-
-            //spawn worker in aws, '-v vendor -w worker_id'
+            // spawn worker in aws, '-v vendor -w worker_id'
             String cmdLine = "-v " + vendor + " -w " + workerId;
             // create worker record in
             SpawnECSTaskRequest request = new SpawnECSTaskRequest();
@@ -386,250 +335,166 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             worker.setStatus(CollectionWorker.STATUS_NEW);
             worker.setSpawnTime(ts);
             worker.setTaskArn(taskArn);
-
             collectionWorkerService.getEntityMgr().create(worker);
 
-            //update request status
+            // update request status
             collectionRequestService.beginCollecting(readyReqs, worker);
-
             log.info("BEG_COLLECTING_REQ=" + vendor + "," + readyReqs.size());
-
             readyReqs.clear();
-
             ++spawnedTasks;
 
         }
-
         if (spawnedTasks > 0) {
-
             log.info("SPAWN_COLLECTION_WORKER=" + spawnedTasks);
-
         }
-
         return spawnedTasks;
-
     }
 
     private Map<String, Task> getTasksByWorkers(List<CollectionWorker> workers) {
-
         List<String> taskArns = workers.stream().map(CollectionWorker::getTaskArn).collect(Collectors.toList());
-
         List<Task> tasks = ecsService.getTasks(ecsClusterName, taskArns);
         HashMap<String, Task> arn2tasks = new HashMap<>(tasks.size() * 2);
-
         for (Task task : tasks) {
             arn2tasks.put(task.getTaskArn(), task);
         }
-
         return arn2tasks;
-
     }
 
     List<String> loadDomainsFromCsv(String domainField, File csvFile) throws Exception {
-
         List<String> ret = new ArrayList<>();
-
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
-                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',').withIgnoreEmptyLines(true)
+                .withIgnoreSurroundingSpaces(true);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile)))) {
             try (CSVParser parser = new CSVParser(reader, format)) {
-
                 Map<String, Integer> colMap = parser.getHeaderMap();
                 int domainIdx = colMap.getOrDefault(domainField, -1);
-
                 if (domainIdx == -1) {
                     log.warn(csvFile + " does not contain " + domainField + " field");
                     return ret;
                 }
-
                 for (CSVRecord rec : parser) {
-
                     String domain = rec.get(domainIdx);
                     ret.add(domain);
                 }
-
             }
         }
-
         return ret;
     }
 
-    private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains, Set<String> errDomains, Set<String> emptyDomains) throws Exception {
-
+    private long getDomainFromCsvEx(String vendor, File csvFile, Set<String> domains, Set<String> errDomains,
+            Set<String> emptyDomains) throws Exception {
         long ret = 0;
         String domainField = vendorConfigService.getDomainField(vendor);
         String domainCheckField = vendorConfigService.getDomainCheckField(vendor);
 
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
-                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',').withIgnoreEmptyLines(true)
+                .withIgnoreSurroundingSpaces(true);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile)))) {
             try (CSVParser parser = new CSVParser(reader, format)) {
-
                 Map<String, Integer> colMap = parser.getHeaderMap();
                 int domainIdx = colMap.getOrDefault(domainField, -1);
                 int domainChkIdx = colMap.getOrDefault(domainCheckField, -1);
-
                 if (domainIdx == -1 || domainChkIdx == -1) {
-
                     return ret;
-
                 }
-
                 for (CSVRecord rec : parser) {
-
                     ++ret;
                     String domain = rec.get(domainIdx);
-
                     String checkFieldVal = rec.get(domainChkIdx);
                     if (!checkFieldVal.equals("")) {
-
                         if (checkFieldVal.equals(checkFieldEmptyValue)) {
-
                             emptyDomains.add(domain);
-
                         } else {
-
                             domains.add(domain);
-
                         }
-
                     } else {
-
                         errDomains.add(domain);
-
                     }
-
-
                 }
-
                 return ret;
-
             }
-
         }
-
     }
 
     private List<File> downloadWorkerOutput(CollectionWorker worker) throws Exception {
-
         String workerId = worker.getWorkerId();
-
-        //list file in s3 output path
+        // list file in s3 output path
         String prefix = s3BucketPrefix + workerId + "/output/";
         List<S3ObjectSummary> itemDescs = s3Service.listObjects(s3Bucket, prefix);
         if (itemDescs.size() < 1) {
-
             return null;
-
         }
 
-        //download content
+        // download content
         List<File> tmpFiles = new ArrayList<>(itemDescs.size());
         for (S3ObjectSummary itemDesc : itemDescs) {
-
             if (itemDesc.getSize() == 0) {
-
                 continue;
-
             }
-
             File tmpFile = File.createTempFile("temp", ".csv");
             tmpFile.deleteOnExit();
             tmpFiles.add(tmpFile);
-
             s3Service.downloadS3File(itemDesc, tmpFile);
-
         }
-
         return tmpFiles;
-
     }
 
     private boolean handleFinishedTask(CollectionWorker worker) throws Exception {
-
         String workerId = worker.getWorkerId();
-
-        //download worker output
+        // download worker output
         List<File> tmpFiles = downloadWorkerOutput(worker);
         if (CollectionUtils.isEmpty(tmpFiles)) {
-
             return false;
-
         }
-
         String vendor = worker.getVendor();
-
-        /*
-        //copy to hdfs
-        String hdfsDir = hdfsPathBuilder.constructCollectorWorkerDir(vendor, workerId).toString();
-        log.info("about to upload collected data to hdfs: " + hdfsDir);
-        HdfsUtils.mkdir(yarnConfiguration, hdfsDir);
-
-        for (File tmpFile : tmpFiles) {
-
-            HdfsUtils.copyFromLocalToHdfs(yarnConfiguration, tmpFile.getPath(), hdfsDir);
-
-        }*/
-
-        //parse csv
+        // parse csv
         Set<String> domains = new HashSet<>();
         Set<String> errDomains = new HashSet<>();
         Set<String> emptyDomains = new HashSet<>();
         long recordsCollected = 0;
 
         for (File tmpFile : tmpFiles) {
-
             recordsCollected += getDomainFromCsvEx(vendor, tmpFile, domains, errDomains, emptyDomains);
-
         }
-
         worker.setRecordsCollected(recordsCollected);
-
-
-        //consumeFinished reqs
+        // consumeFinished reqs
         int reqCollected = 1;
         if (!worker.getHighPriority()) {
             List<CollectionRequest> processedReqs = collectionRequestService.getProcessed(workerId);
             int reqRetried = collectionRequestService.consumeFinished(processedReqs, domains, emptyDomains);
             reqCollected = domains.size() + emptyDomains.size();
-            int reqErrorred = reqCollected + errDomains.size() == processedReqs.size() ? errDomains.size() : processedReqs.size() - reqCollected;
-            log.info("END_COLLECTING_REQ=" + vendor + "," + reqCollected + "," + recordsCollected + "," + reqErrorred +
-                    "," + reqRetried);
+            int reqErrorred = reqCollected + errDomains.size() == processedReqs.size() ? errDomains.size()
+                    : processedReqs.size() - reqCollected;
+            log.info("END_COLLECTING_REQ=" + vendor + "," + reqCollected + "," + recordsCollected + "," + reqErrorred
+                    + "," + reqRetried);
             processedReqs.clear();
         }
-
         domains.clear();
         emptyDomains.clear();
         errDomains.clear();
-
-        //clean tmp files
+        // clean tmp files
         for (File tmpFile : tmpFiles) {
-
             FileUtils.deleteQuietly(tmpFile);
-
         }
-
         return reqCollected > 0;
-
     }
 
     /*
-    Check CollectionWorker table. From TaskARN find the status of the worker by AWS SDK.
-
-    If some worker is started but not terminated, update CollectionWorker to Status=RUNNING
-    If some worker is finished successfully:
-        move the output csv to the vendor's raw ingestion folder
-        scan the csv, update CollectionRequest table for each collected domain
-            Due to the behavior of spider, all collected domains are treated as delivered (just the content may be empty)
-        update status of the worker in CollectionWorker table
-    If some worker is finished with error
-        update status of the worker in CollectionWorker table
+     * Check CollectionWorker table. From TaskARN find the status of the worker
+     * by AWS SDK.
+     * 
+     * If some worker is started but not terminated, update CollectionWorker to
+     * Status=RUNNING If some worker is finished successfully: move the output
+     * csv to the vendor's raw ingestion folder scan the csv, update
+     * CollectionRequest table for each collected domain Due to the behavior of
+     * spider, all collected domains are treated as delivered (just the content
+     * may be empty) update status of the worker in CollectionWorker table If
+     * some worker is finished with error update status of the worker in
+     * CollectionWorker table
      */
     private int updateCollectingStatus() throws Exception {
-
         int stoppedTasks = 0;
-
-        //get the 'active' workers
+        // get the 'active' workers
         List<String> statusList = Arrays.asList(//
                 CollectionWorker.STATUS_NEW, //
                 CollectionWorker.STATUS_RUNNING, //
@@ -637,190 +502,127 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         );
         List<CollectionWorker> activeWorkers = collectionWorkerService.getWorkerByStatus(statusList);
         if (CollectionUtils.isEmpty(activeWorkers)) {
-
             return 0;
-
         }
-
-        //get corresponding aws ecs tasks
+        // get corresponding aws ecs tasks
         Map<String, Task> activeTasks = getTasksByWorkers(activeWorkers);
         activeTasks = MapUtils.emptyIfNull(activeTasks);
-
-        //handling active worker/task
+        // handling active worker/task
         int failedTasks = 0;
         for (CollectionWorker worker : activeWorkers) {
-
             Task task = activeTasks.get(worker.getTaskArn());
-
             if (task != null) {
-
-                if (CollectionWorker.STATUS_NEW.equals(worker.getStatus()) &&
-                        (task.getLastStatus().equals("RUNNING") || task.getLastStatus().equals("STOPPED"))) {
-
+                if (CollectionWorker.STATUS_NEW.equals(worker.getStatus())
+                        && (task.getLastStatus().equals("RUNNING") || task.getLastStatus().equals("STOPPED"))) {
                     log.info("task " + worker.getWorkerId() + " starts running");
-
                     worker.setStatus(CollectionWorker.STATUS_RUNNING);
                     collectionWorkerService.getEntityMgr().update(worker);
-
                 }
-
                 if (!task.getLastStatus().equals("STOPPED")) {
-
                     continue;
-
                 }
-
             } else if (!CollectionWorker.STATUS_FINISHED.equals(worker.getStatus())) {
-
                 log.info("task " + worker.getWorkerId() + " loses traces, mark it as finished now...");
-
                 worker.setStatus(CollectionWorker.STATUS_FINISHED);
             }
-
-            //transfer state to finished
+            // transfer state to finished
             if (CollectionWorker.STATUS_RUNNING.equals(worker.getStatus())) {
-
                 log.info("task " + worker.getWorkerId() + " finished running");
-
                 worker.setStatus(CollectionWorker.STATUS_FINISHED);
                 collectionWorkerService.getEntityMgr().update(worker);
-
             }
-
-            //consuming output
-            //download csv
-            //Files.createTempDirectory()
-            //no csv file: status => fail
-            //copy csv file to hdfs
+            // consuming output
+            // download csv
+            // Files.createTempDirectory()
+            // no csv file: status => fail
+            // copy csv file to hdfs
             if (CollectionWorker.STATUS_FINISHED.equals(worker.getStatus())) {
-
                 log.info("task " + worker.getWorkerId() + " finished, starts consuming its output");
-
                 boolean succ = handleFinishedTask(worker);
-
-                //status => consumed/failed
-                worker.setTerminationTime(task != null ? new Timestamp(task.getStoppedAt().getTime()) : new Timestamp
-                        (System.currentTimeMillis()));
+                // status => consumed/failed
+                worker.setTerminationTime(task != null ? new Timestamp(task.getStoppedAt().getTime())
+                        : new Timestamp(System.currentTimeMillis()));
                 worker.setStatus(succ ? CollectionWorker.STATUS_CONSUMED : CollectionWorker.STATUS_FAILED);
-
                 collectionWorkerService.getEntityMgr().update(worker);
-
                 ++stoppedTasks;
                 if (!succ) {
-
                     ++failedTasks;
-
                 }
-
                 log.info("task " + worker.getWorkerId() + (succ ? " consumed" : " failed"));
-
             }
-
         }
-
         if (stoppedTasks > 0) {
-
             log.info("COLLECTION_WORKER_STOPPED=" + stoppedTasks + "," + failedTasks);
-
         }
-
         return stoppedTasks;
-
     }
 
     public int getActiveTaskCount() {
-
         List<String> statusList = Arrays.asList(//
                 CollectionWorker.STATUS_NEW, //
                 CollectionWorker.STATUS_RUNNING, //
                 CollectionWorker.STATUS_FINISHED //
         );
         List<CollectionWorker> activeWorkers = collectionWorkerService.getWorkerByStatus(statusList);
-
         return CollectionUtils.size(activeWorkers);
-
     }
 
     public void cleanup() {
-
         rawCollectionRequestService.cleanup();
-
         long ts = System.currentTimeMillis();
         for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
-
-            long period = vendorConfigService.getCollectingFreq(vendor); //in seconds
-
+            long period = vendorConfigService.getCollectingFreq(vendor); // in
+                                                                         // seconds
             long tsBefore = ts - period * 1000;
-
             collectionRequestService.cleanupRequestHandled(vendor, new Timestamp(tsBefore));
         }
     }
 
     public boolean collect(boolean forceCollect) {
         if (prevCollectMillis == 0) {
-
             log.info("datacloud collection job starts...");
-
         }
         long currentMillis = System.currentTimeMillis();
-
         boolean finished = true;
         int activeTasks = 0;
         try {
-
-            //log consumed/ingested workers during last 24 hour
-            //do logging during UTC [1:30, 2:00), log one item per 24 hours.
+            // log consumed/ingested workers during last 24 hour
+            // do logging during UTC [1:30, 2:00), log one item per 24 hours.
             long dayMillis = currentMillis % DAY_MILLIS;
-            long logThreshold = DAY_MILLIS - HOUR_MILLIS / 2;//23.5 hours
-            if (dayMillis >= ingestionLogMillisStart &&
-                    dayMillis < ingestionLogMillisStop &&
-                    currentMillis - prevLogIngestionMillis >= logThreshold) {
-
+            long logThreshold = DAY_MILLIS - HOUR_MILLIS / 2;// 23.5 hours
+            if (dayMillis >= ingestionLogMillisStart && dayMillis < ingestionLogMillisStop
+                    && currentMillis - prevLogIngestionMillis >= logThreshold) {
                 prevLogIngestionMillis = currentMillis;
-
                 Timestamp ts = new Timestamp(currentMillis - DAY_MILLIS);
                 CollectionWorkerMgr entityMgr = collectionWorkerService.getEntityMgr();
                 int consumed = entityMgr.getWorkerTerminatedByStatus(ts, CollectionWorker.STATUS_CONSUMED).size();
                 int ingested = entityMgr.getWorkerTerminatedByStatus(ts, CollectionWorker.STATUS_INGESTED).size();
-                log.info("INGESTION_RATE during last 24h: consumed_worker=" + consumed + ",ingested_worker=" + ingested);
-
+                log.info(
+                        "INGESTION_RATE during last 24h: consumed_worker=" + consumed + ",ingested_worker=" + ingested);
             }
-
             if (currentMillis - prevCleanupMillis >= DAY_MILLIS) {
-
                 prevCleanupMillis = currentMillis;
-
                 log.info("begin cleaning up unused raw reqs and collection reqs...");
                 cleanup();
                 log.info("cleaning up done.");
-
             }
-
-            //handling high-priority reqs
+            // handling high-priority reqs
             if (currentMillis - prevHighPirorityReqHandledMillis >= highPriorityReqCheckPeriod * 1000) {
-
                 prevHighPirorityReqHandledMillis = currentMillis;
                 spawnHighPriorityCollectionWorker();
-
             }
-
             activeTasks = getActiveTaskCount();
-            if (prevCollectTasks != activeTasks ||
-                    currentMillis - prevCollectMillis >= HOUR_MILLIS) {
-
+            if (prevCollectTasks != activeTasks || currentMillis - prevCollectMillis >= HOUR_MILLIS) {
                 prevCollectMillis = currentMillis;
                 log.info("There're " + activeTasks + " tasks");
-
             }
             prevCollectTasks = activeTasks;
-
             int reqs = transferRawRequests(true);
             if (reqs > 0) {
                 log.info(reqs + " requests transferred from raw requests to collection requests");
                 finished = false;
             }
             Thread.sleep(LATENCY_GAP_MS);
-
             int newTasks = spawnCollectionWorker(forceCollect);
             activeTasks += newTasks;
             if (newTasks > 0) {
@@ -828,119 +630,88 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 finished = false;
             }
             Thread.sleep(LATENCY_GAP_MS);
-
             int stoppedTasks = updateCollectingStatus();
             activeTasks -= stoppedTasks;
             if (stoppedTasks > 0) {
                 log.info(stoppedTasks + " tasks stopped, active tasks => " + activeTasks);
                 finished = false;
             }
-
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return activeTasks == 0 && finished;
-
     }
 
     private String getTimestampColumn(String vendor) throws Exception {
-
         switch (vendor) {
-            case VendorConfig.VENDOR_BUILTWITH:
-                return bwTimestampColumn;
-            case VendorConfig.VENDOR_ALEXA:
-                return alexaTimestampColumn;
-            case VendorConfig.VENDOR_SEMRUSH:
-                return semrushTimestampColumn;
-            case VendorConfig.VENDOR_ORBI_V2:
-                return orbIntelligenceV2TimestampColumn;
-            default:
-                throw new Exception("not implemented");
+        case VendorConfig.VENDOR_BUILTWITH:
+            return bwTimestampColumn;
+        case VendorConfig.VENDOR_ALEXA:
+            return alexaTimestampColumn;
+        case VendorConfig.VENDOR_SEMRUSH:
+            return semrushTimestampColumn;
+        case VendorConfig.VENDOR_ORBI_V2:
+            return orbIntelligenceV2TimestampColumn;
+        default:
+            throw new Exception("not implemented");
         }
-
     }
 
     private Pair<Long, Long> getTimestampRange(List<File> inputFiles, String vendor) throws Exception {
-
         long maxTs = Long.MIN_VALUE;
         long minTs = Long.MAX_VALUE;
-
         String tsCol = getTimestampColumn(vendor);
-
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
-                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
-
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',').withIgnoreEmptyLines(true)
+                .withIgnoreSurroundingSpaces(true);
         for (File file : inputFiles) {
-
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
                 try (CSVParser parser = new CSVParser(reader, format)) {
-
                     Map<String, Integer> colMap = parser.getHeaderMap();
                     int tsIdx = colMap.getOrDefault(tsCol, -1);
                     if (tsIdx == -1) {
-
                         continue;
-
                     }
-
                     for (CSVRecord csvRec : parser) {
-
                         String tsText = csvRec.get(tsIdx);
                         try {
-
                             long tsVal = Long.parseLong(tsText);
-
                             if (tsVal > maxTs) {
-
                                 maxTs = tsVal;
-
                             }
-
                             if (tsVal < minTs) {
-
                                 minTs = tsVal;
-
                             }
-
                         } catch (Exception e) {
                             log.error(tsText + " is not a valid timestamp value");
                         }
-
                     }
-
                 }
-
             }
-
         }
-
         if (minTs == Long.MAX_VALUE || maxTs == Long.MIN_VALUE) {
-
             log.error("timestamp range wrong: [" + minTs + ", " + maxTs + "]");
             throw new Exception("wrong timestamp range");
-
         }
-
         return Pair.of(minTs, maxTs);
     }
 
     private Schema getSchema(String vendor) throws Exception {
         switch (vendor) {
-            case VendorConfig.VENDOR_BUILTWITH:
-                return new Schema.Parser().parse(AvroUtils.buildSchema("builtwith.avsc"));
-            case VendorConfig.VENDOR_ALEXA:
-                return new Schema.Parser().parse(AvroUtils.buildSchema("alexa.avsc"));
-            case VendorConfig.VENDOR_SEMRUSH:
-                return new Schema.Parser().parse(AvroUtils.buildSchema("semrush.avsc"));
-            case VendorConfig.VENDOR_ORBI_V2:
-                return new Schema.Parser().parse(AvroUtils.buildSchema("orbIntelligence.avsc"));
-            default:
-                throw new Exception("not implemented");
+        case VendorConfig.VENDOR_BUILTWITH:
+            return new Schema.Parser().parse(AvroUtils.buildSchema("builtwith.avsc"));
+        case VendorConfig.VENDOR_ALEXA:
+            return new Schema.Parser().parse(AvroUtils.buildSchema("alexa.avsc"));
+        case VendorConfig.VENDOR_SEMRUSH:
+            return new Schema.Parser().parse(AvroUtils.buildSchema("semrush.avsc"));
+        case VendorConfig.VENDOR_ORBI_V2:
+            return new Schema.Parser().parse(AvroUtils.buildSchema("orbIntelligence.avsc"));
+        default:
+            throw new Exception("not implemented");
         }
     }
 
-    private void createBucketFiles(long minTs, int periodInMS, int bucketCount, Map<Long, File> buckets) throws Exception {
-
+    private void createBucketFiles(long minTs, int periodInMS, int bucketCount, Map<Long, File> buckets)
+            throws Exception {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String path = Files.createTempDirectory("bucket").toString();
@@ -948,73 +719,54 @@ public class CollectionDBServiceImpl implements CollectionDBService {
 
         long ts = minTs;
         for (int i = 0; i < bucketCount; ++i, ts += periodInMS) {
-
             if (buckets.containsKey(ts)) {
-
                 continue;
-
             }
-
             date.setTime(ts);
-
             File of = new File(path, dateFormat.format(date) + "_UTC.avro");
             of.deleteOnExit();
-
             buckets.put(ts, of);
-
         }
-
     }
 
     private void doBucketing(List<File> inputFiles, String vendor, Map<Long, File> bucketFiles) throws Exception {
-
-        //get timestamp, adjust min to whole period
+        // get timestamp, adjust min to whole period
         Pair<Long, Long> tsPair = getTimestampRange(inputFiles, vendor);
         long minTs = tsPair.getKey();
         long maxTs = tsPair.getValue();
 
         int periodInMS = ingestionPartionPeriod * 1000;
-        int dayInMS = (int)DAY_MILLIS;
+        int dayInMS = (int) DAY_MILLIS;
         int weekInMS = dayInMS * 7;
         if (periodInMS == weekInMS) {
-
-            minTs -= minTs % dayInMS;//adjust to day boundary
-            long weekDay = (minTs % weekInMS / dayInMS + 4) % 7;//week day
+            minTs -= minTs % dayInMS;// adjust to day boundary
+            long weekDay = (minTs % weekInMS / dayInMS + 4) % 7;// week day
             minTs -= weekDay * dayInMS;
-
         } else {
-
             minTs -= minTs % periodInMS;
-
         }
 
-        //create bucket file/buffers
+        // create bucket file/buffers
         int bucketCount = 1 + (int) ((maxTs - minTs) / periodInMS);
-
         createBucketFiles(minTs, periodInMS, bucketCount, bucketFiles);
-
         boolean[] bucketCreated = new boolean[bucketCount];
         List<List<GenericRecord>> bucketBuffers = new ArrayList<>();
         for (int i = 0; i < bucketCount; ++i) {
-
             bucketBuffers.add(new ArrayList<>());
-
             long bucketTs = minTs + periodInMS * i;
             File bucket = bucketFiles.get(bucketTs);
             bucketCreated[i] = bucket.exists() && bucket.length() > 0;
-
         }
 
-        //processing files
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
-                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
+        // processing files
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',').withIgnoreEmptyLines(true)
+                .withIgnoreSurroundingSpaces(true);
         Schema schema = getSchema(vendor);
         List<Schema.Field> fields = schema.getFields();
         String tsColName = getTimestampColumn(vendor);
         String domainCheckField = vendorConfigService.getDomainCheckField(vendor);
 
         for (File file : inputFiles) {
-
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)))) {
                 try (CSVParser parser = new CSVParser(reader, format)) {
 
@@ -1022,323 +774,218 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                     int domainChkCsvCol = csvColName2Idx.getOrDefault(domainCheckField, -1);
                     int columnCount = csvColName2Idx.size();
 
-                    //calculate col mapping
+                    // calculate col mapping
                     int[] csvIdx2Avro = new int[columnCount];
                     Schema.Field[] avroIdx2Fields = new Schema.Field[columnCount];
-                    if (fields.size() != columnCount + 2) {//avro has two extra id column
-
+                    if (fields.size() != columnCount + 2) {// avro has two extra
+                                                           // id column
                         throw new Exception("avro column count != csv column count");
-
                     }
-
-                    for (Schema.Field field: fields) {
-
+                    for (Schema.Field field : fields) {
                         int csvIdx = csvColName2Idx.getOrDefault(field.name(), -1);
                         if (csvIdx == -1) {
-
                             continue;
-
                         }
-
                         csvIdx2Avro[csvIdx] = field.pos();
                         avroIdx2Fields[csvIdx] = field;
-
                     }
                     int tsAvroCol = csvIdx2Avro[csvColName2Idx.get(tsColName)];
                     Schema.Field avroIdField = schema.getField(ingestionIdCol);
                     Schema.Field avroPidField = schema.getField(ingestionPidCol);
 
-                    //iterate csv, generate avro
+                    // iterate csv, generate avro
                     for (CSVRecord csvRec : parser) {
-
                         if (domainChkCsvCol != -1) {
-
-                            //bypass dummy line
+                            // bypass dummy line
                             String checkFieldVal = csvRec.get(domainChkCsvCol);
                             if (checkFieldVal.equals("") || checkFieldVal.equals(checkFieldEmptyValue)) {
-
                                 continue;
-
                             }
-
                         }
 
-                        //create avro record, add it to buffer
+                        // create avro record, add it to buffer
                         GenericRecord rec = new GenericData.Record(schema);
                         for (int i = 0; i < columnCount; ++i) {
-
                             rec.put(csvIdx2Avro[i], AvroUtils.checkTypeAndConvertEx(avroIdx2Fields[i].name(), //
                                     csvRec.get(i), avroIdx2Fields[i]));
 
                         }
                         rec.put(avroIdField.pos(), UUID.randomUUID().toString());
                         rec.put(avroPidField.pos(), null);
-
                         int bucketIdx = (int) (((Long) rec.get(tsAvroCol) - minTs) / periodInMS);
                         List<GenericRecord> buf = bucketBuffers.get(bucketIdx);
                         buf.add(rec);
 
-                        //flush bucket buffer when it's full
+                        // flush bucket buffer when it's full
                         if (buf.size() == BUCKET_CACHE_LIMIT) {
-
                             long bucketTs = minTs + periodInMS * bucketIdx;
                             if (!bucketCreated[bucketIdx]) {
-
                                 AvroUtils.writeToLocalFile(schema, buf, bucketFiles.get(bucketTs).getPath(), true);
                                 bucketCreated[bucketIdx] = true;
-
                             } else {
-
                                 AvroUtils.appendToLocalFile(buf, bucketFiles.get(bucketTs).getPath(), true);
-
                             }
-
                             buf.clear();
-
                         }
-
                     }
-
-                    //flush non-empty buffers
+                    // flush non-empty buffers
                     for (int bucketIdx = 0; bucketIdx < bucketCount; ++bucketIdx) {
-
                         List<GenericRecord> buf = bucketBuffers.get(bucketIdx);
                         if (buf.size() == 0) {
-
                             continue;
-
                         }
-
                         long bucketTs = minTs + periodInMS * bucketIdx;
                         if (!bucketCreated[bucketIdx]) {
-
                             AvroUtils.writeToLocalFile(schema, buf, bucketFiles.get(bucketTs).getPath(), true);
                             bucketCreated[bucketIdx] = true;
-
                         } else {
-
                             AvroUtils.appendToLocalFile(buf, bucketFiles.get(bucketTs).getPath(), true);
-
                         }
-
                         buf.clear();
-
                     }
-
                 }
-
             }
-
         }
-
         for (int i = 0; i < bucketCount; ++i) {
-
             long bucketTs = minTs + periodInMS * i;
             File bucket = bucketFiles.get(bucketTs);
             if (bucket.exists() && bucket.length() > 0) {
-
                 log.info("\tbucket file " + bucket.getName() + ", length is " + bucket.length());
-
             }
-
         }
-
     }
 
     private boolean ingestConsumedWorker(CollectionWorker worker, Map<String, Map<Long, File>> bucketGroups) {
-
         boolean ret = false;
         try {
-
             String vendor = worker.getVendor();
             log.info("ingesting " + vendor + ", worker_id = " + worker.getWorkerId());
-
             if (!bucketGroups.containsKey(vendor)) {
-
                 bucketGroups.put(vendor, new HashMap<>());
-
             }
             Map<Long, File> bucketFiles = bucketGroups.get(vendor);
-
             List<File> tmpFiles = downloadWorkerOutput(worker);
             if (CollectionUtils.isEmpty(tmpFiles)) {
-
                 log.warn(worker.getVendor() + " worker " + worker.getWorkerId() //
                         + "\'s output dir on s3 does not contain any files");
                 return true;
-
             }
-
-            //bucketing
+            // bucketing
             doBucketing(tmpFiles, vendor, bucketFiles);
-
-            //clean local file
+            // clean local file
             for (File tmpFile : tmpFiles) {
-
                 FileUtils.deleteQuietly(tmpFile);
-
             }
-
             ret = true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-
         return ret;
     }
 
     private void uploadIngestedBucket(Map<String, Map<Long, File>> bucketGroups) throws Exception {
-
         if (bucketGroups.isEmpty()) {
-
             return;
-
         }
-
-        //success file
+        // success file
         File tagFile = File.createTempFile("temp", "tag");
         tagFile.createNewFile();
         tagFile.deleteOnExit();
 
-        //loop all vendor
+        // loop all vendor
         for (Map.Entry<String, Map<Long, File>> entry : bucketGroups.entrySet()) {
-
             String vendor = entry.getKey();
             Map<Long, File> bucketFiles = entry.getValue();
-
             if (bucketFiles.isEmpty()) {
-
                 log.info("0 ingested files to upload for " + vendor);
                 continue;
-
             }
-
             log.info("uploading ingested file for " + vendor);
-
             List<File> tmpBucketFiles = new ArrayList<>(bucketFiles.size());
             Path ingestLocation = S3PathBuilder.constructIngestionDir(vendor + "_RAW");
-
-            //loop all bucket files
+            // loop all bucket files
             for (File bucketFile : bucketFiles.values()) {
-
                 if (!bucketFile.exists()) {
-
                     log.warn("no data gathered for bucket file: " + bucketFile.getName());
                     continue;
-
                 }
-
                 String fileName = bucketFile.getName();
                 String fileTs = fileName.substring(0, fileName.length() - ".avro".length());
                 Path dirLocation = ingestLocation.append(fileTs);
                 String remoteFilePath = dirLocation.append(bucketFile.getName()).toString();
 
                 if (s3Service.objectExist(s3Bucket, remoteFilePath)) {
-
                     File tmpFile = File.createTempFile("temp", ".avro");
                     tmpFile.deleteOnExit();
                     tmpBucketFiles.add(tmpFile);
 
                     s3Service.downloadS3File(s3Service.listObjects(s3Bucket, remoteFilePath).get(0), tmpFile);
-
                     if (bucketFile.length() >= tmpFile.length()) {
-
                         log.info("\tappending to local file: " + bucketFile.getName());
                         AvroUtils.appendToLocalFile(tmpFile.getPath(), bucketFile.getPath(), true);
-
-                        log.info("\tuploading local file: " + bucketFile.getName() + ", length is " + bucketFile.length());
+                        log.info("\tuploading local file: " + bucketFile.getName() + ", length is "
+                                + bucketFile.length());
                         s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
 
                     } else {
-
                         log.info("\tappending to local file: " + tmpFile.getName());
                         AvroUtils.appendToLocalFile(bucketFile.getPath(), tmpFile.getPath(), true);
-
                         log.info("\tuploading local file: " + tmpFile.getName() + ", length is " + tmpFile.length());
                         s3Service.uploadLocalFile(s3Bucket, remoteFilePath, tmpFile, true);
                     }
-
                 } else {
-
                     log.info("\tuploading local file: " + bucketFile.getName() + ", length is " + bucketFile.length());
                     s3Service.uploadLocalFile(s3Bucket, remoteFilePath, bucketFile, true);
-
                 }
-
                 log.info("\tuploading success tag file");
                 s3Service.uploadLocalFile(s3Bucket, dirLocation.append("_SUCCESS").toString(), tagFile, true);
 
             }
             log.info("ingested files for " + vendor + " uploaded");
-
             for (File bucketFile : bucketFiles.values()) {
-
                 FileUtils.deleteQuietly(bucketFile);
-
             }
-
-            for (File tmpBucketFile: tmpBucketFiles) {
-
+            for (File tmpBucketFile : tmpBucketFiles) {
                 FileUtils.deleteQuietly(tmpBucketFile);
-
             }
         }
-
         FileUtils.deleteQuietly(tagFile);
-
     }
 
     public void ingest() {
-
         if (prevIngestionMillis == 0) {
-
             log.info("datacloud ingestion service starts...");
-
         }
         long curMillis = System.currentTimeMillis();
-
         try {
-
             if (curMillis - prevIngestionMillis >= HOUR_MILLIS) {
-
                 prevIngestionMillis = curMillis;
-
             }
-
-            //get consumed workers
+            // get consumed workers
             List<String> statusList = Collections.singletonList(CollectionWorker.STATUS_CONSUMED);
             List<CollectionWorker> consumedWorkers = collectionWorkerService.getWorkerByStatus(statusList);
             if (CollectionUtils.isEmpty(consumedWorkers)) {
-
                 log.info("no consumed worker to handle, quit...");
                 return;
-
             }
 
-            //process consumed workers
+            // process consumed workers
             int workerCount = consumedWorkers.size();
             log.info("there're " + workerCount + " consumed worker to ingest:");
             List<Boolean> retList = new ArrayList<>(workerCount);
             Map<String, Map<Long, File>> bucketGroups = new HashMap<>();
             for (int i = 0; i < workerCount; ++i) {
-
                 CollectionWorker worker = consumedWorkers.get(i);
-
                 boolean ret = ingestConsumedWorker(worker, bucketGroups);
                 log.info("\t" + (i + 1) + "/" + workerCount + " done");
-
                 retList.add(ret);
             }
 
-            //upload bucket files
+            // upload bucket files
             uploadIngestedBucket(bucketGroups);
-
-            //update status
+            // update status
             for (int i = 0; i < workerCount; ++i) {
-
                 CollectionWorker worker = consumedWorkers.get(i);
-
                 if (retList.get(i)) {
                     worker.setStatus(CollectionWorker.STATUS_INGESTED);
                     collectionWorkerService.getEntityMgr().update(worker);
@@ -1348,97 +995,71 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-
     }
 
     public int getIngestionTaskCount() {
-
         List<String> statusList = Collections.singletonList(CollectionWorker.STATUS_CONSUMED);
         List<CollectionWorker> consumedWorkers = collectionWorkerService.getWorkerByStatus(statusList);
-
         return CollectionUtils.size(consumedWorkers);
-
     }
 
-    //0 -> Sun, 1 -> Mon, ...
+    // 0 -> Sun, 1 -> Mon, ...
     private static int getWeekDay(long millis) {
-
-        int dayInMS = (int)DAY_MILLIS;
+        int dayInMS = (int) DAY_MILLIS;
         int weekInMS = dayInMS * 7;
         millis -= millis % dayInMS;
-        return ((int)(millis % weekInMS) / dayInMS + 4) % 7;
-
+        return ((int) (millis % weekInMS) / dayInMS + 4) % 7;
     }
 
     public void consolidate(List<String> effectiveVendors) {
-
         /*
-        if (consolidationExecPeriod == 86400 * 7) {
+         * if (consolidationExecPeriod == 86400 * 7) {
+         * int weekDay = getWeekDay(System.currentTimeMillis()); if (weekDay !=
+         * consolidationExecWeekDay) {
+         * return;
+         * }
+         * }
+         */
 
-            int weekDay = getWeekDay(System.currentTimeMillis());
-            if (weekDay != consolidationExecWeekDay) {
-
-                return;
-
-            }
-
-        }*/
-
-        //current workers ingested
+        // current workers ingested
         List<String> statusList = Collections.singletonList(CollectionWorker.STATUS_INGESTED);
         List<CollectionWorker> consumedWorkers = collectionWorkerService.getWorkerByStatus(statusList);
-
         if (CollectionUtils.size(consumedWorkers) == 0) {
-
             log.warn("Notice: there're 0 ingested worker output to consolidate...");
-
         }
 
-
-        //current time stamp
+        // current time stamp
         long now = System.currentTimeMillis();
-
         try {
-
             Set<String> external_vendor_set = effectiveVendors == null ? null : new HashSet<>(effectiveVendors);
-
-            for (VendorConfig vendorConfig: vendorConfigMgr.findAll()) {
-
+            for (VendorConfig vendorConfig : vendorConfigMgr.findAll()) {
                 String vendor = vendorConfig.getVendor();
-
-                //only handling effective vendors
-                if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor) ||
-                    external_vendor_set != null && !external_vendor_set.contains(vendor)) {
-
+                // only handling effective vendors
+                if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)
+                        || external_vendor_set != null && !external_vendor_set.contains(vendor)) {
                     continue;
-
                 }
-
-                //check consolidation period
+                // check consolidation period
                 Timestamp ts = vendorConfig.getLastConsolidated();
                 /*
-                boolean triggerConsolidation =
-                        ts == null || (now - ts.getTime()) / 1000 >= consolidationExecPeriod;
-                if (!triggerConsolidation) {
+                 * boolean triggerConsolidation = ts == null || (now -
+                 * ts.getTime()) / 1000 >= consolidationExecPeriod; if
+                 * (!triggerConsolidation) {
+                 * 
+                 * continue;
+                 * 
+                 * }
+                 */
 
-                    continue;
-
-                }*/
-
-                //log prelude
+                // log prelude
                 log.info("issue consolidation request to datacloudapi for " + vendor);
-                if (vendorConfig.getLastConsolidated() != null){
-
+                if (vendorConfig.getLastConsolidated() != null) {
                     log.info("last time consolidating " + vendor + " is: " + ts);
-
-                }
-                else {
-
+                } else {
                     log.info(vendor + " has never been consolidated before");
-
                 }
 
-                //issue req
+                // issue req
                 ConsolidateCollectionConfig collectionConfig = new ConsolidateCollectionConfig();
                 collectionConfig.setShouldInheritSchemaProp(false);
                 collectionConfig.setTransformer("TransformerBase");
@@ -1456,16 +1077,15 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                 req.setSubmitter("DataCloudService");
                 req.setName("consolidateCollection");
                 req.setSteps(Arrays.asList(stepConfig));
-
-                TransformationProgress progress =  transformationProxy.transform(req, HdfsPodContext.getDefaultHdfsPodId());
+                TransformationProgress progress = transformationProxy.transform(req,
+                        HdfsPodContext.getDefaultHdfsPodId());
 
                 vendorConfig.setLastConsolidated(new Timestamp(System.currentTimeMillis()));
                 vendorConfigMgr.update(vendorConfig);
 
-                //log postlude
+                // log postlude
                 log.info("consolidate req issued: \n" + progress);
             }
-
         } catch (Exception e) {
             log.error("exception occurred.", e);
         }
@@ -1474,7 +1094,6 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     @Override
     public void cleanup(Timestamp start, Timestamp end) {
         List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start, end);
-
         // clean up the input and output csv
         for (CollectionWorker worker : workers) {
             String prefix = s3BucketPrefix + worker.getWorkerId();
@@ -1484,7 +1103,6 @@ public class CollectionDBServiceImpl implements CollectionDBService {
             String ingestionPrefix = S3PathBuilder.constructIngestionDir(vendor + "_RAW").toString();
             s3Service.cleanupPrefixByDateBetween(s3Bucket, ingestionPrefix, start, end);
         }
-
         rawCollectionRequestService.cleanupRequestsBetween(start, end);
         collectionRequestService.cleanupRequestsBetween(start, end);
         collectionWorkerService.cleanupWorkerBetween(start, end);

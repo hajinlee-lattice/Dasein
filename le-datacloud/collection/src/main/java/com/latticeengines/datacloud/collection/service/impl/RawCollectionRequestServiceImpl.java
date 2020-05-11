@@ -35,13 +35,10 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
     private int cleanupBatch;
 
     public boolean addNewDomains(List<String> domains, String vendor, String reqId) {
-
         final String vendorUpper = vendor.toUpperCase();
         if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendorUpper)) {
-
             log.warn("invalid vendor name " + vendor + ", ignore it and return...");
             return false;
-
         }
 
         /*
@@ -51,111 +48,72 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
             int chunkSize = 1000;
             List<List<String>> domainPartitions = PartitionUtils.partitionCollectionBySize(domains, chunkSize);
             List<Runnable> uploaders = new ArrayList<>();
-
             domainPartitions.forEach(partition -> {
-
                 Runnable uploader = () -> {
-
                     try (PerformanceTimer timer2 = new PerformanceTimer(
                             "Saved a chunk of " + partition.size() + " raw requests to db.")) {
-
                         Timestamp ts = new Timestamp(System.currentTimeMillis());
                         List<RawCollectionRequest> reqs = partition.stream() //
                                 .map(domain -> RawCollectionRequest.generate(vendorUpper, domain, ts, reqId))//
                                 .collect(Collectors.toList());
-
                         rawCollectionRequestMgr.saveRequests(reqs);
-
                     }
-
                 };
-
                 uploaders.add(uploader);
-
             });
-
             if (CollectionUtils.size(uploaders) == 1) {
-
                 uploaders.get(0).run();
-
             } else {
-
                 ThreadPoolUtils.runInParallel(getUploadWorkers(), uploaders, //
                         60, 5);
-
             }
 
         }*/
         rawCollectionRequestMgr.saveRequests(domains, vendor, reqId);
-
         return true;
-
     }
 
     public List<RawCollectionRequest> getNonTransferred() {
-
         return rawCollectionRequestMgr.getNonTransferred(rawReqTransferBatch);
-
     }
 
     public void updateTransferredStatus(List<RawCollectionRequest> added, BitSet filter, boolean deleteFiltered) {
-
         //update transferred status
         for (int i = 0; i < added.size(); ++i) {
-
             if (!filter.get(i)) {
-
                 added.get(i).setTransferred(true);
-
             }
-
         }
-
         //update raw req in db
         rawCollectionRequestMgr.updateTransferred(added, filter);
         log.info("updating raw req transferred status done");
-
         //delete filtered raw req in db
         if (deleteFiltered) {
-
             rawCollectionRequestMgr.deleteFiltered(added, filter);
-
         }
         log.info("deleting filtered raw req done");
 
     }
 
     private static RawCollectionRequest toRawRequest(String vendor, Timestamp timestamp, String reqId, String domain) {
-
         RawCollectionRequest req = new RawCollectionRequest();
         req.setVendor(vendor);
         req.setTransferred(false);
         req.setRequestedTime(timestamp);
         req.setOriginalRequestId(reqId);
         req.setDomain(domain);
-
         return req;
-
     }
 
     private ExecutorService getUploadWorkers() {
-
         if (uploadWorkers == null) {
-
             synchronized (this) {
-
                 if (uploadWorkers == null) {
-
                     uploadWorkers = ThreadPoolUtils.getFixedSizeThreadPool("raw-req-upload", 4);
-
                 }
-
             }
-
         }
-
         return uploadWorkers;
-
     }
 
     @Override
@@ -165,9 +123,7 @@ public class RawCollectionRequestServiceImpl implements RawCollectionRequestServ
 
     @Override
     public void cleanup() {
-
         rawCollectionRequestMgr.cleanupTransferred(cleanupBatch);
-
         log.info("cleaning transferred raw req done");
 
     }
