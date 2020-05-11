@@ -24,6 +24,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -109,8 +110,11 @@ public class SourceFileUploadServiceImplDeploymentTestNG extends DCPDeploymentTe
         SourceFileInfo sourceFileInfo = sourceFileUploadService.uploadFile("file_" + DateTime.now().getMillis() +
                 ".csv", "TestFileName.csv", false, null, multipartFile);
 
-        ApplicationId applicationId = sourceFileUploadService.submitSourceImport(projectDetails.getProjectId(),
-                source.getSourceId(), sourceFileInfo.getName());
+        DCPImportRequest dcpImportRequest = new DCPImportRequest();
+        dcpImportRequest.setProjectId(projectDetails.getProjectId());
+        dcpImportRequest.setSourceId(source.getSourceId());
+        dcpImportRequest.setSourceFileName(sourceFileInfo.getName());
+        ApplicationId applicationId = sourceFileUploadService.submitSourceImport(dcpImportRequest);
 
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
