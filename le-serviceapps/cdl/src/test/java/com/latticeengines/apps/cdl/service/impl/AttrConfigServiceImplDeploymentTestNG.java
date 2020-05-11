@@ -154,16 +154,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             return true;
         });
         attributeSet = attributeSetAtom.get();
-        String name = attributeSet.getName();
         Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
         Assert.assertEquals(attributeSet.getDisplayName(), displayName);
-        attributeSet.setDisplayName(displayName2);
-        attrConfigService.createAttributeSet(attributeSet);
-        Assert.assertEquals(attributeSet.getDisplayName(), displayName2);
-        Assert.assertEquals(attributeSet.getName(), name);
-        Assert.assertEquals(attrConfigService.getAttributeSets().size(), 1);
-        attrConfigService.deleteAttributeSetByName(name);
-        Assert.assertEquals(attrConfigService.getAttributeSets().size(), 0);
     }
 
     private AttributeSet createAttributeSet(String displayName) {
