@@ -296,9 +296,9 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             worker.setVendor(VendorConfig.VENDOR_ORBI_V2);
             collectionWorkerMgr.createOrUpdate(worker);
         }
-        s3Service.cleanupPrefix("latticeengines-dev-datacloud",
+        s3Service.cleanupDirectory("latticeengines-dev-datacloud",
                 S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ORBI_V2 + "_RAW").toString());
-        for (String workerId : alexaWorkers) {
+        for (String workerId: alexaWorkers) {
             CollectionWorker worker = new CollectionWorker();
             worker.setWorkerId(workerId);
             worker.setStatus(CollectionWorker.STATUS_CONSUMED);
@@ -309,7 +309,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             worker.setVendor(VendorConfig.VENDOR_ALEXA);
             collectionWorkerMgr.createOrUpdate(worker);
         }
-        s3Service.cleanupPrefix("latticeengines-dev-datacloud",
+        s3Service.cleanupDirectory("latticeengines-dev-datacloud",
                 S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ALEXA + "_RAW").toString());
 
         int tasksToIngest = collectionDBService.getIngestionTaskCount();

@@ -12,10 +12,12 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.lp.provision.PLSComponentManager;
+import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.lifecycle.TenantLifecycleManager;
 import com.latticeengines.common.exposed.util.Base64Utils;
@@ -68,6 +70,12 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
 
     @Inject
     private IDaaSService iDaaSService;
+
+    @Inject
+    private S3Service s3Service;
+
+    @Value("${aws.customer.s3.bucket}")
+    private String customersBucket;
 
     @Override
     public void provisionTenant(CustomerSpace space, InstallDocument installDocument) {
@@ -245,6 +253,9 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
     public void discardTenant(String tenantId) {
         Tenant tenant = tenantService.findByTenantId(tenantId);
         if (tenant != null) {
+            String id = CustomerSpace.parse(tenant.getId()).getTenantId();
+            log.info("Cleanup s3 directory for tenant {}", id);
+            s3Service.cleanupDirectory(customersBucket, id);
             discardTenant(tenant);
         }
     }

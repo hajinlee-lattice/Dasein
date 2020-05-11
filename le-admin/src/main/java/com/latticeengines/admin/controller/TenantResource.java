@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.camille.lifecycle.TenantInfo;
-import com.latticeengines.domain.exposed.component.ComponentConstants;
 import com.latticeengines.domain.exposed.dcp.vbo.VboRequest;
 import com.latticeengines.domain.exposed.dcp.vbo.VboResponse;
 import com.latticeengines.proxy.exposed.component.ComponentProxy;
@@ -213,17 +212,6 @@ public class TenantResource {
             @PathVariable String tenantId, //
             @RequestBody TenantInfo tenantInfo) {
         return tenantService.updateTenantInfo(contractId, tenantId, tenantInfo);
-    }
-
-    @PostMapping("/{tenantId}/reset")
-    @ResponseBody
-    @ApiOperation(value = "Reset tenant")
-    public boolean resetTenant(@PathVariable String tenantId) {
-        boolean result_cdl = componentProxy.reset(tenantId, ComponentConstants.CDL);
-        boolean result_lp = componentProxy.reset(tenantId, ComponentConstants.PLS);
-        boolean result_metadata = componentProxy.reset(tenantId, ComponentConstants.METADATA);
-
-        return result_cdl && result_lp && result_metadata;
     }
 
     @PostMapping("/vboadmin")

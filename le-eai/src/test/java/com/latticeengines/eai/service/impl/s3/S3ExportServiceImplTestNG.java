@@ -64,7 +64,7 @@ public class S3ExportServiceImplTestNG extends EaiFunctionalTestNGBase {
     @AfterClass(groups = "aws")
     public void cleanup() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration, sourceFilePath);
-        s3Service.cleanupPrefix(s3Bucket, s3Prefix);
+        s3Service.cleanupDirectory(s3Bucket, s3Prefix);
     }
 
     @Test(groups = "aws")
@@ -87,6 +87,7 @@ public class S3ExportServiceImplTestNG extends EaiFunctionalTestNGBase {
         FinalApplicationStatus status = platformTestBase.waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
         assertEquals(status, FinalApplicationStatus.SUCCEEDED);
 
+        logger.error("===TEST=== " + s3Service.listObjects(s3Bucket, s3Prefix).size());
         Assert.assertTrue(s3Service.listObjects(s3Bucket, s3Prefix).size() >= 1);
     }
 

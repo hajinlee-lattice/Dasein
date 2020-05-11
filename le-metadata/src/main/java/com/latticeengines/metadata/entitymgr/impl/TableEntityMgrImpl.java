@@ -529,7 +529,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     S3DataUnit s3DataUnit = (S3DataUnit) unit;
                     s3DataUnit.fixBucketAndPrefix();
                     if (StringUtils.isNotEmpty(s3DataUnit.getBucket())) {
-                        s3Service.cleanupPrefix(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
+                        s3Service.cleanupDirectory(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
                     } else {
                         log.warn("s3 data unit " + unit.getName() + " has an invalid url " + s3DataUnit.getLinkedDir());
                     }

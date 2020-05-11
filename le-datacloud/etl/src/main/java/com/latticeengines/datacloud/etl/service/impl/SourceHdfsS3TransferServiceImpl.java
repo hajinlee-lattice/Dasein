@@ -369,7 +369,7 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
                     new String[] { sanityPath, hdfsToS3 ? "S3 bucket " + s3Bucket : "HDFS" });
         }
         if (hdfsToS3) {
-            s3Service.cleanupPrefix(s3Bucket, sanityPath);
+            s3Service.cleanupDirectory(s3Bucket, sanityPath);
         } else {
             HdfsUtils.rmdir(yarnConfiguration, sanityPath);
         }
@@ -463,7 +463,7 @@ public class SourceHdfsS3TransferServiceImpl implements SourceHdfsS3TransferServ
     private void cleanupS3PlaceHolder(String sanityPath) {
         String s3Prefix = sanityPath + S3_PLACE_HOLDER;
         if (s3Service.isNonEmptyDirectory(s3Bucket, s3Prefix)) {
-            s3Service.cleanupPrefix(s3Bucket, s3Prefix);
+            s3Service.cleanupDirectory(s3Bucket, s3Prefix);
         }
     }
 

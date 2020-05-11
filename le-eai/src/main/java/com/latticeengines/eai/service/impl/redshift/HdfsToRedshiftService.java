@@ -169,8 +169,8 @@ public class HdfsToRedshiftService extends EaiRuntimeService<HdfsToRedshiftConfi
         }
         RedshiftTableConfiguration redshiftTableConfig = configuration.getRedshiftTableConfiguration();
         String prefix = s3Prefix(redshiftTableConfig.getTableName());
-        s3Service.cleanupPrefix(redshiftTableConfig.getS3Bucket(), prefix);
-        s3Service.cleanupPrefix(redshiftTableConfig.getS3Bucket(), redshiftTableConfig.getJsonPathPrefix());
+        s3Service.cleanupDirectory(redshiftTableConfig.getS3Bucket(), prefix);
+        s3Service.cleanupDirectory(redshiftTableConfig.getS3Bucket(), redshiftTableConfig.getJsonPathPrefix());
     }
 
     private RedshiftService getRedshiftServer(HdfsToRedshiftConfiguration configuration) {

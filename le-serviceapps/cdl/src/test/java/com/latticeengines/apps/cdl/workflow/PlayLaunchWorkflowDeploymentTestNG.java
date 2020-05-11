@@ -204,8 +204,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         log.info("Cleaning up S3 path " + s3FolderPath);
         try {
-            s3Service.cleanupPrefix(exportS3Bucket, s3FolderPath);
-            s3Service.cleanupPrefix(exportS3Bucket, dropboxFolderName);
+            s3Service.cleanupDirectory(exportS3Bucket, s3FolderPath);
+            s3Service.cleanupDirectory(exportS3Bucket, dropboxFolderName);
         } catch (Exception ex) {
             log.error("Error while cleaning up dropbox files ", ex);
         }
@@ -262,8 +262,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         log.info("Cleaning up S3 path " + s3FolderPath);
         try {
-            s3Service.cleanupPrefix(customerS3Bucket, s3FolderPath);
-            s3Service.cleanupPrefix(customerS3Bucket, dropboxFolderName);
+            s3Service.cleanupDirectory(customerS3Bucket, s3FolderPath);
+            s3Service.cleanupDirectory(customerS3Bucket, dropboxFolderName);
         } catch (Exception ex) {
             log.error("Error while cleaning up dropbox files ", ex);
         }
@@ -323,8 +323,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         log.info("Cleaning up S3 path " + s3FolderPath);
         try {
-            s3Service.cleanupPrefix(exportS3Bucket, s3FolderPath);
-            s3Service.cleanupPrefix(exportS3Bucket, dropboxFolderName);
+            s3Service.cleanupDirectory(exportS3Bucket, s3FolderPath);
+            s3Service.cleanupDirectory(exportS3Bucket, dropboxFolderName);
         } catch (Exception ex) {
             log.error("Error while cleaning up dropbox files ", ex);
         }
@@ -384,8 +384,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         log.info("Cleaning up S3 path " + s3FolderPath);
         try {
-            s3Service.cleanupPrefix(exportS3Bucket, s3FolderPath);
-            s3Service.cleanupPrefix(exportS3Bucket, dropboxFolderName);
+            s3Service.cleanupDirectory(exportS3Bucket, s3FolderPath);
+            s3Service.cleanupDirectory(exportS3Bucket, dropboxFolderName);
         } catch (Exception ex) {
             log.error("Error while cleaning up dropbox files ", ex);
         }

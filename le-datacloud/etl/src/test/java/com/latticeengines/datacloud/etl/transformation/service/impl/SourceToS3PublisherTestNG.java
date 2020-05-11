@@ -411,7 +411,7 @@ public class SourceToS3PublisherTestNG extends PipelineTransformationTestNGBase 
     private void cleanupS3Path(String path) {
         try {
             if (s3Service.isNonEmptyDirectory(s3Bucket, path)) {
-                s3Service.cleanupPrefix(s3Bucket, path);
+                s3Service.cleanupDirectory(s3Bucket, path);
             }
         } catch (Exception e) {
             throw new RuntimeException("Fail to clean up s3: " + path, e);

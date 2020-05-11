@@ -164,7 +164,7 @@ public class ScoringDeploymentTestNG extends AbstractTestNGSpringContextTests {
         }
         HdfsUtils.rmdir(emrConfiguration, path);
         HdfsUtils.rmdir(emrConfiguration, modelDirectory);
-        s3Service.cleanupPrefix(s3Bucket, s3Dir);
+        s3Service.cleanupDirectory(s3Bucket, s3Dir);
     }
 
     @Test(groups = "deployment", enabled = false)

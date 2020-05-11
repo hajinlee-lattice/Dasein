@@ -316,7 +316,7 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         try {
             String versionPath = hdfsPathBuilder.constructTransformationSourceDir(source, version).toString();
             if (s3Service.isNonEmptyDirectory(s3Bucket, versionPath)) {
-                s3Service.cleanupPrefix(s3Bucket, versionPath);
+                s3Service.cleanupDirectory(s3Bucket, versionPath);
             }
 
             for (String fileName : fileNames) {
@@ -368,7 +368,7 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
             String podPath = hdfsPathBuilder.podDir().toString();
             HdfsUtils.rmdir(yarnConfiguration, podPath);
             if (s3Service.isNonEmptyDirectory(s3Bucket, podPath)) {
-                s3Service.cleanupPrefix(s3Bucket, podPath);
+                s3Service.cleanupDirectory(s3Bucket, podPath);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

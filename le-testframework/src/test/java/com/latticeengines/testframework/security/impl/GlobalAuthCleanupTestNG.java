@@ -349,7 +349,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                     if (testTime > 0 && (System.currentTimeMillis() - testTime) > redshiftCleanupThreshold) {
                         log.info("Removing S3 folder " + folder);
                         try {
-                            s3Service.cleanupPrefix(customerBucket, folder);
+                            s3Service.cleanupDirectory(customerBucket, folder);
                         } catch (Exception e) {
                             log.error("Failed to remove S3 folder " + folder, e);
                         }

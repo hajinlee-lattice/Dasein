@@ -116,7 +116,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         // clean up s3 target dir
         String tgtDir = "/" + leStack + "/HdfsUtilsTest/output";
         if (s3Service.isNonEmptyDirectory(s3Bucket, tgtDir)) {
-            s3Service.cleanupPrefix(s3Bucket, tgtDir);
+            s3Service.cleanupDirectory(s3Bucket, tgtDir);
         }
         Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
         String s3Uri = "s3a://" + s3Bucket + tgtDir;
@@ -153,14 +153,14 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
 
         String tgtDir = "/" + leStack + "/HdfsUtilsTest/output";
         if (s3Service.isNonEmptyDirectory(s3Bucket, tgtDir)) {
-            s3Service.cleanupPrefix(s3Bucket, tgtDir);
+            s3Service.cleanupDirectory(s3Bucket, tgtDir);
         }
         Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
 
         // copy to unencrypted folder first
         String tgtDirUnenctyped = tgtDir + "_unencrypted";
         if (s3Service.isNonEmptyDirectory(s3Bucket, tgtDirUnenctyped)) {
-            s3Service.cleanupPrefix(s3Bucket, tgtDirUnenctyped);
+            s3Service.cleanupDirectory(s3Bucket, tgtDirUnenctyped);
         }
         Assert.assertFalse(s3Service.isNonEmptyDirectory(s3Bucket, tgtDirUnenctyped));
         String s3Uri = "s3n://" + s3Bucket + tgtDirUnenctyped;
@@ -176,7 +176,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         // move to encrypted folder with kms key
         String kmsKey = "test/ysong";
         s3Service.changeKeyRecursive(s3Bucket, tgtDirUnenctyped, tgtDir, kmsKey);
-        s3Service.cleanupPrefix(s3Bucket, tgtDirUnenctyped);
+        s3Service.cleanupDirectory(s3Bucket, tgtDirUnenctyped);
 
         // assert HDFS to S3 copy: reading does not need ams key
         Assert.assertTrue(s3Service.isNonEmptyDirectory(s3Bucket, tgtDir));
@@ -191,7 +191,7 @@ public class YarnConfigurationTestNG extends AbstractTestNGSpringContextTests {
         s3Service.changeKeyRecursive(s3Bucket, tgtDir, tgtDirUnenctyped, "");
         HdfsUtils.distcp(yarnConfiguration, s3Uri, srcDir, "default");
         // delete staging
-        s3Service.cleanupPrefix(s3Bucket, tgtDirUnenctyped);
+        s3Service.cleanupDirectory(s3Bucket, tgtDirUnenctyped);
         Assert.assertTrue(HdfsUtils.isDirectory(yarnConfiguration, srcDir));
         AvroUtils.iterator(yarnConfiguration, srcDir + "/*.avro").forEachRemaining(System.out::println);
     }
