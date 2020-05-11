@@ -67,12 +67,8 @@ public class SourceFileUploadServiceImpl implements SourceFileUploadService {
     }
 
     @Override
-    public ApplicationId submitSourceImport(String projectId, String sourceId, String sourceFileName) {
-        DCPImportRequest request = new DCPImportRequest();
-        request.setProjectId(projectId);
-        request.setSourceId(sourceId);
-        request.setSourceFileName(sourceFileName);
-        return dcpProxy.startImport(MultiTenantContext.getShortTenantId(), request);
+    public ApplicationId submitSourceImport(DCPImportRequest importRequest) {
+        return dcpProxy.startImport(MultiTenantContext.getShortTenantId(), importRequest);
     }
 
     private SourceFileInfo getSourceFileInfo(SourceFile sourceFile) {

@@ -20,6 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,17 +30,22 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Preconditions;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadEmailInfo;
 import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
 import com.latticeengines.pls.service.AbstractFileDownloadService;
 import com.latticeengines.pls.service.FileDownloadService;
+import com.latticeengines.pls.service.dcp.SourceFileUploadService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Service
 public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDownloadConfig> implements UploadService {
@@ -60,6 +66,12 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
   
     @Inject
     private EmailService emailService;
+
+    @Inject
+    private SourceFileUploadService sourceFileUploadService;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @Value("${hadoop.use.emr}")
     private Boolean useEmr;
@@ -177,6 +189,15 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
                 emailService.sendUploadFailedEmail(uploadEmailInfo);
                 break;
         }
+    }
+
+    @Override
+    public UploadDetails startImport(DCPImportRequest importRequest) {
+        ApplicationId appId = sourceFileUploadService.submitSourceImport(importRequest);
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        Job job = workflowProxy.getWorkflowJobFromApplicationId(appId.toString(), customerSpace);
+        String uploadId = job.getInputs().get(DCPSourceImportWorkflowConfiguration.UPLOAD_ID);
+        return uploadProxy.getUploadByUploadId(customerSpace, uploadId);
     }
 
 }
