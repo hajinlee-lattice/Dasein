@@ -139,8 +139,10 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             diff = diff(matchedTable, upsertMasterStep);
             steps.add(upsert);
         }
-        String joinKey = configuration.isEntityMatchEnabled() ? InterfaceName.EntityId.name()
-                : InterfaceName.AccountId.name();
+        // in migration mode, need to use ContactId because legacy batch store won't
+        // have EntityId column
+        String joinKey = (configuration.isEntityMatchEnabled() && !inMigrationMode()) ? InterfaceName.EntityId.name()
+                : InterfaceName.ContactId.name();
         changeList = createChangeList(upsertMasterStep, joinKey);
         reportChangeList = reportChangeList(changeListStep);
         report = reportDiff(diffStep);
