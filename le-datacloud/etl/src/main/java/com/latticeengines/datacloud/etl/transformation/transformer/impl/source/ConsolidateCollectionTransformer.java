@@ -91,7 +91,6 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
     private VendorConfig vendorConfig;
 
     private String getLegacyConsolidationResultFile(String vendor) {
-
         switch (vendor) {
             case VendorConfig.VENDOR_ALEXA:
                 return alexaLegacyConsolidationResult;
@@ -102,7 +101,6 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
             case VendorConfig.VENDOR_SEMRUSH:
                 return semrushLegacyConsolidationResult;
         }
-
         return null;
     }
 
@@ -124,7 +122,6 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
             case VendorConfig.VENDOR_SEMRUSH:
                 return ConsolidateCollectionSemrushFlow.BEAN_NAME;
         }
-
         log.error("failure: no data-flow bean for " + vendor + " found");
         return null;
     }
@@ -153,29 +150,18 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
             return config.getVendor().equals(vendor);
         }).collect(Collectors.toList());
         if (vendors.size() == 0) {
-
             log.error("failure: unable to find VendorConfig for " + vendor);
-
         }
         vendorConfig = vendors.get(0);
-
         configParamsByVendor(vendor, parameters);
-
         String rawIngestion = configuration.getRawIngestion();
         inputTable = getInputTable(vendor, rawIngestion, workflowDir);
         legacyTable = getLegacyBODCTable(vendor);
-
         if (legacyTable == null) {
-
             parameters.setBaseTables(Collections.singletonList("InputTable"));
-
         } else {
-
             parameters.setBaseTables(Arrays.asList("InputTable", "LegacyTable"));
-
         }
-
-
         // collect data from S3, save to a temp folder in workflowDir, use it as input of cascading dataflow
         System.out.println("Base tables: " + StringUtils.join(parameters.getBaseTables()));
     }
@@ -187,35 +173,23 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         //udpate the last consolidation time stamp
         vendorConfig.setLastConsolidated(new Timestamp(System.currentTimeMillis()));
         vendorConfigMgr.update(vendorConfig);
-
         //clean
         try {
-
             if (tmpInputPath != null) {
-
                 HdfsUtils.rmdir(yarnConfiguration, tmpInputPath);
-
             }
-
         } catch (Exception e) {
-
             log.warn(e.getMessage(), e);
-
         }
-
     }
 
     @Override
     protected Map<String, Table> setupSourceTables(Map<Source, List<String>> baseSourceVersions) {
         Map<String, Table> sourceTables = new HashMap<>();
-
         sourceTables.put("InputTable", inputTable);
         if (legacyTable != null) {
-
             sourceTables.put("LegacyTable", legacyTable);
-
         }
-
         return sourceTables;
     }
 
@@ -233,45 +207,31 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         //when there's no need to process bodc file
         //set property file line to false
         if (!handlingLegacyConsolidationResults) {
-
             return null;
-
         }
-
         //dir/file path
         Path targetDirPath = hdfsPathBuilder.constructBODCLegacyConsolidatonResultDir(vendor);
         String legacyFile = getLegacyConsolidationResultFile(vendor);
         Path targetFilePath = targetDirPath.append(legacyFile);
         Path legacyFileS3Path = S3PathBuilder.constructLegacyBODCMostRecentDir().append(legacyFile);
-
         try {
-
             //copy when not existing
             if (!HdfsUtils.fileExists(yarnConfiguration, targetFilePath.toString())) {
-
                 log.info("copy bodc legacy file to hdfs...");
                 String s3Key = legacyFileS3Path.toS3Key();
                 InputStream is = s3Service.readObjectAsStream(s3Bucket, s3Key);
                 HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, targetFilePath.toString());
                 log.info("copy done.");
-
             }
-
             //construct table
             String tableName = NamingUtils.timestamp("Legacy");
-
             Table legacyTable = MetadataConverter.getTable(yarnConfiguration, targetDirPath.toString());
             legacyTable.setName(tableName);
-
             return legacyTable;
 
         } catch (Exception e) {
-
             log.error(e.getMessage(), e);
-
         }
-
-
         return null;
     }
 
@@ -284,14 +244,11 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         long begMillisAdjusted = begMillis - begMillis % ingestionPeriodInMS;
         Timestamp lastConsolidated = vendorConfig.getLastConsolidated();
         if (lastConsolidated != null) {
-
             log.info("last consolidation time for vendor " + vendor + ": " + lastConsolidated);
             long lastConsolidatedMills = lastConsolidated.getTime();
             lastConsolidatedMills -= lastConsolidatedMills % ingestionPeriodInMS;
             if (begMillisAdjusted < lastConsolidatedMills) {
-
                 log.warn("notice: last consolidation  period is overlapped with current one");
-
             }
         }
 
@@ -307,21 +264,15 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
                 String fileName = key.substring(key.lastIndexOf('/') + 1);
                 String dateStr = fileName.substring(0, fileName.length() - "_UTC.avro".length());
                 try {
-
                     Date date = dateFormat.parse(dateStr);
                     long millis = date.getTime();
                     if (millis >= begMillisAdjusted && millis < curMillis) {
-
                         return key;
-
                     }
                 } catch (Exception e) {
-
                     log.error(key + " contains a malformed date");
-
                 }
             }
-
             return null;
         }).filter(StringUtils::isNotEmpty).collect(Collectors.toList());
         log.info("Found " + CollectionUtils.size(avrosToCopy) + " avro files to copy.");
@@ -330,10 +281,8 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
         String tgtDir = "/tmp/" + tableName;
         tmpInputPath = tgtDir;
         copyAvrosFromS3(tgtDir, ingestionDir, avrosToCopy);
-
         Table inputTable = MetadataConverter.getTable(yarnConfiguration, tgtDir);
         inputTable.setName(tableName);
-
         return inputTable;
     }
 
