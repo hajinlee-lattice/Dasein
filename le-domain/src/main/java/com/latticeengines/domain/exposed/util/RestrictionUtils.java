@@ -48,15 +48,15 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public final class RestrictionUtils {
 
-    protected RestrictionUtils() {
-        throw new UnsupportedOperationException();
-    }
-
     private static final Logger log = LoggerFactory.getLogger(RestrictionUtils.class);
-
     public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
             "HasPurchased");
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^\\d$");
+    private static final long MAX_VALUES_IN_BUCKET = 100_000;
+
+    protected RestrictionUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     public static void inspectBucketRestriction(BucketRestriction bucketRestriction,
             Map<ComparisonType, Set<AttributeLookup>> map, TimeFilterTranslator timeTranslator) {
@@ -226,7 +226,7 @@ public final class RestrictionUtils {
             break;
         case IN_COLLECTION:
         case NOT_IN_COLLECTION:
-            validateNonEmptyValue(comparator, values);
+            validateMultipleValues(comparator, values);
             break;
         default:
             throw new UnsupportedOperationException("comparator " + comparator + " is not supported yet");
@@ -477,11 +477,11 @@ public final class RestrictionUtils {
             restriction = convertBinaryValueComparison(attr, comparisonType, values.get(0), values.get(1));
             break;
         case IN_COLLECTION:
-            validateNonEmptyValue(comparisonType, values);
+            validateMultipleValues(comparisonType, values);
             restriction = Restriction.builder().let(attr).inCollection(values).build();
             break;
         case NOT_IN_COLLECTION:
-            validateNonEmptyValue(comparisonType, values);
+            validateMultipleValues(comparisonType, values);
             restriction = Restriction.builder().let(attr).notInCollection(values).build();
             break;
         case CONTAINS:
@@ -581,9 +581,13 @@ public final class RestrictionUtils {
         }
     }
 
-    private static void validateNonEmptyValue(ComparisonType comparisonType, List<Object> values) {
-        if (CollectionUtils.isEmpty(values)) {
+    private static void validateMultipleValues(ComparisonType comparisonType, List<Object> values) {
+        long nVals = CollectionUtils.size(values);
+        if (nVals == 0) {
             throw new IllegalArgumentException(comparisonType + " should have at least one value.");
+        }
+        if (nVals > MAX_VALUES_IN_BUCKET) {
+            throw new IllegalArgumentException(comparisonType + " should have no more than " + nVals + " values.");
         }
     }
 
