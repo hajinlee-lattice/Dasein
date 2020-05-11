@@ -185,7 +185,7 @@ public abstract class BaseFrontEndEntityResource {
         RestrictionUtils.cleanupBucketsInRestriction(accountRestriction);
         RestrictionUtils.validateCentralEntity(accountRestriction, BusinessEntity.Account);
         RestrictionUtils.cleanupBucketsInRestriction(contactRestriction);
-        RestrictionUtils.validateCentralEntity(accountRestriction, BusinessEntity.Contact);
+        RestrictionUtils.validateCentralEntity(contactRestriction, BusinessEntity.Contact);
         List<BucketRestriction> invalidBkts = new ArrayList<>();
         try {
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(accountRestriction));
