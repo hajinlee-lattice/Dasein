@@ -20,7 +20,6 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
-import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
@@ -38,11 +37,11 @@ import io.swagger.annotations.ApiParam;
 @RestController
 @RequestMapping(value = "/lookup-id-mapping")
 public class LookupIdMappingResource {
-	
-	private static final Logger log = LoggerFactory.getLogger(LookupIdMappingResource.class);
 
     @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
+
+    private static final Logger log = LoggerFactory.getLogger(LookupIdMappingResource.class);
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
@@ -62,36 +61,34 @@ public class LookupIdMappingResource {
     @ResponseBody
     @ApiOperation(value = "Register an org")
     public LookupIdMap registerExternalSystem(HttpServletRequest request, @RequestBody LookupIdMap lookupIdMap) {
-    	try {
-    		return lookupIdMappingProxy.registerExternalSystem(MultiTenantContext.getTenant().getId(), lookupIdMap);
-    	}
-        catch (LedpException e) {
-        	String title = "Cannot create new connection";
-        	String message;
-        	
-        	switch (e.getCode()) {
-	        	case LEDP_40071:
-	        		log.error("Failed to create connection because of duplicate credentials", e);
-	    			message = "A connection with the credentials you entered already exists. Enter different credentials.";
-	    			break;
+        try {
+            return lookupIdMappingProxy.registerExternalSystem(MultiTenantContext.getTenant().getId(), lookupIdMap);
+        } catch (LedpException e) {
+            String title = "Cannot create new connection";
+            String message;
 
-        		case LEDP_40080:
-    				log.error("Failed to create connection because empty org name", e);
-    				message = "System name cannot be empty";
-    				break;
-    				
-    			case LEDP_40081:
-    				log.error("Failed to create connection because of duplicate org name", e);
-    				message = "A connection with the same system name already exists";
-    				break;
-    				
-        		default:
-        			message = e.getMessage();
-        			break;
-        	}
-        	
-        	UIAction action = UIActionUtils.generateUIAction(title, View.Banner, Status.Error, message);
-    		
+            switch (e.getCode()) {
+            case LEDP_40071:
+                log.error("Failed to create connection because of duplicate credentials", e);
+                message = "A connection with the credentials you entered already exists. Enter different credentials.";
+                break;
+
+            case LEDP_40080:
+                log.error("Failed to create connection because empty org name", e);
+                message = "System name cannot be empty";
+                break;
+
+            case LEDP_40081:
+                log.error("Failed to create connection because of duplicate org name", e);
+                message = "A connection with the same system name already exists";
+                break;
+
+            default:
+                message = e.getMessage();
+                break;
+            }
+            UIAction action = UIActionUtils.generateUIAction(title, View.Banner, Status.Error, message);
+
             throw new UIActionException(action, e.getCode());
         }
     }
@@ -115,33 +112,31 @@ public class LookupIdMappingResource {
     @ApiOperation(value = "Update mapped configuration for given config id")
     public LookupIdMap updateLookupIdMap(HttpServletRequest request, @PathVariable String id,
             @RequestBody LookupIdMap lookupIdMap) {
-    	try {
-    		return lookupIdMappingProxy.updateLookupIdMap(MultiTenantContext.getTenant().getId(), id, lookupIdMap);
-    	}
-    	catch (LedpException e) {
-    		String title = "Cannot edit connection";
-    		String message;
-    		
-    		switch (e.getCode()) {
-    			case LEDP_40080:
-    				log.error("Failed to edit connection because empty org name", e);
-    				message = "System name cannot be empty";
-    				break;
-    				
-    			case LEDP_40081:
-    				log.error("Failed to edit connection because of duplicate org name", e);
-    				message = "A connection with the same system name already exists";
-    				break;
-    				
-    			default:
-    				message = e.getMessage();
-    				break;
-    		}
-    		
-    		UIAction action = UIActionUtils.generateUIAction(title, View.Banner, Status.Error, message);
-    		
+        try {
+            return lookupIdMappingProxy.updateLookupIdMap(MultiTenantContext.getTenant().getId(), id, lookupIdMap);
+        } catch (LedpException e) {
+            String title = "Cannot edit connection";
+            String message;
+
+            switch (e.getCode()) {
+            case LEDP_40080:
+                log.error("Failed to edit connection because empty org name", e);
+                message = "System name cannot be empty";
+                break;
+
+            case LEDP_40081:
+                log.error("Failed to edit connection because of duplicate org name", e);
+                message = "A connection with the same system name already exists";
+                break;
+
+            default:
+                message = e.getMessage();
+                break;
+            }
+            UIAction action = UIActionUtils.generateUIAction(title, View.Banner, Status.Error, message);
+
             throw new UIActionException(action, e.getCode());
-    	}
+        }
     }
 
     @RequestMapping(value = "/config/{id}", method = RequestMethod.DELETE)

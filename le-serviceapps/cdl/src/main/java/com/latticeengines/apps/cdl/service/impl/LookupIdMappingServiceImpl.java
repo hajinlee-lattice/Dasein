@@ -100,8 +100,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         } else {
             existingLookupIdMap.setIsRegistered(true);
             existingLookupIdMap.setExternalAuthentication(lookupIdsMap.getExternalAuthentication());
-            existingLookupIdMap = lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(),
-                    existingLookupIdMap);
+            existingLookupIdMap = lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap);
         }
         return populateExportFolder(existingLookupIdMap);
     }
@@ -116,7 +115,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                 lookupIdsMap.getExternalSystemType());
         if (existingLookupIdMap != null && existingLookupIdMap.getIsRegistered()) {
             existingLookupIdMap.setIsRegistered(false);
-            lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(), existingLookupIdMap);
+            lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap);
         }
     }
 
@@ -145,7 +144,7 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
                     + "Will replace this exception with proper LEDP exception.", id));
         }
 
-        return lookupIdMappingEntityMgr.updateLookupIdMap(id, existingLookupIdMap);
+        return lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap);
     }
 
     @Override
