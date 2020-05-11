@@ -331,7 +331,7 @@ public abstract class CheckpointServiceBase {
         String s3Prefix = pathBuilder.getS3AtlasDataPrefix(s3CustomerBucket, cs.getTenantId());
         if (s3Service.isNonEmptyDirectory(s3CustomerBucket, s3Prefix)) {
             log.info("S3 prefix {} already exists, delete first.", s3Prefix);
-            s3Service.cleanupPrefix(s3CustomerBucket, s3Prefix);
+            s3Service.cleanupDirectory(s3CustomerBucket, s3Prefix);
         }
         String localDir = String.format(HDFS_LOCAL_DIR_FORMAT, checkpointDir, checkpoint);
         s3Service.uploadLocalDirectory(s3CustomerBucket, s3Prefix, localDir, true);

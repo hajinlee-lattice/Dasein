@@ -287,7 +287,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
         Schema schema = AvroUtils.classToSchema(getMetadataColumnClass());
         // Prepare clean S3 prefix and clean local directory to cache metadata
         String s3Prefix = getMDSS3Prefix(dataCloudVersion);
-        s3Service.cleanupPrefix(s3Bucket, s3Prefix);
+        s3Service.cleanupDirectory(s3Bucket, s3Prefix);
         String localDir = LOCAL_CACHE + "/" + dataCloudVersion.replace(DataCloudVersion.SEPARATOR, "");
         try {
             FileUtils.deleteDirectory(new File(localDir));

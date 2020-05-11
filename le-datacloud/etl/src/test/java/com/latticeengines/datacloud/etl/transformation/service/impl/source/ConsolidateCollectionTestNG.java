@@ -97,7 +97,7 @@ public class ConsolidateCollectionTestNG extends PipelineTransformationTestNGBas
 
     private void prepareTestDataInS3() {
         String ingestionDir = S3PathBuilder.constructIngestionDir(INGESTION_NAME).toS3Key();
-        s3Service.cleanupPrefix(s3Bucket, ingestionDir);
+        s3Service.cleanupDirectory(s3Bucket, ingestionDir);
         uploadIngestedAvroToS3("2018-11-10_18-00-00_UTC.avro", ingestionDir);
         uploadIngestedAvroToS3("2018-11-11_23-00-00_UTC.avro", ingestionDir);
     }

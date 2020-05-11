@@ -69,7 +69,7 @@ public class HdfsToS3RouteTestNG extends EaiFunctionalTestNGBase {
 
     private void cleanup() throws Exception {
         HdfsUtils.rmdir(yarnConfiguration, HDFS_DIR);
-        s3Service.cleanupPrefix(s3Bucket, s3Prefix);
+        s3Service.cleanupDirectory(s3Bucket, s3Prefix);
         FileUtils.deleteQuietly(new File("tmp"));
     }
 

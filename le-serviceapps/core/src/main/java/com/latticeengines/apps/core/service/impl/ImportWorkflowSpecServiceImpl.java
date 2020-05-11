@@ -151,7 +151,7 @@ public class ImportWorkflowSpecServiceImpl implements ImportWorkflowSpecService 
     @Override
     public void deleteSpecFromS3(String systemType, String systemObject) throws Exception {
         String key = s3Folder + "/" + ImportWorkflowSpecUtils.constructSpecName(systemType, systemObject);
-        s3Service.cleanupPrefix(s3Bucket, key);
+        s3Service.cleanupDirectory(s3Bucket, key);
     }
 
 }

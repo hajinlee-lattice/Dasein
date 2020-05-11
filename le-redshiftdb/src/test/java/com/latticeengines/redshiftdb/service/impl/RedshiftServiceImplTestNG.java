@@ -80,9 +80,9 @@ public class RedshiftServiceImplTestNG extends AbstractTestNGSpringContextTests 
     }
 
     private void cleanupS3() {
-        s3Service.cleanupPrefix(s3Bucket, jsonPathPrefix);
-        s3Service.cleanupPrefix(s3Bucket, avroPrefix);
-        s3Service.cleanupPrefix(s3Bucket, unloadPrefix);
+        s3Service.cleanupDirectory(s3Bucket, jsonPathPrefix);
+        s3Service.cleanupDirectory(s3Bucket, avroPrefix);
+        s3Service.cleanupDirectory(s3Bucket, unloadPrefix);
     }
 
     private void cleanupRedshift() {
