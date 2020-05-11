@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 
 @Service("importFileProxy")
 public class ImportFileProxy extends PlsRestApiProxyBase {
@@ -18,11 +18,11 @@ public class ImportFileProxy extends PlsRestApiProxyBase {
         super("pls/importfile");
     }
 
-    public SourceFile uploadFile(String name, Resource fileResource) {
+    public SourceFileInfo uploadFile(String name, Resource fileResource) {
         String urlPattern = "?name={name}";
         String url = constructUrl(urlPattern, name);
         MultiValueMap<String, Object> parts = new LinkedMultiValueMap<>();
         parts.add("file", fileResource);
-        return postMultiPart("upload file", url, parts, SourceFile.class);
+        return postMultiPart("upload file", url, parts, SourceFileInfo.class);
     }
 }
