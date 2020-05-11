@@ -140,7 +140,6 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     @Test(groups = "deployment-app", priority = 4)
     public void testCrudAttributeSet() {
         String displayName = "TestAttributeSet";
-        String displayName2 = "TestAttributeSet2";
         AttributeSet attributeSet = createAttributeSet(displayName);
         attributeSet = attrConfigService.createAttributeSet(attributeSet);
         String generatedName = attributeSet.getName();
