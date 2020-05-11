@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
@@ -68,11 +70,38 @@ public class SourceResource {
         }
     }
 
+    // Parameters:
+    //   sourceId: The id used to identify one Source .
+    // Body:
+    //    The UploadSourceRequest representing the updates for this source.
+    @PutMapping(value = "/sourceId/{sourceId}")
+    @ResponseBody
+    @PreAuthorize("hasRole('Edit_DCP_Projects')")
+    @ApiOperation(value = "update source")
+    public Source updateSource(@PathVariable String sourceId,
+                               @RequestBody UpdateSourceRequest updateRequest) {
+        try {
+            return sourceService.updateSource(sourceId, updateRequest);
+        } catch (Exception e) {
+            log.error("Failed to update source", e);
+            UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,
+                    Status.Error, e.getMessage());
+            throw new UIActionException(action, LedpCode.LEDP_60004);
+        }
+    }
+
     @GetMapping(value = "/sourceId/{sourceId}")
     @ResponseBody
     @ApiOperation("Get sources by sourceId")
     public Source getSource(@PathVariable String sourceId) {
         return sourceService.getSource(sourceId);
+    }
+
+    @GetMapping(value = "/sourceId/{sourceId}/mappings")
+    @ResponseBody
+    @ApiOperation("Get source mappings")
+    public FieldDefinitionsRecord getSourceMappings(@PathVariable String sourceId) {
+        return sourceService.getSourceMappings(sourceId);
     }
 
     @DeleteMapping(value = "/sourceId/{sourceId}")

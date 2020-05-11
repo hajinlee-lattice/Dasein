@@ -4,12 +4,16 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
@@ -22,22 +26,29 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.Source;
+import com.latticeengines.domain.exposed.dcp.SourceFileInfo;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinition;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
-import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
+import com.latticeengines.testframework.exposed.proxy.pls.ImportFileProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestSourceProxy;
 
+
 public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(SourceResourceDeploymentTestNG.class);
+
     private static final String TEST_FILE_NAME = "Account_base.csv";
+    @Inject
+    private ImportFileProxy importFileProxy;
 
     @Inject
     private TestProjectProxy testProjectProxy;
@@ -45,8 +56,6 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     @Inject
     private TestSourceProxy testSourceProxy;
 
-    @Inject
-    private ModelingFileUploadProxy fileUploadProxy;
 
     private String sourceId;
 
@@ -56,7 +65,7 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         MultiTenantContext.setTenant(mainTestTenant);
         attachProtectedProxy(testProjectProxy);
         attachProtectedProxy(testSourceProxy);
-        attachProtectedProxy(fileUploadProxy);
+        attachProtectedProxy(importFileProxy);
     }
 
     @Test(groups = "deployment")
@@ -109,18 +118,14 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testFieldDefinition() {
+    public void testFieldDefinitions() {
         Resource csvResource = new ClassPathResource("com/latticeengines/pls/end2end/cdlCSVImport/Account_base.csv",
                 Thread.currentThread().getContextClassLoader());
-        SourceFile testSourceFile = fileUploadProxy.uploadFile("file_" + (System.currentTimeMillis()) + ".csv",
-                false,
-                TEST_FILE_NAME, EntityType.Accounts.getSchemaInterpretation(),
-                EntityType.Accounts.getEntity().name(), csvResource);
+        SourceFileInfo testSourceFile = importFileProxy.uploadFile(TEST_FILE_NAME, csvResource);
         FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.fetchDefinitions(null,
                 EntityType.Accounts.name(),
                 testSourceFile.getName());
 
-        System.out.println(JsonUtils.pprint(fetchResponse));
         Assert.assertTrue(MapUtils.isEmpty(fetchResponse.getExistingFieldDefinitionsMap()));
 
         fetchResponse = testSourceProxy.fetchDefinitions(sourceId,
@@ -139,6 +144,26 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertNotEquals(response.getValidationResult(), ValidateFieldDefinitionsResponse.ValidationResult.ERROR);
 
-    }
+        FieldDefinitionsRecord record = testSourceProxy.getSourceMappings(sourceId);
+        Assert.assertNotNull(record);
+        log.info("test get mappings ");
 
+        UpdateSourceRequest updateSourceRequest = new UpdateSourceRequest();
+        updateSourceRequest.setDisplayName("testSourceAfterUpdate");
+        updateSourceRequest.setFieldDefinitionsRecord(validateRequest.getCurrentFieldDefinitionsRecord());
+        updateSourceRequest.setImportFile(testSourceFile.getName());
+        Source retrievedSource = testSourceProxy.updateSource(sourceId, updateSourceRequest);
+        Assert.assertNotNull(retrievedSource);
+
+        log.info("test get mappings after updates");
+        FieldDefinitionsRecord updatedRecord = testSourceProxy.getSourceMappings(sourceId);
+        for (String  fieldSection : record.getFieldDefinitionsRecordsMap().keySet()) {
+            List<FieldDefinition> definitions = record.getFieldDefinitionsRecords(fieldSection);
+            List<FieldDefinition> updatedDefinitions = updatedRecord.getFieldDefinitionsRecords(fieldSection);
+            Assert.assertNotNull(updatedDefinitions);
+            Map<String, FieldDefinition> nameToFieldDefinition =
+                    updatedDefinitions.stream().collect(Collectors.toMap(FieldDefinition::getFieldName, e -> e));
+            definitions.forEach(e -> Assert.assertNotNull(nameToFieldDefinition.get(e.getFieldName())));
+        }
+    }
 }

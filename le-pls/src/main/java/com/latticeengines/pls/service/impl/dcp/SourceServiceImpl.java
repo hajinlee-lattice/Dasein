@@ -12,11 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -37,6 +39,7 @@ import com.latticeengines.pls.util.ImportWorkflowUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.core.ImportWorkflowSpecProxy;
 import com.latticeengines.proxy.exposed.dcp.SourceProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Service("dcpSourceService")
 public class SourceServiceImpl implements SourceService {
@@ -57,6 +60,9 @@ public class SourceServiceImpl implements SourceService {
 
     @Inject
     private Configuration yarnConfiguration;
+
+    @Inject
+    private MetadataProxy metadataProxy;
 
     @Override
     public Source createSource(SourceRequest sourceRequest) {
@@ -117,7 +123,9 @@ public class SourceServiceImpl implements SourceService {
 
         // 1c. Generate customerSpace.
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
         log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n" +
                         "   Source File: %s\n   Customer Space: %s", entityTypeObj.getEntity(),
                 entityTypeObj.getSubType(),
@@ -136,19 +144,8 @@ public class SourceServiceImpl implements SourceService {
                         S3ImportSystem.SystemType.DCP.name(),
                         entityTypeObj.getDisplayName()));
 
-        // 2c. Find previously saved template matching this customerSpace, source, feedType, and entityType, if it
-        // exists.
-        DataFeedTask dataFeedTask = null;
-        if (StringUtils.isNotBlank(sourceId)) {
-            dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace.toString(), sourceId);
-        }
-        Table existingTable = null;
-        Map<String, FieldDefinition> existingFieldDefinitionsMap = null;
-        if (dataFeedTask != null) {
-            existingTable = dataFeedTask.getImportTemplate();
-            fetchFieldDefinitionsResponse.setExistingFieldDefinitionsMap(
-                    ImportWorkflowUtils.getFieldDefinitionsMapFromTable(existingTable));
-        }
+        // 2c. Find previously saved template matching this customerSpace, sourceId, if it exists.
+        setExistingFieldDefinitionsFromSource(customerSpace, fetchFieldDefinitionsResponse, sourceId);
 
         // 2d. Create a MetadataResolver using the sourceFile.
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, false);
@@ -162,6 +159,7 @@ public class SourceServiceImpl implements SourceService {
         return fetchFieldDefinitionsResponse;
     }
 
+    @Override
     public ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile,
                                                               ValidateFieldDefinitionsRequest validateRequest) {
         // get default spec from s3
@@ -200,6 +198,64 @@ public class SourceServiceImpl implements SourceService {
         return response;
     }
 
+    @Override
+    public Source updateSource(String sourceId, UpdateSourceRequest updateSourceRequest) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return sourceProxy.updateSource(customerSpace.toString(), sourceId, updateSourceRequest);
+    }
+
+    @Override
+    public FieldDefinitionsRecord getSourceMappings(String sourceId) {
+        // 1a. default entity type.
+        EntityType entityTypeObj = EntityType.Accounts;
+
+        // 1b. Generate customerSpace.
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        log.info(String.format("Internal Values:\n   entity: %s\n   subType: %s\n" +
+                        "   Customer Space: %s", entityTypeObj.getEntity(),
+                entityTypeObj.getSubType(), customerSpace.toString()));
+
+        // 2a. Set up FetchFieldDefinitionsResponse and Current FieldDefinitionsRecord.
+        FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse = new FetchFieldDefinitionsResponse();
+        fetchFieldDefinitionsResponse.setCurrentFieldDefinitionsRecord(
+                new FieldDefinitionsRecord(S3ImportSystem.SystemType.DCP.getDefaultSystemName(),
+                        S3ImportSystem.SystemType.DCP.name(),
+                        entityTypeObj.getDisplayName()));
+
+        // 2b. Retrieve Spec for given systemType and systemObject.
+        fetchFieldDefinitionsResponse.setImportWorkflowSpec(
+                importWorkflowSpecProxy.getImportWorkflowSpec(customerSpace.toString(),
+                        S3ImportSystem.SystemType.DCP.name(),
+                        entityTypeObj.getDisplayName()));
+
+        // 2c. Find previously saved template matching this customerSpace, sourceId, if it exists.
+        setExistingFieldDefinitionsFromSource(customerSpace, fetchFieldDefinitionsResponse, sourceId);
+
+        ImportWorkflowUtils.generateCurrentFieldDefinitionRecord(fetchFieldDefinitionsResponse);
+        return fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
+    }
+
+    private void setExistingFieldDefinitionsFromSource(CustomerSpace customerSpace,
+                                                       FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse,
+                                                       String sourceId) {
+        if (StringUtils.isNotBlank(sourceId)) {
+            DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace.toString(), sourceId);
+            Preconditions.checkNotNull(dataFeedTask, String.format("Can't retrieve data feed task from source %s",
+                    sourceId));
+            Table existingTable = dataFeedTask.getImportTemplate();
+            Preconditions.checkNotNull(existingTable, String.format("Can't retrieve template table from source %s",
+                    sourceId));
+            fetchFieldDefinitionsResponse.setExistingFieldDefinitionsMap(
+                    ImportWorkflowUtils.getFieldDefinitionsMapFromTable(existingTable));
+        }
+    }
+
     private SourceFile getSourceFile(String sourceFileName) {
         SourceFile sourceFile = sourceFileService.findByName(sourceFileName);
         if (sourceFile == null) {
@@ -212,11 +268,6 @@ public class SourceServiceImpl implements SourceService {
     private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument,
                                                  boolean cdlResolve) {
         return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve, null);
-    }
-
-    private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument,
-                                                 boolean cdlResolve, Table schemaTable) {
-        return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve, schemaTable);
     }
 
 }

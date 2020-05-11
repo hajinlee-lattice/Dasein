@@ -8,10 +8,13 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 
 public interface SourceService {
 
-    Source createSource(String customerSpace, String displayName, String projectId,
+    Source createSource(String customerSpace, String displayName, String projectId, String importFile,
                         FieldDefinitionsRecord fieldDefinitionsRecord);
 
     Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
+                        String importFile, FieldDefinitionsRecord fieldDefinitionsRecord);
+
+    Source updateSource(String customerSpace, String displayName, String sourceId, String importFile,
                         FieldDefinitionsRecord fieldDefinitionsRecord);
 
     Source getSource(String customerSpace, String sourceId);
