@@ -49,7 +49,7 @@ import com.latticeengines.ldc_collectiondb.entitymgr.CollectionWorkerMgr;
 import com.latticeengines.ldc_collectiondb.entitymgr.VendorConfigMgr;
 
 @DirtiesContext
-@ContextConfiguration(locations = {"classpath:test-datacloud-collection-context.xml"})
+@ContextConfiguration(locations = { "classpath:test-datacloud-collection-context.xml" })
 public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests {
 
     private static final Logger log = LoggerFactory.getLogger(CollectionDBServiceTestNG.class);
@@ -100,74 +100,50 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         collectionDBService.cleanup(start, end);
     }
 
-    private List<String> loadDomains(String path) throws Exception
-    {
-
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
-                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
-
+    private List<String> loadDomains(String path) throws Exception {
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',').withIgnoreEmptyLines(true)
+                .withIgnoreSurroundingSpaces(true);
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         List<String> ret = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(classloader.getResourceAsStream(path)))) {
             try (CSVParser parser = new CSVParser(reader, format)) {
-
                 Map<String, Integer> colMap = parser.getHeaderMap();
                 int domainIdx = colMap.getOrDefault("Domain", -1);
-
                 for (CSVRecord rec : parser) {
-
                     ret.add(rec.get(domainIdx));
-
                 }
-
             }
-
         }
-
         return ret;
-
     }
 
     @Test(groups = "functional", enabled = false)
     public void testLoad() throws Exception {
-
-        List<String> pathSet = Arrays.asList(
-                "50kdomains.0.csv",
-                "50kdomains.1.csv",
-                "50kdomains.2.csv",
+        List<String> pathSet = Arrays.asList("50kdomains.0.csv", "50kdomains.1.csv", "50kdomains.2.csv",
                 "50kdomains.3.csv");
-
         List<List<String>> domainLists = new ArrayList<>();
         for (String path : pathSet) {
-
             domainLists.add(loadDomains(path));
-
         }
-
         long lastTriggered = 0;
         int domainIdx = 0;
         long coolDownPeriod = TimeUnit.MINUTES.toMillis(10); // 10 min
         boolean finished = false;
-        while (!finished)
-        {
+        while (!finished) {
 
             long curMillis = System.currentTimeMillis();
             if (lastTriggered == 0 || curMillis - lastTriggered > coolDownPeriod) {
-
                 lastTriggered = curMillis;
                 log.info("uploading " + domainIdx + "-th domain list.");
-
-                collectionDBService.addNewDomains(domainLists.get(domainIdx), "builtwith", UUID.randomUUID()
-                        .toString().toUpperCase());
+                collectionDBService.addNewDomains(domainLists.get(domainIdx), "builtwith",
+                        UUID.randomUUID().toString().toUpperCase());
 
                 log.info("uploaded " + domainLists.get(domainIdx).size() + " domains in " + domainIdx + "-th list.");
                 domainIdx = (domainIdx + 1) % domainLists.size();
-
             }
             finished = collectionDBService.collect(false);
             Thread.sleep(15 * 1000);
         }
-
         List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start,
                 new Timestamp(System.currentTimeMillis()));
         Assert.assertNotNull(workers);
@@ -175,7 +151,6 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
 
     @Test(groups = "testCollection", enabled = false)
     public void testCollectionDBService() throws Exception {
-
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
         collectionDBService.addNewDomains(domains, UUID.randomUUID().toString().toUpperCase());
         boolean finished = false;
@@ -183,39 +158,28 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             finished = collectionDBService.collect(false);
             Thread.sleep(5000);
         }
-
         collectionDBService.ingest();
         List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(start,
                 new Timestamp(System.currentTimeMillis()));
         Assert.assertNotNull(workers);
-
     }
+
     private File generateCsv(String domainField, List<String> domains) throws Exception {
-
         File tempFile = File.createTempFile("temp-", ".csv");
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile))) {
-
             writer.write(domainField);
             writer.newLine();
-
             for (String domain : domains) {
-
                 writer.write(domain);
                 writer.newLine();
-
             }
-
         }
-
         return tempFile;
-
     }
 
     @Test(groups = "functional")
     public void testCollection() throws Exception {
         Timestamp beg = new Timestamp(System.currentTimeMillis());
-
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
         collectionDBService.addNewDomains(domains, UUID.randomUUID().toString().toUpperCase());
         boolean finished = false;
@@ -223,7 +187,6 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             finished = collectionDBService.collect(true);
             Thread.sleep(15000);
         }
-
         List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(beg,
                 new Timestamp(System.currentTimeMillis()));
         Assert.assertTrue(workers.size() > 0);
@@ -232,39 +195,33 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
     @Test(groups = "functional")
     public void testHighPriorityCollection() throws Exception {
         Timestamp beg = new Timestamp(System.currentTimeMillis());
-
         List<String> domains = new ArrayList<>(Arrays.asList(testDomains.split(",")));
         File tmpFile = generateCsv("Domain", domains);
         s3Service.uploadLocalFile(s3Bucket, s3BucketHighPriorityReqPrefix + "temp.csv", tmpFile, true);
-
         boolean finished = false;
         while (!finished) {
             finished = collectionDBService.collect(false);
             Thread.sleep(15000);
         }
-
         List<CollectionWorker> workers = collectionWorkerService.getWorkerBySpawnTimeBetween(beg,
                 new Timestamp(System.currentTimeMillis()));
         Assert.assertTrue(workers.size() > 0);
-
     }
 
     @Test(groups = "functional")
     public void testVendorConfig() throws Exception {
-
         List<VendorConfig> orgVendorConfigs = vendorConfigMgr.findAll();
         long maxPid = Long.MIN_VALUE;
-        for (VendorConfig vendorConfig: orgVendorConfigs) {
+        for (VendorConfig vendorConfig : orgVendorConfigs) {
             if (maxPid < vendorConfig.getPid())
                 maxPid = vendorConfig.getPid();
         }
-
         List<VendorConfig> manualCraftedConfigs = new ArrayList<>();
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         for (int i = 0; i < 10; ++i) {
             VendorConfig vendorConfig = new VendorConfig();
             vendorConfig.setPid(0);
-            vendorConfig.setVendor(((Integer)i).toString());
+            vendorConfig.setVendor(((Integer) i).toString());
             vendorConfig.setGroupBy("domain");
             vendorConfig.setSortBy("CollectedAt");
             vendorConfig.setCollectingFreq(86400L);
@@ -278,10 +235,11 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             vendorConfigMgr.createOrUpdate(vendorConfig);
         }
         List<VendorConfig> vendorConfigsAfterInsertion = vendorConfigMgr.findAll();
-        Assert.assertTrue(orgVendorConfigs == null || orgVendorConfigs.size() + 10 == vendorConfigsAfterInsertion.size());
+        Assert.assertTrue(
+                orgVendorConfigs == null || orgVendorConfigs.size() + 10 == vendorConfigsAfterInsertion.size());
 
         VendorConfig vendorConfig0 = null;
-        for (VendorConfig vendorConfig: vendorConfigsAfterInsertion) {
+        for (VendorConfig vendorConfig : vendorConfigsAfterInsertion) {
             if (vendorConfig.getPid() > maxPid) {
                 vendorConfig0 = vendorConfig;
                 break;
@@ -296,39 +254,38 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         Assert.assertEquals(vendorConfig0.getMaxActiveTasks(), 1);
         Assert.assertEquals(vendorConfig0.getSortBy(), "CollectedAt");
         Assert.assertEquals(vendorConfig0.getVendor(), "0");
-
-        for (VendorConfig vendorConfig: vendorConfigsAfterInsertion) {
+        for (VendorConfig vendorConfig : vendorConfigsAfterInsertion) {
             if (vendorConfig.getPid() > maxPid)
                 vendorConfigMgr.delete(vendorConfig);
         }
         Thread.sleep(10000);
         List<VendorConfig> vendorConfigsAfterDel = vendorConfigMgr.findAll();
         Assert.assertTrue(orgVendorConfigs == null || orgVendorConfigs.size() == vendorConfigsAfterDel.size());
-
-        for (VendorConfig vendorConfig: vendorConfigMgr.findAll()) {
+        for (VendorConfig vendorConfig : vendorConfigMgr.findAll()) {
             System.out.println(vendorConfig.getVendor());
         }
-
     }
 
     @Test(groups = "functional")
     public void testIngestion() throws Exception {
-
-        List<CollectionWorker> consumedWorkers = collectionWorkerMgr.getWorkerByStatus(Arrays.asList(CollectionWorker.STATUS_CONSUMED));
-        for (CollectionWorker worker: consumedWorkers) {
+        List<CollectionWorker> consumedWorkers = collectionWorkerMgr
+                .getWorkerByStatus(Arrays.asList(CollectionWorker.STATUS_CONSUMED));
+        for (CollectionWorker worker : consumedWorkers) {
             worker.setStatus(CollectionWorker.STATUS_INGESTED);
             collectionWorkerMgr.update(worker);
         }
+        String[] orbWorkers = StringUtils
+                .split("05C2CBC5-ADC4-44FD-9408-FA83C350C2E6,271894B8-89EB-4797-A32D-0AA1F0065F49,"
+                        + "286B89BB-F874-40A9-B2C2-575B2D6EE245,3713D933-62FF-49F0-8912-DB6B6532C890", ',');
+        String[] alexaWorkers = StringUtils
+                .split("0420DB2A-C938-4C25-BEB9-C2165BF14354,09C3FA50-CE87-452D-BEE5-1209C929D45D,"
+                        + "6B744B27-3AD0-4313-82C2-3F171398E5F5,8B7BB325-E1AE-48B0-B0A0-BF1A7D16B89D,B01DB53F-D787-426E-8F64-56D974E593A3,"
+                        + "C51AD6B8-8CA5-4A0F-B742-0805C3A84E54", ',');
 
-        String[] orbWorkers = StringUtils.split("05C2CBC5-ADC4-44FD-9408-FA83C350C2E6,271894B8-89EB-4797-A32D-0AA1F0065F49," +
-                "286B89BB-F874-40A9-B2C2-575B2D6EE245,3713D933-62FF-49F0-8912-DB6B6532C890", ',');
-        String[] alexaWorkers = StringUtils.split("0420DB2A-C938-4C25-BEB9-C2165BF14354,09C3FA50-CE87-452D-BEE5-1209C929D45D," +
-                "6B744B27-3AD0-4313-82C2-3F171398E5F5,8B7BB325-E1AE-48B0-B0A0-BF1A7D16B89D,B01DB53F-D787-426E-8F64-56D974E593A3," +
-                "C51AD6B8-8CA5-4A0F-B742-0805C3A84E54", ',');
-
-        //mark these workers as occurred one day before start, so the test data on s3 would not be cleaned after test
+        // mark these workers as occurred one day before start, so the test data
+        // on s3 would not be cleaned after test
         Timestamp ts = new Timestamp(start.getTime() - 86400000);
-        for (String workerId: orbWorkers) {
+        for (String workerId : orbWorkers) {
             CollectionWorker worker = new CollectionWorker();
             worker.setWorkerId(workerId);
             worker.setStatus(CollectionWorker.STATUS_CONSUMED);
@@ -337,12 +294,11 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             worker.setTaskArn("");
             worker.setTerminationTime(ts);
             worker.setVendor(VendorConfig.VENDOR_ORBI_V2);
-
             collectionWorkerMgr.createOrUpdate(worker);
         }
-        s3Service.cleanupPrefix("latticeengines-dev-datacloud", S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ORBI_V2 + "_RAW").toString());
-
-        for (String workerId: alexaWorkers) {
+        s3Service.cleanupPrefix("latticeengines-dev-datacloud",
+                S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ORBI_V2 + "_RAW").toString());
+        for (String workerId : alexaWorkers) {
             CollectionWorker worker = new CollectionWorker();
             worker.setWorkerId(workerId);
             worker.setStatus(CollectionWorker.STATUS_CONSUMED);
@@ -351,10 +307,10 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
             worker.setTaskArn("");
             worker.setTerminationTime(ts);
             worker.setVendor(VendorConfig.VENDOR_ALEXA);
-
             collectionWorkerMgr.createOrUpdate(worker);
         }
-        s3Service.cleanupPrefix("latticeengines-dev-datacloud", S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ALEXA + "_RAW").toString());
+        s3Service.cleanupPrefix("latticeengines-dev-datacloud",
+                S3PathBuilder.constructIngestionDir(VendorConfig.VENDOR_ALEXA + "_RAW").toString());
 
         int tasksToIngest = collectionDBService.getIngestionTaskCount();
         Assert.assertEquals(orbWorkers.length + alexaWorkers.length, tasksToIngest);
@@ -362,7 +318,7 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         int tasksToIngestAfter = collectionDBService.getIngestionTaskCount();
         Assert.assertEquals(tasksToIngestAfter, 0);
 
-        for (CollectionWorker worker: consumedWorkers) {
+        for (CollectionWorker worker : consumedWorkers) {
             worker.setStatus(CollectionWorker.STATUS_CONSUMED);
             collectionWorkerMgr.update(worker);
         }
@@ -381,84 +337,59 @@ public class CollectionDBServiceTestNG extends AbstractTestNGSpringContextTests 
         Assert.assertNotNull(schemaStr);
         Schema schema = new Schema.Parser().parse(schemaStr);
         Assert.assertNotNull(schema);
-
         String schemaStr1 = AvroUtils.buildSchema("alexa.avsc");
         Assert.assertNotNull(schemaStr1);
         Schema schema1 = new Schema.Parser().parse(schemaStr1);
         Assert.assertNotNull(schema1);
-
     }
 
     @Test(groups = "functional", enabled = false)
     public void testAvro() throws Exception {
-
         String schemaStr = AvroUtils.buildSchema("builtwith.avsc");
         Assert.assertNotNull(schemaStr);
         Schema schema = new Schema.Parser().parse(schemaStr);
-
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
-
         DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
         dataFileWriter.setCodec(CodecFactory.deflateCodec(1));
         File tmpFile = File.createTempFile("test", ".avro");
         tmpFile.deleteOnExit();
         log.info("output file: " + tmpFile.getPath());
         dataFileWriter.create(schema, tmpFile);
-
         List<Schema.Field> fields = schema.getFields();
 
         InputStream istream = Thread.currentThread().getContextClassLoader().getResourceAsStream("./part-00000.csv");
-        //FileInputStream istream = new FileInputStream("./part-00000.csv");
-        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',')
-                .withIgnoreEmptyLines(true).withIgnoreSurroundingSpaces(true);
+        // FileInputStream istream = new FileInputStream("./part-00000.csv");
+        CSVFormat format = CSVFormat.RFC4180.withHeader().withDelimiter(',').withIgnoreEmptyLines(true)
+                .withIgnoreSurroundingSpaces(true);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(istream))) {
             try (CSVParser parser = new CSVParser(reader, format)) {
-
                 Map<String, Integer> colMap = parser.getHeaderMap();
-
                 int columns = colMap.size();
                 int[] idxMap = new int[columns];
                 Schema.Field[] idx2Fields = new Schema.Field[columns];
                 if (fields.size() != columns) {
-
                     throw new Exception("avro column count != csv column count");
-
                 }
-
-                for (Schema.Field field: fields) {
-
+                for (Schema.Field field : fields) {
                     int csvIdx = colMap.get(field.name());
                     idxMap[csvIdx] = field.pos();
                     idx2Fields[csvIdx] = field;
-
                 }
 
                 for (CSVRecord csvRec : parser) {
-
                     GenericRecord rec = new GenericData.Record(schema);
                     for (int i = 0; i < columns; ++i) {
-
                         rec.put(idxMap[i], AvroUtils.checkTypeAndConvert(idx2Fields[i].name(), //
                                 csvRec.get(i), idx2Fields[i].schema().getType()));
-
                     }
-
                     try {
-
                         dataFileWriter.append(rec);
-
                     } catch (Exception e) {
                         log.error("error csv line: " + csvRec.get("CollectedAt") + ", " + csvRec.get("Spend"));
                     }
-
                 }
-
             }
-
         }
-
         dataFileWriter.close();
-
     }
-
 }

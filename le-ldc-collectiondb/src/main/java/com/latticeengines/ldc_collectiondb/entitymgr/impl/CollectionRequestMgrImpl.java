@@ -61,36 +61,26 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
                         PageRequest.of(0, upperLimit));
 
         return resultList;
-
     }
 
     @Override
     public List<CollectionRequest> getPending(String vendor, List<CollectionWorker> activeWorkers) {
-
         List<String> activeWorkerIds = new ArrayList<>(activeWorkers.size());
         for (CollectionWorker worker : activeWorkers) {
-
             activeWorkerIds.add(worker.getWorkerId());
-
         }
 
         List<String> desiredStatus = Arrays.asList(CollectionRequest.STATUS_COLLECTING);
         if (activeWorkerIds.size() > 0) {
-
             return readerRepository.findByVendorAndStatusInAndPickupWorkerNotIn(vendor, desiredStatus, activeWorkerIds);
-
         } else {
-
             return readerRepository.findByVendorAndStatusIn(vendor, desiredStatus);
         }
-
     }
 
     @Override
     public List<CollectionRequest> getDelivered(String pickupWorker) {
-
         return readerRepository.findByPickupWorker(pickupWorker);
-
     }
 
     @Override
@@ -100,50 +90,32 @@ public class CollectionRequestMgrImpl extends JpaEntityMgrRepositoryImpl<Collect
 
     @Override
     public void cleanupRequests(Collection<String> statuses, String vendor, Timestamp before, int batch) {
-
         Long minPid = repository.getMinPid(vendor);
         if (minPid == null) {
-
             return;
-
         }
-
         repository.removeByStatusInAndVendorAndDeliveryTimeBeforeAndPidLessThan(statuses, vendor, before, minPid + batch);
-
     }
 
     @Override
     @Transactional
     public void saveRequests(Collection<CollectionRequest> requests) {
-
         int batch = 512;
         if (requests.size() <= batch) {
-
             repository.saveAll(requests);
             return;
-
         }
-
         List<CollectionRequest> reqBuf = new ArrayList<>(batch);
         for (CollectionRequest req: requests) {
-
             reqBuf.add(req);
-
             if (reqBuf.size() == batch) {
-
                 repository.saveAll(reqBuf);
                 reqBuf.clear();
-
             }
-
         }
-
         if (reqBuf.size() > 0) {
-
             repository.saveAll(reqBuf);
             reqBuf.clear();
-
         }
-
     }
 }

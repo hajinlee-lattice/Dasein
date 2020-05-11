@@ -21,35 +21,26 @@ public class CollectionWorkerServiceImpl implements CollectionWorkerService {
 
     @Override
     public CollectionWorkerMgr getEntityMgr() {
-
         return collectionWorkerMgr;
-
     }
 
     @Override
     public List<CollectionWorker> getActiveWorker(String vendor) {
         vendor = vendor.toUpperCase();
         if (!VendorConfig.EFFECTIVE_VENDOR_SET.contains(vendor)) {
-
             return ListUtils.emptyIfNull(null);
-
         }
-
         return collectionWorkerMgr.getActiveWorker(vendor);
-
     }
 
     @Override
     public List<CollectionWorker> getWorkerByStatus(List<String> status) {
-
         return collectionWorkerMgr.getWorkerByStatus(status);
-
     }
 
     @Override
     public void cleanupWorkerBetween(Timestamp start, Timestamp end) {
         collectionWorkerMgr.cleanupWorkerBetween(start, end);
-
     }
 
     @Override
