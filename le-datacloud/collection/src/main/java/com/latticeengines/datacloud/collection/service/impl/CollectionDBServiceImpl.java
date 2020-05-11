@@ -1478,7 +1478,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
         // clean up the input and output csv
         for (CollectionWorker worker : workers) {
             String prefix = s3BucketPrefix + worker.getWorkerId();
-            s3Service.cleanupPrefix(s3Bucket, prefix);
+            s3Service.cleanupDirectory(s3Bucket, prefix);
         }
         for (String vendor : VendorConfig.EFFECTIVE_VENDOR_SET) {
             String ingestionPrefix = S3PathBuilder.constructIngestionDir(vendor + "_RAW").toString();

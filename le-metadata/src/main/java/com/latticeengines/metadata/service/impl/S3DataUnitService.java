@@ -32,7 +32,7 @@ public class S3DataUnitService extends AbstractDataUnitRuntimeServiceImpl<S3Data
         s3DataUnit.fixBucketAndPrefix();
         if (StringUtils.isNotEmpty(s3DataUnit.getBucket())) {
             log.info(String.format("S3 data unit bucket name is %s, prefix is %s.", s3DataUnit.getBucket(), s3DataUnit.getPrefix()));
-            s3Service.cleanupPrefix(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
+            s3Service.cleanupDirectory(s3DataUnit.getBucket(), s3DataUnit.getPrefix());
         }
         return true;
     }

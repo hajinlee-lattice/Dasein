@@ -113,7 +113,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         DropBox dropbox = dropBoxEntityMgr.getDropBox();
         if (dropbox != null) {
             String prefix = toPrefix(dropbox);
-            s3Service.cleanupPrefix(customersBucket, prefix);
+            s3Service.cleanupDirectory(customersBucket, prefix);
 
             String dropBoxId = dropbox.getDropBox();
             String userName = "c-" + dropBoxId;
@@ -516,7 +516,7 @@ public class DropBoxServiceImpl implements DropBoxService {
         String dropBoxPrefix = getDropBoxPrefix();
         String templatePath = dropBoxPrefix + SLASH + TEMPLATES + SLASH + feedType;
         if (s3Service.objectExist(dropBoxBucket, templatePath)) {
-            s3Service.cleanupPrefix(dropBoxBucket, templatePath);
+            s3Service.cleanupDirectory(dropBoxBucket, templatePath);
         }
     }
 

@@ -82,7 +82,7 @@ public class DropBoxCrossTenantServiceImpl implements DropBoxCrossTenantService 
         DropBox dropbox = entityMgr.getDropBox(tenant);
         if (dropbox != null) {
             String prefix = toPrefix(dropbox);
-            s3Service.cleanupPrefix(customersBucket, prefix);
+            s3Service.cleanupDirectory(customersBucket, prefix);
 
             String dropBoxId = dropbox.getDropBox();
             String userName = "c-" + dropBoxId;

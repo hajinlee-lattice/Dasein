@@ -16,7 +16,33 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 
 public interface S3Service {
 
-    void cleanupPrefix(String bucket, String prefix);
+    /**
+     * Delete every object "under the target directory". This means any object that
+     * has key start with "dirPath" will be removed. Note that paths with and
+     * without trailing slashes will be considered the same directory by this
+     * method.
+     *
+     * <pre>
+     * I.e., cleanupDirectory(bucket, "abc") will remove all following objects
+     * - "abc"
+     * - "abc/"
+     * - "abc/123"
+     * - "abc/123/"
+     * but NOT the following
+     * - "abcd"
+     * - "abcd/"
+     * - "abc123/"
+     *
+     * In addition, cleanupDirectory(bucket, "abc") is considered the same as
+     * cleanupDirectory(bucket, "abc/")
+     * </pre>
+     *
+     * @param bucket
+     *            s3 bucket
+     * @param dirPath
+     *            s3 "directory" (emulated with slashes) path
+     */
+    void cleanupDirectory(String bucket, String dirPath);
 
     void cleanupByObjectList(List<S3ObjectSummary> summaries);
 

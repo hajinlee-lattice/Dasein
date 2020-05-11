@@ -171,20 +171,35 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public boolean isNonEmptyDirectory(String bucket, String prefix) {
         prefix = sanitizePathToKey(prefix);
-        ListObjectsV2Request request = new ListObjectsV2Request().withBucketName(bucket).withPrefix(prefix);
+        ListObjectsV2Request request = new ListObjectsV2Request() //
+                .withBucketName(bucket) //
+                .withPrefix(StringUtils.appendIfMissing(prefix, "/"));
         ListObjectsV2Result result = s3Client.listObjectsV2(request);
         return result.getKeyCount() > 0;
     }
 
     @Override
-    public void cleanupPrefix(String bucket, String prefix) {
-        prefix = sanitizePathToKey(prefix);
-        List<S3ObjectSummary> objects = s3Client.listObjectsV2(bucket, prefix).getObjectSummaries();
-        log.info("Deleting " + CollectionUtils.size(objects) + " s3 objects under " + prefix + " from " + bucket);
-        for (S3ObjectSummary summary : objects) {
-            s3Client.deleteObject(bucket, summary.getKey());
-        }
-        s3Client.deleteObject(bucket, prefix);
+    public void cleanupDirectory(String bucket, String dirPath) {
+        dirPath = sanitizePathToKey(dirPath);
+        // add trailing space so that objects in other "directory" with the same prefix
+        // won't be deleted. E.g., dir_1/file.txt when deleting directory dir/
+        String path = StringUtils.appendIfMissing(dirPath, "/");
+        ListObjectsV2Request request = new ListObjectsV2Request() //
+                .withBucketName(bucket) //
+                .withPrefix(path);
+        ListObjectsV2Result result;
+        do {
+            result = s3Client.listObjectsV2(request);
+            deleteObjects(bucket, dirPath, result);
+            if (result.isTruncated()) {
+                request = new ListObjectsV2Request() //
+                        .withBucketName(bucket) //
+                        .withContinuationToken(result.getContinuationToken()) //
+                        .withPrefix(path);
+            }
+        } while (result.isTruncated());
+        // delete object without trailing slash
+        s3Client.deleteObject(bucket, dirPath);
     }
 
     @Override
@@ -264,6 +279,18 @@ public class S3ServiceImpl implements S3Service {
                 })
                 .filter(StringUtils::isNotBlank)
                 .distinct().collect(Collectors.toList());
+    }
+
+    private void deleteObjects(@NotNull String bucket, @NotNull String dirPath, ListObjectsV2Result result) {
+        if (result == null || CollectionUtils.isEmpty(result.getObjectSummaries())) {
+            return;
+        }
+
+        List<S3ObjectSummary> objects = result.getObjectSummaries();
+        log.info("Deleting " + CollectionUtils.size(objects) + " s3 objects under " + dirPath + " from " + bucket);
+        for (S3ObjectSummary summary : objects) {
+            s3Client.deleteObject(bucket, summary.getKey());
+        }
     }
 
     private void waitForUploadResult(Upload upload, MutableInt uploadedObjects, int numFiles, List<File> failedUploadFiles) {

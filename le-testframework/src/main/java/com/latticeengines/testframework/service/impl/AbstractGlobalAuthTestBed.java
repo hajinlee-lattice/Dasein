@@ -187,7 +187,7 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
                 log.info("Skip cleaning up S3 for" + tenant.getId());
             } else {
                 log.info("Clean up S3 for test tenant " + tenant.getId());
-                s3Service.cleanupPrefix(customerBucket, CustomerSpace.parse(tenant.getId()).getTenantId());
+                s3Service.cleanupDirectory(customerBucket, CustomerSpace.parse(tenant.getId()).getTenantId());
             }
         }
     }
