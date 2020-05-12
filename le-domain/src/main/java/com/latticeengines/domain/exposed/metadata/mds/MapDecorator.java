@@ -17,7 +17,7 @@ import reactor.core.publisher.ParallelFlux;
 
 public abstract class MapDecorator implements Decorator, NeedsLoad {
 
-    protected static final Logger log = LoggerFactory.getLogger(MapDecorator.class);
+    private static final Logger log = LoggerFactory.getLogger(MapDecorator.class);
 
     protected final ConcurrentMap<String, ColumnMetadata> filterMap = new ConcurrentHashMap<>();
 
@@ -36,6 +36,7 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
         long duration = System.currentTimeMillis() - start;
         log.debug(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration
                 + " msecs.");
+        loaded.set(true);
     }
 
     @Override
