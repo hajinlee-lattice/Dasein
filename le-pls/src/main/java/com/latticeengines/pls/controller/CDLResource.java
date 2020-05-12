@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.StatusDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
+import com.latticeengines.domain.exposed.cdl.ImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -658,5 +659,13 @@ public class CDLResource {
             log.error("Download DimensionMetadata csv Failed: " + e.getMessage());
             throw new LedpException(LedpCode.LEDP_40076, new String[]{e.getMessage()});
         }
+    }
+
+    @GetMapping(value = "/import/csv")
+    @ResponseBody
+    @ApiOperation(value = "Get all import files")
+    public List<ImportFileInfo> getAllImportFiles() {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        return cdlService.getAllImportFiles(customerSpace.toString());
     }
 }

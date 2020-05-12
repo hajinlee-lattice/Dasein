@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
+import com.latticeengines.domain.exposed.cdl.ImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
@@ -82,6 +83,7 @@ import com.latticeengines.domain.exposed.util.S3PathBuilder;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.pls.service.FileUploadService;
@@ -1122,5 +1124,51 @@ public class CDLServiceImpl implements CDLService {
             return "";
         }
         return "\"" + value.replaceAll("\"", "\"\"") + "\"";
+    }
+
+    @Override
+    public List<ImportFileInfo> getAllImportFiles(String customerSpace) {
+        List<Action> importActions = actionProxy.getActions(customerSpace).stream()
+                .filter(action -> ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.equals(action.getType()))
+                .collect(Collectors.toList());
+        return importActions.stream().map(action -> getImportFile(customerSpace, action)).
+                filter(Objects::nonNull).collect(Collectors.toList());
+    }
+
+    private ImportFileInfo getImportFile(String customerSpace, Action action) {
+        ImportFileInfo importFileInfo = new ImportFileInfo();
+        ImportActionConfiguration importActionConfiguration = (ImportActionConfiguration) action.getActionConfiguration();
+        String dataFeedTaskId = importActionConfiguration.getDataFeedTaskId();
+        if (dataFeedTaskId == null) {
+            return null;
+        }
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, dataFeedTaskId);
+        if (dataFeedTask == null) {
+            return null;
+        }
+        if(dataFeedTask.getImportSystemName() == null) {
+            importFileInfo.setSystemName(DEFAULT_SYSTEM);
+        } else {
+            importFileInfo.setSystemName(dataFeedTask.getImportSystemName());
+        }
+
+        importFileInfo.setTemplateName(dataFeedProxy.getTemplateName(customerSpace, dataFeedTaskId));
+        Long workflowId = importActionConfiguration.getWorkflowId();
+        if(workflowId == null)
+            return null;
+        Job job = workflowProxy.getJobByWorkflowJobPid(customerSpace, workflowId);
+        Map<String, String> inputs = job.getInputs();
+        String filePath = inputs.get(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH);
+        if (StringUtils.isNotEmpty(filePath)) {
+            importFileInfo.setFilePath(filePath);
+        } else {
+            String fileName = inputs.get(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME);
+            if(fileName == null)
+                return null;
+            SourceFile source = sourceFileService.findByName(fileName);
+            importFileInfo.setFilePath(source.getPath());
+        }
+
+        return importFileInfo;
     }
 }
