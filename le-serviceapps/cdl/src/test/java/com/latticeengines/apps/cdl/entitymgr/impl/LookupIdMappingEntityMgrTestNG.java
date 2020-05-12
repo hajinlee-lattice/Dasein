@@ -206,7 +206,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateToEmptyOrgName" })
-    public void testUpdateToDuplicateOrgName() {    	
+    public void testUpdateToDuplicateOrgName() {
         LookupIdMap anotherLookupIdMap = new LookupIdMap();
         anotherLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
         anotherLookupIdMap.setExternalSystemName(CDLExternalSystemName.Salesforce);
