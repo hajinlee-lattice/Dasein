@@ -177,8 +177,11 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
             changeListStep = mergeStep + 3;
         }
 
+        // in migration mode, need to use AccountId because legacy batch store won't
+        // have EntityId column
+        String joinKey = inMigrationMode() ? InterfaceName.AccountId.name() : InterfaceName.EntityId.name();
         TransformationStepConfig diff = diff(mergeStep, upsertStep);
-        TransformationStepConfig changeList = createChangeList(upsertStep, InterfaceName.EntityId.name());
+        TransformationStepConfig changeList = createChangeList(upsertStep, joinKey);
         TransformationStepConfig reportChangeList = reportChangeList(changeListStep);
         TransformationStepConfig report = reportDiff(diffStep);
         if (upsertSystem != null) {
