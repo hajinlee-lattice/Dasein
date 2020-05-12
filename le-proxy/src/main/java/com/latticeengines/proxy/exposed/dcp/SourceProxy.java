@@ -10,7 +10,7 @@ public interface SourceProxy {
 
     Source createSource(String customerSpace, SourceRequest sourceRequest);
 
-    Source updateSource(String customerSpace, String sourceId, UpdateSourceRequest updateSourceRequest);
+    Source updateSource(String customerSpace, UpdateSourceRequest updateSourceRequest);
 
     Source getSource(String customerSpace, String sourceId);
 

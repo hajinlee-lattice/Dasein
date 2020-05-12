@@ -76,7 +76,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION,
                 TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
-        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId, null,
+        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId,
                 fieldDefinitionsRecord);
         sourceId = source.getSourceId();
 

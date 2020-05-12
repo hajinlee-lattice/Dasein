@@ -1,9 +1,12 @@
 package com.latticeengines.pls.functionalframework;
 
+import java.io.InputStream;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.InputStreamResource;
 
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -32,6 +35,26 @@ public class DCPDeploymentTestNGBase extends PlsDeploymentTestNGBase {
     protected JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
         log.info("Running workflow as " + applicationId);
         return waitForWorkflowStatus(workflowProxy, applicationId, running);
+    }
+
+    public class MultipartFileResource extends InputStreamResource {
+
+        private String fileName;
+
+        public MultipartFileResource(InputStream inputStream, String fileName) {
+            super(inputStream);
+            this.fileName = fileName;
+        }
+
+        @Override
+        public String getFilename() {
+            return fileName;
+        }
+
+        @Override
+        public long contentLength() {
+            return -1;
+        }
     }
 }
 

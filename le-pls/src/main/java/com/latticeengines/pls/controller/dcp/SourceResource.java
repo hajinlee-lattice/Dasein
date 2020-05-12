@@ -74,14 +74,13 @@ public class SourceResource {
     //   sourceId: The id used to identify one Source .
     // Body:
     //    The UploadSourceRequest representing the updates for this source.
-    @PutMapping(value = "/sourceId/{sourceId}")
+    @PutMapping(value = "")
     @ResponseBody
     @PreAuthorize("hasRole('Edit_DCP_Projects')")
     @ApiOperation(value = "update source")
-    public Source updateSource(@PathVariable String sourceId,
-                               @RequestBody UpdateSourceRequest updateRequest) {
+    public Source updateSource(@RequestBody UpdateSourceRequest updateRequest) {
         try {
-            return sourceService.updateSource(sourceId, updateRequest);
+            return sourceService.updateSource(updateRequest);
         } catch (Exception e) {
             log.error("Failed to update source", e);
             UIAction action = graphDependencyToUIActionUtil.generateUIAction("", View.Banner,

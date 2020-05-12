@@ -70,8 +70,8 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
         return get("get source mappings", url, FieldDefinitionsRecord.class);
     }
 
-    public Source updateSource(String sourceId, UpdateSourceRequest updateSourceRequest) {
-        String url = constructUrl("/sourceId/{sourceId}", sourceId);
+    public Source updateSource(UpdateSourceRequest updateSourceRequest) {
+        String url = constructUrl("/");
         return put("update source", url, updateSourceRequest, Source.class);
     }
 }

@@ -6,6 +6,9 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import io.swagger.annotations.ApiModelProperty;
 
 public class UpdateSourceRequest {
+    @JsonProperty("source_id")
+    @ApiModelProperty(required = true, value = "sourceId")
+    private String sourceId;
 
     @JsonProperty("display_name")
     @ApiModelProperty(value = "displayName")
@@ -18,6 +21,14 @@ public class UpdateSourceRequest {
     @JsonProperty("field_definitions_record")
     @ApiModelProperty(required = true, value = "fieldDefinitionsRecord")
     private FieldDefinitionsRecord fieldDefinitionsRecord;
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
 
     public String getDisplayName() {
         return displayName;

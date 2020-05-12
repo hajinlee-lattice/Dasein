@@ -46,26 +46,40 @@ public class SourceResource {
             throw new RuntimeException("Cannot create source with empty create source request input!");
         }
         if (StringUtils.isBlank(sourceRequest.getSourceId())) {
-            log.debug("Create source with empty sourceId.");
-            return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
-                    sourceRequest.getProjectId(), sourceRequest.getImportFile(),
-                    sourceRequest.getFieldDefinitionsRecord());
+            if (StringUtils.isBlank(sourceRequest.getImportFile())) {
+                log.debug("Create source with empty sourceId and empty import file.");
+                return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
+                        sourceRequest.getProjectId(), sourceRequest.getFieldDefinitionsRecord());
+            } else {
+                log.debug("Create source with empty sourceId and import file {}.", sourceRequest.getImportFile());
+                return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
+                        sourceRequest.getProjectId(), null, sourceRequest.getImportFile(),
+                        sourceRequest.getFieldDefinitionsRecord());
+            }
         } else {
-            log.debug("Create source with specified sourceId: " + sourceRequest.getSourceId());
-            return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
-                    sourceRequest.getProjectId(), sourceRequest.getSourceId(), sourceRequest.getImportFile(),
-                    sourceRequest.getFieldDefinitionsRecord());
+            if (StringUtils.isBlank(sourceRequest.getImportFile())) {
+                log.debug("Create source with specified sourceId {} ", sourceRequest.getSourceId());
+                return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
+                        sourceRequest.getProjectId(), sourceRequest.getSourceId(),
+                        sourceRequest.getFieldDefinitionsRecord());
+            } else {
+                log.debug("Create source with specified sourceId {} and import file {}",
+                        sourceRequest.getSourceId(), sourceRequest.getImportFile());
+                return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
+                        sourceRequest.getProjectId(), sourceRequest.getSourceId(), sourceRequest.getImportFile(),
+                        sourceRequest.getFieldDefinitionsRecord());
+            }
         }
     }
 
-    @PutMapping("/sourceId/{sourceId}")
+    @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "update a Source")
     public Source updateSource(@PathVariable String customerSpace,
-                               @PathVariable String sourceId,
                                @RequestBody UpdateSourceRequest updateSourceRequest) {
-        return sourceService.updateSource(customerSpace, updateSourceRequest.getDisplayName(), sourceId,
-                updateSourceRequest.getImportFile(), updateSourceRequest.getFieldDefinitionsRecord());
+        return sourceService.updateSource(customerSpace, updateSourceRequest.getDisplayName(),
+                updateSourceRequest.getSourceId(), updateSourceRequest.getImportFile(),
+                updateSourceRequest.getFieldDefinitionsRecord());
     }
 
     @GetMapping("/sourceId/{sourceId}")

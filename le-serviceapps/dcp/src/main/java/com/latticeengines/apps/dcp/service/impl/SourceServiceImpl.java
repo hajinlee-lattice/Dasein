@@ -69,9 +69,15 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId,
-                               String importFile, FieldDefinitionsRecord fieldDefinitionsRecord) {
+                               FieldDefinitionsRecord fieldDefinitionsRecord) {
         String sourceId = generateRandomSourceId(customerSpace);
-        return createSource(customerSpace, displayName, projectId, sourceId, importFile, fieldDefinitionsRecord);
+        return createSource(customerSpace, displayName, projectId, sourceId, fieldDefinitionsRecord);
+    }
+
+    @Override
+    public Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
+                               FieldDefinitionsRecord fieldDefinitionsRecord) {
+        return createSource(customerSpace, displayName, projectId, sourceId, null, fieldDefinitionsRecord);
     }
 
     @Override
@@ -80,6 +86,9 @@ public class SourceServiceImpl implements SourceService {
         Project project = projectService.getProjectByProjectId(customerSpace, projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Cannot create source under project %s", projectId));
+        }
+        if (StringUtils.isBlank(sourceId)) {
+            sourceId = generateRandomSourceId(customerSpace);
         }
         validateSourceId(customerSpace, sourceId);
         String relativePath = generateRelativePath(sourceId);

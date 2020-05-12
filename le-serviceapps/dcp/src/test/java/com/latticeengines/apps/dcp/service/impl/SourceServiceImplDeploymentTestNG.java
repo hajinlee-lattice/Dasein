@@ -61,7 +61,7 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
         Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId,
-                null, fieldDefinitionsRecord);
+                fieldDefinitionsRecord);
 
         Assert.assertNotNull(source);
 
@@ -87,7 +87,7 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         // create another source under same project
         Source source2 = sourceService.createSource(mainCustomerSpace, "TestSource2", projectId,
-                null, fieldDefinitionsRecord);
+                fieldDefinitionsRecord);
         Assert.assertNotEquals(source.getSourceId(), source2.getSourceId());
         s3Service.objectExist(dropBoxSummary.getBucket(),
                 dropBoxService.getDropBoxPrefix() + "/" + source2.getRelativePathUnderDropfolder() + "drop/");

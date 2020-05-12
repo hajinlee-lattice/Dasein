@@ -199,12 +199,12 @@ public class SourceServiceImpl implements SourceService {
     }
 
     @Override
-    public Source updateSource(String sourceId, UpdateSourceRequest updateSourceRequest) {
+    public Source updateSource(UpdateSourceRequest updateSourceRequest) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         if (customerSpace == null) {
             throw new LedpException(LedpCode.LEDP_18217);
         }
-        return sourceProxy.updateSource(customerSpace.toString(), sourceId, updateSourceRequest);
+        return sourceProxy.updateSource(customerSpace.toString(), updateSourceRequest);
     }
 
     @Override

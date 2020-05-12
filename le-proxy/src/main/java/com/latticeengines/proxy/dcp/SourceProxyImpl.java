@@ -33,9 +33,9 @@ public class SourceProxyImpl extends MicroserviceRestApiProxy implements SourceP
     }
 
     @Override
-    public Source updateSource(String customerSpace, String sourceId, UpdateSourceRequest updateSourceRequest) {
-        String baseUrl = "/customerspaces/{customerSpace}/source/sourceId/{sourceId}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), sourceId);
+    public Source updateSource(String customerSpace, UpdateSourceRequest updateSourceRequest) {
+        String baseUrl = "/customerspaces/{customerSpace}/source";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
         return put("update dcp source", url, updateSourceRequest, Source.class);
     }
 

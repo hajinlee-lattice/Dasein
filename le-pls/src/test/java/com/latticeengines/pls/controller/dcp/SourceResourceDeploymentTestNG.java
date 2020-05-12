@@ -14,7 +14,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -46,7 +45,6 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(SourceResourceDeploymentTestNG.class);
 
-    private static final String TEST_FILE_NAME = "Account_base.csv";
     @Inject
     private ImportFileProxy importFileProxy;
 
@@ -119,9 +117,9 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     @Test(groups = "deployment")
     public void testFieldDefinitions() {
-        Resource csvResource = new ClassPathResource("com/latticeengines/pls/end2end/cdlCSVImport/Account_base.csv",
-                Thread.currentThread().getContextClassLoader());
-        SourceFileInfo testSourceFile = importFileProxy.uploadFile(TEST_FILE_NAME, csvResource);
+        Resource csvResource = new MultipartFileResource(testArtifactService.readTestArtifactAsStream(TEST_DATA_DIR,
+                TEST_DATA_VERSION, TEST_ACCOUNT_DATA_FILE), TEST_ACCOUNT_DATA_FILE);
+        SourceFileInfo testSourceFile = importFileProxy.uploadFile(TEST_ACCOUNT_DATA_FILE, csvResource);
         FetchFieldDefinitionsResponse fetchResponse = testSourceProxy.fetchDefinitions(null,
                 EntityType.Accounts.name(),
                 testSourceFile.getName());
@@ -152,7 +150,8 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         updateSourceRequest.setDisplayName("testSourceAfterUpdate");
         updateSourceRequest.setFieldDefinitionsRecord(validateRequest.getCurrentFieldDefinitionsRecord());
         updateSourceRequest.setImportFile(testSourceFile.getName());
-        Source retrievedSource = testSourceProxy.updateSource(sourceId, updateSourceRequest);
+        updateSourceRequest.setSourceId(sourceId);
+        Source retrievedSource = testSourceProxy.updateSource(updateSourceRequest);
         Assert.assertNotNull(retrievedSource);
 
         log.info("test get mappings after updates");

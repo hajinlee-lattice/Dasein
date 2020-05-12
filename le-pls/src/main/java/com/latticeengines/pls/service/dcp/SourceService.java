@@ -14,7 +14,7 @@ public interface SourceService {
 
     Source createSource(SourceRequest sourceRequest);
 
-    Source updateSource(String sourceId, UpdateSourceRequest updateSourceRequest);
+    Source updateSource(UpdateSourceRequest updateSourceRequest);
 
     Source getSource(String sourceId);
 
