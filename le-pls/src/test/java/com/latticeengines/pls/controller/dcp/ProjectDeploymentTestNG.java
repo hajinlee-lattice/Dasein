@@ -17,10 +17,10 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 
-public class ProjectDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class ProjectDeploymentTestNG extends DCPDeploymentTestNGBase {
 
     private static final String DISPLAY_NAME = "testProject";
     private static final String PROJECT_ID = "testProject";

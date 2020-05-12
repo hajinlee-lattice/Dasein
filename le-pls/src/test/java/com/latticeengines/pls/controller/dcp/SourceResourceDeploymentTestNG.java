@@ -30,28 +30,20 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.functionalframework.DCPDeploymentTestNGBase;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestProjectProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestSourceProxy;
-import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
-public class SourceResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
 
-    private static final String TEST_TEMPLATE_DIR = "le-serviceapps/dcp/deployment/template";
-    private static final String TEST_TEMPLATE_NAME = "dcp-accounts-hard-coded.json";
-    private static final String TEST_TEMPLATE_VERSION = "1";
     private static final String TEST_FILE_NAME = "Account_base.csv";
-
 
     @Inject
     private TestProjectProxy testProjectProxy;
 
     @Inject
     private TestSourceProxy testSourceProxy;
-
-    @Inject
-    private TestArtifactService testArtifactService;
 
     @Inject
     private ModelingFileUploadProxy fileUploadProxy;

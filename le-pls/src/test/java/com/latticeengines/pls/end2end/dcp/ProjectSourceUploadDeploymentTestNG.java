@@ -54,19 +54,12 @@ import com.latticeengines.proxy.exposed.dcp.DCPProxy;
 
 public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase {
 
-
     private static final Logger log = LoggerFactory.getLogger(ProjectSourceUploadDeploymentTestNG.class);
 
     private static final String PROJECT_NAME = "testProjectName";
-
     private static final String PROJECT_ID = "testProjectId";
-
     private static final String SOURCE_NAME = "testSourceName";
-
     private static final String SOURCE_ID = "SourceId";
-
-    private static final String TEST_DATA_VERSION = "1";
-    private static final String TEST_ACCOUNT_DATA_FILE = "Account_1_900.csv";
 
     @Inject
     private ProjectService projectService;
@@ -126,7 +119,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         sourceRequest.setSourceId(SOURCE_ID);
         Source source2 = sourceService.createSource(sourceRequest);
         verifySourceAndAccess(source2, response, true);
-        
+
         // Copy test file to drop folder, then trigger dcp workflow
         DropBoxSummary dropBoxSummary = dropBoxProxy.getDropBox(customerSpace);
         // pause source for s3 import

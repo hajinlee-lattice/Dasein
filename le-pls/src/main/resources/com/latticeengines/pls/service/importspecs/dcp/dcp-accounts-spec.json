@@ -4,9 +4,9 @@
     "fieldDefinitionsRecordsMap": {
         "Unique IDs": [
             {
-                "fieldName": "CustomerAccountId",
+                "fieldName": "CustomerId",
                 "fieldType": "TEXT",
-                "screenName": "Customer Account ID",
+                "screenName": "Customer ID",
                 "matchingColumnNames": [
                     "ID",
                     "ACCOUNT",
@@ -14,18 +14,8 @@
                     "ACCOUNT NUMBER",
                     "CUSTOMER ID",
                     "CUSTOMER ACCOUNT ID",
+                    "CUSTOMER NUMBER",
                     "EXTERNAL ID"
-                ],
-                "required": false
-            },
-            {
-                "fieldName": "InternalId",
-                "fieldType": "TEXT",
-                "screenName": "Internal ID",
-                "matchingColumnNames": [
-                    "INTERNAL ID",
-                    "MATCH ID",
-                    "ATLAS ID"
                 ],
                 "required": false
             }
