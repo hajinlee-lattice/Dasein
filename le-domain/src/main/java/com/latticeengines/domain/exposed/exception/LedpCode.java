@@ -869,6 +869,8 @@ public enum LedpCode {
     LEDP_40077("Import using the wrong template {0}, should use {1}."),
     LEDP_40078("S3 import file exceed size limit(100GB)."),
     LEDP_40079("Valid import records count exceed limit(10M)."),
+    LEDP_40080("orgName cannot be blank"), //
+    LEDP_40081("Connection with the same orgName already exists."),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //
