@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -160,6 +161,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     private TimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
+    private List<Long> jobQueryTime = new ArrayList<>();
+
     @Override
     public Map<String, Object> setSystemStatus(@NotNull String schedulerName) {
 
@@ -300,6 +303,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         // print all for migration tenants, shouldn't be too many at the same time
         log.info("Number of skipped test tenants = {}. Skipped migration tenants = {}", skippedTestTenants.size(),
                 skippedMigrationTenants);
+
+        if (CollectionUtils.isNotEmpty(jobQueryTime)) {
+            long totalQueryTime = jobQueryTime.stream().mapToLong(Long::longValue).sum();
+            log.info("query need retry workflowJob spend {} ms.", totalQueryTime);
+        }
 
         int canRunJobCount = concurrentProcessAnalyzeJobs - runningTotalCount;
         int canRunScheduleNowJobCount = maxScheduleNowJobCount - runningScheduleNowCount;
@@ -454,8 +462,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private Job getFailedPAJob(DataFeedExecution execution, String tenantId) {
-
+        Long beforeQuery = System.currentTimeMillis();
         Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), tenantId);
+        Long queryTime = System.currentTimeMillis() - beforeQuery;
+        jobQueryTime.add(queryTime);
+        log.info("query workflow {} need {} ms.", execution.getWorkflowId(), queryTime);
         if (job == null || !PA_JOB_TYPE.equalsIgnoreCase(job.getJobType()) || job.getJobStatus() != JobStatus.FAILED) {
             throw new IllegalArgumentException("the last pa job isn't failed in tenant " + tenantId);
         }
