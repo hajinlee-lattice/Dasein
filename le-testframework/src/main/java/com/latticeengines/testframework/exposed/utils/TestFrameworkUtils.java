@@ -6,7 +6,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.testng.Assert.ThrowingRunnable;
+
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
@@ -126,4 +130,28 @@ public final class TestFrameworkUtils {
         return TENANTID_PREFIX + String.valueOf(System.currentTimeMillis());
     }
 
+    public static void assertThrowsLedpExceptionWithCode(LedpCode code, ThrowingRunnable runnable) {
+        try {
+            runnable.run();
+        } catch (LedpException ledp) {
+            if (ledp.getCode().name().equals(code.name())) {
+                return;
+            } else {
+                String mismatchCodeMessage = String.format(
+                        "Expected LedpException with code %s to be thrown, but %s was thrown", code.name(),
+                        ledp.getCode().name());
+
+                throw new AssertionError(mismatchCodeMessage, ledp);
+            }
+        } catch (Throwable t) {
+            String mismatchMessage = String.format(
+                    "Expected LedpException with code %s to be thrown, but %s was thrown", code.name(),
+                    t.getClass().getSimpleName());
+
+            throw new AssertionError(mismatchMessage, t);
+        }
+        String message = String.format("Expected LedpException with code %s to be thrown, but nothing was thrown",
+                code.name());
+        throw new AssertionError(message);
+    }
 }

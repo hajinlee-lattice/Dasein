@@ -154,7 +154,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, websiteSystem,
                 standardTable);
-        setupWebVisitCatalogs(customerSpace, entityType, websiteSystem, dataFeedTask);
+        setupWebVisitCatalogs(customerSpace, entityType, dataFeedTask);
         return true;
     }
 
@@ -178,7 +178,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, simpleTemplateMetadata, entityType, websiteSystem,
                 standardTable);
-        setupWebVisitCatalogs(customerSpace, entityType, websiteSystem, dataFeedTask);
+        setupWebVisitCatalogs(customerSpace, entityType, dataFeedTask);
         return true;
     }
 
@@ -235,9 +235,8 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
         return dataFeedTask;
     }
 
-    private void setupWebVisitCatalogs(String customerSpace, EntityType entityType, S3ImportSystem websiteSystem,
-                                       DataFeedTask dataFeedTask) {
-        Tenant tenant = websiteSystem.getTenant();
+    private void setupWebVisitCatalogs(String customerSpace, EntityType entityType, DataFeedTask dataFeedTask) {
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         Catalog pathPtnCatalog = catalogEntityMgr.findByNameAndTenant(EntityType.WebVisitPathPattern.name(), tenant);
         Catalog srcMediumCatalog = catalogEntityMgr.findByNameAndTenant(EntityType.WebVisitSourceMedium.name(), tenant);
         if (EntityType.WebVisit == entityType) {

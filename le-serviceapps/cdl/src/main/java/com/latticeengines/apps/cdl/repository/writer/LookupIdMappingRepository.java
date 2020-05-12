@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.repository.writer;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
@@ -12,4 +14,6 @@ public interface LookupIdMappingRepository
     LookupIdMap findById(String id);
 
     LookupIdMap findByOrgIdAndExternalSystemType(String orgId, CDLExternalSystemType externalSystemType);
+    
+    List<LookupIdMap> findAllByOrgName(String orgName);
 }

@@ -15,6 +15,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,10 +200,12 @@ public class QueryFunctionalTestNGBase extends AbstractTestNGSpringContextTests 
         if (version >= 3) {
             tblPathMap = new HashMap<>();
             for (TableRoleInCollection role: QueryTestUtils.getRolesInAttrRepo()) {
-                String tblName = QueryTestUtils.getServingStoreName(role, version);
                 String path = pathMap.get(role);
-                tblPathMap.put(tblName, path);
-                attrRepo.changeServingStoreTableName(role, tblName);
+                if (StringUtils.isNotBlank(path)) {
+                    String tblName = QueryTestUtils.getServingStoreName(role, version);
+                    tblPathMap.put(tblName, path);
+                    attrRepo.changeServingStoreTableName(role, tblName);
+                }
             }
         }
         uploadTablesToHdfs(attrRepo.getCustomerSpace(), version);

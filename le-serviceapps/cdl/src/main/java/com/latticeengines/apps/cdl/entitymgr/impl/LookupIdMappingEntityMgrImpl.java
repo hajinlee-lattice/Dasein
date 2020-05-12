@@ -77,6 +77,8 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public LookupIdMap createExternalSystem(LookupIdMap lookupIdsMap) {
+        checkValidOrgName(lookupIdsMap);
+
         Tenant tenant = MultiTenantContext.getTenant();
         lookupIdsMap.setTenant(tenant);
         lookupIdsMap.setId(UUID.randomUUID().toString());
@@ -115,7 +117,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public LookupIdMap updateLookupIdMap(String id, LookupIdMap lookupIdMap) {
+    public LookupIdMap updateLookupIdMap(LookupIdMap lookupIdMap) {
         Tenant tenant = MultiTenantContext.getTenant();
 
         if (lookupIdMap.getExternalAuthentication() != null) {
@@ -126,6 +128,8 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
                     extSysAuthenticationDao.updateAuthentication(lookupIdMap.getExternalAuthentication());
             lookupIdMap.setExternalAuthentication(updatedAuth);
         }
+
+        checkValidOrgName(lookupIdMap);
 
         if (lookupIdMap.getExportFieldMetadataMappings() != null) {
             List<ExportFieldMetadataMapping> updatedFieldMetadataMapping = exportFieldMetadataMappingEntityMgr
@@ -141,11 +145,24 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
         return lookupIdMap;
     }
 
+    private void checkValidOrgName(LookupIdMap lookupIdMap) {
+        if (StringUtils.isBlank(lookupIdMap.getOrgName())) {
+            throw new LedpException(LedpCode.LEDP_40080);
+        }
+
+        List<LookupIdMap> lookupIdMapWithSameOrgNameList = lookupIdMappingRepository.findAllByOrgName(lookupIdMap.getOrgName());
+
+        for (LookupIdMap lookupIdMapWithSameOrgName : lookupIdMapWithSameOrgNameList) {
+            if (!lookupIdMapWithSameOrgName.getPid().equals(lookupIdMap.getPid())) {
+                throw new LedpException(LedpCode.LEDP_40081);
+            }
+        }
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteLookupIdMap(String id) {
         LookupIdMap existingLookupIdMap = lookupIdMappingRepository.findById(id);
         getDao().delete(existingLookupIdMap);
     }
-
 }

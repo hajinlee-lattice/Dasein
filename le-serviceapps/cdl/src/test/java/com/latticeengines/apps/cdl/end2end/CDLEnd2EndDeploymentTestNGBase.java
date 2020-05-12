@@ -298,7 +298,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // match test (txn data distribution is different for txn test with and
     // without entity match)
     // static final Long DAILY_TXN_UT_EM = 50863L;
-    static final Long DAILY_TXN_UT_EM = 51039L;
+    static final Long DAILY_TXN_UT_EM = 51033L;
     // Number of aggregated period transaction after ProcessTransaction test
     static final Long PERIOD_TRANSACTION_PT = 62550L;
     // Number of aggregated period transaction after ProcessTransaction entity
@@ -311,7 +311,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
     // match test (txn data distribution is different for txn test with and
     // without entity match)
     // static final Long PERIOD_TRANSACTION_UT_EM = 75183L;
-    static final Long PERIOD_TRANSACTION_UT_EM = 75640L;
+    static final Long PERIOD_TRANSACTION_UT_EM = 75586L;
     // Number of total purchase history attributes after ProcessTransaction test
     static final Long TOTAL_PURCHASE_HISTORY_PT = 5L;
     // Number of total purchase history attributes after UpdateTransaction test

@@ -13,7 +13,7 @@ public interface LookupIdMappingEntityMgr {
 
     LookupIdMap getLookupIdMap(String id);
 
-    LookupIdMap updateLookupIdMap(String id, LookupIdMap lookupIdMap);
+    LookupIdMap updateLookupIdMap(LookupIdMap lookupIdMap);
 
     void deleteLookupIdMap(String id);
 
