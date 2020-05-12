@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
@@ -34,6 +36,8 @@ import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 @Component
 public class AttributeSetDecoratorImpl implements AttributeSetDecoratorFac {
+
+    private static final Logger log = LoggerFactory.getLogger(AttributeSetDecoratorImpl.class);
 
     private final AttributeSetEntityMgr attributeSetEntityMgr;
 
