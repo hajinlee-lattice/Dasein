@@ -140,7 +140,14 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getDropFilePath()));
         Assert.assertFalse(StringUtils.isEmpty(upload.getUploadConfig().getUploadRawFilePath()));
-        verifyErrorFile(upload);
+        // Only verify the Error File if there are errors during ingestion and thus the file exists.
+        if (upload.getStatistics().getImportStats().getErrorCnt() > 0) {
+            System.out.println("Found " + upload.getStatistics().getImportStats().getErrorCnt() +
+                    " errors.  Verifying error file.");
+            verifyErrorFile(upload);
+        } else {
+            System.out.println("No ingestion errors found, skipping error file validation.");
+        }
         verifyMatchResult(upload);
         verifyUploadStats(upload);
         verifyDownload(upload);
