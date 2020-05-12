@@ -142,8 +142,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private RatingModel publishedIteration;
 
-    @Column(name = "TEAM_ID")
-    @JsonProperty("teamId")
     private String teamId;
 
     public static String generateIdStr() {
@@ -534,6 +532,17 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
             log.error(new LedpException(LedpCode.LEDP_40021, e, new String[] { defaultName }).getMessage(), e);
         }
         return defaultName;
+    }
+
+    @Column(name = "TEAM_ID")
+    @JsonProperty("teamId")
+    public String getTeamId() {
+        return teamId;
+    }
+
+    @JsonProperty("teamId")
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
     public enum ScoreType {

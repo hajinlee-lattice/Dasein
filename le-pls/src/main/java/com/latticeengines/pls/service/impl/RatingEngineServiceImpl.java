@@ -1,8 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,7 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -45,6 +51,7 @@ import com.latticeengines.pls.service.RatingEngineService;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineDashboardProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.security.exposed.service.TeamService;
 
 @Component("ratingEngineService")
 public class RatingEngineServiceImpl implements RatingEngineService {
@@ -60,10 +67,32 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     @Inject
     private RatingCoverageProxy ratingCoverageProxy;
 
+    @Inject
+    private BatonService batonService;
+
+    @Inject
+    private TeamService teamService;
+
     @Override
     public List<RatingEngineSummary> getRatingEngineSummaries(String status, String type, Boolean publishedRatingsOnly) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, publishedRatingsOnly);
+        List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, publishedRatingsOnly);
+        Set<String> teamIds = teamService.getTeamIdsInContext();
+        boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
+        Map<String, GlobalTeam> globalTeamMap = teamFeatureEnabled ? teamService.getTeamsInContext(false, true)
+                .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam)) : new HashMap<>();
+        for (RatingEngineSummary ratingEngineSummary : ratingEngineSummaries) {
+            setTeamFields(ratingEngineSummary, globalTeamMap.get(ratingEngineSummary.getTeamId()), teamIds);
+        }
+        return ratingEngineSummaries;
+    }
+
+    private void setTeamFields(RatingEngineSummary ratingEngineSummary, GlobalTeam globalTeam, Set<String> teamIds) {
+        ratingEngineSummary.setTeam(globalTeam);
+        String teamId = ratingEngineSummary.getTeamId();
+        if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
+            ratingEngineSummary.setViewOnly(true);
+        }
     }
 
     @Override
@@ -104,7 +133,14 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     @Override
     public RatingEngineDashboard getRatingEngineDashboardById(String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineDashboardProxy.getRatingEngineDashboardById(tenant.getId(), ratingEngineId);
+        RatingEngineDashboard ratingEngineDashboard = ratingEngineDashboardProxy.getRatingEngineDashboardById(tenant.getId(), ratingEngineId);
+        if (ratingEngineDashboard != null && ratingEngineDashboard.getSummary() != null) {
+            RatingEngineSummary ratingEngineSummary = ratingEngineDashboard.getSummary();
+            boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
+            setTeamFields(ratingEngineSummary, teamFeatureEnabled ?
+                    teamService.getTeamInContext(ratingEngineSummary.getTeamId()) : null, teamService.getTeamIdsInContext());
+        }
+        return ratingEngineDashboard;
     }
 
     @Override
