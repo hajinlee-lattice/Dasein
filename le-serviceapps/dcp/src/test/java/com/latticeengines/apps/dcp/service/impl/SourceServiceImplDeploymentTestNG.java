@@ -75,7 +75,8 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(dataFeedTasks.size(), 1);
         Table template = dataFeedTasks.get(0).getImportTemplate();
         Assert.assertNotNull(template);
-        Assert.assertNotNull(template.getAttribute(InterfaceName.CustomerAccountId.name()));
+        Assert.assertNotNull(template.getAttribute(InterfaceName.CompanyName.name()),
+                "getAttribute on CompanyName returned mull");
 
         DropBoxSummary dropBoxSummary = dropBoxService.getDropBoxSummary();
 

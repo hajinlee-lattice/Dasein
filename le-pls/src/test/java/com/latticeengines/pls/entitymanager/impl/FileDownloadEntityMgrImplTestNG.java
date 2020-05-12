@@ -16,7 +16,6 @@ import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
 public class FileDownloadEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
-
     @Inject
     private FileDownloadEntityMgr fileDownloadEntityMgr;
 
