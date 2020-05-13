@@ -1,7 +1,11 @@
 package com.latticeengines.app.exposed.service.impl;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,14 +29,20 @@ import com.latticeengines.app.exposed.download.DlFileHttpDownloader;
 import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.AttributeService;
+import com.latticeengines.app.exposed.service.FileDownloadService;
+import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.DataLicense;
+import com.latticeengines.domain.exposed.pls.LatticeInsightsDownloadConfig;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
@@ -73,9 +83,13 @@ public class AttributeServiceImpl implements AttributeService {
     @Inject
     private BatonService batonService;
 
+    @Inject
+    private FileDownloadService fileDownloadService;
+
     @PostConstruct
     private void postConstruct() {
         columnMetadataProxy.scheduleLoadColumnMetadataCache();
+        FileDownloaderRegistry.register(this);
     }
 
     @SuppressWarnings("rawtypes")
@@ -265,6 +279,37 @@ public class AttributeServiceImpl implements AttributeService {
     public Integer getSelectedAttributePremiumCount(Tenant tenant,
             Boolean considerInternalAttributes) {
         return getSelectedAttrCount(tenant, Boolean.TRUE, considerInternalAttributes);
+    }
+
+    @Override
+    public Class<LatticeInsightsDownloadConfig> configClz() {
+        return LatticeInsightsDownloadConfig.class;
+    }
+
+    @Override
+    public String getDownloadAttrsToken(boolean isSelected) {
+        LatticeInsightsDownloadConfig config = new LatticeInsightsDownloadConfig();
+        config.setOnlySelectedAttrs(isSelected);
+        return fileDownloadService.generateDownloadToken(config);
+    }
+
+    @Override
+    public void downloadByConfig(LatticeInsightsDownloadConfig downloadConfig, HttpServletRequest request,
+                                 HttpServletResponse response) throws IOException {
+        Tenant tenant = MultiTenantContext.getTenant();
+        Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
+        DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+        String dateString = dateFormat.format(new Date());
+        String fileName = downloadConfig.isOnlySelectedAttrs()
+                ? String.format("selectedEnrichmentAttributes_%s.csv", dateString)
+                : String.format("enrichmentAttributes_%s.csv", dateString);
+        downloadAttributes(request, response, "application/csv", fileName, tenant,
+                downloadConfig.isOnlySelectedAttrs(), considerInternalAttributes);
+    }
+
+    private boolean shouldConsiderInternalAttributes(Tenant tenant) {
+        CustomerSpace space = CustomerSpace.parse(tenant.getId());
+        return batonService.isEnabled(space, LatticeFeatureFlag.ENABLE_INTERNAL_ENRICHMENT_ATTRIBUTES);
     }
 
     protected Integer getSelectedAttrCount(Tenant tenant, Boolean countOnlySelectedPremiumAttr,

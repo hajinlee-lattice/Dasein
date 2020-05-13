@@ -34,6 +34,7 @@ import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
@@ -194,6 +195,7 @@ public class LatticeInsightsResource {
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
+    // M37: This api is deprecated (replaced by the token api below)
     @RequestMapping(value = INSIGHTS_PATH
             + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -211,6 +213,16 @@ public class LatticeInsightsResource {
                 : String.format("enrichmentAttributes_%s.csv", dateString);
         attributeService.downloadAttributes(request, response, "application/csv", fileName, tenant,
                 onlySelectedAttributes, considerInternalAttributes);
+    }
+
+    @GetMapping(value = INSIGHTS_PATH + "/downloadcsv-token")
+    @ResponseBody
+    @ApiOperation(value = "Download lead enrichment attributes")
+    public ResponseDocument<String> downloadEnrichmentCSVToken(@ApiParam(value = "Should get only selected attribute") //
+                                            @RequestParam(value = "onlySelectedAttributes", required = false) //
+                                              Boolean onlySelectedAttributes) {
+        String token = attributeService.getDownloadAttrsToken(Boolean.TRUE.equals(onlySelectedAttributes));
+        return ResponseDocument.successResponse(token);
     }
 
     private static final String SEGMENT_CONTACTS_FILE_LOCAL_PATH = "com/latticeengines/pls/controller/internal/export-state-%s.csv";

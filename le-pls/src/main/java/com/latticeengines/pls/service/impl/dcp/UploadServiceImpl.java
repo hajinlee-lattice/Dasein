@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl.dcp;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,7 +30,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.app.exposed.service.FileDownloadService;
+import com.latticeengines.app.exposed.service.FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -40,15 +45,13 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflo
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.pls.service.AbstractFileDownloadService;
-import com.latticeengines.pls.service.FileDownloadService;
 import com.latticeengines.pls.service.dcp.SourceFileUploadService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Service
-public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDownloadConfig> implements UploadService {
+public class UploadServiceImpl implements UploadService, FileDownloader<UploadFileDownloadConfig> {
 
     private static final Logger log = LoggerFactory.getLogger(UploadServiceImpl.class);
 
@@ -63,7 +66,7 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
 
     @Inject
     private Configuration yarnConfiguration;
-  
+
     @Inject
     private EmailService emailService;
 
@@ -79,6 +82,11 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
     @Value("${aws.customer.s3.bucket}")
     private String s3Bucket;
 
+    @PostConstruct
+    public void postConstruct() {
+        FileDownloaderRegistry.register(this);
+    }
+
     @Override
     public List<UploadDetails> getAllBySourceId(String sourceId, Upload.Status status) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
@@ -92,9 +100,13 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
     }
 
     @Override
+    public Class<UploadFileDownloadConfig> configClz() {
+        return UploadFileDownloadConfig.class;
+    }
+
+    @Override
     public void downloadByConfig(UploadFileDownloadConfig downloadConfig, HttpServletRequest request,
-                               HttpServletResponse response)
-            throws Exception {
+                               HttpServletResponse response) throws IOException {
         response.setHeader("Content-Encoding", "gzip");
         response.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + "upload.zip" + "\"");
@@ -176,7 +188,7 @@ public class UploadServiceImpl extends AbstractFileDownloadService<UploadFileDow
     public String generateToken(String uploadId) {
         UploadFileDownloadConfig config = new UploadFileDownloadConfig();
         config.setUploadId(uploadId);
-        return fileDownloadService.generateDownload(config);
+        return fileDownloadService.generateDownloadToken(config);
     }
 
     @Override

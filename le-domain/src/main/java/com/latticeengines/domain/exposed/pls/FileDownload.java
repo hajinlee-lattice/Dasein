@@ -4,6 +4,7 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -37,7 +38,7 @@ public class FileDownload implements HasPid, HasTenant {
     private Long pid;
 
     @JsonIgnore
-    @ManyToOne(cascade = {CascadeType.MERGE})
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_TENANT_ID", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Tenant tenant;
