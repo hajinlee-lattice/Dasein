@@ -30,7 +30,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.latticeengines.app.exposed.service.FileDownloadService;
+import com.latticeengines.app.exposed.service.FileDownloader;
 import com.latticeengines.app.exposed.service.ImportFromS3Service;
+import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.Upload;
@@ -42,11 +45,8 @@ import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflo
 import com.latticeengines.domain.exposed.util.HdfsToS3PathBuilder;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.monitor.exposed.service.EmailService;
-import com.latticeengines.app.exposed.service.FileDownloadService;
-import com.latticeengines.app.exposed.service.FileDownloader;
 import com.latticeengines.pls.service.dcp.SourceFileUploadService;
 import com.latticeengines.pls.service.dcp.UploadService;
-import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 

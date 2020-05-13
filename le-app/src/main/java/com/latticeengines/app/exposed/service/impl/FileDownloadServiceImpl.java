@@ -11,14 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.HashUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.pls.FileDownload;
-import com.latticeengines.domain.exposed.pls.FileDownloadConfig;
 import com.latticeengines.app.exposed.entitymanager.FileDownloadEntityMgr;
 import com.latticeengines.app.exposed.service.FileDownloadService;
 import com.latticeengines.app.exposed.service.FileDownloader;
 import com.latticeengines.app.exposed.util.FileDownloaderRegistry;
+import com.latticeengines.common.exposed.util.HashUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.pls.FileDownload;
+import com.latticeengines.domain.exposed.pls.FileDownloadConfig;
 
 @Component("fileDownloadService")
 public class FileDownloadServiceImpl implements FileDownloadService {
