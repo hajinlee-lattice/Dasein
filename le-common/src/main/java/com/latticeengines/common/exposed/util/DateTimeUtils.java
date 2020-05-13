@@ -141,4 +141,9 @@ public final class DateTimeUtils {
         String newDayPeriod = dateOnlyFormat.format(newDate);
         return dateToDayPeriod(newDayPeriod);
     }
+
+    public static String subtractDays(String date, Integer days) {
+        Integer dateId = dateToDayPeriod(date);
+        return dayPeriodToDate(subtractDays(dateId, days));
+    }
 }
