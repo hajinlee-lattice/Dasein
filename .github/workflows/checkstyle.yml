@@ -26,5 +26,5 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Build with Maven
-      run: bash $GITHUB_WORKSPACE/le-dev/scripts/lint.sh
+    - name: Validate CheckStyle
+      run: mvn -T8 -q -Pcheckstyle validate
