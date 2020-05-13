@@ -98,6 +98,12 @@ public class SourceResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         Assert.assertEquals(getSource.getSourceId(), source.getSourceId());
         Assert.assertEquals(getSource.getImportStatus(), DataFeedTask.S3ImportStatus.Pause);
 
+        testSourceProxy.reactivateSourceById(source.getSourceId());
+        getSource = testSourceProxy.getSource(source.getSourceId());
+        Assert.assertNotNull(getSource);
+        Assert.assertEquals(getSource.getSourceId(), source.getSourceId());
+        Assert.assertEquals(getSource.getImportStatus(), DataFeedTask.S3ImportStatus.Active);
+
         List<Source> allSources = testSourceProxy.getSourcesByProject(projectDetail.getProjectId());
         Assert.assertNotNull(allSources);
         Assert.assertEquals(allSources.size(), 2);

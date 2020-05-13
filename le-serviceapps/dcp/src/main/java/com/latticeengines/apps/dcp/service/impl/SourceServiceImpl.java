@@ -262,4 +262,16 @@ public class SourceServiceImpl implements SourceService {
                     fieldDefinitionsRecord);
         }
     }
+
+    @Override
+    public Boolean reactivateSource(String customerSpace, String sourceId) {
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
+        if (dataFeedTask == null || dataFeedTask.getPid() == null) {
+            throw new RuntimeException(String.format("Cannot find source %s for update!", sourceId));
+        }
+        if(dataFeedTask.getS3ImportStatus().equals(DataFeedTask.S3ImportStatus.Pause)){
+            dataFeedProxy.setDataFeedTaskS3ImportStatus(customerSpace, dataFeedTask.getPid(), DataFeedTask.S3ImportStatus.Active);
+        }
+        return true;
+    }
 }

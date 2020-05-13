@@ -19,4 +19,6 @@ public interface SourceProxy {
     Boolean deleteSource(String customerSpace, String sourceId);
 
     Boolean pauseSource(String customerSpace, String sourceId);
+
+    Boolean reactivateSource(String toString, String sourceId);
 }

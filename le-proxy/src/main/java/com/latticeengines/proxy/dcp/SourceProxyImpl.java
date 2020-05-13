@@ -77,4 +77,16 @@ public class SourceProxyImpl extends MicroserviceRestApiProxy implements SourceP
             return Boolean.FALSE;
         }
     }
+
+    @Override
+    public Boolean reactivateSource(String customerSpace, String sourceId) {
+        String baseUrl = "/customerspaces/{customerSpace}/source/sourceId/{sourceId}/reactivate";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), sourceId);
+        try {
+            put("reactivate source", url);
+            return Boolean.TRUE;
+        } catch (RuntimeException e) {
+            return Boolean.FALSE;
+        }
+    }
 }
