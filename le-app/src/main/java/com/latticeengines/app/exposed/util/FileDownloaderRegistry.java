@@ -3,8 +3,8 @@ package com.latticeengines.app.exposed.util;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.latticeengines.domain.exposed.pls.FileDownloadConfig;
 import com.latticeengines.app.exposed.service.FileDownloader;
+import com.latticeengines.domain.exposed.pls.FileDownloadConfig;
 
 public final class FileDownloaderRegistry {
 
