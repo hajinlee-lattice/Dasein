@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -63,7 +63,7 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamInContext(String teamId) {
-        if (StringUtils.isNotEmpty(teamId)) {
+        if (!TeamUtils.isGlobalTeam(teamId)) {
             Session session = MultiTenantContext.getSession();
             if (session != null) {
                 List<String> teamIds = session.getTeamIds();

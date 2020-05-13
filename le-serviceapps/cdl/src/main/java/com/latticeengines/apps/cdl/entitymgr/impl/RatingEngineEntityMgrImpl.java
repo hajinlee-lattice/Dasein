@@ -35,6 +35,7 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -322,7 +323,7 @@ public class RatingEngineEntityMgrImpl //
                 updateCustomEventModelingType(retrievedRatingEngine, CustomEventModelingType.LPI);
             }
         }
-
+        updateTeamId(retrievedRatingEngine, ratingEngine.getTeamId());
         retrievedRatingEngine.setUpdated(new Date());
         log.info("================\n\n" + JsonUtils.serialize(retrievedRatingEngine) + "\n\n");
         ratingEngineDao.update(retrievedRatingEngine);
@@ -387,7 +388,7 @@ public class RatingEngineEntityMgrImpl //
             ratingEngineNote.setId(UUID.randomUUID().toString());
             ratingEngine.addRatingEngineNote(ratingEngineNote);
         }
-
+        updateTeamId(ratingEngine, ratingEngine.getTeamId());
         AdvancedModelingConfig advancedModelingConfig = null;
         AdvancedRatingConfig advancedRatingConfig = ratingEngine.getAdvancedRatingConfig();
         switch (type) {
@@ -502,6 +503,12 @@ public class RatingEngineEntityMgrImpl //
                         .put(type, bucketAccountRestriction));
     }
 
+    private void updateTeamId(RatingEngine ratingEngine, String teamId) {
+        if (StringUtils.isNotEmpty(teamId)) {
+            ratingEngine.setTeamId(teamId.equals(TeamUtils.GLOBAL_TEAM_ID) ? null : teamId);
+        }
+    }
+
     @SuppressWarnings("deprecation")
     private void createAIModel(RatingEngine ratingEngine, AdvancedModelingConfig advancedModelingConfig) {
         AIModel aiModel = new AIModel();
@@ -511,7 +518,6 @@ public class RatingEngineEntityMgrImpl //
         aiModel.setRatingEngine(ratingEngine);
         aiModel.setAdvancedModelingConfig(advancedModelingConfig);
         aiModelDao.create(aiModel);
-
         ratingEngine.setLatestIteration(aiModel);
         ratingEngineDao.update(ratingEngine);
 

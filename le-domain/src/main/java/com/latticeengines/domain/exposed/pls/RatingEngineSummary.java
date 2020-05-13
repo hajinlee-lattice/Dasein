@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.pls.cdl.rating.AdvancedRatingConfig;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -64,6 +65,10 @@ public class RatingEngineSummary {
     private Boolean completed;
     @JsonProperty("viewOnly")
     private boolean viewOnly;
+    @JsonProperty("team")
+    private GlobalTeam team;
+    @JsonProperty("teamId")
+    private String teamId;
 
     public RatingEngineSummary() {
     }
@@ -266,6 +271,22 @@ public class RatingEngineSummary {
 
     public void setViewOnly(boolean viewOnly) {
         this.viewOnly = viewOnly;
+    }
+
+    public GlobalTeam getTeam() {
+        return team;
+    }
+
+    public void setTeam(GlobalTeam team) {
+        this.team = team;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
     }
 
     @Override

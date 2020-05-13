@@ -80,27 +80,31 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
                 return backendSegments;
             } else {
                 Map<String, GlobalTeam> globalTeamMap;
+                Set<String> teamIds = teamService.getTeamIdsInContext();
                 boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
-                if (teamFeatureEnabled && filter) {
-                    globalTeamMap = teamService.getTeamsFromSession(false, true)
-                            .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
-                    return backendSegments.stream().filter(segment -> StringUtils.isEmpty(segment.getTeamId()) || globalTeamMap.containsKey(segment.getTeamId())) //
-                            .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()),
-                                    teamService.getTeamIdsInContext()))
-                            .sorted((seg1, seg2) -> Boolean.compare( //
-                                    Boolean.TRUE.equals(seg1.getMasterSegment()), //
-                                    Boolean.TRUE.equals(seg2.getMasterSegment()) //
-                            )).collect(Collectors.toList());
+                if (teamFeatureEnabled) {
+                    if (filter) {
+                        globalTeamMap = teamService.getTeamsFromSession(false, true)
+                                .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
+                        return backendSegments.stream().filter(segment -> StringUtils.isEmpty(segment.getTeamId()) || globalTeamMap.containsKey(segment.getTeamId())) //
+                                .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
+                                .sorted((seg1, seg2) -> Boolean.compare( //
+                                        Boolean.TRUE.equals(seg1.getMasterSegment()), //
+                                        Boolean.TRUE.equals(seg2.getMasterSegment()) //
+                                )).collect(Collectors.toList());
+                    } else {
+                        globalTeamMap = teamService.getTeamsInContext(true, true)
+                                .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
+                    }
                 } else {
-                    globalTeamMap = teamFeatureEnabled ? teamService.getTeamsInContext(true, true)
-                            .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam)) : new HashMap<>();
-                    return backendSegments.stream() //
-                            .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamService.getTeamIdsInContext()))
-                            .sorted((seg1, seg2) -> Boolean.compare( //
-                                    Boolean.TRUE.equals(seg1.getMasterSegment()), //
-                                    Boolean.TRUE.equals(seg2.getMasterSegment()) //
-                            )).collect(Collectors.toList());
+                    globalTeamMap = new HashMap<>();
                 }
+                return backendSegments.stream() //
+                        .map(segment -> translateForFrontend(segment, globalTeamMap.get(segment.getTeamId()), teamIds))
+                        .sorted((seg1, seg2) -> Boolean.compare( //
+                                Boolean.TRUE.equals(seg1.getMasterSegment()), //
+                                Boolean.TRUE.equals(seg2.getMasterSegment()) //
+                        )).collect(Collectors.toList());
             }
         }
     }
@@ -262,14 +266,10 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             return null;
         }
         try {
-            if (globalTeam == null) {
-                segment.setTeamId(null);
-            } else {
-                segment.setTeam(globalTeam);
-                String teamId = segment.getTeamId();
-                if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
-                    segment.setViewOnly(true);
-                }
+            segment.setTeam(globalTeam);
+            String teamId = segment.getTeamId();
+            if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
+                segment.setViewOnly(true);
             }
             Restriction accountRestriction = segment.getAccountRestriction();
             if (accountRestriction == null) {

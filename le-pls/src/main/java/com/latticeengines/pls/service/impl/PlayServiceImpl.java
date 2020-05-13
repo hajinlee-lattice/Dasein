@@ -75,7 +75,6 @@ public class PlayServiceImpl implements PlayService {
     private void inflateSegment(Play play, GlobalTeam globalTeam, Set<String> teamIds) {
         MetadataSegment metadataSegment = play.getTargetSegment();
         if (globalTeam == null) {
-            metadataSegment.setTeamId(null);
             return;
         }
         String teamId = metadataSegment.getTeamId();
