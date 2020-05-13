@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.apps.dcp.service.ProjectService;
@@ -21,11 +22,14 @@ import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.DataFeedTaskUtils;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Service("sourceService")
@@ -41,6 +45,9 @@ public class SourceServiceImpl implements SourceService {
     private static final String TEMPLATE_NAME = "%s_Template";
     private static final String FEED_TYPE_PATTERN = "%s_%s"; // SystemName_SourceId;
     private static final String FULL_PATH_PATTERN = "%s/%s/%s"; // {bucket}/{dropfolder}/{project+source path}
+
+    @Inject
+    private SourceFileProxy sourceFileProxy;
 
     @Inject
     private ProjectService projectService;
@@ -61,21 +68,33 @@ public class SourceServiceImpl implements SourceService {
     private DropBoxService dropBoxService;
 
     @Override
-    public Source createSource(String customerSpace, String displayName, String projectId, FieldDefinitionsRecord fieldDefinitionsRecord) {
+    public Source createSource(String customerSpace, String displayName, String projectId,
+                               FieldDefinitionsRecord fieldDefinitionsRecord) {
         String sourceId = generateRandomSourceId(customerSpace);
         return createSource(customerSpace, displayName, projectId, sourceId, fieldDefinitionsRecord);
     }
 
     @Override
-    public Source createSource(String customerSpace, String displayName, String projectId, String sourceId, FieldDefinitionsRecord fieldDefinitionsRecord) {
+    public Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
+                               FieldDefinitionsRecord fieldDefinitionsRecord) {
+        return createSource(customerSpace, displayName, projectId, sourceId, null, fieldDefinitionsRecord);
+    }
+
+    @Override
+    public Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
+                               String importFile, FieldDefinitionsRecord fieldDefinitionsRecord) {
         Project project = projectService.getProjectByProjectId(customerSpace, projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Cannot create source under project %s", projectId));
         }
+        if (StringUtils.isBlank(sourceId)) {
+            sourceId = generateRandomSourceId(customerSpace);
+        }
         validateSourceId(customerSpace, sourceId);
         String relativePath = generateRelativePath(sourceId);
-        Table templateTable = importWorkflowSpecService.tableFromRecord(String.format(TEMPLATE_NAME, sourceId), false,
-                fieldDefinitionsRecord);
+
+        Table templateTable = getTableFromRecord(importFile, customerSpace, sourceId, fieldDefinitionsRecord);
+
         DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, project.getS3ImportSystem(), templateTable,
                 EntityType.fromDisplayNameToEntityType(fieldDefinitionsRecord.getSystemObject()), relativePath,
                 displayName, sourceId);
@@ -87,6 +106,28 @@ public class SourceServiceImpl implements SourceService {
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder + UPLOAD_FOLDER);
         }
         return source;
+    }
+
+    @Override
+    public Source updateSource(String customerSpace, String displayName, String sourceId, String importFile,
+                               FieldDefinitionsRecord fieldDefinitionsRecord) {
+        Table newTable = getTableFromRecord(importFile, customerSpace, sourceId, fieldDefinitionsRecord);
+
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
+        Preconditions.checkNotNull(dataFeedTask, String.format("Can't retrieve data feed task for source %s",
+                sourceId));
+
+        log.info("Found existing DataFeedTask template: {}", dataFeedTask.getTemplateDisplayName());
+        if (StringUtils.isNotBlank(displayName)) {
+            dataFeedTask.setSourceDisplayName(displayName);
+        }
+        Table existingTable = dataFeedTask.getImportTemplate();
+        if (!TableUtils.compareMetadataTables(existingTable, newTable)) {
+            Table mergedTable = TableUtils.mergeMetadataTables(existingTable, newTable);
+            dataFeedTask.setImportTemplate(mergedTable);
+        }
+        dataFeedProxy.updateDataFeedTask(customerSpace, dataFeedTask);
+        return convertToSource(customerSpace, dataFeedTask);
     }
 
     @Override
@@ -194,5 +235,31 @@ public class SourceServiceImpl implements SourceService {
 
     private String generateRelativePath(String sourceId) {
         return String.format(SOURCE_RELATIVE_PATH_PATTERN, sourceId);
+    }
+
+    private Table getTableFromRecord(String importFile, String customerSpace, String sourceId,
+                                    FieldDefinitionsRecord fieldDefinitionsRecord) {
+        if (StringUtils.isNotBlank(importFile)) {
+            SourceFile sourceFile = sourceFileProxy.findByName(customerSpace, importFile);
+            Preconditions.checkNotNull(sourceFile, String.format("Could not locate source file with name %s",
+                    importFile));
+            String newTableName = "SourceFile_" + sourceFile.getName().replace(".", "_");
+            Table newTable = importWorkflowSpecService.tableFromRecord(newTableName, false,
+                    fieldDefinitionsRecord);
+
+            // Delete old table associated with the source file from the database if it exists.
+            if (StringUtils.isNotBlank(sourceFile.getTableName())) {
+                metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());
+            }
+
+            // Associate the new table with the source file and add new table to the database.
+            metadataProxy.createTable(customerSpace, newTable.getName(), newTable);
+            sourceFile.setTableName(newTable.getName());
+            sourceFileProxy.update(customerSpace, sourceFile);
+            return newTable;
+        } else {
+            return importWorkflowSpecService.tableFromRecord(String.format(TEMPLATE_NAME, sourceId), false,
+                    fieldDefinitionsRecord);
+        }
     }
 }

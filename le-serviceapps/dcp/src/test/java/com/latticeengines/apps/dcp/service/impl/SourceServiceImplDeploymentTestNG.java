@@ -60,7 +60,8 @@ public class SourceServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
         InputStream specStream = testArtifactService.readTestArtifactAsStream(TEST_TEMPLATE_DIR, TEST_TEMPLATE_VERSION, TEST_TEMPLATE_NAME);
         FieldDefinitionsRecord fieldDefinitionsRecord = JsonUtils.deserialize(specStream, FieldDefinitionsRecord.class);
-        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId, fieldDefinitionsRecord);
+        Source source = sourceService.createSource(mainCustomerSpace, "TestSource", projectId,
+                fieldDefinitionsRecord);
 
         Assert.assertNotNull(source);
 

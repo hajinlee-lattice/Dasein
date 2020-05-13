@@ -1391,8 +1391,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             log.info("Found existing DataFeedTask template: {}", dataFeedTask.getTemplateDisplayName());
             printTableAttributes("DataFeedTask", dataFeedTask.getImportTemplate());
             Table existingTable = dataFeedTask.getImportTemplate();
-            if (!ImportWorkflowUtils.compareMetadataTables(existingTable, newTable)) {
-                Table mergedTable = ImportWorkflowUtils.mergeMetadataTables(existingTable, newTable);
+            if (!TableUtils.compareMetadataTables(existingTable, newTable)) {
+                Table mergedTable = TableUtils.mergeMetadataTables(existingTable, newTable);
                 printTableAttributes("Merged", mergedTable);
                 dataFeedTask.setImportTemplate(mergedTable);
                 dataFeedProxy.updateDataFeedTask(customerSpace.toString(), dataFeedTask);

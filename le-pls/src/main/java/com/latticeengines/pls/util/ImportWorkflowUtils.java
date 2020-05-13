@@ -46,7 +46,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldValidationMessage;
 import com.latticeengines.domain.exposed.pls.frontend.OtherTemplateData;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.ImportWorkflowSpecUtils;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 
@@ -70,90 +69,7 @@ public final class ImportWorkflowUtils {
     protected static final String SPLIT_CHART = "_";
 
 
-    // TODO(jwinter): Make sure all necessary fields are being compared.  Make sure it is ok to skip modeling fields.
-    // Compare two tables and return true if they are identical and false otherwise.
-    public static boolean compareMetadataTables(Table table1, Table table2) {
-        if ((table1 == null || table2 == null) && table1 != table2) {
-            return false;
-        }
-        if (!StringUtils.equals(table1.getName(), table2.getName())) {
-            return false;
-        }
-        if (table1.getAttributes().size() != table2.getAttributes().size()) {
-            return false;
-        }
-        HashMap<String, Attribute> table2Attrs = new HashMap<>();
-        for (Attribute attr2 : table2.getAttributes()) {
-            table2Attrs.put(attr2.getName(), attr2);
-        }
 
-
-        for (Attribute attr1 : table1.getAttributes()) {
-            if (!table2Attrs.containsKey(attr1.getName())) {
-                return false;
-            }
-            Attribute attr2 = table2Attrs.get(attr1.getName());
-            if (!StringUtils.equals(attr1.getDisplayName(), attr2.getDisplayName())) {
-                return false;
-            }
-            if (!StringUtils.equalsIgnoreCase(attr1.getPhysicalDataType(), attr2.getPhysicalDataType())) {
-                return false;
-            }
-            // TODO(jwinter): Do we need to check required?
-            if (attr1.getRequired() != attr2.getRequired()) {
-                return false;
-            }
-            if (!StringUtils.equals(attr1.getDateFormatString(), attr2.getDateFormatString())) {
-                return false;
-            }
-            if (!StringUtils.equals(attr1.getTimeFormatString(), attr2.getTimeFormatString())) {
-                return false;
-            }
-            if (!StringUtils.equals(attr1.getTimezone(), attr2.getTimezone())) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // Merge new metadata table into existing table.
-    // TODO(jwinter): It is concerning that modeling fields are not copied (eg. approvedUsage, category,
-    // logicalDataType).
-    public static Table mergeMetadataTables(Table existingTable, Table newTable) {
-        log.info("Merging table {} into table {}", newTable.getName(), existingTable.getName());
-
-        HashMap<String, Attribute> existingAttrMap = new HashMap<>();
-        for (Attribute attr : existingTable.getAttributes()) {
-            existingAttrMap.put(attr.getName(), attr);
-        }
-
-        for (Attribute newAttr : newTable.getAttributes()) {
-            if (!existingAttrMap.containsKey(newAttr.getName())) {
-                log.info("Copying over new attribute {}", newAttr.getName());
-                Attribute copyAttr = new Attribute(newAttr.getName());
-                // TODO(jwinter): Does this copy both field and properties?
-                AttributeUtils.copyPropertiesFromAttribute(newAttr, copyAttr);
-                existingTable.addAttribute(newAttr);
-            } else {
-                log.info("Copying over existing attribute {}", newAttr.getName());
-                // TODO(jwinter): Do we not have to copy more fields?
-                // TODO(jwinter): What about the property bag?
-                Attribute existingAttr = existingAttrMap.get(newAttr.getName());
-                existingAttr.setDisplayName(newAttr.getDisplayName());
-                // TODO(jwinter): I believe we need physicalDataType?
-                existingAttr.setRequired(newAttr.getRequired());
-                existingAttr.setPhysicalDataType(newAttr.getPhysicalDataType());
-                existingAttr.setDateFormatString(newAttr.getDateFormatString());
-                existingAttr.setTimeFormatString(newAttr.getTimeFormatString());
-                existingAttr.setTimezone(newAttr.getTimezone());
-                // TODO(jwinter): This is likely only for VisiDB import.
-                if (newAttr.getSourceAttrName() != null) {
-                    existingAttr.setSourceAttrName(newAttr.getSourceAttrName());
-                }
-            }
-        }
-        return existingTable;
-    }
 
     public static void validateFieldDefinitionRequestParameters(
             String requestType, String systemName, String systemType, String systemObject, String importFile)

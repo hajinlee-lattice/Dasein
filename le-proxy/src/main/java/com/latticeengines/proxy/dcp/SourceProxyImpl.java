@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.dcp.SourceProxy;
 
@@ -29,6 +30,13 @@ public class SourceProxyImpl extends MicroserviceRestApiProxy implements SourceP
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
 
         return post("create dcp source", url, sourceRequest, Source.class);
+    }
+
+    @Override
+    public Source updateSource(String customerSpace, UpdateSourceRequest updateSourceRequest) {
+        String baseUrl = "/customerspaces/{customerSpace}/source";
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace));
+        return put("update dcp source", url, updateSourceRequest, Source.class);
     }
 
     @Override
