@@ -92,8 +92,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private static final List<String> usageWithoutEnrichment = Arrays.asList(ColumnSelection.Predefined.Segment.getName(),
             ColumnSelection.Predefined.Model.getName(), ColumnSelection.Predefined.TalkingPoint.getName(), ColumnSelection.Predefined.CompanyProfile.getName());
 
-    private static final String DEFAULT_ATTRIBUTE_SET = "Default Group";
-
     private static final List<String> enrichmentGroup = Arrays.asList(ColumnSelection.Predefined.Enrichment.getName());
 
     private static final HashMap<String, String> usageToDisplayName = new HashMap<>();
@@ -998,19 +996,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public List<AttributeSet> getAttributeSets() {
         log.info("Get attribute set list");
         Tenant tenant = MultiTenantContext.getTenant();
-        List<AttributeSet> attributeSets = new ArrayList<>();
-        attributeSets.add(getDefaultAttributeSet());
-        List<AttributeSet> returnedAttributeSets = cdlAttrConfigProxy.getAttributeSets(tenant.getId());
-        if (CollectionUtils.isNotEmpty(returnedAttributeSets)) {
-            attributeSets.addAll(returnedAttributeSets);
-        }
-        return attributeSets;
-    }
-
-    public AttributeSet getDefaultAttributeSet() {
-        AttributeSet attributeSet = new AttributeSet();
-        attributeSet.setDisplayName(DEFAULT_ATTRIBUTE_SET);
-        return attributeSet;
+        return cdlAttrConfigProxy.getAttributeSets(tenant.getId());
     }
 
     @Override

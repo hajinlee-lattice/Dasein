@@ -56,6 +56,8 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     @Inject
     private AttributeSetEntityMgr attributeSetEntityMgr;
 
+    private static final String DEFAULT_ATTRIBUTE_SET = "Default Group";
+
     @Override
     protected List<ColumnMetadata> getSystemMetadata(BusinessEntity entity) {
         String tenantId = MultiTenantContext.getShortTenantId();
@@ -129,7 +131,19 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Override
     public List<AttributeSet> getAttributeSets() {
-        return attributeSetEntityMgr.findAll();
+        List<AttributeSet> attributeSets = new ArrayList<>();
+        attributeSets.add(getDefaultAttributeSet());
+        List<AttributeSet> returnedAttributeSets = attributeSetEntityMgr.findAll();
+        if (CollectionUtils.isNotEmpty(returnedAttributeSets)) {
+            attributeSets.addAll(returnedAttributeSets);
+        }
+        return attributeSets;
+    }
+
+    private AttributeSet getDefaultAttributeSet() {
+        AttributeSet attributeSet = new AttributeSet();
+        attributeSet.setDisplayName(DEFAULT_ATTRIBUTE_SET);
+        return attributeSet;
     }
 
     @Override
