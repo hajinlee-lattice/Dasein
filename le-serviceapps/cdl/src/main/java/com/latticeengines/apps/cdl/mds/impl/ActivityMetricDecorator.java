@@ -43,6 +43,7 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 import com.latticeengines.domain.exposed.util.OpportunityUtils;
 import com.latticeengines.domain.exposed.util.WebVisitUtils;
 
@@ -194,6 +195,9 @@ public class ActivityMetricDecorator implements Decorator {
             break;
         case AccountMarketingActivity:
         case ContactMarketingActivity:
+            String activityType = ActivityStoreUtils.getDimensionValueAsString(params,
+                    InterfaceName.ActivityTypeId.name(), InterfaceName.ActivityType.name(), tenant);
+            ActivityStoreUtils.setColumnMetadataUIProperties(cm, timeRange, activityType);
             // do nothing atm
             break;
         default:

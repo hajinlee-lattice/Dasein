@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.KeyDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.Sets;
-import com.latticeengines.domain.exposed.util.WebVisitUtils;
+import com.latticeengines.domain.exposed.util.ActivityStoreUtils;
 
 public enum Category {
     RATING("Lattice Ratings", 0), //
@@ -41,7 +41,7 @@ public enum Category {
     WEB_VISIT_PROFILE("My Website Visits", 17) {
         @Override
         public FilterOptions getFilterOptions() {
-            return WebVisitUtils.attrFilterOptions();
+            return ActivityStoreUtils.attrFilterOptions();
         }
 
         @Override
@@ -51,12 +51,42 @@ public enum Category {
 
         @Override
         public String getSecondaryDisplayName() {
-            return WebVisitUtils.defaultTimeFilterDisplayName();
+            return ActivityStoreUtils.defaultTimeFilterDisplayName();
         }
     }, //
     OPPORTUNITY_PROFILE("My Opportunities", 17),
-    ACCOUNT_MARKETING_ACTIVITY_PROFILE("My Account Marketing Activity", 18), //
-    CONTACT_MARKETING_ACTIVITY_PROFILE("My Contact Marketing Activity", 19); //
+    ACCOUNT_MARKETING_ACTIVITY_PROFILE("My Account Marketing Activity", 18) {
+        @Override
+        public FilterOptions getFilterOptions() {
+            return ActivityStoreUtils.attrFilterOptions();
+        }
+
+        @Override
+        public boolean shouldShowSubCategoryInCategoryTile() {
+            return true;
+        }
+
+        @Override
+        public String getSecondaryDisplayName() {
+            return ActivityStoreUtils.defaultTimeFilterDisplayName();
+        }
+    }, //
+    CONTACT_MARKETING_ACTIVITY_PROFILE("My Contact Marketing Activity", 19) {
+        @Override
+        public FilterOptions getFilterOptions() {
+            return ActivityStoreUtils.attrFilterOptions();
+        }
+
+        @Override
+        public boolean shouldShowSubCategoryInCategoryTile() {
+            return true;
+        }
+
+        @Override
+        public String getSecondaryDisplayName() {
+            return ActivityStoreUtils.defaultTimeFilterDisplayName();
+        }
+    }; //
 
 
 
