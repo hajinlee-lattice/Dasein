@@ -195,6 +195,7 @@ public class LatticeInsightsResource {
                 onlySelectedAttributes, considerInternalAttributes);
     }
 
+    // M37: This api is deprecated (replaced by the token api below)
     @RequestMapping(value = INSIGHTS_PATH
             + "/downloadcsv", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
