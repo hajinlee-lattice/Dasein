@@ -6,13 +6,13 @@ import java.util
 
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
-import com.latticeengines.domain.exposed.cdl.activity.{ActivityMetricsGroupUtils, DimensionCalculator, DimensionCalculatorRegexMode, DimensionGenerator}
+import com.latticeengines.domain.exposed.cdl.activity.{ActivityMetricsGroupUtils, ActivityRowReducer, DimensionCalculator, DimensionCalculatorRegexMode, DimensionGenerator}
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, __Row_Count__, __StreamDate, __StreamDateId}
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, AggDailyActivityConfig}
 import com.latticeengines.domain.exposed.util.ActivityStoreUtils
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
-import com.latticeengines.spark.util.MergeUtils
+import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
@@ -25,12 +25,16 @@ import scala.collection.JavaConverters._
 class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[AggDailyActivityConfig]): Unit = {
-    // TODO - currently streams with reducers always go through rebuild (configured in PA)
     val inputMetadata = lattice.config.inputMetadata.getMetadata
     var output: Seq[DataFrame] = Seq()
     val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
     val detailsMap = new util.HashMap[String, Details]() // streamId -> details
     var idx: Int = 0
+    lattice.config.streamReducerMap.values().asScala.foreach((reducer: ActivityRowReducer) => {
+      if (!reducer.getGroupByFields.contains(__StreamDate.name)) {
+        reducer.getGroupByFields.asScala.append(__StreamDate.name) // separate by each day if filter is applied for time
+      }
+    })
     inputMetadata.asScala.foreach(entry => {
       var missingBatch: Boolean = false
       val (streamId: String, details: ActivityStoreSparkIOMetadata.Details) = entry
@@ -41,14 +45,18 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
         }
         val rawStreamDelta: DataFrame = processImportToRawStream(streamId, matchedImportDF, lattice)
         val dailyStoreDelta: DataFrame = processRawStream(streamId, rawStreamDelta, lattice)
-        val updatedDailyStoreBatch: DataFrame = {
+        var (updatedDailyStoreBatch: DataFrame, updatedDailyStoreDelta: DataFrame) = {
           if (missingBatch) {
-            dailyStoreDelta
+            (dailyStoreDelta, dailyStoreDelta)
           } else {
-            updateDailyStoreBatch(streamId, dailyStoreDelta, lattice.input(details.getStartIdx + 1), lattice)
+            var dailyStoreBatch: DataFrame = lattice.input(details.getStartIdx + 1)
+            if (lattice.config.streamRetentionDays.containsKey(streamId)) {
+              dailyStoreBatch = dailyStoreBatch.filter(dailyStoreBatch(__StreamDateId.name).geq(getStartDateId(lattice.config.streamRetentionDays.get(streamId), lattice.config.currentEpochMilli)))
+            }
+            updateDailyStoreBatchAndDelta(streamId, dailyStoreDelta, dailyStoreBatch, lattice)
           }
         }
-        output :+= dailyStoreDelta
+        output :+= updatedDailyStoreDelta
         output :+= updatedDailyStoreBatch
         detailsMap.put(streamId, setDetails(idx))
         idx += 2
@@ -67,7 +75,9 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     lattice.outputStr = serializeJson(outputMetadata)
   }
 
-  def updateDailyStoreBatch(streamId: String, dailyStoreDelta: DataFrame, dailyStoreBatch: DataFrame, lattice: LatticeContext[AggDailyActivityConfig]) : DataFrame = {
+  // Update batch store with delta. Update delta as well if reducer exists
+  // return (updatedBatch, updatedDelta)
+  def updateDailyStoreBatchAndDelta(streamId: String, dailyStoreDelta: DataFrame, dailyStoreBatch: DataFrame, lattice: LatticeContext[AggDailyActivityConfig]) : (DataFrame, DataFrame) = {
     val metadataMap = lattice.config.dimensionMetadataMap.asScala.mapValues(_.asScala)
     val attrDeriverMap = lattice.config.attrDeriverMap.asScala.mapValues(_.asScala.toList)
     val entityIdColMap = lattice.config.additionalDimAttrMap.asScala.mapValues(_.asScala.toList)
@@ -90,11 +100,23 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
       col.as(deriver.getTargetAttribute)
     }
 
-    val updatedSubTable: DataFrame = MergeUtils.concat2(dailyStoreBatch.filter(col(__StreamDateId.name).isInCollection(dateIdRangeToUpdate)), dailyStoreDelta)
-      .groupBy(dimAttrs.head, dimAttrs.tail: _*)
-      .agg(sum(__Row_Count__.name).as(__Row_Count__.name),
-        max(LastActivityDate.name).as(LastActivityDate.name) :: aggFns: _*)
-    MergeUtils.concat2(updatedSubTable, dailyStoreBatch.filter(!col(__StreamDateId.name).isInCollection(dateIdRangeToUpdate)))
+    val affected: DataFrame = dailyStoreBatch.filter(col(__StreamDateId.name).isInCollection(dateIdRangeToUpdate))
+    val notAffected: DataFrame = dailyStoreBatch.filter(!col(__StreamDateId.name).isInCollection(dateIdRangeToUpdate))
+    val updatedDelta: DataFrame = {
+      if (lattice.config.streamReducerMap.containsKey(streamId)) {
+        val reducer = lattice.config.streamReducerMap.get(streamId)
+        DeriveAttrsUtils.applyReducer(MergeUtils.concat2(affected, dailyStoreDelta), reducer)
+      } else {
+        MergeUtils.concat2(affected, dailyStoreDelta)
+          .groupBy(dimAttrs.head, dimAttrs.tail: _*)
+          .agg(sum(__Row_Count__.name).as(__Row_Count__.name), max(LastActivityDate.name).as(LastActivityDate.name) :: aggFns: _*)
+      }
+    }
+    val newBatch: DataFrame = MergeUtils.concat2(notAffected, updatedDelta)
+    (
+      newBatch,
+      updatedDelta
+    )
   }
 
   def processImportToRawStream(streamId: String, matchedImportDF: DataFrame, lattice: LatticeContext[AggDailyActivityConfig]): DataFrame = {
@@ -108,9 +130,10 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     var rawDF = matchedImportDF
     rawDF = rawDF.withColumn(__StreamDate.name, getDate(rawDF.col(dateAttr)))
       .withColumn(__StreamDateId.name, getDateId(rawDF.col(dateAttr)))
-      .withColumn(LastActivityDate.name, getDateId(rawDF.col(dateAttr)))
-    if (lattice.config.streamRetentionDays.containsKey(streamId)) {
-      rawDF.filter(rawDF(__StreamDateId.name).geq(getStartDateId(lattice.config.streamRetentionDays.get(streamId), lattice.config.currentEpochMilli)))
+      .withColumn(LastActivityDate.name, rawDF.col(dateAttr))
+    if (lattice.config.streamReducerMap.containsKey(streamId)) {
+      val reducer = lattice.config.streamReducerMap.get(streamId)
+      DeriveAttrsUtils.applyReducer(rawDF, reducer)
     } else {
       rawDF
     }

@@ -35,14 +35,17 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(PeriodStoresGeneratorTestNG.class);
 
-    private static final String PathPatternId = "PathPatternId";
-    private static final String SourceMediumId = "SourceMediumId";
+    private static final String PathPatternId = InterfaceName.PathPatternId.name();
+    private static final String SourceMediumId = InterfaceName.SourceMediumId.name();
     private static final String AccountId = InterfaceName.AccountId.name();
     private static final String PeriodId = InterfaceName.PeriodId.name();
-    private static final String OpportunityId = "opportunityId";
-    private static final String Stage = "Stage";
+    private static final String OpportunityId = InterfaceName.OpportunityId.name();
+    private static final String StageName = InterfaceName.StageName.name();
+    private static final String StageNameId = InterfaceName.StageNameId.name();
+    private static final String LastModifiedDate = InterfaceName.LastModifiedDate.name();
     private static final String Count = InterfaceName.__Row_Count__.name();
     private static final String StreamDate = InterfaceName.__StreamDate.name();
+    private static final String StreamDateId = InterfaceName.__StreamDateId.name();
     private static final String LastActivityDate = InterfaceName.LastActivityDate.name();
     private static final String DATE_ATTR = InterfaceName.LastModifiedDate.name();
     private static final String PeriodIdForPartition = DeriveAttrsUtils.PARTITION_COL_PREFIX() + PeriodId;
@@ -52,17 +55,26 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static List<String> OUTPUT_FIELDS_WITH_REDUCER;
     private static List<String> PERIODS = Arrays.asList(PeriodStrategy.Template.Week.name(), PeriodStrategy.Template.Month.name());
     private static List<String> SINGLE_PERIOD = Collections.singletonList(PeriodStrategy.Template.Week.name());
-    private static AtlasStream STREAM;
-    private static AtlasStream STREAM_WITH_REDUCER;
     private static AtlasStream INCREMENTAL_STREAM;
     private static final String STREAM_ID = "abc123";
+
+    private static final String STAGE_WON = "won";
+    private static final String STAGE_WON_ID = "1";
+    private static final String STAGE_CLOSE = "close";
+    private static final String STAGE_CLOSE_ID = "2";
+    private static final String STAGE_NEW = "newStage";
+    private static final String STAGE_NEW_ID = "3";
+    private static final String STAGE_OLD = "oldStage";
+    private static final String STAGE_OLD_ID = "4";
+
+    private static final String EVAL_DATE = "2019-10-28";
 
     @Test(groups = "functional")
     public void test() {
         List<String> inputs = Collections.singletonList(setupNoReducer());
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
-        config.evaluationDate = "2019-10-28";
-        config.streams = Collections.singletonList(STREAM);
+        config.evaluationDate = EVAL_DATE;
+        config.streams = Collections.singletonList(setupStream());
         config.inputMetadata = createInputMetadata();
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
         Assert.assertNotNull(result.getOutput());
@@ -75,10 +87,10 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testWithReducer() {
-        List<String> inputs = Collections.singletonList(setupWithReducer());
+        List<String> inputs = Collections.singletonList(setupImportDataForReducerStream());
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
-        config.evaluationDate = "2019-10-28";
-        config.streams = Collections.singletonList(STREAM_WITH_REDUCER);
+        config.evaluationDate = EVAL_DATE;
+        config.streams = Collections.singletonList(setupStreamWithReducer());
         config.inputMetadata = createInputMetadata();
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
         ActivityStoreSparkIOMetadata metadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
@@ -90,7 +102,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     public void testIncr() {
         List<String> inputs = setupIncrStream(true);
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
-        config.evaluationDate = "2019-10-28";
+        config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(INCREMENTAL_STREAM);
         config.incrementalStreams.add(STREAM_ID);
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
@@ -103,14 +115,13 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.inputMetadata = inputMetadata;
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
         log.info("Output metadata: {}", result.getOutput());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
     }
 
     @Test(groups = "functional")
     public void testIncrNoBatch() {
         List<String> inputs = setupIncrStream(false);
         DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
-        config.evaluationDate = "2019-10-28";
+        config.evaluationDate = EVAL_DATE;
         config.streams = Collections.singletonList(INCREMENTAL_STREAM);
         config.incrementalStreams.add(STREAM_ID);
         config.streamsWithNoBatch.add(STREAM_ID);
@@ -124,7 +135,67 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         config.inputMetadata = inputMetadata;
         SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
         log.info("Output metadata: {}", result.getOutput());
-        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+    }
+
+    @Test(groups = "functional")
+    public void testIncrReducer() {
+        List<String> inputs = Arrays.asList(setupIncrReducerBatchStore(), setupIncrReducerDeltaImport());
+        DailyStoreToPeriodStoresJobConfig config = new DailyStoreToPeriodStoresJobConfig();
+        config.evaluationDate = EVAL_DATE;
+        config.streams = Collections.singletonList(setupStreamWithReducer());
+        config.incrementalStreams.add(STREAM_ID);
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, Details> detailsMap = new HashMap<>();
+        Details details = new Details();
+        details.setStartIdx(0);
+        details.setLabels(SINGLE_PERIOD);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        SparkJobResult result = runSparkJob(PeriodStoresGenerator.class, config, inputs, getWorkspace());
+    }
+
+    private String setupIncrReducerBatchStore() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId, String.class), //
+                Pair.of(OpportunityId, String.class), //
+                Pair.of(StageName, String.class), //
+                Pair.of(StageNameId, String.class),
+                Pair.of(LastModifiedDate, Long.class), // epoch
+                Pair.of(StreamDate, String.class),
+                Pair.of(StreamDateId, Integer.class),
+                Pair.of(LastActivityDate, Long.class),
+                Pair.of(Count, Integer.class),
+                Pair.of(PeriodId, Integer.class),
+                Pair.of(PeriodIdForPartition, Integer.class)
+        );
+        Object[][] data = new Object[][]{
+                {"acc1", "opp1", STAGE_OLD, STAGE_OLD_ID, 1L, "2019-10-23", 49847, 1L, 1, 1034, 1034}, // will be replaced by delta
+                {"acc1", "opp2", STAGE_CLOSE, STAGE_CLOSE_ID, 999L, "2019-10-25", 49849, 999L, 1, 1034, 1034}, // no change since affected but newer than delta
+                {"acc1", "opp3", STAGE_WON, STAGE_WON_ID, 1L, "2019-10-23", 49847, 1L, 1, 1034, 1034}, // no change since delta not affecting opportunity
+                {"acc1", "opp1", STAGE_CLOSE, STAGE_CLOSE_ID, 999L, "2020-10-23", 50263, 999L, 1, 1086, 1086}, // no change since not affected
+                {"acc1", "opp1", STAGE_OLD, STAGE_OLD_ID, 0L, "2000-01-01", 41633, 0L, 1, 0, 0} // over retention days, will be removed
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupIncrReducerDeltaImport() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId, String.class), //
+                Pair.of(OpportunityId, String.class),
+                Pair.of(StageName, String.class),
+                Pair.of(StageNameId, String.class),
+                Pair.of(LastModifiedDate, Long.class),
+                Pair.of(StreamDate, String.class),
+                Pair.of(StreamDateId, Integer.class),
+                Pair.of(Count, Integer.class),
+                Pair.of(LastActivityDate, Long.class)
+        );
+        Object[][] data = new Object[][]{
+                {"acc1", "opp1", STAGE_NEW, STAGE_NEW_ID, 2L, "2019-10-24", 49848, 1, 2L},
+                {"acc1", "opp2", STAGE_OLD, STAGE_OLD_ID, 0L, "2019-10-22", 49846, 1, 0L}
+        };
+        return uploadHdfsDataUnit(data, fields);
     }
 
     private ActivityStoreSparkIOMetadata createInputMetadata() {
@@ -153,15 +224,14 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"2", "pp1", "s3", "2019-10-08", 7}, //
                 {"2", "pp2", "s3", "2019-10-08", 6}, //
         };
-        setupStream();
         return uploadHdfsDataUnit(data, inputFields);
     }
 
-    private String setupWithReducer() {
+    private String setupImportDataForReducerStream() {
         List<Pair<String, Class<?>>> inputFields = Arrays.asList( //
                 Pair.of(AccountId, String.class), //
                 Pair.of(OpportunityId, String.class), //
-                Pair.of(Stage, String.class), //
+                Pair.of(StageName, String.class), //
                 Pair.of(DATE_ATTR, String.class), //
                 Pair.of(StreamDate, String.class), //
                 Pair.of(Count, Integer.class), //
@@ -174,7 +244,6 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 { "acc2", "opp1", "close", "Oct 24, 2018 20:37", "2018-10-24", 1, 4L },
                 { "acc2", "opp2", "open", "Oct 29, 2018 20:37", "2018-10-29", 1, 9L }
         };
-        setupStreamWithReducer();
         return uploadHdfsDataUnit(data, inputFields);
     }
 
@@ -225,25 +294,26 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         return uploadHdfsDataUnit(data, fields);
     }
 
-    private void setupStream() {
+    private AtlasStream setupStream() {
         AtlasStream stream = new AtlasStream();
         stream.setStreamId(STREAM_ID);
         stream.setPeriods(PERIODS);
         stream.setDimensions(Collections.singletonList(prepareDimension(PathPatternId)));
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
 
-        STREAM = stream;
+        return stream;
     }
 
-    private void setupStreamWithReducer() {
+    private AtlasStream setupStreamWithReducer() {
         AtlasStream stream = new AtlasStream();
         stream.setStreamId(STREAM_ID);
         stream.setPeriods(SINGLE_PERIOD);
-        stream.setDimensions(Arrays.asList(prepareDimension(OpportunityId), prepareDimension(Stage)));
+        stream.setDimensions(Arrays.asList(prepareDimension(OpportunityId), prepareDimension(StageName)));
         stream.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
         stream.setReducer(prepareReducer());
+        stream.setRetentionDays(30);
 
-        STREAM_WITH_REDUCER = stream;
+        return stream;
     }
 
     private void setupIncrStream() {
@@ -296,7 +366,7 @@ public class PeriodStoresGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     }
 
     private Boolean verifyReduced(HdfsDataUnit df) {
-        OUTPUT_FIELDS_WITH_REDUCER = Arrays.asList(AccountId, OpportunityId, PeriodIdForPartition, Stage, Count,
+        OUTPUT_FIELDS_WITH_REDUCER = Arrays.asList(AccountId, OpportunityId, PeriodIdForPartition, StageName, Count,
                 LastActivityDate);
         Object[][] expected = new Object[][] { //
                 { "acc2", "opp1", 982, "close", 1, 4L }, //

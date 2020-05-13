@@ -2,6 +2,10 @@ package com.latticeengines.spark.exposed.job.cdl;
 
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.AccountId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastActivityDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.LastModifiedDate;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.OpportunityId;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageName;
+import static com.latticeengines.domain.exposed.metadata.InterfaceName.StageNameId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPattern;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternId;
 import static com.latticeengines.domain.exposed.metadata.InterfaceName.PathPatternName;
@@ -34,6 +38,7 @@ import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
+import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculatorRegexMode;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionGenerator;
@@ -60,16 +65,19 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
             SourceMediumId.name(), PathPatternId.name(), __StreamDate.name(), __Row_Count__.name(),
             LastActivityDate.name());
     private static final String STREAM_ID = "daily_agg_stream";
+    private static final String DAY_0 = "2019-05-01"; // over retention days
     private static final String DAY_1 = "2019-07-01";
     private static final String DAY_2 = "2019-07-02";
-    private static final String DAY_3 = "2019-07-03";
     private static final String DAY_9 = "2019-07-09";
+    private static final Integer DAY_PERIOD_0 = DateTimeUtils.dateToDayPeriod(DAY_0);
     private static final Integer DAY_PERIOD_1 = DateTimeUtils.dateToDayPeriod(DAY_1);
     private static final Integer DAY_PERIOD_2 = DateTimeUtils.dateToDayPeriod(DAY_2);
-    private static final Integer DAY_PERIOD_3 = DateTimeUtils.dateToDayPeriod(DAY_3);
     private static final Integer DAY_PERIOD_9 = DateTimeUtils.dateToDayPeriod(DAY_9);
+    private static final long DAY_0_EPOCH = 1556732005000L; // over retention days
     private static final long DAY_1_EPOCH = 1561964400000L;
-    private static final long DAY_2_EPOCH = 1562050800000L;
+    private static final long DAY_1_EPOCH_LATE = 1561964500000L;
+    private static final long DAY_2_EPOCH = 1562050900000L;
+    private static final long DAY_2_EPOCH_EARLY = 1562050800000L;
     private static final long DAY_3_EPOCH = 1562137200000L;
     private static final String ALL_CTN_PAGE_PTN_NAME = "all content pages";
     private static final String ALL_CTN_PAGE_PTN_HASH = DimensionGenerator.hashDimensionValue(ALL_CTN_PAGE_PTN_NAME);
@@ -87,15 +95,33 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private static final String FACEBOOK_PAID_SRC = "Facebook/Paid";
     private static final String FACEBOOK_PAID_SRC_HASH = DimensionGenerator.hashDimensionValue(FACEBOOK_PAID_SRC);
     private static final String FACEBOOK_PAID_SRC_ID = "5";
+    private static final String STAGE_WON = "won";
+    private static final String STAGE_WON_ID = "1";
+    private static final String STAGE_WON_HASH = DimensionGenerator.hashDimensionValue(STAGE_WON);
+    private static final String STAGE_CLOSE = "close";
+    private static final String STAGE_CLOSE_ID = "2";
+    private static final String STAGE_CLOSE_HASH = DimensionGenerator.hashDimensionValue(STAGE_CLOSE);
+    private static final String STAGE_NEW = "newStage";
+    private static final String STAGE_NEW_ID = "3";
+    private static final String STAGE_NEW_HASH = DimensionGenerator.hashDimensionValue(STAGE_NEW);
+    private static final String STAGE_OLD = "oldStage";
+    private static final String STAGE_OLD_ID = "4";
+    private static final String STAGE_OLD_HASH = DimensionGenerator.hashDimensionValue(STAGE_OLD);
 
-    private static final Map<String, String> DIMENSION_HASH_ID_MAP = new HashMap<>();
+    private static final Map<String, String> WEBVISIT_DIMENSION_HASH_ID_MAP = new HashMap<>();
+    private static final Map<String, String> OPPORTUNITY_DIMENSION_HASH_ID_MAP = new HashMap<>();
 
     static {
-        DIMENSION_HASH_ID_MAP.put(ALL_CTN_PAGE_PTN_HASH, ALL_CTN_PAGE_PTN_ID);
-        DIMENSION_HASH_ID_MAP.put(VIDEO_CTN_PAGE_PTN_HASH, VIDEO_CTN_PAGE_PTN_ID);
-        DIMENSION_HASH_ID_MAP.put(GOOGLE_PAID_SRC_HASH, GOOGLE_PAID_SRC_ID);
-        DIMENSION_HASH_ID_MAP.put(GOOGLE_ORGANIC_SRC_HASH, GOOGLE_ORGANIC_SRC_ID);
-        DIMENSION_HASH_ID_MAP.put(FACEBOOK_PAID_SRC_HASH, FACEBOOK_PAID_SRC_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(ALL_CTN_PAGE_PTN_HASH, ALL_CTN_PAGE_PTN_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(VIDEO_CTN_PAGE_PTN_HASH, VIDEO_CTN_PAGE_PTN_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(GOOGLE_PAID_SRC_HASH, GOOGLE_PAID_SRC_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(GOOGLE_ORGANIC_SRC_HASH, GOOGLE_ORGANIC_SRC_ID);
+        WEBVISIT_DIMENSION_HASH_ID_MAP.put(FACEBOOK_PAID_SRC_HASH, FACEBOOK_PAID_SRC_ID);
+
+        OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(STAGE_WON_HASH, STAGE_WON_ID);
+        OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(STAGE_CLOSE_HASH, STAGE_CLOSE_ID);
+        OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(STAGE_NEW_HASH, STAGE_NEW_ID);
+        OPPORTUNITY_DIMENSION_HASH_ID_MAP.put(STAGE_OLD_HASH, STAGE_OLD_ID);
     }
 
     @Test(groups = "functional")
@@ -134,6 +160,19 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         Assert.assertEquals(result.getTargets().size(), 2);
     }
 
+    @Test(groups = "functional")
+    private void testIncrementalModeReducer() {
+        List<String> inputs = Arrays.asList(setupReducerDeltaImport(), setupReducerBatchStore());
+        AggDailyActivityConfig config = incrReducerConfig();
+        SparkJobResult result = runSparkJob(AggDailyActivityJob.class, config, inputs, getWorkspace());
+        log.info("Output metadata: {}", result.getOutput());
+        ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
+        Assert.assertNotNull(outputMetadata);
+        Assert.assertTrue(MapUtils.isNotEmpty(outputMetadata.getMetadata()));
+        Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
+        Assert.assertEquals(result.getTargets().size(), 2);
+    }
+
     private AggDailyActivityConfig incrConfig(boolean withBatch) {
         AggDailyActivityConfig config = new AggDailyActivityConfig();
         ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
@@ -151,10 +190,39 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         config.dimensionCalculatorMap.put(STREAM_ID, webVisitDimensionCalculators());
         config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(SourceMediumId.name(), PathPatternId.name()));
         config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
-        config.dimensionValueIdMap.putAll(DIMENSION_HASH_ID_MAP);
+        config.dimensionValueIdMap.putAll(WEBVISIT_DIMENSION_HASH_ID_MAP);
         config.incrementalStreams.add(STREAM_ID);
 
         return config;
+    }
+
+    private AggDailyActivityConfig incrReducerConfig() {
+        AggDailyActivityConfig config = new AggDailyActivityConfig();
+        ActivityStoreSparkIOMetadata inputMetadata = new ActivityStoreSparkIOMetadata();
+        Map<String, ActivityStoreSparkIOMetadata.Details> detailsMap = new HashMap<>();
+        ActivityStoreSparkIOMetadata.Details details = new ActivityStoreSparkIOMetadata.Details();
+        details.setStartIdx(0);
+        detailsMap.put(STREAM_ID, details);
+        inputMetadata.setMetadata(detailsMap);
+        config.inputMetadata = inputMetadata;
+        config.streamDateAttrs.put(STREAM_ID, LastModifiedDate.name());
+        config.dimensionMetadataMap.put(STREAM_ID, opportunityMetadata());
+        config.dimensionCalculatorMap.put(STREAM_ID, opportunityDimensionCalculators());
+        config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(StageNameId.name()));
+        config.additionalDimAttrMap.put(STREAM_ID, Collections.singletonList(AccountId.name()));
+        config.dimensionValueIdMap.putAll(OPPORTUNITY_DIMENSION_HASH_ID_MAP);
+        config.incrementalStreams.add(STREAM_ID);
+        config.streamReducerMap.put(STREAM_ID, prepareReducer());
+
+        return config;
+    }
+
+    private ActivityRowReducer prepareReducer() {
+        ActivityRowReducer reducer = new ActivityRowReducer();
+        reducer.setGroupByFields(Collections.singletonList(OpportunityId.name()));
+        reducer.setArguments(Collections.singletonList(LastModifiedDate.name()));
+        reducer.setOperator(ActivityRowReducer.Operator.Latest);
+        return reducer;
     }
 
     private String setupDailyBatchStore() {
@@ -186,6 +254,40 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
                 {"a1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_3_EPOCH},
                 {"a1", "Google/Paid", "https://dnb.com/contents/audios/1", DAY_1_EPOCH},
                 {"a2", "Google/Paid", "https://dnb.com/contents/videos/2", DAY_2_EPOCH}
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupReducerDeltaImport() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId.name(), String.class), //
+                Pair.of(OpportunityId.name(), String.class),
+                Pair.of(StageName.name(), String.class),
+                Pair.of(LastModifiedDate.name(), Long.class)
+        );
+        Object[][] data = new Object[][]{
+                {"acc1", "opp1", STAGE_NEW, DAY_1_EPOCH_LATE}, // replacing record in batch
+                {"acc2", "opp2", STAGE_OLD, DAY_2_EPOCH_EARLY}, // will be replaced by batch
+        };
+        return uploadHdfsDataUnit(data, fields);
+    }
+
+    private String setupReducerBatchStore() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId.name(), String.class), //
+                Pair.of(OpportunityId.name(), String.class),
+                Pair.of(StageName.name(), String.class),
+                Pair.of(StageNameId.name(), String.class),
+                Pair.of(LastModifiedDate.name(), Long.class),
+                Pair.of(__StreamDate.name(), String.class),
+                Pair.of(__StreamDateId.name(), Integer.class),
+                Pair.of(__Row_Count__.name(), Integer.class),
+                Pair.of(LastActivityDate.name(), Long.class)
+        );
+        Object[][] data = new Object[][]{
+                {"acc1", "opp1", STAGE_WON, STAGE_WON_ID, DAY_1_EPOCH, DAY_1, DAY_PERIOD_1, 1, DAY_1_EPOCH},
+                {"acc2", "opp2", STAGE_CLOSE, STAGE_CLOSE_ID, DAY_2_EPOCH, DAY_2, DAY_PERIOD_2, 1, DAY_2_EPOCH},
+                {"acc1", "opp1", STAGE_OLD, STAGE_OLD_ID, DAY_0_EPOCH, DAY_0, DAY_PERIOD_0, 1, DAY_0_EPOCH} // should be removed by retention policy
         };
         return uploadHdfsDataUnit(data, fields);
     }
@@ -347,7 +449,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         config.dimensionCalculatorMap.put(STREAM_ID, webVisitDimensionCalculators());
         config.hashDimensionMap.put(STREAM_ID, Sets.newHashSet(SourceMediumId.name(), PathPatternId.name()));
         config.additionalDimAttrMap.put(STREAM_ID, Arrays.asList(AccountId.name(), UserId.name()));
-        config.dimensionValueIdMap.putAll(DIMENSION_HASH_ID_MAP);
+        config.dimensionValueIdMap.putAll(WEBVISIT_DIMENSION_HASH_ID_MAP);
         return config;
     }
 
@@ -355,6 +457,12 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         Map<String, DimensionMetadata> metadataMap = new HashMap<>();
         metadataMap.put(PathPatternId.name(), ptnMetadata());
         metadataMap.put(SourceMediumId.name(), smMetadata());
+        return metadataMap;
+    }
+
+    private Map<String, DimensionMetadata> opportunityMetadata() {
+        Map<String, DimensionMetadata> metadataMap = new HashMap<>();
+        metadataMap.put(StageNameId.name(), stageMetadata());
         return metadataMap;
     }
 
@@ -366,10 +474,26 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         return metadata;
     }
 
+    private DimensionMetadata stageMetadata() {
+        DimensionMetadata metadata = new DimensionMetadata();
+        metadata.setDimensionValues(
+                Arrays.asList(stageValue(STAGE_WON), stageValue(STAGE_CLOSE), stageValue(STAGE_NEW), stageValue(STAGE_OLD))
+        );
+        metadata.setCardinality(4);
+        return metadata;
+    }
+
     private Map<String, Object> smValue(String srcMedium) {
         Map<String, Object> values = new HashMap<>();
         values.put(SourceMedium.name(), srcMedium);
-        values.put(SourceMediumId.name(), DIMENSION_HASH_ID_MAP.get(DimensionGenerator.hashDimensionValue(srcMedium)));
+        values.put(SourceMediumId.name(), WEBVISIT_DIMENSION_HASH_ID_MAP.get(DimensionGenerator.hashDimensionValue(srcMedium)));
+        return values;
+    }
+
+    private Map<String, Object> stageValue(String stage) {
+        Map<String, Object> values = new HashMap<>();
+        values.put(StageName.name(), stage);
+        values.put(StageNameId.name(), OPPORTUNITY_DIMENSION_HASH_ID_MAP.get(DimensionGenerator.hashDimensionValue(stage)));
         return values;
     }
 
@@ -385,7 +509,7 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
     private Map<String, Object> pathPtnValue(String pathPattern, String pathPatternName) {
         Map<String, Object> valueMap = new HashMap<>();
         valueMap.put(PathPatternId.name(),
-                DIMENSION_HASH_ID_MAP.get(DimensionGenerator.hashDimensionValue(pathPatternName)));
+                WEBVISIT_DIMENSION_HASH_ID_MAP.get(DimensionGenerator.hashDimensionValue(pathPatternName)));
         valueMap.put(PathPatternName.name(), pathPatternName);
         valueMap.put(PathPattern.name(), pathPattern);
         return valueMap;
@@ -404,6 +528,15 @@ public class AggDailyActivityJobTestNG extends SparkJobFunctionalTestNGBase {
         smCalculator.setName(InterfaceName.SourceMedium.name());
         smCalculator.setAttribute(InterfaceName.SourceMedium.name());
         calculatorMap.put(SourceMediumId.name(), smCalculator);
+        return calculatorMap;
+    }
+
+    private Map<String, DimensionCalculator> opportunityDimensionCalculators() {
+        Map<String, DimensionCalculator> calculatorMap = new HashMap<>();
+        DimensionCalculator stageCalculator = new DimensionCalculator();
+        stageCalculator.setName(StageName.name());
+        stageCalculator.setAttribute(StageName.name());
+        calculatorMap.put(StageNameId.name(), stageCalculator);
         return calculatorMap;
     }
 }

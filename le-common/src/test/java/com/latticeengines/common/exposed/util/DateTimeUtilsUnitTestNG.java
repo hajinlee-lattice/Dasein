@@ -29,6 +29,13 @@ public class DateTimeUtilsUnitTestNG {
         System.out.println(DateTimeUtils.dateToDayPeriod("2000-01-01"));
     }
 
+    @Test(groups = "unit")
+    public void testSubtractDateString() {
+        String date1 = "2000-01-10";
+        String date2 = "1999-12-11";
+        Assert.assertEquals(DateTimeUtils.subtractDays(date1, 30), date2);
+    }
+
     @Test(groups = "manual")
     public void manualConversion1() {
         System.out.println(DateTimeUtils.dayPeriodToDate(85584));

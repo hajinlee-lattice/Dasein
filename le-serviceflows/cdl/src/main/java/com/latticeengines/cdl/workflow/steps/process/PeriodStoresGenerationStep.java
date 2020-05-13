@@ -76,13 +76,12 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
         Map<String, Table> dailyDeltaTables = getTablesFromMapCtxKey(customerSpace.toString(), DAILY_ACTIVITY_STREAM_DELTA_TABLE_NAME);
         config.incrementalStreams = config.streams.stream()
-                .filter(stream -> shouldIncrUpdate(stream) && dailyDeltaTables.get(stream.getStreamId()) != null)
+                .filter(stream -> shouldIncrUpdate() && dailyDeltaTables.get(stream.getStreamId()) != null)
                 .map(AtlasStream::getStreamId).collect(Collectors.toSet());
 
         log.info("Generating period stores. tenant: {}; evaluation date: {}", customerSpace, config.evaluationDate);
 
         List<DataUnit> inputs = new ArrayList<>();
-        int dailyStoreIdx = 0;
 
         // streamId -> dailyStore table
         Map<String, Table> dailyStoreTables = getTablesFromMapCtxKey(customerSpace.toString(), AGG_DAILY_ACTIVITY_STREAM_TABLE_NAME);
@@ -190,7 +189,7 @@ public class PeriodStoresGenerationStep extends RunSparkJob<ActivityStreamSparkS
         return skippedStreamIds;
     }
 
-    private boolean shouldIncrUpdate(AtlasStream stream) {
-        return stream.getReducer() == null && !configuration.isShouldRebuild();
+    private boolean shouldIncrUpdate() {
+        return !configuration.isShouldRebuild();
     }
 }
