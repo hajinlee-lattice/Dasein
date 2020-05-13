@@ -14,6 +14,12 @@ public interface SourceService {
     Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
                         FieldDefinitionsRecord fieldDefinitionsRecord);
 
+    Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
+                        String importFile, FieldDefinitionsRecord fieldDefinitionsRecord);
+
+    Source updateSource(String customerSpace, String displayName, String sourceId, String importFile,
+                        FieldDefinitionsRecord fieldDefinitionsRecord);
+
     Source getSource(String customerSpace, String sourceId);
 
     Boolean deleteSource(String customerSpace, String sourceId);

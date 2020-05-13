@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 import com.latticeengines.domain.exposed.pls.frontend.FetchFieldDefinitionsResponse;
+import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsRequest;
 import com.latticeengines.domain.exposed.pls.frontend.ValidateFieldDefinitionsResponse;
 
@@ -61,5 +63,15 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
                                                                      ValidateFieldDefinitionsRequest validateRequest) {
         String url = constructUrl("/validate/?importFile={importFile}", importFile);
         return post("validate definitions", url, validateRequest, ValidateFieldDefinitionsResponse.class);
+    }
+
+    public FieldDefinitionsRecord getSourceMappings(String sourceId) {
+        String url = constructUrl("/sourceId/{sourceId}/mappings", sourceId);
+        return get("get source mappings", url, FieldDefinitionsRecord.class);
+    }
+
+    public Source updateSource(UpdateSourceRequest updateSourceRequest) {
+        String url = constructUrl("/");
+        return put("update source", url, updateSourceRequest, Source.class);
     }
 }

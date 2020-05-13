@@ -21,6 +21,7 @@ import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dcp.Source;
 import com.latticeengines.domain.exposed.dcp.SourceRequest;
+import com.latticeengines.domain.exposed.dcp.UpdateSourceRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,15 +46,40 @@ public class SourceResource {
             throw new RuntimeException("Cannot create source with empty create source request input!");
         }
         if (StringUtils.isBlank(sourceRequest.getSourceId())) {
-            log.debug("Create source with empty sourceId.");
-            return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
-                    sourceRequest.getProjectId(), sourceRequest.getFieldDefinitionsRecord());
+            if (StringUtils.isBlank(sourceRequest.getImportFile())) {
+                log.debug("Create source with empty sourceId and empty import file.");
+                return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
+                        sourceRequest.getProjectId(), sourceRequest.getFieldDefinitionsRecord());
+            } else {
+                log.debug("Create source with empty sourceId and import file {}.", sourceRequest.getImportFile());
+                return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
+                        sourceRequest.getProjectId(), null, sourceRequest.getImportFile(),
+                        sourceRequest.getFieldDefinitionsRecord());
+            }
         } else {
-            log.debug("Create source with specified sourceId: " + sourceRequest.getSourceId());
-            return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
-                    sourceRequest.getProjectId(), sourceRequest.getSourceId(),
-                    sourceRequest.getFieldDefinitionsRecord());
+            if (StringUtils.isBlank(sourceRequest.getImportFile())) {
+                log.debug("Create source with specified sourceId {} ", sourceRequest.getSourceId());
+                return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
+                        sourceRequest.getProjectId(), sourceRequest.getSourceId(),
+                        sourceRequest.getFieldDefinitionsRecord());
+            } else {
+                log.debug("Create source with specified sourceId {} and import file {}",
+                        sourceRequest.getSourceId(), sourceRequest.getImportFile());
+                return sourceService.createSource(customerSpace, sourceRequest.getDisplayName(),
+                        sourceRequest.getProjectId(), sourceRequest.getSourceId(), sourceRequest.getImportFile(),
+                        sourceRequest.getFieldDefinitionsRecord());
+            }
         }
+    }
+
+    @PutMapping("")
+    @ResponseBody
+    @ApiOperation(value = "update a Source")
+    public Source updateSource(@PathVariable String customerSpace,
+                               @RequestBody UpdateSourceRequest updateSourceRequest) {
+        return sourceService.updateSource(customerSpace, updateSourceRequest.getDisplayName(),
+                updateSourceRequest.getSourceId(), updateSourceRequest.getImportFile(),
+                updateSourceRequest.getFieldDefinitionsRecord());
     }
 
     @GetMapping("/sourceId/{sourceId}")
