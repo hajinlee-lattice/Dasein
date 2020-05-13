@@ -80,6 +80,9 @@ public class ProfileJobConfig extends SparkJobConfig {
     @JsonProperty("CodeBookLookup")
     private Map<String, String> codeBookLookup; // decoded attr -> encoded attr
 
+    @JsonProperty("EnforceProfileByAttr")
+    private Boolean enforceProfileByAttr; // for test: enforce profile attr-by-attr even for small data set
+
     @Override
     @JsonProperty("Name")
     public String getName() {
@@ -241,4 +244,11 @@ public class ProfileJobConfig extends SparkJobConfig {
         this.codeBookLookup = codeBookLookup;
     }
 
+    public Boolean getEnforceProfileByAttr() {
+        return enforceProfileByAttr;
+    }
+
+    public void setEnforceProfileByAttr(Boolean enforceProfileByAttr) {
+        this.enforceProfileByAttr = enforceProfileByAttr;
+    }
 }

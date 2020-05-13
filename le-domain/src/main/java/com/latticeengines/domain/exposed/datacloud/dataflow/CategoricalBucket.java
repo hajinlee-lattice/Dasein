@@ -16,9 +16,14 @@ public class CategoricalBucket extends BucketAlgorithm {
     private static final long serialVersionUID = 974998427768883957L;
     @JsonProperty("cats")
     private List<String> categories;
+
     // optional
     @JsonProperty("map")
     private Map<String, List<String>> mapping;
+
+    // optional
+    @JsonProperty("counts")
+    private List<Long> counts;
 
     @Override
     @JsonIgnore
@@ -40,6 +45,14 @@ public class CategoricalBucket extends BucketAlgorithm {
 
     public void setMapping(Map<String, List<String>> mapping) {
         this.mapping = mapping;
+    }
+
+    public List<Long> getCounts() {
+        return counts;
+    }
+
+    public void setCounts(List<Long> counts) {
+        this.counts = counts;
     }
 
     @Override
