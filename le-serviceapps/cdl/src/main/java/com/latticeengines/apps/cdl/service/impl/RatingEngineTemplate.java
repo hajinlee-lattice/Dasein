@@ -98,7 +98,7 @@ abstract class RatingEngineTemplate {
                 ratingEngine.getScoringIteration() != null ? ratingEngine.getScoringIteration().getId() : null);
         ratingEngineSummary.setPublishedIterationId(
                 ratingEngine.getPublishedIteration() != null ? ratingEngine.getPublishedIteration().getId() : null);
-
+        ratingEngineSummary.setTeamId(ratingEngine.getTeamId());
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL
                 || ratingEngine.getType() == RatingEngineType.CUSTOM_EVENT) {
             Boolean completed = ratingEngine.getLatestIteration().getIteration() != 1
