@@ -5,6 +5,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 
 public class ImportFileInfo {
 
+    @JsonProperty("feed_type")
+    private String feedType;
+
     @JsonProperty("file_path")
     private String filePath;
 
@@ -17,6 +20,14 @@ public class ImportFileInfo {
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public String getFeedType() {
+        return feedType;
+    }
+
+    public void setFeedType(String feedType) {
+        this.feedType = feedType;
     }
 
     public String getFilePath() {

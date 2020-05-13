@@ -1146,16 +1146,18 @@ public class CDLServiceImpl implements CDLService {
         if (dataFeedTask == null) {
             return null;
         }
+        importFileInfo.setFeedType(dataFeedTask.getFeedType());
         if(dataFeedTask.getImportSystemName() == null) {
-            importFileInfo.setSystemName(DEFAULT_SYSTEM);
+            importFileInfo.setSystemName(S3PathBuilder.getSystemNameFromFeedType(dataFeedTask.getFeedType()));
         } else {
             importFileInfo.setSystemName(dataFeedTask.getImportSystemName());
         }
 
         importFileInfo.setTemplateName(dataFeedProxy.getTemplateName(customerSpace, dataFeedTaskId));
         Long workflowId = importActionConfiguration.getWorkflowId();
-        if(workflowId == null)
+        if(workflowId == null){
             return null;
+        }
         Job job = workflowProxy.getJobByWorkflowJobPid(customerSpace, workflowId);
         Map<String, String> inputs = job.getInputs();
         String filePath = inputs.get(WorkflowContextConstants.Inputs.SOURCE_FILE_PATH);
@@ -1163,8 +1165,9 @@ public class CDLServiceImpl implements CDLService {
             importFileInfo.setFilePath(filePath);
         } else {
             String fileName = inputs.get(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME);
-            if(fileName == null)
+            if(fileName == null){
                 return null;
+            }
             SourceFile source = sourceFileService.findByName(fileName);
             importFileInfo.setFilePath(source.getPath());
         }
