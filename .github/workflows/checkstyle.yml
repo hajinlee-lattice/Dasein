@@ -25,4 +25,4 @@ jobs:
       with:
         java-version: 1.8
     - name: Validate CheckStyle
-      run: echo "Hello!"
+      run: echo "Hello World!"
