@@ -1,4 +1,4 @@
-package com.latticeengines.pls.repository.reader;
+package com.latticeengines.app.repository.reader;
 
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.FileDownload;

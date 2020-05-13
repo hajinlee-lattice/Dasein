@@ -1,11 +1,10 @@
 package com.latticeengines.domain.exposed.pls;
 
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -15,10 +14,16 @@ import com.latticeengines.domain.exposed.dcp.UploadFileDownloadConfig;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE, //
         setterVisibility = JsonAutoDetect.Visibility.NONE //
 )
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = UploadFileDownloadConfig.class, name = "uploadFileDownloadConfig"),
-        @JsonSubTypes.Type(value = LatticeInsightsDownloadConfig.class, name = "latticeInsightsDownloadConfig"),
-})
-public abstract class FileDownloadConfig {
+public class LatticeInsightsDownloadConfig extends FileDownloadConfig {
+
+    @JsonProperty("onlySelectedAttrs")
+    private boolean onlySelectedAttrs;
+
+    public boolean isOnlySelectedAttrs() {
+        return onlySelectedAttrs;
+    }
+
+    public void setOnlySelectedAttrs(boolean onlySelectedAttrs) {
+        this.onlySelectedAttrs = onlySelectedAttrs;
+    }
 }

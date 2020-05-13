@@ -12,12 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.monitor.annotation.NoMetricsLog;
+import com.latticeengines.app.exposed.service.FileDownloadService;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
-import com.latticeengines.monitor.exposed.annotation.IgnoreGlobalApiMeter;
-import com.latticeengines.pls.service.FileDownloadService;
 import com.latticeengines.pls.service.impl.GraphDependencyToUIActionUtil;
 
 import io.swagger.annotations.Api;
@@ -39,8 +37,6 @@ public class FileDownloadController {
     @GetMapping(value = "/{token}")
     @ResponseBody
     @ApiOperation("Pipe an output stream to http response via a token")
-    @NoMetricsLog
-    @IgnoreGlobalApiMeter
     public UIAction downloadByToken(@PathVariable String token,
                                     HttpServletRequest request, HttpServletResponse response) throws Exception {
         try {

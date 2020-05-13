@@ -7,11 +7,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.pls.LatticeInsightsDownloadConfig;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.security.Tenant;
 
-public interface AttributeService {
+public interface AttributeService extends FileDownloader<LatticeInsightsDownloadConfig>  {
 
     void save(LeadEnrichmentAttributesOperationMap attributes, Tenant tenant, Map<String, Integer> limitationMap,
             Boolean considerInternalAttributes);
@@ -35,6 +36,8 @@ public interface AttributeService {
     Map<String, Integer> getPremiumAttributesLimitation(Tenant tenant);
 
     Map<String, Integer> getPremiumAttributesLimitationMap(Tenant tenant);
+
+    String getDownloadAttrsToken(boolean isSelected);
 
     void downloadAttributes(HttpServletRequest request, HttpServletResponse response, String mimeType, String fileName,
             Tenant tenant, Boolean isSelected, Boolean considerInternalAttributes);
