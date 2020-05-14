@@ -30,6 +30,8 @@ public interface RatingEngineService {
 
     List<RatingEngine> getAllDeletedRatingEngines();
 
+    RatingEngineSummary getRatingEngineSummary(String ratingEngineId);
+
     RatingEngine getRatingEngine(String ratingEngineId);
 
     DataPage getEntityPreview(String ratingEngineId, long offset, long maximum, BusinessEntity entityType,
@@ -64,7 +66,7 @@ public interface RatingEngineService {
 
     RatingModel getRatingModel(String ratingEngineId, String ratingModelId);
 
-    RatingModel updateRatingModel(RatingModel ratingModel, String ratingEngineId, String ratingModelId);
+    RatingModel updateRatingModel(String ratingEngineId, String ratingModelId, RatingModel ratingModel);
 
     List<ColumnMetadata> getIterationMetadata(String ratingEngineId, String ratingModelId, String dataStores);
 

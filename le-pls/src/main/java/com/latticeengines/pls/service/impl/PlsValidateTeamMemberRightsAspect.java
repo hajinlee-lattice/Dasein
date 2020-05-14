@@ -1,11 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -21,8 +21,9 @@ import com.latticeengines.domain.exposed.cdl.TalkingPointDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.Play;
-import com.latticeengines.domain.exposed.security.Session;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
 @Aspect
@@ -35,6 +36,9 @@ public class PlsValidateTeamMemberRightsAspect {
 
     @Inject
     private PlayProxy playProxy;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Inject
     private BatonService batonService;
@@ -63,19 +67,8 @@ public class PlsValidateTeamMemberRightsAspect {
     }
 
     private void checkTeamInContext(String teamId) {
-        if (!TeamUtils.isGlobalTeam(teamId)) {
-            Session session = MultiTenantContext.getSession();
-            if (session != null) {
-                List<String> teamIds = session.getTeamIds();
-                log.info("Check team rights with teamId {} and teamIds in session context are {}.", teamId, teamIds);
-                if (CollectionUtils.isEmpty(teamIds) || !teamIds.stream().collect(Collectors.toSet()).contains(teamId)) {
-                    throw new AccessDeniedException("Access denied.");
-                }
-            } else {
-                log.warn("Session doesn't exist in MultiTenantContext.");
-            }
-        } else {
-            log.info("Pass team rights check since teamId is empty.");
+        if (!TeamUtils.isMyTeam(teamId)) {
+            throw new AccessDeniedException("Access denied.");
         }
     }
 
@@ -113,15 +106,12 @@ public class PlsValidateTeamMemberRightsAspect {
         }
     }
 
-    @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.delete(..))")
-    public void deletePlay(JoinPoint joinPoint) {
-        String playName = (String) joinPoint.getArgs()[0];
-        checkTeamWithPlayName(playName);
-    }
-
-    @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.createPlayLaunchChannel(..))" +
-            " ||execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.updatePlayLaunchChannel(..))")
-    public void createOrUpdatePlayChannel(JoinPoint joinPoint) {
+    @Before("execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.delete(..))" +
+            " || execution(public * com.latticeengines.pls.service.impl.TalkingPointServiceImpl.revert(..))" +
+            " || execution(public * com.latticeengines.pls.service.impl.TalkingPointServiceImpl.publish(..))" +
+            " || execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.createPlayLaunchChannel(..))" +
+            " || execution(public * com.latticeengines.pls.service.impl.PlayServiceImpl.updatePlayLaunchChannel(..))")
+    public void checkWithPlayName(JoinPoint joinPoint) {
         String playName = (String) joinPoint.getArgs()[0];
         checkTeamWithPlayName(playName);
     }
@@ -134,11 +124,30 @@ public class PlsValidateTeamMemberRightsAspect {
         }
     }
 
-    @Before("execution(public * com.latticeengines.pls.service.impl.TalkingPointServiceImpl.publish(..))" +
-            " ||execution(public * com.latticeengines.pls.service.impl.TalkingPointServiceImpl.revert(..))")
-    public void publishOrRevertTalkingPoint(JoinPoint joinPoint) {
-        String playName = (String) joinPoint.getArgs()[0];
-        checkTeamWithPlayName(playName);
+    @Before("execution(public * com.latticeengines.pls.service.impl.RatingEngineServiceImpl.create*(..))" +
+            " || execution(public * com.latticeengines.pls.service.impl.RatingEngineServiceImpl.update*(..))" +
+            " || execution(public * com.latticeengines.pls.service.impl.RatingEngineServiceImpl.delete*(..))" +
+            " || execution(public * com.latticeengines.pls.service.impl.RatingEngineServiceImpl.setScoringIteration(..))")
+    public void crudForRatingEngine(JoinPoint joinPoint) {
+        if (joinPoint.getArgs()[0] instanceof RatingEngine) {
+            RatingEngine ratingEngine = (RatingEngine) joinPoint.getArgs()[0];
+            if (StringUtils.isNotEmpty(ratingEngine.getTeamId())) {
+                checkTeamInContext(ratingEngine.getTeamId());
+            } else if (StringUtils.isNotEmpty(ratingEngine.getId())) {
+                checkTeamWithRatingEngineId(ratingEngine.getId());
+            }
+        } else if (joinPoint.getArgs()[0] instanceof String) {
+            checkTeamWithRatingEngineId((String) joinPoint.getArgs()[0]);
+        }
+    }
+
+    private void checkTeamWithRatingEngineId(String ratingEngineId) {
+        if (teamFeatureEnabled()) {
+            RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(MultiTenantContext.getTenant().getId(), ratingEngineId);
+            if (ratingEngine != null) {
+                checkTeamInContext(ratingEngine.getTeamId());
+            }
+        }
     }
 
     private boolean teamFeatureEnabled() {
