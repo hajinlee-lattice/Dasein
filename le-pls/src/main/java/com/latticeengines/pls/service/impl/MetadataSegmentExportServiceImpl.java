@@ -25,6 +25,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.AtlasExport;
 import com.latticeengines.domain.exposed.cdl.EntityExportRequest;
+import com.latticeengines.domain.exposed.cdl.ExportEntity;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -213,8 +214,16 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             } else if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderSystemPath())) {
                 filePath = atlasExportProxy.getSystemExportPath(customerSpace, false);
                 fileName = atlasExport.getFilesUnderSystemPath().get(0);
-                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName),
-                        (atlasExport.getSegmentName() == null ? "" : atlasExport.getSegmentName()) + fileName, "application/csv",
+                // if segment name include special characters, MYSQL @Type(type = "json") annotation can't handle filesToDelete well, so we
+                // need to rebuild file name here
+                if (StringUtils.isNotEmpty(atlasExport.getSegmentName())) {
+                    String suffix = fileName.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
+                    String exportType = getExportType(atlasExport);
+                    if (StringUtils.isNotEmpty(exportType)) {
+                        fileName = exportType + "_" + atlasExport.getSegmentName() + "_" + atlasExport.getUuid() + suffix;
+                    }
+                }
+                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv",
                         request, response, importFromS3Service, batonService);
             } else {
                 throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
@@ -223,6 +232,22 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             log.error("Could not download result of export job: " + exportId, ex);
             throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
         }
+    }
+
+    private String getExportType(AtlasExport atlasExport) {
+        if (atlasExport.getExportType() != null) {
+            switch (atlasExport.getExportType()) {
+                case ACCOUNT:
+                    return ExportEntity.Account.name();
+                case CONTACT:
+                    return ExportEntity.Contact.name();
+                case ACCOUNT_AND_CONTACT:
+                    return ExportEntity.AccountContact.name();
+                default:
+                    return null;
+            }
+        }
+        return null;
     }
 
     private void downloadSegmentExport(MetadataSegmentExport metadataSegmentExport, String exportId,
