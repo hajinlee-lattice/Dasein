@@ -27,6 +27,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -160,6 +161,11 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     @Column(name = "DELETED")
     @JsonProperty("deleted")
     private Boolean deleted;
+
+    @Column(name = "TASK_CONFIG", length = 6000)
+    @Type(type = "json")
+    @JsonProperty("task_config")
+    private DataFeedTaskConfig dataFeedTaskConfig;
 
     @JsonProperty("import_system_name")
     @Transient
@@ -393,6 +399,14 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     @Override
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public DataFeedTaskConfig getDataFeedTaskConfig() {
+        return dataFeedTaskConfig;
+    }
+
+    public void setDataFeedTaskConfig(DataFeedTaskConfig dataFeedTaskConfig) {
+        this.dataFeedTaskConfig = dataFeedTaskConfig;
     }
 
     public enum IngestionBehavior {

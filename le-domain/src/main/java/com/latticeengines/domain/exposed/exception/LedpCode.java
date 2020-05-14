@@ -871,6 +871,8 @@ public enum LedpCode {
     LEDP_40079("Valid import records count exceed limit(10M)."),
     LEDP_40080("orgName cannot be blank"), //
     LEDP_40081("Connection with the same orgName already exists."),
+    LEDP_40082("CDL import error, cannot locate import data."),
+    LEDP_40083("Import record count {0} exceed template limitation {1}."),
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //
