@@ -96,11 +96,8 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
           .agg(sum(__Row_Count__.name).as(__Row_Count__.name), max(LastActivityDate.name).as(LastActivityDate.name))
       } else {
         val reducer = Option(stream.getReducer).get
-
-        if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator)) {
-          if (!reducer.getGroupByFields.contains(PeriodId.name)) {
-            reducer.getGroupByFields.append(PeriodId.name) // separate by each period if filter is applied for time
-          }
+        if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator) && !reducer.getGroupByFields.contains(PeriodId.name)) {
+          reducer.getGroupByFields.append(PeriodId.name) // separate by each period if filter is applied for time
         }
         DeriveAttrsUtils.applyReducer(MergeUtils.concat2(affected, deltaTable), reducer)
       }
@@ -145,11 +142,8 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
 
     if (Option(stream.getReducer).isDefined) {
       val reducer = Option(stream.getReducer).get
-
-      if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator)) {
-        if (!reducer.getGroupByFields.contains(PeriodId.name)) {
-          reducer.getGroupByFields.append(PeriodId.name) // separate by each period if filter is applied for time
-        }
+      if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator) && !reducer.getGroupByFields.contains(PeriodId.name)) {
+        reducer.getGroupByFields.append(PeriodId.name) // separate by each period if filter is applied for time
       }
       df = DeriveAttrsUtils.applyReducer(df, reducer)
     }

@@ -47,6 +47,7 @@ public class ActivityRowReducer implements Serializable {
      */
     public enum Operator {
         Earliest,
-        Latest
+        Latest,
+        RandomOne // pick first one in group
     }
 }

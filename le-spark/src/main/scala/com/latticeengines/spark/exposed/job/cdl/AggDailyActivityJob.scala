@@ -6,7 +6,7 @@ import java.util
 
 import com.latticeengines.common.exposed.util.DateTimeUtils.{dateToDayPeriod, toDateOnlyFromMillis}
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation._
-import com.latticeengines.domain.exposed.cdl.activity.{ActivityMetricsGroupUtils, ActivityRowReducer, DimensionCalculator, DimensionCalculatorRegexMode, DimensionGenerator}
+import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{LastActivityDate, __Row_Count__, __StreamDate, __StreamDateId}
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, AggDailyActivityConfig}
@@ -17,7 +17,7 @@ import org.apache.commons.collections4.CollectionUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.catalyst.encoders.RowEncoder
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{LongType, StringType, StructField}
+import org.apache.spark.sql.types.{BooleanType, LongType, StringType, StructField}
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -31,7 +31,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
     val detailsMap = new util.HashMap[String, Details]() // streamId -> details
     var idx: Int = 0
     lattice.config.streamReducerMap.values().asScala.foreach((reducer: ActivityRowReducer) => {
-      if (!reducer.getGroupByFields.contains(__StreamDate.name)) {
+      if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator) && !reducer.getGroupByFields.contains(__StreamDate.name)) {
         reducer.getGroupByFields.asScala.append(__StreamDate.name) // separate by each day if filter is applied for time
       }
     })
@@ -77,7 +77,7 @@ class AggDailyActivityJob extends AbstractSparkJob[AggDailyActivityConfig] {
 
   // Update batch store with delta. Update delta as well if reducer exists
   // return (updatedBatch, updatedDelta)
-  def updateDailyStoreBatchAndDelta(streamId: String, dailyStoreDelta: DataFrame, dailyStoreBatch: DataFrame, lattice: LatticeContext[AggDailyActivityConfig]) : (DataFrame, DataFrame) = {
+  def updateDailyStoreBatchAndDelta(streamId: String, dailyStoreDelta: DataFrame, dailyStoreBatch: DataFrame, lattice: LatticeContext[AggDailyActivityConfig]): (DataFrame, DataFrame) = {
     val metadataMap = lattice.config.dimensionMetadataMap.asScala.mapValues(_.asScala)
     val attrDeriverMap = lattice.config.attrDeriverMap.asScala.mapValues(_.asScala.toList)
     val entityIdColMap = lattice.config.additionalDimAttrMap.asScala.mapValues(_.asScala.toList)
@@ -231,8 +231,10 @@ object DimensionValueHelper extends Serializable {
     calculator match {
       case regexCalculator: DimensionCalculatorRegexMode =>
         DimensionValueHelper.matchRegexDimensionValue(df, dimensionName, dimValues, regexCalculator, getValueFn)
+      case existenceCalculator: DimensionCalculatorExistence =>
+        df.withColumn(dimensionName, lit(existenceCalculator.getTargetBoolean).cast(BooleanType))
       case _ =>
-        // non-regex can only have one match
+        // non-regex can only have one match (exact match)
         val calDimValue = udf {
           obj: AnyRef =>
             dimValues

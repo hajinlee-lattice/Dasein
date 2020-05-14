@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO}
+import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO, FALSE}
 import com.latticeengines.domain.exposed.query.{BusinessEntity, TimeFilter}
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
@@ -121,6 +121,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val replaceNull: DataFrame = group.getNullImputation match {
       case NULL => missingEntitiesAppended // no operation needed
       case ZERO => DeriveAttrsUtils.fillZero(missingEntitiesAppended, group.getJavaClass)
+      case FALSE => DeriveAttrsUtils.fillFalse(missingEntitiesAppended, group.getJavaClass)
       case _ => throw new UnsupportedOperationException("Unknown null imputation method")
     }
 
