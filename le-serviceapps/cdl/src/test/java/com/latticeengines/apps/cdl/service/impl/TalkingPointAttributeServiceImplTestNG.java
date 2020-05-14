@@ -60,8 +60,7 @@ public class TalkingPointAttributeServiceImplTestNG extends CDLFunctionalTestNGB
             }
 
             @Override
-            public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity,
-                    DataCollection.Version version, StoreFilter filter) {
+            public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, Version version, StoreFilter filter, String attributeSetName) {
                 return null;
             }
 

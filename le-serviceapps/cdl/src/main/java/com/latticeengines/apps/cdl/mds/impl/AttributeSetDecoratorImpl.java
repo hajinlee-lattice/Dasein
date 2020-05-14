@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.mds.AttributeSetDecoratorFac;
-import com.latticeengines.apps.cdl.util.AttributeSetContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -28,7 +27,7 @@ import com.latticeengines.domain.exposed.metadata.mds.ColumnMetadataUtils;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DummyDecorator;
 import com.latticeengines.domain.exposed.metadata.mds.MapDecorator;
-import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace3;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -47,10 +46,10 @@ public class AttributeSetDecoratorImpl implements AttributeSetDecoratorFac {
     }
 
     @Override
-    public Decorator getDecorator(Namespace2<String, BusinessEntity> namespace) {
+    public Decorator getDecorator(Namespace3<String, BusinessEntity, String> namespace) {
         final Tenant tenant = MultiTenantContext.getTenant();
         final BusinessEntity entity = namespace.getCoord2();
-        final String attributeSetName = AttributeSetContext.getAttributeSetName();
+        final String attributeSetName = namespace.getCoord3();
         if (StringUtils.isEmpty(attributeSetName)) {
             return new DummyDecorator();
         } else {

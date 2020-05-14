@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.ApsGeneratorUtils;
@@ -155,6 +156,12 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
         attributeSet = attributeSetAtom.get();
         Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
         Assert.assertEquals(attributeSet.getDisplayName(), displayName);
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(Category.CONTACT_ATTRIBUTES, attributeSet.getName());
+        for (AttrConfig attrConfig : attrConfigs) {
+            if (contactAttributes.contains(attrConfig.getAttrName())) {
+                Assert.assertTrue(((AttrConfigProp<Boolean>) attrConfig.getAttrProps().get(ColumnSelection.Predefined.Enrichment.name())).getCustomValue());
+            }
+        }
     }
 
     private AttributeSet createAttributeSet(String displayName) {

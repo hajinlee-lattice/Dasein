@@ -17,16 +17,16 @@ import com.latticeengines.domain.exposed.metadata.mds.ChainedDecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratedMetadataStore;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
-import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace3;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace4;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.StoreFilter;
 
 @Component("customizedMetadataStore")
 public class CustomizedMetadataStoreImpl extends
-        DecoratedMetadataStore<Namespace3<BusinessEntity, DataCollection.Version, StoreFilter>,
+        DecoratedMetadataStore<Namespace4<BusinessEntity, DataCollection.Version, StoreFilter, String>,
                 Namespace3<BusinessEntity, DataCollection.Version, StoreFilter>,
-                Namespace2<String, BusinessEntity>>
+                Namespace3<String, BusinessEntity, String>>
         implements CustomizedMetadataStore {
 
     private final CDLNamespaceService cdlNamespaceService;
@@ -41,26 +41,27 @@ public class CustomizedMetadataStoreImpl extends
         this.cdlNamespaceService = cdlNamespaceService;
     }
 
-    private static ChainedDecoratorFactory<Namespace2<String, BusinessEntity>> getDecoratorChain(
+    private static ChainedDecoratorFactory<Namespace3<String, BusinessEntity, String>> getDecoratorChain(
             AttrConfigDecorator attrConfigDecorator, AttributeSetDecoratorFac attributeSetDecoratorFac) {
         List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList(attrConfigDecorator, attributeSetDecoratorFac);
-        return new ChainedDecoratorFactory<Namespace2<String, BusinessEntity>>("CustomServingStoreChain", factories) {
+        return new ChainedDecoratorFactory<Namespace3<String, BusinessEntity, String>>("CustomServingStoreChain",
+                factories) {
             @Override
-            protected List<Namespace> project(Namespace2<String, BusinessEntity> namespace) {
+            protected List<Namespace> project(Namespace3<String, BusinessEntity, String> namespace) {
                 return Arrays.asList(namespace, namespace);
             }
         };
     }
 
     @Override
-    protected Namespace2<String, BusinessEntity> projectDecoratorNamespace(
-            Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> namespace) {
-        return cdlNamespaceService.prependTenantId(namespace);
+    protected Namespace3<String, BusinessEntity, String> projectDecoratorNamespace(
+            Namespace4<BusinessEntity, DataCollection.Version, StoreFilter, String> namespace) {
+        return cdlNamespaceService.prependTenantIdAndAttributeSet(Namespace.as(namespace.getCoord1(), namespace.getCoord4()));
     }
 
     @Override
     protected Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> projectBaseNamespace(
-            Namespace3<BusinessEntity, DataCollection.Version, StoreFilter> namespace) {
+            Namespace4<BusinessEntity, DataCollection.Version, StoreFilter, String> namespace) {
         return namespace;
     }
 }

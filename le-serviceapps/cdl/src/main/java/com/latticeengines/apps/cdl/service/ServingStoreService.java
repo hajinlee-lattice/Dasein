@@ -22,7 +22,7 @@ public interface ServingStoreService {
     ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version);
 
     ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version,
-            StoreFilter filter);
+            StoreFilter filter, String attributeSetName);
 
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
             DataCollection.Version version, Collection<ColumnSelection.Predefined> groups);
