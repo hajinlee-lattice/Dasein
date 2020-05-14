@@ -874,6 +874,7 @@ public class DataFeedTaskTemplateServiceImpl implements DataFeedTaskTemplateServ
 
         DimensionCalculatorRegexMode calculator = new DimensionCalculatorRegexMode();
         calculator.setName(InterfaceName.StageName.name());
+        calculator.setAttribute(InterfaceName.StageName.name());
         calculator.setPatternAttribute(InterfaceName.StageName.name());
         calculator.setPatternFromCatalog(true);
         dim.setCalculator(calculator);
