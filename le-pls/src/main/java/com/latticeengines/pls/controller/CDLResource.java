@@ -382,10 +382,28 @@ public class CDLResource {
         }
     }
 
+    @Deprecated
     @GetMapping(value = "/s3import/system/list")
     @ResponseBody
     @ApiOperation("create new S3 Import system")
     public List<S3ImportSystem> getS3ImportSystemList(
+            @RequestParam(value = "Account", required = false, defaultValue = "false") Boolean filterByAccountSystemId,
+            @RequestParam(value = "Contact", required = false, defaultValue = "false") Boolean filterByContactSystemId,
+            @RequestBody(required = false) S3ImportTemplateDisplay templateDisplay) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return cdlService.getS3ImportSystemWithFilter(customerSpace.toString(),
+                Boolean.TRUE.equals(filterByAccountSystemId),
+                Boolean.TRUE.equals(filterByContactSystemId),
+                templateDisplay);
+    }
+
+    @PostMapping(value = "/s3import/system/mappinglist")
+    @ResponseBody
+    @ApiOperation("Get S3ImportSystem list for Id mapping")
+    public List<S3ImportSystem> getS3ImportSystemListForMapping(
             @RequestParam(value = "Account", required = false, defaultValue = "false") Boolean filterByAccountSystemId,
             @RequestParam(value = "Contact", required = false, defaultValue = "false") Boolean filterByContactSystemId,
             @RequestBody(required = false) S3ImportTemplateDisplay templateDisplay) {
