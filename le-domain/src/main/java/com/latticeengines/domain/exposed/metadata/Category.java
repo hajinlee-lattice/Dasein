@@ -97,7 +97,7 @@ public enum Category {
     private static Map<String, Category> nameMap;
     private static Set<String> values;
     private static List<Category> premiumCategories = Arrays.asList(INTENT, TECHNOLOGY_PROFILE,
-            WEBSITE_KEYWORDS, ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES);
+            WEBSITE_KEYWORDS, ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES, GROWTH_TRENDS);
     // used in following scenarios
     // 1. iteration metadata API called via remodeling UI
     // 2. attribute management UI
