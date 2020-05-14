@@ -219,8 +219,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                     String suffix = fileName.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
                     fileName = atlasExport.getExportType().getPathFriendlyName() + "_" + atlasExport.getSegmentName() + "_" + atlasExport.getUuid() + suffix;
                 }
-                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName),
-                        (atlasExport.getSegmentName() == null ? "" : atlasExport.getSegmentName()) + fileName, "application/csv",
+                ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName), fileName, "application/csv",
                         request, response, importFromS3Service, batonService);
             } else {
                 throw new LedpException(LedpCode.LEDP_18161, new Object[]{exportId});
