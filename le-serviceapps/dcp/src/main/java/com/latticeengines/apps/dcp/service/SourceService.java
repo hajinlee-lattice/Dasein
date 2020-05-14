@@ -29,4 +29,6 @@ public interface SourceService {
     Source convertToSource(String customerSpace, DataFeedTask dataFeedTask);
 
     Boolean pauseSource(String customerSpace, String sourceId);
+
+    Boolean reactivateSource(String customerSpace, String sourceId);
 }

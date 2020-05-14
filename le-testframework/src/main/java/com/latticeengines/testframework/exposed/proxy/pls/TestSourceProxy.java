@@ -74,4 +74,9 @@ public class TestSourceProxy extends PlsRestApiProxyBase {
         String url = constructUrl("/");
         return put("update source", url, updateSourceRequest, Source.class);
     }
+
+    public void reactivateSourceById(String sourceId) {
+        String url = constructUrl("/sourceId/{sourceId}/reactivate", sourceId);
+        put("reactivate source", url);
+    }
 }

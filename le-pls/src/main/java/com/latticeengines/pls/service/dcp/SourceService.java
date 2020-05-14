@@ -31,4 +31,5 @@ public interface SourceService {
 
     ValidateFieldDefinitionsResponse validateFieldDefinitions(String importFile,
                                                               ValidateFieldDefinitionsRequest validateRequest);
+    Boolean reactivateSource(String sourceId);
 }

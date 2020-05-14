@@ -114,4 +114,11 @@ public class SourceResource {
         return sourceService.pauseSource(customerSpace, sourceId);
     }
 
+    @PutMapping("/sourceId/{sourceId}/reactivate")
+    @ResponseBody
+    @ApiOperation("Reactivate source by sourceId")
+    public Boolean reactivateSource(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return sourceService.reactivateSource(customerSpace, sourceId);
+    }
 }
