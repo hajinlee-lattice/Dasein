@@ -213,6 +213,12 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
             } else if (CollectionUtils.isNotEmpty(atlasExport.getFilesUnderSystemPath())) {
                 filePath = atlasExportProxy.getSystemExportPath(customerSpace, false);
                 fileName = atlasExport.getFilesUnderSystemPath().get(0);
+                // if segment name include special characters, MYSQL @Type(type = "json") annotation can't handle filesToDelete well, so we
+                // need to rebuild file name here
+                if (StringUtils.isNotEmpty(atlasExport.getSegmentName())) {
+                    String suffix = fileName.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
+                    fileName = atlasExport.getExportType().getPathFriendlyName() + "_" + atlasExport.getSegmentName() + "_" + atlasExport.getUuid() + suffix;
+                }
                 ExportUtils.downloadS3ExportFile(getFilePath(filePath, fileName),
                         (atlasExport.getSegmentName() == null ? "" : atlasExport.getSegmentName()) + fileName, "application/csv",
                         request, response, importFromS3Service, batonService);
