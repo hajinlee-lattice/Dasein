@@ -216,7 +216,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
                 fileName = atlasExport.getFilesUnderSystemPath().get(0);
                 // if segment name include special characters, MYSQL @Type(type = "json") annotation can't handle filesToDelete well, so we
                 // need to rebuild file name here
-                if (StringUtils.isNotEmpty(atlasExport.getSegmentName()) && atlasExport.getExportType() != null) {
+                if (StringUtils.isNotEmpty(atlasExport.getSegmentName())) {
                     String suffix = fileName.endsWith(".csv.gz") ? ".csv.gz" : ".csv";
                     String exportType = getExportType(atlasExport);
                     if (StringUtils.isNotEmpty(exportType)) {
@@ -235,16 +235,19 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     }
 
     private String getExportType(AtlasExport atlasExport) {
-        switch (atlasExport.getExportType()) {
-            case ACCOUNT:
-                return ExportEntity.Account.name();
-            case CONTACT:
-                return ExportEntity.Contact.name();
-            case ACCOUNT_AND_CONTACT:
-                return ExportEntity.AccountContact.name();
-            default:
-                return null;
+        if (atlasExport.getExportType() != null) {
+            switch (atlasExport.getExportType()) {
+                case ACCOUNT:
+                    return ExportEntity.Account.name();
+                case CONTACT:
+                    return ExportEntity.Contact.name();
+                case ACCOUNT_AND_CONTACT:
+                    return ExportEntity.AccountContact.name();
+                default:
+                    return null;
+            }
         }
+        return null;
     }
 
     private void downloadSegmentExport(MetadataSegmentExport metadataSegmentExport, String exportId,
