@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -202,10 +203,11 @@ public class DataLakeAccountResource {
     public FrontEndResponse<String> getAccountsAndTalkingpoints(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
-            @PathVariable String playId) {
+            @PathVariable String playId,//
+            @RequestParam (value = "is-preview", required = false) boolean isPreview) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
         try {
-            List<TalkingPointDTO> tps = talkingPointProxy.findAllByPlayName(customerSpace, playId, true);
+            List<TalkingPointDTO> tps = talkingPointProxy.findAllByPlayName(customerSpace, playId, !isPreview);
             AccountDanteFormatter accountFormatter = accountDanteFormatterProvider.get();
             accountFormatter
                     .setIsEntityMatchEnabled(batonService.isEntityMatchEnabled(CustomerSpace.parse(customerSpace)));

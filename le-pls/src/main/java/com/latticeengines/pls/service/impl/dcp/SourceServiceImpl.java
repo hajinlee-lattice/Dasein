@@ -270,4 +270,12 @@ public class SourceServiceImpl implements SourceService {
         return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve, null);
     }
 
+    @Override
+    public Boolean reactivateSource(String sourceId) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (customerSpace == null) {
+            throw new LedpException(LedpCode.LEDP_18217);
+        }
+        return sourceProxy.reactivateSource(customerSpace.toString(), sourceId);
+    }
 }

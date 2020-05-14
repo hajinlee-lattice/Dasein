@@ -168,4 +168,11 @@ public class SourceResource {
             throw new UIActionException(action, LedpCode.LEDP_60003);
         }
     }
+
+    @PutMapping(value = "/sourceId/{sourceId}/reactivate")
+    @ResponseBody
+    @ApiOperation("Reactivate source by sourceId")
+    public Boolean reactivateSource(@PathVariable String sourceId) {
+        return sourceService.reactivateSource(sourceId);
+    }
 }

@@ -12,6 +12,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.DeleteRequest;
+import com.latticeengines.domain.exposed.cdl.ImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -117,4 +118,6 @@ public interface CDLService {
     void downloadDimensionMetadataInStream(HttpServletRequest request, HttpServletResponse response,
                                            String mimeType, String fileName, String customerSpace,
                                            String systemName, EntityType entityType);
+
+    List<ImportFileInfo> getAllImportFiles(String customerSpace);
 }
