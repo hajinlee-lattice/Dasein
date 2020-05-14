@@ -162,7 +162,7 @@ public class DataFeedTask implements HasPid, SoftDeletable, Serializable {
     @JsonProperty("deleted")
     private Boolean deleted;
 
-    @Column(name = "TASK_CONFIG", length = 6000)
+    @Column(name = "TASK_CONFIG", columnDefinition = "'JSON'", length = 6000)
     @Type(type = "json")
     @JsonProperty("task_config")
     private DataFeedTaskConfig dataFeedTaskConfig;
