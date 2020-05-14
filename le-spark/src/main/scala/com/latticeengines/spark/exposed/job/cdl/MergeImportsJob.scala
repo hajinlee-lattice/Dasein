@@ -85,6 +85,10 @@ class MergeImportsJob extends AbstractSparkJob[MergeImportsConfig] {
 
   private def processSrc(src: DataFrame, srcId: String, joinKey: String, deduplicate: Boolean,
       renameFlds: Array[Array[String]], cloneFlds: Array[Array[String]], hasSystem: Boolean): DataFrame = {
+    val nullCount = if (joinKey != null) src.filter(col(joinKey).isNull).count else 0
+    if (nullCount > 0) {
+      throw new IllegalStateException(s"Import data has null value for key column=$joinKey!")
+    }
     var fldUpd =  cloneSrcFlds(src, cloneFlds)
     fldUpd = renameSrcFlds(fldUpd, renameFlds)
 

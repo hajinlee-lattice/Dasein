@@ -279,7 +279,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         ChangeListConfig config = new ChangeListConfig();
         config.setJoinKey(joinKey);
         config.setExclusionColumns(Arrays.asList(InterfaceName.CDLCreatedTime.name(),
-                InterfaceName.CDLUpdatedTime.name(), InterfaceName.EntityId.name()));
+                InterfaceName.CDLUpdatedTime.name(), joinKey));
         return config;
     }
 
