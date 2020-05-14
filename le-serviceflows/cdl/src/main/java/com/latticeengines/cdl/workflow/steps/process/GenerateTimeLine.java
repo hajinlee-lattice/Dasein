@@ -171,6 +171,8 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
             exportToDynamo(name);
             addToListInContext(TEMPORARY_CDL_TABLES, name, String.class);
         });
+        dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), tableNames,
+                TableRoleInCollection.TimelineProfile, inactive);
     }
 
     private void exportToDynamo(String tableName) {
@@ -365,7 +367,12 @@ public class GenerateTimeLine extends RunSparkJob<TimeLineSparkStepConfiguration
         Map<String, String> timelineRawTableNames = getMapObjectFromContext(TIMELINE_RAWTABLE_NAME,
                 String.class, String.class);
         log.info("timeline raw table names = {}", timelineRawTableNames);
-        return allTablesExist(timelineRawTableNames);
+        boolean isShortCutMode = allTablesExist(timelineRawTableNames);
+        if (isShortCutMode) {
+            dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), timelineRawTableNames,
+                    TableRoleInCollection.TimelineProfile, inactive);
+        }
+        return isShortCutMode;
     }
 
     private boolean shouldPublishDynamo() {

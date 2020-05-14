@@ -59,7 +59,7 @@ public enum TableRoleInCollection {
     CustomIntentProfile,
     PeriodStores, //
     MetricsGroup, //
-
+    TimelineProfile, //
     AccountMaster;
 
     static {
