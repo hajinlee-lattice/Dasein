@@ -44,7 +44,9 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ProcessLegacyDeploymentTestNG.class);
     private static final String ACCOUNT_FEED_TYPE = "AccountVDB";
+    private static final String ACCOUNT_FEED_TYPE_NEW = "AccountVDB_New";
     private static final String CONTACT_FEED_TYPE = "ContactVDB";
+    private static final String CONTACT_FEED_TYPE_NEW = "ContactVDB_New";
     private static final String PRODUCT_FEED_TYPE = "ProductVDB";
     private static final String TRANSACTION_FEED_TYPE = "TransactionVDB";
     static final String UNDER_SCORE = "_";
@@ -99,12 +101,12 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     // Update 10 accounts, insert 10 new accounts
     // Update 10 contacts, insert 10 new contacts
     protected void upsertData() throws InterruptedException {
-        log.info("Importing 20 accounts (10 for update, 10 for insert)");
-        mockVISIDBImport(BusinessEntity.Account, 4, ACCOUNT_FEED_TYPE);
+        log.info("Importing 20 accounts (10 for update, 10 for insert), by using new template");
+        mockVISIDBImport(BusinessEntity.Account, 4, ACCOUNT_FEED_TYPE_NEW);
         Thread.sleep(1100);
 
-        log.info("Importing 20 contacts (10 for update, 10 for insert)");
-        mockVISIDBImport(BusinessEntity.Contact, 4, CONTACT_FEED_TYPE);
+        log.info("Importing 20 contacts (10 for update, 10 for insert), by using new template");
+        mockVISIDBImport(BusinessEntity.Contact, 4, CONTACT_FEED_TYPE_NEW);
         Thread.sleep(1100);
     }
 
