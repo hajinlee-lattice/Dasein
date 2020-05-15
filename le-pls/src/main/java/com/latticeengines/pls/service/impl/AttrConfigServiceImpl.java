@@ -827,9 +827,11 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                                 attrDetail.setIsFrozen(true);
                                 subcategoryDetail.setHasFrozenAttrs(true);
                             }
-
                             subcategoryDetail.setTotalAttrs(subcategoryDetail.getTotalAttrs() + 1);
                             subcategoryDetail.getAttributes().add(attrDetail);
+                            if (attrDetail.getSelected()) {
+                                subcategoryDetail.setSelectedAttrs(subcategoryDetail.getSelectedAttrs() + 1);
+                            }
                             totalAttrs++;
                         } else {
                             log.warn(String.format("%s does not have property %s", attrConfig.getAttrName(), property));
@@ -1000,12 +1002,12 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     }
 
     @Override
-    public AttributeSet createAttributeSet(String attributeSetName, AttributeSet attributeSet) {
+    public AttributeSet cloneAttributeSet(String attributeSetName, AttributeSet attributeSet) {
         Tenant tenant = MultiTenantContext.getTenant();
         setAttributeSetFields(attributeSet);
         log.info("Clone attribute set with name {} in tenant {}.",
                 attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
-        return cdlAttrConfigProxy.createAttributeSet(tenant.getId(), attributeSetName, attributeSet);
+        return cdlAttrConfigProxy.cloneAttributeSet(tenant.getId(), attributeSetName, attributeSet);
     }
 
     @Override

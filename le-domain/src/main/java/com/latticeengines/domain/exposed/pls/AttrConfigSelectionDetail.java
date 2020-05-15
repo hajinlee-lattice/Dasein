@@ -77,6 +77,9 @@ public class AttrConfigSelectionDetail {
         @JsonProperty("HasFrozenAttrs")
         private Boolean hasFrozenAttrs = Boolean.FALSE;
 
+        @JsonProperty("SelectedAttrs")
+        private Long selectedAttrs = 0L;
+
         @JsonProperty("Attributes")
         private List<AttrDetail> attributes = new ArrayList<>();
 
@@ -120,6 +123,13 @@ public class AttrConfigSelectionDetail {
             attributes = attributesValue;
         }
 
+        public Long getSelectedAttrs() {
+            return selectedAttrs;
+        }
+
+        public void setSelectedAttrs(Long selectedAttrs) {
+            this.selectedAttrs = selectedAttrs;
+        }
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -147,7 +147,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     }
 
     @Override
-    public AttributeSet createAttributeSet(String name, AttributeSet attributeSet) {
+    public AttributeSet cloneAttributeSet(String name, AttributeSet attributeSet) {
         if (StringUtils.isEmpty(name)) {
             // get exist attribute map from custom serving store
             Map<String, Set<String>> existingAttributesMap = getCustomAttributesMap();

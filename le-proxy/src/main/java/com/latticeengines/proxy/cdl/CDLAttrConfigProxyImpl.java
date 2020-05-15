@@ -37,9 +37,9 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
     }
 
     @Override
-    public AttributeSet createAttributeSet(String customerSpace, String attributeSetName, AttributeSet attributeSet) {
+    public AttributeSet cloneAttributeSet(String customerSpace, String attributeSetName, AttributeSet attributeSet) {
         StringBuffer url = new StringBuffer();
-        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset", shortenCustomerSpace(customerSpace)));
+        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/clone", shortenCustomerSpace(customerSpace)));
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotEmpty(attributeSetName)) {
             params.add("attributeSetName=" + attributeSetName);
