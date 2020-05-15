@@ -25,6 +25,7 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
     private static final Logger log = LoggerFactory.getLogger(CompletedWorkflowStatusHandler.class);
 
     private String URL = "url";
+    private String FOLDER = "dropfolder";
 
     @Inject
     private PlayLaunchService playLaunchService;
@@ -70,9 +71,9 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
                 // If partial sync, there may be an errorFile.
                 Map<String, String> errorFileMap = eventDetail.getErrorFile();
 
-                if (errorFileMap != null && errorFileMap.containsKey(URL) && errorFileMap.get(URL).contains("dropfolder")) {
+                if (errorFileMap != null && errorFileMap.containsKey(URL) && errorFileMap.get(URL).contains(FOLDER)) {
                     String errorFile = errorFileMap.get(URL);
-                    statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf("dropfolder")));
+                    statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf(FOLDER)));
                 }
             }
 
