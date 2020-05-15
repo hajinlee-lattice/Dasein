@@ -37,6 +37,8 @@ public final class AttributeUtils {
 
     private static final Logger log = LoggerFactory.getLogger(AttributeUtils.class);
 
+    public static final String DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME = "Default Group";
+    public static final String DEFAULT_ATTRIBUTE_SET_NAME = "Default_Group";
 
     public static void copyPropertiesFromAttribute(Attribute source, Attribute dest) {
         copyPropertiesFromAttribute(source, dest, true);
@@ -358,5 +360,12 @@ public final class AttributeUtils {
         public static final String CATEGORY = "Category";
         public static final String SUB_CATEGORY = "Subcategory";
         public static final String SECONDARY_SUB_CATEGORY_DISPLAY_NAME = "subCategorySecondaryDisplayName";
+    }
+
+    public static boolean isDefaultAttributeSet(String name) {
+        if (StringUtils.isEmpty(name) || name.equals(DEFAULT_ATTRIBUTE_SET_NAME)) {
+            return true;
+        }
+        return false;
     }
 }

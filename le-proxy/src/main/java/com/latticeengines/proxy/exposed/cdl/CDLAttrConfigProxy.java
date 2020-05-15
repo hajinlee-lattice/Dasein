@@ -45,6 +45,8 @@ public interface CDLAttrConfigProxy {
 
     AttributeSet updateAttributeSet(String customerSpace, AttributeSet attributeSet);
 
+    AttributeSet createAttributeSet(String customerSpace, AttributeSet attributeSet);
+
     void deleteAttributeSet(String customerSpace, String name);
 
 }

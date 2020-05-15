@@ -15,5 +15,5 @@ public interface AttributeSetRepository extends BaseJpaRepository<AttributeSet, 
 
     @Query(value = "SELECT attrSet.name, attrSet.displayName, attrSet.description, attrSet.created, " +
             "attrSet.updated, attrSet.createdBy, attrSet.updatedBy from AttributeSet attrSet")
-    List<Object[]> findAttributes();
+    List<Object[]> findAttributeSets();
 }

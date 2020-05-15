@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import static j2html.TagCreator.a;
 import static j2html.TagCreator.b;
 import static j2html.TagCreator.each;
 import static j2html.TagCreator.li;
@@ -1017,6 +1018,15 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         log.info("Update attribute set with name {} in tenant {}.",
                 attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
         return cdlAttrConfigProxy.updateAttributeSet(tenant.getId(), attributeSet);
+    }
+
+    @Override
+    public AttributeSet createAttributeSet(AttributeSet attributeSet) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        setAttributeSetFields(attributeSet);
+        log.info("Create attribute set with name {} in tenant {}.",
+                attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
+        return cdlAttrConfigProxy.createAttributeSet(tenant.getId(), attributeSet);
     }
 
     private void setAttributeSetFields(AttributeSet attributeSet) {

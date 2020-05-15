@@ -18,7 +18,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -58,6 +57,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.monitor.tracing.TracingTags;
 import com.latticeengines.monitor.util.TracingUtils;
@@ -359,7 +359,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             || columnsInSystem.contains(attrConfig.getAttrName()))
                     .collect(Collectors.toList());
             Set<String> attributesInSet = null;
-            if (StringUtils.isNotEmpty(attributeSetName)) {
+            if (!AttributeUtils.isDefaultAttributeSet(attributeSetName)) {
                 AttributeSet attributeSet = getAttributeSetByName(attributeSetName);
                 if (attributeSet != null) {
                     Map<String, Set<String>> attributeMap = attributeSet.getAttributesMap();
