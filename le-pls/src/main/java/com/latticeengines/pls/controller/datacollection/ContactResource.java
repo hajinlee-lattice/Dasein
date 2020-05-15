@@ -11,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -63,10 +62,9 @@ public class ContactResource extends BaseFrontEndEntityResource {
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@RequestBody(required = false) FrontEndQuery frontEndQuery,
-            @RequestParam(value = "use-internal-account-id", required = false, defaultValue = "false") boolean useInternalAccountId) {
+    public DataPage getData(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         try {
-            return super.getData(frontEndQuery, useInternalAccountId);
+            return super.getData(frontEndQuery);
         } catch (Exception e) {
             log.error("Failed to get contact data", e);
             throw new LedpException(LedpCode.LEDP_36002);

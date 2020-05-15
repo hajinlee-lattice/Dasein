@@ -41,8 +41,8 @@ public class ProductResource extends BaseFrontEndEntityResource {
     private static final Logger log = LoggerFactory.getLogger(ProductResource.class);
 
     @Inject
-    public ProductResource(EntityProxy entityProxy, SegmentProxy segmentProxy,
-            DataCollectionProxy dataCollectionProxy, GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
+    public ProductResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy,
+            GraphDependencyToUIActionUtil graphDependencyToUIActionUtil) {
         super(entityProxy, segmentProxy, dataCollectionProxy, graphDependencyToUIActionUtil);
     }
 
@@ -62,7 +62,7 @@ public class ProductResource extends BaseFrontEndEntityResource {
                 offset = offset == null ? 0 : offset;
                 query.setPageFilter(new PageFilter(offset, max));
             }
-            return super.getData(query,false);
+            return super.getData(query);
         } catch (Exception e) {
             log.error("Failed to get product data", e);
             throw new LedpException(LedpCode.LEDP_36002);
