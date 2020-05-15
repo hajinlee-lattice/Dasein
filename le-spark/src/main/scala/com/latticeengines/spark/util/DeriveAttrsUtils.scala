@@ -107,7 +107,15 @@ private[spark] object DeriveAttrsUtils {
     val colType: Type = AvroUtils.getAvroType(javaClass)
     colType match {
       case Type.LONG => df.na.fill(0: Long)
-      case _ => throw new UnsupportedOperationException(s"${colType.toString} is not supported for null imputation")
+      case _ => throw new UnsupportedOperationException(s"${colType.toString} is not supported to fill zero")
+    }
+  }
+
+  def fillFalse(df: DataFrame, javaClass: String): DataFrame = {
+    val colType: Type = AvroUtils.getAvroType(javaClass)
+    colType match {
+      case Type.BOOLEAN => df.na.fill(false)
+      case _ => throw new UnsupportedOperationException(s"${colType.toString} is not supported to fill false")
     }
   }
 

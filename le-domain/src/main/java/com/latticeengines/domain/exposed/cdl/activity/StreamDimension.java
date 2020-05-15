@@ -105,6 +105,11 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
     @Column(name = "USAGES", columnDefinition = "'JSON'", nullable = false)
     private Set<Usage> usages;
 
+    @JsonProperty("shouldReplace")
+    @Column(name="SHOULD_REPLACE")
+    // if false, newly generated dimension map will be merged into the active version
+    private Boolean shouldReplace;
+
     @Column(name = "CREATED", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty("created")
@@ -206,6 +211,14 @@ public class StreamDimension implements HasPid, Serializable, HasAuditingFields 
 
     public void setUsages(Set<Usage> usages) {
         this.usages = usages;
+    }
+
+    public Boolean getShouldReplace() {
+        return shouldReplace;
+    }
+
+    public void setShouldReplace(Boolean shouldReplace) {
+        this.shouldReplace = shouldReplace;
     }
 
     @Override

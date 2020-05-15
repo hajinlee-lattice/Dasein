@@ -127,6 +127,11 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
     @Column(name = "REDUCER", columnDefinition = "'JSON'")
     private ActivityRowReducer reducer;
 
+    @JsonProperty("useLatestVersion")
+    @Column(name = "USE_LATEST_VERSION")
+    // if true, will filter out all past versions from period stores before aggregation
+    private Boolean useLatestVersion;
+
     @Override
     public Long getPid() {
         return pid;
@@ -265,5 +270,13 @@ public class ActivityMetricsGroup implements HasPid, HasTenant, Serializable {
 
     public void setReducer(ActivityRowReducer reducer) {
         this.reducer = reducer;
+    }
+
+    public Boolean getUseLatestVersion() {
+        return useLatestVersion;
+    }
+
+    public void setUseLatestVersion(Boolean useLatestVersion) {
+        this.useLatestVersion = useLatestVersion;
     }
 }

@@ -78,7 +78,9 @@ public class StreamAttributeDeriver implements Serializable {
         // max value of input attribute (only accept single input attribute)
         MAX("Max"), //
         // min value of input attribute (only accept single input attribute)
-        MIN("Min");
+        MIN("Min"),
+        // fill true value
+        TRUE("True");
 
         private static Map<String, Calculation> nameMap;
         private static Set<String> values;
