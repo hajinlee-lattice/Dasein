@@ -13,6 +13,7 @@ public class User {
     private String firstName;
     private String lastName;
     private String phoneNumber;
+    private String language;
     private boolean active;
     private String title;
     private String accessLevel;
@@ -68,6 +69,16 @@ public class User {
     @JsonProperty("PhoneNumber")
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    @JsonProperty("Language")
+    public String getLanguage() {
+        return language;
+    }
+
+    @JsonProperty("Language")
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     @JsonProperty("Active")

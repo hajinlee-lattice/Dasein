@@ -24,6 +24,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
@@ -38,6 +39,8 @@ import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.UserResourceTestNGBase;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 public class UserResourceTestNG extends UserResourceTestNGBase {
 
@@ -48,6 +51,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     private static final AccessLevel[] LEVELS = AccessLevel.values();
     private static String usersApi;
@@ -115,6 +121,35 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testConflictingUserInTenant();
         testConflictingUserOutsideTenant();
+    }
+
+    @Test(groups = {"functional", "deployment"})
+    public void registerDCPUser() {
+        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+        testDCPUserCreate("test" + UUID.randomUUID().toString() + "@test.com");
+        testDCPUserCreate("test" + UUID.randomUUID().toString() + "@dnb.com");
+    }
+
+    private void testDCPUserCreate(String email) {
+        UserRegistration uReg = createUserRegistration();
+        uReg.getUser().setEmail(email);
+        uReg.getCredentials().setUsername(email);
+        uReg.setDCP(Boolean.TRUE);
+        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
+
+        String json = restTemplate.postForObject(usersApi, uReg, String.class);
+        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
+                RegistrationResult.class);
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        User user = userService.findByUsername(uReg.getCredentials().getUsername());
+        Assert.assertNotNull(user);
+        Assert.assertEquals(user.getAccessLevel(),String.valueOf(
+                EmailUtils.isInternalUser(email) ? AccessLevel.INTERNAL_ADMIN : AccessLevel.EXTERNAL_ADMIN));
+        IDaaSUser iDaaSUser = iDaaSService.getIDaaSUser(uReg.getUser().getEmail());
+        Assert.assertNotNull(iDaaSUser);
+
+        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
     }
 
     @Test(groups = { "functional", "deployment" }, dataProvider = "getAllUsersProvider")
@@ -201,6 +236,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
         user.setFirstName("Test");
         user.setLastName("Tester");
+        user.setUsername("Test Tester");
+        user.setLanguage("English");
         user.setPhoneNumber("650-555-5555");
         user.setTitle("Silly Tester");
         user.setAccessLevel(AccessLevel.EXTERNAL_USER.name());

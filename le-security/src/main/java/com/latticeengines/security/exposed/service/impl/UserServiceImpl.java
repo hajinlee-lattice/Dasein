@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Preconditions;
 import com.latticeengines.auth.exposed.service.GlobalTeamManagementService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTeam;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.dcp.idaas.ProductRequest;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
@@ -48,6 +50,9 @@ import com.latticeengines.security.exposed.globalauth.GlobalTenantManagementServ
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSServiceImpl;
+import com.latticeengines.security.service.impl.IDaaSUser;
 import com.latticeengines.security.util.IntegrationUserUtils;
 
 @Component("userService")
@@ -69,6 +74,9 @@ public class UserServiceImpl implements UserService {
 
     @Inject
     private GlobalTeamManagementService globalTeamManagementService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     private static EmailValidator emailValidator = EmailValidator.getInstance();
 
@@ -493,6 +501,10 @@ public class UserServiceImpl implements UserService {
             return result;
         }
 
+        if (Boolean.TRUE.equals(userRegistration.isDCP())) {
+            createIDaaSUser(user);
+        }
+
         if (StringUtils.isNotEmpty(user.getAccessLevel())) {
             assignAccessLevel(AccessLevel.valueOf(user.getAccessLevel()), tenantId, user.getUsername(), userName,
                     user.getExpirationDate(), true, false, user.getUserTeams());
@@ -681,6 +693,39 @@ public class UserServiceImpl implements UserService {
         for (GlobalAuthTicket globalAuthTicket : globalAuthTickets) {
             globalSessionManagementService.discardSession(expireSession, new Ticket(globalAuthTicket.getTicket()),
                     tenantId, globalAuthTicket.getPid(), globalAuthTicket.getUserId());
+        }
+    }
+    private void createIDaaSUser(User user) {
+        String email = user.getEmail();
+        IDaaSUser retrievedUser = iDaaSService.getIDaaSUser(email);
+        if (retrievedUser == null) {
+            IDaaSUser iDaasuser = new IDaaSUser();
+            iDaasuser.setFirstName(user.getFirstName());
+            iDaasuser.setEmailAddress(user.getEmail());
+            iDaasuser.setLastName(user.getLastName());
+            iDaasuser.setUserName(user.getUsername());
+            iDaasuser.setPhoneNumber(user.getPhoneNumber());
+            iDaasuser.setLanguage(user.getLanguage());
+            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
+                    "Last name is required");
+            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),
+                    "Email is required");
+            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getUserName()),
+                    "User name is required");
+            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLanguage()),
+                    "Language is required");
+            Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getPhoneNumber()),
+                    "Phone number is required");
+            LOGGER.info("begin creating IDaaS user for {}", email);
+            iDaaSService.createIDaaSUser(iDaasuser);
+        } else if (!retrievedUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
+            // add product access and default role to user when user already exists in IDaaS
+            LOGGER.info("user exist in IDaaS, add product access to user {}", email);
+            ProductRequest request = new ProductRequest();
+            request.setEmailAddress(email);
+            iDaaSService.addProductAccessToUser(request);
+        } else {
+            LOGGER.info("IDaaS user existed for {} and has product access", email);
         }
     }
 }

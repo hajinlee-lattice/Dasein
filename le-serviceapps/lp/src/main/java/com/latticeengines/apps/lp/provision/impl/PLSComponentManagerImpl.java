@@ -2,7 +2,6 @@ package com.latticeengines.apps.lp.provision.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -406,7 +405,9 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
             } else if (!retrievedUser.getApplications().contains(IDaaSServiceImpl.DCP_PRODUCT)) {
                 // add product access and default role to user when user already exists in IDaaS
                 log.info("user exist in IDaaS, add product access to user {}", email);
-                iDaaSService.addProductAccessToUser(constructProductRequest(email));
+                ProductRequest request = new ProductRequest();
+                request.setEmailAddress(email);
+                iDaaSService.addProductAccessToUser(request);
             } else {
                 log.info("IDaaS user existed for {} and has product access", email);
             }
@@ -416,14 +417,6 @@ public class PLSComponentManagerImpl implements PLSComponentManager {
                 externalAdminEmails.add(email.toLowerCase());
             }
         }
-    }
-
-    private ProductRequest constructProductRequest(String email) {
-        ProductRequest request = new ProductRequest();
-        request.setEmailAddress(email);
-        request.setRequestor(IDaaSServiceImpl.DCP_PRODUCT);
-        request.setProducts(Collections.singletonList(IDaaSServiceImpl.DCP_PRODUCT));
-        return request;
     }
 
 }

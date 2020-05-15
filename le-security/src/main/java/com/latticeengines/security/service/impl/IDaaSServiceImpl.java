@@ -256,6 +256,8 @@ public class IDaaSServiceImpl implements IDaaSService {
 
     @Override
     public IDaaSResponse addProductAccessToUser(ProductRequest request) {
+        request.setRequestor(DCP_PRODUCT);
+        request.setProducts(Collections.singletonList(DCP_PRODUCT));
         if (enabled) {
             initialize();
             IDaaSResponse response = null;

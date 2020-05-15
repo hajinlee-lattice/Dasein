@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -111,6 +113,10 @@ public class UserResource {
         AccessLevel targetLevel = AccessLevel.EXTERNAL_USER;
         if (userReg.getUser().getAccessLevel() != null) {
             targetLevel = AccessLevel.valueOf(userReg.getUser().getAccessLevel());
+        }
+        if (StringUtils.isBlank(userReg.getUser().getAccessLevel()) && Boolean.TRUE.equals(userReg.isDCP())) {
+            targetLevel = EmailUtils.isInternalUser(userReg.getUser().getEmail()) ? AccessLevel.INTERNAL_ADMIN :
+                    AccessLevel.EXTERNAL_ADMIN;
         }
         if (!userService.isSuperior(loginLevel, targetLevel)) {
             LOGGER.warn(

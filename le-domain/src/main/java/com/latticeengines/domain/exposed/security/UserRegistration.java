@@ -8,6 +8,7 @@ public class UserRegistration {
     private User user;
     private Credentials credentials;
     private boolean validation = false;
+    private boolean isDCP = false;
 
     @JsonProperty("User")
     public User getUser() {
@@ -37,6 +38,16 @@ public class UserRegistration {
     @JsonProperty("Validation")
     public void setValidation(boolean validation) {
         this.validation = validation;
+    }
+
+    @JsonProperty("IsDCP")
+    public boolean isDCP() {
+        return isDCP;
+    }
+
+    @JsonProperty("IsDCP")
+    public void setDCP(boolean DCP) {
+        isDCP = DCP;
     }
 
     @Override
