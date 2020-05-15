@@ -577,6 +577,8 @@ public final class StatsCubeUtils {
         switch (entity) {
         case WebVisitProfile:
         case Opportunity:
+        case AccountMarketingActivity:
+        case ContactMarketingActivity:
             return firstNumValueTopBktComparator();
         case Rating:
         case PurchaseHistory:

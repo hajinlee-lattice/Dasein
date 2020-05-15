@@ -1,20 +1,19 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.util.ArrayList;
+import static com.latticeengines.domain.exposed.util.ActivityStoreUtils.DEFAULT_TIME_RANGE;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroup;
-import com.latticeengines.domain.exposed.cdl.activity.ActivityMetricsGroupUtils;
 import com.latticeengines.domain.exposed.cdl.activity.AtlasStream;
 import com.latticeengines.domain.exposed.cdl.activity.Catalog;
 import com.latticeengines.domain.exposed.cdl.activity.DimensionCalculator;
@@ -26,9 +25,7 @@ import com.latticeengines.domain.exposed.metadata.FilterOptions;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.EntityType;
-import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 /*-
@@ -41,12 +38,6 @@ public final class WebVisitUtils {
 
     public static final String TOTAL_VISIT_GROUPNAME = "Total Web Visits";
     public static final String SOURCE_MEDIUM_GROUPNAME = "Web Visits By Source Medium";
-
-    // default time range shown in category tile (current value: last 8 weeks)
-    private static final TimeFilter UI_DEFAULT_TIME_FILTER = new TimeFilter(ComparisonType.WITHIN,
-            PeriodStrategy.Template.Week.name(), Collections.singletonList(8));
-    private static final String DEFAULT_TIME_RANGE = ActivityMetricsGroupUtils
-            .timeFilterToTimeRangeTmpl(UI_DEFAULT_TIME_FILTER);
 
     protected WebVisitUtils() {
         throw new UnsupportedOperationException();
@@ -172,52 +163,6 @@ public final class WebVisitUtils {
         return !TOTAL_VISIT_GROUPNAME.equals(group.getGroupName()) || !DEFAULT_TIME_RANGE.equals(timeRange);
     }
 
-    /*-
-     * Time filter options.
-     * DisplayName: time range display name
-     * Value (match against FilterTag in attr): time range
-     */
-    public static FilterOptions attrFilterOptions() {
-        FilterOptions filterOptions = new FilterOptions();
-        filterOptions.setLabel("Timeframe");
-        List<FilterOptions.Option> options = new ArrayList<>();
-        options.add(FilterOptions.Option.anyAttrOption());
-        options.addAll(ActivityMetricsGroupUtils.toTimeFilters(ActivityStoreUtils.defaultTimeRange()) //
-                .stream() //
-                .map(timeFilter -> {
-                    FilterOptions.Option option = new FilterOptions.Option();
-                    option.setValue(ActivityMetricsGroupUtils.timeFilterToTimeRangeTmpl(timeFilter));
-                    option.setDisplayName(filterOptionDisplayName(timeFilter));
-                    return option;
-                }) //
-                .collect(Collectors.toList()));
-        filterOptions.setOptions(options);
-        return filterOptions;
-    }
-
-    /*-
-     * time filter to display name in option drop down
-     *
-     * TODO, move to ActivityMetricsGroupUtils and use StringTemplate
-     *       if we need to support filtering for more than WebVisit
-     */
-    public static String filterOptionDisplayName(@NotNull TimeFilter filter) {
-        if (filter.getRelation() != ComparisonType.WITHIN) {
-            String msg = String.format("Relation %s is not supported", filter.getRelation());
-            throw new UnsupportedOperationException(msg);
-        }
-
-        // e.g., Last 2 Weeks
-        return String.format("Last %s %ss", filter.getValues().get(0).toString(), filter.getPeriod());
-    }
-
-    /*-
-     * label shown in web visit category tile
-     */
-    public static String defaultTimeFilterDisplayName() {
-        return filterOptionDisplayName(UI_DEFAULT_TIME_FILTER);
-    }
-
     public static void setColumnMetadataUIProperties(@NotNull ColumnMetadata cm, @NotNull ActivityMetricsGroup group, @NotNull String timeRange, @NotNull Map<String, Object> params) {
         // any tag for filtering all attrs
         cm.setFilterTags(Arrays.asList(timeRange, FilterOptions.Option.ANY_VALUE));
@@ -225,17 +170,15 @@ public final class WebVisitUtils {
             // leave null for not hidden attrs to save some space
             cm.setIsHiddenInCategoryTile(true);
         }
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> pathPtnParams = (Map<String, Object>) params.get(InterfaceName.PathPatternId.name());
-            if (MapUtils.isNotEmpty(pathPtnParams)) {
-                Object pathPtn = pathPtnParams.get(InterfaceName.PathPattern.name());
-                cm.setSecondarySubCategoryDisplayName(pathPtn == null ? null : pathPtn.toString());
-            }
-        } catch (Exception e) {
+
+        String pathPtn = ActivityStoreUtils.getDimensionValueAsString(params, InterfaceName.PathPatternId.name(),
+                InterfaceName.PathPattern.name(), group.getTenant());
+        if (StringUtils.isNotBlank(pathPtn)) {
+            cm.setSecondarySubCategoryDisplayName(pathPtn);
+        } else {
             String tenantId = group.getTenant() == null ? null : group.getTenant().getId();
-            log.warn(String.format("Failed to retrieve path pattern for attribute %s in group %s for tenant %s",
-                    cm.getAttrName(), group.getGroupId(), tenantId), e);
+            log.warn("Failed to retrieve path pattern for attribute {} in group {} for tenant {}", cm.getAttrName(),
+                    group.getGroupId(), tenantId);
         }
     }
 }

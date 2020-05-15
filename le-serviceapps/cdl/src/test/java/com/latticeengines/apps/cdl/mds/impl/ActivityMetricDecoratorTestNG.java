@@ -47,6 +47,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
+import com.latticeengines.domain.exposed.metadata.FilterOptions;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StringTemplate;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
@@ -64,6 +65,7 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
     private static final String DIM_PATH_PATTERN_ID = PathPatternId.name();
     private static final String PATTERN_ID = "id123";
     private static final String PATTERN_NAME = "Page 123";
+    private static final String PATTERN = "*dnb.com/*";
     private static final String PERIOD = PeriodStrategy.Template.Week.name();
     private static final String GROUPNAME_TOTAL_VISIT = "Total Web Visits";
     private static final String DISPLAY_NAME_TMPL = StringTemplateConstants.ACTIVITY_METRICS_GROUP_TOTAL_VISIT_DISPLAYNAME;
@@ -127,6 +129,9 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         Assert.assertEquals(cm1.getDisplayName(), "Last 2 weeks");
         Assert.assertNull(cm1.getDescription());
         Assert.assertEquals(cm1.getSubcategory(), "Page 123");
+        Assert.assertEquals(cm1.getSecondarySubCategoryDisplayName(), PATTERN);
+        Assert.assertEquals(cm1.getFilterTags(), Arrays.asList("w_2_w", FilterOptions.Option.ANY_VALUE));
+        Assert.assertTrue(cm1.isHiddenInCategoryTile());
         Assert.assertEquals(cm1.getFundamentalType(), FundamentalType.NUMERIC);
 
         ColumnMetadata cm2 = rendered.get(1);
@@ -134,6 +139,9 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         Assert.assertEquals(cm2.getDisplayName(), "Between 2 and 4 weeks");
         Assert.assertNull(cm2.getDescription());
         Assert.assertEquals(cm2.getSubcategory(), "Page 123");
+        Assert.assertEquals(cm2.getSecondarySubCategoryDisplayName(), PATTERN);
+        Assert.assertEquals(cm2.getFilterTags(), Arrays.asList("b_2_4_w", FilterOptions.Option.ANY_VALUE));
+        Assert.assertTrue(cm2.isHiddenInCategoryTile());
         Assert.assertEquals(cm2.getFundamentalType(), FundamentalType.NUMERIC);
     }
 
@@ -164,6 +172,7 @@ public class ActivityMetricDecoratorTestNG extends ActivityRelatedEntityMgrImplT
         Map<String, Object> row = new HashMap<>();
         row.put(PathPatternId.name(), PATTERN_ID);
         row.put(PathPatternName.name(), PATTERN_NAME);
+        row.put(PathPattern.name(), PATTERN);
         DimensionMetadata metadata = new DimensionMetadata();
         metadata.setDimensionValues(Collections.singletonList(row));
         Map<String, DimensionMetadata> allMetadata = new HashMap<>();
