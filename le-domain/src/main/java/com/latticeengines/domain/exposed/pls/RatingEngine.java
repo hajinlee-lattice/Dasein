@@ -144,6 +144,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private String teamId;
 
+    private boolean viewOnly;
+
     public static String generateIdStr() {
         String uuid;
         do {
@@ -543,6 +545,17 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @JsonProperty("teamId")
     public void setTeamId(String teamId) {
         this.teamId = teamId;
+    }
+
+    @JsonProperty("viewOnly")
+    @Transient
+    public boolean isViewOnly() {
+        return viewOnly;
+    }
+
+    @JsonProperty("viewOnly")
+    public void setViewOnly(boolean viewOnly) {
+        this.viewOnly = viewOnly;
     }
 
     public enum ScoreType {

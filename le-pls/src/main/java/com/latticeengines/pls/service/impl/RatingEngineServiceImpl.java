@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -82,13 +83,13 @@ public class RatingEngineServiceImpl implements RatingEngineService {
                     .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
             Set<String> teamIds = teamService.getTeamIdsInContext();
             for (RatingEngineSummary ratingEngineSummary : ratingEngineSummaries) {
-                setTeamFields(ratingEngineSummary, globalTeamMap.get(ratingEngineSummary.getTeamId()), teamIds);
+                renderWithTeam(ratingEngineSummary, globalTeamMap.get(ratingEngineSummary.getTeamId()), teamIds);
             }
         }
         return ratingEngineSummaries;
     }
 
-    private void setTeamFields(RatingEngineSummary ratingEngineSummary, GlobalTeam globalTeam, Set<String> teamIds) {
+    private void renderWithTeam(RatingEngineSummary ratingEngineSummary, GlobalTeam globalTeam, Set<String> teamIds) {
         ratingEngineSummary.setTeam(globalTeam);
         String teamId = ratingEngineSummary.getTeamId();
         if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
@@ -115,7 +116,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             if (teamFeatureEnabled) {
                 Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(false, true)
                         .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
-                setTeamFields(ratingEngineSummary, globalTeamMap.get(ratingEngineSummary.getTeamId()), teamService.getTeamIdsInContext());
+                renderWithTeam(ratingEngineSummary, globalTeamMap.get(ratingEngineSummary.getTeamId()), teamService.getTeamIdsInContext());
             }
         }
         return ratingEngineSummary;
@@ -124,7 +125,9 @@ public class RatingEngineServiceImpl implements RatingEngineService {
     @Override
     public RatingEngine getRatingEngine(String ratingEngineId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
+        ratingEngine.setViewOnly(TeamUtils.isMyTeam(ratingEngine.getTeamId()));
+        return ratingEngine;
     }
 
     @Override
@@ -158,7 +161,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             RatingEngineSummary ratingEngineSummary = ratingEngineDashboard.getSummary();
             boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
             if (teamFeatureEnabled) {
-                setTeamFields(ratingEngineSummary, teamService.getTeamInContext(ratingEngineSummary.getTeamId()), teamService.getTeamIdsInContext());
+                renderWithTeam(ratingEngineSummary, teamService.getTeamInContext(ratingEngineSummary.getTeamId()), teamService.getTeamIdsInContext());
             }
         }
         return ratingEngineDashboard;
