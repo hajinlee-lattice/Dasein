@@ -48,7 +48,7 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
             url.append("?");
             url.append(StringUtils.join(params, "&"));
         }
-        return post("create attribute set", url.toString(), attributeSet, AttributeSet.class);
+        return post("clone attribute set", url.toString(), attributeSet, AttributeSet.class);
     }
 
     @Override
@@ -58,6 +58,12 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
         return put("update attribute set", url, attributeSet, AttributeSet.class);
     }
 
+    @Override
+    public AttributeSet createAttributeSet(String customerSpace, AttributeSet attributeSet) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset",
+                shortenCustomerSpace(customerSpace));
+        return post("create attribute set", url, attributeSet, AttributeSet.class);
+    }
 
     @Override
     public void deleteAttributeSet(String customerSpace, String name) {

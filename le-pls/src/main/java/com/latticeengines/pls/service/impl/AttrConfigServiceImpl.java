@@ -991,7 +991,20 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public AttributeSet getAttributeSet(String name) {
         log.info("Get attribute set by name {}.", name);
         Tenant tenant = MultiTenantContext.getTenant();
-        return cdlAttrConfigProxy.getAttributeSet(tenant.getId(), name);
+        AttributeSet attributeSet = cdlAttrConfigProxy.getAttributeSet(tenant.getId(), name);
+        convertCategory(attributeSet);
+        return attributeSet;
+    }
+
+    private void convertCategory(AttributeSet attributeSet) {
+        if (attributeSet != null) {
+            Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
+            if (MapUtils.isNotEmpty(attributesMap)) {
+                Map<String, Set<String>> convertedMap = attributesMap.entrySet().stream()
+                        .collect(Collectors.toMap(e -> Category.valueOf(e.getKey()).getName(), Map.Entry::getValue));
+                attributeSet.setAttributesMap(convertedMap);
+            }
+        }
     }
 
     @Override
@@ -1019,7 +1032,22 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         return cdlAttrConfigProxy.updateAttributeSet(tenant.getId(), attributeSet);
     }
 
+    @Override
+    public AttributeSet createAttributeSet(AttributeSet attributeSet) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        setAttributeSetFields(attributeSet);
+        log.info("Create attribute set with name {} in tenant {}.",
+                attributeSet.getDisplayName(), MultiTenantContext.getShortTenantId());
+        return cdlAttrConfigProxy.createAttributeSet(tenant.getId(), attributeSet);
+    }
+
     private void setAttributeSetFields(AttributeSet attributeSet) {
+        Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
+        if (MapUtils.isNotEmpty(attributesMap)) {
+            Map<String, Set<String>> convertedMap = attributesMap.entrySet().stream()
+                    .collect(Collectors.toMap(e -> resolveCategory(e.getKey()).name(), Map.Entry::getValue));
+            attributeSet.setAttributesMap(convertedMap);
+        }
         String email = MultiTenantContext.getEmailAddress();
         if (StringUtils.isEmpty(attributeSet.getCreatedBy())) {
             attributeSet.setCreatedBy(email);

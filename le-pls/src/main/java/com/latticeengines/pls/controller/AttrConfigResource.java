@@ -60,8 +60,7 @@ public class AttrConfigResource {
     @GetMapping(value = "/usage/overview/attributeset")
     @ResponseBody
     @ApiOperation("get usage overview")
-    public AttrConfigUsageOverview getUsageOverviewByAttributeSet(@RequestParam(value = "attributeSetName",
-            required = false) String attributeSetName) {
+    public AttrConfigUsageOverview getUsageOverviewByAttributeSet(@RequestParam(value = "attributeSetName", required = false) String attributeSetName) {
             return attrConfigService.getOverallAttrConfigUsageOverview(attributeSetName);
 
     }
@@ -148,11 +147,17 @@ public class AttrConfigResource {
         return true;
     }
 
-    @PostMapping(value = "/attributeset")
+    @PostMapping(value = "/attributeset/clone")
     @ApiOperation(value = "create new attribute set based on an existing attribute set")
-    public AttributeSet cloneAttributeSet(@RequestParam(required = false, value = "attributeSetName") String attributeSetName,
+    public AttributeSet cloneAttributeSet(@RequestParam(value = "attributeSetName") String attributeSetName,
                                           @RequestBody AttributeSet attributeSet) {
         return attrConfigService.cloneAttributeSet(attributeSetName, attributeSet);
+    }
+
+    @PostMapping(value = "/attributeset")
+    @ApiOperation(value = "create new attribute set based on an existing attribute set")
+    public AttributeSet createAttributeSet(@RequestBody AttributeSet attributeSet) {
+        return attrConfigService.createAttributeSet(attributeSet);
     }
 
     @PutMapping(value = "/attributeset")

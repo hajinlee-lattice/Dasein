@@ -37,6 +37,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.StoreFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -94,7 +95,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
         AtomicLong counter = new AtomicLong();
         filter = filter == null ? StoreFilter.ALL : filter;
         Flux<ColumnMetadata> flux;
-        if (!isEnrichmentGroup(groups)) {
+        if (AttributeUtils.isDefaultAttributeSet(attributeSetName) || !isEnrichmentGroup(groups)) {
             attributeSetName = null;
         }
         if (version == null) {

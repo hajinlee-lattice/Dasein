@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +74,9 @@ public class AttributeSetEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRED)
     public AttributeSet createAttributeSet(AttributeSet attributeSet) {
         attributeSet.setTenant(MultiTenantContext.getTenant());
-        attributeSet.setName(AttributeSet.generateNameStr());
+        if (StringUtils.isEmpty(attributeSet.getName())) {
+            attributeSet.setName(AttributeSet.generateNameStr());
+        }
         attributeSetDao.create(attributeSet);
         return attributeSet;
     }
@@ -95,12 +98,16 @@ public class AttributeSetEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRED)
     public AttributeSet createAttributeSet(String name, AttributeSet attributeSet) {
         AttributeSet existingAttributeSet = findByName(name);
-        attributeSet.setTenant(MultiTenantContext.getTenant());
-        attributeSet.setName(AttributeSet.generateNameStr());
         if (existingAttributeSet != null) {
-            Map<String, Set<String>> existingAttributeSetAttributesMap = existingAttributeSet.getAttributesMap();
-            mergeAttributesMap(existingAttributeSetAttributesMap, attributeSet);
-            attributeSet.setAttributesMap(existingAttributeSetAttributesMap);
+            attributeSet.setTenant(MultiTenantContext.getTenant());
+            attributeSet.setName(AttributeSet.generateNameStr());
+            if (StringUtils.isEmpty(attributeSet.getDisplayName())) {
+                attributeSet.setDisplayName(existingAttributeSet.getDisplayName());
+            }
+            if (StringUtils.isEmpty(attributeSet.getDisplayName())) {
+                attributeSet.setDescription(existingAttributeSet.getDescription());
+            }
+            attributeSet.setAttributesMap(existingAttributeSet.getAttributesMap());
             attributeSetDao.create(attributeSet);
             return attributeSet;
         } else {
@@ -152,7 +159,7 @@ public class AttributeSetEntityMgrImpl
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<AttributeSet> findAll() {
-        List<Object[]> results = getReadOrWriteRepository().findAttributes();
+        List<Object[]> results = getReadOrWriteRepository().findAttributeSets();
         // ignore attribute map when query list
         return extractResultsToAttributeSets(results);
     }
