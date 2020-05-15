@@ -164,6 +164,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         SchemaInterpretation schemaInterpretation;
         Table table;
         S3ImportSystem s3ImportSystem = null;
+        Set<String> systemIdSet = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
         if (StringUtils.isNotEmpty(systemName) && entityType != null) {
             s3ImportSystem = cdlService.getS3ImportSystem(customerSpace.toString(), systemName);
             schemaInterpretation = entityType.getSchemaInterpretation();
@@ -180,12 +181,11 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             sourceFile.setSchemaInterpretation(schemaInterpretation);
             sourceFileService.update(sourceFile);
         }
-        boolean withoutId = batonService.isEnabled(customerSpace, LatticeFeatureFlag.IMPORT_WITHOUT_ID);
         boolean enableEntityMatch = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH);
         boolean enableEntityMatchGA = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ENTITY_MATCH_GA);
         MetadataResolver resolver = getMetadataResolver(sourceFile, null, true);
         FieldMappingDocument fieldMappingFromSchemaRepo = resolver.getFieldMappingsDocumentBestEffort(table);
-        generateExtraFieldMappingInfo(fieldMappingFromSchemaRepo, true);
+        generateExtraFieldMappingInfo(fieldMappingFromSchemaRepo, true, systemIdSet);
         FieldMappingDocument resultDocument;
         if (dataFeedTask == null) {
             resultDocument = fieldMappingFromSchemaRepo;
@@ -211,7 +211,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 setSystemMapping(customerSpace.toString(), systemName, fieldMappingFromTemplate);
             }
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo,
-                    templateTable, table);
+                    templateTable, table, systemIdSet);
         }
         EntityMatchGAConverterUtils.convertGuessingMappings(enableEntityMatch, enableEntityMatchGA, resultDocument,
                 s3ImportSystem);
@@ -259,13 +259,16 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
     }
 
-    private void generateExtraFieldMappingInfo(FieldMappingDocument fieldMappingDocument, boolean standard) {
+    private void generateExtraFieldMappingInfo(FieldMappingDocument fieldMappingDocument, boolean standard,
+                                               Set<String> systemIds) {
         if (fieldMappingDocument == null || CollectionUtils.isEmpty(fieldMappingDocument.getFieldMappings())) {
             return;
         }
         ExtraFieldMappingInfo extraFieldMappingInfo = new ExtraFieldMappingInfo();
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
-            if (!standard && fieldMapping.isMappedToLatticeField()) {
+            if (!standard && fieldMapping.isMappedToLatticeField()
+                    && StringUtils.isNotEmpty(fieldMapping.getMappedField())
+                    && !systemIds.contains(fieldMapping.getMappedField())) {
                 extraFieldMappingInfo.addExistingMapping(fieldMapping);
             } else {
                 if (StringUtils.isEmpty(fieldMapping.getMappedField())) {
@@ -277,7 +280,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private FieldMappingDocument mergeFieldMappingBestEffort(FieldMappingDocument templateMapping,
-                                                             FieldMappingDocument standardMapping, Table templateTable, Table standardTable) {
+                                                             FieldMappingDocument standardMapping,
+                                                             Table templateTable, Table standardTable,
+                                                             Set<String> systemIds) {
         // Create schema user -> fieldMapping
         Map<String, FieldMapping> standardMappingMap = new HashMap<>();
         for (FieldMapping fieldMapping : standardMapping.getFieldMappings()) {
@@ -299,7 +304,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             }
         }
         // newMappings will be determined
-        generateExtraFieldMappingInfo(templateMapping, false);
+        generateExtraFieldMappingInfo(templateMapping, false, systemIds);
         // filter existingMappings
         Map<String, Attribute> standardAttrs =
                 standardTable.getAttributes().stream().collect(Collectors.toMap(Attribute::getName, attr -> attr));
@@ -318,7 +323,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                         .collect(Collectors.toSet());
         Map<String, Attribute> missedAttrs = new HashMap<>();
         templateAttrs.forEach((key, value) -> {
-            if (!mappedAttr.contains(key) && !standardAttrs.containsKey(key)) {
+            if (!mappedAttr.contains(key) && !standardAttrs.containsKey(key) && !systemIds.contains(key)) {
                 missedAttrs.put(key, value);
             }
         });

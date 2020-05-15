@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -196,5 +198,31 @@ public class S3ImportSystemServiceImpl implements S3ImportSystemService {
     @Override
     public boolean hasSystemMapToLatticeContact(String customerSpace) {
         return CollectionUtils.isNotEmpty(s3ImportSystemEntityMgr.findByMapToLatticeContact(Boolean.TRUE));
+    }
+
+    @Override
+    public List<String> getAllS3ImportSystemIds(String customerSpace) {
+        List<S3ImportSystem> allSystems = getAllS3ImportSystem(customerSpace);
+        if (CollectionUtils.isEmpty(allSystems)) {
+            return Collections.emptyList();
+        }
+        List<String> idList = new ArrayList<>();
+        allSystems.forEach(system -> {
+            if (StringUtils.isNotEmpty(system.getAccountSystemId())) {
+                idList.add(system.getAccountSystemId());
+            }
+            if (StringUtils.isNotEmpty(system.getContactSystemId())) {
+                idList.add(system.getContactSystemId());
+            }
+            List<String> secondaryAccountIds = system.getSecondaryAccountIdsSortByPriority();
+            List<String> secondaryContactIds = system.getSecondaryContactIdsSortByPriority();
+            if (CollectionUtils.isNotEmpty(secondaryAccountIds)) {
+                idList.addAll(secondaryAccountIds);
+            }
+            if (CollectionUtils.isNotEmpty(secondaryContactIds)) {
+                idList.addAll(secondaryContactIds);
+            }
+        });
+        return idList;
     }
 }

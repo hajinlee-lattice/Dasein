@@ -64,6 +64,8 @@ public interface CDLService {
 
     List<S3ImportSystem> getAllS3ImportSystem(String customerSpace);
 
+    Set<String> getAllS3ImportSystemIdSet(String customerSpace);
+
     List<S3ImportSystem> getS3ImportSystemWithFilter(String customerSpace, boolean filterAccount,
                                                      boolean filterContact, S3ImportTemplateDisplay templateDisplay);
 
