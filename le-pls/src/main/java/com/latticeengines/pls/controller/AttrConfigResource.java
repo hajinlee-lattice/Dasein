@@ -150,9 +150,9 @@ public class AttrConfigResource {
 
     @PostMapping(value = "/attributeset")
     @ApiOperation(value = "create new attribute set based on an existing attribute set")
-    public AttributeSet createAttributeSet(@RequestParam(required = false, value = "attributeSetName") String attributeSetName,
+    public AttributeSet cloneAttributeSet(@RequestParam(required = false, value = "attributeSetName") String attributeSetName,
                                           @RequestBody AttributeSet attributeSet) {
-        return attrConfigService.createAttributeSet(attributeSetName, attributeSet);
+        return attrConfigService.cloneAttributeSet(attributeSetName, attributeSet);
     }
 
     @PutMapping(value = "/attributeset")

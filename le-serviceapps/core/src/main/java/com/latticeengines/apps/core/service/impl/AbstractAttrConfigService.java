@@ -951,7 +951,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     @Override
-    public AttributeSet createAttributeSet(String attributeSetName, AttributeSet attributeSet) {
+    public AttributeSet cloneAttributeSet(String attributeSetName, AttributeSet attributeSet) {
         throw new UnsupportedOperationException("Not supported!");
     }
 

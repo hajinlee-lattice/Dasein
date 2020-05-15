@@ -41,7 +41,7 @@ public interface AttrConfigService {
 
     List<AttributeSet> getAttributeSets();
 
-    AttributeSet createAttributeSet(String name, AttributeSet attributeSet);
+    AttributeSet cloneAttributeSet(String name, AttributeSet attributeSet);
 
     AttributeSet updateAttributeSet(AttributeSet attributeSet);
 
