@@ -77,12 +77,12 @@ public class PlayServiceImpl implements PlayService {
         if (globalTeam == null) {
             return;
         }
+        metadataSegment.setTeam(globalTeam);
         String teamId = metadataSegment.getTeamId();
         if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
             play.setViewOnly(true);
             metadataSegment.setViewOnly(true);
         }
-        metadataSegment.setTeam(globalTeam);
     }
 
     @Override
