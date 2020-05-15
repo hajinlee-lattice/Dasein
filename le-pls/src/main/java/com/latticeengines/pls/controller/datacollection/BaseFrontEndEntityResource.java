@@ -122,11 +122,11 @@ public abstract class BaseFrontEndEntityResource {
         return entityProxy.getCount(tenantId, frontEndQuery);
     }
 
-    public DataPage getData(FrontEndQuery frontEndQuery, boolean useInternalAccountId) {
-        return getData(frontEndQuery, getMainEntity(), useInternalAccountId);
+    public DataPage getData(FrontEndQuery frontEndQuery) {
+        return getData(frontEndQuery, getMainEntity());
     }
 
-    public DataPage getData(FrontEndQuery frontEndQuery, BusinessEntity mainEntity, boolean useInternalAccountId) {
+    public DataPage getData(FrontEndQuery frontEndQuery, BusinessEntity mainEntity) {
         String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
         String servingTableName = dataCollectionProxy.getTableName(tenantId, mainEntity.getServingStore());
         if (StringUtils.isBlank(servingTableName)) {
@@ -167,7 +167,7 @@ public abstract class BaseFrontEndEntityResource {
         }
         ArrayList<Lookup> lookups = new ArrayList<>(frontEndQuery.getLookups());
         boolean companyNameExpanded = expandCompanyNameLookup(lookups);
-        Map<String, String> replacedAttrs = replaceDataLookups(lookups, useInternalAccountId);
+        Map<String, String> replacedAttrs = replaceDataLookups(lookups);
         frontEndQuery.setLookups(lookups);
 
         DataPage data = entityProxy.getData(tenantId, frontEndQuery);
@@ -183,9 +183,7 @@ public abstract class BaseFrontEndEntityResource {
         Restriction contactRestriction = (frontEndQuery.getContactRestriction() != null) ? //
                 frontEndQuery.getContactRestriction().getRestriction() : null;
         RestrictionUtils.cleanupBucketsInRestriction(accountRestriction);
-        RestrictionUtils.validateCentralEntity(accountRestriction, BusinessEntity.Account);
         RestrictionUtils.cleanupBucketsInRestriction(contactRestriction);
-        RestrictionUtils.validateCentralEntity(contactRestriction, BusinessEntity.Contact);
         List<BucketRestriction> invalidBkts = new ArrayList<>();
         try {
             invalidBkts.addAll(RestrictionUtils.validateBktsInRestriction(accountRestriction));
@@ -279,32 +277,8 @@ public abstract class BaseFrontEndEntityResource {
 
     abstract List<Lookup> getDataLookups();
 
-    private Map<String, String> replaceDataLookups(List<Lookup> lookups, boolean useInternalAccount) {
-        Map<String, String> replacedAttrs = new HashMap<>();
-        if (isEntityMatchEnabled()) {
-            List<Lookup> newLookups = new ArrayList<>();
-            for (Lookup lookup : lookups) {
-                if (lookup instanceof AttributeLookup) {
-                    AttributeLookup attributeLookup = (AttributeLookup) lookup;
-                    BusinessEntity entity = attributeLookup.getEntity();
-                    String attr = attributeLookup.getAttribute();
-                    if (InterfaceName.AccountId.name().equalsIgnoreCase(attr) && !useInternalAccount) {
-                        newLookups.add(new AttributeLookup(entity, InterfaceName.CustomerAccountId.name()));
-                        replacedAttrs.put(InterfaceName.CustomerAccountId.name(), InterfaceName.AccountId.name());
-                    } else if (InterfaceName.ContactId.name().equalsIgnoreCase(attr)) {
-                        newLookups.add(new AttributeLookup(entity, InterfaceName.CustomerContactId.name()));
-                        replacedAttrs.put(InterfaceName.CustomerContactId.name(), InterfaceName.ContactId.name());
-                    } else {
-                        newLookups.add(lookup);
-                    }
-                } else {
-                    newLookups.add(lookup);
-                }
-            }
-            lookups.clear();
-            lookups.addAll(newLookups);
-        }
-        return replacedAttrs;
+    private Map<String, String> replaceDataLookups(List<Lookup> lookups) {
+        return new HashMap<>();
     }
 
     private boolean expandCompanyNameLookup(ArrayList<Lookup> lookups) {
