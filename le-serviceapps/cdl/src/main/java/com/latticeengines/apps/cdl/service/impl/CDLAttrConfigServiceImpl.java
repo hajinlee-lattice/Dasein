@@ -105,6 +105,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
                 createAttributeSet(defaultSet);
             } catch (Exception e) {
                 // race condition: the default group may already created by another thread
+                log.warn("Exception happened when create default group {}.", e.getMessage());
             }
             attributeSets.add(0, defaultSet);
         }
