@@ -57,6 +57,15 @@ public class AttrConfigResource {
         return attrConfigService.getOverallAttrConfigUsageOverview();
     }
 
+    @GetMapping(value = "/usage/overview/attributeset")
+    @ResponseBody
+    @ApiOperation("get usage overview")
+    public AttrConfigUsageOverview getUsageOverviewByAttributeSet(@RequestParam(value = "attributeSetName",
+            required = false) String attributeSetName) {
+            return attrConfigService.getOverallAttrConfigUsageOverview(attributeSetName);
+
+    }
+
     @GetMapping(value = "/name/overview")
     @ResponseBody
     @ApiOperation("get Name overview")
@@ -100,8 +109,9 @@ public class AttrConfigResource {
     @ResponseBody
     @ApiOperation("get usage configuration detail for a specific category")
     public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryName,
-            @RequestParam(value = "usage", required = true) String usageName) {
-        return attrConfigService.getAttrConfigSelectionDetailForUsage(categoryName, usageName);
+                                                           @RequestParam(value = "usage") String usageName,
+                                                           @RequestParam(value = "attributeSetName", required = false) String attributeSetName) {
+        return attrConfigService.getAttrConfigSelectionDetailForUsage(categoryName, usageName, attributeSetName);
     }
 
     @GetMapping(value = "/name/config/category/{categoryName}")
@@ -131,16 +141,23 @@ public class AttrConfigResource {
         return attrConfigService.getAttributeSets();
     }
 
-    @PostMapping(value = "/attributeset")
-    @ApiOperation(value = "Create a new attribute set")
-    public AttributeSet createOrUpdateAttributeSet(@RequestBody AttributeSet attributeSet) {
-        return attrConfigService.createOrUpdateAttributeSet(attributeSet);
-    }
-
     @DeleteMapping(value = "/attributeset/name/{name}")
     @ApiOperation(value = "Delete attribute set")
-    public Boolean deleteAttributeSetByName(@PathVariable("name") String name) {
+    public Boolean deleteAttributeSet(@PathVariable("name") String name) {
         attrConfigService.deleteAttributeSet(name);
         return true;
+    }
+
+    @PostMapping(value = "/attributeset")
+    @ApiOperation(value = "create new attribute set based on an existing attribute set")
+    public AttributeSet createAttributeSet(@RequestParam(required = false, value = "attributeSetName") String attributeSetName,
+                                          @RequestBody AttributeSet attributeSet) {
+        return attrConfigService.createAttributeSet(attributeSetName, attributeSet);
+    }
+
+    @PutMapping(value = "/attributeset")
+    @ApiOperation(value = "update attribute set")
+    public AttributeSet updateAttributeSet(@RequestBody AttributeSet attributeSet) {
+        return attrConfigService.updateAttributeSet(attributeSet);
     }
 }

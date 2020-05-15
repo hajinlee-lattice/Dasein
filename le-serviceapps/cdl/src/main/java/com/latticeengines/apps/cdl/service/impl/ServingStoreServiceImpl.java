@@ -69,9 +69,9 @@ public class ServingStoreServiceImpl implements ServingStoreService {
 
     @Override
     public ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity, DataCollection.Version version,
-            StoreFilter filter) {
+            StoreFilter filter, String attributeSetName) {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-        return getFullyDecoratedMetadata(customerSpace, entity, version, filter);
+        return getFullyDecoratedMetadata(customerSpace, entity, version, filter, attributeSetName);
     }
 
     @Override
@@ -83,18 +83,25 @@ public class ServingStoreServiceImpl implements ServingStoreService {
                 .block();
     }
 
+    private boolean isEnrichmentGroup(Collection<ColumnSelection.Predefined> groups) {
+        return CollectionUtils.isNotEmpty(groups) && groups.size() == 1 && groups.contains(ColumnSelection.Predefined.Enrichment);
+    }
+
     @Override
-    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            DataCollection.Version version, Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter) {
+    public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, DataCollection.Version version,
+                                                     Collection<ColumnSelection.Predefined> groups, String attributeSetName, StoreFilter filter) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         filter = filter == null ? StoreFilter.ALL : filter;
         Flux<ColumnMetadata> flux;
+        if (!isEnrichmentGroup(groups)) {
+            attributeSetName = null;
+        }
         if (version == null) {
-            flux = getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace), filter)
+            flux = getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace), filter, attributeSetName)
                     .sequential();
         } else {
-            flux = getFullyDecoratedMetadata(entity, version, filter).sequential();
+            flux = getFullyDecoratedMetadata(entity, version, filter, attributeSetName).sequential();
         }
         flux = flux //
                 .doOnSubscribe(s -> {
@@ -231,7 +238,12 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     }
 
     private ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(String tenantId, BusinessEntity entity,
-            DataCollection.Version version, StoreFilter filter) {
+                                                                   DataCollection.Version version, StoreFilter filter) {
+        return getFullyDecoratedMetadata(tenantId, entity, version, filter, null);
+    }
+
+    private ParallelFlux<ColumnMetadata> getFullyDecoratedMetadata(String tenantId, BusinessEntity entity,
+            DataCollection.Version version, StoreFilter filter, String attributeSetName) {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         TableRoleInCollection role = entity.getServingStore();
         List<String> tables = dataCollectionService.getTableNames(customerSpace, "", role, version);
@@ -241,7 +253,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
         }
         ParallelFlux<ColumnMetadata> flux;
         if (CollectionUtils.isNotEmpty(tables)) {
-            flux = customizedMetadataStore.getMetadataInParallel(entity, version, filter).map(cm -> {
+            flux = customizedMetadataStore.getMetadataInParallel(entity, version, filter, attributeSetName).map(cm -> {
                 cm.setBitOffset(null);
                 cm.setNumBits(null);
                 cm.setPhysicalName(null);

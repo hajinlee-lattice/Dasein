@@ -1,18 +1,24 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
+import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -30,6 +36,9 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    private AttributeSetEntityMgr attributeSetEntityMgr;
 
     @Test(groups = "deployment-app")
     public void testDecoratedMetadata() {
@@ -62,6 +71,28 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
                 Predefined.Enrichment, accountAttrs.stream().collect(Collectors.toSet()), null);
         Assert.assertTrue(attrUsage.get(InterfaceName.LDC_Name.name()));
         Assert.assertTrue(attrUsage.get("LDC_Domain"));
+    }
+
+    @Test(groups = "deployment-app")
+    public void testGetDecoratedMetadata() {
+        Set<String> contactAttributes = Sets.newHashSet(InterfaceName.CustomerContactId.name(),
+                InterfaceName.ContactName.name(), InterfaceName.Email.name());
+        AttributeSet attributeSet = createAttributeSet("TestAttributeSet", contactAttributes);
+        attributeSet = attributeSetEntityMgr.createAttributeSet(attributeSet);
+        Flux<ColumnMetadata> customerAccountAttrs = servingStoreProxy.getDecoratedMetadata(mainTestTenant.getId(),
+                BusinessEntity.Contact, Collections.singletonList(Predefined.Enrichment), null, attributeSet.getName(), null);
+        Set<String> nameSet = customerAccountAttrs.filter(
+                clm -> StringUtils.isNotEmpty(clm.getAttrName())).map(ColumnMetadata::getAttrName).collect(Collectors.toSet()).block();
+        Assert.assertEquals(nameSet.size(), 2);
+    }
+
+    private AttributeSet createAttributeSet(String displayName, Set<String> contactAttributes) {
+        AttributeSet attributeSet = new AttributeSet();
+        attributeSet.setDisplayName(displayName);
+        Map<String, Set<String>> attributesMap = new HashMap<>();
+        attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), contactAttributes);
+        attributeSet.setAttributesMap(attributesMap);
+        return attributeSet;
     }
 
     // AttributeName -> ColumnMetadata (Only involve columns to verify, not
@@ -101,3 +132,4 @@ public class ServingStoreServiceImplDeploymentTestNG extends ServingStoreDeploym
     }
 
 }
+

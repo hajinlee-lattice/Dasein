@@ -2,9 +2,11 @@ package com.latticeengines.proxy.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -41,16 +43,28 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
     @SuppressWarnings({ "unchecked" })
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(String customerSpace,
             @Nullable List<String> categoryNames, @NonNull List<String> propertyNames, boolean activeOnly) {
+        return getAttrConfigOverview(customerSpace, categoryNames, propertyNames, activeOnly, null);
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(String customerSpace, @Nullable List<String> categoryNames,
+                                                                            @NonNull List<String> propertyNames,
+                                                                            boolean activeOnly, String attributeSetName) {
         log.info("customerSpace is " + customerSpace + ", categoryName is " + categoryNames + ", propertyName is "
-                + propertyNames + " activeOnly " + activeOnly);
-        String url = contructUrlForGetAttrConfigOverview(customerSpace, categoryNames, propertyNames, activeOnly);
+                + propertyNames + " activeOnly is " + activeOnly + " attributeSetName is " + attributeSetName);
+        String url = contructUrlForGetAttrConfigOverview(customerSpace, categoryNames, propertyNames, activeOnly, attributeSetName);
         log.info("getAttrConfigOverview url is " + url);
         return postKryo("get Attribute Configuration Overview", url, propertyNames, Map.class);
     }
 
+    String contructUrlForGetAttrConfigOverview(String customerSpace, @Nullable List<String> categoryNames,
+                                               @NonNull List<String> propertyNames, boolean activeOnly) {
+        return contructUrlForGetAttrConfigOverview(customerSpace, categoryNames, propertyNames, activeOnly, null);
+    }
+
     @VisibleForTesting
     String contructUrlForGetAttrConfigOverview(String customerSpace, @Nullable List<String> categoryNames,
-            @NonNull List<String> propertyNames, boolean activeOnly) {
+            @NonNull List<String> propertyNames, boolean activeOnly, String attributeSetName) {
         StringBuilder url = new StringBuilder();
         url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/overview", //
                 shortenCustomerSpace(customerSpace)));
@@ -64,13 +78,27 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
             url.append("?");
         }
         url.append("activeOnly=").append(activeOnly);
+        if (StringUtils.isNotEmpty(attributeSetName)) {
+            url.append("&attributeSetName=").append(attributeSetName);
+        }
         return url.toString();
     }
 
     public AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName) {
+        return getAttrConfigByCategory(customerSpace, categoryName, null);
+    }
+
+    public AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName, String attributeSetName) {
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/categories/", //
                 shortenCustomerSpace(customerSpace));
         url += categoryName;
+        List<String> params = new ArrayList<>();
+        if (StringUtils.isNotEmpty(attributeSetName)) {
+            params.add("attributeSetName=" + attributeSetName);
+        }
+        if (!params.isEmpty()) {
+            url += "?" + StringUtils.join(params, "&");
+        }
         log.info("getAttrConfigByCategory url is " + url);
         AttrConfigRequest result = getKryo("get attr config by category", url, AttrConfigRequest.class);
         result.fixJsonDeserialization();

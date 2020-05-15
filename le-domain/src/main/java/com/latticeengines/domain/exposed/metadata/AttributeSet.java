@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.metadata;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -71,15 +72,15 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
     private Long pid;
 
     @Column(name = "NAME", nullable = false)
-    @JsonProperty("Name")
+    @JsonProperty("name")
     private String name;
 
     @Column(name = "DISPLAY_NAME", nullable = false)
-    @JsonProperty("DisplayName")
+    @JsonProperty("displayName")
     private String displayName;
 
     @Column(name = "DESCRIPTION")
-    @JsonProperty("Description")
+    @JsonProperty("description")
     private String description;
 
     @Column(name = "ATTRIBUTES")
@@ -98,7 +99,7 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
     @Transient
     public Map<String, Set<String>> getAttributesMap() {
         if (getAttributes() == null) {
-            return null;
+            return new HashMap<>();
         }
         String uncompressedData = new String(CompressionUtils.decompressByteArray(getAttributes()));
         if (StringUtils.isNotEmpty(uncompressedData)) {
@@ -106,7 +107,7 @@ public class AttributeSet implements HasPid, HasName, HasTenant, HasAuditingFiel
                     new TypeReference<Map<String, Set<String>>>() {
                     });
         } else {
-            return null;
+            return new HashMap<>();
         }
     }
 

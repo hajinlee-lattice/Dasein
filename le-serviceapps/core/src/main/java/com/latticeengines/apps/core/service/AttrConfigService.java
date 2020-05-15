@@ -17,8 +17,13 @@ public interface AttrConfigService {
 
     List<AttrConfig> getRenderedList(Category category);
 
+    List<AttrConfig> getRenderedList(Category category, String attributeSetName);
+
     Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
             List<String> propertyNames, boolean onlyActive);
+
+    Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories, List<String> propertyNames,
+                                                                     boolean onlyActive, String attributeSetName);
 
     AttrConfigRequest saveRequest(AttrConfigRequest request, AttrConfigUpdateMode mode);
 
@@ -36,7 +41,11 @@ public interface AttrConfigService {
 
     List<AttributeSet> getAttributeSets();
 
-    AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet);
+    AttributeSet createAttributeSet(String name, AttributeSet attributeSet);
+
+    AttributeSet updateAttributeSet(AttributeSet attributeSet);
+
+    AttributeSet createAttributeSet(AttributeSet attributeSet);
 
     void deleteAttributeSetByName(String name);
 }

@@ -19,6 +19,8 @@ public interface CDLAttrConfigProxy {
 
     AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName);
 
+    AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName, String attributeSetName);
+
     AttrConfigRequest getAttrConfigByProperty(String customerSpace, String propertyName, boolean enabled);
 
     AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode);
@@ -28,6 +30,9 @@ public interface CDLAttrConfigProxy {
     Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(String customerSpace,
                                                                      @Nullable List<String> categoryNames, @NonNull List<String> propertyNames, boolean activeOnly);
 
+    Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(String customerSpace, @Nullable List<String> categoryNames,
+                                                                     @NonNull List<String> propertyNames, boolean activeOnly, String attributeSetName);
+
     Map<BusinessEntity, List<AttrConfig>> getCustomDisplayNames(String customerSpace);
 
     void removeAttrConfigByTenantAndEntity(String customerSpace, BusinessEntity entity);
@@ -36,7 +41,9 @@ public interface CDLAttrConfigProxy {
 
     List<AttributeSet> getAttributeSets(String customerSpace);
 
-    AttributeSet createOrUpdateAttributeSet(String customerSpace, AttributeSet attributeSet);
+    AttributeSet createAttributeSet(String customerSpace, String attributeSetName, AttributeSet attributeSet);
+
+    AttributeSet updateAttributeSet(String customerSpace, AttributeSet attributeSet);
 
     void deleteAttributeSet(String customerSpace, String name);
 

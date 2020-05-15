@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -61,10 +62,10 @@ public class AttrConfigResource {
     @ResponseBody
     @ApiOperation("get cdl attribute config request")
     public AttrConfigRequest getAttrConfigByCategory(@PathVariable String customerSpace,
-            @PathVariable String categoryName) {
+            @PathVariable String categoryName, @RequestParam(value = "attributeSetName", required = false) String attributeSetName) {
         AttrConfigRequest request = new AttrConfigRequest();
         Category category = resolveCategory(categoryName);
-        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category, attributeSetName);
         request.setAttrConfigs(attrConfigs);
         return request;
     }
@@ -84,14 +85,15 @@ public class AttrConfigResource {
     @PostMapping(value = "/overview")
     @ResponseBody
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
-            @RequestParam(value = "category", required = false) List<String> categoryNames, //
-            @RequestParam(value = "activeOnly", required = false, defaultValue = "0") boolean activeOnly, //
-            @RequestBody List<String> propertyNames) {
+                                                                            @RequestParam(value = "category", required = false) List<String> categoryNames, //
+                                                                            @RequestParam(value = "activeOnly", required = false, defaultValue = "0") boolean activeOnly, //
+                                                                            @RequestParam(value = "attributeSetName", required = false) String attributeSetName,
+                                                                            @RequestBody List<String> propertyNames) {
         List<Category> categories = categoryNames != null
                 ? categoryNames.stream().map(this::resolveCategory).collect(Collectors.toList())
                 : Arrays.stream(Category.values()).filter(category -> !category.isHiddenFromUi())
-                        .collect(Collectors.toList());
-        return attrConfigService.getAttrConfigOverview(categories, propertyNames, activeOnly);
+                .collect(Collectors.toList());
+        return attrConfigService.getAttrConfigOverview(categories, propertyNames, activeOnly, attributeSetName);
     }
 
     @PostMapping(value = "")
@@ -136,7 +138,7 @@ public class AttrConfigResource {
 
     @GetMapping(value = "/attributeset/name/{name}")
     @ApiOperation(value = "Get attribute set by name")
-    public AttributeSet getAttributeSetByName(@PathVariable String customerSpace, @PathVariable(value = "name") String name) {
+    public AttributeSet getAttributeSet(@PathVariable String customerSpace, @PathVariable(value = "name") String name) {
         return attrConfigService.getAttributeSetByName(name);
     }
 
@@ -147,14 +149,22 @@ public class AttrConfigResource {
     }
 
     @PostMapping(value = "/attributeset")
-    @ApiOperation(value = "Createa or update attribute set")
-    public AttributeSet createOrUpdateAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
-        return attrConfigService.createOrUpdateAttributeSet(attributeSet);
+    @ApiOperation(value = "create new attribute set based on an existing attribute set")
+    public AttributeSet createAttributeSet(@PathVariable String customerSpace,
+                                          @RequestParam(required = false, value = "attributeSetName") String attributeSetName,
+                                          @RequestBody AttributeSet attributeSet) {
+        return attrConfigService.createAttributeSet(attributeSetName, attributeSet);
+    }
+
+    @PutMapping(value = "/attributeset")
+    @ApiOperation(value = "update attribute set")
+    public AttributeSet updateAttributeSet(@PathVariable String customerSpace, @RequestBody AttributeSet attributeSet) {
+        return attrConfigService.updateAttributeSet(attributeSet);
     }
 
     @DeleteMapping(value = "/attributeset/name/{name}")
     @ApiOperation(value = "Delete attribute set")
-    public Boolean deleteAttributeSetByName(@PathVariable String customerSpace, @PathVariable("name") String name) {
+    public Boolean deleteAttributeSet(@PathVariable String customerSpace, @PathVariable("name") String name) {
         attrConfigService.deleteAttributeSetByName(name);
         return true;
     }

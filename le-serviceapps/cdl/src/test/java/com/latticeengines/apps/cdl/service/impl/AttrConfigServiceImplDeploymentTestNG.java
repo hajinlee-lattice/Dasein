@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.ApsGeneratorUtils;
@@ -140,9 +141,8 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
     @Test(groups = "deployment-app", priority = 4)
     public void testCrudAttributeSet() {
         String displayName = "TestAttributeSet";
-        String displayName2 = "TestAttributeSet2";
         AttributeSet attributeSet = createAttributeSet(displayName);
-        attributeSet = attrConfigService.createOrUpdateAttributeSet(attributeSet);
+        attributeSet = attrConfigService.createAttributeSet(attributeSet);
         String generatedName = attributeSet.getName();
         log.info("Attribute set name {}", generatedName);
         AtomicReference<AttributeSet> attributeSetAtom = new AtomicReference<>();
@@ -154,16 +154,14 @@ public class AttrConfigServiceImplDeploymentTestNG extends ServingStoreDeploymen
             return true;
         });
         attributeSet = attributeSetAtom.get();
-        String name = attributeSet.getName();
         Assert.assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
         Assert.assertEquals(attributeSet.getDisplayName(), displayName);
-        attributeSet.setDisplayName(displayName2);
-        attrConfigService.createOrUpdateAttributeSet(attributeSet);
-        Assert.assertEquals(attributeSet.getDisplayName(), displayName2);
-        Assert.assertEquals(attributeSet.getName(), name);
-        Assert.assertEquals(attrConfigService.getAttributeSets().size(), 1);
-        attrConfigService.deleteAttributeSetByName(name);
-        Assert.assertEquals(attrConfigService.getAttributeSets().size(), 0);
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(Category.CONTACT_ATTRIBUTES, attributeSet.getName());
+        for (AttrConfig attrConfig : attrConfigs) {
+            if (contactAttributes.contains(attrConfig.getAttrName())) {
+                Assert.assertTrue(((AttrConfigProp<Boolean>) attrConfig.getAttrProps().get(ColumnSelection.Predefined.Enrichment.name())).getCustomValue());
+            }
+        }
     }
 
     private AttributeSet createAttributeSet(String displayName) {

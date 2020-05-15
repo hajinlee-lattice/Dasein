@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace3;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -51,9 +52,9 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
     }
 
     @Override
-    public <T extends Serializable> Namespace2<String, T> prependTenantId(Namespace1<T> namespace1) {
+    public <T extends Serializable> Namespace3<String, T, String> prependTenantIdAndAttributeSet(Namespace2<T, String> namespace2) {
         String tenantId = MultiTenantContext.getShortTenantId();
-        return Namespace.as(tenantId, namespace1.getCoord1());
+        return Namespace.as(tenantId, namespace2.getCoord1(), namespace2.getCoord2());
     }
 
     // -> tenantId, tableName

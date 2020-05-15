@@ -19,7 +19,7 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
 
     private static final Logger log = LoggerFactory.getLogger(MapDecorator.class);
 
-    private final ConcurrentMap<String, ColumnMetadata> filterMap = new ConcurrentHashMap<>();
+    protected final ConcurrentMap<String, ColumnMetadata> filterMap = new ConcurrentHashMap<>();
 
     private final String name;
     private AtomicBoolean loaded = new AtomicBoolean();
@@ -36,6 +36,7 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
         long duration = System.currentTimeMillis() - start;
         log.debug(getLoggerName() + ": Loaded " + filterMap.size() + " filters in " + duration
                 + " msecs.");
+        loaded.set(true);
     }
 
     @Override
@@ -45,15 +46,13 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
 
     @Override
     public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
+
         AtomicLong counter = new AtomicLong();
         return metadata //
                 .doOnSubscribe(s -> blockingLoad()) //
                 .map(cm -> {
                     cm = preProcess(cm);
-                    if (filterMap.containsKey(cm.getAttrName())) {
-                        counter.incrementAndGet();
-                        cm = ColumnMetadataUtils.overwrite(filterMap.get(cm.getAttrName()), cm);
-                    }
+                    cm = process(cm, counter);
                     return postProcess(cm);
                 }) //
                 .doOnComplete(() -> {
@@ -74,10 +73,7 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
                         counter.set(new AtomicLong());
                     }
                     cm = preProcess(cm);
-                    if (filterMap.containsKey(cm.getAttrName())) {
-                        counter.get().incrementAndGet();
-                        cm = ColumnMetadataUtils.overwrite(filterMap.get(cm.getAttrName()), cm);
-                    }
+                    cm = process(cm, counter.get());
                     return postProcess(cm);
                 }) //
                 .doOnComplete(() -> {
@@ -112,6 +108,14 @@ public abstract class MapDecorator implements Decorator, NeedsLoad {
     protected abstract Collection<ColumnMetadata> loadInternal();
 
     protected ColumnMetadata preProcess(ColumnMetadata cm) {
+        return cm;
+    }
+
+    protected ColumnMetadata process(ColumnMetadata cm, AtomicLong counter) {
+        if (filterMap.containsKey(cm.getAttrName())) {
+            counter.incrementAndGet();
+            cm = ColumnMetadataUtils.overwrite(filterMap.get(cm.getAttrName()), cm);
+        }
         return cm;
     }
 

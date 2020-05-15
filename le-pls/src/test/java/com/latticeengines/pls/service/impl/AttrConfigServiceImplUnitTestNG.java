@@ -24,7 +24,10 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.app.exposed.service.CommonTenantConfigService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
@@ -64,6 +67,9 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Mock
     private CDLAttrConfigProxy cdlAttrConfigProxy;
+
+    @Mock
+    private BatonService batonService;
 
     @Mock
     private UserService userService;
@@ -133,11 +139,12 @@ public class AttrConfigServiceImplUnitTestNG {
     @Test(groups = "unit", dependsOnMethods = { "testGetOverallAttrConfigActivationOverview" })
     public void testGetOverallAttrConfigUsageOverview() {
         when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                Arrays.asList(ColumnSelection.Predefined.usageProperties), true))
-                        .thenReturn(AttrConfigServiceImplTestUtils.generatePropertyAttrConfigOverviewForUsage(
-                                Arrays.asList(ColumnSelection.Predefined.usageProperties)));
+                Arrays.asList(ColumnSelection.Predefined.usageProperties), true, null))
+                .thenReturn(AttrConfigServiceImplTestUtils.generatePropertyAttrConfigOverviewForUsage(
+                        Arrays.asList(ColumnSelection.Predefined.usageProperties)));
         when(appTenantConfigService.getMaxPremiumLeadEnrichmentAttributesByLicense(anyString(), anyString()))
                 .thenReturn(1000);
+        when(batonService.isEnabled(CustomerSpace.parse(tenant.getId()), LatticeFeatureFlag.CONFIGURABLE_SEGMENT_EXPORT)).thenReturn(false);
         AttrConfigUsageOverview usageOverview = attrConfigService.getOverallAttrConfigUsageOverview();
         log.info("overall usageOverview is " + usageOverview);
         List<AttrConfigSelection> selections = usageOverview.getSelections();
@@ -345,7 +352,7 @@ public class AttrConfigServiceImplUnitTestNG {
                 AttrConfigServiceImplTestUtils.getAttr7(Category.FIRMOGRAPHICS, false), //
                 AttrConfigServiceImplTestUtils.getAttr8(Category.FIRMOGRAPHICS, false), //
                 AttrConfigServiceImplTestUtils.getAttr9(Category.FIRMOGRAPHICS, false)));
-        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.FIRMOGRAPHICS.getName()))
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.FIRMOGRAPHICS.getName(), null))
                 .thenReturn(request);
         AttrConfigSelectionDetail selectionDetail = attrConfigService
                 .getAttrConfigSelectionDetailForUsage(Category.FIRMOGRAPHICS.getName(), "Segmentation");
@@ -371,7 +378,7 @@ public class AttrConfigServiceImplUnitTestNG {
                         AttrConfigServiceImplTestUtils.getAttr7(Category.TECHNOLOGY_PROFILE, false), //
                         AttrConfigServiceImplTestUtils.getAttr8(Category.TECHNOLOGY_PROFILE, false), //
                         AttrConfigServiceImplTestUtils.getAttr9(Category.TECHNOLOGY_PROFILE, false)));
-        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName()))
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName(), null))
                 .thenReturn(request);
         AttrConfigSelectionDetail selectionDetail = attrConfigService
                 .getAttrConfigSelectionDetailForUsage(Category.TECHNOLOGY_PROFILE.getName(), "Modeling");
@@ -397,7 +404,7 @@ public class AttrConfigServiceImplUnitTestNG {
                         AttrConfigServiceImplTestUtils.getAttr7(Category.TECHNOLOGY_PROFILE, false), //
                         AttrConfigServiceImplTestUtils.getAttr8(Category.TECHNOLOGY_PROFILE, false), //
                         AttrConfigServiceImplTestUtils.getAttr9(Category.TECHNOLOGY_PROFILE, false)));
-        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName()))
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName(), null))
                 .thenReturn(request);
         // the first AttrConfig is set to be deprecated
         request.getAttrConfigs().get(0).setShouldDeprecate(true);
@@ -423,7 +430,7 @@ public class AttrConfigServiceImplUnitTestNG {
                 AttrConfigServiceImplTestUtils.getAttr7(Category.INTENT, false, false), //
                 AttrConfigServiceImplTestUtils.getAttr8(Category.INTENT, false, false), //
                 AttrConfigServiceImplTestUtils.getAttr9(Category.INTENT, false, false)));
-        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.INTENT.getName())).thenReturn(request);
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.INTENT.getName(), null)).thenReturn(request);
         AttrConfigSelectionDetail selectionDetail = attrConfigService
                 .getAttrConfigSelectionDetailForUsage(Category.INTENT.getName(), "Segmentation");
         log.info("testGetDetailAttrForUsageWithPremiumCategory selectionDetail is " + selectionDetail);

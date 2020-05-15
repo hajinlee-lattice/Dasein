@@ -15,7 +15,7 @@ public final class ColumnMetadataUtils {
     }
 
     // TODO: not completed before review, will keep adding overwriting methods
-    static ColumnMetadata overwrite(ColumnMetadata overwriter, ColumnMetadata overwritee) {
+    public static ColumnMetadata overwrite(ColumnMetadata overwriter, ColumnMetadata overwritee) {
         if (!overwriter.getAttrName().equals(overwritee.getAttrName())) {
             throw new IllegalArgumentException(
                     String.format("Cannot use the metadata of %s to overwrite %s",

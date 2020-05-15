@@ -20,9 +20,15 @@ public interface AttrConfigService {
 
     AttrConfigStateOverview getOverallAttrConfigNameOverview();
 
+    AttrConfigUsageOverview getOverallAttrConfigUsageOverview(String attributeSetName);
+
+    AttrConfigUsageOverview getOverallAttrConfigUsageOverview(String attributeSetName, List<String> usagePropertyList);
+
     AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName);
 
     AttrConfigSelectionDetail getAttrConfigSelectionDetailForUsage(String categoryName, String usageName);
+
+    AttrConfigSelectionDetail getAttrConfigSelectionDetailForUsage(String categoryName, String usageName, String attributeSetName);
 
     SubcategoryDetail getAttrConfigSelectionDetailForName(String categoryName);
 
@@ -38,7 +44,9 @@ public interface AttrConfigService {
 
     List<AttributeSet> getAttributeSets();
 
-    AttributeSet createOrUpdateAttributeSet(AttributeSet attributeSet);
+    AttributeSet createAttributeSet(String attributeSetName, AttributeSet attributeSet);
+
+    AttributeSet updateAttributeSet(AttributeSet attributeSet);
 
     boolean deleteAttributeSet(String name);
 }

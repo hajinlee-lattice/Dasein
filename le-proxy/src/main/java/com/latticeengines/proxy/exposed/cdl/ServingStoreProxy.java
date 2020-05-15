@@ -23,10 +23,13 @@ public interface ServingStoreProxy {
             List<ColumnSelection.Predefined> groups, DataCollection.Version version);
 
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, List<ColumnSelection.Predefined> groups,
-                                              String attributeSetName, DataCollection.Version version);
+                                              DataCollection.Version version, String attributeSetName);
 
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
-            List<ColumnSelection.Predefined> groups, DataCollection.Version version, StoreFilter filter);
+                                              List<ColumnSelection.Predefined> groups, DataCollection.Version version, StoreFilter filter);
+
+    Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+            List<ColumnSelection.Predefined> groups, DataCollection.Version version, String attributeSetName, StoreFilter filter);
 
     List<ColumnMetadata> getAccountMetadata(String customerSpace, ColumnSelection.Predefined group,
             DataCollection.Version version);
