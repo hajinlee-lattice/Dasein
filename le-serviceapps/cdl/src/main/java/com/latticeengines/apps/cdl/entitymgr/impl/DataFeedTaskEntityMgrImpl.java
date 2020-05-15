@@ -390,6 +390,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         if (StringUtils.isNotBlank(dataFeedTask.getSourceDisplayName())) {
             task.setSourceDisplayName(dataFeedTask.getSourceDisplayName());
         }
+        if (dataFeedTask.getDataFeedTaskConfig() != null) {
+            task.setDataFeedTaskConfig(dataFeedTask.getDataFeedTaskConfig());
+        }
         if (!updateTaskOnly) {
             log.info("Update data feed task {} with its import template.", task.getUniqueId());
             TableEntityMgr.inflateTable(task.getImportTemplate());

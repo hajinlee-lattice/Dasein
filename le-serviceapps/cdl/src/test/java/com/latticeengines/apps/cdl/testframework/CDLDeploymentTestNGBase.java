@@ -247,6 +247,15 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         }
     }
 
+    protected Job getWorkflowJobFromApplicationId(String applicationId) {
+        String trueAppId = waitForTrueApplicationId(applicationId);
+        if (!trueAppId.equals(applicationId)) {
+            log.info("Convert fake app id " + applicationId + " to true app id " + trueAppId);
+        }
+        return workflowProxy.getWorkflowJobFromApplicationId(trueAppId,
+                CustomerSpace.parse(mainTestTenant.getId()).toString());
+    }
+
     public void setMainTestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
     }
