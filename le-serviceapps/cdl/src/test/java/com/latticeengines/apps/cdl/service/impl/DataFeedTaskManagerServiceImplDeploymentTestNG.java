@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.cdl.VdbImportConfig;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -47,6 +48,7 @@ import com.latticeengines.domain.exposed.pls.VdbLoadTableConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.DataFeedTaskUtils;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
@@ -231,7 +233,9 @@ public class DataFeedTaskManagerServiceImplDeploymentTestNG extends CDLDeploymen
         String appId = dataFeedTaskManagerService.submitDataOnlyImportJob(mainCustomerSpace, task.getUniqueId(),
                 csvImportConfig);
         JobStatus status = waitForWorkflowStatus(appId, false);
-        Assert.assertEquals(status, JobStatus.COMPLETED);
+        Assert.assertEquals(status, JobStatus.FAILED);
+        Job importJob = getWorkflowJobFromApplicationId(appId);
+        Assert.assertEquals(importJob.getErrorCode(), LedpCode.LEDP_40083);
     }
 
     private long saveFileToHdfs(String outputFileName, InputStream inputStream, String outputPath) throws IOException {
