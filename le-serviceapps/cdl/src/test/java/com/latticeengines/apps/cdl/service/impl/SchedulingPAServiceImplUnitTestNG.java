@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import static org.mockito.Mockito.doReturn;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -16,11 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
@@ -37,12 +38,12 @@ public class SchedulingPAServiceImplUnitTestNG {
     private static final String SYSTEM_STATUS = "SYSTEM_STATUS";
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String TEST_SCHEDULER_NAME = "Default";
-
-    private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
+    private static final long MOCK_CURRENT_TIME = System.currentTimeMillis();
 
     @BeforeClass(groups = "unit")
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        schedulingPAService.setTimeClock(() -> MOCK_CURRENT_TIME);
     }
 
     @Test(groups = "unit")
@@ -126,6 +127,160 @@ public class SchedulingPAServiceImplUnitTestNG {
         Assert.assertFalse(result.getRetryPATenants().contains("Tenant18"));
         //QA tenant has limit, can not poll from queue.
         Assert.assertFalse(result.getNewPATenants().contains("tenant2"));
+    }
+
+    @Test(groups = "unit", dataProvider = "largeTxnLimit")
+    private void testLargeTxnConcurrencyLimit(int total, int scheduleNow, int large, int largeTxn,
+            TenantActivity[] activities, String[] expectedTenantsToScheduleNewPA,
+            String[] expectedTenantsToScheduleRetryPA) {
+        Map<String, Object> map = new HashMap<>();
+        SystemStatus systemStatus = newStatus(total, scheduleNow, large, largeTxn);
+        map.put(SYSTEM_STATUS, systemStatus);
+        map.put(TENANT_ACTIVITY_LIST, Arrays.asList(activities));
+        doReturn(map).when(schedulingPAService).setSystemStatus(TEST_SCHEDULER_NAME);
+        SchedulingResult result = schedulingPAService.getSchedulingResult(TEST_SCHEDULER_NAME);
+        Assert.assertEquals(result.getRetryPATenants().size(), expectedTenantsToScheduleRetryPA.length);
+        Assert.assertEquals(result.getRetryPATenants(), new HashSet<>(Arrays.asList(expectedTenantsToScheduleRetryPA)));
+        Assert.assertEquals(result.getNewPATenants().size(), expectedTenantsToScheduleNewPA.length);
+        Assert.assertEquals(result.getNewPATenants(), new HashSet<>(Arrays.asList(expectedTenantsToScheduleNewPA)));
+    }
+
+    @DataProvider(name = "largeTxnLimit")
+    private Object[][] largeTxnConcurrencyLimitNewPATestData() {
+        return new Object[][] { //
+                /*-
+                 * one large txn, one normal large tenant and one normal tenant competing for one slot
+                 * large txn one should get priority since they have less quota
+                 */
+                { //
+                        1, 1, 1, 1, //
+                        new TenantActivity[] { //
+                                largeCustomerScheduleNow("t1"), //
+                                largeTxnCustomerScheduleNow("t2"), //
+                                customerScheduleNow("t3"), //
+                        }, //
+                        new String[] { "t2" }, new String[0] //
+                }, //
+                /*-
+                 * a lot of normal large tenant, still should schedule for large txn tenant
+                 */
+                { //
+                        1, 1, 1, 1, //
+                        new TenantActivity[] { //
+                                largeCustomerScheduleNow("t1"), //
+                                largeCustomerScheduleNow("t2"), //
+                                largeCustomerScheduleNow("t3"), //
+                                largeCustomerScheduleNow("t4"), //
+                                largeTxnCustomerScheduleNow("t5"), //
+                                largeTxnAutoSchedule("t6", 1L), //
+                                customerScheduleNow("t7"), //
+                                customerScheduleNow("t8"), //
+                                customerScheduleNow("t9"), //
+                                customerScheduleNow("t10"), //
+                        }, //
+                        new String[] { "t5" }, new String[0] //
+                }, //
+                /*-
+                 * large tenant quota = 10, but since large txn quota is 1,
+                 * only one large txn tenant will be scheduled.
+                 * t1 comes first since it's in schedule now queue
+                 */
+                { //
+                        10, 10, 10, 1, //
+                        new TenantActivity[] { //
+                                largeTxnCustomerScheduleNow("t1"), //
+                                largeTxnAutoSchedule("t2", 1L) //
+                        }, //
+                        new String[] { "t1" }, new String[0] //
+                }, //
+                /*-
+                 * only two large txn tenant from schedule now queue can run
+                 * normal tenant and non-txn large tenant still can run
+                 */
+                { //
+                        10, 10, 10, 2, //
+                        new TenantActivity[] { //
+                                largeTxnCustomerScheduleNow("t1"), //
+                                largeTxnCustomerScheduleNow("t3"), //
+                                largeTxnAutoSchedule("t2", 1L), //
+                                customerScheduleNow("t4"), //
+                                largeCustomerScheduleNow("t5"), }, //
+                        new String[] { "t1", "t3", "t4", "t5" }, new String[0] //
+                }, //
+                /*-
+                 * all 3 can run
+                 */
+                { //
+                        10, 10, 10, 3, //
+                        new TenantActivity[] { //
+                                largeTxnCustomerScheduleNow("t1"), //
+                                largeTxnCustomerScheduleNow("t3"), //
+                                largeTxnAutoSchedule("t2", 1L) //
+                        }, //
+                        new String[] { "t1", "t2", "t3" }, new String[0] //
+                }, //
+                /*-
+                 * txn quota = 1, only the one with earlier first action time will be scheduled
+                 */
+                { //
+                        10, 10, 10, 1, //
+                        new TenantActivity[] { //
+                                largeTxnAutoSchedule("t1", 1L), //
+                                largeTxnAutoSchedule("t2", 5L) //
+                        }, //
+                        new String[] { "t1" }, new String[0] //
+                }, //
+                /*-
+                 * have enough quota
+                 */
+                { //
+                        10, 10, 10, 3, //
+                        new TenantActivity[] { //
+                                largeTxnAutoSchedule("t1", 1L), //
+                                largeTxnAutoSchedule("t2", 5L), //
+                                largeTxnAutoSchedule("t3", 10L) //
+                        }, //
+                        new String[] { "t1", "t2", "t3" }, new String[0] //
+                }, //
+                { //
+                        10, 10, 10, 10, //
+                        new TenantActivity[] { //
+                                largeCustomerScheduleNow("t1"), //
+                                largeTxnCustomerScheduleNow("t2"), //
+                                largeTxnAutoSchedule("t3", 10L), //
+                                largeTxnAutoSchedule("t4", 15L) //
+                        }, //
+                        new String[] { "t1", "t2", "t3", "t4" }, new String[0] //
+                }, //
+
+                /*-
+                 * tenants with retries should also be limited to the same quota
+                 */
+                { //
+                        10, 10, 1, 1, //
+                        new TenantActivity[] { //
+                                largeTxnRetry("t1"), //
+                                largeRetry("t2"), //
+                                largeTxnAutoSchedule("t3", 10L), //
+                                largeTxnAutoSchedule("t4", 15L), //
+                                largeCustomerScheduleNow("t5"), //
+                                customerScheduleNow("t6"), //
+                        }, //
+                        new String[] { "t6" }, new String[] { "t1" } //
+                }, //
+                { //
+                        10, 10, 2, 1, //
+                        new TenantActivity[] { //
+                                largeTxnRetry("t1"), //
+                                largeTxnRetry("t2"), //
+                                largeTxnAutoSchedule("t3", 10L), //
+                                largeTxnAutoSchedule("t4", 15L), //
+                                largeCustomerScheduleNow("t5"), //
+                                customerScheduleNow("t6"), //
+                        }, //
+                        new String[] { "t5", "t6" }, new String[] { "t1" } //
+                }, //
+        }; //
     }
 
     private SystemStatus getNoRunningSystemStatus() {
@@ -541,7 +696,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity15 = new TenantActivity();
         tenantActivity15.setRetry(true);
-        tenantActivity15.setLastFinishTime(schedulingPATimeClock.getCurrentTime() - 1000000);
+        tenantActivity15.setLastFinishTime(MOCK_CURRENT_TIME - 1000000);
         tenantActivity15.setDataCloudRefresh(true);
         tenantActivity15.setScheduledNow(false);
         tenantActivity15.setTenantType(TenantType.CUSTOMER);
@@ -552,7 +707,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity16 = new TenantActivity();
         tenantActivity16.setRetry(true);
-        tenantActivity16.setLastFinishTime(schedulingPATimeClock.getCurrentTime() - 9000000);
+        tenantActivity16.setLastFinishTime(MOCK_CURRENT_TIME - 9000000);
         tenantActivity16.setDataCloudRefresh(false);
         tenantActivity16.setScheduledNow(false);
         tenantActivity16.setTenantType(TenantType.CUSTOMER);
@@ -563,7 +718,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity17 = new TenantActivity();
         tenantActivity17.setRetry(true);
-        tenantActivity17.setLastFinishTime(schedulingPATimeClock.getCurrentTime() - 9000000);
+        tenantActivity17.setLastFinishTime(MOCK_CURRENT_TIME - 9000000);
         tenantActivity17.setDataCloudRefresh(false);
         tenantActivity17.setScheduledNow(false);
         tenantActivity17.setTenantType(TenantType.CUSTOMER);
@@ -574,7 +729,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity18 = new TenantActivity();
         tenantActivity18.setRetry(true);
-        tenantActivity18.setLastFinishTime(schedulingPATimeClock.getCurrentTime());
+        tenantActivity18.setLastFinishTime(MOCK_CURRENT_TIME);
         tenantActivity18.setDataCloudRefresh(false);
         tenantActivity18.setScheduledNow(false);
         tenantActivity18.setTenantType(TenantType.CUSTOMER);
@@ -585,7 +740,7 @@ public class SchedulingPAServiceImplUnitTestNG {
 
         TenantActivity tenantActivity19 = new TenantActivity();
         tenantActivity19.setRetry(true);
-        tenantActivity17.setLastFinishTime(schedulingPATimeClock.getCurrentTime() - 9000000);
+        tenantActivity17.setLastFinishTime(MOCK_CURRENT_TIME - 9000000);
         tenantActivity19.setDataCloudRefresh(false);
         tenantActivity19.setScheduledNow(false);
         tenantActivity19.setTenantType(TenantType.QA);
@@ -598,5 +753,88 @@ public class SchedulingPAServiceImplUnitTestNG {
         tenantActivityList.add(tenantActivity19);
 
         return tenantActivityList;
+    }
+
+    private SystemStatus newStatus(int totalLimit, int scheduleNowLimit, int largeLimit, int largeTxnLimit) {
+        SystemStatus status = new SystemStatus();
+        status.setCanRunJobCount(totalLimit);
+        status.setCanRunLargeJobCount(largeLimit);
+        status.setCanRunScheduleNowJobCount(scheduleNowLimit);
+        status.setCanRunLargeTxnJobCount(largeTxnLimit);
+        return status;
+    }
+
+    private TenantActivity retry(String tenantId) {
+        return TenantActivity.Builder.newInstance() //
+                .withTenantId(tenantId) //
+                .withTenantType(TenantType.CUSTOMER) //
+                .withLastFinishTime(1L) //
+                .retry() //
+                .build();
+    }
+
+    private TenantActivity largeRetry(String tenantId) {
+        return TenantActivity.Builder.newInstance() //
+                .withTenantId(tenantId) //
+                .withTenantType(TenantType.CUSTOMER) //
+                .withLastFinishTime(1L) //
+                .large() //
+                .retry() //
+                .build();
+    }
+
+    private TenantActivity largeTxnRetry(String tenantId) {
+        return TenantActivity.Builder.newInstance() //
+                .withTenantId(tenantId) //
+                .withTenantType(TenantType.CUSTOMER) //
+                .withLastFinishTime(1L) //
+                .large() //
+                .largeTxn() //
+                .retry() //
+                .build();
+    }
+
+    // ordinary schedule now tenant
+    private TenantActivity customerScheduleNow(String tenantId) {
+        return TenantActivity.Builder.newInstance() //
+                .withTenantId(tenantId) //
+                .withScheduledNow(true) //
+                .withScheduleTime(MOCK_CURRENT_TIME) //
+                .withTenantType(TenantType.CUSTOMER) //
+                .build();
+    }
+
+    private TenantActivity largeCustomerScheduleNow(String tenantId) {
+        return TenantActivity.Builder.newInstance() //
+                .withTenantId(tenantId) //
+                .withScheduledNow(true) //
+                .withScheduleTime(MOCK_CURRENT_TIME) //
+                .large() //
+                .withTenantType(TenantType.CUSTOMER) //
+                .build();
+    }
+
+    private TenantActivity largeTxnCustomerScheduleNow(String tenantId) {
+        return TenantActivity.Builder.newInstance() //
+                .withTenantId(tenantId) //
+                .withScheduledNow(true) //
+                .withScheduleTime(MOCK_CURRENT_TIME) //
+                .large() //
+                .largeTxn() //
+                .withTenantType(TenantType.CUSTOMER) //
+                .build();
+    }
+
+    private TenantActivity largeTxnAutoSchedule(String tenantId, long firstActionTime) {
+        return TenantActivity.Builder.newInstance() //
+                .withTenantId(tenantId) //
+                .autoSchedule() //
+                .withInvokeTime(MOCK_CURRENT_TIME) //
+                .withFirstActionTime(firstActionTime) //
+                .withLastActionTime(MOCK_CURRENT_TIME - 86400 * 1000) //
+                .large() //
+                .largeTxn() //
+                .withTenantType(TenantType.CUSTOMER) //
+                .build();
     }
 }

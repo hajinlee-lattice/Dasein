@@ -27,6 +27,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
@@ -45,8 +46,10 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.scheduling.ActionStat;
 import com.latticeengines.domain.exposed.cdl.scheduling.GreedyScheduler;
+import com.latticeengines.domain.exposed.cdl.scheduling.PASchedulerConfig;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAQueue;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPATimeClock;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingPAUtil;
@@ -54,6 +57,7 @@ import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingResult;
 import com.latticeengines.domain.exposed.cdl.scheduling.SchedulingStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.SystemStatus;
 import com.latticeengines.domain.exposed.cdl.scheduling.TenantActivity;
+import com.latticeengines.domain.exposed.cdl.scheduling.TimeClock;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
@@ -116,6 +120,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Value("${cdl.processAnalyze.maximum.priority.large.account.count}")
     private long largeAccountCountLimit;
 
+    @Value("${cdl.processAnalyze.maximum.priority.large.transaction.count}")
+    private long largeTransactionCountLimit;
+
     @Value("${cdl.processAnalyze.job.retry.count:1}")
     private int processAnalyzeJobRetryCount;
 
@@ -124,6 +131,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Value("${cdl.processAnalyze.maximum.priority.large.job.count}")
     private int maxLargeJobCount;
+
+    @Value("${cdl.processAnalyze.maximum.priority.large.txn.job.count}")
+    private int maxLargeTxnJobCount;
 
     @Value("${cdl.processAnalyze.concurrent.job.count}")
     private int concurrentProcessAnalyzeJobs;
@@ -140,7 +150,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     @Value("${cdl.processAnalyze.job.datacloudrefresh.failcount:3}")
     private int dataCloudRefreshMaxFailCount;
 
-    private SchedulingPATimeClock schedulingPATimeClock = new SchedulingPATimeClock();
+    private TimeClock schedulingPATimeClock = new SchedulingPATimeClock();
 
     @Override
     public Map<String, Object> setSystemStatus(@NotNull String schedulerName) {
@@ -148,9 +158,13 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         int runningTotalCount = 0;
         int runningScheduleNowCount = 0;
         int runningLargeJobCount = 0;
+        int runningLargeTxnJobCount = 0;
 
         Set<String> largeJobTenantId = new HashSet<>();
         Set<String> runningPATenantId = new HashSet<>();
+        Set<String> largeTransactionTenantId = new HashSet<>();
+
+        setSchedulerQuotaLimit();
 
         List<TenantActivity> tenantActivityList = new LinkedList<>();
         String schedulingGroup = getSchedulingGroup(schedulerName);
@@ -205,8 +219,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 if (simpleDataFeed.isScheduleNow()) {
                     runningScheduleNowCount++;
                 }
-                if (isLarge(tenantId, largeTenantExemptionList, dcStatus)) {
+                if (isLarge(tenantId, largeTenantExemptionList, dcStatus) || isLargeTransaction(tenantId,
+                        largeTenantExemptionList, dcStatus)) {
                     runningLargeJobCount++;
+                }
+                if (isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus)) {
+                    runningLargeTxnJobCount++;
                 }
             } else if (!DataFeed.Status.RUNNING_STATUS.contains(simpleDataFeed.getStatus())) {
                 if (paFailedMap.containsKey(tenantId)) {
@@ -215,7 +233,12 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 TenantActivity tenantActivity = new TenantActivity();
                 tenantActivity.setTenantId(tenantId);
                 tenantActivity.setTenantType(tenant.getTenantType());
-                tenantActivity.setLarge(isLarge(tenantId, largeTenantExemptionList, dcStatus));
+                tenantActivity.setLarge(isLarge(tenantId, largeTenantExemptionList, dcStatus)
+                        || isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus));
+                tenantActivity.setLargeTransaction(isLargeTransaction(tenantId, largeTenantExemptionList, dcStatus));
+                if (tenantActivity.isLargeTransaction()) {
+                    largeTransactionTenantId.add(tenantId);
+                }
                 if (tenantActivity.isLarge()) {
                     largeJobTenantId.add(tenantId);
                 }
@@ -271,20 +294,26 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         int canRunJobCount = concurrentProcessAnalyzeJobs - runningTotalCount;
         int canRunScheduleNowJobCount = maxScheduleNowJobCount - runningScheduleNowCount;
         int canRunLargeJobCount = maxLargeJobCount - runningLargeJobCount;
+        int canRunLargeTxnJobCount = maxLargeTxnJobCount - runningLargeTxnJobCount;
 
         SystemStatus systemStatus = new SystemStatus();
         systemStatus.setCanRunJobCount(canRunJobCount);
         systemStatus.setCanRunLargeJobCount(canRunLargeJobCount);
+        systemStatus.setCanRunLargeTxnJobCount(canRunLargeTxnJobCount);
         systemStatus.setCanRunScheduleNowJobCount(canRunScheduleNowJobCount);
         systemStatus.setRunningTotalCount(runningTotalCount);
         systemStatus.setRunningLargeJobCount(runningLargeJobCount);
+        systemStatus.setRunningLargeTxnJobCount(canRunLargeTxnJobCount);
         systemStatus.setRunningScheduleNowCount(runningScheduleNowCount);
         systemStatus.setLargeJobTenantId(largeJobTenantId);
         systemStatus.setRunningPATenantId(runningPATenantId);
         log.info(
-                "There are {} running PAs({} ScheduleNow PAs, {} large PAs). Tenants = {}. Large PA Tenants = {}. schedulerName={}",
-                runningTotalCount, runningScheduleNowCount, runningLargeJobCount, runningPATenantId, largeJobTenantId,
-                schedulerName);
+                "There are {} running PAs({} ScheduleNow PAs, {} large PAs, {} large Txn PAs). Tenants = {}. Large PA Tenants = {}, "
+                        +
+                        "Large Transaction Tenants = {}. schedulerName={}",
+                runningTotalCount, runningScheduleNowCount, runningLargeJobCount, runningLargeTxnJobCount,
+                runningPATenantId, largeJobTenantId
+                , largeTransactionTenantId, schedulerName);
         Map<String, Object> map = new HashMap<>();
         map.put(SYSTEM_STATUS, systemStatus);
         map.put(TENANT_ACTIVITY_LIST, tenantActivityList);
@@ -359,14 +388,25 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return detail.getAccountCount() != null && detail.getAccountCount() > largeAccountCountLimit;
     }
 
+    private boolean isLargeTransaction(@NotNull String tenantId, @NotNull Set<String> largeTenantExemptionList,
+                            DataCollectionStatus status) {
+        if (status == null || status.getDetail() == null) {
+            return false;
+        }
+        if (largeTenantExemptionList.contains(CustomerSpace.shortenCustomerSpace(tenantId))) {
+            return false;
+        }
+        DataCollectionStatusDetail detail = status.getDetail();
+        return detail.getTransactionCount() != null && detail.getTransactionCount() > largeTransactionCountLimit;
+    }
+
     private boolean retryProcessAnalyze(DataFeedExecution execution, String tenantId) {
         if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))
                 && execution.getUpdated() != null && checkRetryPendingTime(execution.getUpdated().getTime())) {
             if (!reachRetryLimit(CDLJobType.PROCESSANALYZE, execution.getRetryCount())) {
                 return true;
             } else {
-                log.debug("Tenant {} exceeds retry limit and skip failed exeuction",
-                        tenantId);
+                log.debug("Tenant {} exceeds retry limit and skip failed exeuction", tenantId);
             }
         }
         return false;
@@ -583,6 +623,50 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         }
     }
 
+    private void setSchedulerQuotaLimit() {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            Path configPath = PathBuilder.buildSchedulerConfigPath(CamilleEnvironment.getPodId());
+            if (c.exists(configPath)) {
+                String configStr = c.get(configPath).getData();
+                if (StringUtils.isEmpty(configStr)) {
+                    return;
+                }
+                PASchedulerConfig quotaLimit = JsonUtils.deserialize(configStr, PASchedulerConfig.class);
+                if (quotaLimit.getLargeTenantAccountVolumeThreshold() != null) {
+                    largeAccountCountLimit = quotaLimit.getLargeTenantAccountVolumeThreshold();
+                }
+                if (quotaLimit.getConcurrentLargeJobLimit() != null) {
+                    maxLargeJobCount = quotaLimit.getConcurrentLargeJobLimit();
+                }
+                if (quotaLimit.getLargeTenantTxnVolumeThreshold() != null) {
+                    largeTransactionCountLimit = quotaLimit.getLargeTenantTxnVolumeThreshold();
+                }
+                if (quotaLimit.getRetryCountLimit() != null) {
+                    processAnalyzeJobRetryCount = quotaLimit.getRetryCountLimit();
+                }
+                if (quotaLimit.getRetryExpiredTime() != null) {
+                    retryExpiredTime = quotaLimit.getRetryExpiredTime();
+                }
+                if (quotaLimit.getConcurrentScheduleNowJobLimit() != null) {
+                    maxScheduleNowJobCount = quotaLimit.getConcurrentScheduleNowJobLimit();
+                }
+                if (quotaLimit.getConcurrentJobLimit() != null) {
+                    concurrentProcessAnalyzeJobs = quotaLimit.getConcurrentJobLimit();
+                }
+                log.info("Retrieving SchedulerConfig. config = {}", configStr);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve SchedulerConfig", e);
+        }
+
+        log.info(
+                "large tenant threshold (account={}, txn={}). concurrency limit (total={}, scheduleNow={}, large={}, largeTxn={}). Retry limit={}, Retry expired time={}",
+                largeAccountCountLimit, largeTransactionCountLimit, concurrentProcessAnalyzeJobs,
+                maxScheduleNowJobCount, maxLargeJobCount, maxLargeTxnJobCount, processAnalyzeJobRetryCount,
+                retryExpiredTime);
+    }
+
     private static String filterDetail(String stackName, Map<String, String> nodes) {
         String filterName = stackName + SCHEDULING_GROUP_SUFFIX;
         return nodes.getOrDefault(filterName, DEFAULT_SCHEDULING_GROUP);
@@ -636,6 +720,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         nonIngestAndReplaceActionType.remove(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         nonIngestAndReplaceActionType.remove(ActionType.CDL_OPERATION_WORKFLOW);
         return nonIngestAndReplaceActionType;
+    }
+
+    @VisibleForTesting
+    void setTimeClock(TimeClock clock) {
+        this.schedulingPATimeClock = clock;
     }
 
     public boolean reachFailCountLimit(String tenantId, int maxFailCount) {

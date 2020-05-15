@@ -13,6 +13,10 @@ public class SystemStatus {
     @JsonProperty("can_run_large_job_count")
     private int canRunLargeJobCount;
 
+    // tenant with large txn have an additional quota
+    @JsonProperty("can_run_large_txn_job_count")
+    private int canRunLargeTxnJobCount;
+
     @JsonProperty("can_run_schedule_now_job_count")
     private int canRunScheduleNowJobCount;
 
@@ -25,8 +29,14 @@ public class SystemStatus {
     @JsonProperty("running_large_job_count")
     private int runningLargeJobCount;
 
+    @JsonProperty("running_large_txn_job_count")
+    private int runningLargeTxnJobCount;
+
     @JsonProperty("large_job_tenant_id")
     private Set<String> largeJobTenantId;
+
+    @JsonProperty("large_transaction_tenant_id")
+    private Set<String> largeTransactionTenantId;
 
     @JsonProperty("running_pa_tenant_id")
     private  Set<String> runningPATenantId;
@@ -49,6 +59,14 @@ public class SystemStatus {
 
     public void setCanRunLargeJobCount(int canRunLargeJobCount) {
         this.canRunLargeJobCount = canRunLargeJobCount;
+    }
+
+    public int getCanRunLargeTxnJobCount() {
+        return canRunLargeTxnJobCount;
+    }
+
+    public void setCanRunLargeTxnJobCount(int canRunLargeTxnJobCount) {
+        this.canRunLargeTxnJobCount = canRunLargeTxnJobCount;
     }
 
     public int getCanRunScheduleNowJobCount() {
@@ -83,12 +101,28 @@ public class SystemStatus {
         this.runningLargeJobCount = runningLargeJobCount;
     }
 
+    public int getRunningLargeTxnJobCount() {
+        return runningLargeTxnJobCount;
+    }
+
+    public void setRunningLargeTxnJobCount(int runningLargeTxnJobCount) {
+        this.runningLargeTxnJobCount = runningLargeTxnJobCount;
+    }
+
     public Set<String> getLargeJobTenantId() {
         return largeJobTenantId;
     }
 
     public void setLargeJobTenantId(Set<String> largeJobTenantId) {
         this.largeJobTenantId = largeJobTenantId;
+    }
+
+    public Set<String> getLargeTransactionTenantId() {
+        return largeTransactionTenantId;
+    }
+
+    public void setLargeTransactionTenantId(Set<String> largeTransactionTenantId) {
+        this.largeTransactionTenantId = largeTransactionTenantId;
     }
 
     public Set<String> getRunningPATenantId() {
@@ -107,9 +141,13 @@ public class SystemStatus {
     public void changeSystemState(TenantActivity tenantActivity) {
         this.canRunJobCount = this.canRunJobCount - 1;
         this.runningTotalCount = this.runningTotalCount + 1;
-        if (tenantActivity.isLarge()) {
+        if (tenantActivity.isLarge() || tenantActivity.isLargeTransaction()) {
             this.canRunLargeJobCount = this.canRunLargeJobCount - 1;
             this.runningLargeJobCount = this.runningLargeJobCount + 1;
+        }
+        if (tenantActivity.isLargeTransaction()) {
+            this.canRunLargeTxnJobCount--;
+            this.runningLargeTxnJobCount++;
         }
         if (tenantActivity.isScheduledNow()) {
             this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount - 1;
@@ -118,15 +156,19 @@ public class SystemStatus {
     }
 
     /**
-     * will change canRunJobCount when PA finished using fir simulation
+     * will change canRunJobCount when PA finished using for simulation
      *
      */
     public void changeSystemStateAfterPAFinished(TenantActivity tenantActivity) {
         this.canRunJobCount = this.canRunJobCount + 1;
         this.runningTotalCount = this.runningTotalCount - 1;
-        if (tenantActivity.isLarge()) {
+        if (tenantActivity.isLarge() || tenantActivity.isLargeTransaction()) {
             this.canRunLargeJobCount = this.canRunLargeJobCount + 1;
             this.runningLargeJobCount = this.runningLargeJobCount - 1;
+        }
+        if (tenantActivity.isLargeTransaction()) {
+            this.canRunLargeTxnJobCount++;
+            this.runningLargeTxnJobCount--;
         }
         if (tenantActivity.isScheduledNow()) {
             this.canRunScheduleNowJobCount = this.canRunScheduleNowJobCount + 1;
@@ -147,16 +189,12 @@ public class SystemStatus {
 
     @Override
     public String toString() {
-        return "SystemStatus{" +
-                "canRunJobCount=" + canRunJobCount +
-                ", canRunLargeJobCount=" + canRunLargeJobCount +
-                ", canRunScheduleNowJobCount=" + canRunScheduleNowJobCount +
-                ", runningTotalCount=" + runningTotalCount +
-                ", runningScheduleNowCount=" + runningScheduleNowCount +
-                ", runningLargeJobCount=" + runningLargeJobCount +
-                ", largeJobTenantId=" + largeJobTenantId +
-                ", runningPATenantId=" + runningPATenantId +
-                ", scheduleTenants=" + scheduleTenants +
-                '}';
+        return "SystemStatus{" + "canRunJobCount=" + canRunJobCount + ", canRunLargeJobCount=" + canRunLargeJobCount
+                + ", canRunLargeTxnJobCount=" + canRunLargeTxnJobCount + ", canRunScheduleNowJobCount="
+                + canRunScheduleNowJobCount + ", runningTotalCount=" + runningTotalCount + ", runningScheduleNowCount="
+                + runningScheduleNowCount + ", runningLargeJobCount=" + runningLargeJobCount
+                + ", runningLargeTxnJobCount=" + runningLargeTxnJobCount + ", largeJobTenantId=" + largeJobTenantId
+                + ", largeTransactionTenantId=" + largeTransactionTenantId + ", runningPATenantId=" + runningPATenantId
+                + ", scheduleTenants=" + scheduleTenants + '}';
     }
 }

@@ -52,6 +52,8 @@ public final class PathConstants {
     // list of tenants will NOT be considered as large tenant (faster queue time)
     public static final String SCHEDULING_LARGE_TENANT_EXEMPTION_LIST = "schedulingLargeTenantExemptionList";
 
+    public static final String SCHEDULER_CONFIG = "paSchedulerConfig";
+
     public static final String WORKFLOW_THROTTLING_CONFIG_FILE = "workflowThrottlingConfig";
 
     public static final String WORKFLOW_THROTTLING_FLAG = "workflowThrottlingFlag";
