@@ -393,33 +393,23 @@ public abstract class BaseFrontEndEntityResource {
     }
 
     private List<AttributeLookup> getFreeTextSearchAttrs(BusinessEntity queryEntity) {
-        if (BusinessEntity.Account.equals(queryEntity)) {
-            if (isEntityMatchEnabled()) {
-                return Arrays.asList( //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CustomerAccountId.name()) //
-                );
-            } else {
-                return Arrays.asList( //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
-                        new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
-                );
-            }
-        } else if (BusinessEntity.Contact.equals(queryEntity)) {
+        switch (queryEntity) {
+        case Account:
+            return Arrays.asList( //
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.CompanyName.name()), //
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.Website.name()), //
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.City.name()), //
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.State.name()), //
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.Country.name()), //
+                    new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+            );
+        case Contact:
             return Arrays.asList( //
                     new AttributeLookup(BusinessEntity.Contact, InterfaceName.ContactName.name()), //
                     new AttributeLookup(BusinessEntity.Contact, InterfaceName.CompanyName.name()), //
                     new AttributeLookup(BusinessEntity.Contact, InterfaceName.Email.name()) //
             );
-        } else {
+        default:
             return Collections.emptyList();
         }
     }
