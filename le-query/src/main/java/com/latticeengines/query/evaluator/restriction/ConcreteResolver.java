@@ -216,14 +216,20 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 case NOT_IN_COLLECTION:
                     if (rhs instanceof SubQueryAttrLookup) {
                         SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                        ComparableExpression<String> lhsExpression;
+                        if (Boolean.TRUE.equals(subQueryAttrLookup.getToLowerCase())) {
+                            lhsExpression = Expressions.asString(lhsPaths.get(0)).toLowerCase();
+                        } else {
+                            lhsExpression = lhsPaths.get(0);
+                        }
                         if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                            booleanExpression = lhsPaths.get(0)
-                                    .notIn((SQLQuery<?>) subQueryAttrLookup.getSubQuery()
+                            booleanExpression = lhsExpression
+                                    .notIn((SQLQuery<String>) subQueryAttrLookup.getSubQuery()
                                             .getSubQueryExpression());
                         } else {
                             ComparableExpression<String> subselect = rhsResolver
                                     .resolveForSubselect(rhs);
-                            booleanExpression = lhsPaths.get(0).notIn(subselect);
+                            booleanExpression = lhsExpression.notIn(subselect);
                         }
                     } else {
                         if (rhsPaths.size() > 1) {
@@ -248,12 +254,17 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 case IN_COLLECTION:
                     if (rhs instanceof SubQueryAttrLookup) {
                         SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
-                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
-                            booleanExpression = lhsPaths.get(0).in(rhsResolver.resolveForFrom(rhs));
+                        ComparableExpression<String> lhsExpression;
+                        if (Boolean.TRUE.equals(subQueryAttrLookup.getToLowerCase())) {
+                            lhsExpression = Expressions.asString(lhsPaths.get(0)).toLowerCase();
                         } else {
-                            ComparableExpression<String> subselect = rhsResolver
-                                    .resolveForSubselect(rhs);
-                            booleanExpression = lhsPaths.get(0).in(subselect);
+                            lhsExpression = lhsPaths.get(0);
+                        }
+                        if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                            booleanExpression = lhsExpression.in(rhsResolver.resolveForFrom(rhs));
+                        } else {
+                            ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
+                            booleanExpression = lhsExpression.in(subselect);
                         }
                     } else {
                         // when there's only 1 element in the collection,

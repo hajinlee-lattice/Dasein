@@ -16,6 +16,9 @@ public class SubQueryAttrLookup extends Lookup {
     @JsonProperty("attribute")
     private String attribute;
 
+    @JsonProperty("toLowerCase")
+    private Boolean toLowerCase;
+
     // for jackson
     @SuppressWarnings("unused")
     private SubQueryAttrLookup() {
@@ -44,5 +47,13 @@ public class SubQueryAttrLookup extends Lookup {
 
     public void setAttribute(String attribute) {
         this.attribute = attribute;
+    }
+
+    public Boolean getToLowerCase() {
+        return toLowerCase;
+    }
+
+    public void setToLowerCase(Boolean toLowerCase) {
+        this.toLowerCase = toLowerCase;
     }
 }
