@@ -24,6 +24,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationReport;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.exceptions.YarnException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
@@ -116,7 +117,9 @@ public class LivySessionServiceImpl implements LivySessionService {
                 restTemplate.delete(url);
             } catch (ResourceAccessException e) {
                 if (e.getCause() instanceof SocketTimeoutException) {
-                    log.warn("Encountered socket time out error when killing a livy session", e);
+                    log.warn("Encountered socket time out error when killing the livy session: {}", url, e);
+                } else if (e.getCause() instanceof HttpHostConnectException) {
+                    log.warn("Encountered connection exception when killing the livy session: {}", url, e);
                 } else {
                     throw e;
                 }
