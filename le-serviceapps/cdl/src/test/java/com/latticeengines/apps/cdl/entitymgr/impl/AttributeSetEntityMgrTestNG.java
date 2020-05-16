@@ -17,8 +17,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.common.exposed.util.RetryUtils;
@@ -55,34 +53,27 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
         String attributeSetName = attributeSet.getName();
         verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, contactAttributes);
         attributeSet.setDisplayName(displayName2);
-        updateContactAttributes(attributeSet, new HashSet<>());
+        Set<String> emptySet = new HashSet<>();
+        updateContactAttributes(attributeSet, emptySet);
         attributeSetEntityMgr.updateAttributeSet(attributeSet);
         RetryTemplate retry = RetryUtils.getRetryTemplate(10, //
                 Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
             AttributeSet attributeSet2 = attributeSetEntityMgr.findByName(attributeSetName);
-            verifyAttributeSet(attributeSet2, attributeSet2.getName(), displayName2, accountAttributes, new HashSet<>());
+            verifyAttributeSet(attributeSet2, attributeSet2.getName(), displayName2, accountAttributes, emptySet);
             return true;
         });
         assertEquals(attributeSetEntityMgr.findAll().size(), 1);
 
-        Set<String> updatedContactAttributes = Sets.newHashSet(InterfaceName.ContactName.name());
-        attributeSet = createAttributeSet(displayName, null, updatedContactAttributes);
-        attributeSetEntityMgr.createAttributeSet(attributeSetName, attributeSet);
+        attributeSet = new AttributeSet();
+        attributeSet.setDisplayName(displayName);
+        attributeSet = attributeSetEntityMgr.createAttributeSet(attributeSetName, attributeSet);
         attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
-        verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, updatedContactAttributes);
-
-        Set<String> updatedAccountAttributes = Sets.newHashSet(InterfaceName.CompanyName.name());
-        Map<String, Set<String>> attributesMap = Maps.newHashMap();
-        attributesMap.put(Category.ACCOUNT_ATTRIBUTES.name(), updatedAccountAttributes);
-        attributeSet = createAttributeSet(displayName, null, contactAttributes);
-        attributeSetEntityMgr.createAttributeSet(attributesMap, attributeSet);
-        attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
-        verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, updatedAccountAttributes, contactAttributes);
+        verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, emptySet);
 
         attributeSetEntityMgr.deleteByName(attributeSetName);
         retry.execute(context -> {
-            assertEquals(attributeSetEntityMgr.findAll().size(), 2);
+            assertEquals(attributeSetEntityMgr.findAll().size(), 1);
             return true;
         });
     }
@@ -109,8 +100,8 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
     private void verifyAttributeSet(AttributeSet attributeSet, String name, String displayName,
                                     Set<String> accountAttributes, Set<String> contactAttributes) {
-        assertEquals(attributeSet.getDisplayName(), displayName);
         assertEquals(attributeSet.getName(), name);
+        assertEquals(attributeSet.getDisplayName(), displayName);
         assertNotNull(attributeSet.getAttributes());
         assertNotNull(attributeSet.getCreated());
         assertNotNull(attributeSet.getUpdated());

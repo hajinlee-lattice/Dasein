@@ -116,6 +116,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         AttributeSet attributeSet = new AttributeSet();
         attributeSet.setName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
         attributeSet.setDisplayName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME);
+        attributeSet.setDescription(AttributeUtils.DEFAULT_ATTRIBUTE_SET_DESCRIPTION);
         return attributeSet;
     }
 
