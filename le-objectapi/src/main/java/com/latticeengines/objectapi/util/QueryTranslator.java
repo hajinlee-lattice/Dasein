@@ -361,45 +361,51 @@ abstract class QueryTranslator {
                 } else {
                     fieldClz = TempListUtils.getFieldClz(vals);
                 }
-                try {
-                    if (tempListService == null) {
-                        throw new NullPointerException("tempListService is null");
-                    }
-                    String tenantId = repository.getCustomerSpace().getTenantId();
-                    String tempTableName;
-                    try (PerformanceTimer timer = new PerformanceTimer()) {
-                        tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz,
-                                repository.getRedshiftPartition());
-                        timer.setThreshold(10000L);
-                        timer.setTimerMessage("Created a templist named " + tempTableName + " for tenant " + tenantId);
-                    }
+                boolean toLowerCase = String.class.equals(fieldClz);
+                if (tempListService == null) {
+                    throw new NullPointerException("tempListService is null");
+                }
+                String tenantId = repository.getCustomerSpace().getTenantId();
+                String tempTableName;
+                try (PerformanceTimer timer = new PerformanceTimer()) {
+                    tempTableName = tempListService.createTempListIfNotExists(restriction, fieldClz,
+                            repository.getRedshiftPartition());
+                    timer.setThreshold(10000L);
+                    timer.setTimerMessage("Created a templist named " + tempTableName + " for tenant " + tenantId);
+                }
 
-                    if (SPARK_BATCH_USER.equals(sqlUser)
-                            && ComparisonType.NOT_IN_COLLECTION.equals(restriction.getRelation())) {
-                        BusinessEntity entity = attributeLookup.getEntity();
-                        StringPath entityTable = AttrRepoUtils.getTablePath(repository, entity);
-                        String idAttrStr = entity.getServingStore().getPrimaryKey();
-                        EntityPath<String> tempTable = new PathBuilder<>(String.class, tempTableName);
-                        StringPath lhs = Expressions.stringPath(entityTable, attributeLookup.getAttribute());
-                        StringPath rhs = Expressions.stringPath(tempTable, TempListUtils.VALUE_COLUMN);
-                        BooleanExpression joinPredicate = lhs.eq(rhs);
-                        BooleanExpression filterPredicate = lhs.isNotNull().and(rhs.isNull());
-                        SQLQuery<?> query = queryFactory.getQuery(repository, sqlUser) //
-                                .select(Expressions.stringPath(idAttrStr)) //
-                                .from(entityTable) //
-                                .leftJoin(tempTable).on(joinPredicate) //
-                                .where(filterPredicate);
-                        SubQuery subQuery = new SubQuery();
-                        subQuery.setSubQueryExpression(query);
-                        restriction.setLhs(new AttributeLookup(entity, idAttrStr));
-                        restriction.setRelation(ComparisonType.IN_COLLECTION);
-                        restriction.setRhs(new SubQueryAttrLookup(subQuery));
-                    } else {
-                        SubQuery subQuery = new SubQuery(tempTableName);
-                        restriction.setRhs(new SubQueryAttrLookup(subQuery, TempListUtils.VALUE_COLUMN));
+                if (SPARK_BATCH_USER.equals(sqlUser)
+                        && ComparisonType.NOT_IN_COLLECTION.equals(restriction.getRelation())) {
+                    BusinessEntity entity = attributeLookup.getEntity();
+                    StringPath entityTable = AttrRepoUtils.getTablePath(repository, entity);
+                    String idAttrStr = entity.getServingStore().getPrimaryKey();
+                    if (StringUtils.isBlank(idAttrStr)) {
+                        throw new IllegalArgumentException("Serving entity " + entity //
+                                + " does not have a primary key, cannot apply big list restriction.");
                     }
-                } catch (NullPointerException e) {
-                    throw e;
+                    EntityPath<String> tempTable = new PathBuilder<>(String.class, tempTableName);
+                    StringPath lhs = Expressions.stringPath(entityTable, attributeLookup.getAttribute());
+                    StringPath rhs = Expressions.stringPath(tempTable, TempListUtils.VALUE_COLUMN);
+                    BooleanExpression joinPredicate = toLowerCase ? lhs.toLowerCase().eq(rhs) : lhs.eq(rhs);
+                    BooleanExpression filterPredicate = lhs.isNotNull().and(rhs.isNull());
+                    SQLQuery<?> query = queryFactory.getQuery(repository, sqlUser) //
+                            .select(Expressions.stringPath(idAttrStr)) //
+                            .from(entityTable) //
+                            .leftJoin(tempTable).on(joinPredicate) //
+                            .where(filterPredicate);
+                    SubQuery subQuery = new SubQuery();
+                    subQuery.setSubQueryExpression(query);
+                    restriction.setLhs(new AttributeLookup(entity, idAttrStr));
+                    restriction.setRelation(ComparisonType.IN_COLLECTION);
+                    SubQueryAttrLookup rhsLookup = new SubQueryAttrLookup(subQuery);
+                    restriction.setRhs(rhsLookup);
+                } else {
+                    SubQuery subQuery = new SubQuery(tempTableName);
+                    SubQueryAttrLookup rhs = new SubQueryAttrLookup(subQuery, TempListUtils.VALUE_COLUMN);
+                    if (toLowerCase) {
+                        rhs.setToLowerCase(toLowerCase);
+                    }
+                    restriction.setRhs(rhs);
                 }
             }
         }

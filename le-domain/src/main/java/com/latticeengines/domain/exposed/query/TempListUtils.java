@@ -80,10 +80,10 @@ public final class TempListUtils {
         vals.forEach(val -> {
             if (val != null) {
                 Object casted;
-                if (fieldClz.equals(val.getClass())) {
+                if (String.class.equals(fieldClz)) {
+                    casted = ((String) val).toLowerCase();
+                } else if (fieldClz.equals(val.getClass())) {
                     casted = val;
-                } else if (String.class.equals(fieldClz)) {
-                    casted = String.valueOf(val);
                 } else if (Integer.class.equals(fieldClz)) {
                     casted = Integer.valueOf(String.valueOf(val));
                 } else if (Long.class.equals(fieldClz)) {
