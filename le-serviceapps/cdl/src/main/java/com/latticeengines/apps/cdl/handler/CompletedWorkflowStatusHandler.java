@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.handler;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -21,6 +23,9 @@ import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
 
     private static final Logger log = LoggerFactory.getLogger(CompletedWorkflowStatusHandler.class);
+
+    private String URL = "url";
+    private String FOLDER = "dropfolder";
 
     @Inject
     private PlayLaunchService playLaunchService;
@@ -63,6 +68,13 @@ public class CompletedWorkflowStatusHandler implements WorkflowStatusHandler {
                 playLaunch.setLaunchState(LaunchState.SyncFailed);
             } else {
                 playLaunch.setLaunchState(LaunchState.PartialSync);
+                // If partial sync, there may be an errorFile.
+                Map<String, String> errorFileMap = eventDetail.getErrorFile();
+
+                if (errorFileMap != null && errorFileMap.containsKey(URL) && errorFileMap.get(URL).contains(FOLDER)) {
+                    String errorFile = errorFileMap.get(URL);
+                    statusMonitor.setErrorFile(errorFile.substring(errorFile.indexOf(FOLDER)));
+                }
             }
 
             log.info("Channel Config for launch ID " + playLaunch.getLaunchId() + ": "

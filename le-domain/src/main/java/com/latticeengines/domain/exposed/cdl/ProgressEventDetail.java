@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.cdl;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ProgressEventDetail extends EventDetail {
@@ -24,6 +26,8 @@ public class ProgressEventDetail extends EventDetail {
 
     private String message;
 
+    private Map<String, String> errorFile;
+
     @JsonProperty("audience_size")
     private Long audienceSize;
 
@@ -42,6 +46,14 @@ public class ProgressEventDetail extends EventDetail {
 
     public void setBatchId(Long batchId) {
         this.batchId = batchId;
+    }
+
+    public Map<String, String> getErrorFile() {
+        return errorFile;
+    }
+
+    public void setErrorFile(Map<String, String> errorFile) {
+        this.errorFile = errorFile;
     }
 
     public String getImportId() {
