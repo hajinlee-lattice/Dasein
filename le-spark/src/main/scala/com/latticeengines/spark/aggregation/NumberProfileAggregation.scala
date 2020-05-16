@@ -34,9 +34,7 @@ private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscr
 
   // This is the initial value for your buffer schema.
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
-    fields.indices.foreach(idx => {
-      buffer(idx) = new java.util.ArrayList
-    })
+    fields.indices.foreach(idx => buffer(idx) = Seq())
   }
 
   // This is how to update your buffer schema given an input.
