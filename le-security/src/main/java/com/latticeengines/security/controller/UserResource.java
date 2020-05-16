@@ -117,6 +117,7 @@ public class UserResource {
         if (StringUtils.isBlank(userReg.getUser().getAccessLevel()) && Boolean.TRUE.equals(userReg.isDCP())) {
             targetLevel = EmailUtils.isInternalUser(userReg.getUser().getEmail()) ? AccessLevel.INTERNAL_ADMIN :
                     AccessLevel.EXTERNAL_ADMIN;
+            userReg.getUser().setAccessLevel(targetLevel.name());
         }
         if (!userService.isSuperior(loginLevel, targetLevel)) {
             LOGGER.warn(

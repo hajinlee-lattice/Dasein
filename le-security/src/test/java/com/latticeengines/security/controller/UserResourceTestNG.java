@@ -133,10 +133,11 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     private void testDCPUserCreate(String email) {
         UserRegistration uReg = createUserRegistration();
         uReg.getUser().setEmail(email);
+        uReg.getUser().setUsername(email);
         uReg.getCredentials().setUsername(email);
+        uReg.getUser().setAccessLevel(null);
         uReg.setDCP(Boolean.TRUE);
         makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
-
         String json = restTemplate.postForObject(usersApi, uReg, String.class);
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
                 RegistrationResult.class);
@@ -144,7 +145,8 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertTrue(response.isSuccess());
         User user = userService.findByUsername(uReg.getCredentials().getUsername());
         Assert.assertNotNull(user);
-        Assert.assertEquals(user.getAccessLevel(),String.valueOf(
+        AccessLevel level = userService.getAccessLevel(testTenant.getId(), email);
+        Assert.assertEquals(level.name(), String.valueOf(
                 EmailUtils.isInternalUser(email) ? AccessLevel.INTERNAL_ADMIN : AccessLevel.EXTERNAL_ADMIN));
         IDaaSUser iDaaSUser = iDaaSService.getIDaaSUser(uReg.getUser().getEmail());
         Assert.assertNotNull(iDaaSUser);
@@ -236,7 +238,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
         user.setFirstName("Test");
         user.setLastName("Tester");
-        user.setUsername("Test Tester");
         user.setLanguage("English");
         user.setPhoneNumber("650-555-5555");
         user.setTitle("Silly Tester");
