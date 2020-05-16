@@ -69,7 +69,6 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
         }
         // for every tables run Profile->Bucket->CalcStats
         int profileStep = 0;
-        int bucketStep = 1;
         List<TransformationStepConfig> steps = new ArrayList<>();
         Map<String, String> mergedMetricsGroupTableNames = getMapObjectFromContext(MERGED_METRICS_GROUP_TABLE_NAME, String.class, String.class);
         for (BusinessEntity servingEntity : servingEntities) {
@@ -82,10 +81,8 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
             }
             profiledTableNames.put(servingEntity.name(), tableName);
             steps.add(profile(tableName));
-            steps.add(bucket(profileStep, tableName, getBucketTablePrefix(servingEntity.name())));
-            steps.add(calcStats(profileStep, bucketStep, getStatsTablePrefix(servingEntity.name()), null));
-            profileStep += 3;
-            bucketStep += 3;
+            steps.add(calcStats(profileStep, tableName, getStatsTablePrefix(servingEntity.name())));
+            profileStep += 2;
         }
         log.info("{} activity metrics need to be profiled for {}: {}", profiledTableNames.size(), getEntityLevel(), profiledTableNames);
 
@@ -138,9 +135,5 @@ abstract class ProfileActivityMetricsStepBase<T extends BaseWrapperStepConfigura
 
     private String getStatsTablePrefix(String servingEntity) {
         return String.format("%s%s", servingEntity, "Stats");
-    }
-
-    private String getBucketTablePrefix(String servingStore) {
-        return String.format("%s%s", servingStore, "Buckets");
     }
 }

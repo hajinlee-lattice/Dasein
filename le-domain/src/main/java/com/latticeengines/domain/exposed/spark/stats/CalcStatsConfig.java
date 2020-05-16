@@ -7,22 +7,24 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.dataflow.stats.DCEncodedAttr;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
 import com.latticeengines.domain.exposed.spark.SparkJobConfig;
 
-public class BucketEncodeConfig extends SparkJobConfig {
+public class CalcStatsConfig extends SparkJobConfig {
 
-    public static final String NAME = "bucketEncode";
+    public static final String NAME = "calcStats";
 
-    @JsonProperty("EncAttrs")
-    public List<DCEncodedAttr> encAttrs;
+    @JsonProperty("UseChangeList")
+    private boolean useChangeList;
 
-    @JsonProperty("RetainAttrs")
-    public List<String> retainAttrs;
+    // =========================
+    // BEGIN: for AM rebuild
+    // =========================
+    @JsonProperty("DimensionTree")
+    private Map<String, List<String>> dimensionTree;
 
-    @JsonProperty("RenameFields")
-    public Map<String, String> renameFields;
+    @JsonProperty("DedupFields")
+    private List<String> dedupFields;
 
     @JsonProperty("CodeBookMap")
     private Map<String, BitCodeBook> codeBookMap; // encoded attr -> bitCodeBook
@@ -31,10 +33,13 @@ public class BucketEncodeConfig extends SparkJobConfig {
     private Map<String, String> codeBookLookup; // decoded attr -> encoded attr
 
     @JsonProperty("Stage")
-    private String stage; // mainly used by AM rebuild
+    private String stage;
 
     @JsonProperty("DataCloudVersion")
-    private String dataCloudVersion; // mainly used by AM rebuild; PA uses current
+    private String dataCloudVersion;
+    // =========================
+    // END: for AM rebuild
+    // =========================
 
     @Override
     @JsonProperty("Name")
@@ -42,28 +47,28 @@ public class BucketEncodeConfig extends SparkJobConfig {
         return NAME;
     }
 
-    public List<DCEncodedAttr> getEncAttrs() {
-        return encAttrs;
+    public Map<String, List<String>> getDimensionTree() {
+        return dimensionTree;
     }
 
-    public void setEncAttrs(List<DCEncodedAttr> encAttrs) {
-        this.encAttrs = encAttrs;
+    public void setDimensionTree(Map<String, List<String>> dimensionTree) {
+        this.dimensionTree = dimensionTree;
     }
 
-    public List<String> getRetainAttrs() {
-        return retainAttrs;
+    public List<String> getDedupFields() {
+        return dedupFields;
     }
 
-    public void setRetainAttrs(List<String> retainAttrs) {
-        this.retainAttrs = retainAttrs;
+    public void setDedupFields(List<String> dedupFields) {
+        this.dedupFields = dedupFields;
     }
 
-    public Map<String, String> getRenameFields() {
-        return renameFields;
+    public boolean isUseChangeList() {
+        return useChangeList;
     }
 
-    public void setRenameFields(Map<String, String> renameFields) {
-        this.renameFields = renameFields;
+    public void setUseChangeList(boolean useChangeList) {
+        this.useChangeList = useChangeList;
     }
 
     public Map<String, BitCodeBook> getCodeBookMap() {
@@ -82,14 +87,6 @@ public class BucketEncodeConfig extends SparkJobConfig {
         this.codeBookLookup = codeBookLookup;
     }
 
-    public String getDataCloudVersion() {
-        return dataCloudVersion;
-    }
-
-    public void setDataCloudVersion(String dataCloudVersion) {
-        this.dataCloudVersion = dataCloudVersion;
-    }
-
     public String getStage() {
         if (StringUtils.isBlank(stage)) {
             setStage(DataCloudConstants.PROFILE_STAGE_SEGMENT);
@@ -99,5 +96,13 @@ public class BucketEncodeConfig extends SparkJobConfig {
 
     public void setStage(String stage) {
         this.stage = stage;
+    }
+
+    public String getDataCloudVersion() {
+        return dataCloudVersion;
+    }
+
+    public void setDataCloudVersion(String dataCloudVersion) {
+        this.dataCloudVersion = dataCloudVersion;
     }
 }

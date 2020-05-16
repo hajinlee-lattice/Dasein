@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.dataflow.transformation.ConfigurableFlowBase;
 import com.latticeengines.datacloud.dataflow.utils.BucketEncodeUtils;
-import com.latticeengines.datacloud.dataflow.utils.DimensionUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.util.DataFlowUtils;
@@ -46,6 +45,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.stats.DCEncodedAttr;
 import com.latticeengines.domain.exposed.datacloud.transformation.config.stats.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.util.DimensionUtils;
 
 import cascading.operation.Aggregator;
 import cascading.operation.aggregator.Count;

@@ -97,7 +97,7 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
         TransformationStepConfig profile = profile(masterTableName);
         TransformationStepConfig bucket = bucket(profileStep, masterTableName, servingStoreTablePrefix);
         TransformationStepConfig removeOrphan = removeOrphan(bucketStep);
-        TransformationStepConfig calc = calcStats(profileStep, removeOrphanStep, statsTablePrefix, null);
+        TransformationStepConfig calc = calcStats(profileStep, masterTableName, statsTablePrefix);
         TransformationStepConfig sortProfile = sort(profileStep, profileTablePrefix,
                 DataCloudConstants.PROFILE_ATTR_ATTRNAME, 1);
         // -----------

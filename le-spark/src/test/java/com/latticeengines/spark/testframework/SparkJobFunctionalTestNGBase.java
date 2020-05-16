@@ -89,13 +89,13 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     protected String leStack;
 
     @Value("${dataflowapi.spark.driver.cores}")
-    private String driverCores;
+    private int driverCores;
 
     @Value("${dataflowapi.spark.driver.mem}")
     private String driverMem;
 
     @Value("${dataflowapi.spark.executor.cores}")
-    private String executorCores;
+    private int executorCores;
 
     @Value("${dataflowapi.spark.executor.mem}")
     private String executorMem;
@@ -133,8 +133,13 @@ public abstract class SparkJobFunctionalTestNGBase extends AbstractTestNGSpringC
     }
 
     protected void setupLivyEnvironment() {
+        Map<String, Object> conf = new HashMap<>();
+        conf.put("driverCores", driverCores);
+        conf.put("driverMemory", driverMem);
+        conf.put("executorCores", executorCores);
+        conf.put("executorMemory", executorMem);
         session = sessionService.startSession(this.getClass().getSimpleName(), //
-                Collections.emptyMap(), Collections.emptyMap());
+                conf, Collections.emptyMap());
     }
 
     @SuppressWarnings("unused")
