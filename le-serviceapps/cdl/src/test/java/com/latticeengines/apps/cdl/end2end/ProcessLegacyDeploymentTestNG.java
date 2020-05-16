@@ -12,12 +12,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAccountAttributesStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -41,7 +43,22 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
  */
 public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(ProcessLegacyDeploymentTestNG.class);
+    private static final String ACCOUNT_FEED_TYPE = "AccountVDB";
+    private static final String ACCOUNT_FEED_TYPE_NEW = "AccountVDB_New";
+    private static final String CONTACT_FEED_TYPE = "ContactVDB";
+    private static final String CONTACT_FEED_TYPE_NEW = "ContactVDB_New";
+    private static final String PRODUCT_FEED_TYPE = "ProductVDB";
+    private static final String TRANSACTION_FEED_TYPE = "TransactionVDB";
     static final String UNDER_SCORE = "_";
+
+    @BeforeClass(groups = { "end2end" })
+    @Override
+    public void setup() throws Exception {
+        // create VDB migration tenant
+        HashMap<String, Boolean> featureFlagMap = new HashMap<>();
+        featureFlagMap.put(LatticeFeatureFlag.VDB_MIGRATION.getName(), true);
+        setupEnd2EndTestEnvironment(featureFlagMap);
+    }
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -62,19 +79,19 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
 
         log.info("Importing accounts");
-        mockCSVImport(BusinessEntity.Account, 1, "DefaultSystem_AccountData");
+        mockVISIDBImport(BusinessEntity.Account, 1, ACCOUNT_FEED_TYPE);
         Thread.sleep(1100);
 
         log.info("Importing contacts");
-        mockCSVImport(BusinessEntity.Contact, 1, "DefaultSystem_ContactData");
+        mockVISIDBImport(BusinessEntity.Contact, 1, CONTACT_FEED_TYPE);
         Thread.sleep(1100);
 
         log.info("Importing products");
-        mockCSVImport(BusinessEntity.Product, 9, "ProductVDB");
+        mockVISIDBImport(BusinessEntity.Product, 9, PRODUCT_FEED_TYPE);
         Thread.sleep(1100);
 
         log.info("Importing transactions");
-        mockCSVImport(BusinessEntity.Transaction, 1, "DefaultSystem_TransactionData");
+        mockVISIDBImport(BusinessEntity.Transaction, 1, TRANSACTION_FEED_TYPE);
         Thread.sleep(2000);
 
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.InitialLoaded.getName());
@@ -84,12 +101,12 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     // Update 10 accounts, insert 10 new accounts
     // Update 10 contacts, insert 10 new contacts
     protected void upsertData() throws InterruptedException {
-        log.info("Importing 20 accounts (10 for update, 10 for insert)");
-        mockCSVImport(BusinessEntity.Account, 4, "DefaultSystem_AccountData");
+        log.info("Importing 20 accounts (10 for update, 10 for insert), by using new template");
+        mockVISIDBImport(BusinessEntity.Account, 4, ACCOUNT_FEED_TYPE_NEW);
         Thread.sleep(1100);
 
-        log.info("Importing 20 contacts (10 for update, 10 for insert)");
-        mockCSVImport(BusinessEntity.Contact, 4, "DefaultSystem_ContactData");
+        log.info("Importing 20 contacts (10 for update, 10 for insert), by using new template");
+        mockVISIDBImport(BusinessEntity.Contact, 4, CONTACT_FEED_TYPE_NEW);
         Thread.sleep(1100);
     }
 
@@ -98,7 +115,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
     // Delete all transaction data first, and then importing new data
     protected void replaceData() throws InterruptedException {
         log.info("Importing new products to replace existing products");
-        mockCSVImport(BusinessEntity.Product, 10, "ProductVDB");
+        mockVISIDBImport(BusinessEntity.Product, 10, PRODUCT_FEED_TYPE);
         Thread.sleep(1100);
 
         log.info("Register replacement action for transaction");
@@ -107,7 +124,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         cdlProxy.cleanupAllByAction(customerSpace.toString(), BusinessEntity.Transaction, email);
 
         log.info("Importing new transaction data");
-        mockCSVImport(BusinessEntity.Transaction, 2, "DefaultSystem_TransactionData");
+        mockVISIDBImport(BusinessEntity.Transaction, 2, TRANSACTION_FEED_TYPE);
         Thread.sleep(2000);
     }
 

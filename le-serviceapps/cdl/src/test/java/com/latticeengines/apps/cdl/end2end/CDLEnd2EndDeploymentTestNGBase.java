@@ -75,6 +75,7 @@ import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ApsRollingPeriod;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
@@ -676,8 +677,20 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         mockCSVImport(entity, null, fileIdx, feedType);
     }
 
+    void mockVISIDBImport(BusinessEntity entity, int fileIdx, String feedType) {
+        mockVISIDBImport(entity, null, fileIdx, feedType);
+    }
+
     void mockCSVImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
-        List<String> strings = registerMockDataFeedTask(entity, suffix, feedType);
+        mockImport(entity, suffix, fileIdx, feedType, SourceType.FILE);
+    }
+
+    void mockVISIDBImport(BusinessEntity entity, String suffix, int fileIdx, String feedType) {
+        mockImport(entity, suffix, fileIdx, feedType, SourceType.VISIDB);
+    }
+
+    void mockImport(BusinessEntity entity, String suffix, int fileIdx, String feedType, SourceType sourceType) {
+        List<String> strings = registerMockDataFeedTask(entity, suffix, feedType, sourceType);
         String feedTaskId = strings.get(0);
         String templateName = strings.get(1);
         Date now = new Date();
@@ -687,7 +700,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String extractPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",
                 PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace).toString(),
-                SourceType.FILE.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(now));
+                sourceType.getName(), new SimpleDateFormat(COLLECTION_DATE_FORMAT).format(now));
         long numRecords;
         try {
             HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, extractPath + "/part-00000.avro");
@@ -703,7 +716,8 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         extract.setExtractionTimestamp(now.getTime());
         List<String> tableNames = dataFeedProxy.registerExtract(customerSpace.toString(), feedTaskId, templateName,
                 extract);
-        registerImportAction(feedTaskId, numRecords, tableNames);
+        registerImportAction(feedTaskId, numRecords, tableNames,
+                sourceType == SourceType.VISIDB ? CDLConstants.DEFAULT_VISIDB_USER : INITIATOR);
     }
 
     private Table getMockTemplate(BusinessEntity entity, String suffix, String feedType) {
@@ -760,11 +774,12 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         }
     }
 
-    private List<String> registerMockDataFeedTask(BusinessEntity entity, String suffix, String feedType) {
+    private List<String> registerMockDataFeedTask(BusinessEntity entity, String suffix, String feedType,
+            SourceType sourceType) {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
         String feedTaskId;
         String templateName = NamingUtils.timestamp(entity.name());
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.FILE.getName(),
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), sourceType.getName(),
                 feedType, entity.name());
         if (dataFeedTask == null) {
             dataFeedTask = new DataFeedTask();
@@ -775,7 +790,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
             dataFeedTask.setStatus(DataFeedTask.Status.Active);
             dataFeedTask.setEntity(entity.name());
             dataFeedTask.setFeedType(feedType);
-            dataFeedTask.setSource(SourceType.FILE.getName());
+            dataFeedTask.setSource(sourceType.getName());
             dataFeedTask.setActiveJob("Not specified");
             dataFeedTask.setSourceConfig("Not specified");
             dataFeedTask.setStartTime(new Date());
@@ -792,7 +807,11 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         return Arrays.asList(feedTaskId, templateName);
     }
 
-    private void registerImportAction(String feedTaskId, long count, List<String> tableNames) {
+    private List<String> registerMockDataFeedTask(BusinessEntity entity, String suffix, String feedType) {
+        return registerMockDataFeedTask(entity, suffix, feedType, SourceType.FILE);
+    }
+
+    private void registerImportAction(String feedTaskId, long count, List<String> tableNames, String initiator) {
         log.info(String.format("Registering action for dataFeedTask=%s", feedTaskId));
         ImportActionConfiguration configuration = new ImportActionConfiguration();
         configuration.setDataFeedTaskId(feedTaskId);
@@ -801,7 +820,7 @@ public abstract class CDLEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNG
         configuration.setMockCompleted(true);
         Action action = new Action();
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
-        action.setActionInitiator(INITIATOR);
+        action.setActionInitiator(initiator);
         action.setDescription(feedTaskId);
         action.setTrackingPid(null);
         action.setActionConfiguration(configuration);
