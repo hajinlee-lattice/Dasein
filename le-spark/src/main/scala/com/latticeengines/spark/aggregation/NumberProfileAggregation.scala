@@ -13,7 +13,7 @@ import scala.util.Random
 
 private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscrete: Int, numBuckets: Int, minBucketSize: Int, randomSeed: Long) extends UserDefinedAggregateFunction {
 
-  private val NUM_SAMPLES: Int = 100000
+  private val NUM_SAMPLES: Int = 50000
   private val RANDOM = new Random(randomSeed)
 
   // This is the input fields for your aggregate function.
