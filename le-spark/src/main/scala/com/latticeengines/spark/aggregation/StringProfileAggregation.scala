@@ -42,21 +42,21 @@ private[spark] class StringProfileAggregation(fields: Seq[String], maxCategories
     fields.indices.foreach(idx => {
       val currRow: Row = buffer.getAs[Row](idx)
       if (currRow.getInt(1) <= maxCategories) { // not exploded yet
-        val v = input.getAs[String](idx)
+        val v = input.getString(idx)
         val newVal = if(v == null) null else v.trim
         if (newVal != null && newVal.length > 0) {
           if (newVal.length > maxLength) {
             // explode due to long string
-            buffer(idx) = Row.fromSeq(List(List(), maxCategories + 1))
+            buffer(idx) = Row.fromSeq(Seq(Seq(), maxCategories + 1))
           } else {
-            val cats: List[String] = currRow.getList[String](0).asScala.toList
+            val cats: Seq[String] = currRow.getSeq[String](0)
             if (!cats.contains(newVal)) { // merge new value
-              val newCats: List[String] = newVal :: cats
+              val newCats: Seq[String] = Seq(newVal) ++ cats
               val newCnt = newCats.length
               if (newCnt <= maxCategories) {
-                buffer(idx) = Row.fromSeq(List(newCats, newCnt))
+                buffer(idx) = Row.fromSeq(Seq(newCats, newCnt))
               } else {
-                buffer(idx) = Row.fromSeq(List(List(), newCnt))
+                buffer(idx) = Row.fromSeq(Seq(Seq(), maxCategories + 1))
               }
             }
           }
@@ -73,17 +73,17 @@ private[spark] class StringProfileAggregation(fields: Seq[String], maxCategories
       val cnt1 = row1.getInt(1)
       val cnt2 = row2.getInt(1)
       if (cnt1 <= maxCategories && cnt2 <= maxCategories) {
-        val lst1 = row1.getList[String](0).asScala.toSet
-        val lst2 = row2.getList[String](0).asScala.toSet
-        val lst = (lst1 ++ lst2).toList
+        val lst1 = row1.getSeq[String](0)
+        val lst2 = row2.getSeq[String](0)
+        val lst = (lst1 ++ lst2).distinct
         val cnt = lst.length
         if (cnt <= maxCategories) {
-          buffer1(idx) = Row.fromSeq(List(lst, cnt))
+          buffer1(idx) = Row.fromSeq(Seq(lst, cnt))
         } else {
-          buffer1(idx) = Row.fromSeq(List(List(), cnt))
+          buffer1(idx) = Row.fromSeq(Seq(Seq(), maxCategories + 1))
         }
       } else {
-        buffer1(idx) = Row.fromSeq(List(List(), maxCategories + 1))
+        buffer1(idx) = Row.fromSeq(Seq(Seq(), maxCategories + 1))
       }
     })
   }
@@ -98,7 +98,7 @@ private[spark] class StringProfileAggregation(fields: Seq[String], maxCategories
         Row.fromSeq(List(field, null))
       } else {
         val bkt: CategoricalBucket = new CategoricalBucket
-        bkt.setCategories(row.getList[String](0))
+        bkt.setCategories(row.getSeq[String](0).sorted.asJava)
         Row.fromSeq(List(field, JsonUtils.serialize(bkt)))
       }
     })

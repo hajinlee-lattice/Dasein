@@ -1,14 +1,14 @@
-package com.latticeengines.spark.aggregation;
+package com.latticeengines.spark.util;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class NumberProfileAggregationUnitTestNG {
+public class ProfileUtilsUnitTestNG {
 
     @Test(groups = "functional", dataProvider = "roundToData")
     public void testRoundTo(double x, int sigDigits, double y) {
-        Assert.assertEquals(NumberProfileAggregation.roundTo(x, sigDigits), y);
+        Assert.assertEquals(ProfileUtils.roundTo(x, sigDigits), y);
     }
 
     @DataProvider(name = "roundToData")
@@ -28,7 +28,7 @@ public class NumberProfileAggregationUnitTestNG {
 
     @Test(groups = "functional", dataProvider = "roundTo5Data")
     public void testRoundTo5(double x, double y) {
-        Assert.assertEquals(NumberProfileAggregation.roundTo5(x), y);
+        Assert.assertEquals(ProfileUtils.roundTo5(x), y);
     }
 
     @DataProvider(name = "roundTo5Data")

@@ -18,6 +18,10 @@ public class DiscreteBucket extends BucketAlgorithm {
     @JsonProperty("values")
     private List<Number> values;
 
+    // optional
+    @JsonProperty("counts")
+    private List<Long> counts;
+
     @Override
     @JsonIgnore
     public String getAlgorithm() {
@@ -30,6 +34,14 @@ public class DiscreteBucket extends BucketAlgorithm {
 
     public void setValues(List<Number> values) {
         this.values = values;
+    }
+
+    public List<Long> getCounts() {
+        return counts;
+    }
+
+    public void setCounts(List<Long> counts) {
+        this.counts = counts;
     }
 
     @JsonIgnore
