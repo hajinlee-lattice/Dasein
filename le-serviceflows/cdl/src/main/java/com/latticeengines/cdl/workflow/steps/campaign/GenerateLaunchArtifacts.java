@@ -84,7 +84,8 @@ public class GenerateLaunchArtifacts extends BaseSparkSQLStep<GenerateLaunchArti
     private ServingStoreProxy servingStoreProxy;
 
     private Set<String> additionalContactAttr = new HashSet<>(Arrays.asList(InterfaceName.FirstName.name(),
-            InterfaceName.LastName.name(), InterfaceName.DoNotCall.name(), InterfaceName.DoNotMail.name()));
+            InterfaceName.LastName.name(), InterfaceName.Address_Street_2.name(), InterfaceName.DoNotCall.name(),
+            InterfaceName.DoNotMail.name()));
 
     private DataCollection.Version version;
     private String evaluationDate;

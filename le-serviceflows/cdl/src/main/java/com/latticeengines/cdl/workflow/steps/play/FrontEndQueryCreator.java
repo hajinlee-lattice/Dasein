@@ -73,7 +73,8 @@ public class FrontEndQueryCreator {
     private ServingStoreProxy servingStoreProxy;
 
     private Set<String> additionalContactAttrs = Arrays
-            .asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name(), InterfaceName.Title.name(),
+            .asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name(),
+                    InterfaceName.Address_Street_2.name(),
                     InterfaceName.DoNotMail.name(), InterfaceName.DoNotCall.name())
             .stream().collect(Collectors.toSet());
 

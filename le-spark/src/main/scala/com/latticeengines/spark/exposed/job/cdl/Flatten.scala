@@ -46,6 +46,7 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
     } else {
       ele = Map(PlaymakerConstants.Email -> getInputValue(input, InterfaceName.Email.name()), //
       			  PlaymakerConstants.Address -> getInputValue(input, InterfaceName.Address_Street_1.name()), //
+      			  PlaymakerConstants.Address -> getInputValue(input, InterfaceName.Address_Street_2.name()), //
       			  PlaymakerConstants.Phone -> getInputValue(input, InterfaceName.PhoneNumber.name()), //
       			  PlaymakerConstants.State -> getInputValue(input, InterfaceName.State.name()), //
       			  PlaymakerConstants.ZipCode -> getInputValue(input, InterfaceName.PostalCode.name()), //
