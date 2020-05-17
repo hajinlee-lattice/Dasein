@@ -37,8 +37,9 @@ public final class AttributeUtils {
 
     private static final Logger log = LoggerFactory.getLogger(AttributeUtils.class);
 
-    public static final String DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME = "Default Group";
     public static final String DEFAULT_ATTRIBUTE_SET_NAME = "Default_Group";
+    public static final String DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME = "Default Group";
+    public static final String DEFAULT_ATTRIBUTE_SET_DESCRIPTION = "Default Group";
 
     public static void copyPropertiesFromAttribute(Attribute source, Attribute dest) {
         copyPropertiesFromAttribute(source, dest, true);
