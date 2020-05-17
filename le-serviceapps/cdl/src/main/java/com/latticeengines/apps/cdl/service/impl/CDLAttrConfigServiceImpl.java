@@ -18,6 +18,7 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -112,6 +113,8 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         attributeSet.setName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
         attributeSet.setDisplayName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME);
         attributeSet.setDescription(AttributeUtils.DEFAULT_ATTRIBUTE_SET_DESCRIPTION);
+        attributeSet.setCreatedBy(CDLConstants.DEFAULT_SYSTEM_USER);
+        attributeSet.setUpdatedBy(CDLConstants.DEFAULT_SYSTEM_USER);
         return attributeSet;
     }
 
