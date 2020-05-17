@@ -24,11 +24,15 @@ public final class PlaymakerConstants {
     public static final String Contacts = "Contacts";
     public static final String Email = "Email";
     public static final String Address = "Address";
+    public static final String Address2 = "Address2";
     public static final String Phone = "Phone";
     public static final String State = "State";
     public static final String ZipCode = "ZipCode";
     public static final String Country = "Country";
     public static final String City = "City";
+    public static final String Title = "Title";
+    public static final String DoNotMail = "DoNotMail";
+    public static final String DoNotCall = "DoNotCall";
     public static final String Name = "Name";
     public static final String FirstName = "FirstName";
     public static final String LastName = "LastName";
