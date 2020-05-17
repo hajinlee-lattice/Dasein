@@ -1,20 +1,14 @@
 package com.latticeengines.spark.aggregation
 
-
 import com.latticeengines.common.exposed.util.JsonUtils
 import com.latticeengines.domain.exposed.datacloud.dataflow.{DiscreteBucket, IntervalBucket}
-import com.latticeengines.spark.util.NumericProfiler
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
-import org.apache.spark.sql.types.{StructField, _}
+import org.apache.spark.sql.types._
 
 import scala.collection.JavaConverters._
-import scala.util.Random
 
-private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscrete: Int, numBuckets: Int, minBucketSize: Int, randomSeed: Long) extends UserDefinedAggregateFunction {
-
-  private val NUM_SAMPLES: Int = 10000
-  private val RANDOM = new Random(randomSeed)
+private[spark] class DiscreteProfileAggregation(fields: Seq[StructField], maxDiscrete: Int) extends UserDefinedAggregateFunction {
 
   // This is the input fields for your aggregate function.
   override def inputSchema: org.apache.spark.sql.types.StructType = StructType(fields)
@@ -52,15 +46,11 @@ private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscr
   }
 
   private def updateRow[T](buffer: Seq[T], newVal: T): Seq[T] = {
-    if (newVal != null) {
-      val lst = buffer ++ Seq(newVal)
-      if (lst.length >= 2 * NUM_SAMPLES) {
-        return RANDOM.shuffle(lst).take(NUM_SAMPLES)
-      } else {
-        return lst
-      }
+    if (buffer.length <= maxDiscrete && newVal != null && !buffer.contains(newVal)) {
+      buffer ++ Seq(newVal)
+    } else {
+      buffer
     }
-    buffer
   }
 
   // This is how to merge two objects with the bufferSchema type.
@@ -78,11 +68,12 @@ private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscr
   }
 
   private def mergeBuffers[T](lst1: Seq[T], lst2: Seq[T]): Seq[T] = {
-    val lst = lst1 ++ lst2
-    if (lst.length >= 2 * NUM_SAMPLES) {
-      RANDOM.shuffle(lst).take(NUM_SAMPLES)
+    if (lst1.length <= maxDiscrete && lst2.length <= maxDiscrete) {
+      (lst1 ++ lst2).distinct.take(maxDiscrete + 1)
+    } else if (lst1.length > maxDiscrete) {
+      lst1
     } else {
-      lst
+      lst2
     }
   }
 
@@ -91,37 +82,15 @@ private[spark] class NumberProfileAggregation(fields: Seq[StructField], maxDiscr
     fields.indices.map(idx => {
       val field: StructField = fields(idx)
       val attr = field.name
-      val vals = field.dataType match {
-        case IntegerType => buffer.getList[Int](idx).asScala.toList.sorted
-        case LongType => buffer.getList[Long](idx).asScala.toList.sorted
-        case FloatType => buffer.getList[Float](idx).asScala.toList.sorted
-        case DoubleType => buffer.getList[Double](idx).asScala.toList.sorted
-        case _ => throw new UnsupportedOperationException(s"Non numeric type ${field.dataType}")
-      }
       val distinctVals = field.dataType match {
-        case IntegerType => buffer.getList[Int](idx).asScala.distinct.toList.sorted
-        case LongType => buffer.getList[Long](idx).asScala.distinct.toList.sorted
-        case FloatType => buffer.getList[Float](idx).asScala.distinct.toList.sorted
-        case DoubleType => buffer.getList[Double](idx).asScala.distinct.toList.sorted
+        case IntegerType => buffer.getSeq[Int](idx).distinct.toList.sorted
+        case LongType => buffer.getSeq[Long](idx).distinct.toList.sorted
+        case FloatType => buffer.getSeq[Float](idx).distinct.toList.sorted
+        case DoubleType => buffer.getSeq[Double](idx).distinct.toList.sorted
         case _ => throw new UnsupportedOperationException(s"Non numeric type ${field.dataType}")
       }
       if (distinctVals.size > maxDiscrete) {
-        val profiler = field.dataType match {
-          case IntegerType => new NumericProfiler[Int](buffer.getSeq[Int](idx), numBuckets, minBucketSize, randomSeed)
-          case LongType => new NumericProfiler[Long](buffer.getSeq[Long](idx), numBuckets, minBucketSize, randomSeed)
-          case FloatType => new NumericProfiler[Float](buffer.getSeq[Float](idx), numBuckets, minBucketSize, randomSeed)
-          case DoubleType => new NumericProfiler[Double](buffer.getSeq[Double](idx), numBuckets, minBucketSize, randomSeed)
-          case _ => throw new UnsupportedOperationException(s"Non numeric type ${field.dataType}")
-        }
-        val bnds: List[Double] = profiler.findBoundaries()
         val bkt = new IntervalBucket
-        field.dataType match {
-          case IntegerType => bkt.setBoundaries(bnds.map(_.toInt).asJava.asInstanceOf[java.util.List[Number]])
-          case LongType => bkt.setBoundaries(bnds.map(_.toLong).asJava.asInstanceOf[java.util.List[Number]])
-          case FloatType => bkt.setBoundaries(bnds.map(_.toFloat).asJava.asInstanceOf[java.util.List[Number]])
-          case DoubleType => bkt.setBoundaries(bnds.asJava.asInstanceOf[java.util.List[Number]])
-          case _ => throw new UnsupportedOperationException(s"Non numeric type ${field.dataType}")
-        }
         Row.fromSeq(List(attr, JsonUtils.serialize(bkt)))
       } else {
         val bkt = new DiscreteBucket
