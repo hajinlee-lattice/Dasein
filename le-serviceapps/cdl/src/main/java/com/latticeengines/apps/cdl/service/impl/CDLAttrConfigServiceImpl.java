@@ -92,13 +92,8 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     @Override
     public List<AttributeSet> getAttributeSets() {
         List<AttributeSet> attributeSets = attributeSetEntityMgr.findAll();
-        boolean hasDefault = false;
-        for (AttributeSet attributeSet : attributeSets) {
-            if (attributeSet.getName().equals(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME)) {
-                hasDefault = true;
-                break;
-            }
-        }
+        boolean hasDefault = attributeSets.stream().anyMatch(
+                attributeSet -> attributeSet.getName().equals(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME));
         if (!hasDefault) {
             AttributeSet defaultSet = getDefaultAttributeSet();
             try {
