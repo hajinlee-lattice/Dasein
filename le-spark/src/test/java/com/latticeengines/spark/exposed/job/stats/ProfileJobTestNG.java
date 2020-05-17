@@ -163,10 +163,10 @@ public class ProfileJobTestNG extends SparkJobFunctionalTestNGBase {
                     Assert.assertEquals(bktAlgo.getClass(), IntervalBucket.class);
                     if ("GeometricLong".equals(attrName)) {
                         Assert.assertEquals(((IntervalBucket) bktAlgo).getBoundaries().toArray(new Integer[0]),
-                                new Integer[] { 25, 100 });
+                                new Integer[] { 60, 3500 });
                     } else {
                         Assert.assertEquals(((IntervalBucket) bktAlgo).getBoundaries().toArray(new Double[0]),
-                                new Double[] { 0.3, 1. });
+                                new Double[] { 0.6, 35. });
                     }
                     break;
                 case "DiscreteLong":

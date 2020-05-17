@@ -86,6 +86,7 @@ public class ProfileTxfmr extends ConfigurableSparkJobTxfmr<ProfileJobConfig> {
     protected void preSparkJobProcessing(TransformStep step, String workflowDir, ProfileJobConfig sparkJobConfig) {
         initProfileConfig(sparkJobConfig);
         classifyAttrs(step.getBaseSources()[0], step.getBaseVersions().get(0), sparkJobConfig);
+        partitionMultiplier = 8;
     }
 
     @Override
