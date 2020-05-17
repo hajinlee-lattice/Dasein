@@ -110,7 +110,7 @@ public class DplusMatchRule {
     }
 
     public DplusMatchRule review(int lowCode) {
-        return accept(lowCode, 10);
+        return accept(lowCode, HIGHEST_CODE);
     }
 
     public DplusMatchRule review(int lowCode, int highCode) {
