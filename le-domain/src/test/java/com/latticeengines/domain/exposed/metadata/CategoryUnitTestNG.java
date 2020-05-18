@@ -12,6 +12,7 @@ public class CategoryUnitTestNG {
         Assert.assertTrue(Category.CONTACT_ATTRIBUTES.isPremium());
         Assert.assertTrue(Category.TECHNOLOGY_PROFILE.isPremium());
         Assert.assertFalse(Category.FIRMOGRAPHICS.isPremium());
+        Assert.assertTrue(Category.GROWTH_TRENDS.isPremium());
     }
 
 }
