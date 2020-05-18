@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -46,6 +47,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -90,6 +92,7 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
     private static TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>> streamMetadataCacheTypeRef = new TypeReference<ConcurrentMap<String, Map<String, DimensionMetadata>>>() {
     };
     private Set<String> dateRangeEvaluatedSet = new HashSet<>();
+    private Set<Category> updatedCategories = new HashSet<>();
 
     @Override
     protected Class<? extends AbstractSparkJob<MergeActivityMetricsJobConfig>> getJobClz() {
@@ -226,10 +229,27 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
             mergedMetricsGroupTables.put(mergedTableLabel, mergedTable);
             log.info("Processed date ranges for {}: {}", servingStore, dateRangeEvaluatedSet);
         });
+        updateDataRefreshTimeForCategories();
         // signature: entity (Account/Contact)
         // role: WebVisitProfile
         exportToS3AndAddToContext(mergedMetricsGroupTables, MERGED_METRICS_GROUP_TABLE_NAME);
         signatureTableNames.keySet().forEach(role -> dataCollectionProxy.upsertTablesWithSignatures(customerSpace.toString(), signatureTableNames.get(role), role, inactive));
+    }
+
+    private void updateDataRefreshTimeForCategories() {
+        DataCollectionStatus status = getObjectFromContext(CDL_COLLECTION_STATUS, DataCollectionStatus.class);
+        Map<String, Long> dateMap = status.getDateMap();
+        if (MapUtils.isEmpty(dateMap)) {
+            log.error("No date map found in data collection status");
+        } else if (!updatedCategories.isEmpty()) {
+            long updateTime = getLongValueFromContext(PA_TIMESTAMP);
+            updatedCategories.stream() //
+                    .filter(Objects::nonNull) //
+                    .forEach(category -> dateMap.put(category.getName(), updateTime));
+            putObjectInContext(CDL_COLLECTION_STATUS, status);
+        } else {
+            log.warn("No category is updated, not setting refresh time");
+        }
     }
 
     private void enrichActivityAttributes(Table mergedTable, BusinessEntity entity, TableRoleInCollection servingStore, Set<String> deprecatedAttrNames) {
@@ -338,6 +358,9 @@ public class MergeActivityMetricsToEntityStep extends RunSparkJob<ActivityStream
         }
         setFundamentalType(attr, group);
         setAttrEvaluatedDate(attr, timeRange, translator);
+        if (group.getCategory() != null) {
+            updatedCategories.add(group.getCategory());
+        }
     }
 
     private Map<String, Object> createParamMap(String[] rollupDimNames, String[] rollupDimVals, String timeRange, Map<String, DimensionMetadata> streamDimMetadata, String attrName) {
