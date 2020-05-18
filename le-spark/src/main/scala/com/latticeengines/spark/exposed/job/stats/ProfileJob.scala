@@ -18,9 +18,8 @@ import scala.collection.JavaConverters._
 
 class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
 
-  private val STR_CHUNK_SIZE: Int = 1000
+  private val STR_CHUNK_SIZE: Int = 5
   private val NUM_CHUNK_SIZE: Int = 100
-  private val STR_APPROACH_THRESHOLD: Long = 1000000 // (1M) using attr-by-attr approach when more than this # of rows
   private val NUM_APPROACH_THRESHOLD: Long = 10000 // (10K) using attr-by-attr approach when more than this # of rows
   private val ATTR_ATTRNAME = DataCloudConstants.PROFILE_ATTR_ATTRNAME
   private val ATTR_BKTALGO = DataCloudConstants.PROFILE_ATTR_BKTALGO
@@ -44,7 +43,7 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
 
     val catAttrs: List[String] =
       if (config.getCatAttrs == null) List() else config.getCatAttrs.asScala.map(_.getAttr).toList
-    val strProfile = if (enforceByAttr || totalCnt > STR_APPROACH_THRESHOLD) {
+    val strProfile = if (enforceByAttr) {
       profileStrAttrs(spark, inputData, catAttrs, config.getMaxCat, config.getMaxCatLength)
     } else {
       profileStrAttrsByGroup(inputData, catAttrs, config.getMaxCat, config.getMaxCatLength)

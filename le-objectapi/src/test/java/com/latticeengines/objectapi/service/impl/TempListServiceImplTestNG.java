@@ -51,12 +51,12 @@ public class TempListServiceImplTestNG extends QueryServiceImplTestNGBase {
 
         String sql = String.format("SELECT value FROM %s", tempTableName);
         List<String> vals = redshiftJdbcTemplate.queryForList(sql, String.class);
-        Assert.assertEquals(StringUtils.join(vals, ","), "A,B,C");
+        Assert.assertEquals(StringUtils.join(vals, ","), "a,b,c");
 
         String tempTableName2 = tempListService.createTempListIfNotExists(restriction, fieldClz, redshiftPartition);
         Assert.assertEquals(tempTableName2, tempTableName);
         vals = redshiftJdbcTemplate.queryForList(sql, String.class);
-        Assert.assertEquals(StringUtils.join(vals, ","), "A,B,C");
+        Assert.assertEquals(StringUtils.join(vals, ","), "a,b,c");
 
         ((TempListServiceImpl) tempListService).dropTempList(tempTableName);
         String existingTempTable =
