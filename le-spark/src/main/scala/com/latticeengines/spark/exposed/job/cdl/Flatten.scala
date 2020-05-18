@@ -56,10 +56,10 @@ class Flatten(schema: StructType, configuredColumns: Seq[String]) extends UserDe
       			  PlaymakerConstants.ContactID -> getInputValue(input, InterfaceName.ContactId.name()), //
       			  PlaymakerConstants.Name -> getInputValue(input, InterfaceName.ContactName.name()), //
       			  PlaymakerConstants.FirstName -> getInputValue(input, InterfaceName.FirstName.name()), //
-      			  PlaymakerConstants.LastName -> getInputValue(input, InterfaceName.LastName.name())), //
+      			  PlaymakerConstants.LastName -> getInputValue(input, InterfaceName.LastName.name()), //
       			  PlaymakerConstants.Title -> getInputValue(input, InterfaceName.Title.name()), //
-      			  PlaymakerConstants.DoNotCall -> getInputValue(input, InterfaceName.DoNotCall.name())), //
-      			  PlaymakerConstants.DoNotMail -> getInputValue(input, InterfaceName.DoNotMail.name())
+      			  PlaymakerConstants.DoNotCall -> getInputValue(input, InterfaceName.DoNotCall.name()), //
+      			  PlaymakerConstants.DoNotMail -> getInputValue(input, InterfaceName.DoNotMail.name()))
 
     } 
     val cur = buffer(0).asInstanceOf[IndexedSeq[Map[String, String]]]
