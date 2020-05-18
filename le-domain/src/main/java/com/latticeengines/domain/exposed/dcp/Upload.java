@@ -71,10 +71,6 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
     @JoinColumn(name = "FK_MATCH_RESULT")
     private Table matchResult;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_MATCH_CANDIDATES")
-    private Table matchCandidates;
-
     @Column(name = "UPLOAD_CONFIG", columnDefinition = "'JSON'", length = 8000)
     @Type(type = "json")
     private UploadConfig uploadConfig;
@@ -168,14 +164,6 @@ public class Upload implements HasPid, HasTenant, HasAuditingFields {
 
     public void setMatchResult(Table matchResult) {
         this.matchResult = matchResult;
-    }
-
-    private Table getMatchCandidates() {
-        return matchCandidates;
-    }
-
-    public void setMatchCandidates(Table matchCandidates) {
-        this.matchCandidates = matchCandidates;
     }
 
     public enum Status{

@@ -57,13 +57,6 @@ public class UploadProxyImpl extends MicroserviceRestApiProxy implements UploadP
     }
 
     @Override
-    public void registerMatchCandidates(String customerSpace, String uploadId, String tableName) {
-        String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/matchCandidates/{tableName}";
-        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId, tableName);
-        put("register Upload match candidates", url);
-    }
-
-    @Override
     public void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig) {
         String baseUrl = "/customerspaces/{customerSpace}/uploads/update/{uploadId}/config";
         String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), uploadId);

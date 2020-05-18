@@ -118,8 +118,9 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
                 String result = (String) traveler.getResult();
                 if (OperationalMode.isEntityMatch(traveler.getMatchInput().getOperationalMode())) {
                     populateEntityMatchRecordWithTraveler(traveler, result, matchRecord);
-                } else if (OperationalMode.PRIME_MATCH.equals(traveler.getMatchInput().getOperationalMode())) {
-                    populatePrimeMatchResult(traveler, result, matchRecord);
+                } else if (BusinessEntity.PrimeAccount.name().equalsIgnoreCase(traveler.getMatchInput().getTargetEntity())) {
+                    boolean multiCandidates = OperationalMode.MULTI_CANDIDATES.equals(traveler.getMatchInput().getOperationalMode());
+                    populatePrimeMatchResult(traveler, result, matchRecord, multiCandidates);
                 } else {
                     matchRecord.setLatticeAccountId(result);
                     if (StringUtils.isNotEmpty(result)) {
@@ -171,14 +172,16 @@ public class FuzzyMatchServiceImpl implements FuzzyMatchService {
     }
 
     private void populatePrimeMatchResult(MatchTraveler traveler, String result,
-                                          InternalOutputRecord matchRecord) {
+                                          InternalOutputRecord matchRecord, boolean multiCandidates) {
         matchRecord.setLatticeAccountId(result);
         if (StringUtils.isNotEmpty(result)) {
             matchRecord.setMatched(true);
         } else {
             matchRecord.addErrorMessages("Cannot find a match in data cloud for the input.");
         }
-        matchRecord.setCandidates(traveler.getCandidates());
+        if (multiCandidates) {
+            matchRecord.setCandidates(traveler.getCandidates());
+        }
     }
 
     private void populateEntityMatchRecordWithTraveler(MatchTraveler traveler, String result,

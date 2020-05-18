@@ -113,7 +113,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     void setDecisionGraph(MatchInput input) {
         String decisionGraph = input.getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph)) {
-            if (OperationalMode.PRIME_MATCH.equals(input.getOperationalMode())) {
+            if (BusinessEntity.PrimeAccount.name().equalsIgnoreCase(input.getTargetEntity())) {
                 decisionGraph = defaultPrimeGraph;
             } else {
                 decisionGraph = defaultGraph;

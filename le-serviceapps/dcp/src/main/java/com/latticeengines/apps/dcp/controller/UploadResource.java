@@ -88,16 +88,6 @@ public class UploadResource {
         uploadService.registerMatchResult(customerSpace, uploadId, tableName);
     }
 
-    @PutMapping("/update/{uploadId}/matchCandidates/{tableName}")
-    @ResponseBody
-    @ApiOperation(value = "update the upload config")
-    public void registerMatchCandidates(@PathVariable String customerSpace,
-                                    @PathVariable String uploadId,
-                                    @PathVariable String tableName) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        uploadService.registerMatchCandidates(customerSpace, uploadId, tableName);
-    }
-
     @PutMapping("/update/{uploadId}/config")
     @ResponseBody
     @ApiOperation(value = "update the upload config")

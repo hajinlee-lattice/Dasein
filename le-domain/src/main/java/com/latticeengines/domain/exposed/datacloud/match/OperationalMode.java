@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match;
 
 public enum OperationalMode {
     LDC_MATCH, //
-    PRIME_MATCH, // Only look for DUNS from DnB match
+    MULTI_CANDIDATES, // Multiple candidates -> could be converted to a boolean flag
     // CDL match before M25 (Account attributes lookup by AccountId)
     CDL_LOOKUP, //
     ENTITY_MATCH(true), //

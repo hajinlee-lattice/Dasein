@@ -66,6 +66,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.MatchProxy;
 
@@ -425,7 +426,7 @@ public class ProcessorContext {
         decisionGraph = originalInput.getDecisionGraph();
         if (StringUtils.isEmpty(decisionGraph)) {
             decisionGraph = defaultGraph;
-            if (OperationalMode.PRIME_MATCH.equals(originalInput.getOperationalMode())) {
+            if (BusinessEntity.PrimeAccount.name().equalsIgnoreCase(originalInput.getTargetEntity())) {
                 decisionGraph = primeGraph;
             }
             log.info("Decision graph is not provided, use default " + decisionGraph);
@@ -456,7 +457,7 @@ public class ProcessorContext {
         if (MatchUtils.isValidForAccountMasterBasedMatch(dataCloudVersion)) {
             groupSize = actorsGroupSize;
             numThreads = actorsThreadPool;
-            if (OperationalMode.PRIME_MATCH.equals(originalInput.getOperationalMode())) {
+            if (OperationalMode.MULTI_CANDIDATES.equals(originalInput.getOperationalMode())) { // multi-candidate
                 groupSize = primeGroupSize;
                 numThreads = primeThreadPool;
             } else if (useRemoteDnB) {

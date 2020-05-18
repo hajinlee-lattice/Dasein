@@ -15,6 +15,4 @@ public interface UploadEntityMgr extends BaseEntityMgrRepository<Upload, Long> {
 
     String findMatchResultTableNameByUploadId(String uploadId);
 
-    String findMatchCandidatesTableNameByUploadId(String uploadId);
-
 }

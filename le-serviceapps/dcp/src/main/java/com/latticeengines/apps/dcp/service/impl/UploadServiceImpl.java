@@ -102,34 +102,6 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public void registerMatchCandidates(String customerSpace, String uploadId, String tableName) {
-        Upload upload = uploadEntityMgr.findByUploadId(uploadId);
-        if (upload == null) {
-            throw new RuntimeException("Cannot find Upload record with UploadId: " + uploadId);
-        }
-        Table table = metadataService.getTable(CustomerSpace.parse(customerSpace), tableName);
-        if (table == null) {
-            throw new RuntimeException("Cannot find Upload match candidates table with name: " + tableName);
-        }
-        boolean hasOldTable = false;
-        String oldTableName = getMatchCandidatesTableName(uploadId);
-        if (StringUtils.isNotBlank(oldTableName)) {
-            Table oldTable = metadataService.getTable(CustomerSpace.parse(customerSpace), oldTableName);
-            hasOldTable = oldTable != null;
-        }
-        upload.setMatchCandidates(table);
-        uploadEntityMgr.update(upload);
-        if (hasOldTable) {
-            log.info("There was an old match candidates table {}, going to be marked as temporary.", oldTableName);
-            RetentionPolicy retentionPolicy = RetentionPolicyUtil.toRetentionPolicy(7, RetentionPolicyTimeUnit.DAY);
-            metadataService.updateTableRetentionPolicy(CustomerSpace.parse(customerSpace), oldTableName,
-                    retentionPolicy);
-        } else {
-            log.info("There was no old match candidates table.");
-        }
-    }
-
-    @Override
     public void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig) {
         Upload upload = uploadEntityMgr.findByUploadId(uploadId);
         if (upload == null) {
@@ -203,11 +175,6 @@ public class UploadServiceImpl implements UploadService {
     @Override
     public String getMatchResultTableName(String uploadId) {
         return uploadEntityMgr.findMatchResultTableNameByUploadId(uploadId);
-    }
-
-    @Override
-    public String getMatchCandidatesTableName(String uploadId) {
-        return uploadEntityMgr.findMatchCandidatesTableNameByUploadId(uploadId);
     }
 
     private UploadStatsContainer findStats(String uploadId, Long statsId) {

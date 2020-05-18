@@ -355,7 +355,7 @@ public abstract class AbstractBulkMatchProcessorExecutorImpl implements BulkMatc
             return;
         }
         // check whether we need to generate candidate file or not
-        if (!OperationalMode.PRIME_MATCH.equals(processorContext.getOriginalInput().getOperationalMode())) {
+        if (!OperationalMode.MULTI_CANDIDATES.equals(processorContext.getOriginalInput().getOperationalMode())) {
             return;
         }
 
