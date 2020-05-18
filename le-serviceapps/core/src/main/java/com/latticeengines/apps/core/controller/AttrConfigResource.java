@@ -100,7 +100,7 @@ public class AttrConfigResource {
     @ResponseBody
     @ApiOperation("save cdl attribute config request")
     public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace, @RequestBody AttrConfigRequest request,
-            @RequestParam(value = "mode", required = true) AttrConfigUpdateMode mode) {
+            @RequestParam(value = "mode") AttrConfigUpdateMode mode) {
         request.fixJsonDeserialization();
         return attrConfigService.saveRequest(request, mode);
     }

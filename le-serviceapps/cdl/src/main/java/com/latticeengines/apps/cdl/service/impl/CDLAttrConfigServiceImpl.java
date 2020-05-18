@@ -18,14 +18,12 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
-import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 @Service("cdlAttrConfigService")
@@ -92,30 +90,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Override
     public List<AttributeSet> getAttributeSets() {
-        List<AttributeSet> attributeSets = attributeSetEntityMgr.findAll();
-        boolean hasDefault = attributeSets.stream().anyMatch(
-                attributeSet -> attributeSet.getName().equals(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME));
-        if (!hasDefault) {
-            AttributeSet defaultSet = getDefaultAttributeSet();
-            try {
-                createAttributeSet(defaultSet);
-            } catch (Exception e) {
-                // race condition: the default group may already created by another thread
-                log.warn("Exception happened when create default group {}.", e.getMessage());
-            }
-            attributeSets.add(0, defaultSet);
-        }
-        return attributeSets;
-    }
-
-    private AttributeSet getDefaultAttributeSet() {
-        AttributeSet attributeSet = new AttributeSet();
-        attributeSet.setName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
-        attributeSet.setDisplayName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME);
-        attributeSet.setDescription(AttributeUtils.DEFAULT_ATTRIBUTE_SET_DESCRIPTION);
-        attributeSet.setCreatedBy(CDLConstants.DEFAULT_SYSTEM_USER);
-        attributeSet.setUpdatedBy(CDLConstants.DEFAULT_SYSTEM_USER);
-        return attributeSet;
+        return attributeSetEntityMgr.findAll();
     }
 
     @Override
