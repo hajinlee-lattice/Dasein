@@ -70,7 +70,7 @@ public class LivyConfigurer {
 
     public Map<String, String> getSparkConf(LivyScalingConfig livySessionConfig) {
         int scalingMultiplier = livySessionConfig.scalingMultiplier;
-        int partitionMultiplier = scalingMultiplier > 1 ? Math.max(1, livySessionConfig.partitionMultiplier) : 1;
+        int partitionMultiplier = Math.max(1, livySessionConfig.partitionMultiplier);
 
         scalingMultiplier = Math.max(scalingMultiplier - 1, 1);
         Map<String, String> conf = new HashMap<>();
@@ -81,7 +81,7 @@ public class LivyConfigurer {
         conf.put("spark.dynamicAllocation.minExecutors", String.valueOf(minExe));
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
 
-        int partitions = minExe * executorCores * partitionMultiplier;
+        int partitions = minExe * executorCores * 2 * partitionMultiplier;
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
         return conf;

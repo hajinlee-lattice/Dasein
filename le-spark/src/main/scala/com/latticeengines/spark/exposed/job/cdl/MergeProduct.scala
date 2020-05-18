@@ -177,6 +177,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
         val aggregation = new DedupBundleProductAggregation()
         val groupBy = prods.filter(col(Bundle).isNotNull)
                 .groupBy(Id, Bundle).agg(aggregation(col(Id), col(Name), col(Description), col(Bundle)).as("agg"))
+                .persist(StorageLevel.DISK_ONLY)
         val err = groupBy.select(col("agg.Messages"))
                 .withColumn(Message, explode(col("Messages"))).select(Message)
         val valid = groupBy
@@ -215,6 +216,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
                 .withColumn(Bundle, col(s"agg.$Bundle"))
                 .withColumn(Description, col(s"agg.$Description"))
                 .withColumn(Status, col(s"agg.$Status"))
+                .persist(StorageLevel.DISK_ONLY)
         val bundles = groupBy.select(Id, BundleId, Description, Bundle, Status)
         val err = groupBy.select(col("agg.Messages"))
                 .withColumn(Message, explode(col("Messages"))).select(Message)
@@ -258,6 +260,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
         val dedup = new DedupHierarchyProductAggregation()
         val groupBy = filtered.groupBy(Id)
                 .agg(dedup(col(Id), col(Name), col(Description), col(Line), col(Family), col(Category)).as("agg"))
+                .persist(StorageLevel.DISK_ONLY)
         val err = groupBy.select(col("agg.Messages"))
                 .withColumn(Message, explode(col("Messages"))).select(Message)
         val valid = groupBy
@@ -297,6 +300,7 @@ class MergeProduct extends AbstractSparkJob[MergeProductConfig] {
                 .withColumn(FamilyId, col(s"agg.$FamilyId"))
                 .withColumn(CategoryId, col(s"agg.$CategoryId"))
                 .withColumn(Status, col(s"agg.$Status"))
+                .persist(StorageLevel.DISK_ONLY)
         val spendings = groupBy.select(ProductId, Name, Line, Family, Category, LineId, FamilyId, CategoryId, Status)
         val err = groupBy.select(col("agg.Messages"))
                 .withColumn(Message, explode(col("Messages"))).select(Message)

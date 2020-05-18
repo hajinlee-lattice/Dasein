@@ -71,6 +71,7 @@ public class MergeProductSpark extends BaseSparkStep<ProcessProductStepConfigura
         jobConfig.setInput(getInputs());
         jobConfig.setWorkspace(getRandomWorkspace());
         RetryTemplate retry = RetryUtils.getRetryTemplate(3);
+        setPartitionMultiplier(4);
         SparkJobResult result = retry.execute(ctx -> {
             if (ctx.getRetryCount() > 0) {
                 log.info("(Attempt=" + (ctx.getRetryCount() + 1) + ") run merge product spark job.");
