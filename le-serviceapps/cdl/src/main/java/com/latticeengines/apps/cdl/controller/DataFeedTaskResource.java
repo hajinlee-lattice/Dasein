@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -101,6 +102,22 @@ public class DataFeedTaskResource {
     public DataFeedTask getDataFeedTaskBySource(@PathVariable String customerSpace, @PathVariable String sourceId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataFeedTaskService.getDataFeedTaskBySource(customerSpace, sourceId);
+    }
+
+    @GetMapping("/onlySource/{sourceId}")
+    @ResponseBody
+    @ApiOperation(value = "Get data feed task by source")
+    public SourceInfo getSourceBySource(@PathVariable String customerSpace, @PathVariable String sourceId) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getSourceBySourceId(customerSpace, sourceId);
+    }
+
+    @GetMapping("/systemPid/{systemPid}")
+    @ResponseBody
+    @ApiOperation(value = "Get Source list by system pid")
+    public List<SourceInfo> getSourcesBySystemPid(@PathVariable String customerSpace, @PathVariable Long systemPid) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return dataFeedTaskService.getSourcesBySystemPid(customerSpace, systemPid);
     }
 
     @RequestMapping(value = "/{entity}/list", method = RequestMethod.GET, headers = "Accept=application/json")

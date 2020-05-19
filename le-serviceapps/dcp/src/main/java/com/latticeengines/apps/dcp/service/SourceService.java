@@ -3,7 +3,6 @@ package com.latticeengines.apps.dcp.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.dcp.Source;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 
 public interface SourceService {
@@ -26,7 +25,7 @@ public interface SourceService {
 
     List<Source> getSourceList(String customerSpace, String projectId);
 
-    Source convertToSource(String customerSpace, DataFeedTask dataFeedTask);
+//    Source convertToSource(String customerSpace, DataFeedTask dataFeedTask);
 
     Boolean pauseSource(String customerSpace, String sourceId);
 

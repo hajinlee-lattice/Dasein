@@ -1,6 +1,8 @@
 package com.latticeengines.apps.dcp.service.impl;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -9,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Preconditions;
 import com.latticeengines.apps.core.service.DropBoxService;
@@ -16,9 +19,9 @@ import com.latticeengines.apps.core.service.ImportWorkflowSpecService;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
-import com.latticeengines.domain.exposed.dcp.Project;
-import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.Source;
+import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -83,8 +86,10 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
                                String importFile, FieldDefinitionsRecord fieldDefinitionsRecord) {
-        Project project = projectService.getProjectByProjectId(customerSpace, projectId);
-        if (project == null) {
+//        Project project = projectService.getProjectByProjectId(customerSpace, projectId);
+        S3ImportSystem importSystem = projectService.getImportSystemByProjectId(customerSpace, projectId);
+        ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
+        if (importSystem == null || projectInfo == null) {
             throw new RuntimeException(String.format("Cannot create source under project %s", projectId));
         }
         if (StringUtils.isBlank(sourceId)) {
@@ -95,10 +100,10 @@ public class SourceServiceImpl implements SourceService {
 
         Table templateTable = getTableFromRecord(importFile, customerSpace, sourceId, fieldDefinitionsRecord);
 
-        DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, project.getS3ImportSystem(), templateTable,
+        DataFeedTask dataFeedTask = setupDataFeedTask(customerSpace, importSystem, templateTable,
                 EntityType.fromDisplayNameToEntityType(fieldDefinitionsRecord.getSystemObject()), relativePath,
                 displayName, sourceId);
-        Source source = convertToSource(customerSpace, dataFeedTask);
+        Source source = getSourceFromDataFeedTask(projectInfo, dataFeedTask);
         if (StringUtils.isNotBlank(source.getSourceFullPath())) {
             String relativePathUnderDropfolder = source.getRelativePathUnderDropfolder();
             dropBoxService.createFolderUnderDropFolder(relativePathUnderDropfolder);
@@ -112,7 +117,7 @@ public class SourceServiceImpl implements SourceService {
     public Source updateSource(String customerSpace, String displayName, String sourceId, String importFile,
                                FieldDefinitionsRecord fieldDefinitionsRecord) {
         Table newTable = getTableFromRecord(importFile, customerSpace, sourceId, fieldDefinitionsRecord);
-
+        ProjectInfo projectInfo = projectService.getProjectBySourceId(customerSpace, sourceId);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
         Preconditions.checkNotNull(dataFeedTask, String.format("Can't retrieve data feed task for source %s",
                 sourceId));
@@ -127,39 +132,76 @@ public class SourceServiceImpl implements SourceService {
             dataFeedTask.setImportTemplate(mergedTable);
         }
         dataFeedProxy.updateDataFeedTask(customerSpace, dataFeedTask);
-        return convertToSource(customerSpace, dataFeedTask);
+        return getSourceFromDataFeedTask(projectInfo, dataFeedTask);
     }
 
     @Override
     public Source getSource(String customerSpace, String sourceId) {
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
-        return convertToSource(customerSpace, dataFeedTask);
+//        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
+        ProjectInfo projectInfo = projectService.getProjectBySourceId(customerSpace, sourceId);
+        SourceInfo sourceInfo = dataFeedProxy.getSourceBySourceId(customerSpace, sourceId);
+        return getSourceFromSourceInfo(projectInfo, sourceInfo);
     }
 
     @Override
     public Boolean deleteSource(String customerSpace, String sourceId) {
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
-        if (dataFeedTask == null || dataFeedTask.getPid() == null) {
+//        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
+        SourceInfo sourceInfo = dataFeedProxy.getSourceBySourceId(customerSpace, sourceId);
+        if (sourceInfo == null || sourceInfo.getPid() == null) {
             throw new RuntimeException(String.format("Cannot find source %s for delete!", sourceId));
         }
-        dataFeedProxy.setDataFeedTaskDeletedStatus(customerSpace, dataFeedTask.getPid(), Boolean.TRUE);
+        dataFeedProxy.setDataFeedTaskDeletedStatus(customerSpace, sourceInfo.getPid(), Boolean.TRUE);
         return true;
     }
 
     @Override
     public Boolean pauseSource(String customerSpace, String sourceId) {
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
-        if (dataFeedTask == null || dataFeedTask.getPid() == null) {
-            throw new RuntimeException(String.format("Cannot find source %s for update!", sourceId));
+        SourceInfo sourceInfo = dataFeedProxy.getSourceBySourceId(customerSpace, sourceId);
+        if (sourceInfo == null || sourceInfo.getPid() == null) {
+            throw new RuntimeException(String.format("Cannot find source %s to pause!", sourceId));
         }
-        dataFeedProxy.setDataFeedTaskS3ImportStatus(customerSpace, dataFeedTask.getPid(), DataFeedTask.S3ImportStatus.Pause);
+        dataFeedProxy.setDataFeedTaskS3ImportStatus(customerSpace, sourceInfo.getPid(), DataFeedTask.S3ImportStatus.Pause);
         return true;
     }
 
     @Override
     public List<Source> getSourceList(String customerSpace, String projectId) {
-        ProjectDetails projectDetail = projectService.getProjectDetailByProjectId(customerSpace, projectId);
-        return projectDetail.getSources();
+//        ProjectDetails projectDetail = projectService.getProjectDetailByProjectId(customerSpace, projectId);
+        ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
+        if (projectInfo != null) {
+            List<SourceInfo> sourceInfoList = dataFeedProxy.getSourcesBySystemPid(customerSpace,
+                    projectInfo.getSystemId());
+            if (CollectionUtils.isEmpty(sourceInfoList)) {
+                return Collections.emptyList();
+            }
+            return sourceInfoList.stream().map(sourceInfo -> getSourceFromSourceInfo(projectInfo, sourceInfo))
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
+    private Source getSourceFromSourceInfo(ProjectInfo projectInfo, SourceInfo sourceInfo) {
+        Source source = new Source();
+        source.setImportStatus(sourceInfo.getImportStatus());
+        source.setSourceId(sourceInfo.getSourceId());
+        source.setSourceDisplayName(sourceInfo.getSourceDisplayName());
+        source.setRelativePath(sourceInfo.getRelativePath());
+        source.setSourceFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
+                dropBoxService.getDropBoxPrefix(), projectInfo.getRootPath() + sourceInfo.getRelativePath()));
+        source.setDropFullPath(source.getSourceFullPath() + DROP_FOLDER);
+        return source;
+    }
+
+    private Source getSourceFromDataFeedTask(ProjectInfo projectInfo, DataFeedTask dataFeedTask) {
+        Source source = new Source();
+        source.setImportStatus(dataFeedTask.getS3ImportStatus());
+        source.setSourceId(dataFeedTask.getSourceId());
+        source.setSourceDisplayName(dataFeedTask.getSourceDisplayName());
+        source.setRelativePath(dataFeedTask.getRelativePath());
+        source.setSourceFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
+                dropBoxService.getDropBoxPrefix(), projectInfo.getRootPath() + dataFeedTask.getRelativePath()));
+        source.setDropFullPath(source.getSourceFullPath() + DROP_FOLDER);
+        return source;
     }
 
     private void validateSourceId(String customerSpace, String sourceId) {
@@ -174,27 +216,27 @@ public class SourceServiceImpl implements SourceService {
         }
     }
 
-    @Override
-    public Source convertToSource(String customerSpace, DataFeedTask dataFeedTask) {
-        if (dataFeedTask == null) {
-            return null;
-        }
-        Source source = new Source();
-
-        source.setImportStatus(dataFeedTask.getS3ImportStatus());
-        source.setSourceId(dataFeedTask.getSourceId());
-        source.setSourceDisplayName(dataFeedTask.getSourceDisplayName());
-        source.setRelativePath(dataFeedTask.getRelativePath());
-        if (StringUtils.isNotEmpty(dataFeedTask.getImportSystemName())) {
-            S3ImportSystem s3ImportSystem = cdlProxy.getS3ImportSystem(customerSpace,
-                    dataFeedTask.getImportSystemName());
-            Project project = projectService.getProjectByImportSystem(customerSpace, s3ImportSystem);
-            source.setSourceFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
-                    dropBoxService.getDropBoxPrefix(), project.getRootPath() + dataFeedTask.getRelativePath()));
-            source.setDropFullPath(source.getSourceFullPath() + DROP_FOLDER);
-        }
-        return source;
-    }
+//    @Override
+//    public Source convertToSource(String customerSpace, DataFeedTask dataFeedTask) {
+//        if (dataFeedTask == null) {
+//            return null;
+//        }
+//        Source source = new Source();
+//
+//        source.setImportStatus(dataFeedTask.getS3ImportStatus());
+//        source.setSourceId(dataFeedTask.getSourceId());
+//        source.setSourceDisplayName(dataFeedTask.getSourceDisplayName());
+//        source.setRelativePath(dataFeedTask.getRelativePath());
+//        if (StringUtils.isNotEmpty(dataFeedTask.getImportSystemName())) {
+//            S3ImportSystem s3ImportSystem = cdlProxy.getS3ImportSystem(customerSpace,
+//                    dataFeedTask.getImportSystemName());
+//            Project project = projectService.getProjectByImportSystem(customerSpace, s3ImportSystem);
+//            source.setSourceFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
+//                    dropBoxService.getDropBoxPrefix(), project.getRootPath() + dataFeedTask.getRelativePath()));
+//            source.setDropFullPath(source.getSourceFullPath() + DROP_FOLDER);
+//        }
+//        return source;
+//    }
 
     private String generateFeedType(String systemName, String sourceId) {
         return String.format(FEED_TYPE_PATTERN, systemName, sourceId);
@@ -265,12 +307,12 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public Boolean reactivateSource(String customerSpace, String sourceId) {
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
-        if (dataFeedTask == null || dataFeedTask.getPid() == null) {
-            throw new RuntimeException(String.format("Cannot find source %s for update!", sourceId));
+        SourceInfo sourceInfo = dataFeedProxy.getSourceBySourceId(customerSpace, sourceId);
+        if (sourceInfo == null || sourceInfo.getPid() == null) {
+            throw new RuntimeException(String.format("Cannot find source %s to reactivate!", sourceId));
         }
-        if(dataFeedTask.getS3ImportStatus().equals(DataFeedTask.S3ImportStatus.Pause)){
-            dataFeedProxy.setDataFeedTaskS3ImportStatus(customerSpace, dataFeedTask.getPid(), DataFeedTask.S3ImportStatus.Active);
+        if(DataFeedTask.S3ImportStatus.Pause.equals(sourceInfo.getImportStatus())) {
+            dataFeedProxy.setDataFeedTaskS3ImportStatus(customerSpace, sourceInfo.getPid(), DataFeedTask.S3ImportStatus.Active);
         }
         return true;
     }

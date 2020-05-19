@@ -31,6 +31,7 @@ import com.latticeengines.common.exposed.util.DatabaseUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -413,6 +414,17 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     public void setDataFeedTaskS3ImportStatus(String customerSpace, Long pid, DataFeedTask.S3ImportStatus status) {
         dataFeedTaskEntityMgr.setS3ImportStatusBySource(pid, status);
     }
+
+    @Override
+    public List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid) {
+        return dataFeedTaskEntityMgr.getSourcesBySystemPid(systemPid);
+    }
+
+    @Override
+    public SourceInfo getSourceBySourceId(String customerSpace, String sourceId) {
+        return dataFeedTaskEntityMgr.getSourceBySourceId(sourceId);
+    }
+
     private String getSystemNameFromFeedType(String feedType) {
         if (StringUtils.isNotEmpty(feedType) && feedType.contains(SYSTEM_SPLITTER)) {
             return feedType.substring(0, feedType.lastIndexOf(SYSTEM_SPLITTER));

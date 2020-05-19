@@ -14,6 +14,7 @@ import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.testframework.DCPDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 
 public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -68,7 +69,7 @@ public class ProjectServiceImplDeploymentTestNG extends DCPDeploymentTestNGBase 
         Assert.assertNotNull(details.getRecipientList());
         Assert.assertEquals(details.getRecipientList().size(), 2);
 
-        Project project = projectService.getProjectByProjectId(mainCustomerSpace, details.getProjectId());
+        ProjectInfo project = projectService.getProjectInfoByProjectId(mainCustomerSpace, details.getProjectId());
         Assert.assertNotNull(project.getRecipientList());
         Assert.assertEquals(project.getRecipientList().size(), 2);
     }

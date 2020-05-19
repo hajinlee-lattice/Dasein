@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
@@ -97,4 +98,8 @@ public interface DataFeedTaskService {
     void setDataFeedTaskDelete(String customerSpace, Long pid, Boolean deleted);
 
     void setDataFeedTaskS3ImportStatus(String customerSpace, Long pid, DataFeedTask.S3ImportStatus status);
+
+    List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid);
+
+    SourceInfo getSourceBySourceId(String customerSpace, String sourceId);
 }

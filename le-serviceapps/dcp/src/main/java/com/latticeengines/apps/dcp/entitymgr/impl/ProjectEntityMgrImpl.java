@@ -1,6 +1,9 @@
 package com.latticeengines.apps.dcp.entitymgr.impl;
 
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -18,6 +21,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
+import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
@@ -65,12 +69,65 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         return project;
     }
 
+//    @Override
+//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+//    public Project findByImportSystem(S3ImportSystem importSystem) {
+//        Project project = getReadOrWriteRepository().findByImportSystem(importSystem);
+//        inflateSystem(project);
+//        return project;
+//    }
+
+    @Override
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public ProjectInfo getProjectInfoByProjectId(String projectId) {
+        List<Object[]> result = getReadOrWriteRepository().findProjectInfoByProjectId(projectId);
+        if (CollectionUtils.isEmpty(result)) {
+            return null;
+        } else {
+            return getProjectInfo(result.get(0));
+        }
+    }
+
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Project findByImportSystem(S3ImportSystem importSystem) {
-        Project project = getReadOrWriteRepository().findByImportSystem(importSystem);
-        inflateSystem(project);
-        return project;
+    public List<ProjectInfo> getAllProjectInfo() {
+        List<Object[]> result = getReadOrWriteRepository().findAllProjects();
+        if (CollectionUtils.isEmpty(result)) {
+            return Collections.emptyList();
+        } else {
+            return result.stream().map(this::getProjectInfo).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public ProjectInfo getProjectInfoBySourceId(String sourceId) {
+        List<Object[]> result = getReadOrWriteRepository().findProjectInfoBySourceId(sourceId);
+        if (CollectionUtils.isEmpty(result)) {
+            return null;
+        } else {
+            return getProjectInfo(result.get(0));
+        }
+    }
+
+    @Override
+    public S3ImportSystem getImportSystemByProjectId(String projectId) {
+        return getReadOrWriteRepository().findImportSystemByProjectId(projectId);
+    }
+
+    @SuppressWarnings("unchecked")
+    private ProjectInfo getProjectInfo(Object[] columns) {
+        ProjectInfo info = new ProjectInfo();
+        info.setProjectId((String) columns[0]);
+        info.setProjectDisplayName((String) columns[1]);
+        info.setRootPath((String) columns[2]);
+        info.setDeleted((Boolean) columns[3]);
+        info.setCreated((Date) columns[4]);
+        info.setUpdated((Date) columns[5]);
+        info.setCreatedBy((String) columns[6]);
+        info.setRecipientList((List<String>) columns[7]);
+        info.setSystemId((Long) columns[8]);
+        return info;
     }
 
     @Override
