@@ -533,7 +533,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         info.setSourceDisplayName((String) columns[1]);
         info.setRelativePath((String) columns[2]);
         info.setImportStatus((DataFeedTask.S3ImportStatus) columns[3]);
-        info.setPid((Long) columns[5]);
+        info.setPid((Long) columns[4]);
         return info;
     }
 }
