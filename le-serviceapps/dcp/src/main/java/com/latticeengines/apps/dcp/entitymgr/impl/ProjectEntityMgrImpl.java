@@ -78,7 +78,6 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
 //    }
 
     @Override
-
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ProjectInfo findProjectInfoByProjectId(String projectId) {
         List<Object[]> result = getReadOrWriteRepository().findProjectInfoByProjectId(projectId);
@@ -101,6 +100,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ProjectInfo findProjectInfoBySourceId(String sourceId) {
         List<Object[]> result = getReadOrWriteRepository().findProjectInfoBySourceId(sourceId);
         if (CollectionUtils.isEmpty(result)) {
@@ -111,6 +111,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public S3ImportSystem findImportSystemByProjectId(String projectId) {
         return getReadOrWriteRepository().findImportSystemByProjectId(projectId);
     }
