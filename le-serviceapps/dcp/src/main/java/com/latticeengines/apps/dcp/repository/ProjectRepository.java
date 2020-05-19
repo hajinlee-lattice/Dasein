@@ -27,7 +27,7 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
             " where dft.sourceId = ?1")
     List<Object[]> findProjectInfoBySourceId(String sourceId);
 
-    @Query("select s.* from Project as p join p.importSystem as s where p.projectId = ?1")
+    @Query("select s from Project as p join p.importSystem as s where p.projectId = ?1")
     S3ImportSystem findImportSystemByProjectId(String projectId);
 
 }
