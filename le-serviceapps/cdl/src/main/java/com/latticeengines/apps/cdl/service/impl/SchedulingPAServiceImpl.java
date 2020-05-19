@@ -447,8 +447,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                 return false;
             }
             return true;
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             updateRetryCount(execution);
+            log.error("cannot retry this tenant {}", tenantId, e);
+            return false;
+        } catch (Exception e) {
             log.error("cannot retry this tenant {}", tenantId, e);
             return false;
         }
