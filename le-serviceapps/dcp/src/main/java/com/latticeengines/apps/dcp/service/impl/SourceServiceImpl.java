@@ -30,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.query.EntityType;
 import com.latticeengines.domain.exposed.util.DataFeedTaskUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.lp.SourceFileProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -65,9 +64,6 @@ public class SourceServiceImpl implements SourceService {
     private MetadataProxy metadataProxy;
 
     @Inject
-    private CDLProxy cdlProxy;
-
-    @Inject
     private DropBoxService dropBoxService;
 
     @Override
@@ -86,7 +82,6 @@ public class SourceServiceImpl implements SourceService {
     @Override
     public Source createSource(String customerSpace, String displayName, String projectId, String sourceId,
                                String importFile, FieldDefinitionsRecord fieldDefinitionsRecord) {
-//        Project project = projectService.getProjectByProjectId(customerSpace, projectId);
         S3ImportSystem importSystem = projectService.getImportSystemByProjectId(customerSpace, projectId);
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
         if (importSystem == null || projectInfo == null) {
@@ -137,7 +132,6 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public Source getSource(String customerSpace, String sourceId) {
-//        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
         ProjectInfo projectInfo = projectService.getProjectBySourceId(customerSpace, sourceId);
         SourceInfo sourceInfo = dataFeedProxy.getSourceBySourceId(customerSpace, sourceId);
         return getSourceFromSourceInfo(projectInfo, sourceInfo);
@@ -145,7 +139,6 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public Boolean deleteSource(String customerSpace, String sourceId) {
-//        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTaskBySourceId(customerSpace, sourceId);
         SourceInfo sourceInfo = dataFeedProxy.getSourceBySourceId(customerSpace, sourceId);
         if (sourceInfo == null || sourceInfo.getPid() == null) {
             throw new RuntimeException(String.format("Cannot find source %s for delete!", sourceId));
@@ -166,7 +159,6 @@ public class SourceServiceImpl implements SourceService {
 
     @Override
     public List<Source> getSourceList(String customerSpace, String projectId) {
-//        ProjectDetails projectDetail = projectService.getProjectDetailByProjectId(customerSpace, projectId);
         ProjectInfo projectInfo = projectService.getProjectInfoByProjectId(customerSpace, projectId);
         if (projectInfo != null) {
             List<SourceInfo> sourceInfoList = dataFeedProxy.getSourcesBySystemPid(customerSpace,
@@ -215,28 +207,6 @@ public class SourceServiceImpl implements SourceService {
             throw new RuntimeException(String.format("SourceId %s already exists.", sourceId));
         }
     }
-
-//    @Override
-//    public Source convertToSource(String customerSpace, DataFeedTask dataFeedTask) {
-//        if (dataFeedTask == null) {
-//            return null;
-//        }
-//        Source source = new Source();
-//
-//        source.setImportStatus(dataFeedTask.getS3ImportStatus());
-//        source.setSourceId(dataFeedTask.getSourceId());
-//        source.setSourceDisplayName(dataFeedTask.getSourceDisplayName());
-//        source.setRelativePath(dataFeedTask.getRelativePath());
-//        if (StringUtils.isNotEmpty(dataFeedTask.getImportSystemName())) {
-//            S3ImportSystem s3ImportSystem = cdlProxy.getS3ImportSystem(customerSpace,
-//                    dataFeedTask.getImportSystemName());
-//            Project project = projectService.getProjectByImportSystem(customerSpace, s3ImportSystem);
-//            source.setSourceFullPath(String.format(FULL_PATH_PATTERN, dropBoxService.getDropBoxBucket(),
-//                    dropBoxService.getDropBoxPrefix(), project.getRootPath() + dataFeedTask.getRelativePath()));
-//            source.setDropFullPath(source.getSourceFullPath() + DROP_FOLDER);
-//        }
-//        return source;
-//    }
 
     private String generateFeedType(String systemName, String sourceId) {
         return String.format(FEED_TYPE_PATTERN, systemName, sourceId);

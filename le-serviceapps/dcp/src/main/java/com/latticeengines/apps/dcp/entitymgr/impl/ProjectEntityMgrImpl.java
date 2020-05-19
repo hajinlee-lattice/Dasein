@@ -69,14 +69,6 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         return project;
     }
 
-//    @Override
-//    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-//    public Project findByImportSystem(S3ImportSystem importSystem) {
-//        Project project = getReadOrWriteRepository().findByImportSystem(importSystem);
-//        inflateSystem(project);
-//        return project;
-//    }
-
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ProjectInfo findProjectInfoByProjectId(String projectId) {
@@ -129,16 +121,6 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         info.setRecipientList((List<String>) columns[7]);
         info.setSystemId((Long) columns[8]);
         return info;
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<Project> findAll() {
-        List<Project> projectList = getReadOrWriteRepository().findAll();
-        if (CollectionUtils.isNotEmpty(projectList)) {
-            projectList.forEach(this::inflateSystem);
-        }
-        return projectList;
     }
 
     private void inflateSystem(Project project) {

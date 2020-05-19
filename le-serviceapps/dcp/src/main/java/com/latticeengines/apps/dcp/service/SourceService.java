@@ -25,8 +25,6 @@ public interface SourceService {
 
     List<Source> getSourceList(String customerSpace, String projectId);
 
-//    Source convertToSource(String customerSpace, DataFeedTask dataFeedTask);
-
     Boolean pauseSource(String customerSpace, String sourceId);
 
     Boolean reactivateSource(String customerSpace, String sourceId);

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -82,20 +84,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectSummary> getAllProject(String customerSpace) {
-//        List<Project> projectList = projectEntityMgr.findAll();
-        List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo();
-        return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo)).collect(Collectors.toList());
+        log.info("Invoke findAll Project!");
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo();
+            timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in total.");
+            return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo)).collect(Collectors.toList());
+        }
     }
-
-//    @Override
-//    public Project getProjectByProjectId(String customerSpace, String projectId) {
-//        return projectEntityMgr.findByProjectId(projectId);
-//    }
-
-//    @Override
-//    public Project getProjectByImportSystem(String customerSpace, S3ImportSystem importSystem) {
-//        return projectEntityMgr.findByImportSystem(importSystem);
-//    }
 
     @Override
     public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
@@ -165,29 +160,6 @@ public class ProjectServiceImpl implements ProjectService {
         return randomProjectId;
     }
 
-//    private ProjectDetails getProjectDetails(String customerSpace, Project project) {
-//        ProjectDetails details = new ProjectDetails();
-//        details.setProjectId(project.getProjectId());
-//        details.setProjectDisplayName(project.getProjectDisplayName());
-//        details.setProjectRootPath(project.getRootPath());
-//        details.setDropFolderAccess(getDropBoxAccess());
-//        details.setDeleted(project.getDeleted());
-//        if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
-//            details.setSources(new ArrayList<>());
-//            project.getS3ImportSystem().getTasks()
-//                    .forEach(task -> {
-//                        if (!Boolean.TRUE.equals(task.getDeleted())) {
-//                            details.getSources().add(sourceService.convertToSource(customerSpace, task));
-//                        }
-//                    });
-//        }
-//        details.setRecipientList(project.getRecipientList());
-//        details.setCreated(project.getCreated().getTime());
-//        details.setUpdated(project.getUpdated().getTime());
-//        details.setCreatedBy(project.getCreatedBy());
-//        return details;
-//    }
-
     private ProjectDetails getProjectDetails(String customerSpace, ProjectInfo projectInfo) {
         ProjectDetails details = new ProjectDetails();
         details.setProjectId(projectInfo.getProjectId());
@@ -202,27 +174,6 @@ public class ProjectServiceImpl implements ProjectService {
         details.setCreatedBy(projectInfo.getCreatedBy());
         return details;
     }
-
-//    private ProjectSummary getProjectSummary(String customerSpace, Project project) {
-//        ProjectSummary summary = new ProjectSummary();
-//        summary.setProjectId(project.getProjectId());
-//        summary.setProjectDisplayName(project.getProjectDisplayName());
-//        summary.setArchieved(project.getDeleted());
-//        summary.setRecipientList(project.getRecipientList());
-//        if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
-//            summary.setSources(new ArrayList<>());
-//            project.getS3ImportSystem().getTasks()
-//                    .forEach(task -> {
-//                        if (!Boolean.TRUE.equals(task.getDeleted())) {
-//                            summary.getSources().add(sourceService.convertToSource(customerSpace, task));
-//                        }
-//                    });
-//        }
-//        summary.setCreated(project.getCreated().getTime());
-//        summary.setUpdated(project.getUpdated().getTime());
-//        summary.setCreatedBy(project.getCreatedBy());
-//        return summary;
-//    }
 
     private ProjectSummary getProjectSummary(String customerSpace, ProjectInfo projectInfo) {
         ProjectSummary summary = new ProjectSummary();
@@ -292,21 +243,6 @@ public class ProjectServiceImpl implements ProjectService {
     private String generateRootPath(String projectId) {
         return String.format(PROJECT_ROOT_PATH_PATTERN, projectId);
     }
-
-//    private Project getProjectByProjectIdWithRetry(String projectId) {
-//        int retry = 0;
-//        Project project = projectEntityMgr.findByProjectId(projectId);
-//        while (project == null && retry < MAX_RETRY) {
-//            try {
-//                Thread.sleep(1000L + retry * 1000L);
-//            } catch (InterruptedException e) {
-//                return null;
-//            }
-//            project = projectEntityMgr.findByProjectId(projectId);
-//            retry++;
-//        }
-//        return project;
-//    }
 
     private ProjectInfo getProjectInfoByProjectIdWithRetry(String projectId) {
         int retry = 0;

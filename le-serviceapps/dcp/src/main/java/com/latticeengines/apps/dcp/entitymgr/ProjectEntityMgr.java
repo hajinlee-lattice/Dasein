@@ -11,8 +11,6 @@ public interface ProjectEntityMgr extends BaseEntityMgrRepository<Project, Long>
 
     Project findByProjectId(String projectId);
 
-//    Project findByImportSystem(S3ImportSystem importSystem);
-
     ProjectInfo findProjectInfoByProjectId(String projectId);
 
     List<ProjectInfo> findAllProjectInfo();
