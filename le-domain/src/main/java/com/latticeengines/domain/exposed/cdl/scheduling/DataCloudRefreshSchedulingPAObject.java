@@ -32,8 +32,9 @@ public class DataCloudRefreshSchedulingPAObject extends SchedulingPAObject {
 
     private static void initPopConstraint() {
         popConstraintList = new LinkedList<>();
-        popConstraintList.add(new MaxLargePA());
         popConstraintList.add(new MaxPA());
+        popConstraintList.add(new MaxLargePA());
+        popConstraintList.add(new MaxLargeTxnPA());
         popConstraintList.add(new TenantDuplicate());
     }
 

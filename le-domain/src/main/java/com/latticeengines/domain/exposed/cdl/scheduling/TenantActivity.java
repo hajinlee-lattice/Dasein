@@ -14,6 +14,9 @@ public class TenantActivity {
     @JsonProperty("is_large")
     private boolean isLarge;
 
+    @JsonProperty("is_large_transaction")
+    private boolean isLargeTransaction;
+
     @JsonProperty("scheduled_now")
     private boolean scheduledNow;
 
@@ -135,5 +138,94 @@ public class TenantActivity {
 
     public void setAutoSchedule(boolean autoSchedule) {
         isAutoSchedule = autoSchedule;
+    }
+
+    public boolean isLargeTransaction() {
+        return isLargeTransaction;
+    }
+
+    public void setLargeTransaction(boolean largeTransaction) {
+        isLargeTransaction = largeTransaction;
+    }
+
+    public static final class Builder {
+        private TenantActivity tenantActivity;
+
+        private Builder() {
+            tenantActivity = new TenantActivity();
+        }
+
+        public static Builder newInstance() {
+            return new Builder();
+        }
+
+        public Builder withTenantId(String tenantId) {
+            tenantActivity.setTenantId(tenantId);
+            return this;
+        }
+
+        public Builder withTenantType(TenantType tenantType) {
+            tenantActivity.setTenantType(tenantType);
+            return this;
+        }
+
+        public Builder withScheduledNow(boolean scheduledNow) {
+            tenantActivity.setScheduledNow(scheduledNow);
+            return this;
+        }
+
+        public Builder withScheduleTime(Long scheduleTime) {
+            tenantActivity.setScheduleTime(scheduleTime);
+            return this;
+        }
+
+        public Builder withInvokeTime(Long invokeTime) {
+            tenantActivity.setInvokeTime(invokeTime);
+            return this;
+        }
+
+        public Builder withLastActionTime(Long lastActionTime) {
+            tenantActivity.setLastActionTime(lastActionTime);
+            return this;
+        }
+
+        public Builder withFirstActionTime(Long firstActionTime) {
+            tenantActivity.setFirstActionTime(firstActionTime);
+            return this;
+        }
+
+        public Builder withLastFinishTime(Long lastFinishTime) {
+            tenantActivity.setLastFinishTime(lastFinishTime);
+            return this;
+        }
+
+        public Builder large() {
+            tenantActivity.setLarge(true);
+            return this;
+        }
+
+        public Builder largeTxn() {
+            tenantActivity.setLargeTransaction(true);
+            return this;
+        }
+
+        public Builder autoSchedule() {
+            tenantActivity.setAutoSchedule(true);
+            return this;
+        }
+
+        public Builder retry() {
+            tenantActivity.setRetry(true);
+            return this;
+        }
+
+        public Builder dataCloudRefresh() {
+            tenantActivity.setDataCloudRefresh(true);
+            return this;
+        }
+
+        public TenantActivity build() {
+            return tenantActivity;
+        }
     }
 }

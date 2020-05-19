@@ -42,7 +42,10 @@ public abstract class SchedulingPAObject implements Comparable<SchedulingPAObjec
 
     private int compare(TenantActivity o) {
         if (o.getTenantType() == tenantActivity.getTenantType()) {
-            return 0;
+            if (o.isLargeTransaction() == tenantActivity.isLargeTransaction()) {
+                return 0;
+            }
+            return o.isLargeTransaction()? 1 : -1;
         }
         return o.getTenantType() == TenantType.CUSTOMER ? 1 : -1;
     }

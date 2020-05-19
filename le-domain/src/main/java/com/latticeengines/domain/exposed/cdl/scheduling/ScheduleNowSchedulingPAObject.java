@@ -58,6 +58,7 @@ public class ScheduleNowSchedulingPAObject extends SchedulingPAObject {
         popConstraintList.add(new MaxScheduleNowPA());
         popConstraintList.add(new MaxPA());
         popConstraintList.add(new MaxLargePA());
+        popConstraintList.add(new MaxLargeTxnPA());
         popConstraintList.add(new TenantDuplicate());
     }
 

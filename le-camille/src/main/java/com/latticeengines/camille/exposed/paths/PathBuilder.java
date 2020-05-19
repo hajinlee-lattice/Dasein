@@ -249,6 +249,10 @@ public final class PathBuilder {
         return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULING_LARGE_TENANT_EXEMPTION_LIST);
     }
 
+    public static Path buildSchedulerConfigPath(String podId) {
+        return new Path(PathConstants.PODS, podId, PathConstants.SCHEDULER_CONFIG);
+    }
+
     public static Path buildWorkflowThrottlingMasterConfigPath() { // for test only
         return new Path(PathConstants.PODS, PathConstants.WORKFLOW_THROTTLING_CONFIG_FILE);
     }

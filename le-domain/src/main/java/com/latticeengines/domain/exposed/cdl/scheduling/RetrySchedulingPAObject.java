@@ -57,6 +57,7 @@ public class RetrySchedulingPAObject extends SchedulingPAObject {
         popConstraintList = new LinkedList<>();
         popConstraintList.add(new MaxPA());
         popConstraintList.add(new MaxLargePA());
+        popConstraintList.add(new MaxLargeTxnPA());
         popConstraintList.add(new TenantDuplicate());
     }
 }
