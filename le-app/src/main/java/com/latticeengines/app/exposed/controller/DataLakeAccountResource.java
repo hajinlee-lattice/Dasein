@@ -203,8 +203,8 @@ public class DataLakeAccountResource {
     public FrontEndResponse<String> getAccountsAndTalkingpoints(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
-            @PathVariable String playId,//
-            @RequestParam (value = "is-preview", required = false) boolean isPreview) {
+            @PathVariable String playId, //
+            @RequestParam(value = "is-preview", required = false) boolean isPreview) {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).getTenantId();
         try {
             List<TalkingPointDTO> tps = talkingPointProxy.findAllByPlayName(customerSpace, playId, !isPreview);

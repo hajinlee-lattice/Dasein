@@ -18,8 +18,8 @@
 
     <properties>
         <branchPath>trunk</branchPath>
-        <svnrepourl />
-        <nexusrepourl />
+        <svnrepourl/>
+        <nexusrepourl/>
         <checker>warning</checker>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -48,7 +48,8 @@
         <maven.antrun.version>1.8</maven.antrun.version> <!-- Last update in 2014, we should move away -->
 
         <!-- javax mostly specification interfaces, keep up with implementations -->
-        <javax.validation.version>2.0.1.Final</javax.validation.version> <!-- implemented by hibernate-validator (not hibernate) -->
+        <javax.validation.version>2.0.1.Final
+        </javax.validation.version> <!-- implemented by hibernate-validator (not hibernate) -->
         <javax.mail.version>1.5.4</javax.mail.version>
         <javax.el.version>2.2.4</javax.el.version>
         <javax.jsr250.version>1.0</javax.jsr250.version> <!-- implemented by spring -->
@@ -211,7 +212,9 @@
         <jacoco.coverage.dir>${project.build.directory}</jacoco.coverage.dir>
         <maxpermsize>-XX:MaxPermSize=1024m</maxpermsize> <!-- for java 8 compatibility, where this variable is empty -->
         <spotbugs.failOnError>false</spotbugs.failOnError>
-        <spotbugs.omit.visitors>BadAppletConstructor,BadlyOverriddenAdapter,CheckExpectedWarnings,Naming,UnreadFields,FindDeadLocalStores,SwitchFallthrough,XMLFactoryBypass,InvalidJUnitTest</spotbugs.omit.visitors>
+        <spotbugs.omit.visitors>
+            BadAppletConstructor,BadlyOverriddenAdapter,CheckExpectedWarnings,Naming,UnreadFields,FindDeadLocalStores,SwitchFallthrough,XMLFactoryBypass,InvalidJUnitTest
+        </spotbugs.omit.visitors>
         <surefire.reuse.forks>true</surefire.reuse.forks>
     </properties>
 
@@ -452,7 +455,7 @@
                                 <configuration>
                                     <fileSets>
                                         <fileSet
-                                            implementation="org.apache.maven.shared.model.fileset.FileSet">
+                                                implementation="org.apache.maven.shared.model.fileset.FileSet">
                                             <directory>${basedir}/jacoco</directory>
                                             <includes>
                                                 <include>*.exec</include>
@@ -511,20 +514,20 @@
                                     <target>
                                         <!-- Execute an ant task within maven -->
                                         <echo
-                                                message="Generating jacoco reports..." />
+                                                message="Generating jacoco reports..."/>
                                         <taskdef name="report"
                                                  classname="org.jacoco.ant.ReportTask">
                                             <classpath
-                                                    path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar" />
+                                                    path="${jacoco.coverage.dir}/jacoco/jacoco-jars/org.jacoco.ant.jar"/>
                                         </taskdef>
                                         <mkdir
-                                                dir="${jacoco.coverage.dir}/site/jacoco" />
+                                                dir="${jacoco.coverage.dir}/site/jacoco"/>
                                         <report>
                                             <executiondata>
                                                 <fileset
                                                         dir="${jacoco.coverage.dir}/jacoco">
                                                     <include
-                                                            name="*.exec" />
+                                                            name="*.exec"/>
                                                 </fileset>
                                             </executiondata>
                                             <structure
@@ -533,21 +536,21 @@
                                                         name="jacoco-multi-run-coverage">
                                                     <classfiles>
                                                         <fileset
-                                                                dir="${project.build.directory}/classes" />
+                                                                dir="${project.build.directory}/classes"/>
                                                     </classfiles>
                                                     <sourcefiles
                                                             encoding="UTF-8">
                                                         <fileset
-                                                                dir="${project.build.sourceDirectory}" />
+                                                                dir="${project.build.sourceDirectory}"/>
                                                     </sourcefiles>
                                                 </group>
                                             </structure>
                                             <html
-                                                    destdir="${jacoco.coverage.dir}/site/jacoco" />
+                                                    destdir="${jacoco.coverage.dir}/site/jacoco"/>
                                             <xml
-                                                    destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml" />
+                                                    destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.xml"/>
                                             <csv
-                                                    destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv" />
+                                                    destfile="${jacoco.coverage.dir}/site/jacoco/jacoco.csv"/>
                                         </report>
                                     </target>
                                 </configuration>
@@ -962,8 +965,10 @@
                             <failOnError>${spotbugs.failOnError}</failOnError>
                             <includeTests>true</includeTests>
                             <omitVisitors>${spotbugs.omit.visitors}</omitVisitors>
-                            <excludeFilterFile>${env.WSHOME}/le-parent/spotbugs/spotbugs-${checker}-exclude.xml</excludeFilterFile>
-                            <includeFilterFile>${env.WSHOME}/le-parent/spotbugs/spotbugs-${checker}-include.xml</includeFilterFile>
+                            <excludeFilterFile>${env.WSHOME}/le-parent/spotbugs/spotbugs-${checker}-exclude.xml
+                            </excludeFilterFile>
+                            <includeFilterFile>${env.WSHOME}/le-parent/spotbugs/spotbugs-${checker}-include.xml
+                            </includeFilterFile>
                             <plugins>
                                 <plugin>
                                     <groupId>jp.skypencil.findbugs.slf4j</groupId>
@@ -1014,6 +1019,7 @@
                 <configuration>
                     <doCheck>false</doCheck>
                     <doUpdate>false</doUpdate>
+                    <scmBranchPropertyName>buildScmBranch</scmBranchPropertyName>
                 </configuration>
             </plugin>
             <plugin>
@@ -1173,7 +1179,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <execute />
+                                        <execute/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -1606,11 +1612,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-			<dependency>
-    			<groupId>org.apache.zookeeper</groupId>
-    			<artifactId>zookeeper</artifactId>
-    			<version>${zookeeper.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>${zookeeper.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.zookeeper</groupId>
                 <artifactId>zookeeper</artifactId>

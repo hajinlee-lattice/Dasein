@@ -17,8 +17,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.ActivityTimelineService;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
@@ -37,6 +41,9 @@ public class ActivityTimelineResource {
     @Inject
     private Oauth2RestApiProxy oauth2RestApiProxy;
 
+    @Inject
+    private BatonService batonService;
+
     @GetMapping(value = "/accounts/{accountId:.+}", headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Retrieve activity timeline data for an account")
@@ -44,9 +51,14 @@ public class ActivityTimelineResource {
     public DataPage getAccountActivities(@RequestHeader(HttpHeaders.AUTHORIZATION) String authToken, //
             @PathVariable String accountId, //
             @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
-        CustomerSpace space = MultiTenantContext.getCustomerSpace();
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
+        }
         log.info(String.format("Retrieving activity timeline data of accountId(ID: %s) for %s period, ( tenantId: %s )",
-                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod, space.getTenantId()));
+                accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
+                customerSpace.getTenantId()));
         return activityTimelineService.getAccountActivities(accountId, timelinePeriod, getOrgInfo(authToken));
     }
 
@@ -58,11 +70,15 @@ public class ActivityTimelineResource {
             @PathVariable String accountId, //
             @PathVariable String contactId, //
             @RequestParam(value = "timeline-period", required = false) String timelinePeriod) {
-        CustomerSpace space = MultiTenantContext.getCustomerSpace();
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (!batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_ACCOUNT360)) {
+            throw new LedpException(LedpCode.LEDP_32000,
+                    new String[] { "Account 360 is not enabled for tenant: " + customerSpace.getTenantId() });
+        }
         log.info(String.format(
                 "Retrieving activity timeline data of contact(Id: %s), accountId(ID: %s) for %s period, ( tenantId: %s )",
                 contactId, accountId, StringUtils.isBlank(timelinePeriod) ? "default" : timelinePeriod,
-                space.getTenantId()));
+                customerSpace.getTenantId()));
         return activityTimelineService.getContactActivities(accountId, contactId, timelinePeriod,
                 getOrgInfo(authToken));
     }
