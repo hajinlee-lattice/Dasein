@@ -21,6 +21,7 @@ public enum TableRoleInCollection {
 
     SystemAccount, //
     SystemContact, //
+    LatticeAccount, //
 
     PivotedRating, //
 

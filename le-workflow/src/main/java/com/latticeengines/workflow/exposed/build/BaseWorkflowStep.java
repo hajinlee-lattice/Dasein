@@ -241,6 +241,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SYSTEM_ACCOUNT_MASTER_TABLE_NAME = "SYSTEM_ACCOUNT_MASTER_TABLE_NAME";
     protected static final String ACCOUNT_MASTER_TABLE_NAME = "ACCOUNT_MASTER_TABLE_NAME";
     protected static final String FULL_ACCOUNT_TABLE_NAME = "FULL_ACCOUNT_TABLE_NAME";
+    protected static final String LATTICE_ACCOUNT_TABLE_NAME = "LATTICE_ACCOUNT_TABLE_NAME";
     protected static final String ACCOUNT_FEATURE_TABLE_NAME = "ACCOUNT_FEATURE_TABLE_NAME";
     protected static final String ACCOUNT_EXPORT_TABLE_NAME = "ACCOUNT_EXPORT_TABLE_NAME";
     protected static final String ACCOUNT_PROFILE_TABLE_NAME = "ACCOUNT_PROFILE_TABLE_NAME";
@@ -341,6 +342,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             SYSTEM_ACCOUNT_MASTER_TABLE_NAME, //
             ACCOUNT_MASTER_TABLE_NAME, //
             FULL_ACCOUNT_TABLE_NAME, //
+            LATTICE_ACCOUNT_TABLE_NAME, //
             ACCOUNT_EXPORT_TABLE_NAME, //
             ACCOUNT_FEATURE_TABLE_NAME, //
             ACCOUNT_PROFILE_TABLE_NAME, //

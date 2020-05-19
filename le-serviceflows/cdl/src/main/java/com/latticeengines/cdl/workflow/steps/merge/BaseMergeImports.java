@@ -59,7 +59,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
@@ -234,14 +233,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         String configStr = appendEngineConf(config, lightEngineConfig());
         step.setConfiguration(configStr);
         setTargetTable(step, diffReportTablePrefix);
-    }
-
-    protected boolean inMigrationMode() {
-        MigrationTrack.Status status = metadataProxy.getMigrationStatus(customerSpace.toString());
-        log.info("Tenant's migration status is {}.", status);
-        boolean migrationMode = MigrationTrack.Status.STARTED.equals(status);
-        log.info("Migration mode is {}", migrationMode ? "on" : "off");
-        return migrationMode;
     }
 
     protected TransformationStepConfig createChangeList(int inputStep, String joinKey) {
