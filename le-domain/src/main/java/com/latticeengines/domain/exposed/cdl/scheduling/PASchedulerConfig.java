@@ -98,7 +98,7 @@ public class PASchedulerConfig {
 
     @Override
     public String toString() {
-        return "SchedulerQuotaLimit{" + "largeTenantAccountVolumeThreshold=" + largeTenantAccountVolumeThreshold
+        return "PASchedulerConfig{" + "largeTenantAccountVolumeThreshold=" + largeTenantAccountVolumeThreshold
                 + ", largeTenantTxnVolumeThreshold=" + largeTenantTxnVolumeThreshold + ", retryCountLimit="
                 + retryCountLimit + ", concurrentScheduleNowJobLimit=" + concurrentScheduleNowJobLimit
                 + ", concurrentLargeJobLimit=" + concurrentLargeJobLimit + ", concurrentLargeTxnJobLimit="
