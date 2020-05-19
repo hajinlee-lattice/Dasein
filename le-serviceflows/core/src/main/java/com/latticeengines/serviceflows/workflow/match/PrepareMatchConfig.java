@@ -110,7 +110,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         }
 
         ColumnSelection.Predefined predefined = getConfiguration().getPredefinedColumnSelection();
-        
+
         boolean retainLatticeAccountId = getConfiguration().isRetainLatticeAccountId();
         if (predefined != null) {
             if (retainLatticeAccountId) {
@@ -253,7 +253,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         }
         if (MatchStepConfiguration.DCP.equals(getConfiguration().getMatchType())) {
             matchInput.setUseDirectPlus(true);
-            matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
+            // matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
             matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         }
     }

@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-public class PrimeMatchTestNG extends DataCloudMatchFunctionalTestNGBase {
+public class MultiCandiateMatchTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     @Inject
     private RealTimeMatchService realTimeMatchService;
@@ -64,7 +64,7 @@ public class PrimeMatchTestNG extends DataCloudMatchFunctionalTestNGBase {
         matchInput.setAllocateId(false);
         matchInput.setEntityKeyMaps(prepareEntityKeyMap());
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
-        matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
+        matchInput.setOperationalMode(OperationalMode.MULTI_CANDIDATES);
         matchInput.setPredefinedSelection(null);
         matchInput.setUseDirectPlus(true);
         matchInput.setCustomSelection(getColumnSelection());

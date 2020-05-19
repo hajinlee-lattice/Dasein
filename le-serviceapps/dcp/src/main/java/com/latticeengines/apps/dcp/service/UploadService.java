@@ -20,8 +20,6 @@ public interface UploadService {
 
     void registerMatchResult(String customerSpace, String uploadId, String tableName);
 
-    void registerMatchCandidates(String customerSpace, String uploadId, String tableName);
-
     void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig);
 
     void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status);
@@ -35,7 +33,5 @@ public interface UploadService {
     UploadDetails setLatestStatistics(String uploadId, Long statsTimestamp);
 
     String getMatchResultTableName(String uploadId);
-
-    String getMatchCandidatesTableName(String uploadId);
 
 }

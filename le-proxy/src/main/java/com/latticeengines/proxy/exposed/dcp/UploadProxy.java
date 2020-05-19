@@ -17,8 +17,6 @@ public interface UploadProxy {
 
     void registerMatchResult(String customerSpace, String uploadId, String tableName);
 
-    void registerMatchCandidates(String customerSpace, String uploadId, String tableName);
-
     void updateUploadConfig(String customerSpace, String uploadId, UploadConfig uploadConfig);
 
     void updateUploadStatus(String customerSpace, String uploadId, Upload.Status status);

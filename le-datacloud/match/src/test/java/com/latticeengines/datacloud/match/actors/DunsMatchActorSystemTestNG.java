@@ -116,7 +116,7 @@ public class DunsMatchActorSystemTestNG extends DataCloudMatchFunctionalTestNGBa
         matchInput.setEntityKeyMaps(prepareEntityKeyMap());
         matchInput.setFields(Arrays.asList("Duns", "CompanyName", "Sate", "Country"));
         matchInput.setTargetEntity(entity);
-        matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
+        matchInput.setOperationalMode(OperationalMode.MULTI_CANDIDATES);
         return matchInput;
     }
 

@@ -77,10 +77,4 @@ public class UploadEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<UploadRe
         return getReadOrWriteRepository().findMatchResultTableNameByUploadId(uploadId);
     }
 
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public String findMatchCandidatesTableNameByUploadId(String uploadId) {
-        return getReadOrWriteRepository().findMatchCandidatesTableNameByUploadId(uploadId);
-    }
-
 }

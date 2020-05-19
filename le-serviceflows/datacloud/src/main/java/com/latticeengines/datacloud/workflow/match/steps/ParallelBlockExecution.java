@@ -587,7 +587,7 @@ public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecut
             return;
         }
         MatchInput input = jobConfigurations.get(0).getMatchInput();
-        if (OperationalMode.PRIME_MATCH.equals(input.getOperationalMode())) {
+        if (OperationalMode.MULTI_CANDIDATES.equals(input.getOperationalMode())) {
             String blockOperationUid = blockUuidMap.get(appId.toString());
             String blockAvroGlob = hdfsPathBuilder.constructMatchBlockCandidateAvroGlob(rootOperationUid,
                     blockOperationUid);

@@ -759,8 +759,8 @@ public class DnBLookupServiceImpl extends DataSourceLookupServiceBase implements
         return res;
     }
 
-    private boolean isPrimeMatch(DataSourceLookupRequest request) {
-        return OperationalMode.PRIME_MATCH.equals(request.getMatchTravelerContext().getOperationalMode());
+    private boolean isMultiCandidates(DataSourceLookupRequest request) {
+        return OperationalMode.MULTI_CANDIDATES.equals(request.getMatchTravelerContext().getOperationalMode());
     }
 
     private int maxBatchSize(boolean isDirectPlus) {

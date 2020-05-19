@@ -440,7 +440,7 @@ public abstract class MatchExecutorBase implements MatchExecutor {
             outputRecords.add(outputRecord);
         }
 
-        if (OperationalMode.PRIME_MATCH.equals(matchContext.getInput().getOperationalMode())) {
+        if (OperationalMode.MULTI_CANDIDATES.equals(matchContext.getInput().getOperationalMode())) {
             matchContext.getOutput().setCandidateOutputFields(candidateOutputFields());
         }
         matchContext.getOutput().setResult(outputRecords);

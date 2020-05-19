@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.util.ApplicationIdUtils;
 import com.latticeengines.matchapi.testframework.MatchapiDeploymentTestNGBase;
 
 // dpltc deploy -a matchapi,workflowapi
-public class PrimeMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
+public class MultiCandidateMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
 
     private static final String podId = "PrimeMatchDeploymentTestNG";
     private static final String avroDir = "/tmp/PrimeMatchDeploymentTestNG";
@@ -100,7 +100,7 @@ public class PrimeMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
             Assert.assertNotNull(record.get(InterfaceName.InternalId.name()));
             count++;
         }
-        Assert.assertTrue(count > matchCommand.getRowsMatched());
+        Assert.assertTrue(count >= matchCommand.getRowsMatched());
     }
 
     private void setMatchInput(MatchInput matchInput, String version) {
@@ -111,9 +111,10 @@ public class PrimeMatchDeploymentTestNG extends MatchapiDeploymentTestNGBase {
         matchInput.setUseDnBCache(false);
         matchInput.setUseRemoteDnB(true);
         matchInput.setAllocateId(false);
+        matchInput.setUseDirectPlus(true);
         matchInput.setEntityKeyMaps(prepareEntityKeyMap());
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
-        matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
+        matchInput.setOperationalMode(OperationalMode.MULTI_CANDIDATES);
         matchInput.setPredefinedSelection(null);
         matchInput.setCustomSelection(getColumnSelection());
     }

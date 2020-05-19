@@ -128,7 +128,7 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         matchInput.setAllocateId(false);
         matchInput.setEntityKeyMaps(prepareEntityKeyMap());
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
-        matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
+        matchInput.setOperationalMode(OperationalMode.MULTI_CANDIDATES);
 
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);

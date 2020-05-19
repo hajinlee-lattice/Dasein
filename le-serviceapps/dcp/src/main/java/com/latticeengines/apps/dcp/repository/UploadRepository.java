@@ -13,14 +13,9 @@ public interface UploadRepository extends BaseJpaRepository<Upload, Long> {
 
     List<Upload> findBySourceIdAndStatus(String sourceId, Upload.Status status);
 
-    Upload findByPid(Long pid);
-
     Upload findByUploadId(String uploadId);
 
     @Query("select t.name from Upload as u join u.matchResult as t where u.uploadId = ?1")
     String findMatchResultTableNameByUploadId(String uploadId);
-
-    @Query("select t.name from Upload as u join u.matchCandidates as t where u.uploadId = ?1")
-    String findMatchCandidatesTableNameByUploadId(String uploadId);
 
 }

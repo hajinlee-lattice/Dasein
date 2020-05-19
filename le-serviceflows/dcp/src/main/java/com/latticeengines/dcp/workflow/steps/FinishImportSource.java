@@ -2,7 +2,6 @@ package com.latticeengines.dcp.workflow.steps;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -34,7 +33,6 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
         customerSpace = configuration.getCustomerSpace();
         customerSpaceStr = customerSpace.toString();
         saveMatchResultTable();
-        saveMatchCandidatesTable();
         updateStats();
     }
 
@@ -44,18 +42,6 @@ public class FinishImportSource extends BaseSparkStep<ImportSourceStepConfigurat
         exportToS3(matchResultTable);
         registerTable(matchResultName);
         uploadProxy.registerMatchResult(customerSpaceStr, uploadId, matchResultName);
-    }
-
-    private void saveMatchCandidatesTable() {
-        String matchCandidatesTableName = getStringValueFromContext(MATCH_CANDIDATES_TABLE_NAME);
-        if (StringUtils.isNotBlank(matchCandidatesTableName)) {
-            Table matchCandidatesTable = metadataProxy.getTable(customerSpaceStr, matchCandidatesTableName);
-            exportToS3(matchCandidatesTable);
-            registerTable(matchCandidatesTableName);
-            uploadProxy.registerMatchCandidates(customerSpaceStr, uploadId, matchCandidatesTableName);
-        } else {
-            log.warn("No match candidates table generate.");
-        }
     }
 
     private void updateStats() {
