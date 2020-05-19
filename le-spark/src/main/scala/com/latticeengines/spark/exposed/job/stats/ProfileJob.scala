@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.stats.ProfileParamet
 import com.latticeengines.domain.exposed.datacloud.dataflow.{CategoricalBucket, DiscreteBucket, IntervalBucket}
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook
 import com.latticeengines.domain.exposed.spark.stats.ProfileJobConfig
-import com.latticeengines.spark.aggregation.{NumberProfileAggregation, StringProfileAggregation}
+import com.latticeengines.spark.aggregation.{DiscreteProfileAggregation, NumberProfileAggregation, StringProfileAggregation}
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.{BitEncodeUtils, NumericProfiler}
 import org.apache.spark.rdd.RDD
@@ -15,12 +15,13 @@ import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.storage.StorageLevel
 
 import scala.collection.JavaConverters._
+import scala.collection.parallel.ParSeq
 
 class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
 
   private val STR_CHUNK_SIZE: Int = 5
-  private val NUM_CHUNK_SIZE: Int = 100
-  private val NUM_APPROACH_THRESHOLD: Long = 10000 // (10K) using attr-by-attr approach when more than this # of rows
+  private val NUM_CHUNK_SIZE: Int = 1000
+  private val SAMPLE_SIZE: Long = 1000000 // 1M
   private val ATTR_ATTRNAME = DataCloudConstants.PROFILE_ATTR_ATTRNAME
   private val ATTR_BKTALGO = DataCloudConstants.PROFILE_ATTR_BKTALGO
 
@@ -33,11 +34,11 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
     val randomSeed: Long = if (config.getRandSeed == null) System.currentTimeMillis else config.getRandSeed
     val enforceByAttr: Boolean = if (config.getEnforceProfileByAttr == null) false else config.getEnforceProfileByAttr
     val totalCnt = inputData.count
-    val numProfile = if (enforceByAttr || totalCnt > NUM_APPROACH_THRESHOLD) {
-      profileNumAttrs(spark, totalCnt, numAttrs,
+    val numProfile = if (enforceByAttr) {
+      profileNumAttrsIndividually(spark, totalCnt, numAttrs,
         config.getMaxDiscrete, config.getBucketNum, config.getMinBucketSize, randomSeed)
     } else {
-      profileNumAttrsByGroup(numAttrs, numAttrs.columns,
+      profileNumAttrs(spark, numAttrs, totalCnt, numAttrs.columns,
         config.getMaxDiscrete, config.getBucketNum, config.getMinBucketSize, randomSeed)
     }
 
@@ -90,7 +91,7 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
 
   private def profileStrAttrs(spark: SparkSession, input: DataFrame, catAttrs: List[String],
                               maxCats: Int, maxLength: Int): DataFrame = {
-    val rdd: RDD[Row] = spark.sparkContext.parallelize(catAttrs.map(catAttr => {
+    val rdd: RDD[Row] = spark.sparkContext.parallelize(catAttrs.par.map(catAttr => {
       val catCnts = input.filter(col(catAttr).isNotNull && col(catAttr) =!= "")
         .groupBy(catAttr).count().limit(maxCats + 2).collect()
       val nCats = catCnts.length
@@ -109,7 +110,7 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
         null
       }
       Row.fromSeq(Seq(catAttr, bkgAlgo))
-    }))
+    }).toList)
     val outputSchema = StructType(List(
       StructField(ATTR_ATTRNAME, StringType),
       StructField(ATTR_BKTALGO, StringType)
@@ -134,10 +135,54 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
     }
   }
 
-  private def profileNumAttrs(spark: SparkSession, totalCnt: Long, input: DataFrame,
+  private def profileNumAttrsIndividually(spark: SparkSession, totalCnt: Long, input: DataFrame,
                               maxDiscrete: Int, numBuckets: Int, minBucketSize: Int, randomSeed: Long): DataFrame = {
-    val rdd: RDD[Row] = spark.sparkContext.parallelize(input.schema.map(field => {
-      val numAttr = field.name
+    val rows = exactNumAttrsProfile(input, totalCnt, input.columns, maxDiscrete, numBuckets, minBucketSize, randomSeed)
+    val rdd: RDD[Row] = spark.sparkContext.parallelize(rows.toList)
+    val outputSchema = StructType(List(
+      StructField(ATTR_ATTRNAME, StringType),
+      StructField(ATTR_BKTALGO, StringType)
+    ))
+    spark.createDataFrame(rdd, outputSchema).persist(StorageLevel.MEMORY_AND_DISK)
+  }
+
+  private def estimateNumAttrsProfile(input: DataFrame, numAttrs: Seq[String], maxDiscrete: Int, numBuckets: Int,
+                                       minBucketSize: Int, randomSeed: Long): DataFrame = {
+    if (numAttrs.length <= NUM_CHUNK_SIZE) {
+      val fields = input.schema.fields.filter(f => numAttrs.contains(f.name))
+      val aggregate = new NumberProfileAggregation(fields, maxDiscrete, numBuckets, minBucketSize, randomSeed)
+      input.agg(aggregate(numAttrs map col: _*).as("agg"))
+        .withColumn("agg", explode(col("agg")))
+        .withColumn(ATTR_ATTRNAME, col("agg.attr"))
+        .withColumn(ATTR_BKTALGO, col("agg.algo"))
+        .drop("agg")
+    } else {
+      val (head, tail) = numAttrs.splitAt(NUM_CHUNK_SIZE)
+      val headProfile: DataFrame = estimateNumAttrsProfile(input, head, maxDiscrete, numBuckets, minBucketSize, randomSeed)
+      headProfile union estimateNumAttrsProfile(input, tail, maxDiscrete, numBuckets, minBucketSize, randomSeed)
+    }
+  }
+
+  private def discreteNumAttrsProfile(input: DataFrame, numAttrs: Seq[String], maxDiscrete: Int): DataFrame = {
+    if (numAttrs.length <= NUM_CHUNK_SIZE) {
+      val fields = input.schema.fields.filter(f => numAttrs.contains(f.name))
+      val aggregate = new DiscreteProfileAggregation(fields, maxDiscrete)
+      input.agg(aggregate(numAttrs map col: _*).as("agg"))
+        .withColumn("agg", explode(col("agg")))
+        .withColumn(ATTR_ATTRNAME, col("agg.attr"))
+        .withColumn(ATTR_BKTALGO, col("agg.algo"))
+        .drop("agg")
+    } else {
+      val (head, tail) = numAttrs.splitAt(NUM_CHUNK_SIZE)
+      val headProfile: DataFrame = discreteNumAttrsProfile(input, head, maxDiscrete)
+      headProfile union discreteNumAttrsProfile(input, tail, maxDiscrete)
+    }
+  }
+
+  private def exactNumAttrsProfile(input: DataFrame, totalCnt: Long, numAttrs: Seq[String], maxDiscrete: Int, numBuckets: Int,
+                                   minBucketSize: Int, randomSeed: Long): ParSeq[Row] = {
+    numAttrs.par.map(numAttr => {
+      val field = input.schema.fields.find(f => numAttr.equals(f.name)).get
       val catCnts = input.groupBy(numAttr).count().limit(maxDiscrete + 1).filter(col(numAttr).isNotNull).collect()
       val nCats = catCnts.length
       val bkgAlgo = if (nCats <= maxDiscrete) {
@@ -178,28 +223,29 @@ class ProfileJob extends AbstractSparkJob[ProfileJobConfig] {
         serializeJson(bkt)
       }
       Row.fromSeq(Seq(numAttr, bkgAlgo))
-    }))
-    val outputSchema = StructType(List(
-      StructField(ATTR_ATTRNAME, StringType),
-      StructField(ATTR_BKTALGO, StringType)
-    ))
-    spark.createDataFrame(rdd, outputSchema).persist(StorageLevel.MEMORY_AND_DISK)
+    })
   }
 
-  private def profileNumAttrsByGroup(input: DataFrame, numAttrs: Seq[String], maxDiscrete: Int, numBuckets: Int,
-                                     minBucketSize: Int, randomSeed: Long): DataFrame = {
-    if (numAttrs.length <= NUM_CHUNK_SIZE) {
-      val fields = input.schema.fields.filter(f => numAttrs.contains(f.name))
-      val aggregate = new NumberProfileAggregation(fields, maxDiscrete, numBuckets, minBucketSize, randomSeed)
-      input.agg(aggregate(numAttrs map col: _*).as("agg"))
-        .withColumn("agg", explode(col("agg")))
-        .withColumn(ATTR_ATTRNAME, col("agg.attr"))
-        .withColumn(ATTR_BKTALGO, col("agg.algo"))
-        .drop("agg")
+  def profileNumAttrs(spark: SparkSession, input: DataFrame, totalCnt: Long, numAttrs: Seq[String], maxDiscrete: Int, numBuckets: Int, minBucketSize: Int, randomSeed: Long): DataFrame = {
+    if (totalCnt > SAMPLE_SIZE) {
+      val fraction: Double = if (totalCnt > SAMPLE_SIZE) SAMPLE_SIZE.doubleValue / totalCnt.doubleValue else 1.0
+      val samples = input.sample(fraction, randomSeed)
+      val estimate = estimateNumAttrsProfile(samples, numAttrs, maxDiscrete, numBuckets, minBucketSize, randomSeed)
+      val collected = estimate.collect()
+      val intervalRows = collected.filter(row => row.getString(1).contains("Interval"))
+      val nonIntervalAttrs = collected.filter(row => row.getString(1).contains("Discrete")).map(row => row.getString(0))
+      val discrete = discreteNumAttrsProfile(input, nonIntervalAttrs, maxDiscrete).collect()
+      val discreteRows = discrete.filter(row => row.getString(1).contains("Discrete"))
+      val nonDiscreteAttrs = discrete.filter(row => row.getString(1).contains("Interval")).map(row => row.getString(0))
+      val rows = exactNumAttrsProfile(input, totalCnt, nonDiscreteAttrs, maxDiscrete, numBuckets, minBucketSize, randomSeed)
+      val rdd = spark.sparkContext.parallelize(intervalRows ++ discreteRows ++ rows)
+      val outputSchema = StructType(List(
+        StructField(ATTR_ATTRNAME, StringType),
+        StructField(ATTR_BKTALGO, StringType)
+      ))
+      spark.createDataFrame(rdd, outputSchema)
     } else {
-      val (head, tail) = numAttrs.splitAt(NUM_CHUNK_SIZE)
-      val headProfile: DataFrame = profileNumAttrsByGroup(input, head, maxDiscrete, numBuckets, minBucketSize, randomSeed)
-      headProfile union profileNumAttrsByGroup(input, tail, maxDiscrete, numBuckets, minBucketSize, randomSeed)
+      estimateNumAttrsProfile(input, numAttrs, maxDiscrete, numBuckets, minBucketSize, randomSeed)
     }
   }
 
