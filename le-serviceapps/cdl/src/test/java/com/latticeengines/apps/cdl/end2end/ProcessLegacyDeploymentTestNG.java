@@ -16,7 +16,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAccountAttributesStep;
+import com.latticeengines.cdl.workflow.steps.rebuild.CuratedAttributeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
@@ -240,7 +240,7 @@ public class ProcessLegacyDeploymentTestNG extends CDLEnd2EndDeploymentTestNGBas
         Attribute attribute = table.getAttribute(InterfaceName.NumberOfContacts.name());
         Assert.assertNotNull(attribute);
         Assert.assertEquals(attribute.getCategory(), Category.CURATED_ACCOUNT_ATTRIBUTES.getName());
-        Assert.assertEquals(attribute.getDisplayName(), CuratedAccountAttributesStep.NUMBER_OF_CONTACTS_DISPLAY_NAME);
+        Assert.assertEquals(attribute.getDisplayName(), CuratedAttributeUtils.NUMBER_OF_CONTACTS_DISPLAY_NAME);
         Assert.assertEquals(attribute.getFundamentalType(), FundamentalType.NUMERIC.getName());
 
         StatisticsContainer container = dataCollectionProxy.getStats(mainCustomerSpace, initialVersion.complement());

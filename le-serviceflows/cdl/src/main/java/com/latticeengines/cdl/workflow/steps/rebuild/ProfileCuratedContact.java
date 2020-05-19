@@ -70,7 +70,7 @@ public class ProfileCuratedContact extends BaseSingleEntityProfileStep<CuratedCo
         super.initializeConfiguration();
 
         List<Table> tablesInCtx = getTableSummariesFromCtxKeys(customerSpace.toString(), //
-                Arrays.asList(CURATED_CONTACT_SERVING_TABLE_NAME, CURATED_ACCOUNT_STATS_TABLE_NAME));
+                Arrays.asList(CURATED_CONTACT_SERVING_TABLE_NAME, CURATED_CONTACT_STATS_TABLE_NAME));
         boolean shortCut = tablesInCtx.stream().noneMatch(Objects::isNull);
 
         if (shortCut) {

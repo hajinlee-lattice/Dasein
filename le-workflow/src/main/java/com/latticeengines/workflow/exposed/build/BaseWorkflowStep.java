@@ -34,12 +34,14 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.common.exposed.util.YarnUtils;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.WorkflowConfigurationUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
@@ -765,5 +767,24 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             }
         }
         return applicationId;
+    }
+
+    protected boolean isResettingEntity(@NotNull BusinessEntity entity) {
+        Set<BusinessEntity> entitySet = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
+        return CollectionUtils.emptyIfNull(entitySet).contains(entity);
+    }
+
+    protected List<String> getEntityTemplates(@NotNull BusinessEntity entity) {
+        Map<BusinessEntity, List> templates = getMapObjectFromContext(CONSOLIDATE_TEMPLATES_IN_ORDER,
+                BusinessEntity.class, List.class);
+        List<String> templateNames;
+        if (MapUtils.isNotEmpty(templates) && templates.containsKey(entity)) {
+            templateNames = JsonUtils.convertList(templates.get(entity), String.class);
+        } else {
+            templateNames = Collections.emptyList();
+        }
+
+        log.info("{} templates = {}", entity.name(), templateNames);
+        return templateNames;
     }
 }
