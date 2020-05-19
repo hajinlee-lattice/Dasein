@@ -57,8 +57,7 @@ public class LivySessionManager {
                 .withMinExecutors(minExecutors).withMaxExecutors(maxExecutors);
 
         // Construct spark configuration
-        Map<String, String> sparkConf = new HashMap<>();
-        sparkConf.putAll(configurer.getSparkConf(livySessionConfig));
+        Map<String, String> sparkConf = new HashMap<>(configurer.getSparkConf(livySessionConfig));
         if (extraSparkConf != null) {
             sparkConf.putAll(extraSparkConf);
         }

@@ -358,7 +358,7 @@ public class SparkSQLServiceImpl implements SparkSQLService {
         conf.put("spark.dynamicAllocation.maxExecutors", String.valueOf(maxExe));
 
         // partitions
-        int partitions = minExe * executorCores;
+        int partitions = maxExe * executorCores;
         conf.put("spark.default.parallelism", String.valueOf(partitions));
         conf.put("spark.sql.shuffle.partitions", String.valueOf(partitions));
 
