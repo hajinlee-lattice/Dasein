@@ -8,7 +8,7 @@ public class UserRegistration {
     private User user;
     private Credentials credentials;
     private boolean validation = false;
-    private boolean isDCP = false;
+    private boolean useIDaaS = false;
 
     @JsonProperty("User")
     public User getUser() {
@@ -40,14 +40,14 @@ public class UserRegistration {
         this.validation = validation;
     }
 
-    @JsonProperty("IsDCP")
-    public boolean isDCP() {
-        return isDCP;
+    @JsonProperty("UseIDaaS")
+    public boolean isUseIDaaS() {
+        return useIDaaS;
     }
 
-    @JsonProperty("IsDCP")
-    public void setDCP(boolean DCP) {
-        isDCP = DCP;
+    @JsonProperty("UseIDaaS")
+    public void setUseIDaaS(boolean useIDaaS) {
+        this.useIDaaS = useIDaaS;
     }
 
     @Override

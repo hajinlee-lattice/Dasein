@@ -7,7 +7,6 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -114,9 +113,10 @@ public class UserResource {
         if (userReg.getUser().getAccessLevel() != null) {
             targetLevel = AccessLevel.valueOf(userReg.getUser().getAccessLevel());
         }
-        if (StringUtils.isBlank(userReg.getUser().getAccessLevel()) && Boolean.TRUE.equals(userReg.isDCP())) {
-            targetLevel = EmailUtils.isInternalUser(userReg.getUser().getEmail()) ? AccessLevel.INTERNAL_ADMIN :
-                    AccessLevel.EXTERNAL_ADMIN;
+        if (Boolean.TRUE.equals(userReg.isUseIDaaS())) {
+            targetLevel = (AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
+                    && !EmailUtils.isInternalUser(userReg.getUser().getEmail()) ?
+                    AccessLevel.EXTERNAL_ADMIN : targetLevel;
             userReg.getUser().setAccessLevel(targetLevel.name());
         }
         if (!userService.isSuperior(loginLevel, targetLevel)) {

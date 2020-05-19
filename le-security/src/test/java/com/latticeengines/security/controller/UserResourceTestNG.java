@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserLanguage;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -131,12 +132,12 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     }
 
     private void testDCPUserCreate(String email) {
-        UserRegistration uReg = createUserRegistration();
+        UserRegistration uReg = createUserRegistration(EmailUtils.isInternalUser(email) ?
+                AccessLevel.INTERNAL_ADMIN.name() : AccessLevel.EXTERNAL_ADMIN.name());
         uReg.getUser().setEmail(email);
         uReg.getUser().setUsername(email);
         uReg.getCredentials().setUsername(email);
-        uReg.getUser().setAccessLevel(null);
-        uReg.setDCP(Boolean.TRUE);
+        uReg.setUseIDaaS(true);
         makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
         String json = restTemplate.postForObject(usersApi, uReg, String.class);
         ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
@@ -231,18 +232,21 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertTrue(response.isSuccess());
     }
 
-    private UserRegistration createUserRegistration() {
+    private UserRegistration createUserRegistration(String... level) {
         UserRegistration userReg = new UserRegistration();
 
         User user = new User();
         user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
         user.setFirstName("Test");
         user.setLastName("Tester");
-        user.setLanguage("English");
+        user.setLanguage(UserLanguage.English);
         user.setPhoneNumber("650-555-5555");
         user.setTitle("Silly Tester");
-        user.setAccessLevel(AccessLevel.EXTERNAL_USER.name());
-
+        if (level != null && level.length == 1) {
+            user.setAccessLevel(level[0]);
+        } else {
+            user.setAccessLevel(AccessLevel.EXTERNAL_USER.name());
+        }
         Credentials creds = new Credentials();
         creds.setUsername(user.getEmail());
         creds.setPassword("WillBeModifiedImmediately");

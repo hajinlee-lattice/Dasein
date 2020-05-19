@@ -501,7 +501,7 @@ public class UserServiceImpl implements UserService {
             return result;
         }
 
-        if (Boolean.TRUE.equals(userRegistration.isDCP())) {
+        if (Boolean.TRUE.equals(userRegistration.isUseIDaaS())) {
             createIDaaSUser(user);
         }
 
@@ -705,7 +705,7 @@ public class UserServiceImpl implements UserService {
             iDaasuser.setLastName(user.getLastName());
             iDaasuser.setUserName(user.getUsername());
             iDaasuser.setPhoneNumber(user.getPhoneNumber());
-            iDaasuser.setLanguage(user.getLanguage());
+            iDaasuser.setLanguage(user.getLanguage() == null ? null : user.getLanguage().name());
             Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getLastName()),
                     "Last name is required");
             Preconditions.checkState(StringUtils.isNotEmpty(iDaasuser.getEmailAddress()),
