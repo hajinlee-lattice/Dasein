@@ -519,6 +519,9 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         map.addMatchKey(Domain, MatchKey.Email.name());
         map.addMatchKey(MatchKey.Country, MatchKey.Country.name());
         map.addMatchKey(MatchKey.State, MatchKey.State.name());
+        map.addMatchKey(MatchKey.NationalID, MatchKey.NationalID.name());
+        map.addMatchKey(MatchKey.StreetAddress1, MatchKey.StreetAddress1.name());
+        map.addMatchKey(MatchKey.StreetAddress2, MatchKey.StreetAddress2.name());
         return map;
     }
 
@@ -528,6 +531,9 @@ public class ContactMatchDeploymentTestNG extends AdvancedMatchDeploymentTestNGB
         map.addMatchKey(MatchKey.Email, MatchKey.Email.name());
         map.addMatchKey(Name, ContactName.name());
         map.addMatchKey(MatchKey.PhoneNumber, MatchKey.PhoneNumber.name());
+        map.addMatchKey(MatchKey.NationalID, MatchKey.NationalID.name());
+        map.addMatchKey(MatchKey.StreetAddress1, MatchKey.StreetAddress1.name());
+        map.addMatchKey(MatchKey.StreetAddress2, MatchKey.StreetAddress2.name());
         return map;
     }
 

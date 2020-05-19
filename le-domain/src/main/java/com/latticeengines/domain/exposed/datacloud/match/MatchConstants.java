@@ -30,6 +30,9 @@ public final class MatchConstants {
     public static final String DUNS_FIELD = "DUNS";
     public static final String COUNTRY_CODE_FIELD = "CountryCode";
     public static final String LID_FIELD = "LatticeAccountId";
+    public static final String NATIONAL_ID_FIELD = "NationalID";
+    public static final String STREET_ADDRESS1_FIELD = "StreetAddress1";
+    public static final String STREET_ADDRESS2_FIELD = "StreetAddress2";
 
     // these are the same as column names in AM, if applicable
     public static final String AM_DOMAIN_FIELD = "Domain";

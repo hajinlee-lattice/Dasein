@@ -159,6 +159,9 @@ public final class MatchUtils {
         } else {
             addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PreferredEntityId, InterfaceName.CustomerAccountId.name());
         }
+        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.NationalID, InterfaceName.NationalID.name());
+        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.StreetAddress1, InterfaceName.StreetAddress1.name());
+        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.StreetAddress2, InterfaceName.StreetAddress2.name());
         addLegacyCustomerId(columnNames, matchKeys, systemIds, Account);
         addSystemIdsIfExist(columnNames, matchKeys, systemIds);
         log.info("Account match keys = {}", JsonUtils.serialize(matchKeys));
@@ -176,6 +179,9 @@ public final class MatchUtils {
         } else {
             addMatchKeyIfExists(columnNames, matchKeys, MatchKey.PreferredEntityId, InterfaceName.CustomerContactId.name());
         }
+        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.NationalID, InterfaceName.NationalID.name());
+        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.StreetAddress1, InterfaceName.StreetAddress1.name());
+        addMatchKeyIfExists(columnNames, matchKeys, MatchKey.StreetAddress2, InterfaceName.StreetAddress2.name());
         addLegacyCustomerId(columnNames, matchKeys, systemIds, Contact);
         addSystemIdsIfExist(columnNames, matchKeys, systemIds);
         log.info("Contact match keys = {}", JsonUtils.serialize(matchKeys));

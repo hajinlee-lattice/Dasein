@@ -156,6 +156,21 @@ public final class MatchKeyUtils {
             case "entityid":
                 keyMap.put(MatchKey.EntityId, Collections.singletonList(field));
                     break;
+                case "nationalid":
+                case "national_id":
+                case "national":
+                    keyMap.put(MatchKey.NationalID, Collections.singletonList(field));
+                    break;
+                case "street_address_1":
+                case "streetaddress1":
+                case "streetaddress_1":
+                    keyMap.put(MatchKey.StreetAddress1, Collections.singletonList(field));
+                    break;
+                case "street_address_2":
+                case "streetaddress2":
+                case "streetaddress_2":
+                    keyMap.put(MatchKey.StreetAddress2, Collections.singletonList(field));
+                    break;
             default:
             }
         }

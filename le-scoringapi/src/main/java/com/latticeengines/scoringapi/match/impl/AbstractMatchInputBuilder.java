@@ -218,6 +218,9 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         addToKeyMapIfValueExists(keyMap, MatchKey.DUNS, interpreted.getDuns(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.Zipcode, interpreted.getPostalCode(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.LatticeAccountID, interpreted.getLatticeAccountId(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.NationalID, interpreted.getNationalId(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.StreetAddress1, interpreted.getStreetAddress1(), record);
+        addToKeyMapIfValueExists(keyMap, MatchKey.StreetAddress2, interpreted.getStreetAddress2(), record);
 
         if (isDebugMode) {
             log.info(String.format("MatchKey for record: %s is : %s", JsonUtils.serialize(record),

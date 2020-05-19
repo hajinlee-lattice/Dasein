@@ -52,6 +52,15 @@ public class MatchKeyTuple implements Fact {
     @JsonProperty("Email")
     private String email;
 
+    @JsonProperty("NationalID")
+    private String nationalID;
+
+    @JsonProperty("StreetAddress1")
+    private String streetAddress1;
+
+    @JsonProperty("StreetAddress2")
+    private String streetAddress2;
+
     // A list of pairs of System Id name and value.
     @JsonProperty("SystemIds")
     private List<Pair<String, String>> systemIds;
@@ -170,6 +179,37 @@ public class MatchKeyTuple implements Fact {
         refreshCachedStrings();
     }
 
+    @MetricField(name = MatchConstants.NATIONAL_ID_FIELD)
+    public String getNationalID() {
+        return nationalID;
+    }
+
+    public void setNationalID(String nationalID) {
+        this.nationalID = nationalID;
+        refreshCachedStrings();
+    }
+
+    @MetricField(name = MatchConstants.STREET_ADDRESS1_FIELD)
+    public String getStreetAddress1() {
+        return streetAddress1;
+    }
+
+    public void setStreetAddress1(String streetAddress1) {
+        this.streetAddress1 = streetAddress1;
+        refreshCachedStrings();
+    }
+
+    @MetricField(name = MatchConstants.STREET_ADDRESS2_FIELD)
+    public String getStreetAddress2() {
+        return streetAddress2;
+    }
+
+    public void setStreetAddress2(String streetAddress2) {
+        this.streetAddress2 = streetAddress2;
+        refreshCachedStrings();
+    }
+
+
     public List<Pair<String, String>> getSystemIds() {
         return systemIds;
     }
@@ -221,6 +261,18 @@ public class MatchKeyTuple implements Fact {
 
     public boolean hasEmail() {
         return StringUtils.isNotEmpty(email);
+    }
+
+    public boolean hasNationalID() {
+        return StringUtils.isNotEmpty(nationalID);
+    }
+
+    public boolean hasStreetAddress1() {
+        return StringUtils.isNotEmpty(streetAddress1);
+    }
+
+    public boolean hasStreetAddress2() {
+        return StringUtils.isNotEmpty(streetAddress2);
     }
 
     public boolean hasSystemIds() {
@@ -311,6 +363,15 @@ public class MatchKeyTuple implements Fact {
         if (CollectionUtils.isNotEmpty(systemIds)) {
             sb.append(String.format("%s=%s, ", MatchKey.SystemId.name(), systemIds.toString()));
         }
+        if (StringUtils.isNotEmpty(nationalID)) {
+            sb.append(String.format("%s=%s, ", MatchConstants.NATIONAL_ID_FIELD, nationalID));
+        }
+        if (StringUtils.isNotEmpty(streetAddress1)) {
+            sb.append(String.format("%s=%s, ", MatchConstants.STREET_ADDRESS1_FIELD, streetAddress1));
+        }
+        if (StringUtils.isNotEmpty(streetAddress2)) {
+            sb.append(String.format("%s=%s, ", MatchConstants.STREET_ADDRESS2_FIELD, streetAddress2));
+        }
         sb.append(")");
         serializedFormat = sb.toString();
     }
@@ -349,6 +410,18 @@ public class MatchKeyTuple implements Fact {
         if (StringUtils.isNotEmpty(email)) {
             appendKey(sb, MatchKey.Email.name());
         }
+        if (StringUtils.isNotEmpty(email)) {
+            appendKey(sb, MatchKey.Email.name());
+        }
+        if (StringUtils.isNotEmpty(nationalID)) {
+            appendKey(sb, MatchKey.NationalID.name());
+        }
+        if (StringUtils.isNotEmpty(streetAddress1)) {
+            appendKey(sb, MatchKey.StreetAddress1.name());
+        }
+        if (StringUtils.isNotEmpty(streetAddress1)) {
+            appendKey(sb, MatchKey.StreetAddress2.name());
+        }
         uniqueIdForKey = sb.toString();
     }
 
@@ -385,6 +458,15 @@ public class MatchKeyTuple implements Fact {
         }
         if (StringUtils.isNotEmpty(email)) {
             appendKeyValue(sb, MatchKey.Email.name(), email);
+        }
+        if (StringUtils.isNotEmpty(nationalID)) {
+            appendKeyValue(sb, MatchKey.NationalID.name(), nationalID);
+        }
+        if (StringUtils.isNotEmpty(streetAddress1)) {
+            appendKeyValue(sb, MatchKey.StreetAddress1.name(), streetAddress1);
+        }
+        if (StringUtils.isNotEmpty(streetAddress1)) {
+            appendKeyValue(sb, MatchKey.StreetAddress2.name(), streetAddress2);
         }
         uniqueIdForValue = sb.toString();
     }
@@ -465,6 +547,21 @@ public class MatchKeyTuple implements Fact {
 
         public Builder withSystemIds(List<Pair<String, String>> systemIds) {
             matchKeyTuple.setSystemIds(systemIds);
+            return this;
+        }
+
+        public Builder withNationalID(String nationalID) {
+            matchKeyTuple.setNationalID(nationalID);
+            return this;
+        }
+
+        public Builder withStreetAddress1(String streetAddress1) {
+            matchKeyTuple.setStreetAddress1(streetAddress1);
+            return this;
+        }
+
+        public Builder withStreetAddress2(String streetAddress2) {
+            matchKeyTuple.setStreetAddress2(streetAddress2);
             return this;
         }
 
