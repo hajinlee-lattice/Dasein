@@ -69,6 +69,13 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
                 Arrays.asList(entityManager, entityManagerReader));
     }
 
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.AttributeSetEntityMgrImpl.update*(..))")
+    public void updateAttributeSet(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
+                Arrays.asList(entityManager, entityManagerReader));
+    }
+
+
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayLaunchEntityMgrImpl.delete*(..))")
     public void deletePlayLaunch(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,

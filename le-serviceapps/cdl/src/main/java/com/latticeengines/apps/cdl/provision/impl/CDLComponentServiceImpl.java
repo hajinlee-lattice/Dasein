@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DropBoxCrossTenantService;
@@ -42,6 +43,9 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
     private TenantEntityMgr tenantEntityMgr;
 
     @Inject
+    private AttributeSetEntityMgr attributeSetEntityMgr;
+
+    @Inject
     private DropBoxService dropBoxService;
 
     @Inject
@@ -73,6 +77,7 @@ public class CDLComponentServiceImpl extends ComponentServiceBase {
             provisionDropBox(cs);
             s3ImportSystemService.createDefaultImportSystem(cs.toString());
             dropBoxService.createTenantDefaultFolder(cs.toString());
+            attributeSetEntityMgr.createDefaultAttributeSet();
         } catch (Exception e) {
             log.error(String.format("Install CDL component for %s failed. %s", customerSpace, e.toString()));
             return false;

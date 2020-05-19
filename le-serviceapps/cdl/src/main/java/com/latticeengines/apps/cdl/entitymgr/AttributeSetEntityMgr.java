@@ -19,4 +19,6 @@ public interface AttributeSetEntityMgr extends BaseEntityMgrRepository<Attribute
     AttributeSet createAttributeSet(String name, AttributeSet attributeSet);
 
     AttributeSet createAttributeSet(Map<String, Set<String>> existingAttributesMap, AttributeSet attributeSet);
+
+    AttributeSet createDefaultAttributeSet();
 }

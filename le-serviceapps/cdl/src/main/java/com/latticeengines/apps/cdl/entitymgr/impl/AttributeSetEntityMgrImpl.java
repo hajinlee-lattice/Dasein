@@ -25,7 +25,9 @@ import com.latticeengines.apps.cdl.repository.writer.AttributeSetWriterRepositor
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 
 @Component("attributeSetEntityMgr")
 public class AttributeSetEntityMgrImpl
@@ -74,9 +76,7 @@ public class AttributeSetEntityMgrImpl
     @Transactional(propagation = Propagation.REQUIRED)
     public AttributeSet createAttributeSet(AttributeSet attributeSet) {
         attributeSet.setTenant(MultiTenantContext.getTenant());
-        if (StringUtils.isEmpty(attributeSet.getName())) {
-            attributeSet.setName(AttributeSet.generateNameStr());
-        }
+        attributeSet.setName(AttributeSet.generateNameStr());
         attributeSetDao.create(attributeSet);
         return attributeSet;
     }
@@ -113,6 +113,25 @@ public class AttributeSetEntityMgrImpl
         } else {
             throw new RuntimeException(String.format("Attribute set %s does not exist.", attributeSet.getName()));
         }
+    }
+
+    private AttributeSet getDefaultAttributeSet() {
+        AttributeSet attributeSet = new AttributeSet();
+        attributeSet.setName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+        attributeSet.setTenant(MultiTenantContext.getTenant());
+        attributeSet.setDisplayName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_DISPLAY_NAME);
+        attributeSet.setDescription(AttributeUtils.DEFAULT_ATTRIBUTE_SET_DESCRIPTION);
+        attributeSet.setCreatedBy(CDLConstants.DEFAULT_SYSTEM_USER);
+        attributeSet.setUpdatedBy(CDLConstants.DEFAULT_SYSTEM_USER);
+        return attributeSet;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public AttributeSet createDefaultAttributeSet() {
+        AttributeSet defaultSet = getDefaultAttributeSet();
+        attributeSetDao.create(defaultSet);
+        return defaultSet;
     }
 
     @Override

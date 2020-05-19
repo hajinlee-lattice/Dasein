@@ -424,6 +424,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public AttrConfigRequest saveRequest(AttrConfigRequest request, AttrConfigUpdateMode mode) {
+        return saveRequest(request, mode, false);
+    }
+
+    @Override
+    public AttrConfigRequest saveRequest(AttrConfigRequest request, AttrConfigUpdateMode mode, boolean updateDefaultSet) {
         AttrConfigRequest toReturn;
         String tenantId = MultiTenantContext.getShortTenantId();
         List<AttrConfig> attrConfigs = request.getAttrConfigs();
@@ -513,8 +518,16 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             });
             cacheService.refreshKeysByPattern(MultiTenantContext.getShortTenantId(), CacheName.DataLakeStatsCubesCache);
         }
-
+        if (updateDefaultSet) {
+            updateDefaultSet();
+        }
         return toReturn;
+    }
+
+    private void updateDefaultSet() {
+        AttributeSet attributeSet = new AttributeSet();
+        attributeSet.setName(AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME);
+        updateAttributeSet(attributeSet);
     }
 
     private List<ColumnMetadata> getSystemMetadataCols(BusinessEntity entity, Tracer tracer) {
@@ -942,31 +955,31 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public AttributeSet getAttributeSetByName(String name) {
-        throw new UnsupportedOperationException("Not supported!");
+        return null;
     }
 
     @Override
     public List<AttributeSet> getAttributeSets() {
-        throw new UnsupportedOperationException("Not supported!");
+        return null;
     }
 
     @Override
     public AttributeSet cloneAttributeSet(String attributeSetName, AttributeSet attributeSet) {
-        throw new UnsupportedOperationException("Not supported!");
+        return null;
     }
 
     @Override
     public AttributeSet createAttributeSet(AttributeSet attributeSet) {
-        throw new UnsupportedOperationException("Not supported!");
+        return null;
     }
 
     @Override
     public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
-        throw new UnsupportedOperationException("Not supported!");
+        return null;
     }
 
     @Override
     public void deleteAttributeSetByName(String name) {
-        throw new UnsupportedOperationException("Not supported!");
+
     }
 }

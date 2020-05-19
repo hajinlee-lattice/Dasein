@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigUpdateMode;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 
 @Component("cdlAttrConfigProxy")
@@ -70,5 +72,14 @@ public class CDLAttrConfigProxyImpl extends BaseAttrConfigProxyImpl implements C
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/attributeset/name/{name}",
                 shortenCustomerSpace(customerSpace), name);
         delete("Delete a attribute set", url);
+    }
+
+    @Override
+    public AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode, boolean updateDefaultSet) {
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/?mode={mode}&updateDefaultSet={updateDefaultSet}", //
+                shortenCustomerSpace(customerSpace), mode, updateDefaultSet);
+        AttrConfigRequest result = post("save attr config", url, request, AttrConfigRequest.class);
+        result.fixJsonDeserialization();
+        return result;
     }
 }

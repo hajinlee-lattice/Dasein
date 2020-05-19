@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.provision.CDLComponentManager;
 import com.latticeengines.apps.cdl.service.AtlasSchedulingService;
@@ -50,6 +51,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
     private TenantEntityMgr tenantEntityMgr;
 
     @Inject
+    private AttributeSetEntityMgr attributeSetEntityMgr;
+
+    @Inject
     private DropBoxService dropBoxService;
 
     @Inject
@@ -75,7 +79,7 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
         log.info("Initialized data collection " + dataFeed.getDataCollection().getName());
         provisionDropBox(space);
-
+        attributeSetEntityMgr.createDefaultAttributeSet();
         if (!batonService.hasProduct(CustomerSpace.parse(customerSpace), LatticeProduct.DCP)) {
             if (!batonService.isEnabled(CustomerSpace.parse(customerSpace), LatticeFeatureFlag.ENABLE_ENTITY_MATCH)) {
                 log.info("Create Default System for tenant: " + space.toString());
