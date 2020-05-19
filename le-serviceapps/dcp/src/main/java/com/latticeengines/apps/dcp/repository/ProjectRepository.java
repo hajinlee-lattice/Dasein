@@ -14,16 +14,16 @@ public interface ProjectRepository extends BaseJpaRepository<Project, Long> {
 
     Project findByImportSystem(S3ImportSystem importSystem);
 
-    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid " +
-            "from Project as p join p.importSystem as s where p.projectId = ?1")
+    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid" +
+            " from Project as p join p.importSystem as s where p.projectId = ?1")
     List<Object[]> findProjectInfoByProjectId(String projectId);
 
-    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid " +
-            "from Project as p join p.importSystem as s")
+    @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid" +
+            " from Project as p join p.importSystem as s")
     List<Object[]> findAllProjects();
 
     @Query("select p.projectId, p.projectDisplayName, p.rootPath, p.deleted, p.created, p.updated, p.createdBy, p.recipientList, s.pid" +
-            "from Project as p join p.importSystem as s join DataFeedTask as dft on s.pid = dft.importSystem" +
+            " from Project as p join p.importSystem as s join DataFeedTask as dft on s.pid = dft.importSystem" +
             " where dft.sourceId = ?1")
     List<Object[]> findProjectInfoBySourceId(String sourceId);
 
