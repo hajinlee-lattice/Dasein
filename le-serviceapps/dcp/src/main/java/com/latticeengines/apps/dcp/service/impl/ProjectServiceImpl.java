@@ -83,7 +83,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public List<ProjectSummary> getAllProject(String customerSpace) {
 //        List<Project> projectList = projectEntityMgr.findAll();
-        List<ProjectInfo> projectInfoList = projectEntityMgr.getAllProjectInfo();
+        List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo();
         return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo)).collect(Collectors.toList());
     }
 
@@ -99,7 +99,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
-        ProjectInfo projectInfo = projectEntityMgr.getProjectInfoByProjectId(projectId);
+        ProjectInfo projectInfo = projectEntityMgr.findProjectInfoByProjectId(projectId);
         if (projectInfo == null) {
             log.warn("No project found with id: " + projectId);
             return null;
@@ -130,17 +130,17 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectInfo getProjectBySourceId(String customerSpace, String sourceId) {
-        return projectEntityMgr.getProjectInfoBySourceId(sourceId);
+        return projectEntityMgr.findProjectInfoBySourceId(sourceId);
     }
 
     @Override
     public ProjectInfo getProjectInfoByProjectId(String customerSpace, String projectId) {
-        return projectEntityMgr.getProjectInfoByProjectId(projectId);
+        return projectEntityMgr.findProjectInfoByProjectId(projectId);
     }
 
     @Override
     public S3ImportSystem getImportSystemByProjectId(String customerSpace, String projectId) {
-        return projectEntityMgr.getImportSystemByProjectId(projectId);
+        return projectEntityMgr.findImportSystemByProjectId(projectId);
     }
 
     private void validateProjectId(String projectId) {
@@ -150,7 +150,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (!projectId.matches("[A-Za-z0-9_]*")) {
             throw new RuntimeException("Invalid characters in project id, only accept digits, alphabet & underline.");
         }
-        if (projectEntityMgr.getProjectInfoByProjectId(projectId) != null) {
+        if (projectEntityMgr.findProjectInfoByProjectId(projectId) != null) {
             throw new RuntimeException(String.format("ProjectId %s already exists.", projectId));
         }
     }
@@ -158,7 +158,7 @@ public class ProjectServiceImpl implements ProjectService {
     private String generateRandomProjectId() {
         String randomProjectId = String.format(RANDOM_PROJECT_ID_PATTERN,
                 RandomStringUtils.randomAlphanumeric(8).toLowerCase());
-        while (projectEntityMgr.getProjectInfoByProjectId(randomProjectId) != null) {
+        while (projectEntityMgr.findProjectInfoByProjectId(randomProjectId) != null) {
             randomProjectId = String.format(RANDOM_PROJECT_ID_PATTERN,
                     RandomStringUtils.randomAlphanumeric(8).toLowerCase());
         }
@@ -310,14 +310,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     private ProjectInfo getProjectInfoByProjectIdWithRetry(String projectId) {
         int retry = 0;
-        ProjectInfo project = projectEntityMgr.getProjectInfoByProjectId(projectId);
+        ProjectInfo project = projectEntityMgr.findProjectInfoByProjectId(projectId);
         while (project == null && retry < MAX_RETRY) {
             try {
                 Thread.sleep(1000L + retry * 1000L);
             } catch (InterruptedException e) {
                 return null;
             }
-            project = projectEntityMgr.getProjectInfoByProjectId(projectId);
+            project = projectEntityMgr.findProjectInfoByProjectId(projectId);
             retry++;
         }
         return project;

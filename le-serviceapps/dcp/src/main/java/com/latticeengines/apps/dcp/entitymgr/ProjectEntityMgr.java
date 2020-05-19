@@ -13,11 +13,11 @@ public interface ProjectEntityMgr extends BaseEntityMgrRepository<Project, Long>
 
 //    Project findByImportSystem(S3ImportSystem importSystem);
 
-    ProjectInfo getProjectInfoByProjectId(String projectId);
+    ProjectInfo findProjectInfoByProjectId(String projectId);
 
-    List<ProjectInfo> getAllProjectInfo();
+    List<ProjectInfo> findAllProjectInfo();
 
-    ProjectInfo getProjectInfoBySourceId(String sourceId);
+    ProjectInfo findProjectInfoBySourceId(String sourceId);
 
-    S3ImportSystem getImportSystemByProjectId(String projectId);
+    S3ImportSystem findImportSystemByProjectId(String projectId);
 }
