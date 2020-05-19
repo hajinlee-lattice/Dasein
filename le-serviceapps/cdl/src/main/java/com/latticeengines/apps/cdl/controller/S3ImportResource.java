@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -97,5 +98,12 @@ public class S3ImportResource {
         } catch (LedpException e) {
             return ResponseDocument.failedResponse(e);
         }
+    }
+
+    @GetMapping("/system/idList")
+    @ResponseBody
+    @ApiOperation(value = "Get All system ids")
+    public List<String> getS3ImportSystemIdList(@PathVariable String customerSpace) {
+        return s3ImportSystemService.getAllS3ImportSystemIds(customerSpace);
     }
 }

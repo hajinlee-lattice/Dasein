@@ -21,4 +21,6 @@ public interface S3ImportSystemService {
     boolean hasSystemMapToLatticeAccount(String customerSpace);
 
     boolean hasSystemMapToLatticeContact(String customerSpace);
+
+    List<String> getAllS3ImportSystemIds(String customerSpace);
 }

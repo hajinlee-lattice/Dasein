@@ -548,6 +548,13 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         return JsonUtils.convertList(rawlist, S3ImportSystem.class);
     }
 
+    public List<String> getS3ImportSystemIdList(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/idList",
+                shortenCustomerSpace(customerSpace));
+        List<?> rawList = get("get s3 import system id list", url, List.class);
+        return JsonUtils.convertList(rawList, String.class);
+    }
+
     @SuppressWarnings("unchecked")
     public void updateS3ImportSystem(String customerSpace, S3ImportSystem importSystem) {
         String url = constructUrl("/customerspaces/{customerSpace}/s3import/system/update",
