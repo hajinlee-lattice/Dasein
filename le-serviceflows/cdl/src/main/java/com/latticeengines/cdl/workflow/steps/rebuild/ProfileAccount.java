@@ -273,9 +273,9 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
     }
 
     private void checkDataChanges() {
-        hasManyChange = checkManyUpdate();
+        hasManyChange = checkManyNew();
         if (hasManyChange) {
-            log.info("There's many new or updated records, compute stats for all columns.");
+            log.info("There's many new records, compute stats for all columns.");
             return;
         }
         ChoreographerContext grapherContext = getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
@@ -293,9 +293,8 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
                 + doFullProfile);
     }
 
-    private boolean checkManyUpdate() {
+    private boolean checkManyNew() {
         Long existingCount = null;
-        Long updateCount = null;
         Long newCount = null;
         Map<BusinessEntity, Long> existingValueMap = getMapObjectFromContext(BaseWorkflowStep.EXISTING_RECORDS,
                 BusinessEntity.class, Long.class);
@@ -310,15 +309,10 @@ public class ProfileAccount extends ProfileStepBase<ProcessAccountStepConfigurat
         if (newValueMap != null) {
             newCount = newValueMap.get(BusinessEntity.Account);
         }
-        Map<BusinessEntity, Long> updateValueMap = getMapObjectFromContext(BaseWorkflowStep.UPDATED_RECORDS,
-                BusinessEntity.class, Long.class);
-        if (updateValueMap != null) {
-            updateCount = updateValueMap.get(BusinessEntity.Account);
-        }
-        long diffCount = (newCount == null ? 0L : newCount) + (updateCount == null ? 0L : updateCount);
+        long diffCount = newCount == null ? 0L : newCount;
         if (existingCount != null && existingCount != 0L) {
             float diffRate = diffCount * 1.0F / existingCount;
-            return diffRate >= 0.3;
+            return diffRate >= 0.2;
         }
         return false;
     }
