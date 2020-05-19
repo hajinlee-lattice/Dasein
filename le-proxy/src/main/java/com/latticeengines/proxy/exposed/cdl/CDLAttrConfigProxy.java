@@ -25,6 +25,8 @@ public interface CDLAttrConfigProxy {
 
     AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode);
 
+    AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode, boolean updateDefaultSet);
+
     AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request, AttrConfigUpdateMode mode);
 
     Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(String customerSpace,

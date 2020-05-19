@@ -48,4 +48,6 @@ public interface AttrConfigService {
     AttributeSet createAttributeSet(AttributeSet attributeSet);
 
     void deleteAttributeSetByName(String name);
+
+    AttrConfigRequest saveRequest(AttrConfigRequest request, AttrConfigUpdateMode mode, boolean updateDefaultSet);
 }

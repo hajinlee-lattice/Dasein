@@ -488,7 +488,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         String usage = mapDisplayNameToUsage(usageName);
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(categoryName, usage, request);
         AttrConfigRequest saveResponse = cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest,
-                AttrConfigUpdateMode.Usage);
+                AttrConfigUpdateMode.Usage, ColumnSelection.Predefined.Enrichment.getName().equals(usage));
         return processUpdateResponse(saveResponse, request, true);
     }
 
