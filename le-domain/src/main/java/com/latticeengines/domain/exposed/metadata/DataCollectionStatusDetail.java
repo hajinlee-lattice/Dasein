@@ -79,6 +79,13 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("RedshiftPartition")
     private String redshiftPartition;
 
+    /*-
+     * temp flag to track whether a tenant's transaction store has been migrated off CustomerAccountId
+     * TODO remove after everyone is migrated
+     */
+    @JsonProperty("TransactionRebuilt")
+    private Boolean transactionRebuilt;
+
     @JsonProperty("activityBookKeeping")
     private ActivityBookkeeping bookkeeping;
 
@@ -232,6 +239,14 @@ public class DataCollectionStatusDetail implements Serializable {
 
     public void setRedshiftPartition(String redshiftPartition) {
         this.redshiftPartition = redshiftPartition;
+    }
+
+    public Boolean getTransactionRebuilt() {
+        return transactionRebuilt;
+    }
+
+    public void setTransactionRebuilt(Boolean transactionRebuilt) {
+        this.transactionRebuilt = transactionRebuilt;
     }
 
     public ActivityBookkeeping getBookkeeping() {

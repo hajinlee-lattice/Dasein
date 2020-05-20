@@ -255,14 +255,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         List<String> groupByFields = new ArrayList<>();
-        if (entityMatchEnabled) {
-            // In the future, Transaction could have more account fields, need
-            // to consider:
-            // 1. Are they needed in transaction store
-            // 2. How to properly and efficiently retain them -- Keeping adding
-            // in group fields could have performance concern; Add a join?
-            groupByFields.add(InterfaceName.CustomerAccountId.name());
-        }
         groupByFields.addAll(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
@@ -303,14 +295,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
                 InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         List<String> groupByFields = new ArrayList<>();
-        if (entityMatchEnabled) {
-            // In the future, Transaction could have more account fields, need
-            // to consider:
-            // 1. Are they needed in transaction store
-            // 2. How to properly and efficiently retain them -- Keeping adding
-            // in group fields could have performance concern; Add a join?
-            groupByFields.add(InterfaceName.CustomerAccountId.name());
-        }
         groupByFields.addAll(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
