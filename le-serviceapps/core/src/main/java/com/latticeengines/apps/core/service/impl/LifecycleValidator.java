@@ -61,8 +61,8 @@ public class LifecycleValidator extends AttrValidator {
                 Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
                 if (MapUtils.isNotEmpty(attributesMap)) {
                     for (Map.Entry<String, Set<String>> attributesEntry : attributesMap.entrySet()) {
-                        for (String attrName : attributesEntry.getValue()) {
-                            if (CollectionUtils.isNotEmpty(attributesEntry.getValue())) {
+                        if (CollectionUtils.isNotEmpty(attributesEntry.getValue())) {
+                            for (String attrName : attributesEntry.getValue()) {
                                 Category category = Category.valueOf(attributesEntry.getKey());
                                 result.putIfAbsent(category, new HashSet<>());
                                 result.get(category).add(attrName);
