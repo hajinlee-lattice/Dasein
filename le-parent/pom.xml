@@ -48,8 +48,7 @@
         <maven.antrun.version>1.8</maven.antrun.version> <!-- Last update in 2014, we should move away -->
 
         <!-- javax mostly specification interfaces, keep up with implementations -->
-        <javax.validation.version>2.0.1.Final
-        </javax.validation.version> <!-- implemented by hibernate-validator (not hibernate) -->
+        <javax.validation.version>2.0.1.Final</javax.validation.version> <!-- implemented by hibernate-validator (not hibernate) -->
         <javax.mail.version>1.5.4</javax.mail.version>
         <javax.el.version>2.2.4</javax.el.version>
         <javax.jsr250.version>1.0</javax.jsr250.version> <!-- implemented by spring -->
@@ -70,7 +69,7 @@
         <tez.guava.version>11.0.2</tez.guava.version>
         <avro.version>1.8.2</avro.version> <!-- better match with spark -->
         <parquet.version>1.10.1</parquet.version>
-        <aws.version>1.11.615</aws.version> <!-- at least keep up with emr release -->
+        <aws.version>1.11.759</aws.version> <!-- at least keep up with emr release -->
         <aws.sqs.version>1.0.4</aws.sqs.version>
         <spark.version>2.4.4</spark.version>
         <scala.version>2.11.12</scala.version>
