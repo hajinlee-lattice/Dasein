@@ -89,8 +89,12 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     }
 
     @Override
-    public List<AttributeSet> getAttributeSets() {
-        return attributeSetEntityMgr.findAll();
+    public List<AttributeSet> getAttributeSets(boolean withAttributesMap) {
+        if (withAttributesMap) {
+            return attributeSetEntityMgr.findAllWithAttributesMap();
+        } else {
+            return attributeSetEntityMgr.findAll();
+        }
     }
 
     @Override
