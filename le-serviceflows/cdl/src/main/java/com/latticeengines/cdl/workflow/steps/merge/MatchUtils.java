@@ -59,7 +59,7 @@ public final class MatchUtils {
         return JsonUtils.serialize(config);
     }
 
-    static String getAllocateIdMatchConfigForAccount(String customer, MatchInput baseMatchInput,
+    public static String getAllocateIdMatchConfigForAccount(String customer, MatchInput baseMatchInput,
             Set<String> columnNames, List<String> systemIds, String newEntitiesTableName, boolean hasConvertBatchStore,
             String rootOperationUid) {
         MatchTransformerConfig config = new MatchTransformerConfig();
@@ -88,7 +88,7 @@ public final class MatchUtils {
         return JsonUtils.serialize(config);
     }
 
-    static String getAllocateIdMatchConfigForContact(String customer, MatchInput baseMatchInput,
+    public static String getAllocateIdMatchConfigForContact(String customer, MatchInput baseMatchInput,
             Set<String> columnNames, List<String> accountSystemIds, List<String> contactSystemIds,
             String newEntitiesTableName, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey,
             String rootOperationUid) {
@@ -120,12 +120,12 @@ public final class MatchUtils {
         return JsonUtils.serialize(config);
     }
 
-    private static Map<MatchKey, List<String>> getAccountMatchKeysAccount(Set<String> columnNames,
+    public static Map<MatchKey, List<String>> getAccountMatchKeysAccount(Set<String> columnNames,
             List<String> systemIds, boolean hasConvertBatchStore) {
         return getAccountMatchKeys(columnNames, systemIds, false, hasConvertBatchStore);
     }
 
-    private static Map<MatchKey, List<String>> getAccountMatchKeysForContact(Set<String> columnNames,
+    public static Map<MatchKey, List<String>> getAccountMatchKeysForContact(Set<String> columnNames,
             List<String> systemIds, boolean hasConvertBatchStore, boolean ignoreDomainMatchKey) {
         return getAccountMatchKeys(columnNames, systemIds, true, hasConvertBatchStore, ignoreDomainMatchKey);
     }
@@ -165,7 +165,7 @@ public final class MatchUtils {
         return matchKeys;
     }
 
-    private static Map<MatchKey, List<String>> getContactMatchKeys(Set<String> columnNames, List<String> systemIds, boolean hasConvertBatchStore) {
+    public static Map<MatchKey, List<String>> getContactMatchKeys(Set<String> columnNames, List<String> systemIds, boolean hasConvertBatchStore) {
         Map<MatchKey, List<String>> matchKeys = new HashMap<>();
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Name, InterfaceName.ContactName.name());
         addMatchKeyIfExists(columnNames, matchKeys, MatchKey.Country, InterfaceName.Country.name());

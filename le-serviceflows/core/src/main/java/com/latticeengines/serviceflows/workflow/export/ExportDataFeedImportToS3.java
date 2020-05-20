@@ -1,5 +1,6 @@
 package com.latticeengines.serviceflows.workflow.export;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportExportS3StepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
@@ -30,19 +32,29 @@ public class ExportDataFeedImportToS3 extends BaseImportExportS3<ImportExportS3S
 
     @Override
     protected void buildRequests(List<ImportExportRequest> requests) {
-        String applicationId = getOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);
-        if (applicationId == null) {
-            log.warn("There's no application Id! tenentId=" + tenantId);
+        List<String> pathList = new LinkedList<>();
+        String outputTableName = getOutputValue(WorkflowContextConstants.Outputs.RENAME_AND_MATCH_TABLE);
+        // If has gone through the RenameAndMatchStep
+        if (StringUtils.isNotEmpty(outputTableName)) {
+            Table outputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), outputTableName);
+            pathList = outputTable.getExtracts().stream().map(extract -> extract.getPath())
+                                           .collect(Collectors.toList());
+
+        } else { // keep as it is when RenameAndMatchStep has been skipped
+            String applicationId = getOutputValue(WorkflowContextConstants.Outputs.EAI_JOB_APPLICATION_ID);
+            if (applicationId == null) {
+                log.warn("There's no application Id! tenentId=" + tenantId);
+            }
+            EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
+            if (eaiImportJobDetail == null) {
+                log.warn(String.format("Cannot find the job detail for applicationId=%s, tenantId=%s", applicationId,
+                        tenantId));
+                return;
+            }
+            pathList = eaiImportJobDetail.getPathDetail();
+            pathList = pathList == null ? null
+                    : pathList.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
         }
-        EaiImportJobDetail eaiImportJobDetail = eaiJobDetailProxy.getImportJobDetailByAppId(applicationId);
-        if (eaiImportJobDetail == null) {
-            log.warn(String.format("Cannot find the job detail for applicationId=%s, tenantId=%s", applicationId,
-                    tenantId));
-            return;
-        }
-        List<String> pathList = eaiImportJobDetail.getPathDetail();
-        pathList = pathList == null ? null :
-                pathList.stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(pathList)) {
             pathList.forEach(p -> {
                 p = pathBuilder.getFullPath(p);
@@ -61,7 +73,6 @@ public class ExportDataFeedImportToS3 extends BaseImportExportS3<ImportExportS3S
         } else {
             log.warn("There's no avro path found to export!");
         }
-
     }
 
 }
