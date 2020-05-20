@@ -1,10 +1,9 @@
 package com.latticeengines.apps.core.service.impl;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -55,24 +54,14 @@ public class LifecycleValidator extends AttrValidator {
     }
 
     private Map<Category, Set<String>> buildCategoryMap(List<AttributeSet> attributeSets) {
-        Map<Category, Set<String>> result = new HashMap<>();
-        if (CollectionUtils.isNotEmpty(attributeSets)) {
-            for (AttributeSet attributeSet : attributeSets) {
-                Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
-                if (MapUtils.isNotEmpty(attributesMap)) {
-                    for (Map.Entry<String, Set<String>> attributesEntry : attributesMap.entrySet()) {
-                        if (CollectionUtils.isNotEmpty(attributesEntry.getValue())) {
-                            for (String attrName : attributesEntry.getValue()) {
-                                Category category = Category.valueOf(attributesEntry.getKey());
-                                result.putIfAbsent(category, new HashSet<>());
-                                result.get(category).add(attrName);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return result;
+        return attributeSets.stream().filter(attributeSet -> MapUtils.isNotEmpty(attributeSet.getAttributesMap()))
+                .flatMap(attributeSet -> attributeSet.getAttributesMap().entrySet().stream())
+                .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
+                .collect(Collectors.toMap(entry -> Category.valueOf(entry.getKey()), entry -> entry.getValue(),
+                        (Set<String> newValueList, Set<String> oldValueList) -> {
+                            oldValueList.addAll(newValueList);
+                            return oldValueList;
+                        }));
     }
 
     private void checkState(AttrConfig attrConfig, Map<Category, Set<String>> categoryMap) {
