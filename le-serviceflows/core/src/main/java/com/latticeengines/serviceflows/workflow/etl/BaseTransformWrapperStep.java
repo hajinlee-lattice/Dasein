@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.config.impl.Tr
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.MigrationTrack;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PrepareTransformationStepInputConfiguration;
@@ -378,6 +379,14 @@ public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfigur
         String avscFile = table.getName() + ".avsc";
         return PathBuilder.buildDataTableSchemaPath(podId, customerSpace).append(table.getName()).append(avscFile)
                 .toString();
+    }
+
+    protected boolean inMigrationMode() {
+        MigrationTrack.Status status = metadataProxy.getMigrationStatus(customerSpace.toString());
+        log.info("Tenant's migration status is {}.", status);
+        boolean migrationMode = MigrationTrack.Status.STARTED.equals(status);
+        log.info("Migration mode is {}", migrationMode ? "on" : "off");
+        return migrationMode;
     }
 
 }
