@@ -29,6 +29,9 @@ public class DeriveActivityMetricGroupJobConfig extends SparkJobConfig implement
     @JsonProperty("businessCalendar")
     public BusinessCalendar businessCalendar;
 
+    @JsonProperty("currentVersionStamp")
+    public Long currentVersionStamp;
+
     @JsonProperty("streamMetadataMap")
     // streamId -> dimensions
     public Map<String, Map<String, DimensionMetadata>> streamMetadataMap;

@@ -139,6 +139,7 @@ public class MetricsGroupsGenerationStep extends RunSparkJob<ActivityStreamSpark
             config.setInput(inputs);
             config.inputMetadata = inputMetadata;
             config.businessCalendar = periodProxy.getBusinessCalendar(customerSpace.toString());
+            config.currentVersionStamp = getLongValueFromContext(PA_TIMESTAMP);
             return config;
         }
     }

@@ -39,7 +39,6 @@ class MergeActivityMetrics extends AbstractSparkJob[MergeActivityMetricsJobConfi
       detailsMap.put(mergedTableLabel, details)
     })
     outputMetadata.setMetadata(detailsMap)
-
     lattice.outputStr = serializeJson(outputMetadata)
     lattice.output = mergedTables.toList
   }

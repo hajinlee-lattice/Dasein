@@ -4,13 +4,12 @@ import com.latticeengines.common.exposed.util.AvroUtils
 import com.latticeengines.domain.exposed.cdl.activity.ActivityRowReducer.Operator
 import com.latticeengines.domain.exposed.cdl.activity.StreamAttributeDeriver.Calculation
 import com.latticeengines.domain.exposed.cdl.activity.{ActivityRowReducer, AtlasStream, StreamAttributeDeriver}
-import com.latticeengines.domain.exposed.metadata.InterfaceName
 import com.latticeengines.domain.exposed.metadata.InterfaceName.{AccountId, ContactId}
 import com.latticeengines.domain.exposed.query.BusinessEntity
 import org.apache.avro.Schema.Type
 import org.apache.commons.collections4.CollectionUtils
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.LongType
+import org.apache.spark.sql.types.{BooleanType, LongType}
 import org.apache.spark.sql.{Column, DataFrame}
 
 import scala.collection.JavaConversions._
@@ -21,12 +20,15 @@ private[spark] object DeriveAttrsUtils {
 
   val TIME_REDUCER_OPERATIONS: Seq[Operator] = Seq(Operator.Earliest, Operator.Latest)
 
+  val VERSION_COL: String = "versionStamp"
+
   def getAggr(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
     val calculation: Calculation = deriver.getCalculation
     calculation match {
       case Calculation.SUM => getSum(df, deriver)
       case Calculation.MAX => getMax(df, deriver)
       case Calculation.MIN => getMin(df, deriver)
+      case Calculation.TRUE => getTrue(df, deriver)
       case _ => throw new UnsupportedOperationException(s"$calculation is not implemented")
     }
   }
@@ -59,6 +61,10 @@ private[spark] object DeriveAttrsUtils {
   def getMin(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
     checkSingleSource(deriver)
     min(df(deriver.getSourceAttributes.get(0))).alias(deriver.getTargetAttribute)
+  }
+
+  def getTrue(df: DataFrame, deriver: StreamAttributeDeriver): Column = {
+    lit(true).cast(BooleanType).as(deriver.getTargetAttribute)
   }
 
   def applyTimeActivityRowReducer(df: DataFrame, reducer: ActivityRowReducer): DataFrame = {
@@ -123,11 +129,16 @@ private[spark] object DeriveAttrsUtils {
     val colType: Type = AvroUtils.getAvroType(javaClass)
     colType match {
       case Type.LONG => df.withColumn(attrName, lit(null).cast(LongType))
+      case Type.BOOLEAN => df.withColumn(attrName, lit(null).cast(BooleanType))
       case _ => throw new UnsupportedOperationException(s"${colType.toString} is not supported for appending null columns")
     }
   }
 
   def isTimeReducingOperation(operator: Operator): Boolean = {
     TIME_REDUCER_OPERATIONS.contains(operator)
+  }
+
+  def appendVersionStamp(df: DataFrame, version: Long): DataFrame = {
+    df.withColumn(VERSION_COL, lit(version).cast(LongType))
   }
 }

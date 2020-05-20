@@ -42,9 +42,13 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String TOTAL_VISIT_GROUPNAME = "Total Web Visits";
     private static final String OPPORTUNITY_GROUPNAME = "Opportunity By Stage";
     private static final String MARKETING_GROUPNAME = "Marketing Activity Stream";
+    private static final String INTENT_GROUPNAME = "Has Intent";
+    private static final String INTENT_TIMERANGE_GROUPNAME = "Intent By Timerange";
     private static final String TOTAL_VISIT_GROUPID = "twv";
     private static final String OPPORTUNITY_GROUPID = "obs";
     private static final String MARKETING_GROUPID = "mas";
+    private static final String INTENT_GROUPID = "hix";
+    private static final String INTENT_TIMERANGE_GROUPID = "ibt";
     private static final Set<List<Integer>> TIMEFILTER_PARAMS = new HashSet<>(Arrays.asList(
             Collections.singletonList(1),
             Collections.singletonList(2)
@@ -59,6 +63,8 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final int ONE_WEEK_AGO = CUR_PERIODID - 1;
     private static final int TWO_WEEKS_AGO = CUR_PERIODID - 2;
     private static final int FOREVER_AGO = 1;
+    private static final long CURRENT_VERSION = 10L;
+    private static final long OLD_VERSION = 2L;
 
     // column names
     private static final String PathPatternId = InterfaceName.PathPatternId.name();
@@ -68,18 +74,32 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
     private static final String __Row_Count__ = InterfaceName.__Row_Count__.name();
     private static final String dimNotRequired = "SomeRollupDim";
     private static final String PeriodIdPartition = DeriveAttrsUtils.PARTITION_COL_PREFIX() + PeriodId;
-    private static final String OpportunityId = "OpportunityId";
-    private static final String Stage = "Stage";
-    private static final String ActivityType = "ActivityType";
-
-    private static final String ENTITY_ID_COL = AccountId;
+    private static final String OpportunityId = InterfaceName.OpportunityId.name();
+    private static final String Stage = InterfaceName.StageName.name();
+    private static final String ActivityType = InterfaceName.ActivityType.name();
+    private static final String LastActivityDate = InterfaceName.LastActivityDate.name();
+    private static final String versionStamp = "versionStamp";
 
     private static AtlasStream WEB_VISIT_STREAM;
     private static AtlasStream OPPORTUNITY_STREAM;
     private static AtlasStream MARKETING_STREAM;
+    private static AtlasStream INTENT_STREAM;
     private static final String WEB_VISIT_STREAM_ID = "webVisit";
     private static final String OPPORTUNITY_STREAM_ID = "opportunity";
     private static final String MARKETING_STREAM_ID = "marketing";
+    private static final String INTENT_STREAM_ID = "intent";
+    private static final String MODEL_1 = "m1";
+    private static final String MODEL_2 = "m2";
+    private static final String MODEL_3 = "m3";
+    private static final String MODEL_1_ID = "1";
+    private static final String MODEL_2_ID = "2";
+    private static final String MODEL_3_ID = "3";
+
+    // TODO - followings should move to use interface name
+    // TODO - move to column names section
+    private static final String modelName = "modelName";
+    private static final String modelNameId = "modelNameId";
+    private static final String hasIntent = "hasIntent";
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -94,6 +114,9 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         MARKETING_STREAM = new AtlasStream();
         MARKETING_STREAM.setStreamId(MARKETING_STREAM_ID);
         MARKETING_STREAM.setAggrEntities(Arrays.asList(BusinessEntity.Account.name(), BusinessEntity.Contact.name()));
+        INTENT_STREAM = new AtlasStream();
+        INTENT_STREAM.setStreamId(INTENT_STREAM_ID);
+        INTENT_STREAM.setAggrEntities(Collections.singletonList(BusinessEntity.Account.name()));
     }
 
     @Test(groups = "functional")
@@ -146,6 +169,20 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         ActivityStoreSparkIOMetadata outputMetadata = JsonUtils.deserialize(result.getOutput(), ActivityStoreSparkIOMetadata.class);
         Assert.assertEquals(outputMetadata.getMetadata().size(), 1);
         verify(result, Collections.singletonList(this::verifyMarketingMetrics));
+    }
+
+    @Test(groups = "functional")
+    public void testIntentStream() {
+        List<String> inputs = Arrays.asList(appendIntentInput(), appendAccountBatchStore());
+        DeriveActivityMetricGroupJobConfig config = new DeriveActivityMetricGroupJobConfig();
+        config.activityMetricsGroups = Arrays.asList(setupHasIntentGroup(), setupHasIntentByTimeRangeGroup());
+        config.inputMetadata = constructInputMetadata(INTENT_STREAM, Collections.singletonList(BusinessEntity.Account));
+        config.evaluationDate = EVAL_DATE;
+        config.streamMetadataMap = constructIntentMetadata();
+        config.currentVersionStamp = CURRENT_VERSION;
+        SparkJobResult result = runSparkJob(MetricsGroupGenerator.class, config, inputs, getWorkspace());
+        System.out.println(result.getOutput());
+        // TODO - automate verification
     }
 
     private Long calculateWebActivityAttrsCount(Map<String, Map<String, DimensionMetadata>> streamMetadata, ActivityMetricsGroup group) {
@@ -231,6 +268,21 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         return metadata;
     }
 
+    private Map<String, Map<String, DimensionMetadata>> constructIntentMetadata() {
+        Map<String, Map<String, DimensionMetadata>> metadata = new HashMap<>();
+        Map<String, DimensionMetadata> dimensions = new HashMap<>();
+        DimensionMetadata modelMetadata = new DimensionMetadata();
+        modelMetadata.setDimensionValues((Arrays.asList(
+                Collections.singletonMap(modelNameId, MODEL_1_ID),
+                Collections.singletonMap(modelNameId, MODEL_2_ID),
+                Collections.singletonMap(modelNameId, MODEL_3_ID)
+        )));
+        modelMetadata.setCardinality(3);
+        dimensions.put(modelNameId, modelMetadata);
+        metadata.put(INTENT_STREAM_ID, dimensions);
+        return metadata;
+    }
+
     private String appendWebVisitInputData() {
         List<Pair<String, Class<?>>> periodStoreFields = Arrays.asList( //
                 Pair.of(AccountId, String.class), //
@@ -288,6 +340,26 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
                 {"invalidAcc", "c4", ONE_WEEK_AGO, "ClickLink", 40}
         };
         return uploadHdfsDataUnit(data, periodStoreFields);
+    }
+
+    private String appendIntentInput() {
+        List<Pair<String, Class<?>>> fields = Arrays.asList( //
+                Pair.of(AccountId, String.class), //
+                Pair.of(PeriodId, Integer.class), //
+                Pair.of(PeriodIdPartition, Integer.class), //
+                Pair.of(__Row_Count__, Integer.class), //
+                Pair.of(modelNameId, String.class), //
+                Pair.of(hasIntent, Boolean.class), //
+                Pair.of(LastActivityDate, Long.class), //
+                Pair.of(versionStamp, Long.class)
+        );
+        Object[][] data = new Object[][]{
+                {"acc1", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION},
+                {"acc1", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_2_ID, true, 0L, CURRENT_VERSION},
+                {"acc2", TWO_WEEKS_AGO, TWO_WEEKS_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION},
+                {"acc2", ONE_WEEK_AGO, ONE_WEEK_AGO, 22, MODEL_1_ID, true, 0L, OLD_VERSION}
+        };
+        return uploadHdfsDataUnit(data, fields);
     }
 
     private String appendAccountBatchStore() {
@@ -361,6 +433,35 @@ public class MetricsGroupGeneratorTestNG extends SparkJobFunctionalTestNGBase {
         group.setRollupDimensions(ActivityType);
         group.setAggregation(createAttributeDeriver(Collections.singletonList(__Row_Count__), __Row_Count__, StreamAttributeDeriver.Calculation.SUM));
         group.setNullImputation(NullMetricsImputation.ZERO);
+        return group;
+    }
+
+    private ActivityMetricsGroup setupHasIntentGroup() {
+        ActivityMetricsGroup group = new ActivityMetricsGroup();
+        group.setStream(INTENT_STREAM);
+        group.setGroupId(INTENT_GROUPID);
+        group.setGroupName(INTENT_GROUPNAME);
+        group.setJavaClass(Boolean.class.getSimpleName());
+        group.setEntity(BusinessEntity.Account);
+        group.setActivityTimeRange(createActivityTimeRange(ComparisonType.EVER, TIMEFILTER_PERIODS, null));
+        group.setRollupDimensions(modelNameId);
+        group.setAggregation(createAttributeDeriver(Collections.emptyList(), hasIntent, StreamAttributeDeriver.Calculation.TRUE));
+        group.setNullImputation(NullMetricsImputation.FALSE);
+        group.setUseLatestVersion(true);
+        return group;
+    }
+
+    private ActivityMetricsGroup setupHasIntentByTimeRangeGroup() {
+        ActivityMetricsGroup group = new ActivityMetricsGroup();
+        group.setStream(INTENT_STREAM);
+        group.setGroupId(INTENT_TIMERANGE_GROUPID);
+        group.setGroupName(INTENT_TIMERANGE_GROUPNAME);
+        group.setJavaClass(Boolean.class.getSimpleName());
+        group.setEntity(BusinessEntity.Account);
+        group.setActivityTimeRange(createActivityTimeRange(ComparisonType.WITHIN, TIMEFILTER_PERIODS, TIMEFILTER_PARAMS));
+        group.setRollupDimensions(modelNameId);
+        group.setAggregation(createAttributeDeriver(Collections.emptyList(), hasIntent, StreamAttributeDeriver.Calculation.TRUE));
+        group.setNullImputation(NullMetricsImputation.FALSE);
         return group;
     }
 

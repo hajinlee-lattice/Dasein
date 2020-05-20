@@ -31,6 +31,7 @@ public class MergeActivityMetricsTestNG extends SparkJobFunctionalTestNGBase {
     private static final String M1A2 = "M1A2"; // metrics 1 attribute 2
     private static final String M2A1 = "M2A1"; // metrics 2 attribute 1
     private static final String M2A2 = "M2A2"; // metrics 2 attribute 2
+    private static final String BooleanCol = "hasIntent";
     private static final String M3A3 = "M3A3"; // active metrics attr that needs to be deprecated
 
     private static final String ACCOUNT_ENTITY = BusinessEntity.Account.name();
@@ -89,11 +90,13 @@ public class MergeActivityMetricsTestNG extends SparkJobFunctionalTestNGBase {
         FIELDS_M2 = Arrays.asList( //
                 Pair.of(AccountId, String.class),
                 Pair.of(M2A1, Integer.class),
-                Pair.of(M2A2, Integer.class)
+                Pair.of(M2A2, Integer.class),
+                Pair.of(BooleanCol, Boolean.class)
         );
         Object[][] import2 = new Object[][]{
-                {"acc2", 211, 221},
-                {"acc3", 212, 222}
+                {"acc1", 200, 201, true},
+                {"acc2", 211, 221, true},
+                {"acc3", 212, 222, false}
         };
         FIELDS_M3 = Arrays.asList(
                 Pair.of(AccountId, String.class),

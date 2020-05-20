@@ -12,7 +12,9 @@ import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.
 import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata, DailyStoreToPeriodStoresJobConfig}
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
+import com.latticeengines.spark.util.DeriveAttrsUtils.VERSION_COL
 import com.latticeengines.spark.util.{DeriveAttrsUtils, MergeUtils}
+import org.apache.commons.collections4.CollectionUtils
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{IntegerType, LongType, StringType}
@@ -69,7 +71,14 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
       val inputDetails = lattice.config.inputMetadata.getMetadata.get(stream.getStreamId)
       var offset: Int = 0
       periodStoreDelta.foreach(deltaTable => {
-        var periodBatch: DataFrame = lattice.input(inputDetails.getStartIdx + offset)
+        var periodBatch: DataFrame = {
+          val batch: DataFrame = lattice.input(inputDetails.getStartIdx + offset)
+          if (!batch.columns.contains(DeriveAttrsUtils.VERSION_COL)) {
+            DeriveAttrsUtils.appendVersionStamp(batch, 0L)
+          } else {
+            batch
+          }
+        }
         val period: String = inputDetails.getLabels()(offset)
         if (stream.getRetentionDays != null) {
           val startDate: String = DateTimeUtils.subtractDays(lattice.config.evaluationDate, stream.getRetentionDays)
@@ -89,11 +98,22 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
 
     val affected: DataFrame = periodBatch.filter(col(PeriodId.name).isInCollection(affectedPeriods))
     val notAffected: DataFrame = periodBatch.filter(!col(PeriodId.name).isInCollection(affectedPeriods))
+    val aggFns: Seq[Column] = {
+      if (CollectionUtils.isNotEmpty(stream.getAttributeDerivers)) {
+        stream.getAttributeDerivers.map(DeriveAttrsUtils.getAggr(deltaTable, _))
+      } else {
+        Seq()
+      }
+    } ++ Seq(
+      sum(__Row_Count__.name).as(__Row_Count__.name),
+      max(LastActivityDate.name).as(LastActivityDate.name),
+      max(DeriveAttrsUtils.VERSION_COL).as(DeriveAttrsUtils.VERSION_COL)
+    )
     val updatedSubTable: DataFrame = {
       if (Option(stream.getReducer).isEmpty) {
         MergeUtils.concat2(affected, deltaTable)
           .groupBy(columns.head, columns.tail: _*)
-          .agg(sum(__Row_Count__.name).as(__Row_Count__.name), max(LastActivityDate.name).as(LastActivityDate.name))
+          .agg(aggFns.head, aggFns.tail: _*)
       } else {
         val reducer = Option(stream.getReducer).get
         if (DeriveAttrsUtils.isTimeReducingOperation(reducer.getOperator) && !reducer.getGroupByFields.contains(PeriodId.name)) {
@@ -114,17 +134,28 @@ class PeriodStoresGenerator extends AbstractSparkJob[DailyStoreToPeriodStoresJob
     val aggregations: Seq[StreamAttributeDeriver] =
       if (Option(stream.getAttributeDerivers).isEmpty) Seq()
       else stream.getAttributeDerivers.toSeq
+    val dailyStoreWithVersion: DataFrame = {
+      if (!dailyStore.columns.contains(VERSION_COL)) {
+        DeriveAttrsUtils.appendVersionStamp(dailyStore, 0L)
+      } else {
+        dailyStore
+      }
+    }
 
     // for each requested period name (week, month, etc.):
     //  a: append periodId column based on date and period name
     //  b: apply reducer if defined
     //  c: group to period: group by (entityId + all dimensions from stream + periodId) unless reducer is defined
 
-    var withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStore, periodName, translator, stream))
-    if (Option(stream.getReducer).isEmpty) { // if reducer exists, no need to group by PeriodId as each periodId should only has one record
+    var withPeriodId: Seq[DataFrame] = periods.map(periodName => generatePeriodId(dailyStoreWithVersion, periodName, translator, stream))
+    if (Option(stream.getReducer).isEmpty) { // only group by PeriodId when reducer not exists as in that case each periodId should only has one record
       // Default row count and last activity date must exist
-      val defaultAggColumns = Seq(sum(__Row_Count__.name).as(__Row_Count__.name), max(LastActivityDate.name).as(LastActivityDate.name))
-      val aggColumns: Seq[Column] = aggregations.map(aggr => DeriveAttrsUtils.getAggr(dailyStore, aggr)) ++ defaultAggColumns
+      val defaultAggColumns = Seq(
+        sum(__Row_Count__.name).as(__Row_Count__.name),
+        max(LastActivityDate.name).as(LastActivityDate.name),
+        max(VERSION_COL).as(VERSION_COL)
+      )
+      val aggColumns: Seq[Column] = aggregations.map(aggr => DeriveAttrsUtils.getAggr(dailyStoreWithVersion, aggr)) ++ defaultAggColumns
       val columns: Seq[String] = DeriveAttrsUtils.getEntityIdColsFromStream(stream) ++ (dimensions.map(_.getName) :+ PeriodId.name)
       withPeriodId = withPeriodId.map((df: DataFrame) =>
         addLastActivityDateColIfNotExist(df).groupBy(columns.head, columns.tail: _*).agg(aggColumns.head, aggColumns.tail: _*))

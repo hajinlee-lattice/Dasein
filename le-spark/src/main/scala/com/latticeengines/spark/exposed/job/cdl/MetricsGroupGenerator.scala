@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy.Template
 import com.latticeengines.domain.exposed.cdl.activity._
 import com.latticeengines.domain.exposed.metadata.InterfaceName
-import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{NULL, ZERO, FALSE}
+import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation.{FALSE, NULL, ZERO}
 import com.latticeengines.domain.exposed.query.{BusinessEntity, TimeFilter}
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar
 import com.latticeengines.domain.exposed.spark.cdl.ActivityStoreSparkIOMetadata.Details
@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.spark.cdl.{ActivityStoreSparkIOMetadata
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator
 import com.latticeengines.spark.exposed.job.{AbstractSparkJob, LatticeContext}
 import com.latticeengines.spark.util.DeriveAttrsUtils
+import org.apache.commons.lang3.BooleanUtils
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
@@ -35,6 +36,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   private var hasContactBatchStore: Boolean = false
   private var accountBatchStoreTable: DataFrame = _
   private var contactBatchStoreTable: DataFrame = _
+  private var currentVersion: Long = _
 
   override def runJob(spark: SparkSession, lattice: LatticeContext[DeriveActivityMetricGroupJobConfig]): Unit = {
     import spark.implicits._
@@ -46,6 +48,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
     val translator: TimeFilterTranslator = new TimeFilterTranslator(getPeriodStrategies(groups, calendar), evaluationDate)
     val inputMetadata: ActivityStoreSparkIOMetadata = config.inputMetadata
     val streamMetadata = config.streamMetadataMap
+    currentVersion = config.currentVersionStamp
     hasAccountBatchStore = inputMetadata.getMetadata.contains(ACCOUNT_BATCH_STORE)
     hasContactBatchStore = inputMetadata.getMetadata.contains(CONTACT_BATCH_STORE)
 
@@ -66,7 +69,6 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
     val outputMetadata: ActivityStoreSparkIOMetadata = new ActivityStoreSparkIOMetadata()
     val detailsMap = new util.HashMap[String, Details]() // groupId -> details
-    var index: Int = 0
     var metrics: Seq[DataFrame] = Seq()
     for (group: ActivityMetricsGroup <- groups) {
       val dimensionMetadataMap = streamMetadata.get(group.getStream.getStreamId)
@@ -77,8 +79,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       } else {
         metrics :+= aggregateMetrics(group, evaluationDate, aggregatedPeriodStores, translator, periodStoresMetadata, dimensionMetadataMap)
       }
-      detailsMap.put(group.getGroupId, setDetails(index))
-      index += 1
+      detailsMap.put(group.getGroupId, setDetails(detailsMap.size))
     }
     outputMetadata.setMetadata(detailsMap)
 
@@ -124,7 +125,6 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       case FALSE => DeriveAttrsUtils.fillFalse(missingEntitiesAppended, group.getJavaClass)
       case _ => throw new UnsupportedOperationException("Unknown null imputation method")
     }
-
     replaceNull
   }
 
@@ -140,6 +140,9 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
       } else {
         df.filter(df(periodIdColumnName).between(bounds.getLeft, bounds.getRight))
       }
+    }
+    if (BooleanUtils.isTrue(group.getUseLatestVersion)) {
+      inRange = inRange.filter(inRange(DeriveAttrsUtils.VERSION_COL) === currentVersion)
     }
     if (Option(group.getReducer).isDefined) {
       val reducer = Option(group.getReducer).get
@@ -168,7 +171,6 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
 
     val pivoted: DataFrame = excludeNull.withColumn("combColumn", concatColumns(struct(pivotCols.map(col): _*))).groupBy(entityIdColName)
       .pivot("combColumn").agg(DeriveAttrsUtils.getAggr(excludeNull, deriver))
-
     var attrRenamed: DataFrame = pivoted.columns.foldLeft(pivoted) { (pivotedDF, colName) =>
       if (!colName.equals(entityIdColName)) {
         val attrName: String = constructAttrName(group.getGroupId, Seq(colName), timeRangeName)
@@ -233,7 +235,7 @@ class MetricsGroupGenerator extends AbstractSparkJob[DeriveActivityMetricGroupJo
   def unifyBatchStore(df: DataFrame, entity: BusinessEntity): DataFrame = {
     // remove entities not in batch store, append entities missing from batch store
     val entityIdCol: String = DeriveAttrsUtils.getEntityIdColumnNameFromEntity(entity)
-    val batchStore =  entity match {
+    val batchStore = entity match {
       case BusinessEntity.Account => accountBatchStoreTable
       case BusinessEntity.Contact => contactBatchStoreTable
       case _ => throw new UnsupportedOperationException(s"entity $entity is not supported for activity store")
