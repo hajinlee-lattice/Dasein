@@ -53,7 +53,7 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImpor
         Assert.assertTrue(createdDate);
 
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM,
+                dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                         DEFAULT_SYSTEM_TYPE, EntityType.Contacts.getDisplayName(), baseContactFile.getName());
 
         FieldDefinitionsRecord fieldDefinitionsRecord =
@@ -68,7 +68,7 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImpor
         importSystem.setAccountSystemId(importSystem.generateAccountSystemId());
         cdlService.updateS3ImportSystem(mainTestTenant.getName(), importSystem);
 
-        modelingFileMetadataService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
+        dataMappingService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
                 EntityType.Contacts.getDisplayName(), baseContactFile.getName(), false, fieldDefinitionsRecord);
         baseContactFile = sourceFileService.findByName(baseContactFile.getName());
 
@@ -86,7 +86,7 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImpor
                 EntityType.Contacts.getSchemaInterpretation(), EntityType.Contacts.getEntity().name(), CONTACT_SOURCE_FILE,
                 ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + CONTACT_SOURCE_FILE));
         fetchFieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM,
+                dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                         DEFAULT_SYSTEM_TYPE, EntityType.Contacts.getDisplayName(), newContactFile.getName());
         fieldDefinitionsRecord =
                 fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
@@ -98,7 +98,7 @@ public class CSVFileImportAddLatticeFieldDeploymentTestNGV2 extends CSVFileImpor
             }
         }
 
-        modelingFileMetadataService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
+        dataMappingService.commitFieldDefinitions(DEFAULT_SYSTEM,  DEFAULT_SYSTEM_TYPE,
                 EntityType.Contacts.getDisplayName(), newContactFile.getName(), false, fieldDefinitionsRecord);
 
 

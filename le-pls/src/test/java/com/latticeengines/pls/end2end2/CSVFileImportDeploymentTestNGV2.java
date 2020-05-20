@@ -98,7 +98,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
                     false);
         }
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
+                dataMappingService.fetchFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
                         EntityType.Accounts.getDisplayName(), accountFile.getName());
         FieldDefinitionsRecord fieldDefinitionsRecord =
                 fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
@@ -120,7 +120,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
         otherIds.add(crmID);
         otherIds.add(mapID);
 
-        modelingFileMetadataService.commitFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
+        dataMappingService.commitFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
                 EntityType.Accounts.getDisplayName(), accountFile.getName(), false, fieldDefinitionsRecord);
 
         String feedType = EntityTypeUtils.generateFullFeedType(systemName, EntityType.Accounts);
@@ -161,7 +161,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
                     S3ImportSystem.SystemType.Other, false);
         }
         FetchFieldDefinitionsResponse fieldDefinitionsResponse  =
-                modelingFileMetadataService.fetchFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
+                dataMappingService.fetchFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
                         EntityType.Accounts.getDisplayName(), accountFile.getName());
 
         String dateFormatString1 = "DD/MM/YYYY";
@@ -203,7 +203,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
             }
         }
 
-        modelingFileMetadataService.commitFieldDefinitions(systemName,
+        dataMappingService.commitFieldDefinitions(systemName,
                 DEFAULT_SYSTEM_TYPE, EntityType.Accounts.getDisplayName(), accountFile.getName(),
                 false, currentRecord);
 
@@ -326,7 +326,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
                     S3ImportSystem.SystemType.Other, false);
         }
         FetchFieldDefinitionsResponse  fetchFieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
+                dataMappingService.fetchFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE,
                         EntityType.Contacts.name(), accountFile.getName());
 
         FieldDefinition crmID = new FieldDefinition();
@@ -344,7 +344,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
                 .getFieldDefinitionsRecords(FieldDefinitionSectionName.Other_IDs.getName())
                 .addAll(Arrays.asList(crmID, mapID));
 
-        modelingFileMetadataService.commitFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE, EntityType.Contacts.name(),
+        dataMappingService.commitFieldDefinitions(systemName, DEFAULT_SYSTEM_TYPE, EntityType.Contacts.name(),
                 accountFile.getName(), false,
                 fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord());
 
@@ -399,7 +399,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
         String feedType = EntityTypeUtils.generateFullFeedType(systemName, EntityType.Accounts);
         boolean cityExist = false;
         boolean countryExist = false;
-        FetchFieldDefinitionsResponse fetchResponse = modelingFileMetadataService.fetchFieldDefinitions(
+        FetchFieldDefinitionsResponse fetchResponse = dataMappingService.fetchFieldDefinitions(
                 systemName, DEFAULT_SYSTEM_TYPE, EntityType.Accounts.name(), firstFile.getName());
         FieldDefinitionsRecord fieldRecord = fetchResponse.getCurrentFieldDefinitionsRecord();
         for (FieldDefinition definition :
@@ -414,7 +414,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
         Assert.assertFalse(cityExist);
         Assert.assertFalse(countryExist);
 
-        modelingFileMetadataService.commitFieldDefinitions(systemName, systemType,
+        dataMappingService.commitFieldDefinitions(systemName, systemType,
                 EntityType.Accounts.name(), firstFile.getName(), false, fieldRecord);
 
         ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, firstFile.getName(),
@@ -427,7 +427,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
                 EntityType.Accounts.getSchemaInterpretation(), EntityType.Accounts.getEntity().name(),
                 "Extend_Account.csv", ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Extend_Account.csv"));
 
-        fetchResponse = modelingFileMetadataService.fetchFieldDefinitions(
+        fetchResponse = dataMappingService.fetchFieldDefinitions(
                 systemName, DEFAULT_SYSTEM_TYPE, EntityType.Accounts.name(), secondFile.getName());
         fieldRecord = fetchResponse.getCurrentFieldDefinitionsRecord();
         for (FieldDefinition definition :
@@ -590,7 +590,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
         String feedType = EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.Accounts);
 
         FetchFieldDefinitionsResponse fetchFieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE,
+                dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE,
                         EntityType.Accounts.getDisplayName(), firstFile.getName());
 
         FieldDefinition m1 = new FieldDefinition();
@@ -602,7 +602,7 @@ public class CSVFileImportDeploymentTestNGV2 extends CSVFileImportDeploymentTest
         fetchFieldDefinitionsResponse.getCurrentFieldDefinitionsRecord()
                 .getFieldDefinitionsRecords(FieldDefinitionSectionName.Other_IDs.getName()).add(m1);
 
-        modelingFileMetadataService.commitFieldDefinitions(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE,
+        dataMappingService.commitFieldDefinitions(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE,
                 EntityType.Accounts.getDisplayName(), firstFile.getName(), false, currentRecord);
 
         boolean submitError = false;

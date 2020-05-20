@@ -167,11 +167,11 @@ public class CSVFileImportValidationDeploymentTestNGV2 extends CSVFileImportDepl
 
         String feedType = EntityTypeUtils.generateFullFeedType(DEFAULT_SYSTEM, EntityType.ProductBundles);
         FetchFieldDefinitionsResponse fieldDefinitionsResponse =
-                modelingFileMetadataService.fetchFieldDefinitions(DEFAULT_SYSTEM,
+                dataMappingService.fetchFieldDefinitions(DEFAULT_SYSTEM,
                         DEFAULT_SYSTEM_TYPE, EntityType.ProductBundles.getDisplayName(), PRODUCT_SOURCE_FILE);
         FieldDefinitionsRecord currentRecord = fieldDefinitionsResponse.getCurrentFieldDefinitionsRecord();
 
-        modelingFileMetadataService.commitFieldDefinitions(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE,
+        dataMappingService.commitFieldDefinitions(DEFAULT_SYSTEM, DEFAULT_SYSTEM_TYPE,
                 EntityType.ProductBundles.getDisplayName(), sourceFile.getName(), false, currentRecord);
         sourceFile = sourceFileService.findByName(sourceFile.getName());
         ApplicationId applicationId = cdlService.submitCSVImport(customerSpace, sourceFile.getName(),

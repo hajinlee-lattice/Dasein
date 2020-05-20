@@ -104,8 +104,7 @@ public final class ImportWorkflowUtils {
         }
 
         if (StringUtils.isBlank(importFile)) {
-            log.error("importFile is null or blank");
-            throw new LedpException(LedpCode.LEDP_18229, new String[]{requestType, "importFile is null/blank"});
+            log.info("importFile is null or blank");
         }
     }
 
@@ -802,12 +801,12 @@ public final class ImportWorkflowUtils {
                                                                               Map<String, FieldDefinition> existingFieldDefinitionMap,
                                                                               Map<String, OtherTemplateData> otherTemplateDataMap,
                                                                               MetadataResolver resolver) {
-        if (existingFieldDefinitionMap == null) {
-            existingFieldDefinitionMap = new HashMap<>();
-        }
-        if (otherTemplateDataMap == null) {
-            otherTemplateDataMap = new HashMap<>();
-        }
+
+        boolean skipAutoDetectionCheck = resolver == null || MapUtils.isEmpty(autoDetectionResultsMap);
+                existingFieldDefinitionMap = existingFieldDefinitionMap == null ? new HashMap<>() : existingFieldDefinitionMap;
+        otherTemplateDataMap = otherTemplateDataMap == null ? new HashMap<>() : otherTemplateDataMap;
+        autoDetectionResultsMap = autoDetectionResultsMap == null ? new HashMap<>() : autoDetectionResultsMap;
+
         ValidateFieldDefinitionsResponse response = new ValidateFieldDefinitionsResponse();
         Set<String> unMappedColumnNames = fieldDefinitionsRecordsMap.getOrDefault(FieldDefinitionSectionName.Custom_Fields.getName(),
                 new ArrayList<>()).stream().filter(definition -> Boolean.TRUE.equals(definition.isInCurrentImport()) &&
@@ -838,7 +837,7 @@ public final class ImportWorkflowUtils {
                         }
                         FieldDefinition autoDetectedFieldDefinition =
                                 autoDetectionResultsMap.get(columnName);
-                        if (autoDetectedFieldDefinition == null) {
+                        if (!skipAutoDetectionCheck && autoDetectedFieldDefinition == null) {
                             validations.add(new FieldValidationMessage(fieldName,
                                     definition.getColumnName(), String.format("auto-detected field definition " +
                                     "doesn't exist for column %s.", columnName),
@@ -846,7 +845,7 @@ public final class ImportWorkflowUtils {
                             continue;
                         }
                         // check type consistence
-                        if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
+                        if (!skipAutoDetectionCheck && !checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
                                 definition) && !FieldDefinitionSectionName.Match_IDs.getName().equals(sectionName)
                                 && !FieldDefinitionSectionName.Other_IDs.getName().equals(sectionName)) {
                             String message = String.format("column %s is set as %s but appears to only have %s values",
@@ -860,7 +859,7 @@ public final class ImportWorkflowUtils {
                             FieldDefinition existingFieldDefinition = existingFieldDefinitionMap.getOrDefault(fieldName,
                                     null);
                             checkFieldDefinitionWithDateType(definition, autoDetectedFieldDefinition,
-                                    existingFieldDefinition, resolver,
+                                    existingFieldDefinition, skipAutoDetectionCheck, resolver,
                                     validations);
                         }
                     }
@@ -920,7 +919,7 @@ public final class ImportWorkflowUtils {
                             continue;
                         }
                         FieldDefinition autoDetectedFieldDefinition = autoDetectionResultsMap.get(columnName);
-                        if (autoDetectedFieldDefinition == null) {
+                        if (!skipAutoDetectionCheck && autoDetectedFieldDefinition == null) {
                             validations.add(new FieldValidationMessage(fieldName,
                                     definition.getColumnName(), String.format("auto-detected field definition " +
                                     "doesn't exist for column %s in section %s.", columnName, sectionName),
@@ -929,7 +928,7 @@ public final class ImportWorkflowUtils {
                         }
                         // Error/Warning if the auto-detected fieldType based on column data doesn’t match the Spec
                         // defined fieldType of a Lattice Field
-                        if (!checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
+                        if (!skipAutoDetectionCheck && !checkFieldTypeAgainstSpecOrAutoDetectedWihSpecialCase(autoDetectedFieldDefinition,
                                 definition) && !FieldDefinitionSectionName.Match_To_Accounts_ID.getName().equals(sectionName)
                                 && !FieldDefinitionSectionName.Unique_ID.getName().equals(sectionName)) {
                             String message = String.format("auto-detected fieldType %s based on column data %s " +
@@ -951,7 +950,7 @@ public final class ImportWorkflowUtils {
                             FieldDefinition existingFieldDefinition = existingFieldDefinitionMap.getOrDefault(fieldName,
                                     null);
                             checkFieldDefinitionWithDateType(definition, autoDetectedFieldDefinition,
-                                    existingFieldDefinition, resolver,
+                                    existingFieldDefinition, skipAutoDetectionCheck, resolver,
                                     validations);
                         }
                     } else {
@@ -1066,6 +1065,7 @@ public final class ImportWorkflowUtils {
     private static void checkFieldDefinitionWithDateType(FieldDefinition definition,
                                                         FieldDefinition autoDetectedDefinition,
                                                         FieldDefinition existingFieldDefinition,
+                                                        boolean skipAutoDetection,
                                                         MetadataResolver resolver, List<FieldValidationMessage> validations) {
         String columnName = definition.getColumnName();
         String fieldName = definition.getFieldName();
@@ -1083,13 +1083,29 @@ public final class ImportWorkflowUtils {
         String userFormat = StringUtils.isBlank(timeFormat) ? dateFormat :
                 dateFormat + TimeStampConvertUtils.SYSTEM_DELIMITER + timeFormat;
 
-        //check current vs file, DF, TF
-        ImmutableTriple<Boolean, Boolean, String> match = resolver.checkUserFormatAndTimeZone(columnName,
-                dateFormat, timeFormat, timezone);
-        if (Boolean.FALSE.equals(match.getLeft())) {
-            validations.add(new FieldValidationMessage(fieldName,
-                    columnName, String.format("%s is set to %s which can't parse the %s from uploaded" +
-                            " file.", columnName, userFormat, match.getRight()), FieldValidationMessage.MessageLevel.WARNING));
+        if (!skipAutoDetection) {
+            //check current vs file, DF, TF
+            ImmutableTriple<Boolean, Boolean, String> match = resolver.checkUserFormatAndTimeZone(columnName,
+                    dateFormat, timeFormat, timezone);
+            if (Boolean.FALSE.equals(match.getLeft())) {
+                validations.add(new FieldValidationMessage(fieldName,
+                        columnName, String.format("%s is set to %s which can't parse the %s from uploaded" +
+                        " file.", columnName, userFormat, match.getRight()), FieldValidationMessage.MessageLevel.WARNING));
+            }
+            // check current vs file: TZ
+            if (Boolean.FALSE.equals(match.getMiddle())) {
+                boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
+                String message;
+                if (isISO8601) {
+                    message = String.format("Time zone should be part of value but is not for column %s.",
+                            columnName);
+                } else {
+                    message = String.format("Time zone set to %s. Data values should not contain time " +
+                            "zone setting for column %s.", timezone, columnName);
+                }
+                validations.add(new FieldValidationMessage(fieldName,
+                        columnName, message, FieldValidationMessage.MessageLevel.WARNING));
+            }
         }
         // check current vs existing : DF, TF, TZ
         String existingFormat = null;
@@ -1124,33 +1140,20 @@ public final class ImportWorkflowUtils {
                     columnName, message.toString(), FieldValidationMessage.MessageLevel.WARNING));
         }
 
-        // check current vs auto-detected : DF, TF
-        String autoDetectedFormat = StringUtils
-                .isBlank(autoDetectedDefinition.getTimeFormat()) ?
-                autoDetectedDefinition.getDateFormat() :
-                autoDetectedDefinition.getDateFormat() + TimeStampConvertUtils.SYSTEM_DELIMITER
-                        + autoDetectedDefinition.getTimeFormat();
-        if (!StringUtils.equals(userFormat, autoDetectedFormat)) {
-            // this check current format against auto-detected format: DF, TF
-            String message = String.format("%s is set to %s which is different from " +
-                            "auto-detected format %s.", columnName, userFormat, autoDetectedFormat);
-            validations.add(new FieldValidationMessage(fieldName,
-                    columnName, message, FieldValidationMessage.MessageLevel.WARNING));
-        }
-
-        // check current vs file: TZ
-        if (Boolean.FALSE.equals(match.getMiddle())) {
-            boolean isISO8601 = TimeStampConvertUtils.SYSTEM_USER_TIME_ZONE.equals(timezone);
-            String message;
-            if (isISO8601) {
-                message = String.format("Time zone should be part of value but is not for column %s.",
-                        columnName);
-            } else {
-                message = String.format("Time zone set to %s. Data values should not contain time " +
-                        "zone setting for column %s.", timezone, columnName);
+        if (!skipAutoDetection) {
+            // check current vs auto-detected : DF, TF
+            String autoDetectedFormat = StringUtils
+                    .isBlank(autoDetectedDefinition.getTimeFormat()) ?
+                    autoDetectedDefinition.getDateFormat() :
+                    autoDetectedDefinition.getDateFormat() + TimeStampConvertUtils.SYSTEM_DELIMITER
+                            + autoDetectedDefinition.getTimeFormat();
+            if (!StringUtils.equals(userFormat, autoDetectedFormat)) {
+                // this check current format against auto-detected format: DF, TF
+                String message = String.format("%s is set to %s which is different from " +
+                        "auto-detected format %s.", columnName, userFormat, autoDetectedFormat);
+                validations.add(new FieldValidationMessage(fieldName,
+                        columnName, message, FieldValidationMessage.MessageLevel.WARNING));
             }
-            validations.add(new FieldValidationMessage(fieldName,
-                    columnName, message, FieldValidationMessage.MessageLevel.WARNING));
         }
     }
 
