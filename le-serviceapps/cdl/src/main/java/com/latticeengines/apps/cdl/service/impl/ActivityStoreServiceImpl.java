@@ -201,6 +201,9 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
         String streamId = getStreamId(streamName);
         if (StringUtils.isBlank(signature)) {
             signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
+            if (StringUtils.isBlank(signature)) {
+                return Collections.emptyMap();
+            }
         }
         return dimensionMetadataService.getMetadataInStream(signature, streamId);
     }
@@ -210,6 +213,9 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
             String signature) {
         if (StringUtils.isBlank(signature)) {
             signature = getDimensionMetadataSignature(MultiTenantContext.getShortTenantId());
+            if (StringUtils.isBlank(signature)) {
+                return Collections.emptyMap();
+            }
         }
         Map<String, String> streamNameMap = getStreamNameMap(customerSpace);
 
@@ -276,15 +282,17 @@ public class ActivityStoreServiceImpl implements ActivityStoreService {
 
     private String getDimensionMetadataSignature(@NotNull String customerSpace) {
         DataCollection.Version activeVersion = dataCollectionEntityMgr.findActiveVersion();
-        Preconditions.checkNotNull(activeVersion,
-                String.format("No current active version found for tenant %s", customerSpace));
+        if (activeVersion == null) {
+            log.info("No current active version found for tenant {}", customerSpace);
+            return null;
+        }
         DataCollectionStatus status = dataCollectionStatusEntityMgr
                 .findByTenantAndVersion(MultiTenantContext.getTenant(), activeVersion);
-        Preconditions.checkNotNull(status, "No datacollection status for active version found in tenant %s",
-                customerSpace);
+        if (status == null) {
+            log.info("No datacollection status for active version found in tenant {}", customerSpace);
+            return null;
+        }
         String signature = status.getDimensionMetadataSignature();
-        Preconditions.checkNotNull(signature,
-                String.format("No dimension metadata signature found in tenant %s", customerSpace));
         log.info("Found dimension metadata signature in tenant {}, activeVersion = {}, signature = {}", customerSpace,
                 activeVersion, signature);
         return signature;
