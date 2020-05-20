@@ -125,9 +125,13 @@ public class GenerateDimensionMetadata
                         "Stream %s has too many distinct values for its dimensions, skip processing", streamId));
             }
         });
-
+        removeSkippedStreamMetadata(dimensionMetadataMap);
         allocateDimensionIdsAndOverrideMap(dimensionMetadataMap);
         saveDimensionMetadataMap(dimensionMetadataMap);
+    }
+
+    private void removeSkippedStreamMetadata(Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
+        streamErrorMsgs.keySet().forEach(dimensionMetadataMap::remove);
     }
 
     private void saveDimensionMetadataMap(@NotNull Map<String, Map<String, DimensionMetadata>> dimensionMetadataMap) {
