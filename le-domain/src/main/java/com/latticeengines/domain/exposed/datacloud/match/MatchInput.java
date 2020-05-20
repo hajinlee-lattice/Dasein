@@ -23,6 +23,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.datacloud.match.entity.EntityMatchEnvironment;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -165,10 +166,6 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("UseRemoteDnB")
     private Boolean useRemoteDnB;
 
-    // can be retired after fully cutting over to Direct+
-    @JsonProperty("UseDirectPlus")
-    private Boolean useDirectPlus;
-
     // Flag logDnBBulkResult decides whether DnB bulk match result is logged
     @JsonProperty("LogDnBBulkResult")
     private boolean logDnBBulkResult;
@@ -194,6 +191,21 @@ public class MatchInput implements Fact, Dimension {
 
     // ====================
     // END FLAGS
+    // ====================
+
+    // ====================
+    // BEGIN DIRECT+
+    // ====================
+
+    // can be retired after fully cutting over to Direct+
+    @JsonProperty("UseDirectPlus")
+    private Boolean useDirectPlus;
+
+    @JsonProperty("DPlusMatchConfig")
+    private DplusMatchConfig dplusMatchConfig;
+
+    // ====================
+    // END DIRECT+
     // ====================
 
     // ====================
@@ -599,6 +611,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setUseDirectPlus(Boolean useDirectPlus) {
         this.useDirectPlus = useDirectPlus;
+    }
+
+    public DplusMatchConfig getDplusMatchConfig() {
+        return dplusMatchConfig;
+    }
+
+    public void setDplusMatchConfig(DplusMatchConfig dplusMatchConfig) {
+        this.dplusMatchConfig = dplusMatchConfig;
     }
 
     public boolean isMatchDebugEnabled() {
