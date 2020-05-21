@@ -2,6 +2,7 @@ package com.latticeengines.security.exposed.util;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.latticeengines.domain.exposed.auth.IDaaSExternalSession;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.LoginException;
 import com.latticeengines.domain.exposed.security.Session;
@@ -33,6 +34,11 @@ public final class SecurityUtils {
         if (user == null) {
             return null;
         }
+        if (session.getExternalSession() != null && session.getExternalSession() instanceof IDaaSExternalSession) {
+            IDaaSExternalSession iDaaSExternalSession = (IDaaSExternalSession) session.getExternalSession();
+            user.setLanguage(iDaaSExternalSession.getLanguage());
+        }
+
         user.setAccessLevel(session.getAccessLevel());
         return user;
     }

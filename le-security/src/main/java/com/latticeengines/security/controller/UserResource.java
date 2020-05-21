@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -111,6 +112,15 @@ public class UserResource {
         AccessLevel targetLevel = AccessLevel.EXTERNAL_USER;
         if (userReg.getUser().getAccessLevel() != null) {
             targetLevel = AccessLevel.valueOf(userReg.getUser().getAccessLevel());
+        }
+        if (Boolean.TRUE.equals(userReg.isUseIDaaS())) {
+            if ((AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
+                    && !EmailUtils.isInternalUser(userReg.getUser().getEmail())) {
+                LOGGER.info("target level is {} while email is external, change it to {}", targetLevel,
+                        AccessLevel.EXTERNAL_ADMIN);
+                targetLevel = AccessLevel.EXTERNAL_ADMIN;
+            }
+            userReg.getUser().setAccessLevel(targetLevel.name());
         }
         if (!userService.isSuperior(loginLevel, targetLevel)) {
             LOGGER.warn(

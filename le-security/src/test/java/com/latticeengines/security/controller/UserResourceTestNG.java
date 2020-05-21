@@ -24,6 +24,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
@@ -32,12 +33,15 @@ import com.latticeengines.domain.exposed.pls.UserUpdateData;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
+import com.latticeengines.domain.exposed.security.UserLanguage;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationService;
 import com.latticeengines.security.exposed.service.UserService;
 import com.latticeengines.security.functionalframework.UserResourceTestNGBase;
+import com.latticeengines.security.service.IDaaSService;
+import com.latticeengines.security.service.impl.IDaaSUser;
 
 public class UserResourceTestNG extends UserResourceTestNGBase {
 
@@ -48,6 +52,9 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private IDaaSService iDaaSService;
 
     private static final AccessLevel[] LEVELS = AccessLevel.values();
     private static String usersApi;
@@ -115,6 +122,37 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testConflictingUserInTenant();
         testConflictingUserOutsideTenant();
+    }
+
+    @Test(groups = {"functional", "deployment"})
+    public void registerDCPUser() {
+        switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
+        testDCPUserCreate("test" + UUID.randomUUID().toString() + "@test.com");
+        testDCPUserCreate("test" + UUID.randomUUID().toString() + "@dnb.com");
+    }
+
+    private void testDCPUserCreate(String email) {
+        UserRegistration uReg = createUserRegistration(EmailUtils.isInternalUser(email) ?
+                AccessLevel.INTERNAL_ADMIN.name() : AccessLevel.EXTERNAL_ADMIN.name());
+        uReg.getUser().setEmail(email);
+        uReg.getUser().setUsername(email);
+        uReg.getCredentials().setUsername(email);
+        uReg.setUseIDaaS(true);
+        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
+        String json = restTemplate.postForObject(usersApi, uReg, String.class);
+        ResponseDocument<RegistrationResult> response = ResponseDocument.generateFromJSON(json,
+                RegistrationResult.class);
+        assertNotNull(response);
+        assertTrue(response.isSuccess());
+        User user = userService.findByUsername(uReg.getCredentials().getUsername());
+        Assert.assertNotNull(user);
+        AccessLevel level = userService.getAccessLevel(testTenant.getId(), email);
+        Assert.assertEquals(level.name(), String.valueOf(
+                EmailUtils.isInternalUser(email) ? AccessLevel.INTERNAL_ADMIN : AccessLevel.EXTERNAL_ADMIN));
+        IDaaSUser iDaaSUser = iDaaSService.getIDaaSUser(uReg.getUser().getEmail());
+        Assert.assertNotNull(iDaaSUser);
+
+        makeSureUserDoesNotExist(uReg.getCredentials().getUsername());
     }
 
     @Test(groups = { "functional", "deployment" }, dataProvider = "getAllUsersProvider")
@@ -194,17 +232,21 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         assertTrue(response.isSuccess());
     }
 
-    private UserRegistration createUserRegistration() {
+    private UserRegistration createUserRegistration(String... level) {
         UserRegistration userReg = new UserRegistration();
 
         User user = new User();
         user.setEmail("test" + UUID.randomUUID().toString() + "@test.com");
         user.setFirstName("Test");
         user.setLastName("Tester");
+        user.setLanguage(UserLanguage.English);
         user.setPhoneNumber("650-555-5555");
         user.setTitle("Silly Tester");
-        user.setAccessLevel(AccessLevel.EXTERNAL_USER.name());
-
+        if (level != null && level.length == 1) {
+            user.setAccessLevel(level[0]);
+        } else {
+            user.setAccessLevel(AccessLevel.EXTERNAL_USER.name());
+        }
         Credentials creds = new Credentials();
         creds.setUsername(user.getEmail());
         creds.setPassword("WillBeModifiedImmediately");
