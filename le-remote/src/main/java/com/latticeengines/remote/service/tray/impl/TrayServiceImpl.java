@@ -1,28 +1,40 @@
-package com.latticeengines.monitor.exposed.service.impl;
+package com.latticeengines.remote.service.tray.impl;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
-import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.monitor.TraySettings;
-import com.latticeengines.monitor.exposed.service.TrayService;
+import com.latticeengines.domain.exposed.remote.tray.TraySettings;
+import com.latticeengines.proxy.exposed.RestApiClient;
+import com.latticeengines.remote.exposed.service.tray.TrayService;
 
 @Component("TrayService")
 public class TrayServiceImpl implements TrayService {
 
     private static final Logger log = LoggerFactory.getLogger(TrayServiceImpl.class);
 
-    @Value("${monintor.tray.graphql.url}")
+    @Value("${remote.tray.graphql.url}")
     private String trayGraphQLurl;
 
-    private RestTemplate trayRestTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
+    @Inject
+    private ApplicationContext applicationContext;
+
+    private RestApiClient trayClient;
+
+    @PostConstruct
+    public void initialize() throws Exception {
+        trayClient = RestApiClient.newExternalClient(applicationContext);
+    }
 
     @Override
     public Object removeSolutionInstance(TraySettings settings) {
@@ -34,12 +46,11 @@ public class TrayServiceImpl implements TrayService {
             String query = String.format(
                     "{\"query\":\"mutation($solutionInstanceId: ID!) { removeSolutionInstance(input: {    solutionInstanceId: $solutionInstanceId\\n  }) {  clientMutationId\\n }}\",\"variables\":{\"solutionInstanceId\":\"%s\"}}",
                     settings.getSolutionInstanceId());
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", "application/json");
-            headers.set("Authorization", String.format("bearer %s", settings.getUserToken()));
-            HttpEntity<String> request = new HttpEntity<>(query, headers);
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Content-Type", "application/json");
+            headers.put("Authorization", String.format("bearer %s", settings.getUserToken()));
 
-            returnObj = trayRestTemplate.postForObject(trayGraphQLurl, request, Object.class);
+            returnObj = trayClient.postWithHeaders(trayGraphQLurl, query, headers, Object.class);
             log.info(String.format("Returned object is %s", returnObj));
         } catch (Exception e) {
             log.error("Failed to remove Tray solution instance", e);

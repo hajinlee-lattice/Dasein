@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.monitor;
+package com.latticeengines.domain.exposed.remote.tray;
 
 public class TraySettings {
 

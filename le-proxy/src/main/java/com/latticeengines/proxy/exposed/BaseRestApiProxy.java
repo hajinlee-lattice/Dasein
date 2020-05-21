@@ -83,7 +83,8 @@ public abstract class BaseRestApiProxy {
     private long initialWaitMsec = 500;
     private double multiplier = 2D;
     private int maxAttempts = 5;
-    private boolean useUri = false; // when using URI, url request parameters need to be url-encoded.
+    private boolean useUri = false; // when using URI, url request parameters
+                                    // need to be url-encoded.
 
     private ConcurrentMap<String, String> headers = new ConcurrentHashMap<>();
 
@@ -311,14 +312,18 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts,
-                                  final Class<T> returnValueClazz) {
+            final Class<T> returnValueClazz) {
         return exchangeMultiPart(method, HttpMethod.POST, url, parts, null, returnValueClazz);
     }
 
+    protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts,
+            final Map<String, String> headers, final Class<T> returnValueClazz) {
+        return exchangeMultiPart(method, HttpMethod.POST, url, parts, headers, returnValueClazz);
+    }
+
     protected <T> T exchangeMultiPart(final String method, final HttpMethod httpMethod, final String url,
-                                      final MultiValueMap<String, Object> parts,
-                                      final Map<String, String> extraHeaders,
-                                      final Class<T> returnValueClazz) {
+            final MultiValueMap<String, Object> parts, final Map<String, String> extraHeaders,
+            final Class<T> returnValueClazz) {
         RetryTemplate retry = getRetryTemplate(method, httpMethod, url, false, null);
         return retry.execute(context -> {
             logInvocation(method, url, httpMethod, context.getRetryCount() + 1);
@@ -337,8 +342,7 @@ public abstract class BaseRestApiProxy {
                 }
             }
             newRestTemplate.setInterceptors(interceptors);
-            ResponseEntity<T> response = newRestTemplate.exchange(url, httpMethod, requestEntity,
-                    returnValueClazz);
+            ResponseEntity<T> response = newRestTemplate.exchange(url, httpMethod, requestEntity, returnValueClazz);
             return response.getBody();
         });
     }
@@ -372,7 +376,7 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <B> void put(final String method, final String url, final B body, boolean logBody) {
-        put(method, url, body,null,  null, logBody, false);
+        put(method, url, body, null, null, logBody, false);
     }
 
     protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz) {
@@ -380,7 +384,7 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <B, T> T put(final String method, final String url, final B body, final Map<String, String> headers,
-                           final Class<T> returnClz, boolean logBody, boolean kryo) {
+            final Class<T> returnClz, boolean logBody, boolean kryo) {
         HttpMethod verb = HttpMethod.PUT;
         RetryTemplate retry = getRetryTemplate(method, verb, url, logBody, body);
         return retry.execute(context -> {
@@ -478,19 +482,21 @@ public abstract class BaseRestApiProxy {
         return exchange(url, method, payload, clz, kryoContent, kryoResponse, true);
     }
 
-    <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Map<String, String> headers, Class<T> clz, //
-                                      boolean kryoContent, boolean kryoResponse) {
+    <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Map<String, String> headers,
+            Class<T> clz, //
+            boolean kryoContent, boolean kryoResponse) {
         // trace request by default
         return exchange(url, method, payload, headers, clz, kryoContent, kryoResponse, true);
     }
 
     <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
-                                      boolean kryoContent, boolean kryoResponse, boolean instrumentTracing) {
+            boolean kryoContent, boolean kryoResponse, boolean instrumentTracing) {
         // trace request by default
         return exchange(url, method, payload, null, clz, kryoContent, kryoResponse, true);
     }
 
-    <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Map<String, String> extraHeaders, Class<T> clz, //
+    <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Map<String, String> extraHeaders,
+            Class<T> clz, //
             boolean kryoContent, boolean kryoResponse, boolean instrumentTracing) {
         HttpHeaders headers = new HttpHeaders();
 
@@ -540,9 +546,9 @@ public abstract class BaseRestApiProxy {
     }
 
     /**
-     * Reactive api won't start fetching right away. Data transmission starts when
-     * the flux is first time subscribed. Retry should handle retry in callers,
-     * because it may be an infinite stream
+     * Reactive api won't start fetching right away. Data transmission starts
+     * when the flux is first time subscribed. Retry should handle retry in
+     * callers, because it may be an infinite stream
      */
     protected <T> Mono<T> getMono(String channel, String url, Class<T> clz) {
         RequestHeadersSpec<?> request = prepareReactiveRequest(url, HttpMethod.GET, null, false);
