@@ -272,7 +272,7 @@ public class ExtractAtlasEntity extends BaseSparkSQLStep<EntityExportStepConfigu
             addAccountId(BusinessEntity.Account, columnMetadataList, accountId);
         }
         if (entityMatchGA && !hasCustomerAccountId) {
-            addAccountId(BusinessEntity.Contact, columnMetadataList, customerAccountId);
+            addAccountId(BusinessEntity.Account, columnMetadataList, customerAccountId);
         }
         sortAttribute(columnMetadataList);
         return convertToLookup(columnMetadataList);
