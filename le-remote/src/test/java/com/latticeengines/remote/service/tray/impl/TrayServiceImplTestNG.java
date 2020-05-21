@@ -16,7 +16,7 @@ public class TrayServiceImplTestNG extends AbstractTestNGSpringContextTests {
     private TrayService trayService;
 
     @Test(groups = "manual", enabled = true)
-    public void testRemoveeSolutionInstance() {
+    public void testRemoveSolutionInstance() {
         String userToken = "dbc3bcbdff634741af8724813c47f178cbd62071dd014b4a8aef3b15f1913d21";
         String solutionInstanceId = "9b54bfd2-1b70-4762-9000-b3e1f7dea2a7";
         trayService.removeSolutionInstance(
