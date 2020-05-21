@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.pls.service.MetadataSegmentService;
+import com.latticeengines.pls.util.TeamInfoUtils;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.security.exposed.service.TeamService;
@@ -264,11 +265,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             return null;
         }
         try {
-            segment.setTeam(globalTeam);
-            String teamId = segment.getTeamId();
-            if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
-                segment.setViewOnly(true);
-            }
+            TeamInfoUtils.fillTeams(segment, globalTeam, teamIds);
             Restriction accountRestriction = segment.getAccountRestriction();
             if (accountRestriction == null) {
                 segment.setAccountFrontEndRestriction(emptyFrontEndRestriction());

@@ -34,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.domain.exposed.auth.GlobalTeam;
+import com.latticeengines.domain.exposed.auth.HasTeamInfo;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -59,7 +60,7 @@ import io.swagger.annotations.ApiModelProperty;
 @Filters({ @Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Cloneable, SoftDeletable {
+public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasTenantId, Cloneable, SoftDeletable, HasTeamInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -464,26 +465,32 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         return KryoUtils.read(bis, MetadataSegment.class);
     }
 
+    @Override
     public String getTeamId() {
         return teamId;
     }
 
+    @Override
     public void setTeamId(String teamId) {
         this.teamId = teamId;
     }
 
+    @Override
     public GlobalTeam getTeam() {
         return team;
     }
 
+    @Override
     public void setTeam(GlobalTeam team) {
         this.team = team;
     }
 
+    @Override
     public boolean isViewOnly() {
         return viewOnly;
     }
 
+    @Override
     public void setViewOnly(boolean viewOnly) {
         this.viewOnly = viewOnly;
     }

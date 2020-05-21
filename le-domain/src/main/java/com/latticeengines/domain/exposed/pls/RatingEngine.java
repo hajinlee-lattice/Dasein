@@ -48,6 +48,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.auth.HasTeamId;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -70,7 +71,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId"),
         @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable {
+public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable, HasTeamId {
 
     public static final String RATING_ENGINE_PREFIX = "engine";
     public static final String RATING_ENGINE_FORMAT = "%s_%s";
@@ -536,12 +537,14 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         return defaultName;
     }
 
+    @Override
     @Column(name = "TEAM_ID")
     @JsonProperty("teamId")
     public String getTeamId() {
         return teamId;
     }
 
+    @Override
     @JsonProperty("teamId")
     public void setTeamId(String teamId) {
         this.teamId = teamId;
