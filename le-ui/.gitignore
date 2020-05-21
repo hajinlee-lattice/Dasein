@@ -1,7 +1,0 @@
-#NPM modules
-**/node_modules/**
-
-#Dist folders created during build
-**/dist/**
-**/.sass-cache/**
-.vscode/

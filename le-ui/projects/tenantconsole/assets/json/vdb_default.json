@@ -1,9 +1,0 @@
-{
-  "RootPath": "/Pods/Default/Services/VDB/Default",
-  "Nodes": [
-    {"Node": "Config1", "Data": "value1"},
-    {"Node": "Config2", "Data": 2.34},
-    {"Node": "Config3", "Data": true},
-    {"Node": "Config4", "Data": "OPTION_1"}
-  ]
-}
