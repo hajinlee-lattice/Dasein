@@ -360,4 +360,18 @@ public class AbstractAttrConfigServiceUnitTestNG {
         };
     }
 
+    static class AttrConfigServiceTestImpl extends AbstractAttrConfigService {
+
+        @Override
+        protected List<ColumnMetadata> getSystemMetadata(BusinessEntity entity) {
+            return null;
+        }
+
+        @Override
+        protected List<ColumnMetadata> getSystemMetadata(Category category) {
+            return null;
+        }
+
+    }
+
 }
