@@ -6,11 +6,11 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.service.ActionService;
@@ -63,7 +63,7 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
         }
         Action action = registerAction(customerSpace, request, pidWrapper.getPid());
         RegisterDeleteDataWorkflowConfiguration configuration = generateConfig(customerSpace,
-                sourceFile.getTableName(), sourceFile.getPath(), user, action.getPid());
+                sourceFile.getTableName(), sourceFile.getPath(), request, user, action.getPid());
         return workflowJobService.submit(configuration, pidWrapper.getPid());
     }
 
@@ -120,6 +120,10 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
         deleteActionConfiguration.setIdEntity(request.getIdEntity());
         deleteActionConfiguration.setDeleteEntities(request.getDeleteEntities());
         deleteActionConfiguration.setDeleteStreamIds(request.getDeleteStreamIds());
+        deleteActionConfiguration.setDeleteEntityType(request.getDeleteEntityType());
+        deleteActionConfiguration.setIdSystem(request.getIdSystem());
+        deleteActionConfiguration.setFromDate(request.getFromDate());
+        deleteActionConfiguration.setToDate(request.getToDate());
         action.setActionConfiguration(deleteActionConfiguration);
         action.setTenant(tenant);
         if (tenant.getPid() != null) {
@@ -131,13 +135,19 @@ public class RegisterDeleteDataWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private RegisterDeleteDataWorkflowConfiguration generateConfig(CustomerSpace customerSpace, String tableName,
-                                                                   String filePath, String user, Long actionPid) {
+                                                                   String filePath, DeleteRequest request,String user, Long actionPid) {
+        boolean skipRenameAndMatch = (StringUtils.isEmpty(request.getIdSystem())) || (request.getIdEntity() == null);
+
         return new RegisterDeleteDataWorkflowConfiguration.Builder()
                 .customer(customerSpace)
                 .internalResourceHostPort(internalResourceHostPort) //
                 .microServiceHostPort(microserviceHostPort) //
                 .tableName(tableName)
                 .filePath(filePath)
+                .deleteEntityType(request.getDeleteEntityType())
+                .idEntity(request.getIdEntity())
+                .idSystem(request.getIdSystem())
+                .skipRenameAndMatch(skipRenameAndMatch)
                 .userId(user)
                 .inputProperties(ImmutableMap.<String, String>builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString())

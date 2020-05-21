@@ -241,6 +241,7 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public UIAction softDelete(DeleteRequest deleteRequest) {
+        log.info(deleteRequest.toString());
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         UIAction uiAction = new UIAction();
         if (!batonService.isEntityMatchEnabled(customerSpace)) {
