@@ -18,10 +18,6 @@ public interface ProjectService {
 
     List<ProjectSummary> getAllProject(String customerSpace);
 
-//    Project getProjectByProjectId(String customerSpace, String projectId);
-
-//    Project getProjectByImportSystem(String customerSpace, S3ImportSystem importSystem);
-
     ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId);
 
     Boolean deleteProject(String customerSpace, String projectId);

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.dcp.service.ProjectService;
+import com.latticeengines.common.exposed.annotation.UseReaderConnection;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
 import com.latticeengines.domain.exposed.dcp.ProjectRequest;
@@ -56,6 +57,7 @@ public class ProjectResource {
     @GetMapping(value = "/list")
     @ResponseBody
     @ApiOperation(value = "Get all projects")
+    @UseReaderConnection
     public List<ProjectSummary> getAllProject(@PathVariable String customerSpace) {
         return projectService.getAllProject(customerSpace);
     }
@@ -63,6 +65,7 @@ public class ProjectResource {
     @GetMapping(value = "/projectId/{projectId}")
     @ResponseBody
     @ApiOperation(value = "Get project by projectId")
+    @UseReaderConnection
     public ProjectDetails getProjectByProjectId(@PathVariable String customerSpace, @PathVariable String projectId) {
         return projectService.getProjectDetailByProjectId(customerSpace, projectId);
     }
