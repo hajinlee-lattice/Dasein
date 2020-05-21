@@ -94,16 +94,14 @@ public class ServingStoreServiceImpl implements ServingStoreService {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
         filter = filter == null ? StoreFilter.ALL : filter;
-        Flux<ColumnMetadata> flux;
+
         if (AttributeUtils.isDefaultAttributeSet(attributeSetName) || !isEnrichmentGroup(groups)) {
             attributeSetName = null;
         }
         if (version == null) {
-            flux = getFullyDecoratedMetadata(entity, dataCollectionService.getActiveVersion(customerSpace), filter, attributeSetName)
-                    .sequential();
-        } else {
-            flux = getFullyDecoratedMetadata(entity, version, filter, attributeSetName).sequential();
+            version = dataCollectionService.getActiveVersion(customerSpace);
         }
+        ParallelFlux<ColumnMetadata> flux = getFullyDecoratedMetadata(entity, version, filter, attributeSetName);
         flux = flux //
                 .doOnSubscribe(s -> {
                     timer.set(System.currentTimeMillis());
@@ -122,7 +120,7 @@ public class ServingStoreServiceImpl implements ServingStoreService {
         if (CollectionUtils.isNotEmpty(filterGroups)) {
             flux = flux.filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor));
         }
-        return flux;
+        return flux.sequential();
     }
 
     @Override

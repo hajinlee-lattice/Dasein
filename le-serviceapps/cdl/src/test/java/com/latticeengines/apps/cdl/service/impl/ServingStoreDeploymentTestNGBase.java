@@ -1,19 +1,25 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
+import com.google.common.collect.Sets;
+import com.latticeengines.apps.cdl.entitymgr.AttributeSetEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.apps.cdl.service.S3ImportSystemService;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
@@ -27,13 +33,17 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
+
+import reactor.core.publisher.Flux;
 
 public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
@@ -64,7 +74,7 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
     protected ServingStoreService servingStoreService;
 
     @Inject
-    protected ServingStoreProxy servingStoreProxy;
+    protected AttributeSetEntityMgr attributeSetEntityMgr;
 
     final Set<String> internalEnrichAttrs = new HashSet<>();
     final Set<String> cannotSegmentAttrs = new HashSet<>();
@@ -156,6 +166,58 @@ public abstract class ServingStoreDeploymentTestNGBase extends CDLDeploymentTest
         Map<String, ColumnMetadata> cmsToVerify = getContactMetadataToVerify();
         verifyMetadata(cms, cmsToVerify);
         verifyContactMetadata(cms);
+    }
+
+    public void testModelAttrs() {
+        Flux<ColumnMetadata> newModelingAttrs = servingStoreService.getAttrsEnabledForModeling(mainCustomerSpace, BusinessEntity.Account, null);
+        Predicate<ColumnMetadata> p = attr -> ApprovedUsage.MODEL_ALLINSIGHTS.equals(attr.getApprovedUsageList().get(0))
+                && attr.getTagList() != null;
+        Assert.assertTrue(newModelingAttrs.all(p).block());
+
+        Flux<ColumnMetadata> allModelingAttrs = servingStoreService.getAttrsCanBeEnabledForModeling(mainCustomerSpace, BusinessEntity.Account, null, false);
+        p = ColumnMetadata::getCanModel;
+        Assert.assertTrue(allModelingAttrs.all(p).block());
+    }
+
+    protected void testGetAttributesUsage() {
+        List<String> contactAttrs = Arrays.asList(InterfaceName.FirstName.name(), InterfaceName.LastName.name());
+        Map<String, Boolean> attrUsage = servingStoreService.getAttributesUsage(mainCustomerSpace, //
+                BusinessEntity.Contact, new HashSet<>(contactAttrs), //
+                ColumnSelection.Predefined.Enrichment, null);
+        Assert.assertFalse(attrUsage.get(InterfaceName.FirstName.name()));
+        Assert.assertFalse(attrUsage.get(InterfaceName.LastName.name()));
+
+        List<String> accountAttrs = Arrays.asList(InterfaceName.LDC_Name.name(), "LDC_Domain");
+        attrUsage = servingStoreService.getAttributesUsage(mainCustomerSpace, //
+                BusinessEntity.Account, new HashSet<>(accountAttrs), ColumnSelection.Predefined.Enrichment, null);
+        Assert.assertTrue(attrUsage.get(InterfaceName.LDC_Name.name()));
+        Assert.assertTrue(attrUsage.get("LDC_Domain"));
+    }
+
+    protected void testGetDecoratedMetadata() {
+        Set<String> contactAttributes = Sets.newHashSet(InterfaceName.CustomerContactId.name(),
+                InterfaceName.ContactName.name(), InterfaceName.Email.name());
+        AttributeSet attributeSet = createAttributeSet("TestAttributeSet", contactAttributes);
+        attributeSet = attributeSetEntityMgr.createAttributeSet(attributeSet);
+        Flux<ColumnMetadata> customerAccountAttrs =
+                servingStoreService.getDecoratedMetadata(mainCustomerSpace, BusinessEntity.Contact, null,
+                        Collections.singletonList(ColumnSelection.Predefined.Enrichment), attributeSet.getName(), null);
+        Set<String> nameSet = customerAccountAttrs.filter(clm -> StringUtils.isNotEmpty(clm.getAttrName()))
+                .map(ColumnMetadata::getAttrName).collect(Collectors.toSet()).block();
+        Assert.assertEquals(CollectionUtils.size(nameSet), expectedAttrsInSet(), StringUtils.join(nameSet, ","));
+    }
+
+    protected int expectedAttrsInSet() {
+        return 2;
+    }
+
+    private AttributeSet createAttributeSet(String displayName, Set<String> contactAttributes) {
+        AttributeSet attributeSet = new AttributeSet();
+        attributeSet.setDisplayName(displayName);
+        Map<String, Set<String>> attributesMap = new HashMap<>();
+        attributesMap.put(Category.CONTACT_ATTRIBUTES.name(), contactAttributes);
+        attributeSet.setAttributesMap(attributesMap);
+        return attributeSet;
     }
 
     private void verifyMetadata(List<ColumnMetadata> cms, Map<String, ColumnMetadata> cmsToVerify) {
