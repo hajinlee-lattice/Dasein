@@ -465,9 +465,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     }
 
     private Job getFailedPAJob(DataFeedExecution execution, String tenantId) {
-        Long beforeQuery = System.currentTimeMillis();
+        long beforeQuery = System.currentTimeMillis();
         Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), tenantId);
-        Long queryTime = System.currentTimeMillis() - beforeQuery;
+        long queryTime = System.currentTimeMillis() - beforeQuery;
         jobQueryTime.add(queryTime);
         log.info("query workflow {} need {} ms.", execution.getWorkflowId(), queryTime);
         if (job == null || !PA_JOB_TYPE.equalsIgnoreCase(job.getJobType()) || job.getJobStatus() != JobStatus.FAILED) {
