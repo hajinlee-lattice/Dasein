@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -24,8 +25,9 @@ public class RestApiClient extends BaseRestApiProxy {
     }
 
     /**
-     * This is the client used to talk to lattice's internal servers.
-     * This client will ignore ssl name check
+     * This is the client used to talk to lattice's internal servers. This
+     * client will ignore ssl name check
+     * 
      * @param appCtx
      * @param hostport
      * @return RestApiClient
@@ -35,8 +37,9 @@ public class RestApiClient extends BaseRestApiProxy {
     }
 
     /**
-     * This is the client used to talk to servers outside of lattice.
-     * This client WON'T ignore ssl name check
+     * This is the client used to talk to servers outside of lattice. This
+     * client WON'T ignore ssl name check
+     * 
      * @param appCtx
      * @param hostport
      * @return RestApiClient
@@ -61,6 +64,7 @@ public class RestApiClient extends BaseRestApiProxy {
         return restApiClient;
     }
 
+    @Override
     public void setErrorHandler(ResponseErrorHandler handler) {
         super.setErrorHandler(handler);
     }
@@ -94,7 +98,13 @@ public class RestApiClient extends BaseRestApiProxy {
         super.put("generic put", url, body, headers, String.class, false, false);
     }
 
-    public void putMultipart(final String url, final MultiValueMap<String, Object> parts, final Map<String, String> headers) {
+    public void putMultipart(final String url, final MultiValueMap<String, Object> parts,
+            final Map<String, String> headers) {
         super.putMultiPart("put multi-part", url, parts, headers);
+    }
+
+    public <T, P> T postWithHeaders(final String url, final P entity, final Map<String, String> headers,
+            final Class<T> returnValueClazz) {
+        return super.exchange(url, HttpMethod.POST, entity, headers, returnValueClazz, false, false).getBody();
     }
 }

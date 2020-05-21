@@ -8,6 +8,8 @@
       http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:remote-context.xml"/>
+    <import resource="classpath:common-properties-context.xml" />
+    
     <context:component-scan base-package="com.latticeengines.remote.exposed"/>
 
 </beans>
