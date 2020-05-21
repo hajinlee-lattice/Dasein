@@ -29,7 +29,7 @@ public interface DataFeedTaskRepository extends BaseJpaRepository<DataFeedTask, 
 
     @Query("select dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
             "from DataFeedTask as dft join dft.importSystem as s where s.pid = ?1 and dft.deleted != True")
-    List<Object[]> findBySystemPid(Long systemPid);
+    List<Object[]> findSourceInfoBySystemPid(Long systemPid);
 
     @Query("select dft.sourceId, dft.sourceDisplayName, dft.relativePath, dft.s3ImportStatus, dft.pid " +
             "from DataFeedTask as dft where dft.sourceId = ?1")

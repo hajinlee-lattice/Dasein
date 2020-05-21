@@ -508,7 +508,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public List<SourceInfo> getSourcesBySystemPid(Long systemPid) {
-        List<Object[]> result = datafeedTaskRepository.findBySystemPid(systemPid);
+        List<Object[]> result = datafeedTaskRepository.findSourceInfoBySystemPid(systemPid);
         if (CollectionUtils.isEmpty(result)) {
             return Collections.emptyList();
         } else {

@@ -16,14 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.dcp.dao.ProjectDao;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.repository.ProjectRepository;
-import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseReadWriteRepoEntityMgrImpl;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectInfo;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("projectEntityMgr")
 public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<ProjectRepository, Project, Long>
@@ -64,9 +61,7 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Project findByProjectId(String projectId) {
-        Project project = getReadOrWriteRepository().findByProjectId(projectId);
-        inflateSystem(project);
-        return project;
+        return getReadOrWriteRepository().findByProjectId(projectId);
     }
 
     @Override
@@ -121,17 +116,5 @@ public class ProjectEntityMgrImpl extends BaseReadWriteRepoEntityMgrImpl<Project
         info.setRecipientList((List<String>) columns[7]);
         info.setSystemId((Long) columns[8]);
         return info;
-    }
-
-    private void inflateSystem(Project project) {
-        if (project == null) {
-            return;
-        }
-        HibernateUtils.inflateDetails(project.getS3ImportSystem());
-        HibernateUtils.inflateDetails(project.getS3ImportSystem().getTasks());
-        for (DataFeedTask datafeedTask : project.getS3ImportSystem().getTasks()) {
-            TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
-            TableEntityMgr.inflateTable(datafeedTask.getImportData());
-        }
     }
 }
