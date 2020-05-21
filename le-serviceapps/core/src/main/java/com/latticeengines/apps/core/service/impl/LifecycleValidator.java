@@ -1,17 +1,21 @@
 package com.latticeengines.apps.core.service.impl;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
@@ -33,30 +37,40 @@ public class LifecycleValidator extends AttrValidator {
 
     static final String VALIDATOR_NAME = "LIFECYCLE_VALIDATOR";
 
+    @Inject
+    private ApplicationContext applicationContext;
+
     protected LifecycleValidator() {
         super(VALIDATOR_NAME);
     }
 
     @Override
     public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
-            AttrValidation validation) {
+                         AttrValidation validation) {
         log.info(String.format("start to validate lifecycle for tenant %s", MultiTenantContext.getShortTenantId()));
-        List<AttributeSet> attributeSets = new ArrayList<>();
-        Map<Category, Set<String>> categoryMap = buildCategoryMap(attributeSets);
+        Map<Category, Set<String>> categoryMap = buildCategoryMap();
         for (AttrConfig attrConfig : userProvidedAttrConfigs) {
             checkState(attrConfig, categoryMap);
         }
     }
 
-    private Map<Category, Set<String>> buildCategoryMap(List<AttributeSet> attributeSets) {
-        return attributeSets.stream().filter(attributeSet -> MapUtils.isNotEmpty(attributeSet.getAttributesMap()))
-                .flatMap(attributeSet -> attributeSet.getAttributesMap().entrySet().stream())
-                .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
-                .collect(Collectors.toMap(entry -> Category.valueOf(entry.getKey()), entry -> entry.getValue(),
-                        (Set<String> newValueList, Set<String> oldValueList) -> {
-                            oldValueList.addAll(newValueList);
-                            return oldValueList;
-                        }));
+    private Map<Category, Set<String>> buildCategoryMap() {
+        try {
+            AttrConfigService attrConfigService = applicationContext.getBean(AttrConfigService.class);
+            List<AttributeSet> attributeSets = attrConfigService.getAttributeSets(true);
+            return CollectionUtils.isNotEmpty(attributeSets) ? attributeSets.stream()
+                    .filter(attributeSet -> MapUtils.isNotEmpty(attributeSet.getAttributesMap()))
+                    .flatMap(attributeSet -> attributeSet.getAttributesMap().entrySet().stream())
+                    .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
+                    .collect(Collectors.toMap(entry -> Category.valueOf(entry.getKey()), entry -> entry.getValue(),
+                            (Set<String> newValueList, Set<String> oldValueList) -> {
+                                oldValueList.addAll(newValueList);
+                                return oldValueList;
+                            })) : new HashMap<>();
+        } catch (Exception e) {
+            log.warn("Unable to build category map: {}.", e.getMessage());
+            return new HashMap<>();
+        }
     }
 
     private void checkState(AttrConfig attrConfig, Map<Category, Set<String>> categoryMap) {

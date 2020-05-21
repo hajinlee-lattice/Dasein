@@ -64,13 +64,15 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
             return true;
         });
         assertEquals(attributeSetEntityMgr.findAll().size(), 1);
-
         attributeSet = new AttributeSet();
         attributeSet.setDisplayName(displayName);
         attributeSet = attributeSetEntityMgr.createAttributeSet(attributeSetName, attributeSet);
-        attributeSet = attributeSetEntityMgr.findByName(attributeSet.getName());
-        verifyAttributeSet(attributeSet, attributeSet.getName(), displayName, accountAttributes, emptySet);
-
+        String attributeSetName2 = attributeSet.getName();
+        retry.execute(context -> {
+            AttributeSet attributeSet2 = attributeSetEntityMgr.findByName(attributeSetName2);
+            verifyAttributeSet(attributeSet2, attributeSet2.getName(), displayName, accountAttributes, emptySet);
+            return true;
+        });
         attributeSetEntityMgr.deleteByName(attributeSetName);
         retry.execute(context -> {
             assertEquals(attributeSetEntityMgr.findAll().size(), 1);
