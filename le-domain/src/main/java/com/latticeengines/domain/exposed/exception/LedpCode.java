@@ -873,6 +873,9 @@ public enum LedpCode {
     LEDP_40081("Connection with the same orgName already exists."),
     LEDP_40082("CDL import error, cannot locate import data."),
     LEDP_40083("Import record count {0} exceed template limitation {1}."),
+    LEDP_40084("Failed to add attribute group, exceed size limitation: {0}."), //
+    LEDP_40085("Display name of attribute group can't be empty."), //
+    LEDP_40086("Attribute group name \"{0}\" already exists."), //
 
     // le-domain
     LEDP_41001("PeriodName field {0} is null for record {1}."), //

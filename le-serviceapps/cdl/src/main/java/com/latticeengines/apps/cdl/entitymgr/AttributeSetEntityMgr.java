@@ -24,4 +24,6 @@ public interface AttributeSetEntityMgr extends BaseEntityMgrRepository<Attribute
     AttributeSet createDefaultAttributeSet();
 
     List<AttributeSet> findAllWithAttributesMap();
+
+    AttributeSet findByDisPlayName(String displayName);
 }

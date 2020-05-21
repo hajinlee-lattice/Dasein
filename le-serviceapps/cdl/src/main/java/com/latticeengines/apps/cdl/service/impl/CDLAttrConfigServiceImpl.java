@@ -6,6 +6,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.AttributeSet;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -42,6 +45,8 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Inject
     private AttributeSetEntityMgr attributeSetEntityMgr;
+
+    private static int ATTRIBUTE_SET_LIMITATION = 50;
 
     @Override
     protected List<ColumnMetadata> getSystemMetadata(BusinessEntity entity) {
@@ -99,16 +104,37 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Override
     public AttributeSet cloneAttributeSet(String name, AttributeSet attributeSet) {
+        validateAttributeSet(true, attributeSet);
         return attributeSetEntityMgr.createAttributeSet(name, attributeSet);
+    }
+
+    private void validateAttributeSet(boolean checkSize, AttributeSet attributeSet) {
+        if (checkSize) {
+            List<AttributeSet> attributeSets = attributeSetEntityMgr.findAll();
+            if (attributeSets.size() > ATTRIBUTE_SET_LIMITATION) {
+                throw new LedpException(LedpCode.LEDP_40084, new String[]{String.valueOf(ATTRIBUTE_SET_LIMITATION)});
+            }
+        }
+        String displayName = attributeSet.getDisplayName().trim();
+        if (StringUtils.isEmpty(displayName)) {
+            throw new LedpException(LedpCode.LEDP_40085, new String[]{});
+        }
+        attributeSet.setDisplayName(displayName);
+        AttributeSet attributeSet2 = attributeSetEntityMgr.findByDisPlayName(displayName);
+        if (attributeSet2 != null && !attributeSet2.getName().equals(attributeSet.getName())) {
+            throw new LedpException(LedpCode.LEDP_40086, new String[]{displayName});
+        }
     }
 
     @Override
     public AttributeSet createAttributeSet(AttributeSet attributeSet) {
+        validateAttributeSet(true, attributeSet);
         return attributeSetEntityMgr.createAttributeSet(attributeSet);
     }
 
     @Override
     public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
+        validateAttributeSet(false, attributeSet);
         return attributeSetEntityMgr.updateAttributeSet(attributeSet);
     }
 

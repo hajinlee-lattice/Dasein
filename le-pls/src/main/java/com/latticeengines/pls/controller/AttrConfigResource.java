@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigStateOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
+import com.latticeengines.domain.exposed.util.UIActionUtils;
 import com.latticeengines.pls.service.AttrConfigService;
 
 import io.swagger.annotations.Api;
@@ -151,18 +152,30 @@ public class AttrConfigResource {
     @ApiOperation(value = "create new attribute set based on an existing attribute set")
     public AttributeSet cloneAttributeSet(@RequestParam(value = "attributeSetName") String attributeSetName,
                                           @RequestBody AttributeSet attributeSet) {
-        return attrConfigService.cloneAttributeSet(attributeSetName, attributeSet);
+        try {
+            return attrConfigService.cloneAttributeSet(attributeSetName, attributeSet);
+        } catch (Exception ex) {
+            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+        }
     }
 
     @PostMapping(value = "/attributeset")
     @ApiOperation(value = "create new attribute set based on an existing attribute set")
     public AttributeSet createAttributeSet(@RequestBody AttributeSet attributeSet) {
-        return attrConfigService.createAttributeSet(attributeSet);
+        try {
+            return attrConfigService.createAttributeSet(attributeSet);
+        } catch (Exception ex) {
+            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+        }
     }
 
     @PutMapping(value = "/attributeset")
     @ApiOperation(value = "update attribute set")
     public AttributeSet updateAttributeSet(@RequestBody AttributeSet attributeSet) {
-        return attrConfigService.updateAttributeSet(attributeSet);
+        try {
+            return attrConfigService.updateAttributeSet(attributeSet);
+        } catch (Exception ex) {
+            throw UIActionUtils.handleExceptionForCreateOrUpdate(ex);
+        }
     }
 }
