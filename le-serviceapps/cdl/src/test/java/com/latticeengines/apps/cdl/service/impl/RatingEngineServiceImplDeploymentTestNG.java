@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.auth.exposed.util.TeamUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.SleepUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -100,6 +101,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         // Test Rulebased Rating Engine
         rbRatingEngine = createRatingEngine(RatingEngineType.RULE_BASED);
         Assert.assertEquals(rbRatingEngine.getType(), RatingEngineType.RULE_BASED);
+        Assert.assertNull(rbRatingEngine.getTeamId());
         assertRatingEngine(rbRatingEngine);
         rbRatingEngineId = rbRatingEngine.getId();
         // Only mock the Rulebased Rating data in Redshift to test the filtering
@@ -120,6 +122,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         ratingEngine.setUpdatedBy(CREATED_BY);
         ratingEngine.setType(type);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
+        ratingEngine.setTeamId(TeamUtils.GLOBAL_TEAM_ID);
         // test basic creation
         ratingEngine = createOrUpdate(ratingEngine);
 

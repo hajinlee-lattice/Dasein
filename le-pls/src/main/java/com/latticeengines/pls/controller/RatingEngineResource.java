@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.RequestEntity;
@@ -264,7 +263,7 @@ public class RatingEngineResource {
     public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
         try {
-            return ratingEngineService.updateRatingModel(ratingModel, ratingEngineId, ratingModelId);
+            return ratingEngineService.updateRatingModel(ratingEngineId, ratingModelId, ratingModel);
         } catch (Exception ex) {
             throw graphDependencyToUIActionUtil.handleExceptionForCreateOrUpdate(ex, LedpCode.LEDP_40041);
         }
@@ -325,13 +324,8 @@ public class RatingEngineResource {
     @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
     public Map<String, UIAction> getRatingEnigneDependenciesModelAndView(@PathVariable String ratingEngineId) {
         Map<String, List<String>> dependencies = ratingEngineService.getRatingEngineDependencies(ratingEngineId);
-        UIAction uiAction = graphDependencyToUIActionUtil.generateUIAction("Model is safe to edit", View.Notice,
-                Status.Success, null);
-        if (MapUtils.isNotEmpty(dependencies)) {
-            String message = graphDependencyToUIActionUtil.generateHtmlMsg(dependencies, "This model is in use.", null);
-            uiAction = graphDependencyToUIActionUtil.generateUIAction("Model In Use", View.Banner, Status.Warning,
-                    message);
-        }
+        RatingEngineSummary ratingEngineSummary = ratingEngineService.getRatingEngineSummary(ratingEngineId);
+        UIAction uiAction = graphDependencyToUIActionUtil.generateModelDependenciesAction(dependencies, ratingEngineSummary);
         return ImmutableMap.of(UIAction.class.getSimpleName(), uiAction);
     }
 

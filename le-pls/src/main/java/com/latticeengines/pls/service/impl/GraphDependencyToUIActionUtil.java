@@ -18,10 +18,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.auth.GlobalTeam;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.exception.UIActionException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.frontend.Status;
 import com.latticeengines.domain.exposed.pls.frontend.UIAction;
 import com.latticeengines.domain.exposed.pls.frontend.View;
@@ -31,6 +33,8 @@ public class GraphDependencyToUIActionUtil {
 
     private static final String TITLE_DEFAULT_UPDATE_FAILED = "Update failed as system detected potential circular dependency";
     private static final String TITLE_MODELS_EXCEED_LIMIT = "Limit Reached";
+    private static final String SEGMENT = "segment";
+    private static final String MODEL ="model";
 
     public UIAction processUpdateSegmentResponse(MetadataSegment segment, Map<String, List<String>> dependencies) {
         UIAction uiAction;
@@ -44,14 +48,32 @@ public class GraphDependencyToUIActionUtil {
                     generateHtmlMsg(dependencies,
                             "Changing a segment that is in use may affect the scoring and rating configuration.",
                             String.format("This segment has %d dependencies", count.get())) + (segment.isViewOnly()
-                            ? generateHtmlMsgWithTeamInfo(segment) : ""));
+                            ? generateHtmlMsgWithTeamInfo(SEGMENT, segment.getTeam()) : ""));
         } else {
             if (segment.isViewOnly()) {
                 uiAction = generateUIAction(String.format("Segment %s is not safe to edit", segment.getDisplayName()),
-                        View.Banner, Status.Warning, generateHtmlMsgWithTeamInfo(segment));
+                        View.Banner, Status.Warning, generateHtmlMsgWithTeamInfo(SEGMENT, segment.getTeam()));
             } else {
                 uiAction = generateUIAction(String.format("Segment %s is safe to edit", segment.getDisplayName()),
                         View.Notice, Status.Success, null);
+            }
+        }
+        return uiAction;
+    }
+
+    public UIAction generateModelDependenciesAction(Map<String, List<String>> dependencies, RatingEngineSummary ratingEngineSummary) {
+        UIAction uiAction;
+        if (MapUtils.isNotEmpty(dependencies)) {
+            String message = generateHtmlMsg(dependencies, "This model is in use.", null);
+            uiAction = generateUIAction("Model In Use", View.Banner, Status.Warning,
+                    message + (ratingEngineSummary.isViewOnly() ? generateHtmlMsgWithTeamInfo(MODEL, ratingEngineSummary.getTeam()) : ""));
+        } else {
+            if (ratingEngineSummary.isViewOnly()) {
+                uiAction = generateUIAction("Model is not safe to edit", View.Banner,
+                        Status.Warning, generateHtmlMsgWithTeamInfo(MODEL, ratingEngineSummary.getTeam()));
+            } else {
+                uiAction = generateUIAction("Model is safe to edit", View.Notice,
+                        Status.Success, null);
             }
         }
         return uiAction;
@@ -67,10 +89,10 @@ public class GraphDependencyToUIActionUtil {
         return uiAction;
     }
 
-    private String generateHtmlMsgWithTeamInfo(MetadataSegment segment) {
+    private String generateHtmlMsgWithTeamInfo(String entity, GlobalTeam authTeam) {
         StringBuffer html = new StringBuffer();
-        html.append(div(String.format("This segment belongs to \"%s\", you are not allowed to edit it. You can ask admin to add you to the team.",
-                segment.getTeam().getTeamName())).render());
+        html.append(div(String.format("This %s belongs to \"%s\", you are not allowed to edit it. You can ask admin to add you to the team.",
+                entity, authTeam.getTeamName())).render());
         return html.toString();
     }
 
