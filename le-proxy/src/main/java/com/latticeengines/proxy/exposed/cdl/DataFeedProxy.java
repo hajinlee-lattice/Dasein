@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.DataLimit;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
+import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -188,6 +189,19 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/source/{sourceId}",
                 shortenCustomerSpace(customerSpace), sourceId);
         return get("getDataFeedTaskById", url, DataFeedTask.class);
+    }
+
+    public SourceInfo getSourceBySourceId(String customerSpace, String sourceId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/onlySource/{sourceId}",
+                shortenCustomerSpace(customerSpace), sourceId);
+        return get("getSourceBySourceId", url, SourceInfo.class);
+    }
+
+    public List<SourceInfo> getSourcesBySystemPid(String customerSpace, Long systemPid) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/systemPid/{systemPid}",
+                shortenCustomerSpace(customerSpace), systemPid);
+        List<?> rawList = get("getSourcesBySystemPid", url, List.class);
+        return JsonUtils.convertList(rawList, SourceInfo.class);
     }
 
     public S3ImportSystem getImportSystemByTaskId(String customerSpace, String taskId) {

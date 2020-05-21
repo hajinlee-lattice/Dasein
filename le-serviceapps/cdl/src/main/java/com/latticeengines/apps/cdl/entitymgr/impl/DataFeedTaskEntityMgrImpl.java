@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -25,6 +26,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -501,5 +503,37 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void setS3ImportStatusBySource(Long pid, DataFeedTask.S3ImportStatus status) {
         datafeedTaskDao.updateS3ImportStatusBySource(pid, status);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<SourceInfo> getSourcesBySystemPid(Long systemPid) {
+        List<Object[]> result = datafeedTaskRepository.findSourceInfoBySystemPid(systemPid);
+        if (CollectionUtils.isEmpty(result)) {
+            return Collections.emptyList();
+        } else {
+            return result.stream().map(this::getSource).collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public SourceInfo getSourceBySourceId(String sourceId) {
+        List<Object[]> result = datafeedTaskRepository.findBySourceId(sourceId);
+        if (CollectionUtils.isEmpty(result)) {
+            return null;
+        } else {
+            return getSource(result.get(0));
+        }
+    }
+
+    private SourceInfo getSource(Object[] columns) {
+        SourceInfo info = new SourceInfo();
+        info.setSourceId((String) columns[0]);
+        info.setSourceDisplayName((String) columns[1]);
+        info.setRelativePath((String) columns[2]);
+        info.setImportStatus((DataFeedTask.S3ImportStatus) columns[3]);
+        info.setPid((Long) columns[4]);
+        return info;
     }
 }

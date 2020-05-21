@@ -1,6 +1,5 @@
 package com.latticeengines.apps.dcp.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +17,7 @@ import com.latticeengines.apps.core.service.DropBoxService;
 import com.latticeengines.apps.dcp.entitymgr.ProjectEntityMgr;
 import com.latticeengines.apps.dcp.service.ProjectService;
 import com.latticeengines.apps.dcp.service.SourceService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.DropBoxAccessMode;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.cdl.GrantDropBoxAccessResponse;
 import com.latticeengines.domain.exposed.cdl.S3ImportSystem;
 import com.latticeengines.domain.exposed.dcp.Project;
 import com.latticeengines.domain.exposed.dcp.ProjectDetails;
+import com.latticeengines.domain.exposed.dcp.ProjectInfo;
 import com.latticeengines.domain.exposed.dcp.ProjectSummary;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 
@@ -58,7 +59,7 @@ public class ProjectServiceImpl implements ProjectService {
         String rootPath = generateRootPath(projectId);
         S3ImportSystem system = createProjectSystem(customerSpace, displayName, projectId);
         projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
-        Project project = getProjectByProjectIdWithRetry(projectId);
+        ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
@@ -73,7 +74,7 @@ public class ProjectServiceImpl implements ProjectService {
         String rootPath = generateRootPath(projectId);
         S3ImportSystem system = createProjectSystem(customerSpace, displayName, projectId);
         projectEntityMgr.create(generateProjectObject(projectId, displayName, projectType, user, rootPath, system));
-        Project project = getProjectByProjectIdWithRetry(projectId);
+        ProjectInfo project = getProjectInfoByProjectIdWithRetry(projectId);
         if (project == null) {
             throw new RuntimeException(String.format("Create DCP Project %s failed!", displayName));
         }
@@ -83,28 +84,22 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectSummary> getAllProject(String customerSpace) {
-        List<Project> projectList = projectEntityMgr.findAll();
-        return projectList.stream().map(project-> getProjectSummary(customerSpace, project)).collect(Collectors.toList());
-    }
-
-    @Override
-    public Project getProjectByProjectId(String customerSpace, String projectId) {
-        return projectEntityMgr.findByProjectId(projectId);
-    }
-
-    @Override
-    public Project getProjectByImportSystem(String customerSpace, S3ImportSystem importSystem) {
-        return projectEntityMgr.findByImportSystem(importSystem);
+        log.info("Invoke findAll Project!");
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            List<ProjectInfo> projectInfoList = projectEntityMgr.findAllProjectInfo();
+            timer.setTimerMessage("Find " + CollectionUtils.size(projectInfoList) + " Projects in total.");
+            return projectInfoList.stream().map(projectInfo -> getProjectSummary(customerSpace, projectInfo)).collect(Collectors.toList());
+        }
     }
 
     @Override
     public ProjectDetails getProjectDetailByProjectId(String customerSpace, String projectId) {
-        Project project = projectEntityMgr.findByProjectId(projectId);
-        if (project == null) {
+        ProjectInfo projectInfo = projectEntityMgr.findProjectInfoByProjectId(projectId);
+        if (projectInfo == null) {
             log.warn("No project found with id: " + projectId);
             return null;
         }
-        return getProjectDetails(customerSpace, project);
+        return getProjectDetails(customerSpace, projectInfo);
     }
 
     @Override
@@ -128,6 +123,21 @@ public class ProjectServiceImpl implements ProjectService {
         projectEntityMgr.update(project);
     }
 
+    @Override
+    public ProjectInfo getProjectBySourceId(String customerSpace, String sourceId) {
+        return projectEntityMgr.findProjectInfoBySourceId(sourceId);
+    }
+
+    @Override
+    public ProjectInfo getProjectInfoByProjectId(String customerSpace, String projectId) {
+        return projectEntityMgr.findProjectInfoByProjectId(projectId);
+    }
+
+    @Override
+    public S3ImportSystem getImportSystemByProjectId(String customerSpace, String projectId) {
+        return projectEntityMgr.findImportSystemByProjectId(projectId);
+    }
+
     private void validateProjectId(String projectId) {
         if (StringUtils.isBlank(projectId)) {
             throw new RuntimeException("Cannot create DCP project with blank projectId!");
@@ -135,7 +145,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (!projectId.matches("[A-Za-z0-9_]*")) {
             throw new RuntimeException("Invalid characters in project id, only accept digits, alphabet & underline.");
         }
-        if (projectEntityMgr.findByProjectId(projectId) != null) {
+        if (projectEntityMgr.findProjectInfoByProjectId(projectId) != null) {
             throw new RuntimeException(String.format("ProjectId %s already exists.", projectId));
         }
     }
@@ -143,54 +153,38 @@ public class ProjectServiceImpl implements ProjectService {
     private String generateRandomProjectId() {
         String randomProjectId = String.format(RANDOM_PROJECT_ID_PATTERN,
                 RandomStringUtils.randomAlphanumeric(8).toLowerCase());
-        while (projectEntityMgr.findByProjectId(randomProjectId) != null) {
+        while (projectEntityMgr.findProjectInfoByProjectId(randomProjectId) != null) {
             randomProjectId = String.format(RANDOM_PROJECT_ID_PATTERN,
                     RandomStringUtils.randomAlphanumeric(8).toLowerCase());
         }
         return randomProjectId;
     }
 
-    private ProjectDetails getProjectDetails(String customerSpace, Project project) {
+    private ProjectDetails getProjectDetails(String customerSpace, ProjectInfo projectInfo) {
         ProjectDetails details = new ProjectDetails();
-        details.setProjectId(project.getProjectId());
-        details.setProjectDisplayName(project.getProjectDisplayName());
-        details.setProjectRootPath(project.getRootPath());
+        details.setProjectId(projectInfo.getProjectId());
+        details.setProjectDisplayName(projectInfo.getProjectDisplayName());
+        details.setProjectRootPath(projectInfo.getRootPath());
         details.setDropFolderAccess(getDropBoxAccess());
-        details.setDeleted(project.getDeleted());
-        if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
-            details.setSources(new ArrayList<>());
-            project.getS3ImportSystem().getTasks()
-                    .forEach(task -> {
-                        if (!Boolean.TRUE.equals(task.getDeleted())) {
-                            details.getSources().add(sourceService.convertToSource(customerSpace, task));
-                        }
-                    });
-        }
-        details.setRecipientList(project.getRecipientList());
-        details.setCreated(project.getCreated().getTime());
-        details.setUpdated(project.getUpdated().getTime());
-        details.setCreatedBy(project.getCreatedBy());
+        details.setDeleted(projectInfo.getDeleted());
+        details.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+        details.setRecipientList(projectInfo.getRecipientList());
+        details.setCreated(projectInfo.getCreated().getTime());
+        details.setUpdated(projectInfo.getUpdated().getTime());
+        details.setCreatedBy(projectInfo.getCreatedBy());
         return details;
     }
 
-    private ProjectSummary getProjectSummary(String customerSpace, Project project) {
+    private ProjectSummary getProjectSummary(String customerSpace, ProjectInfo projectInfo) {
         ProjectSummary summary = new ProjectSummary();
-        summary.setProjectId(project.getProjectId());
-        summary.setProjectDisplayName(project.getProjectDisplayName());
-        summary.setArchieved(project.getDeleted());
-        summary.setRecipientList(project.getRecipientList());
-        if (project.getS3ImportSystem() != null && CollectionUtils.isNotEmpty(project.getS3ImportSystem().getTasks())) {
-            summary.setSources(new ArrayList<>());
-            project.getS3ImportSystem().getTasks()
-                    .forEach(task -> {
-                        if (!Boolean.TRUE.equals(task.getDeleted())) {
-                            summary.getSources().add(sourceService.convertToSource(customerSpace, task));
-                        }
-                    });
-        }
-        summary.setCreated(project.getCreated().getTime());
-        summary.setUpdated(project.getUpdated().getTime());
-        summary.setCreatedBy(project.getCreatedBy());
+        summary.setProjectId(projectInfo.getProjectId());
+        summary.setProjectDisplayName(projectInfo.getProjectDisplayName());
+        summary.setArchieved(projectInfo.getDeleted());
+        summary.setRecipientList(projectInfo.getRecipientList());
+        summary.setSources(sourceService.getSourceList(customerSpace, projectInfo.getProjectId()));
+        summary.setCreated(projectInfo.getCreated().getTime());
+        summary.setUpdated(projectInfo.getUpdated().getTime());
+        summary.setCreatedBy(projectInfo.getCreatedBy());
         return summary;
     }
 
@@ -250,16 +244,16 @@ public class ProjectServiceImpl implements ProjectService {
         return String.format(PROJECT_ROOT_PATH_PATTERN, projectId);
     }
 
-    private Project getProjectByProjectIdWithRetry(String projectId) {
+    private ProjectInfo getProjectInfoByProjectIdWithRetry(String projectId) {
         int retry = 0;
-        Project project = projectEntityMgr.findByProjectId(projectId);
+        ProjectInfo project = projectEntityMgr.findProjectInfoByProjectId(projectId);
         while (project == null && retry < MAX_RETRY) {
             try {
                 Thread.sleep(1000L + retry * 1000L);
             } catch (InterruptedException e) {
                 return null;
             }
-            project = projectEntityMgr.findByProjectId(projectId);
+            project = projectEntityMgr.findProjectInfoByProjectId(projectId);
             retry++;
         }
         return project;

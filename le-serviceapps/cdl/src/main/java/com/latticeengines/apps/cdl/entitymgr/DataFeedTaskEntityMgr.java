@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
+import com.latticeengines.domain.exposed.dcp.SourceInfo;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -63,5 +64,9 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
     void setDeleted(Long pid, Boolean deleted);
 
     void setS3ImportStatusBySource(Long pid, DataFeedTask.S3ImportStatus status);
+
+    List<SourceInfo> getSourcesBySystemPid(Long systemPid);
+
+    SourceInfo getSourceBySourceId(String sourceId);
 
 }

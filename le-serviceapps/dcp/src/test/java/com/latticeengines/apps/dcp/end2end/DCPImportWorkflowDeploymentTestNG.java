@@ -126,7 +126,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
         Assert.assertNotNull(uploadList);
         Assert.assertEquals(uploadList.size(), 2);
-        UploadDetails upload = uploadList.get(1);
+        UploadDetails upload = uploadList.get(0).getUploadId().equals(uploadId) ? uploadList.get(1) : uploadList.get(0);
         Assert.assertEquals(upload.getStatus(), Upload.Status.ERROR);
     }
 
