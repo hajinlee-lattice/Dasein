@@ -114,9 +114,12 @@ public class UserResource {
             targetLevel = AccessLevel.valueOf(userReg.getUser().getAccessLevel());
         }
         if (Boolean.TRUE.equals(userReg.isUseIDaaS())) {
-            targetLevel = (AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
-                    && !EmailUtils.isInternalUser(userReg.getUser().getEmail()) ?
-                    AccessLevel.EXTERNAL_ADMIN : targetLevel;
+            if ((AccessLevel.SUPER_ADMIN.equals(targetLevel) || AccessLevel.INTERNAL_ADMIN.equals(targetLevel))
+                    && !EmailUtils.isInternalUser(userReg.getUser().getEmail())) {
+                LOGGER.info("target level is {} while email is external, change it to {}", targetLevel,
+                        AccessLevel.EXTERNAL_ADMIN);
+                targetLevel = AccessLevel.EXTERNAL_ADMIN;
+            }
             userReg.getUser().setAccessLevel(targetLevel.name());
         }
         if (!userService.isSuperior(loginLevel, targetLevel)) {
