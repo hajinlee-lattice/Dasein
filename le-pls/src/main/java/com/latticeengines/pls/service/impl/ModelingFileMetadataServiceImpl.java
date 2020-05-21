@@ -732,11 +732,19 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         Preconditions.checkNotNull(customerSpace);
         // 1. set system related mapping //only apply to Account / Contact
+        Set<String> systemIdSet = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
             List<FieldMapping> customerLatticeIdList = new ArrayList<>();
-            for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            Iterator<FieldMapping> iterator = fieldMappingDocument.getFieldMappings().iterator();
+            while (iterator.hasNext()) {
+                FieldMapping fieldMapping = iterator.next();
                 if (fieldMapping.getIdType() != null && !fieldMapping.isMappedToLatticeSystem()) {
                     setSystemIdMapping(customerSpace, feedType, customerLatticeIdList, fieldMapping);
+                } else if (fieldMapping.getIdType() == null) {
+                    // Assumption: user cannot map column to SystemId, so remove error fieldMapping provided by UI.
+                    if (StringUtils.isNotEmpty(fieldMapping.getMappedField()) && systemIdSet.contains(fieldMapping.getMappedField())) {
+                        iterator.remove();
+                    }
                 }
             }
             // map customer lattice id
