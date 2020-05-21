@@ -2,14 +2,22 @@ package com.latticeengines.apps.core.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.AttrValidator;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.AttributeSet;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
@@ -27,6 +35,9 @@ public class LifecycleValidator extends AttrValidator {
 
     static final String VALIDATOR_NAME = "LIFECYCLE_VALIDATOR";
 
+    @Inject
+    private AttrConfigService attrConfigService;
+
     protected LifecycleValidator() {
         super(VALIDATOR_NAME);
     }
@@ -35,12 +46,25 @@ public class LifecycleValidator extends AttrValidator {
     public void validate(List<AttrConfig> existingAttrConfigs, List<AttrConfig> userProvidedAttrConfigs,
             AttrValidation validation) {
         log.info(String.format("start to validate lifecycle for tenant %s", MultiTenantContext.getShortTenantId()));
+        List<AttributeSet> attributeSets = attrConfigService.getAttributeSets(true);
+        Map<Category, Set<String>> categoryMap = buildCategoryMap(attributeSets);
         for (AttrConfig attrConfig : userProvidedAttrConfigs) {
-            checkState(attrConfig);
+            checkState(attrConfig, categoryMap);
         }
     }
 
-    private void checkState(AttrConfig attrConfig) {
+    private Map<Category, Set<String>> buildCategoryMap(List<AttributeSet> attributeSets) {
+        return attributeSets.stream().filter(attributeSet -> MapUtils.isNotEmpty(attributeSet.getAttributesMap()))
+                .flatMap(attributeSet -> attributeSet.getAttributesMap().entrySet().stream())
+                .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue()))
+                .collect(Collectors.toMap(entry -> Category.valueOf(entry.getKey()), entry -> entry.getValue(),
+                        (Set<String> newValueList, Set<String> oldValueList) -> {
+                            oldValueList.addAll(newValueList);
+                            return oldValueList;
+                        }));
+    }
+
+    private void checkState(AttrConfig attrConfig, Map<Category, Set<String>> categoryMap) {
         Map<String, AttrConfigProp<?>> attrConfigPropMap = attrConfig.getAttrProps();
         if (MapUtils.isEmpty(attrConfigPropMap)) {
             return;
@@ -65,6 +89,16 @@ public class LifecycleValidator extends AttrValidator {
                         Boolean finalUsageValue = attrConfig.getPropertyFinalValue(group, Boolean.class);
                         if (Boolean.TRUE.equals((finalUsageValue))) {
                             addWarningMsg(ImpactWarnings.Type.USAGE_ENABLED, group, attrConfig);
+                        }
+                        if (ColumnSelection.Predefined.Enrichment.getName().equals(group)) {
+                            // we need to check attribute usage in attribute set
+                            Category category = attrConfig.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class);
+                            if (category != null) {
+                                Set<String> attributes = categoryMap.get(category);
+                                if (CollectionUtils.isNotEmpty(attributes) && attributes.contains(attrConfig.getAttrName())) {
+                                    addWarningMsg(ImpactWarnings.Type.USAGE_ENABLED, group, attrConfig);
+                                }
+                            }
                         }
                     }
                 }

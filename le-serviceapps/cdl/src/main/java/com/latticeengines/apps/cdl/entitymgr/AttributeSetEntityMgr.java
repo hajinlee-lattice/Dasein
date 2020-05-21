@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,4 +22,6 @@ public interface AttributeSetEntityMgr extends BaseEntityMgrRepository<Attribute
     AttributeSet createAttributeSet(Map<String, Set<String>> existingAttributesMap, AttributeSet attributeSet);
 
     AttributeSet createDefaultAttributeSet();
+
+    List<AttributeSet> findAllWithAttributesMap();
 }

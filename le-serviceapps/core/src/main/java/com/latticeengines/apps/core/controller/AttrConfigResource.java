@@ -147,7 +147,7 @@ public class AttrConfigResource {
     @GetMapping(value = "/attributeset")
     @ApiOperation(value = "Get attribute set list")
     public List<AttributeSet> getAttributeSets(@PathVariable String customerSpace) {
-        return attrConfigService.getAttributeSets();
+        return attrConfigService.getAttributeSets(false);
     }
 
     @PostMapping(value = "/attributeset/clone")

@@ -183,6 +183,12 @@ public class AttributeSetEntityMgrImpl
         return extractResultsToAttributeSets(results);
     }
 
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<AttributeSet> findAllWithAttributesMap() {
+        return getReadOrWriteRepository().findAll();
+    }
+
     private List<AttributeSet> extractResultsToAttributeSets(List<Object[]> objects) {
         if (CollectionUtils.isEmpty(objects)) {
             return new ArrayList<>();

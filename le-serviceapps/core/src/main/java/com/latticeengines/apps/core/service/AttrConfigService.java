@@ -39,7 +39,7 @@ public interface AttrConfigService {
 
     AttributeSet getAttributeSetByName(String name);
 
-    List<AttributeSet> getAttributeSets();
+    List<AttributeSet> getAttributeSets(boolean withAttributesMap);
 
     AttributeSet cloneAttributeSet(String name, AttributeSet attributeSet);
 
