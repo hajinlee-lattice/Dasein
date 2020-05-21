@@ -83,6 +83,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotEquals(duplicateLookupIdMap2.getUpdated(), extractedLookupIdMap.getUpdated());
 
         duplicateLookupIdMap.setOrgId(orgId + "_different");
+        duplicateLookupIdMap.setOrgName(orgName + "_different");
         Assert.assertNotNull(lookupIdMappingLaunchService.registerExternalSystem(duplicateLookupIdMap));
 
         String accountId = "someAccId";
