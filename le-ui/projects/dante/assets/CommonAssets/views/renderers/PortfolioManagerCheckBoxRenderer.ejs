@@ -1,8 +1,0 @@
-<%== $.View('assets/CommonAssets/views/renderers/BaseRenderer.ejs',{itemValue: portfolioPlay.LaunchPlayFlag, renderType: RenderWorker.PORTFOLIO_MANAGER_CHECKBOX_RENDERER}) %>
-﻿<input type="hidden" name="InternalID" value="<%= portfolioPlay.InternalID %>"/>
-<%var dynamicID = StringUtil.GenerateUniqueExternalID("portfolioManagerCheckBoxRenderer_");%>
-<% if (portfolioPlay.Status.IsUnavailable !== true) { %>
-    <input type="checkbox" id="<%=dynamicID%>" class="radial-checkbox" <% if (portfolioPlay.LaunchPlayFlag) { %> checked <% } %> /><label for="<%=dynamicID%>"></label>
-<% } else { %>
-    <img width="28" height="28" src="assets/CommonAssets/images/loading_spinner.gif"/>
-<% } %>

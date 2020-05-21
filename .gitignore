@@ -45,7 +45,6 @@ jacoco/
 # tez
 *.dot
 
-/le-ui.tar.gz
 /.metadata/
 /.recommenders/
 /le-datacloud/etl/src/test/resources/sources/DnBUKAccounts/
