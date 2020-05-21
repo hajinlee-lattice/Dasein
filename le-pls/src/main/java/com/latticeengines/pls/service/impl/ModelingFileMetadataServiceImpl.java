@@ -34,6 +34,7 @@ import com.google.common.base.Preconditions;
 import com.latticeengines.app.exposed.service.impl.CommonTenantConfigServiceImpl;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.TimeStampConvertUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -723,6 +724,37 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         return schemaTable;
     }
 
+    // Assumption: UI might send duplicate system id mapping, remove the one that already map to systemId (old one)
+    private void removeDuplicateSystemIdMapping(FieldMappingDocument fieldMappingDocument, Set<String> systemIdSet) {
+        if (CollectionUtils.isEmpty(systemIdSet)) {
+            return;
+        }
+        Map<String, FieldMapping> systemIdMapping = new HashMap<>();
+        List<FieldMapping> mappingToRemove = new ArrayList<>();
+        fieldMappingDocument.getFieldMappings().forEach(fieldMapping -> {
+            if (fieldMapping.getIdType() != null && StringUtils.isNotEmpty(fieldMapping.getSystemName())
+                    && !fieldMapping.isMappedToLatticeSystem()) {
+                String key = fieldMapping.getIdType() + "|" + fieldMapping.getSystemName();
+                if (systemIdMapping.containsKey(key)) {
+                    if (StringUtils.isNotEmpty(fieldMapping.getMappedField()) && systemIdSet.contains(fieldMapping.getMappedField())) {
+                        mappingToRemove.add(fieldMapping);
+                    } else if (StringUtils.isNotEmpty(systemIdMapping.get(key).getMappedField())
+                            && systemIdSet.contains(systemIdMapping.get(key).getMappedField())) {
+                        mappingToRemove.add(systemIdMapping.get(key));
+                    } else {
+                        log.error("There's duplicate system id mapping but cannot determine which one to remove! {} vs {}",
+                                JsonUtils.serialize(fieldMapping), JsonUtils.serialize(systemIdMapping.get(key)));
+                    }
+                } else {
+                    systemIdMapping.put(key, fieldMapping);
+                }
+            }
+        });
+        if (CollectionUtils.isNotEmpty(mappingToRemove)) {
+            fieldMappingDocument.getFieldMappings().removeAll(mappingToRemove);
+        }
+    }
+
     private void regulateFieldMapping(FieldMappingDocument fieldMappingDocument, BusinessEntity entity, String feedType,
                                       Table templateTable) {
         if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null
@@ -734,13 +766,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         // 1. set system related mapping //only apply to Account / Contact
         Set<String> systemIdSet = cdlService.getAllS3ImportSystemIdSet(customerSpace.toString());
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+            removeDuplicateSystemIdMapping(fieldMappingDocument, systemIdSet);
             List<FieldMapping> customerLatticeIdList = new ArrayList<>();
             Iterator<FieldMapping> iterator = fieldMappingDocument.getFieldMappings().iterator();
             while (iterator.hasNext()) {
                 FieldMapping fieldMapping = iterator.next();
                 if (fieldMapping.getIdType() != null && !fieldMapping.isMappedToLatticeSystem()) {
                     setSystemIdMapping(customerSpace, feedType, customerLatticeIdList, fieldMapping);
-                } else if (fieldMapping.getIdType() == null) {
+                } else {
                     // Assumption: user cannot map column to SystemId, so remove error fieldMapping provided by UI.
                     if (StringUtils.isNotEmpty(fieldMapping.getMappedField()) && systemIdSet.contains(fieldMapping.getMappedField())) {
                         iterator.remove();
