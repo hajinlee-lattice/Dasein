@@ -83,13 +83,13 @@ public class RatingEngineServiceImpl implements RatingEngineService {
                     .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
             Set<String> teamIds = teamService.getTeamIdsInContext();
             for (RatingEngineSummary ratingEngineSummary : ratingEngineSummaries) {
-                renderWithTeam(ratingEngineSummary, globalTeamMap.get(ratingEngineSummary.getTeamId()), teamIds);
+                fillTeamInfo(ratingEngineSummary, globalTeamMap.get(ratingEngineSummary.getTeamId()), teamIds);
             }
         }
         return ratingEngineSummaries;
     }
 
-    private void renderWithTeam(RatingEngineSummary ratingEngineSummary, GlobalTeam globalTeam, Set<String> teamIds) {
+    private void fillTeamInfo(RatingEngineSummary ratingEngineSummary, GlobalTeam globalTeam, Set<String> teamIds) {
         ratingEngineSummary.setTeam(globalTeam);
         String teamId = ratingEngineSummary.getTeamId();
         if (StringUtils.isNotEmpty(teamId) && !teamIds.contains(teamId)) {
@@ -114,9 +114,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             ratingEngineSummary.setTeamId(ratingEngine.getTeamId());
             boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
             if (teamFeatureEnabled) {
-                Map<String, GlobalTeam> globalTeamMap = teamService.getTeamsInContext(false, true)
-                        .stream().collect(Collectors.toMap(GlobalTeam::getTeamId, GlobalTeam -> GlobalTeam));
-                renderWithTeam(ratingEngineSummary, globalTeamMap.get(ratingEngineSummary.getTeamId()), teamService.getTeamIdsInContext());
+                fillTeamInfo(ratingEngineSummary, teamService.getTeamInContext(ratingEngineSummary.getTeamId()), teamService.getTeamIdsInContext());
             }
         }
         return ratingEngineSummary;
@@ -161,7 +159,7 @@ public class RatingEngineServiceImpl implements RatingEngineService {
             RatingEngineSummary ratingEngineSummary = ratingEngineDashboard.getSummary();
             boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
             if (teamFeatureEnabled) {
-                renderWithTeam(ratingEngineSummary, teamService.getTeamInContext(ratingEngineSummary.getTeamId()), teamService.getTeamIdsInContext());
+                fillTeamInfo(ratingEngineSummary, teamService.getTeamInContext(ratingEngineSummary.getTeamId()), teamService.getTeamIdsInContext());
             }
         }
         return ratingEngineDashboard;

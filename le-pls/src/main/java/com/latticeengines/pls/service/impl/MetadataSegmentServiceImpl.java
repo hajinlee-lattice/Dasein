@@ -138,9 +138,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(customerSpace, name);
         if (shouldTranslateForFrontend) {
-            boolean teamFeatureEnabled = batonService.isEnabled(MultiTenantContext.getCustomerSpace(), LatticeFeatureFlag.TEAM_FEATURE);
-            segmentDTO.setMetadataSegment(translateForFrontend(segmentDTO.getMetadataSegment(), null,
-                    teamService.getTeamIdsInContext()));
+            segmentDTO.setMetadataSegment(translateForFrontend(segmentDTO.getMetadataSegment(), null, null));
         }
         return segmentDTO;
     }
