@@ -15,7 +15,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
  */
 public class ServingStoreServiceImplEntityMatchDeploymentTestNG extends ServingStoreServiceImplEntityMatchDeploymentTestNGBase {
 
-
     @Override
     protected void overwriteFeatureFlag() {
         testBed.overwriteFeatureFlag(mainTestTenant, LatticeFeatureFlag.ENABLE_ENTITY_MATCH.getName(), true);
