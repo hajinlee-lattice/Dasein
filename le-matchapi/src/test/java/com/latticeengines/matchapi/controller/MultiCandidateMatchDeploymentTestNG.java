@@ -100,8 +100,9 @@ public class MultiCandidateMatchDeploymentTestNG extends MatchapiDeploymentTestN
             Assert.assertNotNull(record.get(InterfaceName.InternalId.name()));
             count++;
         }
+        // FIXME: 100 rows matched, but only 80 match candidates, need to check further.
         Assert.assertTrue(count > 0);
-        // Assert.assertTrue(count >= matchCommand.getRowsMatched());
+        // Assert.assertTrue(count >= matchCommand.getRowsMatched(), String.valueOf(count));
     }
 
     private void setMatchInput(MatchInput matchInput, String version) {
