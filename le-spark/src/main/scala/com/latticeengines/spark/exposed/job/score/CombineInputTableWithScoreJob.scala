@@ -21,7 +21,7 @@ class CombineInputTableWithScoreJob extends AbstractSparkJob[CombineInputTableWi
     override def runJob(spark: SparkSession, lattice: LatticeContext[CombineInputTableWithScoreJobConfig]): Unit = {
 
       val config: CombineInputTableWithScoreJobConfig = lattice.config
-      val inputTable: DataFrame = lattice.input.head
+      var inputTable: DataFrame = lattice.input.head
       var scoreTable: DataFrame = lattice.input(1)
       
       val noRatingColumnInScoreTable = !scoreTable.columns.contains(ratingField)
@@ -56,16 +56,16 @@ class CombineInputTableWithScoreJob extends AbstractSparkJob[CombineInputTableWi
           idColumn = InterfaceName.InternalId.name
       }
   
-      var retainFields = inputTable.columns
+      val scoreFields = for (col <- scoreTable.columns) yield col.toUpperCase
       var dropFields : scala.collection.immutable.List[String] = scala.collection.immutable.List()
-      scoreTable.columns.foreach(c => {
-          if (retainFields.contains(c) && c != idColumn) {
+      inputTable.columns.foreach(c => {
+          if (scoreFields.contains(c.toUpperCase) && c != idColumn) {
               dropFields = c :: dropFields
           }
       })
 
       if (dropFields.size > 0) {   
-        scoreTable = scoreTable.drop(dropFields:_*)
+        inputTable = inputTable.drop(dropFields:_*)
       }
     
       var combinedResultTable = inputTable.join(scoreTable, Seq(idColumn), joinType = "left")
