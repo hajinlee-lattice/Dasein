@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dcp.workflow.listeners.SourceImportListener;
 import com.latticeengines.dcp.workflow.steps.FinishImportSource;
 import com.latticeengines.dcp.workflow.steps.ImportSource;
+import com.latticeengines.dcp.workflow.steps.MatchImport;
 import com.latticeengines.dcp.workflow.steps.SplitImportMatchResult;
 import com.latticeengines.dcp.workflow.steps.StartImportSource;
 import com.latticeengines.domain.exposed.serviceflows.dcp.DCPSourceImportWorkflowConfiguration;
-import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -30,7 +30,7 @@ public class DCPSourceImportWorkflow extends AbstractWorkflow<DCPSourceImportWor
     private ImportSource importSource;
 
     @Inject
-    private MatchDataCloudWorkflow match;
+    private MatchImport match;
 
     @Inject
     private SplitImportMatchResult splitMatchResult;

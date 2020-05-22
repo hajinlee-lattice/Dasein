@@ -100,6 +100,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String SCORING_UNIQUEKEY_COLUMN = "SCORING_UNIQUEKEY_COLUMN";
     protected static final String ATTR_LEVEL_TYPE = "ATTR_LEVEL_TYPE";
     protected static final String IMPORT_DATA_APPLICATION_ID = "IMPORT_DATA_APPLICATION_ID";
+    protected static final String IMPORT_DATA_LOCATION = "IMPORT_DATA_LOCATION";
     protected static final String ACTIVATE_MODEL_IDS = "ACTIVATE_MODEL_IDS";
     protected static final String COMPUTE_LIFT_INPUT_TABLE_NAME = "COMPUTE_LIFT_INPUT_TABLE_NAME";
     protected static final String MAP_TARGET_SCORE_INPUT_TABLE_NAME = "MAP_TARGET_SCORE_INPUT_TABLE_NAME";

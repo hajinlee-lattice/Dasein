@@ -22,7 +22,6 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.latticeengines.aws.s3.S3Service;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
@@ -37,11 +36,7 @@ import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.S3FileToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
-import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
-import com.latticeengines.domain.exposed.metadata.datastore.HdfsDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
@@ -51,7 +46,6 @@ import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.serviceflows.workflow.util.SparkUtils;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("importSource")
@@ -125,32 +119,16 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         putObjectInContext(UPLOAD_STATS, stats);
     }
 
-    private Table registerResultAsATable(EaiImportJobDetail jobDetail) {
-        HdfsDataUnit result = new HdfsDataUnit();
-        result.setDataFormat(DataUnit.DataFormat.AVRO);
-
+    private String extractResultPath(EaiImportJobDetail jobDetail) {
         List<String> paths = JsonUtils.convertList((List<?>) jobDetail.getDetails().get("ExtractPathList"), String.class);
         if (CollectionUtils.isEmpty(paths) || paths.size() != 1) {
             throw new RuntimeException("Should have exactly one extract path, but found {}" + CollectionUtils.size(paths));
         } else {
             String path = PathUtils.toParquetOrAvroDir(paths.get(0));
-            log.info("Setting data unit path to " + path);
-            result.setPath(path);
+            log.info("Extracted eai result path {}", path);
+            putStringValueInContext(IMPORT_DATA_LOCATION, path);
+            return path;
         }
-        List<String> counts = JsonUtils.convertList((List<?>) jobDetail.getDetails().get("ProcessedRecordsList"), String.class);
-        if (CollectionUtils.isEmpty(counts) || counts.size() != paths.size()) {
-            log.info("Cannot determine counts from eai job detail.");
-        } else {
-            result.setCount(Long.parseLong(counts.get(0)));
-        }
-
-        String tableName = NamingUtils.timestamp("ImportResult");
-        CustomerSpace customerSpace = configuration.getCustomerSpace();
-        Table table = SparkUtils.hdfsUnitToTable(tableName, InterfaceName.InternalId.name(), result, yarnConfiguration, podId, customerSpace);
-        metadataProxy.createTable(customerSpace.toString(), tableName, table);
-        Table eventTable = metadataProxy.getTable(customerSpace.toString(), tableName);
-        putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, eventTable);
-        return eventTable;
     }
 
     private S3FileToHdfsConfiguration setupConfiguration(DataFeedTask dataFeedTask, DropBoxSummary dropBoxSummary,
@@ -189,8 +167,8 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
             throw new RuntimeException("Error in extract info, skip register data table!");
         }
         updateUploadStatistics(eaiImportJobDetail);
-        Table eventTable = registerResultAsATable(eaiImportJobDetail);
-        copyErrorFile(customerSpace, upload, dropBoxSummary, eaiImportJobDetail, eventTable.getExtractsDirectory());
+        String resultPath = extractResultPath(eaiImportJobDetail);
+        copyErrorFile(customerSpace, upload, dropBoxSummary, eaiImportJobDetail, resultPath);
 
         uploadProxy.updateUploadStatus(customerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED);
     }

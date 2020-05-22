@@ -1,15 +1,8 @@
 package com.latticeengines.domain.exposed.serviceflows.dcp;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
-import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.DCPExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 
@@ -28,13 +21,11 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
 
         private ImportSourceStepConfiguration importSourceStepConfiguration = new ImportSourceStepConfiguration();
         private DCPExportStepConfiguration exportS3StepConfiguration = new DCPExportStepConfiguration();
-        private MatchDataCloudWorkflowConfiguration.Builder matchConfig = new MatchDataCloudWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             importSourceStepConfiguration.setCustomerSpace(customerSpace);
             exportS3StepConfiguration.setCustomerSpace(customerSpace);
-            matchConfig.customer(customerSpace);
             return this;
         }
 
@@ -79,18 +70,6 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
             return this;
         }
 
-        // BEGIN: Match
-        public Builder dataCloudVersion(String version) {
-            matchConfig.dataCloudVersion(version);
-            return this;
-        }
-
-        public Builder queue(String queue) {
-            matchConfig.matchQueue(queue);
-            return this;
-        }
-        // END: Match
-
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
             return this;
@@ -101,34 +80,7 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
                     configuration.getClass().getSimpleName());
             configuration.add(importSourceStepConfiguration);
             configuration.add(exportS3StepConfiguration);
-
-            matchConfig.joinWithInternalId(true);
-            matchConfig.fetchOnly(false);
-            matchConfig.matchType(MatchStepConfiguration.DCP);
-            matchConfig.matchRequestSource(MatchRequestSource.ENRICHMENT);
-            matchConfig.excludePublicDomains(false);
-            matchConfig.matchColumnSelection(getDCPEnrichAttrs());
-            matchConfig.sourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.name());
-            configuration.add(matchConfig.build());
-
             return configuration;
-        }
-
-        //FIXME: in alpha release, use a hard coded enrich list
-        private List<String> getDCPEnrichAttrs() {
-            return Arrays.asList(
-                    DataCloudConstants.ATTR_LDC_DUNS,
-                    DataCloudConstants.ATTR_LDC_NAME,
-                    "TRADESTYLE_NAME",
-                    "LDC_Street",
-                    "STREET_ADDRESS_2",
-                    DataCloudConstants.ATTR_CITY,
-                    DataCloudConstants.ATTR_STATE,
-                    DataCloudConstants.ATTR_ZIPCODE,
-                    DataCloudConstants.ATTR_COUNTRY,
-                    "TELEPHONE_NUMBER",
-                    "LE_SIC_CODE"
-            );
         }
     }
 }
