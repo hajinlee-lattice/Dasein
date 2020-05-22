@@ -27,7 +27,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
-import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 @Service("cdlAttrConfigService")
@@ -138,9 +137,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Override
     public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
-        if (!AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME.equals(attributeSet.getName())) {
-            validateAttributeSet(false, attributeSet);
-        }
+        validateAttributeSet(false, attributeSet);
         return attributeSetEntityMgr.updateAttributeSet(attributeSet);
     }
 
