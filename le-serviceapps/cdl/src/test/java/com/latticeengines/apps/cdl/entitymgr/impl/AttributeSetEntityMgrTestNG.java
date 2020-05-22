@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
                 Collections.singleton(AssertionError.class), null);
         retry.execute(context -> {
             AttributeSet attributeSet2 = attributeSetEntityMgr.findByName(attributeSetName);
-            verifyAttributeSet(attributeSet2, attributeSet2.getName(), displayName2, accountAttributes, emptySet);
+            verifyAttributeSet(attributeSet2, attributeSet2.getName(), displayName2, accountAttributes, null);
             return true;
         });
         assertEquals(attributeSetEntityMgr.findAll().size(), 1);
@@ -70,7 +71,7 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
         String attributeSetName2 = attributeSet.getName();
         retry.execute(context -> {
             AttributeSet attributeSet2 = attributeSetEntityMgr.findByName(attributeSetName2);
-            verifyAttributeSet(attributeSet2, attributeSet2.getName(), displayName, accountAttributes, emptySet);
+            verifyAttributeSet(attributeSet2, attributeSet2.getName(), displayName, accountAttributes, null);
             return true;
         });
         attributeSetEntityMgr.deleteByName(attributeSetName);
@@ -108,6 +109,10 @@ public class AttributeSetEntityMgrTestNG extends CDLFunctionalTestNGBase {
         assertNotNull(attributeSet.getCreated());
         assertNotNull(attributeSet.getUpdated());
         assertEquals(attributeSet.getAttributesMap().get(Category.ACCOUNT_ATTRIBUTES.name()).size(), accountAttributes.size());
-        assertEquals(attributeSet.getAttributesMap().get(Category.CONTACT_ATTRIBUTES.name()).size(), contactAttributes.size());
+        if (contactAttributes != null) {
+            assertEquals(attributeSet.getAttributesMap().get(Category.CONTACT_ATTRIBUTES.name()).size(), contactAttributes.size());
+        } else {
+            assertNull(attributeSet.getAttributesMap().get(Category.CONTACT_ATTRIBUTES.name()));
+        }
     }
 }

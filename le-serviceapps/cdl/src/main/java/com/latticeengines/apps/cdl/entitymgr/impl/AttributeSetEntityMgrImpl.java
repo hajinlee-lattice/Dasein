@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,6 +83,11 @@ public class AttributeSetEntityMgrImpl
     public AttributeSet createAttributeSet(AttributeSet attributeSet) {
         attributeSet.setTenant(MultiTenantContext.getTenant());
         attributeSet.setName(AttributeSet.generateNameStr());
+        if (MapUtils.isNotEmpty(attributeSet.getAttributesMap())) {
+            Map<String, Set<String>> attributesMap = attributeSet.getAttributesMap();
+            attributeSet.setAttributesMap(attributesMap.entrySet().stream()
+                    .filter(entry -> CollectionUtils.isNotEmpty(entry.getValue())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        }
         attributeSetDao.create(attributeSet);
         return attributeSet;
     }
@@ -155,7 +159,11 @@ public class AttributeSetEntityMgrImpl
     private void mergeAttributesMap(Map<String, Set<String>> existingAttributeSetAttributesMap, AttributeSet overrideAttributeSet) {
         if (MapUtils.isNotEmpty(overrideAttributeSet.getAttributesMap())) {
             for (Map.Entry<String, Set<String>> entry : overrideAttributeSet.getAttributesMap().entrySet()) {
-                existingAttributeSetAttributesMap.put(entry.getKey(), entry.getValue() == null ? new HashSet<>() : entry.getValue());
+                if (CollectionUtils.isEmpty(entry.getValue())) {
+                    existingAttributeSetAttributesMap.remove(entry.getKey());
+                } else {
+                    existingAttributeSetAttributesMap.put(entry.getKey(), entry.getValue());
+                }
             }
         }
     }
