@@ -93,7 +93,7 @@ public class DeltaCampaignLaunchWorkflowListener extends LEJobListener {
         // equal to incremental launched
         launch.setContactsErrored(contactsAdded + contactsDeleted);
 
-        PlayLaunch playLaunch = playProxy.updatePlayLaunch(playLaunchId, playName, playLaunchId, launch);
+        PlayLaunch playLaunch = playProxy.updatePlayLaunch(customerSpace, playName, playLaunchId, launch);
         log.info("After updat, PlayLauunch = " + JsonUtils.serialize(playLaunch));
     }
 
