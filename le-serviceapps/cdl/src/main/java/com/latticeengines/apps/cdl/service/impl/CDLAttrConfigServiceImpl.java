@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 @Service("cdlAttrConfigService")
@@ -108,21 +109,24 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
         return attributeSetEntityMgr.createAttributeSet(name, attributeSet);
     }
 
-    private void validateAttributeSet(boolean checkSize, AttributeSet attributeSet) {
-        if (checkSize) {
+    private void validateAttributeSet(boolean createOrClone, AttributeSet attributeSet) {
+        if (createOrClone) {
             List<AttributeSet> attributeSets = attributeSetEntityMgr.findAll();
             if (attributeSets.size() > ATTRIBUTE_SET_LIMITATION) {
                 throw new LedpException(LedpCode.LEDP_40084, new String[]{String.valueOf(ATTRIBUTE_SET_LIMITATION)});
             }
+            if (StringUtils.isBlank(attributeSet.getDisplayName())) {
+                throw new LedpException(LedpCode.LEDP_40085, new String[]{});
+            }
         }
-        String displayName = attributeSet.getDisplayName().trim();
-        if (StringUtils.isEmpty(displayName)) {
-            throw new LedpException(LedpCode.LEDP_40085, new String[]{});
-        }
-        attributeSet.setDisplayName(displayName);
-        AttributeSet attributeSet2 = attributeSetEntityMgr.findByDisPlayName(displayName);
-        if (attributeSet2 != null && !attributeSet2.getName().equals(attributeSet.getName())) {
-            throw new LedpException(LedpCode.LEDP_40086, new String[]{displayName});
+        String displayName = attributeSet.getDisplayName();
+        if (StringUtils.isNotEmpty(displayName)) {
+            displayName = displayName.trim();
+            attributeSet.setDisplayName(displayName);
+            AttributeSet attributeSet2 = attributeSetEntityMgr.findByDisPlayName(displayName);
+            if (attributeSet2 != null && !attributeSet2.getName().equals(attributeSet.getName())) {
+                throw new LedpException(LedpCode.LEDP_40086, new String[]{displayName});
+            }
         }
     }
 
@@ -134,7 +138,9 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
 
     @Override
     public AttributeSet updateAttributeSet(AttributeSet attributeSet) {
-        validateAttributeSet(false, attributeSet);
+        if (!AttributeUtils.DEFAULT_ATTRIBUTE_SET_NAME.equals(attributeSet.getName())) {
+            validateAttributeSet(false, attributeSet);
+        }
         return attributeSetEntityMgr.updateAttributeSet(attributeSet);
     }
 
