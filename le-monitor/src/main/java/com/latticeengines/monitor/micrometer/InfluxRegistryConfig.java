@@ -113,6 +113,7 @@ public class InfluxRegistryConfig {
         return registry;
     }
 
+    @SuppressWarnings("checkstyle:anonInnerLength")
     private InfluxConfig getInfluxConfig(@NotNull String db, long stepInMinutes) {
         return new InfluxConfig() {
 

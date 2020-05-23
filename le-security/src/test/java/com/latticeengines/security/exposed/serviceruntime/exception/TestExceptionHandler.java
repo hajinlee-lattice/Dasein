@@ -26,6 +26,7 @@ public class TestExceptionHandler extends FrontEndFacingExceptionHandler {
     }
 
     @Override
+    @SuppressWarnings("checkstyle:anonInnerLength")
     protected HttpServletRequest getCurrentRequest() {
         return new HttpServletRequest() {
             @Override

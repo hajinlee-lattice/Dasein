@@ -77,13 +77,6 @@
         <module name="HideUtilityClassConstructor"/>
         <module name="OneTopLevelClass"/>
 
-        <!-- Miscellaneous -->
-        <module name="OuterTypeFilename"/>
-
-        <!-- Modifiers -->
-        <module name="ModifierOrder"/>
-        <module name="RedundantModifier"/>
-
         <!-- Imports -->
         <module name="AvoidStarImport"/>
         <module name="UnusedImports"/>
@@ -96,6 +89,22 @@
         </module>
         <module name="ImportControl">
             <property name="file" value="le-parent/checkstyle/import-control-error.xml"/>
+        </module>
+
+        <!-- Miscellaneous -->
+        <module name="OuterTypeFilename"/>
+
+        <!-- Modifiers -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Naming -->
+        <module name="PackageName"/>
+        <module name="TypeName"/>
+
+        <!-- Sizes -->
+        <module name="AnonInnerLength">
+            <property name="max" value="50"/>
         </module>
 
     </module>
