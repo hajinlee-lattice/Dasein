@@ -95,12 +95,13 @@ public class EventQueryServiceImplSparkSQLTestNG extends EventQueryServiceImplTe
     @Override
     protected EventQueryService getEventQueryService(String sqlUser) {
         switch (sqlUser) {
-        case SEGMENT_USER:
-            return super.getEventQueryService(sqlUser);
-        case SPARK_BATCH_USER:
-            return eventQueryServiceSparkSql;
+            case SEGMENT_USER:
+                return super.getEventQueryService(sqlUser);
+            case SPARK_BATCH_USER:
+                return eventQueryServiceSparkSql;
+            default:
+                throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
         }
-        throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }
 
     @Override

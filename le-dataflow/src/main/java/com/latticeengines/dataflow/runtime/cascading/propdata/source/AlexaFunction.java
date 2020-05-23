@@ -73,6 +73,7 @@ public class AlexaFunction extends BaseOperation implements Function {
                     output[10] = rank;
                     output[11] = users;
                     break;
+                default:
             }
         }
         return new Tuple(output);

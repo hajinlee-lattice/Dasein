@@ -200,6 +200,7 @@ public class UploadServiceImpl implements UploadService, FileDownloader<UploadFi
             case "FAILED":
                 emailService.sendUploadFailedEmail(uploadEmailInfo);
                 break;
+            default:
         }
     }
 

@@ -119,6 +119,7 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
                 Assert.assertNotNull(baseTransactionFile);
                 startCDLImport(baseTransactionFile, ENTITY_TRANSACTION);
                 break;
+            default:
         }
     }
 
@@ -144,6 +145,7 @@ public abstract class CSVFileImportDeploymentTestNGBase extends CDLDeploymentTes
                 webVisitPathPatternDataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE,
                         DEFAULT_WEBSITE_SYSTEM + SPLIT_CHART + EntityType.WebVisitPathPattern.getDefaultFeedTypeName(), ENTITY_CATALOG);
                 break;
+            default:
         }
     }
 

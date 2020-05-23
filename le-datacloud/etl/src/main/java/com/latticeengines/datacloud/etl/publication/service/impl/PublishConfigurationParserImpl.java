@@ -173,6 +173,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
             break;
         case APPEND:
             break;
+        default:
         }
         String customer = String.format(EngineConstants.SQOOP_CUSTOMER_PATTERN, tableName);
 
@@ -253,6 +254,7 @@ public class PublishConfigurationParserImpl implements PublishConfigurationParse
             break;
         case APPEND:
             break;
+        default:
         }
 
         return sql;

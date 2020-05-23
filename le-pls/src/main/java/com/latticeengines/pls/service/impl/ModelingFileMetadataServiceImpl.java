@@ -983,6 +983,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     fieldMapping.setMappedField(leadSystemId);
                 }
                 break;
+            default:
         }
     }
 

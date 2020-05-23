@@ -88,6 +88,7 @@ public final class CamilleEnvironment {
                 throw e;
             }
             break;
+        default:
         }
         log.info("Camille env started pod " + camilleConfig.getPodId() + ", conn " + camilleConfig.getConnectionString()
                 + ", div " + camilleConfig.getDivision() + ", shareQ " + camilleConfig.getSharedQueues());

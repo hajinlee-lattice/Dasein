@@ -141,6 +141,8 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                     break;
                 case 4:
                     val = null;
+                    break;
+                default:
             }
             updateIntervalInt(data, i, val);
         }
@@ -168,6 +170,8 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                     break;
                 case 4:
                     val = null;
+                    break;
+                default:
             }
             updateIntervalDouble(data, i, val);
         }
@@ -195,6 +199,8 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                     break;
                 case 4:
                     val = "Value3";
+                    break;
+                default:
             }
             updateCatString(data, i, val);
         }
@@ -222,6 +228,8 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                     break;
                 case 4:
                     val = null;
+                    break;
+                default:
             }
             updateCatMapString(data, i, val);
         }
@@ -249,6 +257,8 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                     break;
                 case 4:
                     val = new Boolean[] { null, false, false, null };
+                    break;
+                default:
             }
             updateBooleans(data, i, val);
         }
@@ -276,6 +286,8 @@ public class CalcStatsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
                     break;
                 case 4:
                     val = new int[] { 1, 5 };
+                    break;
+                default:
             }
             updateYesBits(data, i, val);
         }

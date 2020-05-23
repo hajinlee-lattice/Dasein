@@ -5,6 +5,8 @@ import static org.testng.Assert.assertEquals;
 import java.io.IOException;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.joda.time.DateTime;
@@ -51,22 +53,22 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
 
     protected static final String DEFAULT_SYSTEM_TYPE = S3ImportSystem.SystemType.Other.name();
 
-    @Autowired
+    @Inject
     protected FileUploadService fileUploadService;
 
-    @Autowired
+    @Inject
     protected SourceFileService sourceFileService;
 
-    @Autowired
+    @Inject
     protected ModelingFileMetadataService modelingFileMetadataService;
 
-    @Autowired
+    @Inject
     protected WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     protected DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     protected CDLService cdlService;
 
     @Autowired
@@ -109,6 +111,7 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
                 Assert.assertNotNull(baseTransactionFile);
                 startCDLImport(baseTransactionFile, EntityType.ProductPurchases);
                 break;
+            default:
         }
     }
 
@@ -132,6 +135,7 @@ public abstract class CSVFileImportDeploymentTestNGBaseV2 extends CDLDeploymentT
             case WebVisitPathPattern:
                 webVisitPathPatternDataFeedTask = task;
                 break;
+            default:
         }
     }
 

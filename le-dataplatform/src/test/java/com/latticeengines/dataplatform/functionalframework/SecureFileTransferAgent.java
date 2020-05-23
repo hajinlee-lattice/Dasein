@@ -67,14 +67,15 @@ public class SecureFileTransferAgent {
 
             // Copy local file to sftp server
             switch (option) {
-            case UPLOAD:
-                remoteFile.copyFrom(localFile, Selectors.SELECT_SELF);
-                log.info("File upload successful.");
-                break;
-            case DOWNLOAD:
-                localFile.copyFrom(remoteFile, Selectors.SELECT_SELF);
-                log.info("File download successful.");
-                break;
+                case UPLOAD:
+                    remoteFile.copyFrom(localFile, Selectors.SELECT_SELF);
+                    log.info("File upload successful.");
+                    break;
+                case DOWNLOAD:
+                    localFile.copyFrom(remoteFile, Selectors.SELECT_SELF);
+                    log.info("File download successful.");
+                    break;
+                default:
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);

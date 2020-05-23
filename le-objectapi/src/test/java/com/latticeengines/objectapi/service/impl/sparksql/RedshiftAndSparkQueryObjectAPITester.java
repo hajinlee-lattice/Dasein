@@ -12,30 +12,32 @@ public interface RedshiftAndSparkQueryObjectAPITester extends RedshiftAndSparkQu
 
     default long testAndAssertCountFromTester(String sqlUser, long resultCount, long expectedCount) {
         switch (sqlUser) {
-        case USER_SEGMENT:
-            getLogger().info("Redshift Query Count: {}", resultCount);
-            redshiftQueryCountResults.add(resultCount);
-            return resultCount;
-        case SPARK_BATCH_USER:
-            getLogger().info("SparkSQL Query Count: {}", resultCount);
-            sparkQueryCountResults.add(resultCount);
-            return resultCount;
+            case USER_SEGMENT:
+                getLogger().info("Redshift Query Count: {}", resultCount);
+                redshiftQueryCountResults.add(resultCount);
+                return resultCount;
+            case SPARK_BATCH_USER:
+                getLogger().info("SparkSQL Query Count: {}", resultCount);
+                sparkQueryCountResults.add(resultCount);
+                return resultCount;
+            default:
+                throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
         }
-        throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }
 
     default List<Map<String, Object>> testAndAssertDataFromTester(String sqlUser, List<Map<String, Object>> results,
             List<Map<String, Object>> expectedResults) {
         switch (sqlUser) {
-        case USER_SEGMENT:
-            getLogger().info("Redshift Query Data Size: {}", results.size());
-            redshiftQueryDataResults.add(results);
-            return results;
-        case SPARK_BATCH_USER:
-            getLogger().info("SparkSQL Query Data Size: {}", results.size());
-            sparkQueryDataResults.add(results);
-            return results;
+            case USER_SEGMENT:
+                getLogger().info("Redshift Query Data Size: {}", results.size());
+                redshiftQueryDataResults.add(results);
+                return results;
+            case SPARK_BATCH_USER:
+                getLogger().info("SparkSQL Query Data Size: {}", results.size());
+                sparkQueryDataResults.add(results);
+                return results;
+            default:
+                throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
         }
-        throw new IllegalArgumentException(String.format("SQL User: %s is not supported", sqlUser));
     }
 }

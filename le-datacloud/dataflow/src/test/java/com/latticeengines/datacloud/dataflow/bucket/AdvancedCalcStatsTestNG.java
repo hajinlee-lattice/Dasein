@@ -134,18 +134,19 @@ public class AdvancedCalcStatsTestNG extends CalcStatsTestNG {
                 Assert.assertEquals(A2, "__ALL__");
             }
             switch (A2) {
-                case "2":
-                    Assert.assertEquals(bktCnts, "2:4");
-                    break;
-                case "3":
-                    Assert.assertEquals(bktCnts, "3:2");
-                    break;
-                case "4":
-                    Assert.assertEquals(bktCnts, "4:2");
-                    break;
-                case "__ALL__":
-                    Assert.assertEquals(bktCnts, "2:4|3:2|4:2");
-                    break;
+            case "2":
+                Assert.assertEquals(bktCnts, "2:4");
+                break;
+            case "3":
+                Assert.assertEquals(bktCnts, "3:2");
+                break;
+            case "4":
+                Assert.assertEquals(bktCnts, "4:2");
+                break;
+            case "__ALL__":
+                Assert.assertEquals(bktCnts, "2:4|3:2|4:2");
+                break;
+            default:
             }
         }
     }

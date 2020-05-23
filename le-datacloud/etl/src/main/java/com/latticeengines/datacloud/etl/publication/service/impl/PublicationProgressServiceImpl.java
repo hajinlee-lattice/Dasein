@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -77,11 +78,12 @@ public class PublicationProgressServiceImpl implements PublicationProgressServic
             String ingestionName = publication.getSourceName();
             String ingestionDir = hdfsPathBuilder.constructIngestionDir(ingestionName).toString();
             List<String> versions = HdfsUtils.getFilesForDir(yarnConfiguration, ingestionDir);
-            if (versions != null && !versions.isEmpty()) {
+            if (CollectionUtils.isNotEmpty(versions)) {
                 Path currentVersionPath = new Path(Collections.max(versions));
                 currentVersion = currentVersionPath.getName();
             }
             break;
+        default:
         }
         if (currentVersion != null && newProgressValidator.isValidToStartNewProgress(publication, currentVersion)) {
             return publishVersion(publication, currentVersion, creator);

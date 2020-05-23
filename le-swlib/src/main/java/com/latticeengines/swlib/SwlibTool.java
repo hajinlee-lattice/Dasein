@@ -89,6 +89,7 @@ public final class SwlibTool {
                         break;
                     case "uninstall":
                         break;
+                    default:
                 }
             }
         } catch (Exception e) {

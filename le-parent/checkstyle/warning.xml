@@ -75,6 +75,9 @@
             <property name="classes" value="java.lang.Float"/>
             <property name="classes" value="java.lang.Double"/>
         </module>
+        <module name="IllegalToken">
+            <property name="tokens" value="LITERAL_NATIVE"/>
+        </module>
         <module name="InnerAssignment"/>
         <module name="MissingSwitchDefault"/>
         <module name="NestedForDepth">

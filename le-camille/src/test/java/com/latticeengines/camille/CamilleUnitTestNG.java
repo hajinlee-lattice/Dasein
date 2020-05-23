@@ -229,6 +229,7 @@ public class CamilleUnitTestNG {
             case "d6":
                 Assert.assertEquals(i, 6);
                 break;
+            default:
             }
 
             ++i;

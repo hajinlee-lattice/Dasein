@@ -98,6 +98,7 @@ public class FileSystemGetChildrenFunctionUnitTestNG {
             case "/0/2/6/6.txt":
                 Assert.assertEquals("six", n.getDocument().getData());
                 break;
+            default:
             }
         }
     }

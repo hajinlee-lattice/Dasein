@@ -292,6 +292,7 @@ public class ScoringComparisonAgainstProdForSingleModelTestNG extends ScoringFun
                     recordsAreSame = false;
                 }
                 break;
+            default:
             }
         }
         return recordsAreSame;

@@ -179,6 +179,8 @@ public class CreateChangeListTestNG extends SparkJobFunctionalTestNGBase {
                 Assert.assertEquals(toInteger, "18", record.toString());
                 assertListNull(Arrays.asList(isDeleted, fromString, toString, fromBoolean, toBoolean, fromInteger,
                         fromBoolean, toBoolean, fromFloat, toFloat, FromDouble, toDouble), record);
+                break;
+            default:
             }
             rows++;
         }

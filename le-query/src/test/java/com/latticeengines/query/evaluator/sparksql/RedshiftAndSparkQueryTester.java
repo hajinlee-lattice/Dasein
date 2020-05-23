@@ -92,6 +92,7 @@ public interface RedshiftAndSparkQueryTester {
                         String.format("Data doesn't match for %s : %s", testResult.getMethod().getMethodName(),
                                 Arrays.deepToString(params)));
                 break;
+            default:
             }
         } finally {
             System.out.println(String.format(

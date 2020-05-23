@@ -39,8 +39,7 @@ public class AudienceCreationWorkflowStatusHandler implements WorkflowStatusHand
 
         AudienceCreationEventDetail eventDetail = (AudienceCreationEventDetail) status.getEventDetail();
 
-        switch (statusMonitor.getEntityName()) {
-        case "PlayLaunch":
+        if ("PlayLaunch".equals(statusMonitor.getEntityName())) {
             playLaunchService.updateAudience(eventDetail.getAudienceId(), eventDetail.getAudienceName(), statusMonitor.getEntityId());
         }
 

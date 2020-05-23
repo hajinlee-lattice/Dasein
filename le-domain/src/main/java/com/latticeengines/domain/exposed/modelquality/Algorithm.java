@@ -102,8 +102,9 @@ public class Algorithm implements HasName, HasPid, Fact, Dimension, SupportsLate
                 return "LR";
             case DECISIONTREE:
                 return "DT";
+            default:
+                return "RF";
         }
-        return "RF";
     }
 
     @MetricTag(tag = "AlgorithmScript")

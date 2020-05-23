@@ -1,6 +1,7 @@
 package com.latticeengines.apps.lp.entitymgr.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -407,7 +408,7 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
         List<Predictor> predictorsUsedForBi = modelSummaryEntityMgr
                 .findPredictorsUsedByBuyerInsightsByModelId(summary1.getId());
-        assertTrue(predictorsUsedForBi.size() == 2);
+        assertEquals(predictorsUsedForBi.size(), 2);
 
         List<Predictor> predictors = retrievedSummary.getPredictors();
         AttributeMap attrMap = createValidMap();
@@ -418,21 +419,22 @@ public class ModelSummaryEntityMgrImplTestNG extends LPFunctionalTestNGBase {
 
         predictorsUsedForBi = modelSummaryEntityMgr
                 .findPredictorsUsedByBuyerInsightsByModelId(summary1.getId());
-        assertTrue(predictorsUsedForBi.size() == 1);
+        assertEquals(predictorsUsedForBi.size(), 1);
 
         predictors = retrievedSummaryAfterUpdatingPredictors.getPredictors();
         for (Predictor predictor : predictors) {
             String predictorName = predictor.getName();
             switch (predictorName) {
                 case "LeadSource":
-                    assertTrue(predictor.getUsedForBuyerInsights() == false);
+                    assertFalse((boolean) predictor.getUsedForBuyerInsights());
                     break;
                 case "Website_Custom":
-                    assertTrue(predictor.getUsedForBuyerInsights() == false);
+                    assertFalse((boolean) predictor.getUsedForBuyerInsights());
                     break;
                 case "Income":
-                    assertTrue(predictor.getUsedForBuyerInsights() == true);
+                    assertTrue((boolean) predictor.getUsedForBuyerInsights());
                     break;
+                default:
             }
         }
 

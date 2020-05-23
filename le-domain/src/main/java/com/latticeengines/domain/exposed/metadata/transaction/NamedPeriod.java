@@ -67,6 +67,7 @@ public enum NamedPeriod {
                     timeRange[1] = year + "-" + getMonthStr(lastQuarter * 3 + 3) + "-31";
                 }
                 break;
+            default:
         }
         return timeRange;
     }

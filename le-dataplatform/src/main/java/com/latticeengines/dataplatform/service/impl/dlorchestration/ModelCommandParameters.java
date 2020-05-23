@@ -90,9 +90,10 @@ public class ModelCommandParameters {
             case ModelCommandParameters.VALIDATE:
                 this.setValidate(Boolean.parseBoolean(parameter.getValue()));
                 break;
-
             case ModelCommandParameters.DL_QUERY:
                 this.setDlQuery(parameter.getValue());
+                break;
+            default:
             }
         }
 

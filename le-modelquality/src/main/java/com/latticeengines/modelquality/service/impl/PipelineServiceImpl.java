@@ -118,6 +118,7 @@ public class PipelineServiceImpl extends BaseServiceImpl implements PipelineServ
                 break;
             case PYTHONRTS:
                 break;
+            default:
             }
             HdfsUtils.mkdir(yarnConfiguration, getHdfsDir() + "/steps/" + stepName);
             String tplPath = "%s/steps/%s/%s.%s";

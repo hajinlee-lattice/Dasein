@@ -115,6 +115,7 @@ public class TranslatorCommon {
             aggrPredicate = (aggregate) ? toAggregatedBooleanExpression(stringPath, cmp, values)
                     : toBooleanExpression(stringPath, cmp, values);
             break;
+        default:
         }
 
         return aggrPredicate;
@@ -204,6 +205,7 @@ public class TranslatorCommon {
                 windowAgg = SQLExpressions.max(trxnValNumber.coalesce(BigDecimal.ZERO)).over();
             }
             break;
+        default:
         }
 
         if (ascendingPeriod) {

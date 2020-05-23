@@ -62,6 +62,8 @@ public class PublicationNewProgressValidatorImpl implements PublicationNewProgre
                 if (noIngestionFile(publication.getSourceName(), currentVersion)) {
                     return false;
                 }
+                break;
+            default:
         }
 
 

@@ -73,6 +73,7 @@ public class CSVFileImportForS3DeploymentTestNG extends CSVFileImportDeploymentT
             testS3ImportWithTemplateData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION, entityType);
             testS3ImportOnlyData(TRANSACTION_SOURCE_FILE, ENTITY_TRANSACTION);
             break;
+        default:
         }
     }
 

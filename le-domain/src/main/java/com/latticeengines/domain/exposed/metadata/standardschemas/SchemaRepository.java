@@ -292,9 +292,9 @@ public class SchemaRepository {
         table.setLastModifiedKey(createLastModifiedKey("Timestamp"));
 
         /*
-         * Each transaction row has to be associated with an account keyed off
-         * the following: 1. AccountId - could be SFDC external id 2.
-         * CompanyName+Location 3. DUNS number
+         * Each transaction row has to be associated with an account keyed off the
+         * following: 1. AccountId - could be SFDC external id 2. CompanyName+Location
+         * 3. DUNS number
          */
 
         table.addAttribute(attr("AccountId") //
@@ -1437,11 +1437,7 @@ public class SchemaRepository {
     }
 
     private AttributeBuilder attr(String name) {
-        return new AttributeBuilder()
-                .name(name)
-                .displayName(name)
-                .tag(Tag.INTERNAL.toString())
-                .nullable(true)
+        return new AttributeBuilder().name(name).displayName(name).tag(Tag.INTERNAL.toString()).nullable(true)
                 .approvedUsage(ModelingMetadata.MODEL_AND_ALL_INSIGHTS_APPROVED_USAGE);
     }
 
@@ -1554,7 +1550,7 @@ public class SchemaRepository {
         Preconditions.checkNotNull(systemType);
         Table schemaTable = null;
         List<Attribute> attrs;
-        //TODO(JHE): 1. systemType support. 2. Split Product & Contact with subType.
+        // TODO(JHE): 1. systemType support. 2. Split Product & Contact with subType.
         switch (entityType) {
         case Accounts:
             schemaTable = getAccountSchema(true, false, enableEntityMatch);
@@ -1613,14 +1609,14 @@ public class SchemaRepository {
             schemaTable = createTable(SchemaInterpretation.MarketingActivityType);
             schemaTable.setAttributes(attrs);
             break;
+        default:
         }
         return schemaTable;
     }
 
     private Attribute attrName() {
-        return attr(InterfaceName.Name.name())
-                .allowedDisplayNames(Collections.singletonList("Name")).required().notNull()
-                .physicalDataType(Schema.Type.STRING) //
+        return attr(InterfaceName.Name.name()).allowedDisplayNames(Collections.singletonList("Name")).required()
+                .notNull().physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.Name) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1628,9 +1624,8 @@ public class SchemaRepository {
     }
 
     private Attribute attrActivityType() {
-        return attr(InterfaceName.ActivityType.name())
-                .allowedDisplayNames(Collections.singletonList("ActivityType")).required().notNull()
-                .physicalDataType(Schema.Type.STRING) //
+        return attr(InterfaceName.ActivityType.name()).allowedDisplayNames(Collections.singletonList("ActivityType"))
+                .required().notNull().physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.ActivityType) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1638,11 +1633,9 @@ public class SchemaRepository {
     }
 
     private Attribute attrActivityDate() {
-        return attr(InterfaceName.ActivityDate.name()).allowedDisplayNames(Arrays.asList("activityDate", "ActivityDate"))
-                .required()
-                .notNull()
-                .physicalDataType(Schema.Type.LONG)
-                .interfaceName(InterfaceName.ActivityDate)
+        return attr(InterfaceName.ActivityDate.name())
+                .allowedDisplayNames(Arrays.asList("activityDate", "ActivityDate")).required().notNull()
+                .physicalDataType(Schema.Type.LONG).interfaceName(InterfaceName.ActivityDate)
                 .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.DATE.getName()) //
@@ -1650,10 +1643,9 @@ public class SchemaRepository {
     }
 
     private Attribute attrStageName() {
-        return attr(InterfaceName.StageName.name()).allowedDisplayNames(Arrays.asList("STAGENAME", "STAGE_NAME",
-                "Stage Name"))
-                .notNull()
-                .required().physicalDataType(Schema.Type.STRING) //
+        return attr(InterfaceName.StageName.name())
+                .allowedDisplayNames(Arrays.asList("STAGENAME", "STAGE_NAME", "Stage Name")).notNull().required()
+                .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.StageName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1673,8 +1665,7 @@ public class SchemaRepository {
     private Attribute attrOpportunityDate() {
         return attr(InterfaceName.LastModifiedDate.name())
                 .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LAST_MODIFIED_DATE")) //
-                .notNull()
-                .required().physicalDataType(Schema.Type.LONG) //
+                .notNull().required().physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
                 .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1685,9 +1676,7 @@ public class SchemaRepository {
     private Attribute attrWebVisitDate() {
         return attr(InterfaceName.WebVisitDate.name())
                 .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED_DATE", "WEBVISITDATE", "WEB_VISIT_DATE")) //
-                .required()
-                .notNull()
-                .physicalDataType(Schema.Type.LONG) //
+                .required().notNull().physicalDataType(Schema.Type.LONG) //
                 .interfaceName(InterfaceName.WebVisitDate) //
                 .logicalDataType(LogicalDataType.Date) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1697,9 +1686,7 @@ public class SchemaRepository {
 
     private Attribute attrPageUrl() {
         return attr(InterfaceName.WebVisitPageUrl.name())
-                .allowedDisplayNames(Arrays.asList("PAGE_URL", "PAGEURL", "WEB_VISIT_PAGE_URL"))
-                .required()
-                .notNull()
+                .allowedDisplayNames(Arrays.asList("PAGE_URL", "PAGEURL", "WEB_VISIT_PAGE_URL")).required().notNull()
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.WebVisitPageUrl) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1708,9 +1695,7 @@ public class SchemaRepository {
     }
 
     private Attribute attrUserId() {
-        return attr(InterfaceName.UserId.name())
-                .allowedDisplayNames(Arrays.asList("ID", "USER_ID"))
-                .required()
+        return attr(InterfaceName.UserId.name()).allowedDisplayNames(Arrays.asList("ID", "USER_ID")).required()
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.UserId) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1766,8 +1751,8 @@ public class SchemaRepository {
 
     private Attribute attrState() {
         return attr(InterfaceName.State.name()) //
-                .allowedDisplayNames(Arrays.asList("STATE", "STATE PROVINCE", "STATE_PROVINCE", "BILLING_STATE",
-                        "BILLING_PROVINCE")) //
+                .allowedDisplayNames(
+                        Arrays.asList("STATE", "STATE PROVINCE", "STATE_PROVINCE", "BILLING_STATE", "BILLING_PROVINCE")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.State) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1787,8 +1772,8 @@ public class SchemaRepository {
 
     private Attribute attrPostalCode() {
         return attr(InterfaceName.PostalCode.name()) //
-                .allowedDisplayNames(Arrays.asList("ZIP", "ZIP_CODE", "POSTAL_CODE", "BILLING_ZIP",
-                        "BILLING_ZIP_CODE", "BILLING_POSTAL_CODE")) //
+                .allowedDisplayNames(Arrays.asList("ZIP", "ZIP_CODE", "POSTAL_CODE", "BILLING_ZIP", "BILLING_ZIP_CODE",
+                        "BILLING_POSTAL_CODE")) //
                 .physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PostalCode) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
@@ -1809,9 +1794,7 @@ public class SchemaRepository {
     private Attribute attrPathPattern() {
         return attr(InterfaceName.PathPattern.name()) //
                 .allowedDisplayNames(Arrays.asList("PATTERN", "PATH_PATTERN")) //
-                .required()
-                .notNull()
-                .physicalDataType(Schema.Type.STRING) //
+                .required().notNull().physicalDataType(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.PathPattern) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
@@ -1825,8 +1808,6 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.PathPatternName) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
-                .required()
-                .notNull()
-                .build();
+                .required().notNull().build();
     }
 }

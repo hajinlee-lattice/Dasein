@@ -92,16 +92,17 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
 
     private String getLegacyConsolidationResultFile(String vendor) {
         switch (vendor) {
-            case VendorConfig.VENDOR_ALEXA:
-                return alexaLegacyConsolidationResult;
-            case VendorConfig.VENDOR_BUILTWITH:
-                return bwLegacyConsolidationResult;
-            case VendorConfig.VENDOR_ORBI_V2:
-                return orbLegacyConsolidationResult;
-            case VendorConfig.VENDOR_SEMRUSH:
-                return semrushLegacyConsolidationResult;
+        case VendorConfig.VENDOR_ALEXA:
+            return alexaLegacyConsolidationResult;
+        case VendorConfig.VENDOR_BUILTWITH:
+            return bwLegacyConsolidationResult;
+        case VendorConfig.VENDOR_ORBI_V2:
+            return orbLegacyConsolidationResult;
+        case VendorConfig.VENDOR_SEMRUSH:
+            return semrushLegacyConsolidationResult;
+        default:
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -113,17 +114,18 @@ public class ConsolidateCollectionTransformer extends AbstractDataflowTransforme
     public String getDataFlowBeanName() {
         String vendor = vendorConfig.getVendor();
         switch (vendor){
-            case VendorConfig.VENDOR_ALEXA:
-                return ConsolidateCollectionAlexaFlow.BEAN_NAME;
-            case VendorConfig.VENDOR_BUILTWITH:
-                return ConsolidateCollectionBWFlow.BEAN_NAME;
-            case VendorConfig.VENDOR_ORBI_V2:
-                return ConsolidateCollectionOrbFlow.BEAN_NAME;
-            case VendorConfig.VENDOR_SEMRUSH:
-                return ConsolidateCollectionSemrushFlow.BEAN_NAME;
+        case VendorConfig.VENDOR_ALEXA:
+            return ConsolidateCollectionAlexaFlow.BEAN_NAME;
+        case VendorConfig.VENDOR_BUILTWITH:
+            return ConsolidateCollectionBWFlow.BEAN_NAME;
+        case VendorConfig.VENDOR_ORBI_V2:
+            return ConsolidateCollectionOrbFlow.BEAN_NAME;
+        case VendorConfig.VENDOR_SEMRUSH:
+            return ConsolidateCollectionSemrushFlow.BEAN_NAME;
+        default:
+            log.error("failure: no data-flow bean for " + vendor + " found");
+            return null;
         }
-        log.error("failure: no data-flow bean for " + vendor + " found");
-        return null;
     }
 
     @Override

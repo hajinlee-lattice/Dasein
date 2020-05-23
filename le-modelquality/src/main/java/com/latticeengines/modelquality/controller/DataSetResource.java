@@ -69,6 +69,8 @@ public class DataSetResource implements ModelQualityDataSetInterface, CrudInterf
             break;
         case PLAYMAKER:
             toReturn = dataSetService.createDataSetFromPlaymakerTenant(tenantId, sourceId);
+            break;
+        default:
         }
         return toReturn;
     }
