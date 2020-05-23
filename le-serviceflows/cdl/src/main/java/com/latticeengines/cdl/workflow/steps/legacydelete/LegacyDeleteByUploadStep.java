@@ -406,6 +406,8 @@ public class LegacyDeleteByUploadStep extends BaseTransformWrapperStep<LegacyDel
             case Transaction:
                 if (type.equals(CleanupOperationType.BYUPLOAD_MINDATE)) {
                     return InterfaceName.TransactionDayPeriod.name();
+                } else {
+                    return null;
                 }
             default:
                 return null;

@@ -106,6 +106,7 @@ public class ActionResourceDeploymentTestNG  extends PlsDeploymentTestNGBase {
                         .setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
                 ((AttrConfigLifeCycleChangeConfiguration) ac).setAttrNums(1000L);
                 ((AttrConfigLifeCycleChangeConfiguration) ac).setCategoryName("Category_abc");
+                break;
             default:
                 ac = null;
                 break;

@@ -95,6 +95,7 @@ public class DynamoPublishService extends AbstractPublishService
             createTable(dynamoService, tableName, configuration);
             log.info("Table " + tableName + " is created");
             progress = progressService.update(progress).destination(destination).progress(0.3f).commit();
+            break;
         case APPEND:
             if (PublicationConfiguration.PublicationStrategy.APPEND.equals(configuration.getPublicationStrategy())) {
                 long readCapacity = configuration.getLoadingReadCapacity();
@@ -143,6 +144,7 @@ public class DynamoPublishService extends AbstractPublishService
             case Production:
                 environment = "production";
                 break;
+            default:
         }
         Map<String, String> tags = ImmutableMap.of(TAG_LE_ENV, environment, TAG_LE_PRODUCT, TAG_LE_PRODUCT_VALUE,
                 TAG_LE_NAME, tableName);

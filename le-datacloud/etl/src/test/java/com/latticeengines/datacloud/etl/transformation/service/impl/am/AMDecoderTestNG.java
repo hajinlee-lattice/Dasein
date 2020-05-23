@@ -198,8 +198,8 @@ public class AMDecoderTestNG extends PipelineTransformationTestNGBase {
             break;
         case FULLAM_DECODED_SOURCE:
             verifyFullAMDecoded(source, version, records);
-        default:
             break;
+        default:
         }
     }
 

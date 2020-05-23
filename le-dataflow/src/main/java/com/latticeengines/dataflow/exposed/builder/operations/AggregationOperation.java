@@ -35,19 +35,20 @@ public class AggregationOperation extends Operation {
             targetFieldClass = Long.class;
             break;
         case MAX:
-                aggregationPipe = new MaxBy(aggregationPipe, //
-                        Fields.NONE, //
-                        new Fields(aggregation.getAggregatedFieldName()), //
-                        new Fields(aggregation.getTargetFieldName()));
-                targetFieldClass = Long.class;
+            aggregationPipe = new MaxBy(aggregationPipe, //
+                    Fields.NONE, //
+                    new Fields(aggregation.getAggregatedFieldName()), //
+                    new Fields(aggregation.getTargetFieldName()));
+            targetFieldClass = Long.class;
+            break;
         case MIN_STR:
             aggregationPipe = new MinBy(aggregationPipe, //
                     Fields.NONE, //
                     new Fields(aggregation.getAggregatedFieldName()), //
                     new Fields(aggregation.getTargetFieldName()));
             targetFieldClass = String.class;
-        default:
             break;
+        default:
         }
         List<FieldMetadata> mergedFields = new ArrayList<>();
         mergedFields.addAll(lhs.metadata);

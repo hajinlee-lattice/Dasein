@@ -57,6 +57,8 @@ public class BitCodeBook implements Serializable {
                 for (int i = 0; i < valueDictArr.length; i++) {
                     valueDictRev.put(Integer.toBinaryString(i + 1), valueDictArr[i]);
                 }
+                bitUnit = bitDecodeStrategy.getBitUnit();
+                break;
             case NUMERIC_INT:
             case NUMERIC_UNSIGNED_INT:
                 bitUnit = bitDecodeStrategy.getBitUnit();

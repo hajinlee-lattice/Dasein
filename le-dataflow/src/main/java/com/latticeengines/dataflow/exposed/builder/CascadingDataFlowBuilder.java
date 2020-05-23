@@ -744,8 +744,8 @@ public abstract class CascadingDataFlowBuilder extends DataFlowBuilder {
                     break;
                 case NONE:
                     outputStrategy = Fields.NONE;
-                default:
                     break;
+                default:
                 }
             }
             groupby = new Every(groupby,

@@ -180,6 +180,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
                                 valueDictRev.put(Integer.toBinaryString(i + 1), valueDictArr[i]);
                             }
                             valueDictRevMap.put(encodedColumn, valueDictRev);
+                            // falls through
                         case NUMERIC_INT:
                         case NUMERIC_UNSIGNED_INT:
                             Integer bitUnit = jsonNode.get("BitUnit").asInt();

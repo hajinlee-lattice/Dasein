@@ -57,8 +57,7 @@ public abstract class AvroTypeConverter {
                 break;
             case LONG:
                 targetType = Long.class;
-                DateTimeFormatter dtf = null;
-
+                DateTimeFormatter dtf;
                 if (attr.getSourceLogicalDataType().equalsIgnoreCase("Date")) {
                     dtf = ISODateTimeFormat.dateElementParser();
                 } else if (attr.getSourceLogicalDataType().equalsIgnoreCase("Datetime")
@@ -80,6 +79,7 @@ public abstract class AvroTypeConverter {
                                 attr.getName(), value));
                     }
                 }
+                break;
             case STRING:
                 if (attr.getLogicalDataType() != null && attr.getLogicalDataType().equals(LogicalDataType.Timestamp)) {
                     return valueConverter.convertTimeStampString(value);

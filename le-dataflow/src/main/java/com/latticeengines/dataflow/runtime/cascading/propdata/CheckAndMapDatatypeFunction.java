@@ -61,24 +61,28 @@ public class CheckAndMapDatatypeFunction extends BaseOperation implements Functi
                 if (!(value instanceof Double)) {
                     return Double.valueOf(value.toString());
                 }
+                break;
             case FLOAT:
                 if (!(value instanceof Float)) {
                     return Float.valueOf(value.toString());
                 }
+                break;
             case INT:
                 if (!(value instanceof Integer)) {
                     return Integer.valueOf(value.toString());
                 }
+                break;
             case LONG:
                 if (!(value instanceof Long)) {
                     return Long.valueOf(value.toString());
                 }
+                break;
             case BOOLEAN:
                 if (!(value instanceof Boolean)) {
                     return Boolean.valueOf(value.toString());
                 }
-            default:
                 break;
+            default:
         }
         return value;
     }
