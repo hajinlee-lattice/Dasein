@@ -27,7 +27,6 @@ import com.latticeengines.common.exposed.util.RetryUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
-import com.latticeengines.domain.exposed.dcp.Upload;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
 import com.latticeengines.domain.exposed.dcp.UploadStats;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -169,8 +168,6 @@ public class ImportSource extends BaseWorkflowStep<ImportSourceStepConfiguration
         updateUploadStatistics(eaiImportJobDetail);
         String resultPath = extractResultPath(eaiImportJobDetail);
         copyErrorFile(customerSpace, upload, dropBoxSummary, eaiImportJobDetail, resultPath);
-
-        uploadProxy.updateUploadStatus(customerSpace, upload.getUploadId(), Upload.Status.MATCH_STARTED);
     }
 
     private void copyErrorFile(String customerSpace, UploadDetails upload, DropBoxSummary dropBoxSummary,
