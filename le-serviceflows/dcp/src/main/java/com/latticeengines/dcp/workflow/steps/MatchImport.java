@@ -42,6 +42,7 @@ public class MatchImport extends BaseMatchStep<ImportSourceStepConfiguration> {
     @Override
     protected void preMatchProcessing(MatchInput matchInput) {
         matchInput.setUseDirectPlus(true);
+        matchInput.setDplusMatchConfig(configuration.getMatchConfig());
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         matchInput.setRequestSource(MatchRequestSource.ENRICHMENT);
         // matchInput.setExcludePublicDomain(false); // not sure if needed

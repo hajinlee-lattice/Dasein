@@ -4,7 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchDataProfile;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchGrade;
 import com.latticeengines.domain.exposed.datacloud.dnb.DnBMatchInsight;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
+import com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 
@@ -70,9 +73,15 @@ public final class DirectPlusUtils {
             default:
                 throw new LedpException(LedpCode.LEDP_25025, new String[] { apiType.name() });
         }
-        parts.add("candidateMaximumQuantity=10");
+        parts.add("candidateMaximumQuantity=1");
         parts.add("confidenceLowerLevelThresholdValue=1");
         parts.add("isCleanseAndStandardizeInformationRequired=true");
+        if (context.getMatchRule() != null && //
+                CollectionUtils.isNotEmpty(context.getMatchRule().getExclusionCriteria())) {
+            String exclusions = StringUtils.join(context.getMatchRule().getExclusionCriteria().stream() //
+                    .map(ExclusionCriterion::getUrlParam).collect(Collectors.toList()), ",");
+            parts.add("exclusionCriteria=" + exclusions);
+        }
         return StringUtils.join(parts, "&");
     }
 

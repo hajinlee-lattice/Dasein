@@ -1,5 +1,7 @@
 package com.latticeengines.datacloud.yarn.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -35,6 +37,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.OperationalMode;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -86,16 +90,7 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
             Assert.assertNotNull(record.get(InterfaceName.InternalId.name()));
             count++;
         }
-
-        avroGlob = getBlockCandidateOutputDir(jobConfiguration) + "/*.avro";
-        records = AvroUtils.iterateAvroFiles(yarnConfiguration, avroGlob);
-        long candidateCount = 0L;
-        while (records.hasNext()) {
-            GenericRecord record = records.next();
-            Assert.assertNotNull(record.get(InterfaceName.InternalId.name()));
-            candidateCount++;
-        }
-        Assert.assertTrue(candidateCount >= count);
+        Assert.assertTrue(count > 0);
     }
 
     private String getBlockOutputDir(DataCloudJobConfiguration jobConfiguration) {
@@ -124,11 +119,16 @@ public class PrimeMatchYarnTestNG extends DataCloudYarnFunctionalTestNGBase {
         matchInput.setDecisionGraph(primeMatchDG);
         matchInput.setUseDnBCache(false);
         matchInput.setUseRemoteDnB(true);
-        matchInput.setUseDirectPlus(true);
         matchInput.setAllocateId(false);
         matchInput.setEntityKeyMaps(prepareEntityKeyMap());
         matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
-        matchInput.setOperationalMode(OperationalMode.MULTI_CANDIDATES);
+        matchInput.setOperationalMode(OperationalMode.LDC_MATCH);
+        DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton("A.{3}A.{3}.*"))
+                .exclude(OutOfBusiness) //
+                .review(4, 6, Collections.singleton("A.*"));
+        DplusMatchConfig dplusMatchConfig = new DplusMatchConfig(baseRule);
+        matchInput.setDplusMatchConfig(dplusMatchConfig);
+        matchInput.setUseDirectPlus(true);
 
         DataCloudJobConfiguration jobConfiguration = new DataCloudJobConfiguration();
         jobConfiguration.setHdfsPodId(podId);

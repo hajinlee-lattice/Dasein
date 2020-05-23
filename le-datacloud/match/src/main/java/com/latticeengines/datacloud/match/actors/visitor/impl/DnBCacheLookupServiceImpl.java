@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.match.actors.visitor.impl;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class DnBCacheLookupServiceImpl extends DataSourceLookupServiceBase {
     @Inject
     private DnBCacheService dnbCacheService;
 
-    @Inject
+    @Resource(name = "dnbMatchResultValidator")
     private DnBMatchResultValidator dnbMatchResultValidator;
 
     @Override

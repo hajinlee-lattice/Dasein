@@ -4,7 +4,7 @@ package com.latticeengines.domain.exposed.datacloud.match.config;
 public enum ExclusionCriterion {
     NonHeadQuarters("ExcludeNonHeadQuarters"), //
     NonMarketable("ExcludeNonMarketable"), //
-    OutofBusiness("ExcludeOutofBusiness"), //
+    OutOfBusiness("ExcludeOutofBusiness"), //
     Undeliverable("ExcludeUndeliverable"), //
     Unreachable("ExcludeUnreachable");
 

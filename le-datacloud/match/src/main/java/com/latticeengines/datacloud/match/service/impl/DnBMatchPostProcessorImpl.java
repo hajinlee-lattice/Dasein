@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.Map;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyTuple;
 @Component("dnBMatchPostProcessor")
 public class DnBMatchPostProcessorImpl implements DnBMatchPostProcessor {
 
-    @Inject
+    @Resource(name = "dnbMatchResultValidator")
     private DnBMatchResultValidator validator;
 
     @Inject

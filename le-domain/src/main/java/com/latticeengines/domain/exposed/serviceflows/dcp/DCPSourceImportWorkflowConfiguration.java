@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.dcp;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.DCPExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.dcp.steps.ImportSourceStepConfiguration;
 
@@ -19,26 +20,26 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
     public static class Builder {
         private DCPSourceImportWorkflowConfiguration configuration = new DCPSourceImportWorkflowConfiguration();
 
-        private ImportSourceStepConfiguration importSourceStepConfiguration = new ImportSourceStepConfiguration();
-        private DCPExportStepConfiguration exportS3StepConfiguration = new DCPExportStepConfiguration();
+        private ImportSourceStepConfiguration importSource = new ImportSourceStepConfiguration();
+        private DCPExportStepConfiguration exportS3 = new DCPExportStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
-            importSourceStepConfiguration.setCustomerSpace(customerSpace);
-            exportS3StepConfiguration.setCustomerSpace(customerSpace);
+            importSource.setCustomerSpace(customerSpace);
+            exportS3.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            importSourceStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            exportS3StepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            importSource.setInternalResourceHostPort(internalResourceHostPort);
+            exportS3.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            importSourceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            exportS3StepConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            importSource.setMicroServiceHostPort(microServiceHostPort);
+            exportS3.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -48,25 +49,25 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
         }
 
         public Builder projectId(String projectId) {
-            importSourceStepConfiguration.setProjectId(projectId);
-            exportS3StepConfiguration.setProjectId(projectId);
+            importSource.setProjectId(projectId);
+            exportS3.setProjectId(projectId);
             return this;
         }
 
         public Builder sourceId(String sourceId) {
-            importSourceStepConfiguration.setSourceId(sourceId);
-            exportS3StepConfiguration.setSourceId(sourceId);
+            importSource.setSourceId(sourceId);
+            exportS3.setSourceId(sourceId);
             return this;
         }
 
         public Builder uploadId(String uploadId) {
-            importSourceStepConfiguration.setUploadId(uploadId);
-            exportS3StepConfiguration.setUploadId(uploadId);
+            importSource.setUploadId(uploadId);
+            exportS3.setUploadId(uploadId);
             return this;
         }
 
         public Builder statsPid(long statsPid) {
-            importSourceStepConfiguration.setStatsPid(statsPid);
+            importSource.setStatsPid(statsPid);
             return this;
         }
 
@@ -75,11 +76,16 @@ public class DCPSourceImportWorkflowConfiguration extends BaseDCPWorkflowConfigu
             return this;
         }
 
+        public Builder matchConfig(DplusMatchConfig matchConfig) {
+            importSource.setMatchConfig(matchConfig);
+            return this;
+        }
+
         public DCPSourceImportWorkflowConfiguration build() {
             configuration.setContainerConfiguration(WORKFLOW_NAME, configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-            configuration.add(importSourceStepConfiguration);
-            configuration.add(exportS3StepConfiguration);
+            configuration.add(importSource);
+            configuration.add(exportS3);
             return configuration;
         }
     }

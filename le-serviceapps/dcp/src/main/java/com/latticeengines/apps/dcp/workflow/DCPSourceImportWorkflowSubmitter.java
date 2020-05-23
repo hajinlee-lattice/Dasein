@@ -1,5 +1,9 @@
 package com.latticeengines.apps.dcp.workflow;
 
+import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
+
+import java.util.Collections;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +17,8 @@ import com.latticeengines.apps.dcp.service.UploadService;
 import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
 import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.dcp.DCPImportRequest;
 import com.latticeengines.domain.exposed.dcp.UploadConfig;
 import com.latticeengines.domain.exposed.dcp.UploadDetails;
@@ -83,9 +89,15 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
                         .put(DCPSourceImportWorkflowConfiguration.UPLOAD_ID, uploadId) //
                         .put(DCPSourceImportWorkflowConfiguration.SOURCE_ID, sourceId) //
                         .put(DCPSourceImportWorkflowConfiguration.PROJECT_ID, projectId)
-                        .build())
+                        .build()) //
+                .matchConfig(hardCodedMatchConfig()) //
                 .build();
     }
 
+    // to be changed to read from Match Configuration management
+    private DplusMatchConfig hardCodedMatchConfig() {
+        DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton(".*A.*")).exclude(OutOfBusiness);
+        return new DplusMatchConfig(baseRule);
+    }
 
 }

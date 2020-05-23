@@ -5,10 +5,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -82,7 +85,7 @@ public class DplusMatchRule {
     // can be called multiple times. append to exclusionCriteria collection
     public DplusMatchRule exclude(ExclusionCriterion... criteria) {
         ExclusionCriterion first = criteria[0];
-        EnumSet<ExclusionCriterion> criteriaSet = criteria.length > 1 ? EnumSet.of(first) : //
+        EnumSet<ExclusionCriterion> criteriaSet = criteria.length == 1 ? EnumSet.of(first) : //
                 EnumSet.of(first, Arrays.copyOfRange(criteria, 1, criteria.length));
         if (CollectionUtils.isNotEmpty(exclusionCriteria)) {
             criteriaSet.addAll(exclusionCriteria);
@@ -142,6 +145,9 @@ public class DplusMatchRule {
         @JsonProperty("MatchGradePatterns")
         private Collection<String> matchGradePatterns;
 
+        @JsonIgnore
+        private Collection<Pattern> compiledPatterns;
+
         // for jackson
         private ClassificationCriterion(){}
 
@@ -175,6 +181,20 @@ public class DplusMatchRule {
 
         public void setMatchGradePatterns(Collection<String> matchGradePatterns) {
             this.matchGradePatterns = matchGradePatterns;
+        }
+
+        public Collection<Pattern> getCompiledMatchGradePatterns() {
+            if (compiledPatterns == null && CollectionUtils.isNotEmpty(matchGradePatterns)) {
+                compilePatterns();
+            }
+            return compiledPatterns;
+        }
+
+        private synchronized void compilePatterns() {
+            if (compiledPatterns == null) {
+                compiledPatterns = matchGradePatterns.stream() //
+                        .map(p -> Pattern.compile("^" + p + "$")).collect(Collectors.toList());
+            }
         }
 
     }

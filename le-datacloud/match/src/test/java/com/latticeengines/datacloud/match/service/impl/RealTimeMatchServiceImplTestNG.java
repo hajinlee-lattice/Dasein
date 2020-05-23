@@ -1,5 +1,9 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
+import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.NonHeadQuarters;
+import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
@@ -50,8 +56,11 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchKeyUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.OutputRecord;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchRule;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component
 public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTestNGBase {
@@ -82,64 +91,66 @@ public class RealTimeMatchServiceImplTestNG extends DataCloudMatchFunctionalTest
     @Inject
     private CountryCodeService countryCodeService;
 
-    // Test against retired V1.0 matcher -- DerivedColumnsCache
-    // Disable the test as SQL Server is shutdown
-    @Test(groups = "functional", enabled = false)
-    public void testSimpleMatchRTSCache() {
+    @Test(groups = "functional")
+    public void testSimpleMatchWithDplusConfig() {
         Object[][] data = new Object[][] {
-                { 123, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" },
-                { 456, "abc@gmail.com", "TestPublicDomainNoState", null, null, "USA" } };
+                { 1, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" },
+                { 2, "google.com", "Google", null, "California", "USA" },
+                { 3, "google.com", "Google", null, null, "UK" },
+                { 4, "bp.com", "British Petroleum", "London", "London", "UK"}
+        };
         MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
+        input.setTargetEntity(BusinessEntity.PrimeAccount.name());
+
+        List<Column> columns = Stream.of(
+                DataCloudConstants.ATTR_LDC_DUNS,
+                DataCloudConstants.ATTR_LDC_NAME,
+                DataCloudConstants.ATTR_CITY,
+                DataCloudConstants.ATTR_STATE,
+                DataCloudConstants.ATTR_ZIPCODE,
+                DataCloudConstants.ATTR_COUNTRY,
+                InterfaceName.LatticeAccountId.name()
+        ).map(c -> new Column(c, c)).collect(Collectors.toList());
+        ColumnSelection columnSelection = new ColumnSelection();
+        columnSelection.setColumns(columns);
+        input.setCustomSelection(columnSelection);
+        input.setPredefinedSelection(null);
+
+        DplusMatchRule baseRule = new DplusMatchRule(7, Collections.singleton("A.{3}A.{3}[^Z]{2}.*"))
+                .exclude(OutOfBusiness) //
+                .review(4, 6, Collections.singleton("A.*"));
+        DplusMatchRule ukRule = //
+                new DplusMatchRule(7)
+                        .exclude(OutOfBusiness, NonHeadQuarters) //
+                        .review(4, 6, Collections.singleton("A.*"));
+        DplusMatchConfig dplusMatchConfig = new DplusMatchConfig(baseRule) //
+                .when(Country, Collections.singleton("UK")).apply(ukRule);
+        input.setDplusMatchConfig(dplusMatchConfig);
+        input.setUseDirectPlus(true);
+
         MatchOutput output = realTimeMatchService.match(input);
         Assert.assertNotNull(output);
-        Assert.assertTrue(output.getResult().size() > 0);
+        Assert.assertEquals(output.getResult().size(), data.length);
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
-    }
 
-    // Test against retired V1.0 matcher -- DerivedColumnsCache
-    // Disable the test as SQL Server is shutdown
-    @Test(groups = "functional", enabled = false)
-    public void testSimpleRealTimeBulkMatchRTSCache() {
-        Object[][] data = new Object[][] { //
-                { 123, null, "Chevron Corporation", null, null, "USA" },
-                { 456, null, "Chevron Corporation", "San Ramon", "California", "USA" },
-                { 789, "chevron.com", "Chevron Corporation", "San Ramon", "California", "USA" } };
-        List<MatchInput> inputs = new ArrayList<>();
-        for (int i = 0; i < 50; i++) {
-            MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
-            inputs.add(input);
-        }
-        BulkMatchInput bulkMatchInput = new BulkMatchInput();
-        bulkMatchInput.setInputList(inputs);
-        BulkMatchOutput bulkMatchOutput = realTimeMatchService.matchBulk(bulkMatchInput);
-        Assert.assertNotNull(bulkMatchOutput);
-        Assert.assertEquals(bulkMatchOutput.getOutputList().size(), 50);
+        OutputRecord output1 = output.getResult().get(0); // Chevron - 7 - AZZZZZZZZFZ
+        //System.out.println(JsonUtils.pprint(output1));
+        Assert.assertTrue(output1.isMatched());
+        Assert.assertEquals(output1.getOutput().get(0), "001382555");
 
-        bulkMatchOutput.getOutputList().forEach(output -> {
-            Assert.assertNotNull(output.getResult());
-            Assert.assertEquals(output.getResult().size(), 3);
-        });
+        OutputRecord output2 = output.getResult().get(1); // Google USA - 6 - AZZZAZZZFFZ
+        //System.out.println(JsonUtils.pprint(output2));
+        Assert.assertTrue(output2.isMatched());
+        Assert.assertEquals(output2.getOutput().get(0), "060902413");
 
-        // Test correctness by checking matched domain
-        data = new Object[][] { //
-                { 1, null, "Facebook Inc", "Menlo Park", "California", "USA" },
-                { 2, null, "Alphabet Inc", "Mountain View", "California", "USA" },
-                { 3, null, "Amazon.com, Inc.", "Seattle", "Washington", "USA" } };
-        inputs.clear();
-        for (int i = 0; i < 50; i++) {
-            MatchInput input = testMatchInputService.prepareSimpleRTSMatchInput(data);
-            inputs.add(input);
-        }
-        bulkMatchOutput = realTimeMatchService.matchBulk(bulkMatchInput);
-        Assert.assertNotNull(bulkMatchOutput);
-        Assert.assertEquals(bulkMatchOutput.getOutputList().size(), 50);
-        bulkMatchOutput.getOutputList().forEach(output -> {
-            Assert.assertNotNull(output.getResult());
-            Assert.assertEquals(output.getResult().size(), 3);
-            Assert.assertEquals(output.getResult().get(0).getMatchedDomain(), "facebook.com");
-            Assert.assertEquals(output.getResult().get(1).getMatchedDomain(), "google.com");
-            Assert.assertEquals(output.getResult().get(2).getMatchedDomain(), "amazon.com");
-        });
+        OutputRecord output3 = output.getResult().get(2); // Google UK - 6 - AZZZZZZZZFZ
+        //System.out.println(JsonUtils.pprint(output3));
+        Assert.assertFalse(output3.isMatched());
+
+        OutputRecord output4 = output.getResult().get(3); // BP - 7 - AZZAZZZZZFZ
+        //System.out.println(JsonUtils.pprint(output4));
+        Assert.assertTrue(output4.isMatched());
+        Assert.assertEquals(output4.getOutput().get(0), "210042669");
     }
 
     @Test(groups = "functional")

@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.datacloud.match.config;
 
 import static com.latticeengines.domain.exposed.datacloud.match.MatchKey.Country;
 import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.NonHeadQuarters;
-import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutofBusiness;
+import static com.latticeengines.domain.exposed.datacloud.match.config.ExclusionCriterion.OutOfBusiness;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,11 +18,11 @@ public class DplusMatchConfigUnitTestNG {
     @Test(groups = "unit")
     public void testBuilder() {
         DplusMatchRule baseRule = new DplusMatchRule(7) // code >= 7
-                .exclude(OutofBusiness) //
+                .exclude(OutOfBusiness) //
                 .review(4, 6, Arrays.asList("A", "B")); // code in [4, 6] or grade is A|B
         DplusMatchRule ukRule = //
                 new DplusMatchRule(8, Arrays.asList("A", "B")) // code >= 8 or grade is A|B
-                        .exclude(OutofBusiness, NonHeadQuarters) //
+                        .exclude(OutOfBusiness, NonHeadQuarters) //
                         .review(4, 7, Collections.singleton("A")); // code in [4, 7] or grade is A
         DplusMatchConfig config = new DplusMatchConfig(baseRule) //
                 .when(Country, Collections.singleton("UK")).apply(ukRule);
@@ -36,7 +36,7 @@ public class DplusMatchConfigUnitTestNG {
         DplusMatchRule baseRule2 = deserialized.getBaseRule();
         Assert.assertNotNull(baseRule2);
         Assert.assertEquals(baseRule2.getExclusionCriteria().size(), 1);
-        Assert.assertEquals(new ArrayList<>(baseRule2.getExclusionCriteria()).get(0), OutofBusiness);
+        Assert.assertEquals(new ArrayList<>(baseRule2.getExclusionCriteria()).get(0), OutOfBusiness);
 
         Assert.assertEquals(deserialized.getSpecialRules().size(), 1);
         DplusMatchConfig.SpeicalRule specialRule = deserialized.getSpecialRules().get(0);

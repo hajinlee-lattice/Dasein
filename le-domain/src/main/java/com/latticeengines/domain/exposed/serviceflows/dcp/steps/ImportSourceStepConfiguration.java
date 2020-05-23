@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.dcp.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.datacloud.match.config.DplusMatchConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration {
@@ -16,6 +17,9 @@ public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration
 
     @JsonProperty("stats_pid")
     private Long statsPid;
+
+    @JsonProperty("match_config")
+    private DplusMatchConfig matchConfig;
 
     public String getProjectId() {
         return projectId;
@@ -47,5 +51,13 @@ public class ImportSourceStepConfiguration extends MicroserviceStepConfiguration
 
     public void setStatsPid(Long statsPid) {
         this.statsPid = statsPid;
+    }
+
+    public DplusMatchConfig getMatchConfig() {
+        return matchConfig;
+    }
+
+    public void setMatchConfig(DplusMatchConfig matchConfig) {
+        this.matchConfig = matchConfig;
     }
 }
