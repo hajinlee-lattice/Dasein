@@ -19,7 +19,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.amazonaws.services.sns.model.PublishResult;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportPublishToSNSStep;
+import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchExportPublishToSNSStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.DropBoxSummary;
@@ -29,8 +29,8 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchChannel;
 import com.latticeengines.domain.exposed.pls.cdl.channel.AudienceType;
 import com.latticeengines.domain.exposed.pls.cdl.channel.GoogleChannelConfig;
 import com.latticeengines.domain.exposed.pls.cdl.channel.LinkedInChannelConfig;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchExportPublishToSNSConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
@@ -48,7 +48,7 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
     private LookupIdMappingProxy lookupIdMappingProxy;
 
     @Inject
-    private PlayLaunchExportPublishToSNSStep publishToSNSStep;
+    private CampaignLaunchExportPublishToSNSStep publishToSNSStep;
 
     private String customerSpace = "CUSTOMER_SPACE";
 
@@ -62,7 +62,7 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         MockitoAnnotations.initMocks(this);
         publishToSNSStep.setExecutionContext(new ExecutionContext());
         publishToSNSStep.setDropBoxProxy(dropboxProxy);
-        publishToSNSStep.putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, Arrays
+        publishToSNSStep.putObjectInContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_S3_EXPORT_FILE_PATHS, Arrays
                 .asList("lattice-engines-test/dropfolder/example.csv", "lattice-engines-test/dropfolder/example.json"));
 
         PlayLaunchExportPublishToSNSConfiguration publishConfig = new PlayLaunchExportPublishToSNSConfiguration();
@@ -82,11 +82,11 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
     @Test(groups = "manual")
     public void testPublishToSnsTopic() {
 
-        publishToSNSStep.putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID,
+        publishToSNSStep.putObjectInContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID,
                 UUID.randomUUID().toString());
 
         String workflowRequestId = publishToSNSStep
-                .getObjectFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
+                .getObjectFromContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
 
         DropBoxSummary dropbox = new DropBoxSummary();
         dropbox.setDropBox(UUID.randomUUID().toString());
@@ -117,11 +117,11 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         publishConfig.setExternalAudienceName("externalAudienceName");
         publishConfig.setExternalFolderName("folderName");
         publishToSNSStep.setConfiguration(publishConfig);
-        publishToSNSStep.putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID,
+        publishToSNSStep.putObjectInContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID,
                 UUID.randomUUID().toString());
 
         String workflowRequestId = publishToSNSStep
-                .getObjectFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
+                .getObjectFromContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
 
         DropBoxSummary dropbox = new DropBoxSummary();
         dropbox.setDropBox(UUID.randomUUID().toString());
@@ -150,11 +150,11 @@ public class PublishSnsMessageFunctionalTestNG extends WorkflowTestNGBase {
         publishConfig.setExternalAudienceName("externalAudienceName");
         publishConfig.setExternalFolderName("folderName");
         publishToSNSStep.setConfiguration(publishConfig);
-        publishToSNSStep.putObjectInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID,
+        publishToSNSStep.putObjectInContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID,
                 UUID.randomUUID().toString());
 
         String workflowRequestId = publishToSNSStep
-                .getObjectFromContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
+                .getObjectFromContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_WORKFLOW_REQUEST_ID, String.class);
 
         DropBoxSummary dropbox = new DropBoxSummary();
         dropbox.setDropBox(UUID.randomUUID().toString());

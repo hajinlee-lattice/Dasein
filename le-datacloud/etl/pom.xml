@@ -92,16 +92,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-sqoop</artifactId>
-            <classifier>intf</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-sqoop</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>${xerces.version}</version>

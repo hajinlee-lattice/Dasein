@@ -7,11 +7,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.listeners.PlayLaunchWorkflowListener;
+import com.latticeengines.cdl.workflow.listeners.CampaignLaunchWorkflowListener;
 import com.latticeengines.cdl.workflow.steps.PlayLaunchInitStep;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFilesToS3Step;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportPublishToSNSStep;
+import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchExportFileGeneratorStep;
+import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchExportFilesToS3Step;
+import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchExportPublishToSNSStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -26,25 +26,25 @@ public class PlayLaunchWorkflow extends AbstractWorkflow<PlayLaunchWorkflowConfi
     private PlayLaunchInitStep playLaunchInitStep;
 
     @Inject
-    private PlayLaunchExportFileGeneratorStep playLaunchExportFileGeneratorStep;
+    private CampaignLaunchExportFileGeneratorStep campaignLaunchExportFileGeneratorStep;
 
     @Inject
-    private PlayLaunchExportFilesToS3Step playLaunchExportFilesToS3Step;
+    private CampaignLaunchExportFilesToS3Step campaignLaunchExportFilesToS3Step;
 
     @Inject
-    private PlayLaunchExportPublishToSNSStep playLaunchExportPublishToSNSStep;
+    private CampaignLaunchExportPublishToSNSStep campaignLaunchExportPublishToSNSStep;
 
     @Inject
-    private PlayLaunchWorkflowListener playLaunchWorkflowListener;
+    private CampaignLaunchWorkflowListener campaignLaunchWorkflowListener;
 
     @Override
     public Workflow defineWorkflow(PlayLaunchWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(playLaunchInitStep) //
-                .next(playLaunchExportFileGeneratorStep) //
-                .next(playLaunchExportFilesToS3Step) //
-                .next(playLaunchExportPublishToSNSStep) //
-                .listener(playLaunchWorkflowListener) //
+                .next(campaignLaunchExportFileGeneratorStep) //
+                .next(campaignLaunchExportFilesToS3Step) //
+                .next(campaignLaunchExportPublishToSNSStep) //
+                .listener(campaignLaunchWorkflowListener) //
                 .build();
     }
 }

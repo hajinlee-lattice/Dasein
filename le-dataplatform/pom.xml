@@ -23,7 +23,6 @@
         <le.security.version>4.26.0-SNAPSHOT</le.security.version>
         <le.quartzclient.version>4.26.0-SNAPSHOT</le.quartzclient.version>
         <le.hadoop.version>4.26.0-SNAPSHOT</le.hadoop.version>
-        <le.sqoop.version>4.26.0-SNAPSHOT</le.sqoop.version>
     </properties>
 
     <parent>
@@ -122,36 +121,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-sqoop</artifactId>
-            <classifier>intf</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.sqoop</groupId>
-                    <artifactId>sqoop</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-sqoop</artifactId>
-            <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.sqoop</groupId>
-                    <artifactId>sqoop</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-hadoop</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
@@ -179,6 +148,32 @@
             <artifactId>le-yarn</artifactId>
             <version>${project.version}</version>
             <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-scheduler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-db</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sqoop</groupId>
+            <artifactId>sqoop</artifactId>
+            <version>${sqoop.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>

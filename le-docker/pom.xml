@@ -13,7 +13,6 @@
         <matchapi.docker.context>src/main/scripts/tomcat/le-matchapi</matchapi.docker.context>
         <saml.docker.context>src/main/scripts/tomcat/le-saml</saml.docker.context>
         <oauth2.docker.context>src/main/scripts/tomcat/le-oauth2</oauth2.docker.context>
-        <sqoop.docker.context>src/main/scripts/tomcat/le-sqoop</sqoop.docker.context>
         <scoringapi.docker.context>src/main/scripts/tomcat/le-scoringapi</scoringapi.docker.context>
         <express.docker.context>src/main/scripts/nodejs/le-express</express.docker.context>
         <microservice.docker.context>src/main/scripts/tomcat/le-microservice</microservice.docker.context>
@@ -59,9 +58,6 @@
                                 <!-- special wars -->
                                 <copy file="${project.basedir}/../le-oauth2/target/le-oauth2-${project.version}.war"
                                       tofile="${project.basedir}/${oauth2.docker.context}/webapps/ROOT.war"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-microservice/sqoop/target/le-sqoop-microservice-${project.version}.war"
-                                      tofile="${project.basedir}/${sqoop.docker.context}/webapps/sqoop.war"
                                       overwrite="true" />
 
                                 <!-- microservices -->
@@ -115,9 +111,6 @@
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/datacloudapi/target/le-datacloudapi-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/datacloudapi.war"
-                                      overwrite="true" />
-                                <copy file="${project.basedir}/../le-microservice/dellebi/target/le-dellebi-microservice-${project.version}.war"
-                                      tofile="${project.basedir}/${microservice.docker.context}/webapps/dellebi.war"
                                       overwrite="true" />
                                 <copy file="${project.basedir}/../le-microservice/cdl/target/le-cdl-microservice-${project.version}.war"
                                       tofile="${project.basedir}/${microservice.docker.context}/webapps/cdl.war"

@@ -46,8 +46,8 @@ else:
     logger.info('CATALINA_HOME=%s' % CATALINA_HOME)
 
 LE_APPS = ['api', 'admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 'saml', 'matchapi', 'ulysses']
-MS_MODULES = ['ms-core', 'dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
-              'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'cdl', 'lp', 'dcp']
+MS_MODULES = ['ms-core', 'dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz',
+              'modelquality', 'datacloudapi', 'objectapi', 'cdl', 'lp', 'dcp']
 
 LE_APPS = [ app for app in LE_APPS + MS_MODULES if app != 'microservice' ]
 
@@ -69,13 +69,11 @@ PRESETS = {
     'cdl': {
         'apps': ['admin', 'pls', 'lp', 'cdl', 'matchapi', 'metadata',
                  'scoringapi', 'dataflowapi', 'workflowapi', 'objectapi',
-                 'eai', 'modeling', 'scoring', 'datacloudapi',
-                 'sqoop', 'quartz']
+                 'eai', 'modeling', 'scoring', 'datacloudapi', 'quartz']
     },
     'lp': {
         'apps': ['admin', 'pls', 'lp', 'cdl', 'oauth2', 'saml', 'scoringapi', 'matchapi', 'metadata',
-                 'playmaker', 'dataflowapi', 'eai', 'modeling', 'scoring', 'workflowapi',
-                 'quartz', 'sqoop']
+                 'playmaker', 'dataflowapi', 'eai', 'modeling', 'scoring', 'workflowapi', 'quartz']
     },
     'dcp': {
         'apps': ['admin', 'pls', 'lp', 'cdl', 'dcp', 'matchapi', 'metadata', 'modeling',
@@ -83,20 +81,20 @@ PRESETS = {
     },
     'benchmark': {
         'apps': ['pls', 'lp', 'cdl', 'matchapi', 'metadata', 'dataflowapi', 'eai', 'modeling',
-                 'scoring', 'workflowapi', 'quartz', 'sqoop']
+                 'scoring', 'workflowapi', 'quartz']
     },
     'etl': {
-        'apps': ['microservice', 'matchapi', 'metadata', 'workflowapi', 'datacloudapi', 'eai', 'sqoop']
+        'apps': ['microservice', 'matchapi', 'metadata', 'workflowapi', 'datacloudapi', 'eai']
     },
     'mq': {
         'apps': ['admin', 'pls', 'oauth2', 'scoringapi', 'matchapi', 'saml',
                  'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi',
-                 'lp', 'quartz', 'sqoop', 'modelquality']
+                 'lp', 'quartz', 'modelquality']
     },
     'all': {
         'apps': ['admin', 'pls', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'ulysses', 'saml',
                  'dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz',
-                 'sqoop', 'datacloudapi', 'cdl', 'objectapi', 'dcp']
+                 'datacloudapi', 'cdl', 'objectapi', 'dcp']
     }
 }
 

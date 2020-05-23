@@ -45,7 +45,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchSparkContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CampaignLaunchInitStepConfiguration;
 import com.latticeengines.domain.exposed.spark.SparkJobResult;
 import com.latticeengines.domain.exposed.spark.cdl.CreateRecommendationConfig;
@@ -142,11 +142,11 @@ public class CampaignLaunchInitStep extends BaseSparkSQLStep<CampaignLaunchInitS
             log.info(createRecJobResult.getOutput());
             String recHistoryTargetPath = createRecJobResult.getTargets().get(0).getPath();
             log.info("Target HDFS path for Recommendation history table: " + recHistoryTargetPath);
-            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
+            putStringValueInContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recHistoryTargetPath));
             String recCsvTargetPath = createRecJobResult.getTargets().get(1).getPath();
             log.info("Target HDFS path for csv file table: " + recCsvTargetPath);
-            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH,
+            putStringValueInContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     PathUtils.toAvroGlob(recCsvTargetPath));
 
             /*

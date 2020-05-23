@@ -24,7 +24,7 @@ import org.testng.annotations.Test;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
+import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
@@ -176,7 +176,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         config.setDestinationSysType(marketoTestPlayChannelSetupConfig.getDestinationSystemType());
         config.setDestinationSysName(marketoTestPlayChannelSetupConfig.getDestinationSystemName());
 
-        PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
+        CampaignLaunchExportFileGeneratorStep exportFileGen = new CampaignLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxFolderName));
         sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.", "/"));
@@ -295,7 +295,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         config.setDestinationSysType(linkedInTestPlayChannelSetupConfig.getDestinationSystemType());
         config.setDestinationSysName(linkedInTestPlayChannelSetupConfig.getDestinationSystemName());
 
-        PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
+        CampaignLaunchExportFileGeneratorStep exportFileGen = new CampaignLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxFolderName));
         sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.", "/"));
@@ -356,7 +356,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends CDLDeploymentTestNGBase 
         config.setDestinationSysType(facebookTestPlayChannelSetupConfig.getDestinationSystemType());
         config.setDestinationSysName(facebookTestPlayChannelSetupConfig.getDestinationSystemName());
 
-        PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
+        CampaignLaunchExportFileGeneratorStep exportFileGen = new CampaignLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxFolderName));
         sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.", "/"));

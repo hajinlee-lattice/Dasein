@@ -61,7 +61,6 @@
         <module>le-pls</module>
         <module>le-playmaker</module>
         <module>le-playmakercore</module>
-        <module>le-dellebi</module>
         <module>le-workflow</module>
         <module>le-workflowapi</module>
         <module>le-quartz</module>
@@ -70,7 +69,6 @@
         <module>le-modelquality</module>
         <module>le-saml</module>
         <module>le-actors</module>
-        <module>le-sqoop</module>
         <module>le-ulysses</module>
         <module>le-serviceapps</module>
         <module>le-oauth2</module>

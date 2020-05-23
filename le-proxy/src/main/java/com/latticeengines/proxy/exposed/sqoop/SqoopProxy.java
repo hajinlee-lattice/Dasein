@@ -13,6 +13,8 @@ import com.latticeengines.domain.exposed.dataplatform.SqoopExporter;
 import com.latticeengines.domain.exposed.dataplatform.SqoopImporter;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
+// there is no sqoop server any more
+@Deprecated
 @Component("sqoopProxy")
 public class SqoopProxy extends BaseRestApiProxy {
 

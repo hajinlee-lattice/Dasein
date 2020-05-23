@@ -25,7 +25,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.latticeengines.apps.cdl.end2end.CDLEnd2EndDeploymentTestNGBase;
 import com.latticeengines.apps.cdl.testframework.CDLWorkflowFrameworkDeploymentTestNGBase;
 import com.latticeengines.aws.s3.S3Service;
-import com.latticeengines.cdl.workflow.steps.play.PlayLaunchExportFileGeneratorStep;
+import com.latticeengines.cdl.workflow.steps.play.CampaignLaunchExportFileGeneratorStep;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemName;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -165,7 +165,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         config.setDestinationSysType(marketoTestPlayChannelSetupConfig.getDestinationSystemType());
         config.setDestinationSysName(marketoTestPlayChannelSetupConfig.getDestinationSystemName());
 
-        PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
+        CampaignLaunchExportFileGeneratorStep exportFileGen = new CampaignLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxFolderName));
         sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.", "/"));
@@ -283,7 +283,7 @@ public class CampaignLaunchWorkflowDeploymentTestNG extends CDLWorkflowFramework
         config.setDestinationSysType(linkedInTestPlayChannelSetupConfig.getDestinationSystemType());
         config.setDestinationSysName(linkedInTestPlayChannelSetupConfig.getDestinationSystemName());
 
-        PlayLaunchExportFileGeneratorStep exportFileGen = new PlayLaunchExportFileGeneratorStep();
+        CampaignLaunchExportFileGeneratorStep exportFileGen = new CampaignLaunchExportFileGeneratorStep();
         HdfsToS3PathBuilder pathBuilder = new HdfsToS3PathBuilder();
         StringBuilder sb = new StringBuilder(pathBuilder.getS3AtlasFileExportsDir(exportS3Bucket, dropboxFolderName));
         sb.append("/").append(exportFileGen.buildNamespace(config).replaceAll("\\.", "/"));

@@ -27,12 +27,6 @@ alias dcdpl='dcbld && dirs -c && pushd $WSHOME/le-datacloud/yarn && mvn -Pshaded
 alias dpdplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh dataplatform && pushd $WSHOME/le-dataplatform && bash $WSHOME/le-dataplatform/bin/deployPythonHDFS.sh && popd'
 alias dpdpl='mvn -Pshaded-yarn -DskipTests clean install && dpdplnobld'
 
-alias dedplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh dellebi'
-alias dedpl='mvn -Pshaded-yarn -DskipTests clean install && dedplnobld'
-
-alias sqdplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh sqoop'
-alias sqdpl='mvn -Pshaded-yarn -DskipTests clean install && sqdplnobld'
-
 alias eaidplnobld='bash $WSHOME/le-dev/scripts/libdpl.sh eai'
 alias eaidpl='mvn -Pshaded-yarn -DexcludeArtifactIds=jetty-servlets,jetty-continuation -DskipTests clean install && eaidplnobld'
 

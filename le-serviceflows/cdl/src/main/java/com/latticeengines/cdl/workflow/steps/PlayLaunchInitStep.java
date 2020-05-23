@@ -17,8 +17,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CampaignLaunchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchInitStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.play.PlayLaunchWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -56,7 +56,7 @@ public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfi
             log.info(String.format("For playLaunchId: %s", playLaunchId));
 
             String recAvroHdfsFilePath = playLaunchProcessor.launchPlay(tenant, config);
-            putStringValueInContext(PlayLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH,
+            putStringValueInContext(CampaignLaunchWorkflowConfiguration.RECOMMENDATION_CSV_EXPORT_AVRO_HDFS_FILEPATH,
                     recAvroHdfsFilePath);
 
             successUpdates(customerSpace, playName, playLaunchId);
