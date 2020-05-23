@@ -244,7 +244,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                         DebugRecordScoreResponse.class);
                 try {
                     Assert.assertEquals(result.getScores().get(0).getScore().intValue(),
-                            new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
+                            signleRecordScoreResponseList.get(idx).getScore());
                 } catch (Exception ex) {
                     log.error(
                             String.format(

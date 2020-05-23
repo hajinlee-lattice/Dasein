@@ -77,9 +77,9 @@ public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBa
         context.setMatchStrategy(DnBMatchContext.DnBMatchStrategy.ENTITY);
         DnBCache whiteCache = dnbCacheService.lookupCache(context);
 
-        Assert.assertTrue(whiteCache != null);
+        Assert.assertNotNull(whiteCache);
         Assert.assertEquals(whiteCache.getDuns(), "039891115");
-        Assert.assertEquals(whiteCache.getConfidenceCode(), new Integer(6));
+        Assert.assertEquals(whiteCache.getConfidenceCode(), Integer.valueOf(6));
         Assert.assertEquals(whiteCache.getMatchGrade().getRawCode(), "AAA");
     }
 
@@ -94,7 +94,7 @@ public class CacheLoaderServiceImplTestNG extends PropDataEngineAbstractTestNGBa
         fieldMap.put("ZipCode", "zipcode");
         config.setFieldMap(fieldMap);
     }
-    
+
     @Test(groups = "deployment", enabled = true)
     public void startLoadWithoutDuns() {
         try {

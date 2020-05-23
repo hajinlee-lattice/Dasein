@@ -46,7 +46,7 @@ public class ProbabilityDistributionHandler extends PMMLResultHandlerBase {
                     result.put(ScoreType.CLASSIFICATION, "1");
                 }
                 result.put(ScoreType.PROBABILITY_OR_VALUE, null);
-                result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
+                result.put(ScoreType.PERCENTILE, Double.valueOf(predicted * 100.).intValue());
                 return;
             }
         }
@@ -57,7 +57,7 @@ public class ProbabilityDistributionHandler extends PMMLResultHandlerBase {
             result.put(ScoreType.CLASSIFICATION, "1");
         }
         result.put(ScoreType.PROBABILITY_OR_VALUE, null);
-        result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
+        result.put(ScoreType.PERCENTILE, Double.valueOf(predicted * 100.).intValue());
     }
 
 }

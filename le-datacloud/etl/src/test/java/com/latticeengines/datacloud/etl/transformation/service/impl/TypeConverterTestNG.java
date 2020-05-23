@@ -58,7 +58,7 @@ public class TypeConverterTestNG extends PipelineTransformationTestNGBase {
         step0.setConfiguration(getTypeConvertConfig());
 
         // -----------
-        List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+        List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(step0);
 
         // -----------
@@ -185,17 +185,17 @@ public class TypeConverterTestNG extends PipelineTransformationTestNGBase {
             Assert.assertTrue(isObjEquals(record.get("Col33"), 6D));
             // AnyToBoolean
             Assert.assertTrue(isObjEquals(record.get("Col32"), null));
-            Assert.assertTrue(isObjEquals(record.get("Col7"), new Boolean(false)));
-            Assert.assertTrue(isObjEquals(record.get("Col12"), new Boolean(true)));
-            Assert.assertTrue(isObjEquals(record.get("Col13"), new Boolean(true)));
-            Assert.assertTrue(isObjEquals(record.get("Col14"), new Boolean(true)));
-            Assert.assertTrue(isObjEquals(record.get("Col34"), new Boolean(true)));
-            Assert.assertTrue(isObjEquals(record.get("Col35"), new Boolean(true)));
-            Assert.assertTrue(isObjEquals(record.get("Col36"), new Boolean(true)));
-            Assert.assertTrue(isObjEquals(record.get("Col37"), new Boolean(false)));
-            Assert.assertTrue(isObjEquals(record.get("Col38"), new Boolean(false)));
-            Assert.assertTrue(isObjEquals(record.get("Col39"), new Boolean(false)));
-            Assert.assertTrue(isObjEquals(record.get("Col40"), new Boolean(false)));
+            Assert.assertTrue(isObjEquals(record.get("Col7"), Boolean.FALSE));
+            Assert.assertTrue(isObjEquals(record.get("Col12"), Boolean.TRUE));
+            Assert.assertTrue(isObjEquals(record.get("Col13"), Boolean.TRUE));
+            Assert.assertTrue(isObjEquals(record.get("Col14"), Boolean.TRUE));
+            Assert.assertTrue(isObjEquals(record.get("Col34"), Boolean.TRUE));
+            Assert.assertTrue(isObjEquals(record.get("Col35"), Boolean.TRUE));
+            Assert.assertTrue(isObjEquals(record.get("Col36"), Boolean.TRUE));
+            Assert.assertTrue(isObjEquals(record.get("Col37"), Boolean.FALSE));
+            Assert.assertTrue(isObjEquals(record.get("Col38"), Boolean.FALSE));
+            Assert.assertTrue(isObjEquals(record.get("Col39"), Boolean.FALSE));
+            Assert.assertTrue(isObjEquals(record.get("Col40"), Boolean.FALSE));
             // AnyToInt
             Assert.assertTrue(isObjEquals(record.get("Col31"), 12));
             Assert.assertTrue(isObjEquals(record.get("Col26"), null));

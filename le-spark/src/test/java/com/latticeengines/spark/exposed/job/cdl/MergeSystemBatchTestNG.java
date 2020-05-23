@@ -233,17 +233,17 @@ public class MergeSystemBatchTestNG extends SparkJobFunctionalTestNGBase {
             String attr2 = record.get("Attr2") == null ? null : record.get("Attr2").toString();
             String attr3 = record.get(InterfaceName.CustomerAccountId.name()) == null ? null
                     : record.get(InterfaceName.CustomerAccountId.name()).toString();
-            Long createTime = new Long(record.get(InterfaceName.CDLCreatedTime.name()) == null ? null
+            Long createTime = Long.valueOf(record.get(InterfaceName.CDLCreatedTime.name()) == null ? null
                     : record.get(InterfaceName.CDLCreatedTime.name()).toString());
-            Long updateTime = new Long(record.get(InterfaceName.CDLCreatedTime.name()) == null ? null
+            Long updateTime = Long.valueOf(record.get(InterfaceName.CDLCreatedTime.name()) == null ? null
                     : record.get(InterfaceName.CDLUpdatedTime.name()).toString());
             switch (id) {
             case 1:
                 Assert.assertEquals(attr1, "2_1", record.toString());
                 Assert.assertEquals(attr2, "2_2", record.toString());
                 Assert.assertEquals(attr3, "2_3", record.toString());
-                Assert.assertTrue(createTime == 1L, record.toString());
-                Assert.assertTrue(updateTime == 2000L, record.toString());
+                Assert.assertEquals((long) createTime, 1L, record.toString());
+                Assert.assertEquals((long) updateTime, 2000L, record.toString());
                 break;
             case 2:
                 Assert.assertEquals(attr1, "2_1b", record.toString());

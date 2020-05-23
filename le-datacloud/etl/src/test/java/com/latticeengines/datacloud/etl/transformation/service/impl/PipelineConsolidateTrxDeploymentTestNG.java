@@ -712,7 +712,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             recordMap.put(id, record);
             rowCount++;
         }
-        Assert.assertEquals(rowCount, new Integer(8));
+        Assert.assertEquals(rowCount, Integer.valueOf(8));
 
         GenericRecord record = recordMap.get("1");
         Assert.assertEquals(record.get("AccountId").toString(), "1");
@@ -744,7 +744,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             recordMap.put((accountId + "-" + productId), record);
             rowCount++;
         }
-        Assert.assertEquals(rowCount, new Integer(9));
+        Assert.assertEquals(rowCount, Integer.valueOf(9));
 
         GenericRecord record = recordMap.get("1-b1");
         Assert.assertEquals(record.get("TotalAmount"), 20D);
@@ -783,7 +783,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             recordMap.get(id).add(record);
             rowCount++;
         }
-        Assert.assertEquals(rowCount, new Integer(4));
+        Assert.assertEquals(rowCount, Integer.valueOf(4));
         assertAccount1(recordMap);
         assertAccount2(recordMap);
         assertAccount3(recordMap);

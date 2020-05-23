@@ -31,7 +31,7 @@ public class VoteDistributionHandler extends PMMLResultHandlerBase {
         double predicted = distribution.getProbability((String) r);
 
         result.put(ScoreType.PROBABILITY_OR_VALUE, null);
-        result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
+        result.put(ScoreType.PERCENTILE, Double.valueOf(predicted * 100.).intValue());
     }
 
 }

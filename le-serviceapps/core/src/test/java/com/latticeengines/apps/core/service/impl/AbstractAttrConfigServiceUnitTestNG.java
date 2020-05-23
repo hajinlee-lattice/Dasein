@@ -91,7 +91,7 @@ public class AbstractAttrConfigServiceUnitTestNG {
         // attr9 's State allowCustomization is false. For Activate/Deactivate
         // page, hide attributes that are: Inactive and AllowCustomization=FALSE
         List<AttrConfig> attrs = generatePropertyListWithSomeActive();
-        Assert.assertEquals(overview.getTotalAttrs(), new Long(generatePropertyListWithSomeActive().size() - 4));
+        Assert.assertEquals(overview.getTotalAttrs(), Long.valueOf(generatePropertyListWithSomeActive().size() - 4));
         Assert.assertEquals(overview.getLimit() - intentLimit, 0);
         Map<String, Map<?, Long>> propSummary = overview.getPropSummary();
         Assert.assertNotNull(propSummary);

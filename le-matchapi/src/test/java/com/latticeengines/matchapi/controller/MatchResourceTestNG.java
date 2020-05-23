@@ -121,7 +121,7 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
-        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(0));
+        Assert.assertEquals(output.getStatistics().getRowsMatched(), Integer.valueOf(0));
         Assert.assertFalse(output.getResult().get(0).getInput().isEmpty(), "result record should contain input values");
         Assert.assertFalse(output.getResult().get(0).getOutput().isEmpty(), "result record should contain result list");
     }
@@ -137,7 +137,7 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
         MatchOutput output = restTemplate.postForObject(url, input, MatchOutput.class);
         Assert.assertNotNull(output);
         Assert.assertTrue(output.getResult().size() > 0);
-        Assert.assertTrue(output.getStatistics().getRowsMatched() == 0);
+        Assert.assertEquals((int) output.getStatistics().getRowsMatched(), 0);
         Assert.assertFalse(output.getResult().get(0).getInput().isEmpty(), "result record should contain input values");
         Assert.assertFalse(output.getResult().get(0).isMatched(), "result record should be marked as not matched");
     }
@@ -161,7 +161,7 @@ public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {
         for (OutputRecord result : output.getResult()) {
             log.info(String.format("Record %d matched: %b", result.getRowNumber(), result.isMatched()));
         }
-        Assert.assertEquals(output.getStatistics().getRowsMatched(), new Integer(5));
+        Assert.assertEquals((int) output.getStatistics().getRowsMatched(), 5);
     }
 
     @Test(groups = { "functional" }, dataProvider = "cachedMatchGoodDataProvider", dependsOnMethods = "testLocationEnrichment")

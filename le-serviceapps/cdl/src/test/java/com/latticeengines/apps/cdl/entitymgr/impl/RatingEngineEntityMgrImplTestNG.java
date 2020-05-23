@@ -335,9 +335,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         log.info("Rating Engine after update is " + retrievedRatingEngine.toString());
         Map<String, Long> counts = retrievedRatingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(counts));
-        Assert.assertEquals(counts.get(RatingBucketName.A.getName()), new Long(1));
-        Assert.assertEquals(counts.get(RatingBucketName.B.getName()), new Long(2));
-        Assert.assertEquals(counts.get(RatingBucketName.C.getName()), new Long(3));
+        Assert.assertEquals(counts.get(RatingBucketName.A.getName()), Long.valueOf(1));
+        Assert.assertEquals(counts.get(RatingBucketName.B.getName()), Long.valueOf(2));
+        Assert.assertEquals(counts.get(RatingBucketName.C.getName()), Long.valueOf(3));
 
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
                 RatingEngineStatus.ACTIVE.name());

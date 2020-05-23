@@ -391,19 +391,19 @@ public class VdbTableImportServiceImpl extends ImportService {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void updateExtractContext(Table table, ImportContext context, String targetPath, Long processedRecords,
                                      Long errorRecords, Long duplicateRecords) {
         Configuration config = context.getProperty(ImportProperty.HADOOPCONFIG, Configuration.class);
         String defaultFS = config.get(FileSystem.FS_DEFAULT_NAME_KEY);
         String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
-        List.class.cast(context.getProperty(ImportVdbProperty.EXTRACT_PATH_LIST, Map.class).get(table.getName()))
+        ((List) context.getProperty(ImportVdbProperty.EXTRACT_PATH_LIST, Map.class).get(table.getName()))
                 .add(hdfsUri);
-        List.class.cast(context.getProperty(ImportVdbProperty.EXTRACT_RECORDS_LIST, Map.class).get(table.getName()))
+        ((List) context.getProperty(ImportVdbProperty.EXTRACT_RECORDS_LIST, Map.class).get(table.getName()))
                 .add(processedRecords);
-        List.class.cast(context.getProperty(ImportVdbProperty.IGNORED_ROWS_LIST, Map.class).get(table.getName()))
+        ((List) context.getProperty(ImportVdbProperty.IGNORED_ROWS_LIST, Map.class).get(table.getName()))
                 .add(errorRecords);
-        List.class.cast(context.getProperty(ImportVdbProperty.DUPLICATE_ROWS_LIST, Map.class).get(table.getName()))
+        ((List) context.getProperty(ImportVdbProperty.DUPLICATE_ROWS_LIST, Map.class).get(table.getName()))
                 .add(duplicateRecords);
     }
 
@@ -535,7 +535,7 @@ public class VdbTableImportServiceImpl extends ImportService {
                     for (Map.Entry<Integer, Future<Integer[]>> futureEntry : processFutureMap.entrySet()) {
                         Integer[] result = futureEntry.getValue().get();
                         updateExtractContext(table, context, targetPathMap.get(futureEntry.getKey()),
-                                new Long(result[0]), new Long(result[1]), new Long(result[2]));
+                                Long.valueOf(result[0]), Long.valueOf(result[1]), Long.valueOf(result[2]));
                     }
                 } catch (InterruptedException e) {
                     log.error("Importing thread is terminated!");

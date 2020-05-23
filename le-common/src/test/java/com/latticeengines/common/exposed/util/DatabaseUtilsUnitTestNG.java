@@ -2,14 +2,13 @@ package com.latticeengines.common.exposed.util;
 
 import static org.testng.Assert.assertNotNull;
 
-import org.apache.commons.collections4.Closure;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 public class DatabaseUtilsUnitTestNG {
-    private Integer counter = new Integer(0);
+    private Integer counter = 0;
 
     @Test(groups = "unit")
     public void testRetryFailure() {
@@ -17,12 +16,9 @@ public class DatabaseUtilsUnitTestNG {
         int startCounterValue = counter;
         int maxRetry = 8;
         try {
-            DatabaseUtils.retry("failure", maxRetry, new Closure<Object>() {
-                @Override
-                public void execute(Object input) {
-                    counter++;
-                    throw new LockAcquisitionException("Deadlock!", null);
-                }
+            DatabaseUtils.retry("failure", maxRetry, input -> {
+                counter++;
+                throw new LockAcquisitionException("Deadlock!", null);
             });
         } catch (Exception e) {
             thrown = e;
@@ -38,13 +34,10 @@ public class DatabaseUtilsUnitTestNG {
         int maxRetry = 4;
         try {
             DatabaseUtils.retry("customFailure", maxRetry, ConstraintViolationException.class,
-                    "Ignore unique key violation for UQ__SELECTED__1234", "UQ__SELECTED__", new Closure<Object>() {
-                        @Override
-                        public void execute(Object input) {
-                            counter++;
-                            throw new ConstraintViolationException("UQ__SELECTED__1234 violation", null,
-                                    "UQ__SELECTED__1234");
-                        }
+                    "Ignore unique key violation for UQ__SELECTED__1234", "UQ__SELECTED__", input -> {
+                        counter++;
+                        throw new ConstraintViolationException("UQ__SELECTED__1234 violation", null,
+                                "UQ__SELECTED__1234");
                     });
         } catch (Exception e) {
             thrown = e;
@@ -55,11 +48,7 @@ public class DatabaseUtilsUnitTestNG {
 
     @Test(groups = "unit")
     public void testRetrySuccess() {
-        DatabaseUtils.retry("success", new Closure<Object>() {
-
-            @Override
-            public void execute(Object input) {
-            }
+        DatabaseUtils.retry("success", input -> {
         });
     }
 }

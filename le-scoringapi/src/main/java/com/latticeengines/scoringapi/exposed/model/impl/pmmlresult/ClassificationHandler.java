@@ -32,7 +32,7 @@ public class ClassificationHandler extends PMMLResultHandlerBase {
         double predicted = 0.0;
 
         result.put(ScoreType.PROBABILITY_OR_VALUE, null);
-        result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
+        result.put(ScoreType.PERCENTILE, Double.valueOf(predicted * 100.).intValue());
     }
 
 }

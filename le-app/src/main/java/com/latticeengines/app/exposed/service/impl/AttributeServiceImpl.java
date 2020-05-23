@@ -532,7 +532,7 @@ public class AttributeServiceImpl implements AttributeService {
             Map<String, Integer> additionalPremiumAttrMap) {
 
         for (String key : limitationMap.keySet()) {
-            additionalPremiumAttrMap.put(key, new Integer(0));
+            additionalPremiumAttrMap.put(key, 0);
         }
     }
 

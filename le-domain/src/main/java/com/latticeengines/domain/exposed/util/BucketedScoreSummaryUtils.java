@@ -68,13 +68,13 @@ public final class BucketedScoreSummaryUtils {
                         Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
                         Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()), cumulativeNumLeads,
                         cumulativeNumConverted,
-                        isEV ? Double.valueOf(pivotedRecord.get(BUCKET_AVG_SCORE).toString()).doubleValue() : null,
-                        isEV ? Double.valueOf(pivotedRecord.get(BUCKET_SUM).toString()).doubleValue() : null,
+                        isEV ? Double.valueOf(pivotedRecord.get(BUCKET_AVG_SCORE).toString()) : null,
+                        isEV ? Double.valueOf(pivotedRecord.get(BUCKET_SUM).toString()) : null,
                         isEV ? totalExpectedRevenue : null);
-                cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
+                cumulativeNumLeads += Long.valueOf((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
                 cumulativeNumConverted += (double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS);
                 if (isEV) {
-                    totalExpectedRevenue += Double.valueOf(pivotedRecord.get(BUCKET_SUM).toString()).doubleValue();
+                    totalExpectedRevenue += Double.parseDouble(pivotedRecord.get(BUCKET_SUM).toString());
                 }
                 idx--;
             } else {

@@ -126,9 +126,9 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         Map<String, Long> ratingCounts = ratingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(ratingCounts));
         String counts = JsonUtils.serialize(ratingCounts);
-        Assert.assertEquals(ratingCounts.get(RatingBucketName.A.getName()), new Long(136), counts);
-        Assert.assertEquals(ratingCounts.get(RatingBucketName.D.getName()), new Long(1018), counts);
-        Assert.assertEquals(ratingCounts.get(RatingBucketName.F.getName()), new Long(88), counts);
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.A.getName()), Long.valueOf(136), counts);
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.D.getName()), Long.valueOf(1018), counts);
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.F.getName()), Long.valueOf(88), counts);
     }
 
     private Map<String, List<BucketMetadata>> generateRatingCounts(String ratingEngineId) {
@@ -144,8 +144,8 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         assertMetadataSegmentUpdateActionNotGen();
         MetadataSegment segment = testSegmentProxy.getSegment(segmentName);
         Assert.assertNotNull(segment);
-        Assert.assertEquals(segment.getAccounts(), new Long(initialAccountNum), JsonUtils.serialize(segment));
-        Assert.assertEquals(segment.getContacts(), new Long(initialContactNum), JsonUtils.serialize(segment));
+        Assert.assertEquals(segment.getAccounts(), Long.valueOf(initialAccountNum), JsonUtils.serialize(segment));
+        Assert.assertEquals(segment.getContacts(), Long.valueOf(initialContactNum), JsonUtils.serialize(segment));
 
         Restriction accountRestriction = Restriction.builder() //
                 .let(BusinessEntity.Account, InterfaceName.LDC_Name.name()).gte("F").build();

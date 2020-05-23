@@ -136,7 +136,7 @@ public class TransactionAggregator extends BaseAggregator<TransactionAggregator.
         Map<String, Long> periodQuantity = context.quantityTable.get(period);
         if (periodQuantity != null) {
             if (quantity == null) {
-                quantity = new Long(1);
+                quantity = 1L;
             }
             Long curQuantity = periodQuantity.get(productId);
             periodQuantity.put(productId,

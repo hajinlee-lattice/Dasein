@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.export;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,8 +31,8 @@ public class ExportAccoutFetcherUnitTestNG {
         matchOutput.setOutputFields(Arrays.asList("Field1", "Field2"));
         OutputRecord outputRecord = new OutputRecord();
         outputRecord.setMatched(true);
-        outputRecord.setOutput(Arrays.asList("abc", new Long(123)));
-        List<OutputRecord> result = Arrays.asList(outputRecord);
+        outputRecord.setOutput(Arrays.asList("abc", 123L));
+        List<OutputRecord> result = Collections.singletonList(outputRecord);
         matchOutput.setResult(result);
         fetcher = new ExportAccountFetcher();
     }

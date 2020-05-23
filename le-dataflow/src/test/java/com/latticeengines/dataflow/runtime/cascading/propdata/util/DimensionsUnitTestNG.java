@@ -63,10 +63,10 @@ public class DimensionsUnitTestNG {
         putInMap(dim4, map);
 
         Assert.assertEquals(map.size(), 3);
-        Assert.assertEquals(map.get(dim1), new Long(2L));
-        Assert.assertEquals(map.get(dim2), new Long(2L));
-        Assert.assertEquals(map.get(dim3), new Long(1L));
-        Assert.assertEquals(map.get(dim4), new Long(1L));
+        Assert.assertEquals(map.get(dim1), Long.valueOf(2L));
+        Assert.assertEquals(map.get(dim2), Long.valueOf(2L));
+        Assert.assertEquals(map.get(dim3), Long.valueOf(1L));
+        Assert.assertEquals(map.get(dim4), Long.valueOf(1L));
     }
 
     private void putInMap(Dimensions dim, Map<Dimensions, Long> map) {

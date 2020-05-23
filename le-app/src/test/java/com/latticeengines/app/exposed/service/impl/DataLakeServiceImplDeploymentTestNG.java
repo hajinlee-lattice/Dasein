@@ -59,7 +59,7 @@ public class DataLakeServiceImplDeploymentTestNG extends DataLakeServiceImplDepl
 
     private final List<String> expectedResultFields = Arrays.asList("Field1", "Field2");
 
-    private final List<Object> expectedResultFieldValues = Arrays.asList("abc", new Long(123));
+    private final List<Object> expectedResultFieldValues = Arrays.asList("abc", 123L);
 
     private final List<String> expectedResultFieldsWithAccountId = Arrays.asList("Field1", "Field2",
             InterfaceName.AccountId.name());

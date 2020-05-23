@@ -120,7 +120,7 @@ public class WatcherCache<K, V> {
                 log.info("Loading " + initKeys.length + " initial keys.");
                 Arrays.stream(initKeys).map(k -> (K) k).forEach(this::loadKey);
             }
-            double duration = new Long(System.currentTimeMillis() - startTime).doubleValue()
+            double duration = Long.valueOf(System.currentTimeMillis() - startTime).doubleValue()
                     / SEC_TO_MSEC;
             log.info(String.format("Finished initializing the WatcherCache %s after %.3f secs.",
                     cacheName, duration));

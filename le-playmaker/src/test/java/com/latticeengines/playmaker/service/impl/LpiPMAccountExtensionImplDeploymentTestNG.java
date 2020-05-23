@@ -101,18 +101,10 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
                     "SalesforceAccountID", //
                     "RowNum"));
 
-    private List<List<Object>> expectedResultFieldValues = Arrays
-            .asList(Arrays.asList("abc", "abc", "abc", new Long(123), new Long(123), 1, 1), Arrays.asList( //
-                    "123", //
-                    new Date(), //
-                    "1", //
-                    "www.website.com", //
-                    "LDC_Name", //
-                    "123", //
-                    "123", //
-                    new Date(), //
-                    "123", //
-                    1));
+    private List<List<Object>> expectedResultFieldValues = Arrays.asList(
+            Arrays.asList("abc", "abc", "abc", 123L, 123L, 1, 1), //
+            Arrays.asList("123", new Date(), "1", "www.website.com", "LDC_Name", "123", "123", new Date(), "123", 1) //
+    );
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -160,7 +152,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
     }
 
     private Map<String, String> setupLookupIdMapping(String accountIdColumn, String tenantId) {
-        Long timestamp = System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
         String orgId = "O_" + timestamp;
         String orgName = "Name O_" + timestamp;
 
@@ -201,7 +193,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment", dependsOnMethods = { "testGetAccountExtensionCount" })
     public void testGetAccountExtensionsWithoutAccountIds() throws Exception {
         log.info("testGetAccountExtensionsWithoutAccountIds");
-        long max = accountCount > 5L ? 5L : accountCount;
+        long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(0),
                 expectedResultFieldValues.get(0), true, (int) max);
@@ -217,7 +209,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment", dependsOnMethods = { "testGetAccountExtensionsWithoutAccountIds" })
     public void testGetAccountExtensionsWithoutColumns() throws Exception {
         log.info("testGetAccountExtensionsWithoutColumns");
-        long max = accountCount > 5L ? 5L : accountCount;
+        long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(0),
                 expectedResultFieldValues.get(0), true, (int) max);
@@ -233,7 +225,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment", dependsOnMethods = { "testGetAccountExtensionsWithoutColumns" })
     public void testGetAccountExtensionsWithColumns() {
         log.info("testGetAccountExtensionsWithColumns");
-        long max = accountCount > 5L ? 5L : accountCount;
+        long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(1),
                 expectedResultFieldValues.get(1), true, (int) max);
@@ -249,7 +241,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment", dependsOnMethods = { "testGetAccountExtensionsWithColumns" })
     public void testGetAccountExtensionsWithLookupIdColumn() throws Exception {
         log.info("testGetAccountExtensionsWithLookupIdColumn");
-        long max = accountCount > 5L ? 5L : accountCount;
+        long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(1),
                 expectedResultFieldValues.get(1), true, (int) max);
@@ -265,7 +257,7 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
     @Test(groups = "deployment", dependsOnMethods = { "testGetAccountExtensionsWithColumns" })
     public void testGetAccountExtensionsWithoutMatch() throws Exception {
         log.info("testGetAccountExtensionsWithoutMatch");
-        long max = accountCount > 5L ? 5L : accountCount;
+        long max = Math.min(accountCount, 5L);
         lpiPMAccountExtensionImpl.setMatchProxy(mockedMatchProxyWithMatchedResult);
         List<Object> emptyResultsList = new ArrayList<Object>();
         createMockedMatchProxy(mockedMatchProxyWithMatchedResult, expectedResultFields.get(1), emptyResultsList, false,
@@ -300,32 +292,29 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
         Assert.assertNotNull(datapage);
         Assert.assertEquals(datapage.size(), (int) max);
 
-        datapage.stream() //
-                .forEach(row -> {
-                    if (row.keySet().size() != expectedResultFieldValues.size()) {
-                        log.info(String.format("Expected fields: %s , Result fields: %s", //
-                                JsonUtils.serialize(expectedResultFieldValues), //
-                                JsonUtils.serialize(row.keySet())));
-                        log.info("Account Ext Data: " + JsonUtils.serialize(row));
-                    }
-                    log.info(JsonUtils.serialize(row.keySet()));
-                    Assert.assertEquals(row.keySet().size(), expectedResultFieldValues.size());
-                    Assert.assertNotNull(row.get(InterfaceName.AccountId.name()));
-                    Assert.assertNotNull(row.get(PlaymakerConstants.ID));
-                    Assert.assertNotNull(row.get(PlaymakerConstants.LEAccountExternalID));
-                    Assert.assertNotNull(row.get(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY));
-                    Assert.assertNotNull(row.get(PlaymakerConstants.RowNum));
-                    expectedResultFields.stream() //
-                            .forEach(field -> {
-                                if (!row.containsKey(field)) {
-                                    log.info(String.format("Expected field: %s , Result fields: %s", //
-                                            field, //
-                                            JsonUtils.serialize(row.keySet())));
-                                }
-
-                                Assert.assertTrue(row.containsKey(field),
-                                        String.format("row = %s, field = %s", JsonUtils.serialize(row), field));
-                            });
-                });
+        datapage.forEach(row -> {
+            if (row.keySet().size() != expectedResultFieldValues.size()) {
+                log.info(String.format("Expected fields: %s , Result fields: %s", //
+                        JsonUtils.serialize(expectedResultFieldValues), //
+                        JsonUtils.serialize(row.keySet())));
+                log.info("Account Ext Data: " + JsonUtils.serialize(row));
+            }
+            log.info(JsonUtils.serialize(row.keySet()));
+            Assert.assertEquals(row.keySet().size(), expectedResultFieldValues.size());
+            Assert.assertNotNull(row.get(InterfaceName.AccountId.name()));
+            Assert.assertNotNull(row.get(PlaymakerConstants.ID));
+            Assert.assertNotNull(row.get(PlaymakerConstants.LEAccountExternalID));
+            Assert.assertNotNull(row.get(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY));
+            Assert.assertNotNull(row.get(PlaymakerConstants.RowNum));
+            expectedResultFields.forEach(field -> {
+                if (!row.containsKey(field)) {
+                    log.info(String.format("Expected field: %s , Result fields: %s", //
+                            field, //
+                            JsonUtils.serialize(row.keySet())));
+                }
+                Assert.assertTrue(row.containsKey(field),
+                        String.format("row = %s, field = %s", JsonUtils.serialize(row), field));
+            });
+        });
     }
 }

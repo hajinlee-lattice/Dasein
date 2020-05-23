@@ -31,7 +31,7 @@ public class ReplaceNullValueV2 implements RealTimeTransform {
         if (o == null) {
             Object value = lookupMap.get(column);
             if (value instanceof Integer) {
-                return new Double((Integer) value);
+                return ((Integer) value).doubleValue();
             }
             return value;
         }

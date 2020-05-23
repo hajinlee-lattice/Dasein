@@ -62,7 +62,7 @@ public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
                 Map.class);
         Assert.assertTrue(MapUtils.isNotEmpty(map));
         Map<BusinessEntity, Long> counts = JsonUtils.convertMap(map, BusinessEntity.class, Long.class);
-        counts.forEach((entity, count) -> Assert.assertEquals(count, new Long(0)));
+        counts.forEach((entity, count) -> Assert.assertEquals(count, Long.valueOf(0)));
     }
 
     @Override

@@ -138,7 +138,7 @@ public class RecommendationDaoImpl extends BaseDaoWithAssignedSessionFactoryImpl
     }
 
     Long dateToUnixTimestamp(Date lastModificationDate) {
-        return new Long(lastModificationDate.getTime() / 1000);
+        return lastModificationDate.getTime() / 1000;
     }
 
     @Override

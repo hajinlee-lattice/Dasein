@@ -54,7 +54,7 @@ public abstract class NaturalPeriodBuilderUnitTestNGBase {
     public void testConvertToPeriodId(String startDate, String endDate, int period) {
         PeriodBuilder builder = StringUtils.isBlank(startDate) ? getBuilder() : getBuilder(startDate);
         int actualPeriod = builder.toPeriodId(endDate);
-        Assert.assertEquals(new Integer(actualPeriod), new Integer(period));
+        Assert.assertEquals(actualPeriod, period);
     }
 
     protected abstract PeriodBuilder getBuilder();

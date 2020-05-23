@@ -16,10 +16,10 @@ public class ScalarTypeHandler extends PMMLResultHandlerBase {
 
     @Override
     public void processResult(Evaluator evaluator, Map<ScoreType, Object> result, Object originalResult) {
-        double predicted = Double.valueOf(originalResult.toString());
+        double predicted = Double.parseDouble(originalResult.toString());
 
         result.put(ScoreType.PROBABILITY_OR_VALUE, predicted);
-        result.put(ScoreType.PERCENTILE, new Double(predicted * 100).intValue());
+        result.put(ScoreType.PERCENTILE, Double.valueOf(predicted * 100.).intValue());
     }
 
 }

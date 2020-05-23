@@ -427,7 +427,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingModelsCoverageMap().get(ratingId1)));
         CoverageInfo coverageAggregated = response.getRatingModelsCoverageMap().get(ratingId1);
 
-        assertEquals(new Long(coverage1.getAccountCount() + coverage2.getAccountCount()),
+        assertEquals(Long.valueOf(coverage1.getAccountCount() + coverage2.getAccountCount()),
                 coverageAggregated.getAccountCount());
         coverageAggregated.getBucketCoverageCounts().forEach(rbc -> {
             RatingBucketCoverage coverage1Bucket = coverage1.getCoverageForBucket(rbc.getBucket());
@@ -500,9 +500,9 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         log.info("Ratings Coverage: " + JsonUtils.serialize(response.getRatingModelsCoverageMap().get(ratingId1)));
         CoverageInfo coverageAggregated = response.getRatingModelsCoverageMap().get(ratingId1);
 
-        assertEquals(new Long(coverage1.getAccountCount() + coverage2.getAccountCount()),
+        assertEquals(Long.valueOf(coverage1.getAccountCount() + coverage2.getAccountCount()),
                 coverageAggregated.getAccountCount());
-        assertEquals(new Long(coverage1.getContactCount() + coverage2.getContactCount()),
+        assertEquals(Long.valueOf(coverage1.getContactCount() + coverage2.getContactCount()),
                 coverageAggregated.getContactCount());
         coverageAggregated.getBucketCoverageCounts().forEach(rbc -> {
             RatingBucketCoverage coverage1Bucket = coverage1.getCoverageForBucket(rbc.getBucket());

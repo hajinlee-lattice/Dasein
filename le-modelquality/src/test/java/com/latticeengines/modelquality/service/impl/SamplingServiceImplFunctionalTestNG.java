@@ -30,18 +30,16 @@ public class SamplingServiceImplFunctionalTestNG extends ModelQualityFunctionalT
 
             s = spiedSamplingService.createLatestProductionSamplingConfig();
             Assert.assertNotNull(s);
-            Assert.assertEquals(new Integer(initialVersion.intValue() + 1), s.getVersion());
+            Assert.assertEquals(Integer.valueOf(initialVersion + 1), s.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.8-SNAPSHOT", s.getName());
             Assert.assertNotNull(samplingEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT"));
 
             doReturn("z/9.9.9-SNAPSHOT").when(spiedSamplingService).getLedsVersion();
             s = spiedSamplingService.createLatestProductionSamplingConfig();
             Assert.assertNotNull(s);
-            Assert.assertEquals(new Integer(initialVersion + 2), s.getVersion());
+            Assert.assertEquals(Integer.valueOf(initialVersion + 2), s.getVersion());
             Assert.assertEquals("PRODUCTION-z_9.9.9-SNAPSHOT", s.getName());
             Assert.assertNotNull(samplingEntityMgr.findByName("PRODUCTION-z_9.9.9-SNAPSHOT"));
-        } catch (Exception e) {
-            throw e;
         } finally {
             Sampling s = samplingEntityMgr.findByName("PRODUCTION-z_9.9.8-SNAPSHOT");
             if (s != null) {

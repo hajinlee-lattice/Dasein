@@ -29,16 +29,16 @@ public class FieldTypeUnitTestNG {
         FieldType type = FieldType.FLOAT;
         Object actual = FieldType.parse(type, "1.03");
         Double dactual = (Double) actual;
-        Assert.assertTrue(Math.abs(dactual.doubleValue() - 1.03) < 1e-10);
-        Assert.assertEquals(FieldType.parse(FieldType.FLOAT, "      1.03      "), new Double(1.03));
+        Assert.assertTrue(Math.abs(dactual - 1.03) < 1e-10);
+        Assert.assertEquals(FieldType.parse(FieldType.FLOAT, "      1.03      "), 1.03);
     }
 
     @Test(groups = "unit")
     public void testParseInteger() {
         FieldType type = FieldType.INTEGER;
         Object actual = FieldType.parse(type, "42");
-        Assert.assertEquals(actual, new Long(42));
-        Assert.assertEquals(FieldType.parse(FieldType.INTEGER, "      42      "), new Long(42));
+        Assert.assertEquals(actual, 42L);
+        Assert.assertEquals(FieldType.parse(FieldType.INTEGER, "      42      "), 42L);
     }
 
     @Test(groups = "unit")

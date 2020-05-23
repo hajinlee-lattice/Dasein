@@ -102,7 +102,7 @@ public class TblDrivenTransformationTestNG
             for (int j = 0; j < keys.length; j++) {
                 data[i][j] = "" + i;
             }
-            data[i][keys.length] = new Long(i);
+            data[i][keys.length] = (long) i;
         }
         uploadBaseSourceData(source.getSourceName(), baseSourceVersion, columns, data);
 
@@ -112,8 +112,8 @@ public class TblDrivenTransformationTestNG
     private void prepareMapTable() {
         // Retain every key attribute from seed
         String[] seedKeys = keys[0];
-        for (int i = 0; i < seedKeys.length; i++) {
-            createMapAttribute(seedKeys[i], sourceTypes[0] + 0, seedKeys[i]);
+        for (String seedKey : seedKeys) {
+            createMapAttribute(seedKey, sourceTypes[0] + 0, seedKey);
         }
 
         // Collect remaining attrbute from all sources;
@@ -130,7 +130,7 @@ public class TblDrivenTransformationTestNG
     }
 
     private void prepareDeriveTable() {
-        List<String> origAttrs = new ArrayList<String>();
+        List<String> origAttrs = new ArrayList<>();
         for (int i = 0; i < totalAttributes; i++) {
             origAttrs.add(ATTRIBUTE + i);
         }
@@ -145,7 +145,7 @@ public class TblDrivenTransformationTestNG
         } catch (Exception e) {
             log.error("Failed to create derived fuction", e);
         }
-   
+
     }
 
     private void createMapAttribute(String attribute, String source, String origAttr) {
@@ -175,7 +175,7 @@ public class TblDrivenTransformationTestNG
             log.error("Skip already existing attribute ", e);
         }
      }
-        
+
 
     @Override
     protected PipelineTransformationConfiguration createTransformationConfiguration() {
@@ -203,7 +203,7 @@ public class TblDrivenTransformationTestNG
             templates.add(targetSourceName);
             List<Integer> inputSteps = new ArrayList<>();
             inputSteps.add(0);
-        
+
             step2.setInputSteps(inputSteps);
             step2.setTransformer(MapAttributeFlow.DERIVE_TRANSFORMER);
             step2.setTargetSource(targetSourceName);
@@ -312,6 +312,8 @@ public class TblDrivenTransformationTestNG
                     Assert.assertEquals(keyValue, value);
                 }
             }
+            Assert.assertNotNull(value);
+
             Long lValue= Long.valueOf(value);
             for (int i = 0; i < totalAttributes; i++) {
                 Long attrVaule = (Long)record.get(ATTRIBUTE + i);
@@ -319,7 +321,7 @@ public class TblDrivenTransformationTestNG
             }
 
             Long derivedValue = (Long)record.get(DERIVED_ATTRIBUTE);
-            Assert.assertEquals(derivedValue, new Long(totalAttributes * lValue));
+            Assert.assertEquals(derivedValue, Long.valueOf(totalAttributes * lValue));
             rowNum++;
         }
         Assert.assertEquals(rowNum, numRecords);
