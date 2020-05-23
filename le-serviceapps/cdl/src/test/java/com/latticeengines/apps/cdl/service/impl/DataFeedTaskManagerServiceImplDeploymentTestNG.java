@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.testng.Assert;
@@ -158,7 +158,7 @@ public class DataFeedTaskManagerServiceImplDeploymentTestNG extends CDLDeploymen
         for (DataFeedTask task : tasks) {
             Assert.assertNull(task.getImportTemplate());
         }
-        //verify action is deleted 
+        //verify action is deleted
         Set<String> taskIds = tasks.stream().map(DataFeedTask::getUniqueId).collect(Collectors.toSet());
         List<Action> actions = actionService.findAll().stream()
                 .filter(action -> action.getType().equals(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW))

@@ -9,10 +9,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.support.RetryTemplate;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

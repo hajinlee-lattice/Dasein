@@ -35,9 +35,9 @@ public class Encoder implements RealTimeTransform {
         }
 
         if (valueAsString == null //
-                || valueAsString.equals("None") //
-                || valueAsString.equals("null") //
-                || valueAsString.equals("NULL")) {
+                || "None".equals(valueAsString) //
+                || "null".equals(valueAsString) //
+                || "NULL".equals(valueAsString)) {
             valueAsString = "NULL";
             return 1463472903L;
         }
@@ -59,8 +59,8 @@ public class Encoder implements RealTimeTransform {
                 || value.getClass() == Float.class || value.getClass() == Double.class) {
             if (valueAsString.matches("^-?\\d+$") //
                     || valueAsString.matches("^-?\\d+.\\d+$") //
-                    || valueAsString.equals("false") //
-                    || valueAsString.equals("true")) {
+                    || "false".equals(valueAsString) //
+                    || "true".equals(valueAsString)) {
                 try {
                     Double d = Double.parseDouble(valueAsString);
                     if (d.isNaN()) {

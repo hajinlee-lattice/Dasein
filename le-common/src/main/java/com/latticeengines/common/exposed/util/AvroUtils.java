@@ -343,7 +343,7 @@ public final class AvroUtils {
             String k = entry.getKey();
             String v = entry.getValue();
 
-            if (k.equals("uuid")) {
+            if ("uuid".equals(k)) {
                 recordBuilder = recordBuilder.prop("uuid", UUID.randomUUID().toString());
             } else {
                 recordBuilder = recordBuilder.prop(k, v);

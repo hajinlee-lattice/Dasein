@@ -116,8 +116,8 @@ public class FeatureImportanceParser {
                     return false;
                 }
 
-                String name = file.getPath().getName().toString();
-                return name.equals("rf_model.txt");
+                String name = file.getPath().getName();
+                return "rf_model.txt".equals(name);
             }
 
         };
@@ -146,7 +146,7 @@ public class FeatureImportanceParser {
             boolean first = true;
             while ((line = r.readLine()) != null) {
                 if (first) {
-                    if (line.equals("RandomForestClassifier")) {
+                    if ("RandomForestClassifier".equals(line)) {
                         return parseOldFiFormat(r);
                     }
                     first = false;

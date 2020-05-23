@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.hadoop.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public final class ScoringMapperTransformUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ScoringMapperTransformUtil.class);
 
-    private static Charset charSet = Charset.forName("UTF-8");
+    private static Charset charSet = StandardCharsets.UTF_8;
 
     public static Map<String, URI> getModelUris(URI[] uris) {
         Map<String, URI> modelUris = new HashMap<>();
@@ -222,7 +222,7 @@ public final class ScoringMapperTransformUtil {
         String recordId = jsonNode.get(uniqueKeyColumn).asText();
 
         ArrayNode jsonArray = jsonObj.putArray("value");
-        jsonObj.put("key", StringUtils.byteToHexString(recordId.getBytes("UTF8")));
+        jsonObj.put("key", org.apache.hadoop.util.StringUtils.byteToHexString(recordId.getBytes("UTF8")));
 
         ObjectMapper mapper = new ObjectMapper();
         for (JsonNode objKey : metadata) {
@@ -250,7 +250,7 @@ public final class ScoringMapperTransformUtil {
     @VisibleForTesting
     static String processBitValue(String type, String value) {
         String toReturn = value;
-        if (type.equals("Float")) {
+        if ("Float".equals(type)) {
             switch (value.toUpperCase()) {
             case "TRUE":
                 toReturn = "1";

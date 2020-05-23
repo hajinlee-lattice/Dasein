@@ -4,6 +4,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.FileProperty;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
 
-import io.micrometer.core.instrument.util.StringUtils;
 
 @Component("dropBoxProxy")
 public class DropBoxProxyImpl extends MicroserviceRestApiProxy implements DropBoxProxy {

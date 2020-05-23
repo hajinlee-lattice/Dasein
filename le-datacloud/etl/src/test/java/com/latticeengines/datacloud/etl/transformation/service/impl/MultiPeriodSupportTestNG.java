@@ -151,16 +151,16 @@ public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
         if (source.equals(PeriodStrategy.CalendarYear.getName())) {
             verifyYearOutput(records);
         }
-        if (source.equals(BUSINESS + PeriodStrategy.CalendarWeek.getName())) {
+        if ((BUSINESS + PeriodStrategy.CalendarWeek.getName()).equals(source)) {
             verifyBusinessWeekOutput(records);
         }
-        if (source.equals(BUSINESS + PeriodStrategy.CalendarMonth.getName())) {
+        if ((BUSINESS + PeriodStrategy.CalendarMonth.getName()).equals(source)) {
             verifyBusinessMonthOutput(records);
         }
-        if (source.equals(BUSINESS + PeriodStrategy.CalendarQuarter.getName())) {
+        if ((BUSINESS + PeriodStrategy.CalendarQuarter.getName()).equals(source)) {
             verifyBusinessQuarterOutput(records);
         }
-        if (source.equals(BUSINESS + PeriodStrategy.CalendarYear.getName())) {
+        if ((BUSINESS + PeriodStrategy.CalendarYear.getName()).equals(source)) {
             verifyBusinessYearOutput(records);
         }
     }
@@ -180,7 +180,7 @@ public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
                     expected.get(record.get(InterfaceName.AccountId.name()).toString()));
         }
     }
-    
+
     @SuppressWarnings("serial")
     private void verifyBusinessWeekOutput(Iterator<GenericRecord> records) {
         Map<String, Integer> expected = new HashMap<String, Integer>() {
@@ -212,7 +212,7 @@ public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
                     expected.get(record.get(InterfaceName.AccountId.name()).toString()));
         }
     }
-    
+
     @SuppressWarnings("serial")
     private void verifyBusinessMonthOutput(Iterator<GenericRecord> records) {
         Map<String, Integer> expected = new HashMap<String, Integer>() {
@@ -244,7 +244,7 @@ public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
                     expected.get(record.get(InterfaceName.AccountId.name()).toString()));
         }
     }
-    
+
     @SuppressWarnings("serial")
     private void verifyBusinessQuarterOutput(Iterator<GenericRecord> records) {
         Map<String, Integer> expected = new HashMap<String, Integer>() {
@@ -276,7 +276,7 @@ public class MultiPeriodSupportTestNG extends PipelineTransformationTestNGBase {
                     expected.get(record.get(InterfaceName.AccountId.name()).toString()));
         }
     }
-    
+
     @SuppressWarnings("serial")
     private void verifyBusinessYearOutput(Iterator<GenericRecord> records) {
         @SuppressWarnings("unused")

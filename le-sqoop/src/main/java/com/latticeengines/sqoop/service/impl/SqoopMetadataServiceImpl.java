@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.sqoop.ConnFactory;
@@ -12,7 +13,6 @@ import org.apache.sqoop.orm.AvroSchemaGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.cloudera.sqoop.SqoopOptions;
 import com.cloudera.sqoop.manager.ConnManager;

@@ -395,7 +395,7 @@ public final class BootstrapUtil {
     }
 
     private static void getHostName() {
-        if (hostname == null || hostname.equals("unknown")) {
+        if (hostname == null || "unknown".equals(hostname)) {
             try {
                 InetAddress addr;
                 addr = InetAddress.getLocalHost();

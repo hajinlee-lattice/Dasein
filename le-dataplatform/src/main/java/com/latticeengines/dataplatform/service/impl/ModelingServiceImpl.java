@@ -530,7 +530,7 @@ public class ModelingServiceImpl implements ModelingService {
         String afterPart = StringUtils.substringAfter(script, "/app");
 
         // If this is empty, it means it's a customer supplied pipeline driver
-        if (afterPart.equals("")) {
+        if ("".equals(afterPart)) {
             return script;
         }
 
@@ -753,7 +753,7 @@ public class ModelingServiceImpl implements ModelingService {
                     continue;
                 }
 
-                if (datatype.equals("BND")) {
+                if ("BND".equals(datatype)) {
                     featureName += "_Continuous";
                 } else {
                     featureName += "_" + value;

@@ -664,7 +664,7 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
             Assert.assertNotNull(countMap.get(dataSource));
             Assert.assertTrue(countMap.get(dataSource) > 0);
 
-            if (dataSource.equals("HGData_Pivoted_Source")) {
+            if ("HGData_Pivoted_Source".equals(dataSource)) {
                 foundHGDataSourceInfo = true;
             }
         }

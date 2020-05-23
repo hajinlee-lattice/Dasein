@@ -272,7 +272,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         boolean hasValidFilterBy = false;
         filterBy = (filterBy == null ? null : filterBy.trim().toUpperCase());
         if (StringUtils.isNotEmpty(filterBy)
-                && (filterBy.equals("RECOMMENDATIONS") || filterBy.equals("NORECOMMENDATIONS"))) {
+                && ("RECOMMENDATIONS".equals(filterBy) || "NORECOMMENDATIONS".equals(filterBy))) {
             if (recStart == null) {
                 throw new RuntimeException("Missng recStart when filterBy is used.");
             }
@@ -492,7 +492,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     private String getInNotInClauseForFilterBy(String filterBy) {
         String whereClause = " %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND "
                 + DATEDIFF_1970 + " L.[Last_Modification_Date]) >= :recStart) ";
-        String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
+        String oper = "RECOMMENDATIONS".equals(filterBy) ? "IN" : "NOT IN";
         whereClause = String.format(whereClause, oper);
         return whereClause;
     }

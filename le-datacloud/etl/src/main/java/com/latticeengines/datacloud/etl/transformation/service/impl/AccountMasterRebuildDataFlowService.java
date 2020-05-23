@@ -139,12 +139,12 @@ public class AccountMasterRebuildDataFlowService extends AbstractTransformationD
                 continue;
             }
 
-            if (sourceName.equals("AccountMasterSeed")) {
+            if ("AccountMasterSeed".equals(sourceName)) {
                 log.info("All columns from AccountMasterSeed will be added");
                 continue;
             }
 
-            String baseColumnName = null;
+            String baseColumnName;
             try {
                 Map<String, String> props = JsonUtils.deserialize(column.getArguments(), Map.class);
                 baseColumnName = props.get("BaseSourceColumn");
@@ -265,9 +265,9 @@ public class AccountMasterRebuildDataFlowService extends AbstractTransformationD
         try {
             char beanName[] = sourceName.toCharArray();
             beanName[0] = Character.toLowerCase(beanName[0]);
-            if (sourceName.equals("HGDataPivoted") || sourceName.equals("HGDataTechIndicators")) {
+            if ("HGDataPivoted".equals(sourceName) || "HGDataTechIndicators".equals(sourceName)) {
                 beanName[1] = Character.toLowerCase(beanName[1]);
-            } if (sourceName.equals("HPANewPivoted")) {
+            } if ("HPANewPivoted".equals(sourceName)) {
                 beanName[1] = Character.toLowerCase(beanName[1]);
                 beanName[2] = Character.toLowerCase(beanName[2]);
             }

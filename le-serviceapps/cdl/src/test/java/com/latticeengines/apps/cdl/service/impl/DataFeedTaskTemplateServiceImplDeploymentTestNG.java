@@ -16,7 +16,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
-import org.datanucleus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

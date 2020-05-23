@@ -401,7 +401,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                     ++ret;
                     String domain = rec.get(domainIdx);
                     String checkFieldVal = rec.get(domainChkIdx);
-                    if (!checkFieldVal.equals("")) {
+                    if (!"".equals(checkFieldVal)) {
                         if (checkFieldVal.equals(checkFieldEmptyValue)) {
                             emptyDomains.add(domain);
                         } else {
@@ -482,7 +482,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
     /*
      * Check CollectionWorker table. From TaskARN find the status of the worker
      * by AWS SDK.
-     * 
+     *
      * If some worker is started but not terminated, update CollectionWorker to
      * Status=RUNNING If some worker is finished successfully: move the output
      * csv to the vendor's raw ingestion folder scan the csv, update
@@ -798,7 +798,7 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                         if (domainChkCsvCol != -1) {
                             // bypass dummy line
                             String checkFieldVal = csvRec.get(domainChkCsvCol);
-                            if (checkFieldVal.equals("") || checkFieldVal.equals(checkFieldEmptyValue)) {
+                            if ("".equals(checkFieldVal) || checkFieldVal.equals(checkFieldEmptyValue)) {
                                 continue;
                             }
                         }
@@ -1045,9 +1045,9 @@ public class CollectionDBServiceImpl implements CollectionDBService {
                  * boolean triggerConsolidation = ts == null || (now -
                  * ts.getTime()) / 1000 >= consolidationExecPeriod; if
                  * (!triggerConsolidation) {
-                 * 
+                 *
                  * continue;
-                 * 
+                 *
                  * }
                  */
 

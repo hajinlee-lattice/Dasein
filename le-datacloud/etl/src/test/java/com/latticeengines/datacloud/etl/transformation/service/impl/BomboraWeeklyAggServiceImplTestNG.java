@@ -145,27 +145,27 @@ public class BomboraWeeklyAggServiceImplTestNG
                 Float totalAggregatedScore = (Float) record.get(TOTAL_AGGREGATED_SCORE);
                 Float totalAggregatedScoreHighlyRelevant = (Float) record.get(TOTAL_AGGREGATED_SCORE_HIGHLY_RELEVANT);
                 Float totalAggregatedScoreMostRelevant = (Float) record.get(TOTAL_AGGREGATED_SCORE_MOST_RELEVANT);
-                Assert.assertTrue((domain.equals("google.com") && date.equals(aggDate.getTime())
-                        && topic.equals("Big Data") && zipCodeOfHighestAggregatedScore.equals("94043")
+                Assert.assertTrue(("google.com".equals(domain) && date.equals(aggDate.getTime())
+                        && "Big Data".equals(topic) && "94043".equals(zipCodeOfHighestAggregatedScore)
                         && contentSources.equals(89) && totalViews.equals(996) && uniqueUsers.equals(794)
                         && Math.abs(totalAggregatedScore - 248.3) < 0.01 && highlyRelevantSources == null
                         && mostRelevantSources == null && totalAggregatedScoreHighlyRelevant == null
                         && totalAggregatedScoreMostRelevant == null)
-                        || (domain.equals("uber.com") && date.equals(aggDate.getTime()) && topic.equals("Big Data")
-                                && zipCodeOfHighestAggregatedScore.equals("94133") && contentSources.equals(5)
+                        || ("uber.com".equals(domain) && date.equals(aggDate.getTime()) && "Big Data".equals(topic)
+                                && "94133".equals(zipCodeOfHighestAggregatedScore) && contentSources.equals(5)
                                 && totalViews.equals(15) && uniqueUsers.equals(8)
                                 && Math.abs(totalAggregatedScore - 3.2) < 0.01
                                 && highlyRelevantSources == null && mostRelevantSources == null
                                 && totalAggregatedScoreHighlyRelevant == null
                                 && totalAggregatedScoreMostRelevant == null)
-                        || (domain.equals("uber.com") && date.equals(aggDate.getTime()) && topic.equals("Apple (AAPL)")
-                                && zipCodeOfHighestAggregatedScore.equals("94103") && contentSources.equals(39)
+                        || ("uber.com".equals(domain) && date.equals(aggDate.getTime()) && "Apple (AAPL)".equals(topic)
+                                && "94103".equals(zipCodeOfHighestAggregatedScore) && contentSources.equals(39)
                                 && totalViews.equals(449) && uniqueUsers.equals(135)
                                 && Math.abs(totalAggregatedScore - 92.71) < 0.01 && highlyRelevantSources == null
                                 && mostRelevantSources == null && totalAggregatedScoreHighlyRelevant == null
                                 && totalAggregatedScoreMostRelevant == null)
-                        || (domain.equals("google.com") && date.equals(aggDate.getTime())
-                                && topic.equals("Apple (AAPL)") && zipCodeOfHighestAggregatedScore.equals("94043")
+                        || ("google.com".equals(domain) && date.equals(aggDate.getTime())
+                                && "Apple (AAPL)".equals(topic) && "94043".equals(zipCodeOfHighestAggregatedScore)
                                 && contentSources.equals(696) && totalViews.equals(67162) && uniqueUsers.equals(41103)
                                 && Math.abs(totalAggregatedScore - 10305.9) < 0.01 && highlyRelevantSources == null
                                 && mostRelevantSources == null && totalAggregatedScoreHighlyRelevant == null

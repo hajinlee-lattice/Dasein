@@ -4,7 +4,6 @@ import java.util.Date;
 
 import javax.inject.Inject;
 
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -147,9 +146,11 @@ public class DefaultDataFeedController {
                                              @PathVariable String initialDataFeedStatus,
                                              @RequestParam(required = false) Long executionId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        if (StringUtils.isEmpty(executionId))
+        if (executionId == null) {
             return datafeedService.finishExecution(customerSpace, "", initialDataFeedStatus);
-        return datafeedService.finishExecution(customerSpace, "", initialDataFeedStatus, executionId);
+        } else {
+            return datafeedService.finishExecution(customerSpace, "", initialDataFeedStatus, executionId);
+        }
     }
 
     @PostMapping(value = "/status/{initialDataFeedStatus}/failexecution")
@@ -158,9 +159,11 @@ public class DefaultDataFeedController {
     public DataFeedExecution failExecution(@PathVariable String customerSpace,
             @PathVariable String initialDataFeedStatus, @RequestParam(required = false) Long executionId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        if (StringUtils.isEmpty(executionId))
+        if (executionId == null) {
             return datafeedService.failExecution(customerSpace, "", initialDataFeedStatus);
-        return datafeedService.failExecution(customerSpace, "", initialDataFeedStatus, executionId);
+        } else {
+            return datafeedService.failExecution(customerSpace, "", initialDataFeedStatus, executionId);
+        }
     }
 
     @PostMapping(value = "/execution/workflow/{workflowId}")

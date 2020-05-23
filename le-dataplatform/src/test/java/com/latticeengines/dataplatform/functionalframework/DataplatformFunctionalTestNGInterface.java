@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.yarn.fs.PrototypeLocalResourcesFactoryBean.CopyEntry;
 
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -38,11 +38,13 @@ public interface DataplatformFunctionalTestNGInterface {
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         for (CopyEntry e : copyEntries) {
-            for (String pattern : StringUtils.commaDelimitedListToStringArray(e.getSrc())) {
-                for (Resource res : resolver.getResources(pattern)) {
-                    Path destinationPath = getDestinationPath(e, res);
-                    FSDataOutputStream os = fs.create(destinationPath);
-                    FileCopyUtils.copy(res.getInputStream(), os);
+            if (StringUtils.isNotBlank(e.getSrc())) {
+                for (String pattern : e.getSrc().split(",")) {
+                    for (Resource res : resolver.getResources(pattern)) {
+                        Path destinationPath = getDestinationPath(e, res);
+                        FSDataOutputStream os = fs.create(destinationPath);
+                        FileCopyUtils.copy(res.getInputStream(), os);
+                    }
                 }
             }
         }
@@ -76,7 +78,7 @@ public interface DataplatformFunctionalTestNGInterface {
 
     default String generateUnique(String base) {
         String id = UUID.randomUUID().toString();
-        return base.equals("") ? id : (base + "_" + id);
+        return "".equals(base) ? id : (base + "_" + id);
     }
 
     default String generateUnique() {

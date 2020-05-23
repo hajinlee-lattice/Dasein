@@ -118,7 +118,7 @@ public class Pivot implements RealTimeTransform {
                             }
                             values.add(value);
                             sourceColValues = matcherValues.group(4);
-                            if (!sourceColValues.equals("")) {
+                            if (!"".equals(sourceColValues)) {
                                 sourceColValues = sourceColValues.substring(2);
                             } else {
                                 break;
@@ -132,7 +132,7 @@ public class Pivot implements RealTimeTransform {
                     valueTuple.add(values);
                     lookupMap.put(targetColKey, valueTuple);
                     dictionaryString = matcherKeyAndValue.group(8);
-                    if (!dictionaryString.equals("")) {
+                    if (!"".equals(dictionaryString)) {
                         dictionaryString = dictionaryString.substring(2);
                     } else {
                         break;

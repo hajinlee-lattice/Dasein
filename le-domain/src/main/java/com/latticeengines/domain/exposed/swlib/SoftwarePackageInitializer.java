@@ -7,7 +7,7 @@ public interface SoftwarePackageInitializer {
     ApplicationContext initialize(ApplicationContext applicationContext, String module);
 
     default String getClassifier(String module) {
-        if (module.equals("workflowapi")) {
+        if ("workflowapi".equals(module)) {
             return "workflow";
         }
         return "dataflow";

@@ -389,7 +389,7 @@ public class AMStatsDeploymentTestNG extends PipelineTransformationTestNGBase {
 
     private void printCube(AccountMasterCube actualCube) {
         for (String attr : actualCube.getStatistics().keySet()) {
-            if (!attr.equals("FeatureTermCellular")) {
+            if (!"FeatureTermCellular".equals(attr)) {
                 continue;
             }
             System.out.println("Attribute " + attr);

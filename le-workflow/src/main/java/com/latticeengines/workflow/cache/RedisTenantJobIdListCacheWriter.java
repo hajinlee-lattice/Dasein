@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -123,8 +123,8 @@ public class RedisTenantJobIdListCacheWriter implements TenantJobIdListCacheWrit
      */
     private String getKey(@NotNull Tenant tenant) {
         // only using pid for now
-        return StringUtils.collectionToDelimitedString(
-                Arrays.asList(CACHE_KEY_PREFIX, namespace, JOB_ID_LIST_KEY, tenant.getPid()), DELIMITER);
+        return StringUtils.join(Arrays.asList(CACHE_KEY_PREFIX, namespace, JOB_ID_LIST_KEY, tenant.getPid()),
+                DELIMITER);
     }
 
     private boolean containsIdField(Job job) {

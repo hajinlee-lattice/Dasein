@@ -23,10 +23,10 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.hadoop.conf.Configuration;
-import org.eclipse.jetty.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -350,7 +350,7 @@ public abstract class SegmentExportProcessor {
                 List<AttrConfig> renderedConfigList = customDisplayNameAttrs.get(business);
                 if (CollectionUtils.isNotEmpty(renderedConfigList)) {
                     renderedConfigList.forEach(config -> {
-                        if (StringUtil.isNotBlank(
+                        if (StringUtils.isNotBlank(
                                 config.getPropertyFinalValue(ColumnMetadataKey.DisplayName, String.class))) {
                             nameToDisplayNameMap.put(business.name() + SEPARATOR + config.getAttrName(),
                                     (String) (config.getProperty(ColumnMetadataKey.DisplayName).getCustomValue()));

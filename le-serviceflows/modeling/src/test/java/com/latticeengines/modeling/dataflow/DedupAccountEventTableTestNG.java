@@ -27,7 +27,7 @@ public class DedupAccountEventTableTestNG extends ServiceFlowsDataFlowFunctional
 
     @Override
     protected String getLastModifiedColumnName(String tableName) {
-        if (!tableName.equals("PublicDomain")) {
+        if (!"PublicDomain".equals(tableName)) {
             return "LastModifiedDate";
         }
         return null;

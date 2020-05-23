@@ -318,7 +318,7 @@ public class DataFileProviderServiceImpl implements DataFileProviderService {
         String eventColumn = getEventColumn(customer, summary.getEventTableName());
         Map<String, String> headerTransform = null;
         log.info("event column name = " + eventColumn);
-        if (!eventColumn.equals("Event")) {
+        if (!"Event".equals(eventColumn)) {
             headerTransform = new HashMap<>();
             headerTransform.put(eventColumn, "Event");
         }

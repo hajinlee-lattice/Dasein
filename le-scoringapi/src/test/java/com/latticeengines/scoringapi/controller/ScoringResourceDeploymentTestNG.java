@@ -55,8 +55,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         ResponseEntity<List<Model>> response = oAuth2RestTemplate.exchange(url, HttpMethod.GET, null,
                 new ParameterizedTypeReference<List<Model>>() {
                 });
-        List<Model> models = response.getBody();
-        return models;
+        return response.getBody();
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -373,7 +372,7 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
         Assert.assertTrue(singleRecordScoreTransformedRecord.size() > 0);
 
         for (String key : singleRecordScoreTransformedRecord.keySet()) {
-            if (skipMissingDUNSKey && key.equals("DUNS")) {
+            if (skipMissingDUNSKey && "DUNS".equals(key)) {
                 continue;
             }
             Assert.assertTrue(batchScoreTransformedRecord.containsKey(key), "Missing key:::" + key);

@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionException;
-import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;

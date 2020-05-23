@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,6 @@ import com.latticeengines.domain.exposed.cdl.activity.TimeLine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.TimeLineStoreUtils;
-
-import io.micrometer.core.instrument.util.StringUtils;
 
 @Service("timeLineService")
 public class TimeLineServiceImpl implements TimeLineService {

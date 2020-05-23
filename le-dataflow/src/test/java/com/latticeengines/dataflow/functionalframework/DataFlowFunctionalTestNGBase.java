@@ -20,7 +20,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -36,7 +35,7 @@ public class DataFlowFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         for (AbstractMap.SimpleEntry<String, String> e : copyEntries) {
-            for (String pattern : StringUtils.commaDelimitedListToStringArray(e.getKey())) {
+            for (String pattern : e.getKey().split(",")) {
                 for (Resource res : resolver.getResources(pattern)) {
                     Path destinationPath = getDestinationPath(e.getValue(), res);
                     FSDataOutputStream os = fs.create(destinationPath);

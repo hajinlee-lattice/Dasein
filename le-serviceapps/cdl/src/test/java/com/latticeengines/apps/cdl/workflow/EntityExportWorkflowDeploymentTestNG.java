@@ -255,7 +255,7 @@ public class EntityExportWorkflowDeploymentTestNG extends CDLWorkflowFrameworkDe
                     }
                     String decodedStr = record.get("Has Oracle Commerce");
                     if (StringUtils.isNotBlank(decodedStr)) {
-                        Assert.assertTrue(decodedStr.equals("Yes") || decodedStr.equals("No"), //
+                        Assert.assertTrue("Yes".equals(decodedStr) || "No".equals(decodedStr), //
                                 "Invalid decoded value " + decodedStr);
                         break; // only need to verify the first record
                     }

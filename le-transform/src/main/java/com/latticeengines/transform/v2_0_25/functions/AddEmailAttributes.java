@@ -96,7 +96,7 @@ public class AddEmailAttributes implements RealTimeTransform {
         String emailTrfColumn = (String) arguments.get("column2");
 
         if (attributeFunctions.containsKey(emailTrfColumn)) {
-            if (emailTrfColumn.equals("DS_Email_PrefixLength")) {
+            if ("DS_Email_PrefixLength".equals(emailTrfColumn)) {
                 String prefix = null;
                 if (email != null) {
                     int index = email.indexOf('@');
@@ -105,7 +105,7 @@ public class AddEmailAttributes implements RealTimeTransform {
                     prefix = email.substring(0, index);
                 }
                 return attributeFunctions.get(emailTrfColumn).execute(prefix);
-            } else if (emailTrfColumn.equals("DS_Domain_Length")) {
+            } else if ("DS_Domain_Length".equals(emailTrfColumn)) {
                 String domain = null;
                 if (email != null) {
                     int index = email.indexOf('@');

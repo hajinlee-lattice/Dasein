@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +50,6 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunSparkJob;
 import com.latticeengines.spark.exposed.job.AbstractSparkJob;
 import com.latticeengines.spark.exposed.job.cdl.TimeLineJob;
-
-import io.micrometer.core.instrument.util.StringUtils;
 
 @Component(GenerateTimeLine.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)

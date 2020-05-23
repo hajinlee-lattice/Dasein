@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.RedisConnectionFailureException;
@@ -23,7 +24,6 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.types.Expiration;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.util.StringUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -83,7 +83,7 @@ public abstract class CacheWriterImpl<T extends HasId<String>> implements CacheW
      */
     protected String getCacheKeyForIds(Tenant tenant) {
         // only using pid for now
-        return StringUtils.collectionToDelimitedString(
+        return StringUtils.join( //
                 Arrays.asList(getCacheKeyPrefix(), namespace, getIdListKey(), tenant.getPid()), DELIMITER);
     }
 
@@ -93,15 +93,13 @@ public abstract class CacheWriterImpl<T extends HasId<String>> implements CacheW
     @Override
     public String getCacheKeyForObject(String id) {
         Preconditions.checkNotNull(id);
-        return StringUtils.collectionToDelimitedString(Arrays.asList(getCacheKeyPrefix(), namespace, getObjectKey(), id)
-                , DELIMITER);
+        return StringUtils.join(Arrays.asList(getCacheKeyPrefix(), namespace, getObjectKey(), id), DELIMITER);
     }
 
     @Override
     public String getLockKeyForObject(Tenant tenant) {
-        return StringUtils.collectionToDelimitedString(Arrays.asList(getCacheKeyPrefix(), namespace,
-                getCacheLockKey(), tenant.getPid())
-                , DELIMITER);
+        return StringUtils.join(Arrays.asList(getCacheKeyPrefix(), namespace, getCacheLockKey(), tenant.getPid()),
+                DELIMITER);
     }
 
     protected void check(Tenant tenant) {

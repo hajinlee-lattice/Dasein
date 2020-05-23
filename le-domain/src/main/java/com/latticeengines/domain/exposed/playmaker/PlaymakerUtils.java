@@ -77,11 +77,11 @@ public final class PlaymakerUtils {
 
             if (sourceLogicalDataType.contains(PlaymakerConstants.VarChar)) {
                 type = "nvarchar";
-            } else if (sourceLogicalDataType.equals("double")) {
+            } else if ("double".equals(sourceLogicalDataType)) {
                 type = "decimal";
-            } else if (sourceLogicalDataType.equals("long")) {
+            } else if ("long".equals(sourceLogicalDataType)) {
                 type = "bigint";
-            } else if (sourceLogicalDataType.equals("boolean")) {
+            } else if ("boolean".equals(sourceLogicalDataType)) {
                 type = "bit";
             }
         } else {

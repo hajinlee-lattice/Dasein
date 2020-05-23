@@ -26,9 +26,10 @@ if [[ -n "$PROJECT" ]]; then
     pushd "./le-$PROJECT"
 fi
 
-mvn -T8 -q -Pcheckstyle-report -Dconfig_loc=${WSHOME}/le-parent/checkstyle -Dchecker=${CHECKER} validate \
-    && mvn -q -Pcheckstyle-report -Dconfig_loc=${WSHOME}/le-parent/checkstyle -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate \
-    && mvn -q -Pcheckstyle-report -Dconfig_loc=${WSHOME}/le-parent/checkstyle -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate
+mvn -T8 -q -Pcheckstyle-report -Dconfig_loc=${WSHOME}/le-parent/checkstyle -Dchecker=${CHECKER} validate
+echo "Aggregating reports ..."
+mvn -q -Pcheckstyle-report -Dconfig_loc=${WSHOME}/le-parent/checkstyle -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate
+# mvn -T4 -q -Pcheckstyle-report -Dconfig_loc=${WSHOME}/le-parent/checkstyle -Dchecker=${CHECKER} checkstyle:checkstyle-aggregate
 
 if [[ -n "${PROJECT}" ]]; then
     popd

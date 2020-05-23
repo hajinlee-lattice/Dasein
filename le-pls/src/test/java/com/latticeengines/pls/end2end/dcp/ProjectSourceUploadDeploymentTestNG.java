@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.fs.s3a.BasicAWSCredentialsProvider;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.util.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

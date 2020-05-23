@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.controller;
 
 import javax.inject.Inject;
 
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -81,9 +80,11 @@ public class DataFeedResource {
                                              @PathVariable String datafeedName,
                                              @PathVariable String initialDataFeedStatus,
                                              @RequestParam(required = false) Long executionId) {
-        if (StringUtils.isEmpty(executionId))
+        if (executionId == null) {
             return datafeedService.finishExecution(customerSpace, datafeedName, initialDataFeedStatus);
-        return datafeedService.finishExecution(customerSpace, datafeedName, initialDataFeedStatus, executionId);
+        } else {
+            return datafeedService.finishExecution(customerSpace, datafeedName, initialDataFeedStatus, executionId);
+        }
     }
 
     @PostMapping(value = "/{datafeedName}/status/{initialDataFeedStatus}/failexecution",
@@ -93,9 +94,11 @@ public class DataFeedResource {
     public DataFeedExecution failExecution(@PathVariable String customerSpace, @PathVariable String datafeedName,
                                            @PathVariable String initialDataFeedStatus,
                                            @RequestParam(required = false) Long executionId) {
-        if (StringUtils.isEmpty(executionId))
+        if (executionId == null) {
             return datafeedService.failExecution(customerSpace, datafeedName, initialDataFeedStatus);
-        return datafeedService.failExecution(customerSpace, datafeedName, initialDataFeedStatus, executionId);
+        } else {
+            return datafeedService.failExecution(customerSpace, datafeedName, initialDataFeedStatus, executionId);
+        }
     }
 
     @PostMapping(value = "/{datafeedName}/execution/workflow/{workflowId}", headers = "Accept=application/json")

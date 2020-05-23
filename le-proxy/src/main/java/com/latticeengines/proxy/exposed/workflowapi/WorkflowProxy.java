@@ -401,7 +401,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
     String parseOptionalParameter(String baseUrl, String parameterName, String... parameterValues) {
         if (parameterValues != null && parameterValues.length > 0) {
             String var = parameterValues[0];
-            if (parameterName.equals("customerSpace")) {
+            if ("customerSpace".equals(parameterName)) {
                 return String.format(baseUrl + "?%s=%s", parameterName, shortenCustomerSpace(var));
             } else {
                 return String.format(baseUrl + "?%s=%s", parameterName, var);

@@ -21,7 +21,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -156,7 +155,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         int idx = 0;
         for (Object res : output.getResult().get(0).getOutput()) {
             String field = output.getOutputFields().get(idx++);
-            if (!StringUtils.isEmpty(res)) {
+            if (res != null) {
                 log.info(field + " = " + res + ", ");
             }
         }

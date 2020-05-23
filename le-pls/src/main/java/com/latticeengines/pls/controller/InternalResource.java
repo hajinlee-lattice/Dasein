@@ -494,7 +494,7 @@ public class InternalResource extends InternalResourceBase {
                     ModelSummary modelSummary = modelSummaryProxy.getByModelId(modelId);
                     if (modelSummary != null) {
                         String modelName = modelSummary.getDisplayName();
-                        if (result.equals("COMPLETED")) {
+                        if ("COMPLETED".equals(result)) {
                             if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
                                     || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
                                 emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName,
@@ -503,7 +503,7 @@ public class InternalResource extends InternalResourceBase {
                                 emailService.sendPlsScoreCompletionEmail(user, appPublicUrl, tenantName, modelName,
                                         false);
                             }
-                        } else if (result.equals("FAILED")) {
+                        } else if ("FAILED".equals(result)) {
                             if (user.getAccessLevel().equals(AccessLevel.INTERNAL_ADMIN.name())
                                     || user.getAccessLevel().equals(AccessLevel.INTERNAL_USER.name())) {
                                 emailService.sendPlsScoreErrorEmail(user, appPublicUrl, tenantName, modelName, true);
@@ -533,10 +533,10 @@ public class InternalResource extends InternalResourceBase {
                     ModelSummary modelSummary = modelSummaryProxy.getByModelId(modelId);
                     if (modelSummary != null) {
                         String modelName = modelSummary.getDisplayName();
-                        if (result.equals("COMPLETED")) {
+                        if ("COMPLETED".equals(result)) {
                             emailService.sendPlsEnrichInternalAttributeCompletionEmail(user, appPublicUrl, tenantName,
                                     modelName, emailInfo.getExtraInfoList());
-                        } else if (result.equals("FAILED")) {
+                        } else if ("FAILED".equals(result)) {
                             emailService.sendPlsEnrichInternalAttributeErrorEmail(user, appPublicUrl, tenantName,
                                     modelName, emailInfo.getExtraInfoList());
                         }
@@ -556,11 +556,11 @@ public class InternalResource extends InternalResourceBase {
         Tenant tenant = tenantService.findByTenantId(tenantId);
         boolean onlyCurrentUser = tenant.getNotificationType().equals(TenantEmailNotificationType.SINGLE_USER);
         for (User user : users) {
-            if (result.equals("COMPLETED") && tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
+            if ("COMPLETED".equals(result) && tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.INFO) >= 0) {
                 if ((!onlyCurrentUser && AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) || user.getEmail().equals(emailInfo.getUserId())) {
                     emailService.sendCDLProcessAnalyzeCompletionEmail(user, tenant, appPublicUrl);
                 }
-            } else if (result.equals("FAILED") && tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
+            } else if ("FAILED".equals(result) && tenant.getNotificationLevel().compareTo(TenantEmailNotificationLevel.ERROR) >= 0) {
                 if ((!onlyCurrentUser && AccessLevel.EXTERNAL_ADMIN.name().equals(user.getAccessLevel())) || user.getEmail().equals(emailInfo.getUserId())) {
                     emailService.sendCDLProcessAnalyzeErrorEmail(user, tenant, appPublicUrl);
                 }
@@ -585,13 +585,15 @@ public class InternalResource extends InternalResourceBase {
                             exportID);
                     log.info(String.format("URL=%s, result=%s", url, result));
                     switch (result) {
-                    case "READY":
-                        emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
-                                exportID, exportType);
-                        break;
-                    case "GENERATING":
-                        emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
-                        break;
+                        case "READY":
+                            emailService.sendPlsExportOrphanRecordsSuccessEmail(user, tenantName, appPublicUrl, url,
+                                    exportID, exportType);
+                            break;
+                        case "GENERATING":
+                            emailService.sendPlsExportOrphanRecordsRunningEmail(user, exportID, exportType);
+                            break;
+                        default:
+                            log.warn("Unknown result {}", result);
                     }
                 }
             }
@@ -628,6 +630,8 @@ public class InternalResource extends InternalResourceBase {
                         case "STARTED":
                             emailService.sendPlsExportSegmentRunningEmail(user, exportID);
                             break;
+                        default:
+                            log.warn("Unknown result {}", result);
                     }
                 }
             }

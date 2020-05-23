@@ -119,10 +119,10 @@ public class DomainValidationServiceTestNG
             GenericRecord record = records.next();
             String domain = record.get("Domain").toString();
             Boolean isValidDomain = (Boolean) record.get("IsValidDomain");
-            Assert.assertTrue((domain.equals("baidu.com") && isValidDomain == null)
-                           || (domain.equals("google.com") && isValidDomain == Boolean.TRUE)
-                           || (domain.equals("yahoo.com") && isValidDomain == null)
-                           || (domain.equals("abcdefghijklmn.com") && isValidDomain == Boolean.FALSE));
+            Assert.assertTrue(("baidu.com".equals(domain) && isValidDomain == null)
+                           || ("google.com".equals(domain) && isValidDomain == Boolean.TRUE)
+                           || ("yahoo.com".equals(domain) && isValidDomain == null)
+                           || ("abcdefghijklmn.com".equals(domain) && isValidDomain == Boolean.FALSE));
             rowNum++;
         }
         Assert.assertEquals(rowNum, 4);

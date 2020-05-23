@@ -92,11 +92,11 @@ public class ScoreAggregateTestNG extends SparkJobFunctionalTestNGBase {
         AtomicInteger count = new AtomicInteger();
         verifyAndReadTarget(tgt).forEachRemaining(record -> {
             count.incrementAndGet();
-            String modelId = (String) record.get(MODEL_ID).toString();
-            if (modelId.equals("Model1")) {
-                Assert.assertEquals((Double) record.get(InterfaceName.AverageScore.name()), 150D);
+            String modelId = record.get(MODEL_ID).toString();
+            if ("Model1".equals(modelId)) {
+                Assert.assertEquals(record.get(InterfaceName.AverageScore.name()), 150D);
             } else {
-                Assert.assertEquals((Double) record.get(InterfaceName.AverageScore.name()), 7000 / 3D);
+                Assert.assertEquals(record.get(InterfaceName.AverageScore.name()), 7000 / 3D);
             }
 
         });

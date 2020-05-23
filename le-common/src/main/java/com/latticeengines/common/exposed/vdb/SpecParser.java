@@ -126,15 +126,15 @@ public class SpecParser {
     }
 
     public static boolean isLeftParenthesis(String token) {
-        return token.equals("(");
+        return "(".equals(token);
     }
 
     public static boolean isRightParenthesis(String token) {
-        return token.equals(")");
+        return ")".equals(token);
     }
 
     public static boolean isComma(String token) {
-        return token.equals(",");
+        return ",".equals(token);
     }
 
     public static boolean isText(String token) {

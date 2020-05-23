@@ -4,7 +4,10 @@ import argparse
 import operator
 import os
 import re
+import logging
 import xml.dom.minidom as xml
+
+LOGGER = logging.getLogger(__name__)
 
 ROOT_PROJECT_PATH_ENV = 'WSHOME'
 TARGET_DIR = 'target'
@@ -171,4 +174,8 @@ def exportReport(logReportToConsole, outputFilePath, report):
 
 
 if __name__ == '__main__':
+    fmt = '%(asctime)s [%(threadName)s] %(levelname)s %(lineno)d: - %(message)s'
+    dfmt = '%Y-%m-%d %H:%M:%S'
+    logging.basicConfig(format=fmt, datefmt=dfmt, level=logging.INFO)
+
     main()

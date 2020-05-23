@@ -333,10 +333,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                             .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
 
                     if (entity == BusinessEntity.Product) {
-                        sb.append(reportConstant.equals("REPLACE")
+                        sb.append("REPLACE".equals(reportConstant)
                                 ? consolidateSummaryNode.get(ReportConstants.PRODUCT_HIERARCHY).toString() : "NA");
                         sb.append(columnDelimiter);
-                        sb.append(reportConstant.equals("REPLACE")
+                        sb.append("REPLACE".equals(reportConstant)
                                 ? consolidateSummaryNode.get(ReportConstants.PRODUCT_BUNDLE).toString() : "NA");
                     } else {
                         sb.append(consolidateSummaryNode.get(reportConstant) != null

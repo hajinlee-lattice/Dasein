@@ -61,13 +61,13 @@ public class MetadataServiceImplTestNG extends SqoopFunctionalTestNGBase {
             System.out.println("Field " + field.getName() + " with avro type " + avroField.schema().toString()
                     + " and sql type = " + field.getSqlType());
 
-            if (fieldName.equals("Ext_LEAccount_PD_FundingDateUpdated")) {
+            if ("Ext_LEAccount_PD_FundingDateUpdated".equals(fieldName)) {
                 assertEquals(field.getSqlType(), Types.TIMESTAMP);
             }
-            if (fieldName.equals("Ext_LEAccount_PD_Timestamp")) {
+            if ("Ext_LEAccount_PD_Timestamp".equals(fieldName)) {
                 assertEquals(field.getSqlType(), Types.BINARY);
             }
-            if (fieldName.equals("Ext_LEAccount_PD_Time")) {
+            if ("Ext_LEAccount_PD_Time".equals(fieldName)) {
                 assertEquals(field.getSqlType(), Types.TIME);
             }
         }

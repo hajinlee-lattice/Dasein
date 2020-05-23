@@ -27,52 +27,52 @@ public class StdVisidbDsIndustryGroup implements RealTimeTransform {
         String column = (String) arguments.get("column");
         String s = column == null ? null : String.valueOf(record.get(column));
 
-        if (s.equals("null"))
+        if ("null".equals(s))
             return null;
 
         return calculateStdVisidbDsIndustryGroup(s);
     }
 
     public static String calculateStdVisidbDsIndustryGroup(String industryGroup) {
-        if (StringUtils.isEmpty(industryGroup))
-            return null;
-
-        industryGroup = industryGroup.trim().toLowerCase();
-
-        if (Pattern.matches("(.*?\\b)credit(.*?\\b)|(.*?\\b)financial(.*?\\b)|(.*?\\b)bank(.*?\\b)", industryGroup))
-            return "Finance";
-        else if (Pattern.matches("(.*)tech(.*)|(.*?\\b)tele(.*?\\b)", industryGroup))
-            return "Tech";
-        else if (Pattern.matches("(.*?\\b)health(.*?\\b)|(.*?\\b)medical(.*?\\b)|(.*?\\b)pharm(.*?\\b)", industryGroup))
-            return "Health Care";
-        else if (Pattern.matches("(.*?\\b)real(.*?\\b)|(.*?\\b)property(.*?\\b)", industryGroup))
-            return "Real Estate/Property Mgmt";
-        else if (Pattern.matches("(.*?\\b)staff(.*?\\b)|(.*?\\b)hr(.*?\\b)", industryGroup))
-            return "HR/Staffing";
-        else if (Pattern.matches("(.*?\\b)services(.*?\\b)|(.*?\\b)consulting(.*?\\b)", industryGroup))
-            return "Business Service";
-        else if (Pattern.matches("(.*?\\b)education(.*?\\b)", industryGroup))
-            return "Education";
-        else if (Pattern.matches("(.*?\\b)equipment(.*?\\b)", industryGroup))
-            return "Equipment";
-        else if (Pattern.matches("(.*?\\b)util(.*?\\b)", industryGroup))
-            return "Utilities";
-        else if (Pattern.matches("(.*?\\b)retail(.*?\\b)", industryGroup))
-            return "Retail";
-        else if (Pattern.matches("(.*?\\b)transport(.*?\\b)", industryGroup))
-            return "Transportation";
-        else if (Pattern.matches("(.*?\\b)account(.*?\\b)|(.*?\\b)legal(.*?\\b)", industryGroup))
-            return "Accounting/Legal";
-        else if (Pattern.matches("(.*?\\b)construction(.*?\\b)", industryGroup))
-            return "Construction";
-        else if (Pattern.matches("(.*?\\b)profit(.*?\\b)", industryGroup))
-            return "Non-Profit";
-        else if (Pattern.matches("(.*?\\b)insurance(.*?\\b)", industryGroup))
-            return "Insurance";
-        else if (Pattern.matches("(.*?\\b)manufact(.*?\\b)", industryGroup))
-            return "Manufacturing";
-
-        return "Other";
+        String stdGroup = null;
+        if (StringUtils.isNotBlank(industryGroup)) {
+            industryGroup = industryGroup.trim().toLowerCase();
+            if (Pattern.matches("(.*?\\b)credit(.*?\\b)|(.*?\\b)financial(.*?\\b)|(.*?\\b)bank(.*?\\b)", industryGroup))
+                stdGroup =  "Finance";
+            else if (Pattern.matches("(.*)tech(.*)|(.*?\\b)tele(.*?\\b)", industryGroup))
+                stdGroup =  "Tech";
+            else if (Pattern.matches("(.*?\\b)health(.*?\\b)|(.*?\\b)medical(.*?\\b)|(.*?\\b)pharm(.*?\\b)", industryGroup))
+                stdGroup =  "Health Care";
+            else if (Pattern.matches("(.*?\\b)real(.*?\\b)|(.*?\\b)property(.*?\\b)", industryGroup))
+                stdGroup =  "Real Estate/Property Mgmt";
+            else if (Pattern.matches("(.*?\\b)staff(.*?\\b)|(.*?\\b)hr(.*?\\b)", industryGroup))
+                stdGroup =  "HR/Staffing";
+            else if (Pattern.matches("(.*?\\b)services(.*?\\b)|(.*?\\b)consulting(.*?\\b)", industryGroup))
+                stdGroup =  "Business Service";
+            else if (Pattern.matches("(.*?\\b)education(.*?\\b)", industryGroup))
+                stdGroup =  "Education";
+            else if (Pattern.matches("(.*?\\b)equipment(.*?\\b)", industryGroup))
+                stdGroup =  "Equipment";
+            else if (Pattern.matches("(.*?\\b)util(.*?\\b)", industryGroup))
+                stdGroup =  "Utilities";
+            else if (Pattern.matches("(.*?\\b)retail(.*?\\b)", industryGroup))
+                stdGroup =  "Retail";
+            else if (Pattern.matches("(.*?\\b)transport(.*?\\b)", industryGroup))
+                stdGroup =  "Transportation";
+            else if (Pattern.matches("(.*?\\b)account(.*?\\b)|(.*?\\b)legal(.*?\\b)", industryGroup))
+                stdGroup =  "Accounting/Legal";
+            else if (Pattern.matches("(.*?\\b)construction(.*?\\b)", industryGroup))
+                stdGroup =  "Construction";
+            else if (Pattern.matches("(.*?\\b)profit(.*?\\b)", industryGroup))
+                stdGroup =  "Non-Profit";
+            else if (Pattern.matches("(.*?\\b)insurance(.*?\\b)", industryGroup))
+                stdGroup =  "Insurance";
+            else if (Pattern.matches("(.*?\\b)manufact(.*?\\b)", industryGroup))
+                stdGroup =  "Manufacturing";
+            else
+                stdGroup =  "Other";
+        }
+        return stdGroup;
     }
 
     @Override

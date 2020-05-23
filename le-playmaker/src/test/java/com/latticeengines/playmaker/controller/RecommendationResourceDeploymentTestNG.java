@@ -140,7 +140,7 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         @SuppressWarnings("unchecked")
         List<Map<String, String>> records = (List<Map<String, String>>) result.get("records");
         Assert.assertNotNull(records);
-        Assert.assertEquals(new Integer(records.size()), totalCount);
+        Assert.assertEquals(Integer.valueOf(records.size()), totalCount);
         List<String> impFields = Arrays.asList("ID", "SfdcAccountID", "LEAccountExternalID", "LastModificationDate",
                 "RowNum");
         List<Class<?>> impFieldTypes = Arrays.asList(Long.class, String.class, String.class, Long.class, Long.class);
@@ -156,8 +156,8 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
                 if (type == Long.class) {
                     Object valObj = rec.get(field);
                     Long val = Long.parseLong(valObj.toString());
-                    if (field.equals("RowNum")) {
-                        Assert.assertEquals(val, new Long((rowCount + offset)));
+                    if ("RowNum".equals(field)) {
+                        Assert.assertEquals(val, Long.valueOf(rowCount + offset));
                     }
                 }
             }

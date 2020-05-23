@@ -44,8 +44,8 @@ public final class ModelingHdfsUtils {
             if (file == null) {
                 return false;
             }
-            String name = file.getPath().getName().toString();
-            return name.equals("modelsummary.json");
+            String name = file.getPath().getName();
+            return "modelsummary.json".equals(name);
         });
         if (paths.size() == 0) {
             throw new LedpException(LedpCode.LEDP_00002);

@@ -6,9 +6,9 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.CollectionUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.scheduling.SimulationContext;
