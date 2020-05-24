@@ -256,6 +256,8 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             // matchInput.setOperationalMode(OperationalMode.PRIME_MATCH);
             matchInput.setTargetEntity(BusinessEntity.PrimeAccount.name());
         }
+        // always use direct plus
+        matchInput.setUseDirectPlus(true);
     }
 
     private AvroInputBuffer inputBuffer(Table preMatchEventTable) {

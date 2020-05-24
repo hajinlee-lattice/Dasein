@@ -251,11 +251,8 @@ public class CheckpointAutoService extends CheckpointServiceBase {
             // in "Configuration" or "Workflow". These can be regenerated when the workflow is restarted from the
             // checkpoint.
             Set<Map.Entry<String, Object>> executionContextMap = executionContext.entrySet();
-            for (Map.Entry<String, Object> mapEntry : executionContextMap) {
-                if (mapEntry.getKey().endsWith("Configuration") || mapEntry.getKey().endsWith("Workflow")) {
-                    executionContextMap.remove(mapEntry);
-                }
-            }
+            executionContextMap.removeIf(mapEntry -> //
+                    mapEntry.getKey().endsWith("Configuration") || mapEntry.getKey().endsWith("Workflow"));
             String jsonFile = String.format(EXECUTION_CONTEXT_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
             om.writeValue(new File(jsonFile), executionContextMap);
             log.info("Save Workflow Execution Context to {}.", jsonFile);
@@ -264,11 +261,11 @@ public class CheckpointAutoService extends CheckpointServiceBase {
 
     private void saveDataFeedTaskIfExists(String checkpointName, List<DataFeedTask> dataFeedTasks) throws IOException {
         List<Table> templateTables =
-                new ArrayList<>(dataFeedTasks.stream().map(dataFeedTask -> {
+                dataFeedTasks.stream().map(dataFeedTask -> {
                     Table templateTable = dataFeedTask.getImportTemplate();
                     templateTable.setName(dataFeedTask.getFeedType());
                     return templateTable;
-                }).collect(Collectors.toList()));
+                }).collect(Collectors.toList());
         saveTemplateTableIfExists(checkpointName, templateTables);
         String jsonFile = String.format(DATAFEEDTASK_JSONFILE_FORMAT, LOCAL_CHECKPOINT_DIR, checkpointName);
         om.writeValue(new File(jsonFile), dataFeedTasks);
