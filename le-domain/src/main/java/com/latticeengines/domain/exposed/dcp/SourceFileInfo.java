@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class SourceFileInfo {
 
-    @JsonProperty("fileImportId")
+    @JsonProperty("file_import_id")
     private String fileImportId;
 
     @JsonProperty("display_name")

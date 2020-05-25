@@ -57,12 +57,12 @@ public class DCPSourceImportWorkflowSubmitter extends WorkflowSubmitter {
 
     private UploadConfig generateUploadConfig(CustomerSpace customerSpace, DCPImportRequest importRequest) {
         UploadConfig uploadConfig = new UploadConfig();
-        if (StringUtils.isNotEmpty(importRequest.getSourceFileName())) {
+        if (StringUtils.isNotEmpty(importRequest.getFileImportId())) {
             SourceFile sourceFile = sourceFileProxy.findByName(customerSpace.toString(),
-                    importRequest.getSourceFileName());
+                    importRequest.getFileImportId());
             if (sourceFile == null || StringUtils.isEmpty(sourceFile.getPath())) {
                 throw new IllegalArgumentException(String.format("Not a valid source file %s to import!",
-                        importRequest.getSourceFileName()));
+                        importRequest.getFileImportId()));
             }
             uploadConfig.setSourceOnHdfs(Boolean.TRUE);
             uploadConfig.setDropFilePath(sourceFile.getPath());

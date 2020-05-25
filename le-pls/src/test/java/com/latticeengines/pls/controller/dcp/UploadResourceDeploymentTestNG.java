@@ -91,7 +91,7 @@ public class UploadResourceDeploymentTestNG extends DCPDeploymentTestNGBase {
         DCPImportRequest dcpImportRequest = new DCPImportRequest();
         dcpImportRequest.setProjectId(projectDetails.getProjectId());
         dcpImportRequest.setSourceId(source.getSourceId());
-        dcpImportRequest.setSourceFileName(sourceFileInfo.getFileImportId());
+        dcpImportRequest.setFileImportId(sourceFileInfo.getFileImportId());
         UploadDetails uploadDetails = testUploadProxy.startImport(dcpImportRequest);
 
         Assert.assertNotNull(uploadDetails);
