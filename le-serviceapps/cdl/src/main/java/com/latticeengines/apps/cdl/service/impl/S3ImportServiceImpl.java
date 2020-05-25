@@ -29,8 +29,8 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.dcp.DCPProxy;
 import com.latticeengines.proxy.exposed.dcp.SourceProxy;
+import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 
 @Component("s3ImportService")
 public class S3ImportServiceImpl implements S3ImportService {
@@ -207,8 +207,8 @@ public class S3ImportServiceImpl implements S3ImportService {
         request.setSourceId(sourceId);
         request.setS3FileKey(key);
         try {
-            DCPProxy dcpProxy = new DCPProxy(hostUrl);
-            ApplicationId applicationId = dcpProxy.startImport(tenantId, request);
+            UploadProxy uploadProxy = new UploadProxy(hostUrl);
+            ApplicationId applicationId = uploadProxy.startImport(tenantId, request);
             log.info("Start DCP file import by applicationId : " + applicationId.toString());
             return true;
         } catch (Exception e) {

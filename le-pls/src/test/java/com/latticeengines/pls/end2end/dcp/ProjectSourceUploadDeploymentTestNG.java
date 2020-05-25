@@ -51,7 +51,7 @@ import com.latticeengines.pls.service.dcp.ProjectService;
 import com.latticeengines.pls.service.dcp.SourceService;
 import com.latticeengines.pls.service.dcp.UploadService;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
-import com.latticeengines.proxy.exposed.dcp.DCPProxy;
+import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 
 public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase {
 
@@ -78,7 +78,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
     private DropBoxProxy dropBoxProxy;
 
     @Inject
-    private DCPProxy dcpProxy;
+    private UploadProxy uploadProxy;
 
     @Inject
     private UploadService uploadService;
@@ -136,7 +136,7 @@ public class ProjectSourceUploadDeploymentTestNG extends DCPDeploymentTestNGBase
         request.setProjectId(details.getProjectId());
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
-        ApplicationId applicationId = dcpProxy.startImport(customerSpace, request);
+        ApplicationId applicationId = uploadProxy.startImport(customerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         List<UploadDetails> uploadDetails = uploadService.getAllBySourceId(source.getSourceId(), null);

@@ -45,7 +45,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldDefinitionsRecord;
 import com.latticeengines.domain.exposed.util.UploadS3PathBuilderUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.DropBoxProxy;
-import com.latticeengines.proxy.exposed.dcp.DCPProxy;
+import com.latticeengines.proxy.exposed.dcp.UploadProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -60,7 +60,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
     private DropBoxProxy dropBoxProxy;
 
     @Inject
-    private DCPProxy dcpProxy;
+    private UploadProxy uploadProxy;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -92,7 +92,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         request.setProjectId(projectDetails.getProjectId());
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(s3FileKey);
-        ApplicationId applicationId = dcpProxy.startImport(mainCustomerSpace, request);
+        ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
 
@@ -120,7 +120,7 @@ public class DCPImportWorkflowDeploymentTestNG extends DCPDeploymentTestNGBase {
         request.setProjectId(projectDetails.getProjectId());
         request.setSourceId(source.getSourceId());
         request.setS3FileKey(errorFileKey);
-        ApplicationId applicationId = dcpProxy.startImport(mainCustomerSpace, request);
+        ApplicationId applicationId = uploadProxy.startImport(mainCustomerSpace, request);
         JobStatus completedStatus = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(completedStatus, JobStatus.FAILED);
         List<UploadDetails> uploadList = uploadProxy.getUploads(mainCustomerSpace, source.getSourceId(), null);
