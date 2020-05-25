@@ -409,7 +409,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         if (CollectionUtils.isNotEmpty(canRunRetryJobSet)) {
             for (String tenantId : canRunRetryJobSet) {
                 try {
-                    if (!dryRun && retryValidation(tenantId)) {
+                    if (!dryRun) {
                         ApplicationId retryAppId = cdlProxy.restartProcessAnalyze(tenantId, Boolean.TRUE);
                         logScheduledPA(schedulerName, tenantId, retryAppId, true, result);
                         if (retryAppId != null) {
@@ -844,50 +844,4 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    /**
-     * Don't retry if last PA failed due to user error
-     * will update retryCount in table DataFeedExecution
-     */
-    private boolean retryValidation(String tenantId) {
-        try {
-            DataFeedExecution execution = getLastFailedPAExecution(tenantId);
-            if (execution.getWorkflowId() == null) {
-                execution.setRetryCount(execution.getRetryCount() + 1);
-                dataFeedExecutionEntityMgr.updateRetryCount(execution);
-                log.warn("cannot find workflowId, tenant {} cannot be retry.", tenantId);
-                return false;
-            }
-            Job job = getFailedPAJob(execution, tenantId);
-            if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
-                execution.setRetryCount(execution.getRetryCount() + 1);
-                dataFeedExecutionEntityMgr.updateRetryCount(execution);
-                log.warn("due to user error, tenant {} cannot be retry.", tenantId);
-                return false;
-            }
-            return true;
-        } catch (Exception e) {
-            log.error("cannot retry this tenant {}", tenantId, e);
-            return false;
-        }
-    }
-
-    private DataFeedExecution getLastFailedPAExecution(String tenantId) {
-        DataFeed dataFeed = dataFeedService.getDefaultDataFeed(tenantId);
-        if (dataFeed == null) {
-            throw new NullPointerException("can not find datafeed in tenant " + tenantId);
-        }
-        DataFeedExecution execution;
-        execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(dataFeed,
-                DataFeedExecutionJobType.PA);
-        return execution;
-    }
-
-    private Job getFailedPAJob(DataFeedExecution execution, String tenantId) {
-
-        Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), tenantId);
-        if (job == null || !PA_JOB_TYPE.equalsIgnoreCase(job.getJobType()) || job.getJobStatus() != JobStatus.FAILED) {
-            throw new IllegalArgumentException("the last pa job isn't failed in tenant " + tenantId);
-        }
-        return job;
-    }
 }

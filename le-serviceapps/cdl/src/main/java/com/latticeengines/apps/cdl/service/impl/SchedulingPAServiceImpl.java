@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -70,8 +71,11 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.TenantStatus;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobType;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.metadata.entitymgr.MigrationTrackEntityMgr;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("SchedulingPAService")
 public class SchedulingPAServiceImpl implements SchedulingPAService {
@@ -82,6 +86,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private static final String TENANT_ACTIVITY_LIST = "TENANT_ACTIVITY_LIST";
     private static final String SCHEDULING_GROUP_SUFFIX = "_scheduling";
     private static final String DEFAULT_SCHEDULING_GROUP = "Default";
+    private static final String PA_JOB_TYPE = "processAnalyzeWorkflow";
+    private static final String USER_ERROR_CATEGORY = "User Error";
 
     private static ObjectMapper om = new ObjectMapper();
 
@@ -113,6 +119,9 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
 
     @Inject
     private RedisTemplate<String, Object> redisTemplate;
@@ -151,6 +160,8 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
     private int dataCloudRefreshMaxFailCount;
 
     private TimeClock schedulingPATimeClock = new SchedulingPATimeClock();
+
+    private List<Long> jobQueryTime = new ArrayList<>();
 
     @Override
     public Map<String, Object> setSystemStatus(@NotNull String schedulerName) {
@@ -247,9 +258,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     execution = dataFeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(simpleDataFeed,
                             DataFeedExecutionJobType.PA);
                 } catch (Exception e) {
+                    log.warn("cannot find execution, dataFeedPid is {}, tenantId is {}.", simpleDataFeed.getPid(),
+                            tenantId);
                     execution = null;
                 }
-                tenantActivity.setRetry(retryProcessAnalyze(execution, tenantId));
+                tenantActivity.setRetry(retryValidation(execution, tenantId));
                 if (execution != null && execution.getUpdated() != null) {
                     tenantActivity.setLastFinishTime(execution.getUpdated().getTime());
                 }
@@ -290,6 +303,11 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         // print all for migration tenants, shouldn't be too many at the same time
         log.info("Number of skipped test tenants = {}. Skipped migration tenants = {}", skippedTestTenants.size(),
                 skippedMigrationTenants);
+
+        if (CollectionUtils.isNotEmpty(jobQueryTime)) {
+            long totalQueryTime = jobQueryTime.stream().mapToLong(Long::longValue).sum();
+            log.info("query need retry workflowJob spend {} ms.", totalQueryTime);
+        }
 
         int canRunJobCount = concurrentProcessAnalyzeJobs - runningTotalCount;
         int canRunScheduleNowJobCount = maxScheduleNowJobCount - runningScheduleNowCount;
@@ -373,7 +391,7 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
                     DataFeedExecutionJobType.PA);
         }
         return new SchedulingStatus(customerSpace, schedulerEnabled, feed, execution,
-                retryProcessAnalyze(execution, customerSpace));
+                retryValidation(execution, customerSpace));
     }
 
     private boolean isLarge(@NotNull String tenantId, @NotNull Set<String> largeTenantExemptionList,
@@ -400,16 +418,62 @@ public class SchedulingPAServiceImpl implements SchedulingPAService {
         return detail.getTransactionCount() != null && detail.getTransactionCount() > largeTransactionCountLimit;
     }
 
-    private boolean retryProcessAnalyze(DataFeedExecution execution, String tenantId) {
-        if ((execution != null) && (DataFeedExecution.Status.Failed.equals(execution.getStatus()))
-                && execution.getUpdated() != null && checkRetryPendingTime(execution.getUpdated().getTime())) {
-            if (!reachRetryLimit(CDLJobType.PROCESSANALYZE, execution.getRetryCount())) {
-                return true;
-            } else {
-                log.debug("Tenant {} exceeds retry limit and skip failed exeuction", tenantId);
+    /**
+     * Don't retry if last PA failed due to user error or job was canceled
+     * will update retryCount in table DataFeedExecution
+     */
+    private boolean retryValidation(DataFeedExecution execution, String tenantId) {
+        try {
+            if (execution == null || !DataFeedExecution.Status.Failed.equals(execution.getStatus())
+                    || execution.getUpdated() == null || !checkRetryPendingTime(execution.getUpdated().getTime())) {
+                log.warn("execution is invalid to retry PA.");
+                return false;
             }
+
+            if (reachRetryLimit(CDLJobType.PROCESSANALYZE, execution.getRetryCount())) {
+                log.debug("Tenant {} exceeds retry limit and skip failed exeuction",
+                        tenantId);
+                return false;
+            }
+
+            if (execution.getWorkflowId() == null) {
+                log.warn("cannot find workflowId, tenant {} cannot be retry.", tenantId);
+                return false;
+            }
+            Job job = getFailedPAJob(execution, tenantId);
+            if (USER_ERROR_CATEGORY.equalsIgnoreCase(job.getErrorCategory())) {
+                updateRetryCount(execution);
+                log.warn("due to user error, tenant {} cannot be retry.", tenantId);
+                return false;
+            }
+            return true;
+        } catch (IllegalArgumentException e) {
+            updateRetryCount(execution);
+            log.error("cannot retry this tenant {}", tenantId, e);
+            return false;
+        } catch (Exception e) {
+            log.error("cannot retry this tenant {}", tenantId, e);
+            return false;
         }
-        return false;
+    }
+
+    private void updateRetryCount(DataFeedExecution execution) {
+        if (execution != null) {
+            execution.setRetryCount(processAnalyzeJobRetryCount);
+            dataFeedExecutionEntityMgr.updateRetryCount(execution);
+        }
+    }
+
+    private Job getFailedPAJob(DataFeedExecution execution, String tenantId) {
+        long beforeQuery = System.currentTimeMillis();
+        Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), tenantId);
+        long queryTime = System.currentTimeMillis() - beforeQuery;
+        jobQueryTime.add(queryTime);
+        log.info("query workflow {} need {} ms.", execution.getWorkflowId(), queryTime);
+        if (job == null || !PA_JOB_TYPE.equalsIgnoreCase(job.getJobType()) || job.getJobStatus() != JobStatus.FAILED) {
+            throw new IllegalArgumentException("the last pa job isn't failed in tenant " + tenantId);
+        }
+        return job;
     }
 
     private boolean reachRetryLimit(CDLJobType cdlJobType, int retryCount) {
