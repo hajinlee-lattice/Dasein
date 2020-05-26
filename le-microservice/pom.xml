@@ -78,10 +78,8 @@
         <module>datacloudapi</module>
         <module>scoring</module>
         <module>workflowapi</module>
-        <module>dellebi</module>
         <module>quartz</module>
         <module>modelquality</module>
-        <module>sqoop</module>
         <module>objectapi</module>
         <module>cdl</module>
         <module>lp</module>

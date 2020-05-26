@@ -60,10 +60,6 @@
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
-            <artifactId>le-sqoop</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
             <artifactId>le-quartzclient</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -91,12 +87,6 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-datafabric</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.latticeengines</groupId>
-            <artifactId>le-testframework</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.argparse4j</groupId>

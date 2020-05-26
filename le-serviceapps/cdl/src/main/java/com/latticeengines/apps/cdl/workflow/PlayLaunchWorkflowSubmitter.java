@@ -41,6 +41,7 @@ public class PlayLaunchWorkflowSubmitter extends WorkflowSubmitter {
     private LookupIdMappingService lookupIdMappingService;
 
     public ApplicationId submit(PlayLaunch playLaunch) {
+        log.error("DEPRECATED!!! Should use spark based campaign launch.");
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "playLaunchWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.PLAY_NAME, playLaunch.getPlay().getName());
