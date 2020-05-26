@@ -107,6 +107,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         if (entityMatchEnabled) {
             log.info("Entity match is enabled for transaction update");
         }
+        log.info("IsTransactionRebuilt for CustomerAccountId = {}", isTransactionRebuilt());
     }
 
     @Override
@@ -255,6 +256,13 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         List<String> groupByFields = new ArrayList<>();
+        /*-
+         * only add CustomerAccountId for legacy tenant that hasn't been rebuilt
+         * TODO remove after all tenants rebuilt
+         */
+        if (entityMatchEnabled && !isTransactionRebuilt()) {
+            groupByFields.add(InterfaceName.CustomerAccountId.name());
+        }
         groupByFields.addAll(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
@@ -295,6 +303,13 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
                 InterfaceName.TransactionCount.name(), InterfaceName.TotalQuantity.name()));
         List<String> groupByFields = new ArrayList<>();
+        /*-
+         * only add CustomerAccountId for legacy tenant that hasn't been rebuilt
+         * TODO remove after all tenants rebuilt
+         */
+        if (entityMatchEnabled && !isTransactionRebuilt()) {
+            groupByFields.add(InterfaceName.CustomerAccountId.name());
+        }
         groupByFields.addAll(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //

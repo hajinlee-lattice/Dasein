@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -80,6 +81,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
     @Inject
     private YarnConfiguration yarnConfiguration;
+
+    @Value("${cdl.processAnalyze.maximum.priority.large.transaction.count}")
+    private long largeTransactionCountLimit;
 
     private boolean hasRawStore = false;
     private boolean hasProducts = false;
@@ -166,10 +170,22 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     private void checkRebuildForCustomerAccountId(AbstractStep<? extends BaseStepConfiguration> step) {
         DataCollectionStatus status = step.getObjectFromContext(BaseWorkflowStep.CDL_COLLECTION_STATUS,
                 DataCollectionStatus.class);
+        ChoreographerContext context = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
         Preconditions.checkNotNull(status, "DataCollectionStatus in context should not be null");
         if (BooleanUtils.isNotTrue(status.getTransactionRebuilt())) {
-            log.info("TransactionRebuilt flag in data collection status is not true, need to rebuild transaction");
-            needRebuildForCustomerAccountId = true;
+            if (status.getTransactionCount() != null && status.getTransactionCount() >= largeTransactionCountLimit) {
+                log.info("TransactionRebuilt flag in data collection status is not true, "
+                        + "but not forcing rebuild because existing number of transaction ({}) exceeds limit ({})",
+                        status.getTransactionCount(), largeTransactionCountLimit);
+            } else if (context != null && context.isSkipForceRebuildTxn()) {
+                log.info("TransactionRebuilt flag in data collection status is not true, "
+                        + "but not forcing rebuild because tenant in the skip list");
+            } else {
+                log.info(
+                        "TransactionRebuilt flag in data collection status is not true, need to rebuild transaction (no. txn = {})",
+                        status.getTransactionCount());
+                needRebuildForCustomerAccountId = true;
+            }
         }
     }
 

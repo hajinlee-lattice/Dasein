@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -26,8 +27,12 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.camille.exposed.Camille;
+import com.latticeengines.camille.exposed.CamilleEnvironment;
+import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.AttributeLimit;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
@@ -360,11 +365,45 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         grapherContext.setHasAccountBatchStore(hasAccountBatchStore());
         grapherContext.setHasContactBatchStore(hasContactBatchStore());
         grapherContext.setHasTransactionRawStore(hasTransactionRawStore());
+        grapherContext.setSkipForceRebuildTxn(skipForceRebuildTxn());
 
         String tenantId = customerSpace.getTenantId();
         grapherContext.setAlwaysRebuildServingStores(shouldAlwaysRebuildServingStore(tenantId));
 
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
+    }
+
+    /*-
+     * TODO remove after all tenants are migrated off CustomerAccountId
+     */
+    private boolean skipForceRebuildTxn() {
+        try {
+            Camille c = CamilleEnvironment.getCamille();
+            Path path = PathBuilder.buildSkipForceTxnRebuildListPath(CamilleEnvironment.getPodId());
+            if (!c.exists(path)) {
+                return false;
+            }
+            String tenantsStr = c.get(path).getData();
+            log.info("Tenant list to skip force rebuild transaction = {}", tenantsStr);
+            if (StringUtils.isBlank(tenantsStr)) {
+                return false;
+            }
+
+            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace.getTenantId());
+            String[] tenants = tenantsStr.split(",");
+            boolean skip = Arrays.stream(tenants) //
+                    .filter(StringUtils::isNotBlank) //
+                    .map(CustomerSpace::shortenCustomerSpace) //
+                    .filter(StringUtils::isNotBlank) //
+                    .anyMatch(tenantId::equals);
+            if (skip) {
+                log.info("Skip force rebuilding txn for tenant {} since it's in list", tenantId);
+            }
+            return skip;
+        } catch (Exception e) {
+            log.warn("Fail to check skip force rebuild transaction (for CustomerAccountId) tenant list", e);
+            return false;
+        }
     }
 
     Set<BusinessEntity> getEntitiesShouldRebuildByActions() {
