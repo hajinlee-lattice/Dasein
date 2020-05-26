@@ -128,7 +128,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     public void registerDCPUser() {
         switchToAccessLevel(AccessLevel.INTERNAL_ADMIN);
         testDCPUserCreate("test" + UUID.randomUUID().toString() + "@test.com");
-        testDCPUserCreate("test" + UUID.randomUUID().toString() + "@dnb.com");
+        testDCPUserCreate("test" + UUID.randomUUID().toString() + "@lattice-engines.com");
     }
 
     private void testDCPUserCreate(String email) {
