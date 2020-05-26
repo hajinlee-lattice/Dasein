@@ -90,6 +90,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     private boolean hasAccounts = false;
     private boolean isBusinessCalenderChanged = false;
     private boolean needRebuildForCustomerAccountId = false;
+    private boolean entityMatchEnabled = false;
 
     @Override
     void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -99,6 +100,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected void doInitialize(AbstractStep<? extends BaseStepConfiguration> step) {
         super.doInitialize(step);
+        checkEntityMatchEnabled(step);
         checkRebuildForCustomerAccountId(step);
         checkBusinessCalendarChanged(step);
     }
@@ -172,7 +174,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 DataCollectionStatus.class);
         ChoreographerContext context = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
         Preconditions.checkNotNull(status, "DataCollectionStatus in context should not be null");
-        if (BooleanUtils.isNotTrue(status.getTransactionRebuilt())) {
+        if (entityMatchEnabled && BooleanUtils.isNotTrue(status.getTransactionRebuilt())) {
             if (status.getTransactionCount() != null && status.getTransactionCount() >= largeTransactionCountLimit) {
                 log.info("TransactionRebuilt flag in data collection status is not true, "
                         + "but not forcing rebuild because existing number of transaction ({}) exceeds limit ({})",
@@ -186,6 +188,14 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                         status.getTransactionCount());
                 needRebuildForCustomerAccountId = true;
             }
+        }
+    }
+
+    private void checkEntityMatchEnabled(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext context = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY, ChoreographerContext.class);
+        if (context != null && context.isEntityMatchEnabled()) {
+            log.info("entity match enabled for current tenant");
+            entityMatchEnabled = true;
         }
     }
 
